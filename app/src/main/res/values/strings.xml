@@ -1,0 +1,33 @@
+<resources>
+    <string name="app_name">TBLauncher</string>
+    <string name="ui_search_hint">Search apps, contacts, …</string>
+
+    <string name="dummy_button">Dummy Button</string>
+    <string name="dummy_content">DUMMY\nCONTENT</string>
+
+    <string name="removed_item">Removed</string>
+
+    <string name="unable_to_initialize_shortcuts">Unable to initialize shortcuts. Is KISS your default launcher?</string>
+    <string name="cant_pin_shortcut">Could not add shortcut. Is KISS your default launcher\?</string>
+    <string name="cant_save_shortcuts">Could not add shortcuts. Is KISS your default launcher\?</string>
+    <string name="toast_favorites_added">%s was added to favorites</string>
+    <string name="toast_favorites_removed">%s was removed from favorites</string>
+    <string name="menu_favorites_add">Add to favorites</string>
+    <string name="menu_remove">Remove from history</string>
+    <string name="menu_favorites_remove">Remove favorite</string>
+    <string name="stub_application">App Name</string>
+    <string name="stub_app_tag">app tag list</string>
+    <string name="main_menu">Menu</string>
+    <string name="main_clear">Clear search bar</string>
+    <string name="permission_denied">Permission has been denied</string>
+    <string name="menu_exclude">Exclude app …</string>
+    <string name="menu_tags_edit">Add or edit tags…</string>
+    <string name="menu_app_details">App info</string>
+    <string name="menu_app_store">View in store…</string>
+    <string name="menu_app_uninstall">Uninstall…</string>
+    <string name="menu_exclude_history">from history</string>
+    <string name="menu_exclude_kiss">from KISS</string>
+    <string name="excluded_app_history_added">App excluded from history. Reset through the KISS settings</string>
+    <string name="excluded_app_list_added">App excluded from KISS. Reset through the KISS settings</string>
+    <string name="application_not_found">Whoops… unable to launch that app.</string>
+</resources>

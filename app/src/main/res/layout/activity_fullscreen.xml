@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/root_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@null"
+    tools:context=".TBLauncherActivity">
+
+    <!-- Views in this Layout are drawn under the status bar and nav bar
+    -->
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:fitsSystemWindows="true"
+        android:orientation="vertical">
+        <!-- This Layout insets its children based on system windows using
+             android:fitsSystemWindows.
+             This is the only way to resize the result list and move the
+             search bar when the soft keyboard is displayed
+        -->
+
+        <include layout="@layout/result_list" />
+
+        <include layout="@layout/search_bar" />
+    </LinearLayout>
+
+</FrameLayout>

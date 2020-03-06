@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="icon_width">48dp</dimen>
+    <dimen name="icon_height">48dp</dimen>
+
+    <dimen name="icon_margin_left">0dp</dimen>
+    <dimen name="icon_margin_right">10dp</dimen>
+    <dimen name="icon_margin_top">5dp</dimen>
+    <dimen name="icon_margin_bottom">5dp</dimen>
+
+    <dimen name="result_margin_left">10dp</dimen>
+    <dimen name="result_margin_right">10dp</dimen>
+    <dimen name="result_margin_top">2dp</dimen>
+    <dimen name="result_margin_bottom">2dp</dimen>
+
+    <dimen name="result_title_size">18sp</dimen>
+    <dimen name="result_small_size">14sp</dimen>
+
+    <dimen name="color_swatch_large">64dip</dimen>
+    <dimen name="color_swatch_small">48dip</dimen>
+    <dimen name="color_swatch_margins_large">8dip</dimen>
+    <dimen name="color_swatch_margins_small">4dip</dimen>
+
+    <dimen name="bar_height">40dp</dimen>
+    <dimen name="large_bar_height">58dp</dimen>
+    <dimen name="corner_radius">29dp</dimen> <!--half of large_bar_height-->
+
+
+
+    <dimen name="launcher_button_width">45dp</dimen>
+    <dimen name="launcher_button_padding">10dp</dimen>
+
+    <dimen name="favorite_padding">5dp</dimen>
+    <dimen name="favorite_height">58dp</dimen>
+    <dimen name="large_favorite_height">68dp</dimen>
+
+    <dimen name="popup_title">12sp</dimen>
+</resources>

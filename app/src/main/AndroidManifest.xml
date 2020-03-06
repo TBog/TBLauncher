@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="rocks.tbog.tblauncher">
+
+    <permission
+        android:name="com.android.launcher.permission.INSTALL_SHORTCUT"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:protectionLevel="normal" />
+
+    <permission
+        android:name="com.android.launcher.permission.UNINSTALL_SHORTCUT"
+        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
+        android:protectionLevel="normal" />
+
+    <!-- Self explanatory -->
+    <uses-permission android:name="android.permission.READ_CONTACTS" />
+    <!-- To call a phone number directly without displaying the dialer -->
+    <uses-permission android:name="android.permission.CALL_PHONE" />
+    <!-- To read phone state -->
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+    <!-- Display notification drawer -->
+    <uses-permission android:name="android.permission.EXPAND_STATUS_BAR" />
+    <!-- Ability to uninstall an app from KISS -->
+    <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
+
+    <uses-feature
+        android:name="android.hardware.telephony"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.bluetooth"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.wifi"
+        android:required="false" />
+    <uses-feature
+        android:name="android.hardware.nfc"
+        android:required="false" />
+
+    <application
+        android:name=".TBApplication"
+        android:allowBackup="true"
+        android:fullBackupContent="@xml/backup_descriptor"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+        <activity
+            android:name=".TBLauncherActivity"
+            android:clearTaskOnLaunch="true"
+            android:configChanges="orientation|keyboardHidden|screenSize"
+            android:excludeFromRecents="true"
+            android:label="@string/app_name"
+            android:launchMode="singleTask"
+            android:resizeableActivity="true"
+            android:screenOrientation="user"
+            android:stateNotNeeded="true"
+            android:theme="@style/AppThemeTransparent"
+            android:windowSoftInputMode="stateAlwaysHidden|adjustResize">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+                <category android:name="android.intent.category.HOME" />
+                <category android:name="android.intent.category.DEFAULT" />
+            </intent-filter>
+        </activity>
+
+        <meta-data android:name="android.max_aspect" android:value="3"/>
+
+        <service android:name=".dataprovider.AppProvider" />
+        <service android:name=".dataprovider.ContactsProvider" />
+        <service android:name=".dataprovider.ShortcutsProvider" />
+
+    </application>
+
+</manifest>

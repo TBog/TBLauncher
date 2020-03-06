@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
+
+    <LinearLayout
+        android:id="@+id/searchBarContainer"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/bar_height"
+        android:layout_gravity="bottom|center_horizontal"
+        android:background="@color/black_overlay"
+        android:gravity="start"
+        android:orientation="horizontal">
+
+        <FrameLayout
+            android:layout_width="@dimen/launcher_button_width"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/launcherButton"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="?attr/selectableItemBackgroundBorderless"
+                android:clickable="true"
+                android:contentDescription="@string/app_name"
+                android:focusable="true"
+                android:paddingLeft="@dimen/launcher_button_padding"
+                android:paddingRight="@dimen/launcher_button_padding"
+                android:scaleType="centerCrop"
+                android:src="@drawable/launcher_white" />
+
+            <ProgressBar
+                android:id="@+id/loaderBar"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:indeterminate="true"
+                android:paddingLeft="@dimen/launcher_button_padding"
+                android:paddingRight="@dimen/launcher_button_padding"
+                android:visibility="invisible"
+                tools:visibility="visible" />
+        </FrameLayout>
+
+        <EditText
+            android:id="@+id/launcherSearch"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="?attr/searchBackgroundColor"
+            android:gravity="start|center_vertical"
+            android:hint="@string/ui_search_hint"
+            android:imeOptions="flagNoExtractUi|actionSearch"
+            android:importantForAutofill="no"
+            android:inputType="textVisiblePassword|textNoSuggestions"
+            android:shadowColor="?attr/searchShadowColor"
+            android:shadowDx="1"
+            android:shadowDy="2"
+            android:shadowRadius="?attr/textShadowRadius"
+            android:singleLine="true"
+            android:textAlignment="textStart"
+            android:textColor="?attr/searchColor"
+            android:textColorHint="?android:attr/textColorSecondary"
+            android:textCursorDrawable="@null"
+            android:textSize="16sp" />
+
+        <FrameLayout
+            android:layout_width="@dimen/launcher_button_width"
+            android:layout_height="match_parent">
+
+            <ImageView
+                android:id="@+id/menuButton"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="?attr/appSelectableItemBackground"
+                android:contentDescription="@string/main_menu"
+                android:focusable="true"
+                android:onClick="onMenuButtonClicked"
+                android:paddingLeft="@dimen/launcher_button_padding"
+                android:paddingRight="@dimen/launcher_button_padding"
+                android:src="@drawable/ic_dots"
+                android:scaleType="centerCrop"
+                android:tint="?attr/searchColor" />
+
+            <ImageView
+                android:id="@+id/clearButton"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="?attr/appSelectableItemBackground"
+                android:contentDescription="@string/main_clear"
+                android:focusable="true"
+                android:paddingLeft="@dimen/launcher_button_padding"
+                android:paddingRight="@dimen/launcher_button_padding"
+                android:src="@drawable/ic_clear"
+                android:scaleType="centerCrop"
+                android:tint="?attr/searchColor"
+                android:visibility="visible" />
+
+        </FrameLayout>
+    </LinearLayout>
+</merge>
