@@ -13,8 +13,13 @@ import android.os.Handler;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.DragEvent;
+import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -238,12 +243,53 @@ public class TBLauncherActivity extends AppCompatActivity implements IResultList
 
         registerForContextMenu(mMenuButton);
         mClearButton.setOnClickListener(v -> mSearchEditText.setText(""));
+        mMenuButton.setOnClickListener(View::showContextMenu);
     }
 
     @Override
     protected void onDestroy() {
         unregisterReceiver(mReceiver);
         super.onDestroy();
+    }
+
+    @Override
+    public boolean onKeyDown(int keycode, @NonNull KeyEvent e) {
+        if (keycode == KeyEvent.KEYCODE_MENU) {
+            // For devices with a physical menu button, we still want to display *our* contextual menu
+            mMenuButton.showContextMenu();
+            mMenuButton.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+            return true;
+        }
+
+        return super.onKeyDown(keycode, e);
+    }
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        super.onCreateContextMenu(menu, v, menuInfo);
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu_main, menu);
+    }
+
+    @Override
+    public boolean onContextItemSelected(@NonNull MenuItem item) {
+        if (super.onContextItemSelected(item))
+            return true;
+        switch ( item.getItemId() )
+        {
+            case R.id.settings:
+                startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS));
+                return true;
+            case R.id.wallpaper:
+                hideKeyboard();
+                Intent intent = new Intent(Intent.ACTION_SET_WALLPAPER);
+                startActivity(Intent.createChooser(intent, getString(R.string.menu_wallpaper)));
+                return true;
+            case R.id.preferences:
+                startActivity(new Intent(this, SettingsActivity.class));
+                return true;
+        }
+        return false;
     }
 
     private void initResultLayout(ViewGroup resultLayout) {
@@ -378,6 +424,7 @@ public class TBLauncherActivity extends AppCompatActivity implements IResultList
         // are available.
         //delayedHide(100);
         hide();
+        displayClearOnInput();
 
         if (!Permission.checkContactPermission(this)) {
             Permission.askContactPermission(this);
@@ -415,7 +462,9 @@ public class TBLauncherActivity extends AppCompatActivity implements IResultList
                 .setDuration(UI_ANIMATION_DURATION)
                 .setInterpolator(new AccelerateInterpolator())
                 .start();
+        clearAdapter();
         mVisible = false;
+
 
         // Schedule a runnable to remove the status and navigation bar after a delay
         mHideHandler.removeCallbacks(mShowPart2Runnable);

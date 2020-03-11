@@ -11,10 +11,8 @@
     android:layout_weight="1"
     android:background="?attr/listBackgroundColor"
     android:elevation="2dp"
-    android:visibility="gone"
     tools:ignore="UnusedAttribute"
-    tools:layout_height="match_parent"
-    tools:visibility="visible">
+    tools:layout_height="match_parent">
 
     <rocks.tbog.tblauncher.ui.AnimatedListView
         android:id="@+id/resultList"

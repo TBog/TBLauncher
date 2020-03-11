@@ -1,4 +1,58 @@
 <?xml version="1.0" encoding="utf-8"?>
-<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:key="preferences-root"
+    android:title="@string/activity_settings">
 
-</PreferenceScreen>
+    <androidx.preference.PreferenceScreen
+        android:key="ui-holder"
+        android:summary="@string/user_interface_summary"
+        android:title="@string/title_ui">
+        <androidx.preference.ListPreference
+            android:defaultValue="transparent"
+            android:entries="@array/themesEntries"
+            android:entryValues="@array/themesValues"
+            android:key="theme"
+            android:title="@string/theme_name" />
+        <androidx.preference.PreferenceCategory
+            android:key="colors-section"
+            android:title="@string/colors">
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:dialogLayout="@layout/pref_color"
+                android:key="notification-bar-color"
+                android:title="@string/notification_bar_color" />
+            <androidx.preference.SwitchPreference
+                android:key="black-notification-icons"
+                android:title="@string/black_notification_icons" />
+        </androidx.preference.PreferenceCategory>
+        <androidx.preference.PreferenceCategory android:title="@string/misc">
+            <androidx.preference.SwitchPreference
+                android:key="transparent-search"
+                android:title="@string/transparent_search_bar" />
+            <androidx.preference.SwitchPreference
+                android:defaultValue="true"
+                android:key="transparent-favorites"
+                android:title="@string/transparent_favorites_bar" />
+            <androidx.preference.SwitchPreference
+                android:defaultValue="false"
+                android:key="large-search-bar"
+                android:title="@string/large_search_bar" />
+            <androidx.preference.SwitchPreference
+                android:defaultValue="false"
+                android:key="pref-rounded-list"
+                android:title="@string/rounded_list" />
+            <androidx.preference.SwitchPreference
+                android:defaultValue="true"
+                android:key="pref-rounded-bars"
+                android:title="@string/rounded_bars" />
+            <androidx.preference.SwitchPreference
+                android:defaultValue="false"
+                android:key="pref-swap-kiss-button-with-menu"
+                android:title="@string/swap_kiss_button_with_menu" />
+        </androidx.preference.PreferenceCategory>
+    </androidx.preference.PreferenceScreen>
+
+    <androidx.preference.Preference
+        android:key="rate-app"
+        android:title="@string/rate_the_app" />
+
+</androidx.preference.PreferenceScreen>

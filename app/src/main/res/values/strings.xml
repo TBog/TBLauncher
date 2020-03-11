@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">TBLauncher</string>
     <string name="ui_search_hint">Search apps, contacts, …</string>
 
@@ -30,4 +30,32 @@
     <string name="excluded_app_history_added">App excluded from history. Reset through the KISS settings</string>
     <string name="excluded_app_list_added">App excluded from KISS. Reset through the KISS settings</string>
     <string name="application_not_found">Whoops… unable to launch that app.</string>
+    <string name="menu_wallpaper">Change wallpaper</string>
+    <string name="menu_widget_add">Widget settings</string>
+    <string name="menu_settings">Device settings</string>
+    <string name="activity_settings">TBLauncher settings</string>
+    <string name="rate_the_app">Rate the app</string>
+    <string name="user_interface_summary">Themes, transparency and colors</string>
+    <string name="title_ui">User interface</string>
+    <string name="theme_name">Theme</string>
+    <string name="misc">Misc</string>
+    <string name="colors">Colors</string>
+    <string name="notification_bar_color">Notification bar color</string>
+    <string name="black_notification_icons">Display notification icons in black</string>
+    <string name="transparent_search_bar">Transparent search bar</string>
+    <string name="transparent_favorites_bar">Transparent favorites bar</string>
+    <string name="large_search_bar">Bigger search bar</string>
+    <string name="rounded_list">Rounded list corners</string>
+    <string name="rounded_bars">Rounded bar corners</string>
+    <string name="swap_kiss_button_with_menu">KISS button on the right</string>
+
+    <!-- Default title for color picker dialog [CHAR LIMIT=30] -->
+    <string name="color_picker_default_title">Select a Color</string>
+    <!-- Content description for a color square. -->
+    <string name="color_swatch_description">Color %1$d</string>
+    <!-- Content description for a selected color square. -->
+    <string name="color_swatch_description_selected" tools:ignore="PluralsCandidate">Color %1$d selected</string>
+    <string name="color_transparent_dark">Transparent dark</string>
+    <string name="color_transparent_white">Transparent white</string>
+    <string name="color_transparent">Transparent</string>
 </resources>

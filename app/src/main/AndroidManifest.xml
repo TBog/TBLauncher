@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="rocks.tbog.tblauncher">
 
     <permission
@@ -56,7 +57,8 @@
             android:screenOrientation="user"
             android:stateNotNeeded="true"
             android:theme="@style/AppThemeTransparent"
-            android:windowSoftInputMode="stateAlwaysHidden|adjustResize">
+            android:windowSoftInputMode="stateAlwaysHidden|adjustResize"
+            tools:ignore="UnusedAttribute">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -64,6 +66,15 @@
                 <category android:name="android.intent.category.HOME" />
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name=".SettingsActivity"
+            android:label="@string/activity_settings"
+            android:parentActivityName=".TBLauncherActivity"
+            android:theme="@style/SettingTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".TBLauncherActivity" />
         </activity>
 
         <meta-data android:name="android.max_aspect" android:value="3"/>

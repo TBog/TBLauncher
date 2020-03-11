@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
+    <string-array name="themesEntries">
+        <item>Light theme</item>
+        <item>Semi-transparent theme</item>
+        <item>Transparent theme</item>
+        <item>Dark theme</item>
+        <item>Dark semi-transparent theme</item>
+        <item>Dark transparent theme</item>
+        <item>AMOLED dark theme</item>
+    </string-array>
+    <string-array name="themesValues" translatable="false">
+        <item>light</item>
+        <item>semi-transparent</item>
+        <item>transparent</item>
+        <item>dark</item>
+        <item>semi-transparent-dark</item>
+        <item>transparent-dark</item>
+        <item>amoled-dark</item>
+    </string-array>
+</resources>
