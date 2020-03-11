@@ -53,6 +53,10 @@
 
     <androidx.preference.Preference
         android:key="rate-app"
-        android:title="@string/rate_the_app" />
+        android:title="@string/rate_the_app">
+        <intent
+            android:action="android.intent.action.VIEW"
+            android:data="market://details?id=rocks.tbog.tblauncher" />
+    </androidx.preference.Preference>
 
 </androidx.preference.PreferenceScreen>
