@@ -163,6 +163,7 @@ public abstract class Result {
      *
      * @return a PopupMenu object
      */
+    @NonNull
     public ListPopup getPopupMenu(final Context context, final ResultAdapter parent, final View parentView) {
         ArrayAdapter<ListPopup.Item> adapter = new ArrayAdapter<>(context, R.layout.popup_list_item);
         ListPopup menu = buildPopupMenu(context, adapter, parent, parentView);
@@ -273,7 +274,9 @@ public abstract class Result {
     private void removeFromResultsAndHistory(Context context, ResultAdapter parent) {
         removeFromHistory(context);
         Toast.makeText(context, R.string.removed_item, Toast.LENGTH_SHORT).show();
-        parent.removeResult(context, this);
+        //parent.removeResult(context, this);
+        //TODO: parent should be ISearchActivity
+        TBApplication.behaviour(context).removeResult(this);
     }
 
     public final void launch(Context context, View v) {

@@ -27,10 +27,10 @@ public class QuerySearcher extends Searcher {
      */
     private final SharedPreferences prefs;
 
-    public QuerySearcher(TBLauncherActivity activity, String query) {
+    public QuerySearcher(ISearchActivity activity, String query) {
         super(activity, query);
         this.trimmedQuery = query.trim();
-        prefs = PreferenceManager.getDefaultSharedPreferences(activity);
+        prefs = PreferenceManager.getDefaultSharedPreferences(activity.getContext());
 
     }
 

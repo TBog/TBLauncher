@@ -1,6 +1,5 @@
 package rocks.tbog.tblauncher.result;
 
-import android.content.Context;
 import android.os.Handler;
 import android.view.View;
 import android.view.ViewGroup;
@@ -91,16 +90,6 @@ public class ResultAdapter extends BaseAdapter implements SectionIndexer {
         return results.get(position).display(parent.getContext(), convertView, parent, fuzzyScore);
     }
 
-    public void onLongClick(final int pos, View v) {
-        ListPopup menu = results.get(pos).getPopupMenu(v.getContext(), this, v);
-
-        // check if menu contains elements and if yes show it
-        if (menu.getAdapter().getCount() > 0) {
-            parent.registerPopup(menu);
-            menu.show(v);
-        }
-    }
-
     public void onClick(final int position, View v) {
         final Result result;
 
@@ -120,25 +109,48 @@ public class ResultAdapter extends BaseAdapter implements SectionIndexer {
 
     }
 
-    public void removeResult(Context context, Result result) {
-        results.remove(result);
-        notifyDataSetChanged();
-        // Do not reset scroll, we want the remaining items to still be in view
-        parent.temporarilyDisableTranscriptMode();
+    public boolean onLongClick(final int pos, View v) {
+        ListPopup menu;
+        try {
+            // TOOD: pass `parent` to getPopupMenu instead of `this`
+            menu = results.get(pos).getPopupMenu(v.getContext(), this, v);
+        } catch (ArrayIndexOutOfBoundsException ignored) {
+            return false;
+        }
+
+        // check if menu contains elements and if yes show it
+        if (!menu.getAdapter().isEmpty()) {
+            parent.registerPopup(menu);
+            menu.show(v);
+            return true;
+        }
+
+        return false;
     }
 
-    public void updateResults(List<Result> results, boolean isRefresh, String query) {
+    /**
+     * Should be called only from Behaviour.
+     *
+     * @param result what to remove
+     */
+    public void removeResult(Result result) {
+        results.remove(result);
+        notifyDataSetChanged();
+    }
+
+    /**
+     * Should be called only from Behaviour.
+     *
+     * @param results new list of results
+     * @param query   used to generate detailed match indices
+     */
+    public void updateResults(List<Result> results, String query) {
         this.results.clear();
         this.results.addAll(results);
         StringNormalizer.Result queryNormalized = StringNormalizer.normalizeWithResult(query, false);
 
         fuzzyScore = new FuzzyScore(queryNormalized.codePoints, true);
         notifyDataSetChanged();
-
-        if(isRefresh) {
-            // We're refreshing an existing dataset, do not reset scroll!
-            parent.temporarilyDisableTranscriptMode();
-        }
     }
 
 //    /**

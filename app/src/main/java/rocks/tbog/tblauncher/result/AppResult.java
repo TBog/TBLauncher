@@ -197,7 +197,9 @@ public class AppResult extends Result {
 
     private void excludeFromKiss(Context context, AppEntry appPojo, final ResultAdapter parent) {
         // remove item since it will be hidden
-        parent.removeResult(context, AppResult.this);
+        //TODO: parent should be ISearchActivity
+        //parent.removeResult(context, AppResult.this);
+        TBApplication.behaviour(context).removeResult(AppResult.this);
 
         TBApplication.getApplication(context).getDataHandler().addToExcluded(appPojo);
         // In case the newly excluded app was in a favorite, refresh them

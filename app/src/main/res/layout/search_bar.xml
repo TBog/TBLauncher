@@ -39,7 +39,7 @@
                 tools:visibility="visible" />
         </FrameLayout>
 
-        <EditText
+        <rocks.tbog.tblauncher.ui.SearchEditText
             android:id="@+id/launcherSearch"
             android:layout_width="0dp"
             android:layout_height="match_parent"

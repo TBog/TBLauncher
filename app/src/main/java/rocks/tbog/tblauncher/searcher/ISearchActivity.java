@@ -28,4 +28,9 @@ public interface ISearchActivity {
      * Called when searcher found results
      */
     void updateAdapter(ArrayList<Result> results, boolean isRefresh, String query);
+
+    /**
+     * Called when user removed/hidden app
+     */
+    void removeResult(Result result);
 }

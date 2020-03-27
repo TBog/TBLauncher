@@ -26,6 +26,26 @@ import rocks.tbog.tblauncher.utils.UserHandle;
 
 public class AppProvider extends Provider<AppEntry> {
 
+    final BroadcastReceiver mProfileReceiver = new BroadcastReceiver() {
+        @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (Objects.equals(intent.getAction(), Intent.ACTION_MANAGED_PROFILE_ADDED)) {
+                AppProvider.this.reload();
+            } else if (Objects.equals(intent.getAction(), Intent.ACTION_MANAGED_PROFILE_REMOVED)) {
+                android.os.UserHandle profile = intent.getParcelableExtra(Intent.EXTRA_USER);
+
+                final UserManager manager = (UserManager) AppProvider.this.getSystemService(Context.USER_SERVICE);
+                assert manager != null;
+                UserHandle user = new UserHandle(manager.getSerialNumberForUser(profile), profile);
+
+                TBApplication.getApplication(context).getDataHandler().removeFromExcluded(user);
+                TBApplication.getApplication(context).getDataHandler().removeFromFavorites(user);
+                AppProvider.this.reload();
+            }
+        }
+    };
+
     @Override
     @SuppressLint("NewApi")
     public void onCreate() {
@@ -94,23 +114,7 @@ public class AppProvider extends Provider<AppEntry> {
             IntentFilter filter = new IntentFilter();
             filter.addAction(Intent.ACTION_MANAGED_PROFILE_ADDED);
             filter.addAction(Intent.ACTION_MANAGED_PROFILE_REMOVED);
-            this.registerReceiver(new BroadcastReceiver() {
-                @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    if (Objects.equals(intent.getAction(), Intent.ACTION_MANAGED_PROFILE_ADDED)) {
-                        AppProvider.this.reload();
-                    } else if (Objects.equals(intent.getAction(), Intent.ACTION_MANAGED_PROFILE_REMOVED)) {
-                        android.os.UserHandle profile = intent.getParcelableExtra(Intent.EXTRA_USER);
-
-                        UserHandle user = new UserHandle(manager.getSerialNumberForUser(profile), profile);
-
-                        TBApplication.getApplication(context).getDataHandler().removeFromExcluded(user);
-                        TBApplication.getApplication(context).getDataHandler().removeFromFavorites(user);
-                        AppProvider.this.reload();
-                    }
-                }
-            }, filter);
+            registerReceiver(mProfileReceiver, filter);
         }
 
         // Get notified when app changes on standard user profile
@@ -125,6 +129,13 @@ public class AppProvider extends Provider<AppEntry> {
 
         super.onCreate();
     }
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        unregisterReceiver(mProfileReceiver);
+    }
+
 
     @Override
     public void reload() {
