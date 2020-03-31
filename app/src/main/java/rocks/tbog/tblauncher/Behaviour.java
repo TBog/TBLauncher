@@ -4,11 +4,12 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.drawable.Animatable;
+import android.graphics.drawable.Drawable;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.DragEvent;
 import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
 import android.view.View;
@@ -34,6 +35,7 @@ import rocks.tbog.tblauncher.searcher.ISearchActivity;
 import rocks.tbog.tblauncher.searcher.QuerySearcher;
 import rocks.tbog.tblauncher.ui.AnimatedListView;
 import rocks.tbog.tblauncher.ui.KeyboardScrollHider;
+import rocks.tbog.tblauncher.ui.LoadingDrawable;
 
 public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardHandler {
 
@@ -53,7 +55,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     private View mClearButton;
     private View mMenuButton;
     private ImageView mLauncherButton;
-    private ProgressBar mLoaderSpinner;
+    //private ProgressBar mLoaderSpinner;
     private View mDecorView;
     private Handler mHideHandler;
 
@@ -96,13 +98,17 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         mResultList.setOnItemLongClickListener((parent, view, position, id) -> mResultAdapter.onLongClick(position, view));
     }
 
-    private void initLauncherButton(ImageView launcherButton, ProgressBar loaderBar) {
+    private void initLauncherButton(ImageView launcherButton) {
         mLauncherButton = launcherButton;
-        mLoaderSpinner = loaderBar;
+        //mLoaderSpinner = loaderBar;
+        mLauncherButton.setImageDrawable(new LoadingDrawable());
+
         // Upon interacting with UI controls, delay any scheduled hide()
         // operations to prevent the jarring behavior of controls going away
         // while interacting with the UI.
         //mLauncherButton.setOnTouchListener(mDelayHideTouchListener);
+
+        mLauncherButton.setOnClickListener((v) -> displayLoader(true));
     }
 
     private void initLauncherSearchEditText(EditText searchEditText) {
@@ -133,14 +139,8 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 // if keyboard closed
-                if (actionId == android.R.id.closeButton) {
-                    if (mTBLauncherActivity.dismissPopup())
-                        return true;
-                    //mHider.fixScroll();
-                    mSearchEditText.setText("");
-                    hideSearchBar();
-                    return false;
-                }
+                if (actionId == android.R.id.closeButton)
+                    return onKeyboardClosed();
 
                 // launch most relevant result
                 mResultAdapter.onClick(mResultAdapter.getCount() - 1, v);
@@ -164,7 +164,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         findViewById(R.id.root_layout).setOnClickListener(view -> toggleSearchBar());
 
         initResultLayout(findViewById(R.id.resultLayout));
-        initLauncherButton(findViewById(R.id.launcherButton), findViewById(R.id.loaderBar));
+        initLauncherButton(findViewById(R.id.launcherButton));
         initLauncherSearchEditText(findViewById(R.id.launcherSearch));
 
         mTBLauncherActivity.registerForContextMenu(mMenuButton);
@@ -241,6 +241,10 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     private void hideSearchBar() {
+        hideSearchBar(UI_ANIMATION_DELAY);
+    }
+
+    private void hideSearchBar(int delay) {
         // Hide UI first
         ActionBar actionBar = mTBLauncherActivity != null ? mTBLauncherActivity.getSupportActionBar() : null;
         if (actionBar != null) {
@@ -255,7 +259,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                         mSearchBarContainer.setVisibility(View.INVISIBLE);
                     }
                 })
-                .setStartDelay(UI_ANIMATION_DELAY)
+                .setStartDelay(delay)
                 .alpha(0f)
                 .translationY(mSearchBarContainer.getHeight() * 2f)
                 .setDuration(UI_ANIMATION_DURATION)
@@ -268,7 +272,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         // Schedule a runnable to remove the status and navigation bar after a delay
         mHideHandler.removeCallbacks(mShowPart2Runnable);
         //mHideHandler.post(mHidePart2Runnable);
-        mHideHandler.postDelayed(mHidePart2Runnable, UI_ANIMATION_DELAY);
+        mHideHandler.postDelayed(mHidePart2Runnable, delay);
     }
 
     public void showKeyboard() {
@@ -302,32 +306,43 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 
     @Override
     public void displayLoader(boolean display) {
-        int animationDuration = mTBLauncherActivity.getResources().getInteger(android.R.integer.config_longAnimTime);
+//        int animationDuration = mTBLauncherActivity.getResources().getInteger(android.R.integer.config_longAnimTime);
 
-        // Do not display animation if launcher button is already visible
-        if (!display && mLauncherButton.getVisibility() == View.INVISIBLE) {
-            mLauncherButton.setVisibility(View.VISIBLE);
-
-            // Animate transition from loader to launch button
-            mLauncherButton.setAlpha(0f);
-            mLauncherButton.animate()
-                    .alpha(1f)
-                    .setDuration(animationDuration)
-                    .setListener(null);
-            mLoaderSpinner.animate()
-                    .alpha(0f)
-                    .setDuration(animationDuration)
-                    .setListener(new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            mLoaderSpinner.setVisibility(View.GONE);
-                            mLoaderSpinner.setAlpha(1f);
-                        }
-                    });
-        } else if (display) {
-            mLauncherButton.setVisibility(View.INVISIBLE);
-            mLoaderSpinner.setVisibility(View.VISIBLE);
+        Drawable loadingDrawable = mLauncherButton.getDrawable();
+        if (loadingDrawable instanceof Animatable) {
+            if (display)
+                ((Animatable) loadingDrawable).start();
+            else
+                ((Animatable) loadingDrawable).stop();
         }
+
+//        // Do not display animation if launcher button is already visible
+//        if (!display && mLauncherButton.getVisibility() == View.INVISIBLE) {
+//            mLauncherButton.setVisibility(View.VISIBLE);
+//
+//            // Animate transition from loader to launch button
+//            mLauncherButton.setAlpha(0f);
+//            mLauncherButton.animate()
+//                    .alpha(1f)
+//                    .setDuration(animationDuration)
+//                    .setListener(null);
+////            mLoaderSpinner.animate()
+////                    .alpha(0f)
+////                    .setDuration(animationDuration)
+////                    .setListener(new AnimatorListenerAdapter() {
+////                        @Override
+////                        public void onAnimationEnd(Animator animation) {
+////                            mLoaderSpinner.setVisibility(View.GONE);
+////                            mLoaderSpinner.setAlpha(1f);
+////                        }
+////                    });
+//
+//            //mLoader.setVisibility(View.GONE);
+//        } else if (display) {
+//            mLauncherButton.setVisibility(View.INVISIBLE);
+//
+//            //mLoaderSpinner.setVisibility(View.VISIBLE);
+//        }
     }
 
     @NonNull
@@ -444,6 +459,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 
     /**
      * Handle the back button press. Returns true if action handled.
+     *
      * @return returns true if action handled
      */
     public boolean onBackPressed() {
@@ -457,5 +473,14 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         // Calling super.onBackPressed() will quit the launcher, only do this if KISS is not the user's default home.
         // Action not handled (return false) if not the default launcher.
         return TBApplication.isDefaultLauncher(mTBLauncherActivity);
+    }
+
+    boolean onKeyboardClosed() {
+        if (mTBLauncherActivity.dismissPopup())
+            return true;
+        //mHider.fixScroll();
+        mSearchEditText.setText("");
+        hideSearchBar(0);
+        return false;
     }
 }

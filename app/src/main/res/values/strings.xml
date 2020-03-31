@@ -58,4 +58,9 @@
     <string name="color_transparent_dark">Transparent dark</string>
     <string name="color_transparent_white">Transparent white</string>
     <string name="color_transparent">Transparent</string>
+
+
+    <!-- Content Description -->
+    <string name="cd_show_all_apps">Show all applications</string>
+
 </resources>

@@ -11,33 +11,20 @@
         android:gravity="start"
         android:orientation="horizontal">
 
-        <FrameLayout
+        <ImageView
+            android:id="@+id/launcherButton"
             android:layout_width="@dimen/launcher_button_width"
-            android:layout_height="match_parent">
+            android:layout_height="match_parent"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:clickable="true"
+            android:contentDescription="@string/cd_show_all_apps"
+            android:focusable="true"
+            android:paddingLeft="@dimen/launcher_button_padding"
+            android:paddingRight="@dimen/launcher_button_padding"
+            android:textAlignment="center"
+            android:scaleType="centerCrop"
+            android:src="@drawable/launcher_white" />
 
-            <ImageView
-                android:id="@+id/launcherButton"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="?attr/selectableItemBackgroundBorderless"
-                android:clickable="true"
-                android:contentDescription="@string/app_name"
-                android:focusable="true"
-                android:paddingLeft="@dimen/launcher_button_padding"
-                android:paddingRight="@dimen/launcher_button_padding"
-                android:scaleType="centerCrop"
-                android:src="@drawable/launcher_white" />
-
-            <ProgressBar
-                android:id="@+id/loaderBar"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:indeterminate="true"
-                android:paddingLeft="@dimen/launcher_button_padding"
-                android:paddingRight="@dimen/launcher_button_padding"
-                android:visibility="invisible"
-                tools:visibility="visible" />
-        </FrameLayout>
 
         <rocks.tbog.tblauncher.ui.SearchEditText
             android:id="@+id/launcherSearch"
@@ -70,13 +57,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="?attr/appSelectableItemBackground"
+                android:clickable="true"
                 android:contentDescription="@string/main_menu"
                 android:focusable="true"
-                android:clickable="true"
                 android:paddingLeft="@dimen/launcher_button_padding"
                 android:paddingRight="@dimen/launcher_button_padding"
-                android:src="@drawable/ic_dots"
                 android:scaleType="centerCrop"
+                android:src="@drawable/ic_dots"
                 android:tint="?attr/searchColor" />
 
             <ImageView
@@ -84,13 +71,13 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="?attr/appSelectableItemBackground"
+                android:clickable="true"
                 android:contentDescription="@string/main_clear"
                 android:focusable="true"
-                android:clickable="true"
                 android:paddingLeft="@dimen/launcher_button_padding"
                 android:paddingRight="@dimen/launcher_button_padding"
-                android:src="@drawable/ic_clear"
                 android:scaleType="centerCrop"
+                android:src="@drawable/ic_clear"
                 android:tint="?attr/searchColor"
                 android:visibility="visible" />
 
