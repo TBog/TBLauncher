@@ -245,13 +245,13 @@ public class CutoutFactory {
     }
 
     // In case some manufactures' not coming up with a getNotchHeight() method, you can just use the status bar's height. Android has guarantee that notch height is at most the status bar height.
-    private static class StatusBarCutout extends ComputeSafeZoneFromCutout {
+    public static class StatusBarCutout extends ComputeSafeZoneFromCutout {
 
         StatusBarCutout(@NonNull Context context) {
             super(context);
         }
 
-        static int getStatusBarHeight(Context context) {
+        public static int getStatusBarHeight(Context context) {
             int statusBarHeight = 0;
             Resources res = context.getResources();
             int resourceId = res.getIdentifier("status_bar_height", "dimen", "android");

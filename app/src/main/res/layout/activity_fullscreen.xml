@@ -9,6 +9,12 @@
 
     <!-- Views in this Layout are drawn under the status bar and nav bar
     -->
+    <ImageView
+        android:id="@+id/notificationBackground"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:src="@drawable/notification_bar_background"
+        android:contentDescription="@null" />
 
     <LinearLayout
         android:layout_width="match_parent"

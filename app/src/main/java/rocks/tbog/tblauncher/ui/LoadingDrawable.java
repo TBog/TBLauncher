@@ -8,7 +8,6 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.view.animation.LinearInterpolator;
@@ -22,7 +21,7 @@ public class LoadingDrawable extends Drawable implements Animatable, ValueAnimat
     private final ArrayList<Shape> mShapeList = new ArrayList<>(0);
     private final Path mShapePath;
     private final Paint mPaint;
-    private ValueAnimator mAnimator = null;
+    private ValueAnimator mShapeListAnimator = null;
 
     final static private float SHAPE_SIZE_PERCENT = 0.22f;
     final static private float CORNER_SMOOTHING_PERCENT = 0.05f;
@@ -110,33 +109,37 @@ public class LoadingDrawable extends Drawable implements Animatable, ValueAnimat
 
     @Override
     public void start() {
-        if (mAnimator == null) {
-            mAnimator = ValueAnimator.ofFloat(0, 360);
-            mAnimator.setDuration(3000);
-            mAnimator.addUpdateListener(this);
-            mAnimator.setRepeatCount(ValueAnimator.INFINITE);
-            mAnimator.setInterpolator(new LinearInterpolator());
+        if (mShapeListAnimator == null) {
+            mShapeListAnimator = ValueAnimator.ofFloat(0, 360);
+            mShapeListAnimator.setDuration(3000);
+            mShapeListAnimator.addUpdateListener(this);
+            mShapeListAnimator.setRepeatCount(ValueAnimator.INFINITE);
+            mShapeListAnimator.setInterpolator(new LinearInterpolator());
         }
+
+        if (mShapeListAnimator.isRunning())
+            return;
 
 //        if (mAnimator.isPaused())
 //            mAnimator.resume();
 //        else
-        mAnimator.start();
+        mShapeListAnimator.start();
         mPaint.setAntiAlias(true);
     }
 
     @Override
     public void stop() {
-        if (mAnimator != null)
-            mAnimator.end();
+        if (mShapeListAnimator != null)
+            mShapeListAnimator.end();
         mPaint.setAntiAlias(false);
+        invalidateSelf();
     }
 
     @Override
     public boolean isRunning() {
-        if (mAnimator == null)
+        if (mShapeListAnimator == null)
             return false;
-        return mAnimator.isRunning();
+        return mShapeListAnimator.isRunning();
     }
 
     @Override

@@ -1,6 +1,9 @@
 package rocks.tbog.tblauncher;
 
+import android.content.SharedPreferences;
+import android.os.Build;
 import android.os.Bundle;
+import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
@@ -13,8 +16,11 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceScreen;
 
-import rocks.tbog.tblauncher.preference.CustomDialog;
 import rocks.tbog.tblauncher.preference.CustomDialogPreference;
+import rocks.tbog.tblauncher.preference.PaletteDialog;
+import rocks.tbog.tblauncher.preference.SliderDialog;
+import rocks.tbog.tblauncher.utils.SystemUiVisibility;
+import rocks.tbog.tblauncher.utils.UIColors;
 
 public class SettingsActivity extends AppCompatActivity implements PreferenceFragmentCompat.OnPreferenceStartScreenCallback/*, PreferenceFragmentCompat.OnPreferenceStartFragmentCallback*/ {
 
@@ -87,7 +93,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 //        return true;
 //    }
 
-    public static class SettingsFragment extends PreferenceFragmentCompat {
+    public static class SettingsFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
         static final String FRAGMENT_TAG = SettingsFragment.class.getName();
         private static final String DIALOG_FRAGMENT_TAG = "androidx.preference.PreferenceFragment.DIALOG";
 
@@ -98,6 +104,44 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
             setPreferencesFromResource(R.xml.preferences, rootKey);
+
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+                removePreference("black-notification-icons");
+            }
+
+        }
+
+        private void removePreference(String key) {
+            Preference pref = findPreference(key);
+            if (pref != null && pref.getParent() != null)
+                pref.getParent().removePreference(pref);
+        }
+
+        @Override
+        public void onResume() {
+            super.onResume();
+            SharedPreferences sharedPreferences = getPreferenceScreen().getSharedPreferences();
+            sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+
+            int color = UIColors.getColor(sharedPreferences, "notification-bar-color");
+            int alpha = UIColors.getAlpha(sharedPreferences, "notification-bar-alpha");
+            UIColors.setStatusBarColor((SettingsActivity) getActivity(), UIColors.setAlpha(color, alpha));
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                View view = getView();
+                if (view != null) {
+                    if (sharedPreferences.getBoolean("black-notification-icons", false)) {
+                        SystemUiVisibility.setLightStatusBar(view);
+                    } else {
+                        SystemUiVisibility.clearLightStatusBar(view);
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void onPause() {
+            super.onPause();
+            getPreferenceScreen().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
         }
 
         @Override
@@ -106,7 +150,19 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             DialogFragment dialogFragment = null;
             if (preference instanceof CustomDialogPreference) {
                 // Create a new instance of CustomDialog with the key of the related Preference
-                dialogFragment = CustomDialog.newInstance(preference.getKey());
+                String key = preference.getKey();
+                switch (key) {
+                    case "notification-bar-color":
+                    case "search-bar-color":
+                        dialogFragment = PaletteDialog.newInstance(key);
+                        break;
+                    case "notification-bar-alpha":
+                    case "search-bar-alpha":
+                        dialogFragment = SliderDialog.newInstance(key);
+                        break;
+                    default:
+                        throw new RuntimeException("CustomDialogPreference \"" + key + "\" has no dialog defined");
+                }
             }
 
             // If it was one of our custom Preferences, show its dialog
@@ -119,6 +175,31 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             // Could not be handled here. Try with the super method.
             else {
                 super.onDisplayPreferenceDialog(preference);
+            }
+        }
+
+        @Override
+        public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            switch (key) {
+                case "notification-bar-color":
+                case "notification-bar-alpha": {
+                    int color = UIColors.getColor(sharedPreferences, "notification-bar-color");
+                    int alpha = UIColors.getAlpha(sharedPreferences, "notification-bar-alpha");
+                    UIColors.setStatusBarColor((SettingsActivity) getActivity(), UIColors.setAlpha(color, alpha));
+                    break;
+                }
+                case "black-notification-icons":
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                        View view = getView();
+                        if (view == null)
+                            break;
+                        if (sharedPreferences.getBoolean("black-notification-icons", false)) {
+                            SystemUiVisibility.setLightStatusBar(view);
+                        } else {
+                            SystemUiVisibility.clearLightStatusBar(view);
+                        }
+                    }
+                    break;
             }
         }
     }

@@ -7,9 +7,11 @@
         android:layout_width="match_parent"
         android:layout_height="@dimen/bar_height"
         android:layout_gravity="bottom|center_horizontal"
-        android:background="@color/black_overlay"
+        android:background="@drawable/search_bar_background"
         android:gravity="start"
-        android:orientation="horizontal">
+        android:clipChildren="false"
+        android:orientation="horizontal"
+        tools:backgroundTint="@color/colorAccent">
 
         <ImageView
             android:id="@+id/launcherButton"

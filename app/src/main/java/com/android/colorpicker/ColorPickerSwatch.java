@@ -17,6 +17,7 @@
 package com.android.colorpicker;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -60,9 +61,12 @@ public class ColorPickerSwatch extends FrameLayout implements View.OnClickListen
     }
 
     protected void setColor(int color) {
+        Resources res = getContext().getResources();
         Drawable[] colorDrawable = new Drawable[]
-                {getContext().getResources().getDrawable(R.drawable.color_picker_swatch)};
+                {res.getDrawable(R.drawable.color_picker_swatch)};
+
         mSwatchImage.setImageDrawable(new ColorStateDrawable(colorDrawable, color));
+        mSwatchImage.setContentDescription(res.getString(R.string.color_swatch_description, color));
     }
 
     private void setChecked(boolean checked) {

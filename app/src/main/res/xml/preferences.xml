@@ -13,17 +13,51 @@
             android:entryValues="@array/themesValues"
             android:key="theme"
             android:title="@string/theme_name" />
+
+        <!-- Notification bar -->
+
         <androidx.preference.PreferenceCategory
-            android:key="colors-section"
-            android:title="@string/colors">
+            android:key="notification-bar-section"
+            android:title="@string/notification_bar_section">
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:dialogLayout="@layout/pref_color"
                 android:key="notification-bar-color"
-                android:title="@string/notification_bar_color" />
+                android:title="@string/color" />
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:dialogLayout="@layout/pref_alpha"
+                android:defaultValue="255"
+                android:key="notification-bar-alpha"
+                android:title="@string/alpha" />
+            <androidx.preference.SwitchPreference
+                android:key="notification-bar-gradient"
+                android:defaultValue="true"
+                android:title="@string/gradient" />
             <androidx.preference.SwitchPreference
                 android:key="black-notification-icons"
                 android:title="@string/black_notification_icons" />
         </androidx.preference.PreferenceCategory>
+
+        <!-- Search bar -->
+
+        <androidx.preference.PreferenceCategory
+            android:key="search-bar-section"
+            android:title="@string/search_bar_section">
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:dialogLayout="@layout/pref_color"
+                android:key="search-bar-color"
+                android:title="@string/color" />
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:dialogLayout="@layout/pref_alpha"
+                android:defaultValue="127"
+                android:key="search-bar-alpha"
+                android:title="@string/alpha" />
+            <androidx.preference.SwitchPreference
+                android:key="search-bar-gradient"
+                android:defaultValue="true"
+                android:title="@string/gradient" />
+        </androidx.preference.PreferenceCategory>
+
+
         <androidx.preference.PreferenceCategory android:title="@string/misc">
             <androidx.preference.SwitchPreference
                 android:key="transparent-search"

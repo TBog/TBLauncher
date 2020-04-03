@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
@@ -16,16 +17,17 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
+import android.view.animation.LinearInterpolator;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
+import androidx.preference.PreferenceManager;
 
 import java.util.ArrayList;
 
@@ -34,13 +36,16 @@ import rocks.tbog.tblauncher.result.ResultAdapter;
 import rocks.tbog.tblauncher.searcher.ISearchActivity;
 import rocks.tbog.tblauncher.searcher.QuerySearcher;
 import rocks.tbog.tblauncher.ui.AnimatedListView;
+import rocks.tbog.tblauncher.ui.CutoutFactory;
 import rocks.tbog.tblauncher.ui.KeyboardScrollHider;
 import rocks.tbog.tblauncher.ui.LoadingDrawable;
+import rocks.tbog.tblauncher.utils.SystemUiVisibility;
+import rocks.tbog.tblauncher.utils.UIColors;
 
 public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardHandler {
 
     private static final int UI_ANIMATION_DELAY = 300;
-    private static final int UI_ANIMATION_DURATION = 300;
+    private static final int UI_ANIMATION_DURATION = 200;
     private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
 
     private TBLauncherActivity mTBLauncherActivity = null;
@@ -58,22 +63,13 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     //private ProgressBar mLoaderSpinner;
     private View mDecorView;
     private Handler mHideHandler;
+    private View mNotificationBackground;
 
     private final Runnable mHidePart2Runnable = new Runnable() {
         @SuppressLint("InlinedApi")
         @Override
         public void run() {
-            // Delayed removal of status and navigation bar
-
-            // Note that some of these constants are new as of API 16 (Jelly Bean)
-            // and API 19 (KitKat). It is safe to use them, as they are inlined
-            // at compile-time and do nothing on earlier devices.
-            mDecorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
-                    | View.SYSTEM_UI_FLAG_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+            SystemUiVisibility.setFullscreen(mDecorView);
         }
     };
 
@@ -88,6 +84,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             mSearchBarContainer.setVisibility(View.VISIBLE);
         }
     };
+    private SharedPreferences mPref;
 
     private void initResultLayout(ViewGroup resultLayout) {
         mResultLayout = resultLayout;
@@ -151,11 +148,13 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 
     public void onCreateActivity(TBLauncherActivity tbLauncherActivity) {
         mTBLauncherActivity = tbLauncherActivity;
+        mPref = PreferenceManager.getDefaultSharedPreferences(tbLauncherActivity);
 
         bSearchBarHidden = true;
         mSearchBarContainer = findViewById(R.id.searchBarContainer);
         mClearButton = findViewById(R.id.clearButton);
         mMenuButton = findViewById(R.id.menuButton);
+        mNotificationBackground = findViewById(R.id.notificationBackground);
 
         mDecorView = mTBLauncherActivity.getWindow().getDecorView();
         mHideHandler = new Handler(Looper.getMainLooper());
@@ -215,10 +214,15 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     private void showSearchBar() {
-        // Show the system bar
-        mDecorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
+        SystemUiVisibility.clearFullscreen(mDecorView);
+
+        mNotificationBackground.setTranslationY(-mNotificationBackground.getLayoutParams().height);
+        mNotificationBackground.animate()
+                .translationY(0f)
+                .setStartDelay(0)
+                .setDuration(UI_ANIMATION_DURATION)
+                .setInterpolator(new LinearInterpolator())
+                .start();
 
         mSearchBarContainer.animate()
                 .setListener(new AnimatorListenerAdapter() {
@@ -250,6 +254,13 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         if (actionBar != null) {
             actionBar.hide();
         }
+
+        mNotificationBackground.animate()
+                .translationY(-mNotificationBackground.getLayoutParams().height)
+                .setStartDelay(delay)
+                .setDuration(UI_ANIMATION_DURATION)
+                .setInterpolator(new AccelerateInterpolator())
+                .start();
 
         //TODO: animate mResultLayout to fill the space freed by mSearchBarContainer
         mSearchBarContainer.animate()
@@ -448,6 +459,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         if (!mSearchEditText.getText().toString().isEmpty()) {
             mSearchEditText.setText("");
             displayClearOnInput();
+            hideSearchBar(0);
             hideKeyboard();
         }
     }

@@ -19,16 +19,24 @@
         android:id="@+id/color_picker_swatch"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        tools:src="@android:color/black"/>
+        android:contentDescription="@null" />
 
     <ImageView
         android:id="@+id/color_picker_checkmark"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
+        android:contentDescription="@null"
         android:scaleType="fitXY"
         android:scaleX="0.5"
         android:scaleY="0.5"
         android:src="@drawable/ic_colorpicker_swatch_selected"
         android:visibility="gone"
         tools:visibility="visible" />
+
+    <!-- draw a border over @id/color_picker_swatch -->
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:contentDescription="@null"
+        android:src="@drawable/color_picker_swatch" />
 </merge>

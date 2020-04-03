@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -13,10 +14,13 @@ import android.view.KeyEvent;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
 import android.widget.PopupWindow;
 
+import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.preference.PreferenceManager;
@@ -71,49 +75,6 @@ public class TBLauncherActivity extends AppCompatActivity implements IResultList
      * Receive events from providers
      */
     private BroadcastReceiver mReceiver;
-
-//    private final Handler mHideHandler = new Handler();
-//    private View mDecorView;
-//    private final Runnable mHidePart2Runnable = new Runnable() {
-//        @SuppressLint("InlinedApi")
-//        @Override
-//        public void run() {
-//            // Delayed removal of status and navigation bar
-//
-//            // Note that some of these constants are new as of API 16 (Jelly Bean)
-//            // and API 19 (KitKat). It is safe to use them, as they are inlined
-//            // at compile-time and do nothing on earlier devices.
-//            mDecorView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
-//                    | View.SYSTEM_UI_FLAG_FULLSCREEN
-//                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-//                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-//                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-//                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
-//        }
-//    };
-//    private final Runnable mHideRunnable = new Runnable() {
-//        @Override
-//        public void run() {
-//            hide();
-//        }
-//    };
-
-    /**
-     * Touch listener to use for in-layout UI controls to delay hiding the
-     * system UI. This is to prevent the jarring behavior of controls going away
-     * while interacting with activity UI.
-     */
-//    private final View.OnTouchListener mDelayHideTouchListener = new View.OnTouchListener() {
-//        @Override
-//        public boolean onTouch(View view, MotionEvent motionEvent) {
-//            if (AUTO_HIDE) {
-//                delayedHide(AUTO_HIDE_DELAY_MILLIS);
-//            }
-//            if (motionEvent.getAction() == MotionEvent.ACTION_UP)
-//                return view.performClick();
-//            return false;
-//        }
-//    };
 
 //    @Override
 //    public void onAttachedToWindow() {
@@ -188,13 +149,21 @@ public class TBLauncherActivity extends AppCompatActivity implements IResultList
 
         // call after all views are set
         TBApplication.behaviour(this).onCreateActivity(this);
+        TBApplication.ui(this).onCreateActivity(this);
     }
 
     @Override
     protected void onDestroy() {
         TBApplication.behaviour(this).onDestroyActivity(this);
+        TBApplication.ui(this).onDestroyActivity(this);
         unregisterReceiver(mReceiver);
         super.onDestroy();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        TBApplication.ui(this).onResume();
     }
 
     @Override
@@ -257,7 +226,7 @@ public class TBLauncherActivity extends AppCompatActivity implements IResultList
         if (dismissPopup())
             return;
 
-        if ( TBApplication.behaviour(this).onBackPressed() )
+        if (TBApplication.behaviour(this).onBackPressed())
             return;
 
         super.onBackPressed();

@@ -12,12 +12,12 @@ import com.android.colorpicker.ColorPickerPalette;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.utils.UIColors;
 
-public class CustomDialog extends PreferenceDialogFragmentCompat {
+public class PaletteDialog extends PreferenceDialogFragmentCompat {
 
     private ColorPickerPalette mPalette;
 
-    public static CustomDialog newInstance(String key) {
-        final CustomDialog fragment = new CustomDialog();
+    public static PaletteDialog newInstance(String key) {
+        final PaletteDialog fragment = new PaletteDialog();
         final Bundle b = new Bundle(1);
         b.putString(ARG_KEY, key);
         fragment.setArguments(b);
@@ -33,10 +33,8 @@ public class CustomDialog extends PreferenceDialogFragmentCompat {
         if (!(dialogPreference instanceof CustomDialogPreference))
             return;
         CustomDialogPreference preference = (CustomDialogPreference) dialogPreference;
-        // save data when user clicked OK
-        if ("notification-bar-color".equals(preference.getKey())) {
-            preference.persistValueIfAllowed();
-        }
+
+        preference.persistValueIfAllowed();
     }
 
     @Override
@@ -44,20 +42,18 @@ public class CustomDialog extends PreferenceDialogFragmentCompat {
         View root = super.onCreateDialogView(context);
         DialogPreference preference = getPreference();
         final String key = preference.getKey();
-        // initialize layout data
-        if ("notification-bar-color".equals(key)) {
-            // initialize value
-            ((CustomDialogPreference) preference).setValue(preference.getSharedPreferences().getInt(key, UIColors.COLOR_DEFAULT));
+        // initialize value
+        ((CustomDialogPreference) preference).setValue(preference.getSharedPreferences().getInt(key, UIColors.COLOR_DEFAULT));
 
-            mPalette = root.findViewById(R.id.colorPicker);
-            mPalette.init(ColorPickerPalette.SIZE_SMALL, 4, color -> {
-                CustomDialogPreference pref = ((CustomDialogPreference) CustomDialog.this.getPreference());
-                pref.setValue(color);
-                //pref.persistValueIfAllowed();
-                CustomDialog.this.drawPalette();
-                //CustomDialog.this.dismiss();
-            });
-        }
+        // initialize layout data
+        mPalette = root.findViewById(R.id.colorPicker);
+        mPalette.init(ColorPickerPalette.SIZE_SMALL, 4, color -> {
+            CustomDialogPreference pref = ((CustomDialogPreference) PaletteDialog.this.getPreference());
+            pref.setValue(color);
+            //pref.persistValueIfAllowed();
+            PaletteDialog.this.drawPalette();
+            //CustomDialog.this.dismiss();
+        });
         return root;
     }
 
@@ -67,12 +63,10 @@ public class CustomDialog extends PreferenceDialogFragmentCompat {
 
         DialogPreference preference = getPreference();
         // initialize layout data
-        if ("notification-bar-color".equals(preference.getKey())) {
 //            // Calculate number of swatches to display
 //            int swatchSize = mPalette.getResources().getDimensionPixelSize(R.dimen.color_swatch_small);
 //            mPalette.init(ColorPickerPalette.SIZE_SMALL, (view.getWidth() - (swatchSize * 2 / 3)) / swatchSize, mPalette.mOnColorSelectedListener);
-            drawPalette();
-        }
+        drawPalette();
     }
 
     private void drawPalette() {

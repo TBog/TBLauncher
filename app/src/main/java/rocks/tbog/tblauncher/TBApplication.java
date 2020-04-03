@@ -6,6 +6,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 
+import androidx.preference.PreferenceManager;
+
 import rocks.tbog.tblauncher.searcher.Searcher;
 
 public class TBApplication extends Application {
@@ -24,6 +26,18 @@ public class TBApplication extends Application {
      */
     private Behaviour mBehaviour = new Behaviour();
 
+    /**
+     * Everything that has to do with the UI customization
+     */
+    private CustomizeUI mCustomizeUI = new CustomizeUI();
+
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, true);
+    }
+
     public static TBApplication getApplication(Context context) {
         return (TBApplication) context.getApplicationContext();
     }
@@ -34,6 +48,14 @@ public class TBApplication extends Application {
 
     public static void clearBehaviour(Context context) {
         getApplication(context).mBehaviour = new Behaviour();
+    }
+
+    public static CustomizeUI ui(Context context) {
+        return getApplication(context).mCustomizeUI;
+    }
+
+    public static void clearUi(Context context) {
+        getApplication(context).mCustomizeUI = new CustomizeUI();
     }
 
     public static void runTask(Context context, Searcher task) {
