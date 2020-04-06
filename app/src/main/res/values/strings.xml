@@ -47,8 +47,7 @@
     <string name="transparent_search_bar">Transparent search bar</string>
     <string name="transparent_favorites_bar">Transparent favorites bar</string>
     <string name="large_search_bar">Bigger search bar</string>
-    <string name="rounded_list">Rounded list corners</string>
-    <string name="rounded_bars">Rounded bar corners</string>
+    <string name="round_corners">Rounded corners</string>
     <string name="swap_kiss_button_with_menu">KISS button on the right</string>
 
     <!-- Default title for color picker dialog [CHAR LIMIT=30] -->
@@ -66,5 +65,7 @@
     <string name="cd_show_all_apps">Show all applications</string>
     <string name="select_alpha">Drag the slider to select the desired transparency</string>
     <string name="search_bar_section">Search bar</string>
+    <string name="search_bar_size">Bar and text size</string>
+    <string name="result_list_section">Result list</string>
 
 </resources>

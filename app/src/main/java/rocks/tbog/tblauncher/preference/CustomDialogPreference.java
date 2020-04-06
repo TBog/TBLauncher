@@ -1,7 +1,11 @@
 package rocks.tbog.tblauncher.preference;
 
 import android.content.Context;
+import android.content.res.TypedArray;
 import android.util.AttributeSet;
+import android.util.TypedValue;
+
+import androidx.annotation.Nullable;
 
 public class CustomDialogPreference extends androidx.preference.DialogPreference {
 
@@ -54,5 +58,22 @@ public class CustomDialogPreference extends androidx.preference.DialogPreference
             return true;
         }
         return false;
+    }
+
+    @Override
+    protected void onSetInitialValue(@Nullable Object defaultValue) {
+        if (getValue() == null)
+            setValue(defaultValue);
+        persistValue();
+    }
+
+    @Override
+    protected Object onGetDefaultValue(TypedArray a, int index) {
+        try {
+            return a.getInteger(index, 0);
+        } catch (UnsupportedOperationException e)
+        {
+            return a.getString(index);
+        }
     }
 }

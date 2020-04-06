@@ -12,7 +12,7 @@ import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.WindowManager;
-import android.webkit.WebView;
+//import android.webkit.WebView;
 
 import androidx.annotation.Nullable;
 
@@ -341,7 +341,7 @@ public class DeviceUtils {
         Log.i(tagOfLogCat, "SDK RELEASE=" + Build.VERSION.RELEASE);
         Log.i(tagOfLogCat, "SDK CODENAME=" + Build.VERSION.CODENAME);
         Log.i(tagOfLogCat, "SDK INCREMENTAL=" + Build.VERSION.INCREMENTAL);
-        Log.i(tagOfLogCat, "User Agent=" + new WebView(context).getSettings().getUserAgentString());
+        //Log.i(tagOfLogCat, "User Agent=" + new WebView(context).getSettings().getUserAgentString());
         Log.i(tagOfLogCat, "===End show device information===");
     }
 

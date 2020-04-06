@@ -154,10 +154,13 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 switch (key) {
                     case "notification-bar-color":
                     case "search-bar-color":
+                    case "result-list-color":
                         dialogFragment = PaletteDialog.newInstance(key);
                         break;
                     case "notification-bar-alpha":
                     case "search-bar-alpha":
+                    case "result-list-alpha":
+                    case "search-bar-size":
                         dialogFragment = SliderDialog.newInstance(key);
                         break;
                     default:

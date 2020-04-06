@@ -15,7 +15,6 @@
             android:title="@string/theme_name" />
 
         <!-- Notification bar -->
-
         <androidx.preference.PreferenceCategory
             android:key="notification-bar-section"
             android:title="@string/notification_bar_section">
@@ -24,13 +23,13 @@
                 android:key="notification-bar-color"
                 android:title="@string/color" />
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:dialogLayout="@layout/pref_alpha"
                 android:defaultValue="255"
+                android:dialogLayout="@layout/pref_alpha"
                 android:key="notification-bar-alpha"
                 android:title="@string/alpha" />
             <androidx.preference.SwitchPreference
-                android:key="notification-bar-gradient"
                 android:defaultValue="true"
+                android:key="notification-bar-gradient"
                 android:title="@string/gradient" />
             <androidx.preference.SwitchPreference
                 android:key="black-notification-icons"
@@ -38,7 +37,6 @@
         </androidx.preference.PreferenceCategory>
 
         <!-- Search bar -->
-
         <androidx.preference.PreferenceCategory
             android:key="search-bar-section"
             android:title="@string/search_bar_section">
@@ -47,37 +45,47 @@
                 android:key="search-bar-color"
                 android:title="@string/color" />
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:dialogLayout="@layout/pref_alpha"
                 android:defaultValue="127"
+                android:dialogLayout="@layout/pref_alpha"
                 android:key="search-bar-alpha"
                 android:title="@string/alpha" />
             <androidx.preference.SwitchPreference
-                android:key="search-bar-gradient"
                 android:defaultValue="true"
+                android:disableDependentsState="true"
+                android:key="search-bar-gradient"
                 android:title="@string/gradient" />
+            <androidx.preference.SwitchPreference
+                android:defaultValue="true"
+                android:dependency="search-bar-gradient"
+                android:key="search-bar-rounded"
+                android:title="@string/round_corners" />
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@integer/default_bar_size"
+                android:dialogLayout="@layout/pref_alpha"
+                android:key="search-bar-size"
+                android:title="@string/search_bar_size" />
         </androidx.preference.PreferenceCategory>
 
+        <!-- Result list -->
+        <androidx.preference.PreferenceCategory
+            android:key="result-list-section"
+            android:title="@string/result_list_section">
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:dialogLayout="@layout/pref_color"
+                android:key="result-list-color"
+                android:title="@string/color" />
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="127"
+                android:dialogLayout="@layout/pref_alpha"
+                android:key="result-list-alpha"
+                android:title="@string/alpha" />
+            <androidx.preference.SwitchPreference
+                android:defaultValue="true"
+                android:key="result-list-rounded"
+                android:title="@string/round_corners" />
+        </androidx.preference.PreferenceCategory>
 
         <androidx.preference.PreferenceCategory android:title="@string/misc">
-            <androidx.preference.SwitchPreference
-                android:key="transparent-search"
-                android:title="@string/transparent_search_bar" />
-            <androidx.preference.SwitchPreference
-                android:defaultValue="true"
-                android:key="transparent-favorites"
-                android:title="@string/transparent_favorites_bar" />
-            <androidx.preference.SwitchPreference
-                android:defaultValue="false"
-                android:key="large-search-bar"
-                android:title="@string/large_search_bar" />
-            <androidx.preference.SwitchPreference
-                android:defaultValue="false"
-                android:key="pref-rounded-list"
-                android:title="@string/rounded_list" />
-            <androidx.preference.SwitchPreference
-                android:defaultValue="true"
-                android:key="pref-rounded-bars"
-                android:title="@string/rounded_bars" />
             <androidx.preference.SwitchPreference
                 android:defaultValue="false"
                 android:key="pref-swap-kiss-button-with-menu"
