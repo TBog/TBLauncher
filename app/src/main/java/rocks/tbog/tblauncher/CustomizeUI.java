@@ -8,13 +8,9 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.ImageView;
 
-import androidx.annotation.ColorInt;
 import androidx.annotation.IdRes;
-import androidx.appcompat.app.ActionBar;
 import androidx.preference.PreferenceManager;
 
 import rocks.tbog.tblauncher.ui.CutoutFactory;
@@ -38,14 +34,6 @@ public class CustomizeUI {
 
         mNotificationBackground = findViewById(R.id.notificationBackground);
         mSearchBarContainer = findViewById(R.id.searchBarContainer);
-    }
-
-    public void onDestroyActivity(TBLauncherActivity tbLauncherActivity) {
-        if (mTBLauncherActivity != tbLauncherActivity)
-            throw new RuntimeException("Destroy called from a different activity");
-
-        // to make sure we don't keep any references, recreate this class
-        TBApplication.clearUi(tbLauncherActivity);
     }
 
     public void onResume() {

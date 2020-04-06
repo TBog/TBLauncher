@@ -20,6 +20,7 @@ import android.widget.PopupWindow;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -154,8 +155,7 @@ public class TBLauncherActivity extends AppCompatActivity implements IResultList
 
     @Override
     protected void onDestroy() {
-        TBApplication.behaviour(this).onDestroyActivity(this);
-        TBApplication.ui(this).onDestroyActivity(this);
+        TBApplication.onDestroyActivity(this);
         unregisterReceiver(mReceiver);
         super.onDestroy();
     }

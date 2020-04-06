@@ -46,16 +46,16 @@ public class TBApplication extends Application {
         return getApplication(context).mBehaviour;
     }
 
-    public static void clearBehaviour(Context context) {
-        getApplication(context).mBehaviour = new Behaviour();
-    }
-
     public static CustomizeUI ui(Context context) {
         return getApplication(context).mCustomizeUI;
     }
 
-    public static void clearUi(Context context) {
-        getApplication(context).mCustomizeUI = new CustomizeUI();
+    public static void onDestroyActivity(TBLauncherActivity tbLauncherActivity) {
+        TBApplication tbApplication = getApplication(tbLauncherActivity);
+
+        // to make sure we don't keep any references to activity or it's views
+        tbApplication.mBehaviour = new Behaviour();
+        tbApplication.mCustomizeUI = new CustomizeUI();
     }
 
     public static void runTask(Context context, Searcher task) {

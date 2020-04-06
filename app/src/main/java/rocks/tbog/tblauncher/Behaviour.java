@@ -36,12 +36,14 @@ import rocks.tbog.tblauncher.result.ResultAdapter;
 import rocks.tbog.tblauncher.searcher.ISearchActivity;
 import rocks.tbog.tblauncher.searcher.QuerySearcher;
 import rocks.tbog.tblauncher.ui.AnimatedListView;
-import rocks.tbog.tblauncher.ui.CutoutFactory;
 import rocks.tbog.tblauncher.ui.KeyboardScrollHider;
 import rocks.tbog.tblauncher.ui.LoadingDrawable;
 import rocks.tbog.tblauncher.utils.SystemUiVisibility;
-import rocks.tbog.tblauncher.utils.UIColors;
 
+
+/**
+ * Behaviour of the launcher, when are stuff hidden, animation, user interaction responses
+ */
 public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardHandler {
 
     private static final int UI_ANIMATION_DELAY = 300;
@@ -60,7 +62,6 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     private View mClearButton;
     private View mMenuButton;
     private ImageView mLauncherButton;
-    //private ProgressBar mLoaderSpinner;
     private View mDecorView;
     private Handler mHideHandler;
     private View mNotificationBackground;
@@ -169,14 +170,6 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         mTBLauncherActivity.registerForContextMenu(mMenuButton);
         mClearButton.setOnClickListener(v -> mSearchEditText.setText(""));
         mMenuButton.setOnClickListener(View::showContextMenu);
-    }
-
-    public void onDestroyActivity(TBLauncherActivity tbLauncherActivity) {
-        if (mTBLauncherActivity != tbLauncherActivity)
-            throw new RuntimeException("Destroy called from a different activity");
-
-        // to make sure we don't keep any references, recreate this class
-        TBApplication.clearBehaviour(tbLauncherActivity);
     }
 
     public void onPostCreate() {
@@ -308,11 +301,6 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         mTBLauncherActivity.dismissPopup();
 
         mSearchEditText.clearFocus();
-    }
-
-    @Override
-    public void applyScrollSystemUi() {
-        //systemUiVisibilityHelper.applyScrollSystemUi();
     }
 
     @Override
