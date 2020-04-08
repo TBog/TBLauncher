@@ -15,6 +15,7 @@ public class TBApplication extends Application {
     public static final int TOUCH_DELAY = 120;
     private DataHandler dataHandler;
     private IconsHandler iconsPackHandler;
+    private boolean bLayoutUpdateRequired = false;
 
     /**
      * Task launched on text change
@@ -115,5 +116,17 @@ public class TBApplication extends Application {
         }
 
         return homePackage.equals(context.getPackageName());
+    }
+
+    public boolean isLayoutUpdateRequired() {
+        return bLayoutUpdateRequired;
+    }
+
+    public void requireLayoutUpdate(boolean require) {
+        bLayoutUpdateRequired = require;
+    }
+
+    public void requireLayoutUpdate() {
+        bLayoutUpdateRequired = true;
     }
 }

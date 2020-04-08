@@ -14,6 +14,7 @@ import android.os.Build;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 
 import androidx.annotation.IdRes;
 import androidx.preference.PreferenceManager;
@@ -48,8 +49,7 @@ public class CustomizeUI {
 
     public void onResume() {
         setNotificationBarColor();
-        setSearchBarColor();
-        setSearchBarSize();
+        setSearchBarPref();
         setResultListPref();
     }
 
@@ -85,29 +85,22 @@ public class CustomizeUI {
 
     }
 
-    private void setSearchBarColor() {
-        int color = UIColors.getColor(mPref, "search-bar-color");
-        int alpha = UIColors.getAlpha(mPref, "search-bar-alpha");
-        boolean gradient = mPref.getBoolean("search-bar-gradient", true);
-        if (gradient)
-            mSearchBarContainer.setBackgroundResource(R.drawable.search_bar_background);
-        else
-            mSearchBarContainer.setBackground(new ColorDrawable(Color.WHITE));
-        mSearchBarContainer.getBackground().setColorFilter(new PorterDuffColorFilter(UIColors.setAlpha(color, alpha), PorterDuff.Mode.MULTIPLY));
-    }
-
-    private void setSearchBarSize() {
-        int percent = mPref.getInt("search-bar-size", 0);
+    private void setSearchBarPref() {
         Resources resources = mSearchBarContainer.getResources();
+
+        // size
+        int percent = mPref.getInt("search-bar-size", 0);
 
         // set layout height
         {
             int smallSize = resources.getDimensionPixelSize(R.dimen.bar_height);
             int largeSize = resources.getDimensionPixelSize(R.dimen.large_bar_height);
             ViewGroup.LayoutParams params = mSearchBarContainer.getLayoutParams();
-            if (params != null) {
+            if (params instanceof LinearLayout.LayoutParams) {
                 params.height = smallSize + (largeSize - smallSize) * percent / 100;
                 mSearchBarContainer.setLayoutParams(params);
+            } else {
+                throw new IllegalStateException("mSearchBarContainer has the wrong layout params");
             }
         }
 
@@ -116,6 +109,26 @@ public class CustomizeUI {
             float smallSize = resources.getDimension(R.dimen.bar_text);
             float largeSize = resources.getDimension(R.dimen.large_bar_text);
             mSearchBar.setTextSize(smallSize + (largeSize - smallSize) * percent / 100);
+        }
+
+        // color
+        int color = UIColors.getColor(mPref, "search-bar-color");
+        int alpha = UIColors.getAlpha(mPref, "search-bar-alpha");
+        boolean gradient = mPref.getBoolean("search-bar-gradient", true);
+        if (gradient) {
+            mSearchBarContainer.setBackgroundResource(R.drawable.search_bar_background);
+            mSearchBarContainer.getBackground().setColorFilter(new PorterDuffColorFilter(UIColors.setAlpha(color, alpha), PorterDuff.Mode.MULTIPLY));
+        } else {
+            if (mPref.getBoolean("search-bar-rounded", true)) {
+                PaintDrawable drawable = new PaintDrawable();
+                drawable.getPaint().setColor(UIColors.setAlpha(color, alpha));
+                LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) mSearchBarContainer.getLayoutParams();
+                drawable.setCornerRadius(params.height * .5f);
+                mSearchBarContainer.setBackground(drawable);
+                int margin = (int) (params.height * .25f);
+                params.setMargins(margin, 0, margin, margin);
+            } else
+                mSearchBarContainer.setBackground(new ColorDrawable(UIColors.setAlpha(color, alpha)));
         }
     }
 
@@ -130,9 +143,7 @@ public class CustomizeUI {
                 // clip list content to rounded corners
                 mResultLayout.setClipToOutline(true);
             }
-        }
-        else
-        {
+        } else {
             drawable = new ShapeDrawable();
         }
         drawable.getPaint().setColor(UIColors.setAlpha(color, alpha));

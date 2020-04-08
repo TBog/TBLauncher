@@ -1,8 +1,12 @@
 package rocks.tbog.tblauncher;
 
+import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.view.View;
 
 import androidx.annotation.Nullable;
@@ -12,6 +16,7 @@ import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
+import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceScreen;
@@ -23,6 +28,8 @@ import rocks.tbog.tblauncher.utils.SystemUiVisibility;
 import rocks.tbog.tblauncher.utils.UIColors;
 
 public class SettingsActivity extends AppCompatActivity implements PreferenceFragmentCompat.OnPreferenceStartScreenCallback/*, PreferenceFragmentCompat.OnPreferenceStartFragmentCallback*/ {
+
+    private final static String PREF_THAT_REQUIRE_LAYOUT_UPDATE = "result-list-rounded search-bar-rounded search-bar-gradient";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -109,12 +116,53 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 removePreference("black-notification-icons");
             }
 
+            final ListPreference iconsPack = findPreference("icons-pack");
+            if ( iconsPack != null )
+                iconsPack.setEnabled(false);
+
+            Runnable iconsPackLoad = () -> {
+                if (iconsPack == null)
+                    return;
+                SettingsFragment.this.setListPreferenceIconsPacksData(iconsPack);
+                new Handler(Looper.getMainLooper()).post(() -> iconsPack.setEnabled(true));
+            };
+
+            if (savedInstanceState == null) {
+                // Run asynchronously to open settings fast
+                AsyncTask.execute(iconsPackLoad);
+            } else {
+                // Run synchronously to ensure preferences can be restored from state
+                iconsPackLoad.run();
+            }
+
         }
 
         private void removePreference(String key) {
             Preference pref = findPreference(key);
             if (pref != null && pref.getParent() != null)
                 pref.getParent().removePreference(pref);
+        }
+
+        private void setListPreferenceIconsPacksData(ListPreference lp) {
+            Context context = getContext();
+            if (context == null)
+                return;
+            IconsHandler iph = TBApplication.getApplication(context).getIconsHandler();
+
+            CharSequence[] entries = new CharSequence[iph.getIconsPacks().size() + 1];
+            CharSequence[] entryValues = new CharSequence[iph.getIconsPacks().size() + 1];
+
+            int i = 0;
+            entries[0] = this.getString(R.string.icons_pack_default_name);
+            entryValues[0] = "default";
+            for (String packageIconsPack : iph.getIconsPacks().keySet()) {
+                entries[++i] = iph.getIconsPacks().get(packageIconsPack);
+                entryValues[i] = packageIconsPack;
+            }
+
+            lp.setEntries(entries);
+            lp.setDefaultValue("default");
+            lp.setEntryValues(entryValues);
         }
 
         @Override
@@ -183,12 +231,19 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+            SettingsActivity activity = (SettingsActivity)getActivity();
+            if (activity == null)
+                return;
+
+            if (PREF_THAT_REQUIRE_LAYOUT_UPDATE.contains(key))
+                TBApplication.getApplication(activity).requireLayoutUpdate();
+
             switch (key) {
                 case "notification-bar-color":
                 case "notification-bar-alpha": {
                     int color = UIColors.getColor(sharedPreferences, "notification-bar-color");
                     int alpha = UIColors.getAlpha(sharedPreferences, "notification-bar-alpha");
-                    UIColors.setStatusBarColor((SettingsActivity) getActivity(), UIColors.setAlpha(color, alpha));
+                    UIColors.setStatusBarColor(activity, UIColors.setAlpha(color, alpha));
                     break;
                 }
                 case "black-notification-icons":
@@ -202,6 +257,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                             SystemUiVisibility.clearLightStatusBar(view);
                         }
                     }
+                    break;
+                case "icons-pack":
+                    TBApplication.getApplication(activity).getIconsHandler().loadIconsPack(sharedPreferences.getString(key, "default"));
                     break;
             }
         }

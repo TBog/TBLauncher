@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.drawable.ColorDrawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -14,14 +13,10 @@ import android.view.KeyEvent;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.view.Window;
 import android.view.WindowManager;
 import android.widget.PopupWindow;
 
-import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
-import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.preference.PreferenceManager;
@@ -59,16 +54,6 @@ public class TBLauncherActivity extends AppCompatActivity implements IResultList
     public static final String LOAD_OVER = "fr.neamar.summon.LOAD_OVER";
     public static final String FULL_LOAD_OVER = "fr.neamar.summon.FULL_LOAD_OVER";
 
-//    private View mResultLayout;
-//    private AnimatedListView mResultList;
-//    private ResultAdapter mResultAdapter;
-//    private EditText mSearchEditText;
-//    private View mSearchBarContainer;
-//    private View mClearButton;
-//    private View mMenuButton;
-//    private ImageView mLauncherButton;
-//    private ProgressBar mLoaderSpinner;
-
     private KeyboardScrollHider mHider;
     private PopupWindow mPopup;
 
@@ -93,6 +78,7 @@ public class TBLauncherActivity extends AppCompatActivity implements IResultList
 //
 //        findViewById(R.id.root_layout).setPadding(padding.left, padding.top, padding.right, padding.bottom);
 //    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -155,6 +141,7 @@ public class TBLauncherActivity extends AppCompatActivity implements IResultList
 
     @Override
     protected void onDestroy() {
+        Log.d(TAG, "onDestroy()");
         TBApplication.onDestroyActivity(this);
         unregisterReceiver(mReceiver);
         super.onDestroy();
@@ -162,9 +149,21 @@ public class TBLauncherActivity extends AppCompatActivity implements IResultList
 
     @Override
     protected void onResume() {
+        Log.d(TAG, "onResume()");
         super.onResume();
+
+        if (TBApplication.getApplication(this).isLayoutUpdateRequired()) {
+            TBApplication.getApplication(this).requireLayoutUpdate(false);
+            Log.i(TAG, "Restarting app after setting changes");
+            // Restart current activity to refresh view, since some preferences may require using a new UI
+            this.recreate();
+            return;
+        }
+
         TBApplication.ui(this).onResume();
     }
+
+
 
     @Override
     public boolean onKeyDown(int keycode, @NonNull KeyEvent e) {
