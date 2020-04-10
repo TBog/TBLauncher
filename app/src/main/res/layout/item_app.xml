@@ -3,25 +3,20 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingHorizontal="@dimen/result_margin_horizontal"
+    android:paddingVertical="@dimen/result_margin_vertical"
     android:gravity="center_vertical"
-    android:orientation="horizontal"
-    android:paddingStart="@dimen/result_margin_left"
-    android:paddingLeft="@dimen/result_margin_left"
-    android:paddingTop="@dimen/result_margin_top"
-    android:paddingEnd="@dimen/result_margin_right"
-    android:paddingRight="@dimen/result_margin_right"
-    android:paddingBottom="@dimen/result_margin_bottom">
+    android:orientation="horizontal">
 
     <FrameLayout
         android:layout_width="@dimen/icon_width"
         android:layout_height="@dimen/icon_height"
         android:layout_gravity="start|center_vertical"
         android:layout_marginStart="@dimen/icon_margin_left"
-        android:layout_marginLeft="@dimen/icon_margin_left"
         android:layout_marginTop="@dimen/icon_margin_top"
         android:layout_marginEnd="@dimen/icon_margin_right"
-        android:layout_marginRight="@dimen/icon_margin_right"
         android:layout_marginBottom="@dimen/icon_margin_bottom">
+
         <ImageView
             android:id="@+id/item_app_icon"
             android:layout_width="match_parent"
@@ -33,10 +28,10 @@
             android:id="@+id/item_notification_dot"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="gone"
-            tools:visibility="visible"
             android:contentDescription="@null"
-            android:src="@drawable/notification_dot" />
+            android:src="@drawable/notification_dot"
+            android:visibility="gone"
+            tools:visibility="visible" />
     </FrameLayout>
 
     <LinearLayout
@@ -53,7 +48,6 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:paddingEnd="2dp"
-            android:paddingRight="2dp"
             android:paddingBottom="3dp"
             android:shadowColor="?attr/resultShadowColor"
             android:shadowDx="1"
@@ -71,7 +65,6 @@
             android:layout_marginTop="-6dp"
             android:ellipsize="end"
             android:paddingEnd="2dp"
-            android:paddingRight="2dp"
             android:shadowColor="?attr/resultShadowColor"
             android:shadowDx="1"
             android:shadowDy="2"

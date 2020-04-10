@@ -8,10 +8,9 @@
     <dimen name="icon_margin_top">5dp</dimen>
     <dimen name="icon_margin_bottom">5dp</dimen>
 
-    <dimen name="result_margin_left">10dp</dimen>
-    <dimen name="result_margin_right">10dp</dimen>
-    <dimen name="result_margin_top">2dp</dimen>
-    <dimen name="result_margin_bottom">2dp</dimen>
+    <dimen name="result_margin_horizontal">10dp</dimen>
+    <dimen name="result_margin_vertical">2dp</dimen>
+    <dimen name="result_corner_radius">24dp</dimen>
 
     <dimen name="result_title_size">18sp</dimen>
     <dimen name="result_small_size">14sp</dimen>
@@ -21,12 +20,11 @@
     <dimen name="color_swatch_margins_large">8dip</dimen>
     <dimen name="color_swatch_margins_small">4dip</dimen>
 
-    <dimen name="bar_height">30dp</dimen>
-    <dimen name="large_bar_height">60dp</dimen>
-    <dimen name="corner_radius">30dp</dimen> <!--half of large_bar_height-->
-    <dimen name="bar_text">8sp</dimen>
-    <dimen name="large_bar_text">18sp</dimen>
-
+    <dimen name="bar_height">25dp</dimen>
+    <dimen name="large_bar_height">40dp</dimen>
+    <dimen name="bar_corner_radius">15dp</dimen> <!-- at most half of `large_bar_height` -->
+    <dimen name="bar_text">12sp</dimen>
+    <dimen name="large_bar_text">22sp</dimen>
 
 
     <dimen name="launcher_button_width">45dp</dimen>

@@ -16,6 +16,8 @@ import rocks.tbog.tblauncher.R;
 
 public class SliderDialog extends PreferenceDialogFragmentCompat {
 
+    protected TextView mTextView2;
+
     public static SliderDialog newInstance(String key) {
         SliderDialog fragment = new SliderDialog();
         final Bundle b = new Bundle(1);
@@ -67,18 +69,18 @@ public class SliderDialog extends PreferenceDialogFragmentCompat {
                 seekBar.setMax(255);
                 break;
         }
+        seekBar.setProgress((Integer) preference.getValue());
 
         if ("search-bar-size".equals(key))
             ((TextView) root.findViewById(android.R.id.text1)).setText(R.string.search_bar_size);
 
-        seekBar.setProgress((Integer) preference.getValue());
+        mTextView2 = root.findViewById(android.R.id.text2);
+        mTextView2.setText( mTextView2.getResources().getString(R.string.value, seekBar.getProgress()) );
+
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-//                if (fromUser) {
-//                    CustomDialogPreference pref = ((CustomDialogPreference) SliderDialog.this.getPreference());
-//                    pref.setValue(progress);
-//                }
+                mTextView2.setText( mTextView2.getResources().getString(R.string.value, progress) );
             }
 
             @Override

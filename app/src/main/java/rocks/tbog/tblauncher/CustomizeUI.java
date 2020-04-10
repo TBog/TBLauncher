@@ -2,15 +2,14 @@ package rocks.tbog.tblauncher;
 
 import android.content.SharedPreferences;
 import android.content.res.Resources;
-import android.graphics.Color;
-import android.graphics.ColorFilter;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.PaintDrawable;
-import android.graphics.drawable.ShapeDrawable;
 import android.os.Build;
+import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
@@ -108,7 +107,7 @@ public class CustomizeUI {
         {
             float smallSize = resources.getDimension(R.dimen.bar_text);
             float largeSize = resources.getDimension(R.dimen.large_bar_text);
-            mSearchBar.setTextSize(smallSize + (largeSize - smallSize) * percent / 100);
+            mSearchBar.setTextSize(TypedValue.COMPLEX_UNIT_PX, smallSize + (largeSize - smallSize) * percent / 100);
         }
 
         // color
@@ -123,7 +122,7 @@ public class CustomizeUI {
                 PaintDrawable drawable = new PaintDrawable();
                 drawable.getPaint().setColor(UIColors.setAlpha(color, alpha));
                 LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) mSearchBarContainer.getLayoutParams();
-                drawable.setCornerRadius(params.height * .5f);
+                drawable.setCornerRadius(resources.getDimension(R.dimen.bar_corner_radius));
                 mSearchBarContainer.setBackground(drawable);
                 int margin = (int) (params.height * .25f);
                 params.setMargins(margin, 0, margin, margin);
@@ -135,18 +134,18 @@ public class CustomizeUI {
     private void setResultListPref() {
         int color = UIColors.getColor(mPref, "result-list-color");
         int alpha = UIColors.getAlpha(mPref, "result-list-alpha");
-        ShapeDrawable drawable;
+        Drawable drawable;
         if (mPref.getBoolean("result-list-rounded", true)) {
-            drawable = new PaintDrawable();
-            ((PaintDrawable) drawable).setCornerRadius(80f);
+            drawable = new GradientDrawable();  // can't use PaintDrawable when alpha < 255, ugly big darker borders
+            ((GradientDrawable) drawable).setColor(UIColors.setAlpha(color, alpha));
+            ((GradientDrawable) drawable).setCornerRadius(mResultLayout.getResources().getDimension(R.dimen.result_corner_radius));
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 // clip list content to rounded corners
                 mResultLayout.setClipToOutline(true);
             }
         } else {
-            drawable = new ShapeDrawable();
+            drawable = new ColorDrawable(UIColors.setAlpha(color, alpha));
         }
-        drawable.getPaint().setColor(UIColors.setAlpha(color, alpha));
         //drawable.setColorFilter(new PorterDuffColorFilter(UIColors.setAlpha(color, alpha), PorterDuff.Mode.MULTIPLY));
         mResultLayout.setBackground(drawable);
     }

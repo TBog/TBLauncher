@@ -17,6 +17,14 @@ import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 
+/**
+ * This drawable is best used when the view is set to have
+ *      adjustViewBounds="true"
+ *      scaleType="fitCenter"
+ *      either width or height have a size or match_parent
+ * Set Intrinsic size to 1x1 if you want to use scaleType="fitXY" in the view
+ */
+
 public class LoadingDrawable extends Drawable implements Animatable, ValueAnimator.AnimatorUpdateListener {
     private final ArrayList<Shape> mShapeList = new ArrayList<>(0);
     private final Path mShapePath;
@@ -31,7 +39,6 @@ public class LoadingDrawable extends Drawable implements Animatable, ValueAnimat
         mShapePath = new Path();
         mPaint = new Paint();
         mPaint.setColor(0xffffffff);
-        //mPaint.setStrokeWidth(3);
         mPaint.setStyle(Paint.Style.FILL);
         mPaint.setAntiAlias(false);
     }
@@ -62,6 +69,16 @@ public class LoadingDrawable extends Drawable implements Animatable, ValueAnimat
         return PixelFormat.TRANSLUCENT;
     }
 
+//    @Override
+//    public int getIntrinsicWidth() {
+//        return 1;
+//    }
+//
+//    @Override
+//    public int getIntrinsicHeight() {
+//        return 1;
+//    }
+
     @Override
     protected void onBoundsChange(Rect bounds) {
         super.onBoundsChange(bounds);
@@ -79,7 +96,6 @@ public class LoadingDrawable extends Drawable implements Animatable, ValueAnimat
             // compute height
             rect.top = rect.centerY() - rad;
             rect.bottom = rect.top + size;
-
         }
 
         // generate shapes
