@@ -45,28 +45,28 @@ public class LoadAppEntry extends LoadEntryItem<AppEntry> {
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             UserManager manager = (UserManager) ctx.getSystemService(Context.USER_SERVICE);
             LauncherApps launcher = (LauncherApps) ctx.getSystemService(Context.LAUNCHER_APPS_SERVICE);
+            if (manager != null && launcher != null)
+                // Handle multi-profile support introduced in Android 5 (#542)
+                for (android.os.UserHandle profile : manager.getUserProfiles()) {
+                    UserHandle user = new UserHandle(manager.getSerialNumberForUser(profile), profile);
+                    for (LauncherActivityInfo activityInfo : launcher.getActivityList(null, profile)) {
+                        ApplicationInfo appInfo = activityInfo.getApplicationInfo();
 
-            // Handle multi-profile support introduced in Android 5 (#542)
-            for (android.os.UserHandle profile : manager.getUserProfiles()) {
-                UserHandle user = new UserHandle(manager.getSerialNumberForUser(profile), profile);
-                for (LauncherActivityInfo activityInfo : launcher.getActivityList(null, profile)) {
-                    ApplicationInfo appInfo = activityInfo.getApplicationInfo();
+                        String id = user.addUserSuffixToString(pojoScheme + appInfo.packageName + "/" + activityInfo.getName(), '/');
 
-                    String id = user.addUserSuffixToString(pojoScheme + appInfo.packageName + "/" + activityInfo.getName(), '/');
+                        boolean isExcluded = false;//excludedAppList.contains(user.getComponentName(appInfo.packageName, activityInfo.getName()));
+                        boolean isExcludedFromHistory = false;//excludedFromHistoryAppList.contains(id);
 
-                    boolean isExcluded = false;//excludedAppList.contains(user.getComponentName(appInfo.packageName, activityInfo.getName()));
-                    boolean isExcludedFromHistory = false;//excludedFromHistoryAppList.contains(id);
+                        AppEntry app = new AppEntry(id, appInfo.packageName, activityInfo.getName(), user,
+                                isExcluded, isExcludedFromHistory);
 
-                    AppEntry app = new AppEntry(id, appInfo.packageName, activityInfo.getName(), user,
-                            isExcluded, isExcludedFromHistory);
+                        app.setName(activityInfo.getLabel().toString());
 
-                    app.setName(activityInfo.getLabel().toString());
+                        //app.setTags(tagsHandler.getTags(app.id));
 
-                    //app.setTags(tagsHandler.getTags(app.id));
-
-                    apps.add(app);
+                        apps.add(app);
+                    }
                 }
-            }
         } else {
             PackageManager manager = ctx.getPackageManager();
 

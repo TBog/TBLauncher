@@ -40,8 +40,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 
+import rocks.tbog.tblauncher.utils.DrawableUtils;
 import rocks.tbog.tblauncher.utils.UserHandle;
-import rocks.tbog.tblauncher.utils.Utilities;
 
 /**
  * Inspired from http://stackoverflow.com/questions/31490630/how-to-load-icon-from-icon-pack
@@ -190,25 +190,33 @@ public class IconsHandler {
 
     @NonNull
     private Drawable getDefaultAppDrawable(ComponentName componentName, UserHandle userHandle) {
+        Drawable drawable = null;
         try {
             if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 LauncherApps launcher = (LauncherApps) ctx.getSystemService(Context.LAUNCHER_APPS_SERVICE);
                 List<LauncherActivityInfo> icons = launcher.getActivityList(componentName.getPackageName(), userHandle.getRealHandle());
                 for (LauncherActivityInfo info : icons) {
                     if (info.getComponentName().equals(componentName)) {
-                        return info.getBadgedIcon(0);
+                        drawable = info.getBadgedIcon(0);
+                        break;
                     }
                 }
 
                 // This should never happen, let's just return the first icon
-                return icons.get(0).getBadgedIcon(0);
+                if (drawable == null)
+                    drawable = icons.get(0).getBadgedIcon(0);
             } else {
-                return pm.getActivityIcon(componentName);
+                drawable = pm.getActivityIcon(componentName);
             }
         } catch (NameNotFoundException | IndexOutOfBoundsException e) {
             Log.e(TAG, "Unable to found component " + componentName.toString() + e);
             return new ColorDrawable(Color.WHITE);
         }
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            return DrawableUtils.applyIconMaskShape(ctx, drawable);
+        }
+        return drawable;
     }
 
 
@@ -231,9 +239,9 @@ public class IconsHandler {
 
         // check the icon pack for a resource
         {
-            String drawable = packagesDrawables.get(componentName.toString());
-            if (drawable != null) { //there is a custom icon
-                int id = iconPackres.getIdentifier(drawable, "drawable", iconsPackPackageName);
+            String drawableName = packagesDrawables.get(componentName.toString());
+            if (drawableName != null) { //there is a custom icon
+                int id = iconPackres.getIdentifier(drawableName, "drawable", iconsPackPackageName);
                 if (id > 0) {
                     try {
                         return iconPackres.getDrawable(id);
@@ -258,7 +266,7 @@ public class IconsHandler {
                 bitmap = Bitmap.createBitmap(systemIcon.getIntrinsicWidth(), systemIcon.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
             systemIcon.setBounds(0, 0, bitmap.getWidth(), bitmap.getHeight());
             systemIcon.draw(new Canvas(bitmap));
-            generated = generateBitmap( new BitmapDrawable(this.ctx.getResources(), bitmap) );
+            generated = generateBitmap(new BitmapDrawable(this.ctx.getResources(), bitmap));
         }
         cacheStoreDrawable(componentName.toString(), generated);
         return generated;
@@ -295,7 +303,7 @@ public class IconsHandler {
             maskCanvas.drawBitmap(maskImage, 0, 0, new Paint());
 
             // paint the bitmap with mask into the result
-            Paint paint = new Paint(Paint.FILTER_BITMAP_FLAG |Paint.ANTI_ALIAS_FLAG);
+            Paint paint = new Paint(Paint.FILTER_BITMAP_FLAG | Paint.ANTI_ALIAS_FLAG);
             paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.DST_OUT));
             canvas.drawBitmap(scaledBitmap, (w - scaledBitmap.getWidth()) / 2, (h - scaledBitmap.getHeight()) / 2, null);
             canvas.drawBitmap(mutableMask, 0, 0, paint);
