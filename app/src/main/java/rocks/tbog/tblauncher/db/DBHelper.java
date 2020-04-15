@@ -3,7 +3,9 @@ package rocks.tbog.tblauncher.db;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
+import android.text.TextUtils;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -13,6 +15,7 @@ import java.util.Map;
 
 import rocks.tbog.tblauncher.DataHandler;
 import rocks.tbog.tblauncher.TBApplication;
+import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.entry.ShortcutEntry;
 
 public class DBHelper {
@@ -228,6 +231,16 @@ public class DBHelper {
         return records;
     }
 
+    public static boolean insertApp(Context context, AppEntry entry) {
+        SQLiteDatabase db = getDatabase(context);
+
+        ContentValues values = new ContentValues();
+        values.put("name", entry.getName());
+        values.put("component_name", entry.getComponentName());
+
+        return -1 != db.insert("apps", null, values);
+    }
+
     public static boolean insertShortcut(Context context, ShortcutRecord shortcut) {
         SQLiteDatabase db = getDatabase(context);
         // Do not add duplicate shortcuts
@@ -388,5 +401,61 @@ public class DBHelper {
         cursor.close();
         return records;
 
+    }
+
+    public static HashMap<String, AppRecord> getAppsData(Context context) {
+        HashMap<String, AppRecord> records;
+        SQLiteDatabase db = getDatabase(context);
+        try (Cursor cursor = db.query("apps", new String[]{"_id", "display_name", "component_name", "custom_flags"},
+                null, null, null, null, null)) {
+            records = new HashMap<>(cursor.getCount());
+            while (cursor.moveToNext()) {
+                AppRecord entry = new AppRecord();
+
+                entry.dbId = cursor.getLong(0);
+                entry.displayName = cursor.getString(1);
+                entry.componentName = cursor.getString(2);
+                entry.flags = cursor.getInt(3);
+
+                records.put(entry.componentName, entry);
+            }
+        }
+
+        return records;
+    }
+
+    public static void insertOrUpdateApps(Context context, ArrayList<AppRecord> appRecords) {
+        SQLiteDatabase db = getDatabase(context);
+        db.beginTransaction();
+        ContentValues values = new ContentValues();
+        try {
+            for (AppRecord app : appRecords) {
+                values.put("display_name", app.displayName);
+                values.put("component_name", app.componentName);
+                values.put("custom_flags", app.getFlagsDB());
+                if (app.dbId == -1) {
+                    // insert
+                    db.insertWithOnConflict("apps", null, values, SQLiteDatabase.CONFLICT_IGNORE);
+                } else {
+                    // update
+                    db.updateWithOnConflict("apps", values, "_id=" + app.dbId, null, SQLiteDatabase.CONFLICT_IGNORE);
+                }
+            }
+
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    public static void deleteApps(Context context, ArrayList<AppRecord> appRecords) {
+        SQLiteDatabase db = getDatabase(context);
+        String[] list = new String[appRecords.size()];
+        for (int i = 0; i < appRecords.size(); i++) {
+            AppRecord rec = appRecords.get(i);
+            list[i] = String.valueOf(rec.dbId);
+        }
+        String whereClause = String.format("_id IN (%s)", TextUtils.join(",", Collections.nCopies(list.length, "?")));
+        db.delete("apps", whereClause, list);
     }
 }

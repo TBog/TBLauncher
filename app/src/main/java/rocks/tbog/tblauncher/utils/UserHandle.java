@@ -1,8 +1,11 @@
 package rocks.tbog.tblauncher.utils;
 
 import android.annotation.TargetApi;
+import android.content.Context;
 import android.os.Build;
 import android.os.Process;
+
+import androidx.annotation.RequiresApi;
 
 
 /**
@@ -49,7 +52,7 @@ public class UserHandle {
     }
 
 
-    public String addUserSuffixToString(String base, char separator) {
+    private String addUserSuffixToString(String base, char separator) {
         if (this.handle == null) {
             return base;
         } else {
@@ -76,5 +79,29 @@ public class UserHandle {
 
     public String getComponentName(String packageName, String activityName) {
         return addUserSuffixToString(packageName + "/" + activityName, '#');
+    }
+
+    public String getPackageName(String componentName) {
+        int index = componentName.indexOf('/');
+        if (index > 0)
+            return componentName.substring(0, index);
+        return "";
+    }
+
+    public String getActivityName(String componentName) {
+        int start = componentName.indexOf('/') + 1;
+        int end = componentName.lastIndexOf('#');
+        if (end == -1)
+            end = componentName.length();
+        if (start > 0 && start < end) {
+            return componentName.substring(start, end);
+        }
+        return "";
+    }
+
+    public String getBadgedLabelForUser(Context context, String label) {
+        if (handle == null || Build.VERSION.SDK_INT < Build.VERSION_CODES.LOLLIPOP)
+            return label;
+        return context.getPackageManager().getUserBadgedLabel(label, (android.os.UserHandle) handle).toString();
     }
 }

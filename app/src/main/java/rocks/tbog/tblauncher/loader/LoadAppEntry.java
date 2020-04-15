@@ -11,22 +11,50 @@ import android.os.Build;
 import android.os.UserManager;
 import android.util.Log;
 
-import java.util.ArrayList;
-import java.util.Set;
+import androidx.annotation.NonNull;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+
+import rocks.tbog.tblauncher.DataHandler;
 import rocks.tbog.tblauncher.TBApplication;
+import rocks.tbog.tblauncher.db.AppRecord;
 import rocks.tbog.tblauncher.entry.AppEntry;
-import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.utils.UserHandle;
 
 public class LoadAppEntry extends LoadEntryItem<AppEntry> {
 
+    private HashMap<String, AppRecord> dbApps = null;
+    private ArrayList<AppRecord> pendingChanges = null;
     //private final TagsHandler tagsHandler;
 
     public LoadAppEntry(Context context) {
         super(context, "app://");
         //tagsHandler = TBApplication.getApplication(context).getDataHandler().getTagsHandler();
     }
+
+//    static class PendingAppList {
+//        final ArrayList<AppRecord> appRecords = new ArrayList<>();
+//        final ArrayList<UserHandle> userHandles = new ArrayList<>();
+//
+//        void add(AppRecord appRecord, UserHandle userHandle) {
+//            appRecords.add(appRecord);
+//            userHandles.add(userHandle);
+//        }
+//
+//        int size() {
+//            return appRecords.size();
+//        }
+//
+//        AppRecord getAppRecord(int index) {
+//            return appRecords.get(index);
+//        }
+//
+//        UserHandle getUserHandle(int index) {
+//            return userHandles.get(index);
+//        }
+//    }
 
     @Override
     protected ArrayList<AppEntry> doInBackground(Void... params) {
@@ -39,8 +67,13 @@ public class LoadAppEntry extends LoadEntryItem<AppEntry> {
             return apps;
         }
 
-        Set<String> excludedAppList = TBApplication.getApplication(ctx).getDataHandler().getExcluded();
-        Set<String> excludedFromHistoryAppList = TBApplication.getApplication(ctx).getDataHandler().getExcludedFromHistory();
+        DataHandler dataHandler = TBApplication.getApplication(ctx).getDataHandler();
+
+//        Set<String> excludedAppList = dataHandler.getExcluded();
+//        Set<String> excludedFromHistoryAppList = dataHandler.getExcludedFromHistory();
+
+        dbApps = dataHandler.getCachedApps();
+        pendingChanges = new ArrayList<>(0);
 
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             UserManager manager = (UserManager) ctx.getSystemService(Context.USER_SERVICE);
@@ -52,17 +85,8 @@ public class LoadAppEntry extends LoadEntryItem<AppEntry> {
                     for (LauncherActivityInfo activityInfo : launcher.getActivityList(null, profile)) {
                         ApplicationInfo appInfo = activityInfo.getApplicationInfo();
 
-                        String id = user.addUserSuffixToString(pojoScheme + appInfo.packageName + "/" + activityInfo.getName(), '/');
-
-                        boolean isExcluded = false;//excludedAppList.contains(user.getComponentName(appInfo.packageName, activityInfo.getName()));
-                        boolean isExcludedFromHistory = false;//excludedFromHistoryAppList.contains(id);
-
-                        AppEntry app = new AppEntry(id, appInfo.packageName, activityInfo.getName(), user,
-                                isExcluded, isExcludedFromHistory);
-
-                        app.setName(activityInfo.getLabel().toString());
-
-                        //app.setTags(tagsHandler.getTags(app.id));
+                        String displayName = activityInfo.getLabel().toString();
+                        AppEntry app = processApp(displayName, appInfo.packageName, activityInfo.getName(), user);
 
                         apps.add(app);
                     }
@@ -74,24 +98,64 @@ public class LoadAppEntry extends LoadEntryItem<AppEntry> {
             mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
 
             for (ResolveInfo info : manager.queryIntentActivities(mainIntent, 0)) {
+                UserHandle user = new UserHandle();
                 ApplicationInfo appInfo = info.activityInfo.applicationInfo;
-                String id = pojoScheme + appInfo.packageName + "/" + info.activityInfo.name;
-                boolean isExcluded = false;//excludedAppList.contains(EntryItem.getComponentName(appInfo.packageName, info.activityInfo.name, new UserHandle()));
-                boolean isExcludedFromHistory = false;//excludedFromHistoryAppList.contains(id);
 
-                AppEntry app = new AppEntry(id, appInfo.packageName, info.activityInfo.name, new UserHandle(), isExcluded, isExcludedFromHistory);
-
-                app.setName(info.loadLabel(manager).toString());
-
-                //app.setTags(tagsHandler.getTags(app.id));
+                String displayName = info.loadLabel(manager).toString();
+                AppEntry app = processApp(displayName, appInfo.packageName, info.activityInfo.name, user);
 
                 apps.add(app);
             }
         }
 
+        // add new apps to database
+        dataHandler.updateAppCache(pendingChanges);
+        pendingChanges.clear();
+
+        for (Map.Entry<String, AppRecord> entry : dbApps.entrySet())
+        {
+            AppRecord rec = entry.getValue();
+            if ((rec.flags & AppRecord.FLAG_VALIDATED) == AppRecord.FLAG_VALIDATED)
+                continue;
+            pendingChanges.add(rec);
+        }
+
+        // remove apps from database
+        dataHandler.removeAppCache(pendingChanges);
+        pendingChanges = null;
+        dbApps = null;
+
         long end = System.nanoTime();
         Log.i("time", Long.toString((end - start) / 1000000) + " milliseconds to list apps");
 
         return apps;
+    }
+
+    @NonNull
+    private AppEntry processApp(String displayName, String packageName, String activityName, UserHandle user) {
+        String componentName = user.getComponentName(packageName, activityName);
+        AppRecord rec = dbApps.get(componentName);
+        if (rec == null) {
+            rec = new AppRecord();
+            rec.componentName = componentName;
+            rec.displayName = displayName;
+            pendingChanges.add(rec);
+        }
+        if (!rec.hasCustomName() && !displayName.equals(rec.displayName)) {
+            rec.displayName = displayName;
+            pendingChanges.add(rec);
+        }
+
+        rec.flags |= AppRecord.FLAG_VALIDATED;
+
+        String id = pojoScheme + componentName;
+//        boolean isExcluded = excludedAppList.contains(componentName);
+//        boolean isExcludedFromHistory = excludedFromHistoryAppList.contains(id);
+        AppEntry app = new AppEntry(id, packageName, activityName, user);
+
+        app.setName(user.getBadgedLabelForUser(context.get(), displayName));
+        //app.setTags(tagsHandler.getTags(app.id));
+
+        return app;
     }
 }

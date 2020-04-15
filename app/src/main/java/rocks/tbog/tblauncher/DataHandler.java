@@ -13,7 +13,9 @@ import android.content.pm.ShortcutInfo;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+
 import androidx.preference.PreferenceManager;
+
 import android.text.TextUtils;
 import android.util.Log;
 
@@ -34,6 +36,7 @@ import rocks.tbog.tblauncher.dataprovider.ContactsProvider;
 import rocks.tbog.tblauncher.dataprovider.IProvider;
 import rocks.tbog.tblauncher.dataprovider.Provider;
 import rocks.tbog.tblauncher.dataprovider.ShortcutsProvider;
+import rocks.tbog.tblauncher.db.AppRecord;
 import rocks.tbog.tblauncher.db.DBHelper;
 import rocks.tbog.tblauncher.db.ShortcutRecord;
 import rocks.tbog.tblauncher.db.ValuedHistoryRecord;
@@ -79,7 +82,7 @@ public class DataHandler extends BroadcastReceiver
         start = System.currentTimeMillis();
 
         IntentFilter intentFilter = new IntentFilter(TBLauncherActivity.LOAD_OVER);
-        this.context.getApplicationContext().registerReceiver(this, intentFilter);
+        this.context.registerReceiver(this, intentFilter);
 
         Intent i = new Intent(TBLauncherActivity.START_LOAD);
         this.context.sendBroadcast(i);
@@ -190,7 +193,7 @@ public class DataHandler extends BroadcastReceiver
             // https://github.com/Neamar/KISS/issues/1154
             Log.w(TAG, "Unable to start service for " + name + ". KISS is probably not in the foreground. Service will automatically be started when KISS gets to the foreground.");
 
-            if(counter > 20) {
+            if (counter > 20) {
                 Log.e(TAG, "Already tried and failed twenty times to start service. Giving up.");
                 return;
             }
@@ -208,7 +211,7 @@ public class DataHandler extends BroadcastReceiver
                     KeyguardManager myKM = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
                     assert myKM != null;
                     boolean isPhoneLocked = myKM.inKeyguardRestrictedInputMode();
-                    if(!isPhoneLocked) {
+                    if (!isPhoneLocked) {
                         context.unregisterReceiver(this);
                         final Handler handler = new Handler();
                         // Even when all the stars are aligned,
@@ -360,15 +363,15 @@ public class DataHandler extends BroadcastReceiver
      * May return an empty set if the providers are not done building records,
      * in this case it is probably a good idea to call this function 500ms after
      *
-     * @param context        android context
-     * @param itemCount      max number of items to retrieve, total number may be less (search or calls are not returned for instance)
-     * @param historyMode    Recency vs Frecency vs Frequency vs Adaptive
-     * @param sortHistory    Sort history entries alphabetically
+     * @param context            android context
+     * @param itemCount          max number of items to retrieve, total number may be less (search or calls are not returned for instance)
+     * @param historyMode        Recency vs Frecency vs Frequency vs Adaptive
+     * @param sortHistory        Sort history entries alphabetically
      * @param itemsToExcludeById Items to exclude from history by their id
      * @return pojos in recent history
      */
     public ArrayList<EntryItem> getHistory(Context context, int itemCount, String historyMode,
-                                      boolean sortHistory, Set<String> itemsToExcludeById) {
+                                           boolean sortHistory, Set<String> itemsToExcludeById) {
         // Pre-allocate array slots that are likely to be used based on the current maximum item
         // count
         ArrayList<EntryItem> history = new ArrayList<>(Math.min(itemCount, 256));
@@ -388,7 +391,7 @@ public class DataHandler extends BroadcastReceiver
                 continue;
             }
 
-            if(itemsToExcludeById.contains(pojo.id)) {
+            if (itemsToExcludeById.contains(pojo.id)) {
                 continue;
             }
 
@@ -410,7 +413,7 @@ public class DataHandler extends BroadcastReceiver
     /**
      * Query database for item and return its name
      *
-     * @param id      globally unique ID, usually starts with provider scheme, e.g. "app://" or "contact://"
+     * @param id globally unique ID, usually starts with provider scheme, e.g. "app://" or "contact://"
      * @return name of item (i.e. app name)
      */
     public String getItemName(String id) {
@@ -607,16 +610,16 @@ public class DataHandler extends BroadcastReceiver
         PreferenceManager.getDefaultSharedPreferences(context).edit().putStringSet("excluded-apps", newExcluded).apply();
     }
 
-	/**
-	 * Return all applications (including excluded)
-	 *
-	 * @return pojos for all applications
-	 */
-	@Nullable
-	public List<AppEntry> getApplications() {
-		AppProvider appProvider = getAppProvider();
-		return appProvider != null ? appProvider.getAllApps() : null;
-	}
+    /**
+     * Return all applications (including excluded)
+     *
+     * @return pojos for all applications
+     */
+    @Nullable
+    public List<AppEntry> getApplications() {
+        AppProvider appProvider = getAppProvider();
+        return appProvider != null ? appProvider.getAllApps() : null;
+    }
 
     /**
      * Return all applications
@@ -689,7 +692,7 @@ public class DataHandler extends BroadcastReceiver
         List<EntryItem> currentFavorites = getFavorites();
         List<String> favAppsList = new ArrayList<>();
 
-        for(EntryItem pojo : currentFavorites) {
+        for (EntryItem pojo : currentFavorites) {
             favAppsList.add(pojo.getHistoryId());
         }
 
@@ -771,7 +774,7 @@ public class DataHandler extends BroadcastReceiver
      * @param id pojo.id of item to record
      */
     public void addToHistory(String id) {
-        if(id.isEmpty()) {
+        if (id.isEmpty()) {
             return;
         }
 
@@ -794,6 +797,20 @@ public class DataHandler extends BroadcastReceiver
         }
 
         return null;
+    }
+
+    public HashMap<String, AppRecord> getCachedApps() {
+        return DBHelper.getAppsData(context);
+    }
+
+    public void updateAppCache(ArrayList<AppRecord> appRecords) {
+        if (appRecords.size() > 0)
+            DBHelper.insertOrUpdateApps(context, appRecords);
+    }
+
+    public void removeAppCache(ArrayList<AppRecord> appRecords) {
+        if (appRecords.size() > 0)
+            DBHelper.deleteApps(context, appRecords);
     }
 
 //    public TagsHandler getTagsHandler() {

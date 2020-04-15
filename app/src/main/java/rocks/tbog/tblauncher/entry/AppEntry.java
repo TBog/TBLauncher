@@ -25,19 +25,15 @@ public final class AppEntry extends EntryWithTags {
     @NonNull
     private final UserHandle userHandle;
 
-    private boolean excluded;
-    private boolean excludedFromHistory;
+    private boolean excluded = false;
+    private boolean excludedFromHistory = false;
 
-    public AppEntry(String id, @NonNull String packageName, @NonNull String activityName, @NonNull UserHandle userHandle,
-                    boolean isExcluded, boolean isExcludedFromHistory) {
+    public AppEntry(String id, @NonNull String packageName, @NonNull String activityName, @NonNull UserHandle userHandle) {
         super(id);
 
         this.packageName = packageName;
         this.activityName = activityName;
         this.userHandle = userHandle;
-
-        this.excluded = isExcluded;
-        this.excludedFromHistory = isExcludedFromHistory;
     }
 
     public String getComponentName() {
