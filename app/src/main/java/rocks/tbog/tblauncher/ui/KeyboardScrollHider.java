@@ -6,6 +6,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
+import android.widget.AbsListView;
 
 /**
  * Utility class for automatically hiding the keyboard when scrolling down a {@see ListView},
@@ -85,6 +86,8 @@ public class KeyboardScrollHider implements View.OnTouchListener {
         // Make sure list uses the height of it's parent
         this.list.setVerticalScrollBarEnabled(this.scrollBarEnabled);
         this.setListLayoutHeight(ViewGroup.LayoutParams.MATCH_PARENT);
+
+        this.list.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_NORMAL);
 
         this.resizeDone = true;
     }
@@ -207,6 +210,7 @@ public class KeyboardScrollHider implements View.OnTouchListener {
 
         // Hide the keyboard if the user has scrolled down by about half a result item
         if ((this.offsetYCurrent - this.offsetYStart) > THRESHOLD) {
+            this.list.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_DISABLED);
             this.handler.hideKeyboard();
         }
 
@@ -225,6 +229,7 @@ public class KeyboardScrollHider implements View.OnTouchListener {
 
     public interface KeyboardHandler {
         void showKeyboard();
+
         void hideKeyboard();
     }
 }
