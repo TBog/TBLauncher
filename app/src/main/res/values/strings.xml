@@ -70,5 +70,10 @@
     <string name="icons_pack_name">Icon pack (ADW launcher)</string>
     <string name="icons_pack_default_name">System icons</string>
     <string name="value">value %d</string>
+    <string name="menu_app_rename">Rename app</string>
+    <string name="menu_custom_icon">Change icon</string>
+    <string name="app_rename_title">Choose a custom name for this application</string>
+    <string name="app_rename_confirmation">App name is now %s</string>
+    <string name="custom_icon_search">Search</string>
 
 </resources>

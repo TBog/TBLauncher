@@ -20,16 +20,20 @@ import android.view.Menu;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.PopupMenu;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.preference.PreferenceManager;
 
+import rocks.tbog.tblauncher.CustomIconDialog;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
+import rocks.tbog.tblauncher.TBLauncherActivity;
 import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
@@ -106,6 +110,8 @@ public class AppResult extends Result {
         adapter.add(new ListPopup.Item(context, R.string.menu_exclude));
         adapter.add(new ListPopup.Item(context, R.string.menu_favorites_add));
         adapter.add(new ListPopup.Item(context, R.string.menu_tags_edit));
+        adapter.add(new ListPopup.Item(context, R.string.menu_app_rename));
+        adapter.add(new ListPopup.Item(context, R.string.menu_custom_icon));
         adapter.add(new ListPopup.Item(context, R.string.menu_favorites_remove));
         adapter.add(new ListPopup.Item(context, R.string.menu_app_details));
         adapter.add(new ListPopup.Item(context, R.string.menu_app_store));
@@ -180,6 +186,12 @@ public class AppResult extends Result {
                 return true;
             case R.string.menu_tags_edit:
                 launchEditTagsDialog(context, parent, appPojo);
+                return true;
+            case R.string.menu_app_rename:
+                launchRenameDialog(context, parent, appPojo);
+                return true;
+            case R.string.menu_custom_icon:
+                launchCustomIconDialog(context, appPojo);
                 return true;
         }
 
@@ -258,6 +270,57 @@ public class AppResult extends Result {
 //        parent.updateTranscriptMode(AbsListView.TRANSCRIPT_MODE_DISABLED);
 //        AlertDialog dialog = builder.create();
 //        dialog.show();
+    }
+
+    private void launchRenameDialog(final Context context, ResultAdapter parent, final AppEntry app) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle(context.getResources().getString(R.string.app_rename_title));
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            builder.setView(R.layout.rename_dialog);
+        } else {
+            builder.setView(View.inflate(context, R.layout.rename_dialog, null));
+        }
+
+        builder.setPositiveButton(android.R.string.ok, (dialog, which) -> {
+            EditText input = ((AlertDialog)dialog).findViewById(R.id.rename);
+            dialog.dismiss();
+
+            // Set new name
+            String newName = input.getText().toString().trim();
+            app.setName(newName);
+            TBApplication.getApplication(context).getDataHandler().renameApp(appPojo, newName);
+
+            // Show toast message
+            String msg = context.getResources().getString(R.string.app_rename_confirmation, app.getName());
+            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
+
+            // We'll need to reset the list view to its previous transcript mode,
+            // but it has to happen *after* the keyboard is hidden, otherwise scroll will be reset
+            // Let's wait for half a second, that's ugly but we don't have any other option :(
+//            final Handler handler = new Handler();
+//            handler.postDelayed(() -> parent.updateTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL), 500);
+        });
+        builder.setNegativeButton(android.R.string.cancel, (dialog, which) -> {
+            dialog.cancel();
+//            final Handler handler = new Handler();
+//            handler.postDelayed(() -> parent.updateTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL), 500);
+        });
+
+        //parent.updateTranscriptMode(AbsListView.TRANSCRIPT_MODE_DISABLED);
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        // call after dialog got inflated (show call)
+        ((TextView)dialog.findViewById(R.id.rename)).setHint(appPojo.getName());
+    }
+
+    private void launchCustomIconDialog(final Context context, final AppEntry app)
+    {
+        if (!(context instanceof TBLauncherActivity))
+            return;
+        TBLauncherActivity activity = (TBLauncherActivity) context;
+        CustomIconDialog dialog = new CustomIconDialog();
+        dialog.show(activity.getSupportFragmentManager(), CustomIconDialog.class.getSimpleName());
     }
 
     /**

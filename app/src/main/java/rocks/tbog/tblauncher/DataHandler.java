@@ -813,6 +813,10 @@ public class DataHandler extends BroadcastReceiver
             DBHelper.deleteApps(context, appRecords);
     }
 
+    public void renameApp(AppEntry app, String newName) {
+        DBHelper.setCustomAppName(context, app.getComponentName(), newName);
+    }
+
 //    public TagsHandler getTagsHandler() {
 //        if (tagsHandler == null) {
 //            tagsHandler = new TagsHandler(context);

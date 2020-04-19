@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@android:id/icon"
+    android:layout_width="@dimen/icon_width"
+    android:layout_height="@dimen/icon_height"
+    android:layout_gravity="center"
+    android:contentDescription="@null"
+    android:scaleType="centerCrop"
+    tools:src="@android:drawable/ic_menu_call"
+    tools:showIn="@layout/custom_icon"
+    android:layout_marginVertical="@dimen/result_margin_vertical"
+    android:layout_marginHorizontal="@dimen/result_margin_horizontal">
+
+</ImageView>

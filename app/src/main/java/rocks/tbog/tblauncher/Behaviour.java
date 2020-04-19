@@ -280,6 +280,8 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     public void showKeyboard() {
+        mTBLauncherActivity.dismissPopup();
+
         mSearchEditText.requestFocus();
         InputMethodManager mgr = (InputMethodManager) mTBLauncherActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
         assert mgr != null;

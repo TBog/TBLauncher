@@ -5,7 +5,9 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.database.sqlite.SQLiteDatabase;
+import android.database.sqlite.SQLiteStatement;
 import android.text.TextUtils;
+import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,6 +21,7 @@ import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.entry.ShortcutEntry;
 
 public class DBHelper {
+    private static final String TAG = DBHelper.class.getSimpleName();
     private static SQLiteDatabase database = null;
 
     private DBHelper() {
@@ -457,5 +460,23 @@ public class DBHelper {
         }
         String whereClause = String.format("_id IN (%s)", TextUtils.join(",", Collections.nCopies(list.length, "?")));
         db.delete("apps", whereClause, list);
+    }
+
+    public static void setCustomAppName(Context context, String componentName, String newName) {
+        SQLiteDatabase db = getDatabase(context);
+        String sql = "UPDATE custom_apps SET display_name=?,custom_flags=custom_flags|? WHERE component_name=?";
+        try {
+            SQLiteStatement statement = db.compileStatement(sql);
+            statement.bindString(1, newName);
+            statement.bindLong(2, AppRecord.FLAG_CUSTOM_NAME);
+            statement.bindString(3, componentName);
+            int count = statement.executeUpdateDelete();
+            if (count != 1) {
+                Log.e(TAG, "Update name count = " + count);
+            }
+            statement.close();
+        } catch (Exception e) {
+            Log.e(TAG, "Insert or Update custom app name", e);
+        }
     }
 }
