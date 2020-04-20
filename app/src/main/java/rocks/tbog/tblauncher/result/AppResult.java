@@ -316,11 +316,7 @@ public class AppResult extends Result {
 
     private void launchCustomIconDialog(final Context context, final AppEntry app)
     {
-        if (!(context instanceof TBLauncherActivity))
-            return;
-        TBLauncherActivity activity = (TBLauncherActivity) context;
-        CustomIconDialog dialog = new CustomIconDialog();
-        dialog.show(activity.getSupportFragmentManager(), CustomIconDialog.class.getSimpleName());
+        TBApplication.behaviour(context).launchCustomIconDialog(app);
     }
 
     /**

@@ -4,19 +4,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
-
-    <TextView
-        android:id="@+id/searchLabel"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:labelFor="@id/searchIcon"
-        android:text="@string/custom_icon_search" />
+    android:orientation="vertical"
+    android:paddingHorizontal="@dimen/result_margin_horizontal"
+    android:paddingVertical="@dimen/result_margin_vertical">
 
     <EditText
         android:id="@+id/searchIcon"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:autofillHints="application,text"
+        android:hint="@string/custom_icon_hint"
         android:inputType="textAutoCorrect" />
 
     <androidx.recyclerview.widget.RecyclerView
@@ -25,9 +22,9 @@
         android:layout_height="match_parent"
         android:layout_gravity="center"
         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-        tools:spanCount="6"
-        tools:itemCount="20"
         tools:context="rocks.tbog.tblauncher.CustomIconDialog"
-        tools:listitem="@layout/custom_icon_item" />
+        tools:itemCount="20"
+        tools:listitem="@layout/custom_icon_item"
+        tools:spanCount="6" />
 
 </LinearLayout>

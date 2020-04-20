@@ -1,9 +1,12 @@
 package rocks.tbog.tblauncher;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +14,7 @@ import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -23,14 +27,34 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import rocks.tbog.tblauncher.normalizer.StringNormalizer;
+import rocks.tbog.tblauncher.utils.FuzzyScore;
+
 public class CustomIconDialog extends DialogFragment {
-    List<IconData> mIconData = new ArrayList<>();
+    private List<IconData> mIconData = new ArrayList<>();
     private RecyclerView mIconGrid;
+    private TextView mSearch;
+    private OnDismissListener mOnDismissListener = null;
+
+    public interface OnDismissListener {
+        void onDismiss(CustomIconDialog dialog);
+    }
+
+    void setOnDismissListener(OnDismissListener listener) {
+        mOnDismissListener = listener;
+    }
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setStyle(DialogFragment.STYLE_NO_FRAME, R.style.Theme_AppCompat_Dialog);
+        setStyle(DialogFragment.STYLE_NO_FRAME, 0);
+    }
+
+    @Override
+    public void onDismiss(@NonNull DialogInterface dialog) {
+        super.onDismiss(dialog);
+        if (mOnDismissListener != null)
+            mOnDismissListener.onDismiss(this);
     }
 
     @Nullable
@@ -60,6 +84,22 @@ public class CustomIconDialog extends DialogFragment {
         // First param is number of columns and second param is orientation i.e Vertical or Horizontal
         StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(6, StaggeredGridLayoutManager.VERTICAL);
         mIconGrid.setLayoutManager(layoutManager);
+
+        mSearch = view.findViewById(R.id.searchIcon);
+        mSearch.addTextChangedListener(new TextWatcher() {
+            public void afterTextChanged(Editable s) {
+                // Auto left-trim text.
+                if (s.length() > 0 && s.charAt(0) == ' ')
+                    s.delete(0, 1);
+            }
+
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                mSearch.post(() -> refreshList());
+            }
+        });
     }
 
     @Override
@@ -69,14 +109,17 @@ public class CustomIconDialog extends DialogFragment {
     }
 
     private void refreshList() {
+        mIconData.clear();
         IconsHandler iconsHandler = TBApplication.getApplication(getActivity()).getIconsHandler();
         IconPack iconPack = iconsHandler.getCurrentIconPack();
-        if (iconPack == null)
-            return;
-        Collection<IconPack.DrawableInfo> drawables = iconPack.getDrawableList();
-        mIconData.clear();
-        for (IconPack.DrawableInfo info : drawables) {
-            mIconData.add(new IconData(iconPack, info));
+        if (iconPack != null) {
+            StringNormalizer.Result normalized = StringNormalizer.normalizeWithResult(mSearch.getText(), true);
+            FuzzyScore fuzzyScore = new FuzzyScore(normalized.codePoints);
+            Collection<IconPack.DrawableInfo> drawables = iconPack.getDrawableList();
+            for (IconPack.DrawableInfo info : drawables) {
+                if (fuzzyScore.match(info.drawableName).match)
+                    mIconData.add(new IconData(iconPack, info));
+            }
         }
         mIconGrid.getAdapter().notifyDataSetChanged();
     }
@@ -145,14 +188,14 @@ public class CustomIconDialog extends DialogFragment {
                 int halfWidth = root.getRight() / 2;
                 int halfHeight = root.getBottom() / 2;
 
-                int parentCenterX = ((gvr.right - gvr.left) / 2) + gvr.left;
+                int parentCenterX = (gvr.width() / 2) + gvr.left;
 
-                int parentCenterY = ((gvr.bottom - gvr.top) / 2) + gvr.top;
+                int parentCenterY = (gvr.height() / 2) + gvr.top;
 
                 if (parentCenterY <= halfHeight) {
-                    yOffset = -(halfHeight - parentCenterY) - parentHeight;
+                    yOffset = -(halfHeight - parentCenterY);
                 } else {
-                    yOffset = (parentCenterY - halfHeight) - parentHeight;
+                    yOffset = (parentCenterY - halfHeight);
                 }
 
                 if (parentCenterX < halfWidth) {
@@ -165,7 +208,7 @@ public class CustomIconDialog extends DialogFragment {
             }
 
             Toast toast = Toast.makeText(v.getContext(), message, Toast.LENGTH_SHORT);
-            toast.setGravity(Gravity.CENTER, xOffset, yOffset);
+            toast.setGravity(Gravity.CENTER, xOffset, yOffset + v.getHeight());
             toast.show();
         }
 

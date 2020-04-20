@@ -31,6 +31,7 @@ import androidx.preference.PreferenceManager;
 
 import java.util.ArrayList;
 
+import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.result.Result;
 import rocks.tbog.tblauncher.result.ResultAdapter;
 import rocks.tbog.tblauncher.searcher.ISearchActivity;
@@ -484,5 +485,12 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         mSearchEditText.setText("");
         hideSearchBar(0);
         return false;
+    }
+
+    public void launchCustomIconDialog(AppEntry appEntry) {
+        mResultLayout.setVisibility(View.INVISIBLE);
+        CustomIconDialog dialog = new CustomIconDialog();
+        dialog.setOnDismissListener(dlg -> mResultLayout.setVisibility(View.VISIBLE));
+        dialog.show(mTBLauncherActivity.getSupportFragmentManager(), "custom_icon");
     }
 }

@@ -74,6 +74,6 @@
     <string name="menu_custom_icon">Change icon</string>
     <string name="app_rename_title">Choose a custom name for this application</string>
     <string name="app_rename_confirmation">App name is now %s</string>
-    <string name="custom_icon_search">Search</string>
+    <string name="custom_icon_hint">Filter by name</string>
 
 </resources>

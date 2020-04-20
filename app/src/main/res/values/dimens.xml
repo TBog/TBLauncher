@@ -9,7 +9,7 @@
     <dimen name="icon_margin_bottom">5dp</dimen>
 
     <dimen name="result_margin_horizontal">10dp</dimen>
-    <dimen name="result_margin_vertical">2dp</dimen>
+    <dimen name="result_margin_vertical">5dp</dimen>
     <dimen name="result_corner_radius">24dp</dimen>
 
     <dimen name="result_title_size">18sp</dimen>
