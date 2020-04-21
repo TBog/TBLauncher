@@ -23,6 +23,7 @@ import rocks.tbog.tblauncher.entry.ShortcutEntry;
 public class DBHelper {
     private static final String TAG = DBHelper.class.getSimpleName();
     private static SQLiteDatabase database = null;
+    private static final String[] TABLE_COLUMNS_APPS = new String[]{"_id", "display_name", "component_name", "custom_flags"};
 
     private DBHelper() {
     }
@@ -409,7 +410,7 @@ public class DBHelper {
     public static HashMap<String, AppRecord> getAppsData(Context context) {
         HashMap<String, AppRecord> records;
         SQLiteDatabase db = getDatabase(context);
-        try (Cursor cursor = db.query("apps", new String[]{"_id", "display_name", "component_name", "custom_flags"},
+        try (Cursor cursor = db.query("apps", TABLE_COLUMNS_APPS,
                 null, null, null, null, null)) {
             records = new HashMap<>(cursor.getCount());
             while (cursor.moveToNext()) {
@@ -464,7 +465,7 @@ public class DBHelper {
 
     public static void setCustomAppName(Context context, String componentName, String newName) {
         SQLiteDatabase db = getDatabase(context);
-        String sql = "UPDATE custom_apps SET display_name=?,custom_flags=custom_flags|? WHERE component_name=?";
+        String sql = "UPDATE apps SET display_name=?,custom_flags=custom_flags|? WHERE component_name=?";
         try {
             SQLiteStatement statement = db.compileStatement(sql);
             statement.bindString(1, newName);
@@ -478,5 +479,39 @@ public class DBHelper {
         } catch (Exception e) {
             Log.e(TAG, "Insert or Update custom app name", e);
         }
+    }
+
+    public static AppRecord setCustomAppIcon(Context context, String componentName) {
+        SQLiteDatabase db = getDatabase(context);
+        String sql = "UPDATE apps SET custom_flags=custom_flags|? WHERE component_name=?";
+        try {
+            SQLiteStatement statement = db.compileStatement(sql);
+            statement.bindLong(1, AppRecord.FLAG_CUSTOM_ICON);
+            statement.bindString(2, componentName);
+            int count = statement.executeUpdateDelete();
+            if (count != 1) {
+                Log.e(TAG, "Update name count = " + count);
+            }
+            statement.close();
+        } catch (Exception e) {
+            Log.e(TAG, "Insert or Update custom app name", e);
+        }
+
+        // get AppRecord
+        String[] selArgs = new String[]{componentName};
+        try (Cursor cursor = db.query("apps", TABLE_COLUMNS_APPS,
+                "component_name=?", selArgs, null, null, null)) {
+            if (cursor.moveToNext()) {
+                AppRecord entry = new AppRecord();
+
+                entry.dbId = cursor.getLong(0);
+                entry.displayName = cursor.getString(1);
+                entry.componentName = cursor.getString(2);
+                entry.flags = cursor.getInt(3);
+
+                return entry;
+            }
+        }
+        return null;
     }
 }

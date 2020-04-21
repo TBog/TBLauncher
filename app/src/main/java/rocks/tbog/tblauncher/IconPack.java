@@ -27,7 +27,7 @@ import java.util.Random;
 
 import rocks.tbog.tblauncher.utils.Utilities;
 
-public class IconPack {
+public class IconPack implements IIconPack {
     private final static String TAG = IconPack.class.getSimpleName();
     private final Map<String, ArraySet<DrawableInfo>> drawablesByComponent = new ArrayMap<>(0);
     private final ArraySet<DrawableInfo> drawableList = new ArraySet<>(0);
@@ -76,7 +76,7 @@ public class IconPack {
     }
 
     @Nullable
-    Drawable getComponentNameDrawables(String componentName) {
+    public Drawable getComponentNameDrawable(String componentName) {
         ArraySet<DrawableInfo> drawables = drawablesByComponent.get(componentName);
         DrawableInfo drawableInfo = drawables != null ? drawables.valueAt(0) : null;
         return drawableInfo != null ? getDrawable(drawableInfo) : null;

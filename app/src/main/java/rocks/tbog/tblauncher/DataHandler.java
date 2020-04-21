@@ -817,6 +817,10 @@ public class DataHandler extends BroadcastReceiver
         DBHelper.setCustomAppName(context, app.getComponentName(), newName);
     }
 
+    public AppRecord setCustomAppIcon(AppEntry app) {
+        return DBHelper.setCustomAppIcon(context, app.getComponentName());
+    }
+
 //    public TagsHandler getTagsHandler() {
 //        if (tagsHandler == null) {
 //            tagsHandler = new TagsHandler(context);

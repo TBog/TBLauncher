@@ -149,14 +149,14 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 return;
             IconsHandler iph = TBApplication.getApplication(context).getIconsHandler();
 
-            CharSequence[] entries = new CharSequence[iph.getIconsPacks().size() + 1];
-            CharSequence[] entryValues = new CharSequence[iph.getIconsPacks().size() + 1];
+            CharSequence[] entries = new CharSequence[iph.getIconPackNames().size() + 1];
+            CharSequence[] entryValues = new CharSequence[iph.getIconPackNames().size() + 1];
 
             int i = 0;
             entries[0] = this.getString(R.string.icons_pack_default_name);
             entryValues[0] = "default";
-            for (String packageIconsPack : iph.getIconsPacks().keySet()) {
-                entries[++i] = iph.getIconsPacks().get(packageIconsPack);
+            for (String packageIconsPack : iph.getIconPackNames().keySet()) {
+                entries[++i] = iph.getIconPackNames().get(packageIconsPack);
                 entryValues[i] = packageIconsPack;
             }
 

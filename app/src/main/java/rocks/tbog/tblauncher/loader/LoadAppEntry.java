@@ -112,8 +112,7 @@ public class LoadAppEntry extends LoadEntryItem<AppEntry> {
         dataHandler.updateAppCache(pendingChanges);
         pendingChanges.clear();
 
-        for (Map.Entry<String, AppRecord> entry : dbApps.entrySet())
-        {
+        for (Map.Entry<String, AppRecord> entry : dbApps.entrySet()) {
             AppRecord rec = entry.getValue();
             if ((rec.flags & AppRecord.FLAG_VALIDATED) == AppRecord.FLAG_VALIDATED)
                 continue;
@@ -132,17 +131,17 @@ public class LoadAppEntry extends LoadEntryItem<AppEntry> {
     }
 
     @NonNull
-    private AppEntry processApp(String displayName, String packageName, String activityName, UserHandle user) {
+    private AppEntry processApp(String appName, String packageName, String activityName, UserHandle user) {
         String componentName = user.getComponentName(packageName, activityName);
         AppRecord rec = dbApps.get(componentName);
         if (rec == null) {
             rec = new AppRecord();
             rec.componentName = componentName;
-            rec.displayName = displayName;
+            rec.displayName = appName;
             pendingChanges.add(rec);
         }
-        if (!rec.hasCustomName() && !displayName.equals(rec.displayName)) {
-            rec.displayName = displayName;
+        if (!rec.hasCustomName() && !appName.equals(rec.displayName)) {
+            rec.displayName = appName;
             pendingChanges.add(rec);
         }
 
@@ -153,7 +152,12 @@ public class LoadAppEntry extends LoadEntryItem<AppEntry> {
 //        boolean isExcludedFromHistory = excludedFromHistoryAppList.contains(id);
         AppEntry app = new AppEntry(id, packageName, activityName, user);
 
-        app.setName(user.getBadgedLabelForUser(context.get(), displayName));
+        if (rec.hasCustomName())
+            app.setName(rec.displayName);
+        else
+            app.setName(user.getBadgedLabelForUser(context.get(), appName));
+        if (rec.hasCustomIcon())
+            app.setCustomIcon(rec.dbId);
         //app.setTags(tagsHandler.getTags(app.id));
 
         return app;

@@ -27,6 +27,7 @@ import android.widget.TextView;
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
+import androidx.fragment.app.FragmentManager;
 import androidx.preference.PreferenceManager;
 
 import java.util.ArrayList;
@@ -52,6 +53,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
 
     private TBLauncherActivity mTBLauncherActivity = null;
+    private CustomIconDialog mCustomIconDialog = null;
 
     private boolean bSearchBarHidden;
 
@@ -366,14 +368,18 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 
     @Override
     public void updateAdapter(ArrayList<Result> results, boolean isRefresh, String query) {
-        mResultLayout.setVisibility(View.VISIBLE);
-        mResultList.prepareChangeAnim();
-        mResultAdapter.updateResults(results, query);
         if (isRefresh) {
             // We're refreshing an existing dataset, do not reset scroll!
             temporarilyDisableTranscriptMode();
         }
-        mResultList.animateChange();
+        if (isCustomIconDialogVisible()) {
+            mResultAdapter.updateResults(results, query);
+        } else {
+            mResultLayout.setVisibility(View.VISIBLE);
+            mResultList.prepareChangeAnim();
+            mResultAdapter.updateResults(results, query);
+            mResultList.animateChange();
+        }
     }
 
     @Override
@@ -488,9 +494,26 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     public void launchCustomIconDialog(AppEntry appEntry) {
+        closeCustomIconDialog();
+        // We assume the mResultLayout is visible
         mResultLayout.setVisibility(View.INVISIBLE);
-        CustomIconDialog dialog = new CustomIconDialog();
-        dialog.setOnDismissListener(dlg -> mResultLayout.setVisibility(View.VISIBLE));
-        dialog.show(mTBLauncherActivity.getSupportFragmentManager(), "custom_icon");
+
+        if (mCustomIconDialog == null)
+            mCustomIconDialog = new CustomIconDialog();
+
+        // OnDismiss: We assume the mResultLayout was visible
+        mCustomIconDialog.setOnDismissListener(dlg -> mResultLayout.setVisibility(View.VISIBLE));
+
+        mCustomIconDialog.setOnConfirmListener(drawable -> TBApplication.getApplication(mTBLauncherActivity).getIconsHandler().changeAppIcon(appEntry, drawable));
+        mCustomIconDialog.show(mTBLauncherActivity.getSupportFragmentManager(), "custom_icon");
+    }
+
+    private boolean isCustomIconDialogVisible() {
+        return mCustomIconDialog != null && mCustomIconDialog.isVisible();
+    }
+
+    private void closeCustomIconDialog() {
+        if (mCustomIconDialog != null && mCustomIconDialog.isVisible())
+            mCustomIconDialog.dismiss();
     }
 }

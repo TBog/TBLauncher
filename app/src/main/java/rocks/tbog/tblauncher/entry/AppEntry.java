@@ -13,6 +13,7 @@ import androidx.annotation.RequiresApi;
 
 import java.util.List;
 
+import rocks.tbog.tblauncher.IconsHandler;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.utils.UserHandle;
 
@@ -25,6 +26,7 @@ public final class AppEntry extends EntryWithTags {
     @NonNull
     private final UserHandle userHandle;
 
+    private long customIcon = 0;
     private boolean excluded = false;
     private boolean excludedFromHistory = false;
 
@@ -71,12 +73,21 @@ public final class AppEntry extends EntryWithTags {
     }
 
     public Drawable getIconDrawable(Context context) {
-        return TBApplication.getApplication(context).getIconsHandler()
-                .getDrawableIconForPackage(new ComponentName(packageName, activityName), userHandle);
+        IconsHandler iconsHandler = TBApplication.getApplication(context).getIconsHandler();
+        if (customIcon != 0) {
+            Drawable drawable = iconsHandler.getCustomIcon(getComponentName(), customIcon);
+            if (drawable != null)
+                return drawable;
+        }
+        return iconsHandler.getDrawableIconForPackage(new ComponentName(packageName, activityName), userHandle);
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
     public android.os.UserHandle getRealHandle() {
         return userHandle.getRealHandle();
+    }
+
+    public void setCustomIcon(long dbId) {
+        customIcon = dbId;
     }
 }

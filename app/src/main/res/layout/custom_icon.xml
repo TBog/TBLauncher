@@ -8,23 +8,39 @@
     android:paddingHorizontal="@dimen/result_margin_horizontal"
     android:paddingVertical="@dimen/result_margin_vertical">
 
-    <EditText
-        android:id="@+id/searchIcon"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:autofillHints="application,text"
-        android:hint="@string/custom_icon_hint"
-        android:inputType="textAutoCorrect" />
-
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/iconGrid"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
         android:layout_gravity="center"
+        android:layout_weight="1"
         app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
+        app:reverseLayout="true"
         tools:context="rocks.tbog.tblauncher.CustomIconDialog"
         tools:itemCount="20"
         tools:listitem="@layout/custom_icon_item"
         tools:spanCount="6" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center">
+
+        <EditText
+            android:id="@+id/searchIcon"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:autofillHints="application,text"
+            android:hint="@string/custom_icon_hint"
+            android:inputType="textAutoCorrect" />
+
+        <Button
+            android:id="@android:id/button1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@android:string/ok"
+            android:textAllCaps="false" />
+    </LinearLayout>
 
 </LinearLayout>
