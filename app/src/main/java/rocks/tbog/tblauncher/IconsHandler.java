@@ -11,7 +11,6 @@ import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
-import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 
@@ -29,7 +28,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import rocks.tbog.tblauncher.db.AppRecord;
-import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.result.AppResult;
 import rocks.tbog.tblauncher.utils.DrawableUtils;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
@@ -200,7 +198,7 @@ public class IconsHandler {
         return drawableFile.isFile();
     }
 
-    private void storeDrawable(File drawableFile, Drawable drawable) {
+    private void storeDrawable(@NonNull File drawableFile, Drawable drawable) {
         if (drawable instanceof BitmapDrawable) {
             FileOutputStream fos;
             try {
@@ -213,6 +211,15 @@ public class IconsHandler {
             }
         } else {
             Log.w(TAG, "Only BitmapDrawable can be stored! " + drawableFile);
+        }
+    }
+
+    private void removeStoredDrawable(@NonNull File drawableFile) {
+        try {
+            //noinspection ResultOfMethodCallIgnored
+            drawableFile.delete();
+        } catch (Exception e) {
+            Log.e(TAG, "stored drawable " + drawableFile + " can't be deleted!", e);
         }
     }
 
@@ -309,5 +316,11 @@ public class IconsHandler {
         AppRecord appRecord = TBApplication.getApplication(ctx).getDataHandler().setCustomAppIcon(appResult.getComponentName());
         storeDrawable(customIconFileName(appRecord.componentName, appRecord.dbId), drawable);
         appResult.setCustomIcon(appRecord.dbId, drawable);
+    }
+
+    public void restoreAppIcon(AppResult appResult) {
+        AppRecord appRecord = TBApplication.getApplication(ctx).getDataHandler().removeCustomAppIcon(appResult.getComponentName());
+        removeStoredDrawable(customIconFileName(appRecord.componentName, appRecord.dbId));
+        appResult.clearCustomIcon();
     }
 }

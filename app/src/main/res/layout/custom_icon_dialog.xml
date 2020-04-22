@@ -4,9 +4,9 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/dialog_background"
+    android:clipChildren="true"
     android:clipToPadding="true"
     android:orientation="vertical"
-    android:clipChildren="true"
     android:paddingHorizontal="@dimen/result_margin_horizontal"
     android:paddingVertical="@dimen/result_margin_vertical">
 
@@ -16,21 +16,22 @@
         android:layout_height="0dp"
         android:layout_weight="1"
         android:columnWidth="@dimen/custom_icon_column_width"
-        android:numColumns="auto_fit"
-        android:verticalSpacing="1dp"
-        android:horizontalSpacing="1dp"
-        android:stretchMode="spacingWidth"
-        tools:itemCount="20"
         android:gravity="center"
-        tools:listitem="@layout/custom_icon_item"/>
+        android:horizontalSpacing="1dp"
+        android:numColumns="auto_fit"
+        android:stretchMode="spacingWidth"
+        android:verticalSpacing="1dp"
+        tools:itemCount="20"
+        tools:listitem="@layout/custom_icon_item" />
 
     <LinearLayout
+        android:id="@+id/searchBarContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center">
 
         <EditText
-            android:id="@+id/searchIcon"
+            android:id="@+id/search"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
@@ -38,12 +39,6 @@
             android:hint="@string/custom_icon_hint"
             android:inputType="textAutoCorrect" />
 
-        <Button
-            android:id="@android:id/button1"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@android:string/ok"
-            android:textAllCaps="false" />
     </LinearLayout>
 
     <View
@@ -56,18 +51,63 @@
         android:layout_height="wrap_content">
 
         <LinearLayout
+            android:id="@+id/quickList"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
             android:orientation="horizontal">
 
             <!-- code expects the parent of @+id/defaultIcon to be a ViewGroup -->
-            <include
-                android:id="@+id/defaultIcon"
-                layout="@layout/custom_icon_item" />
+            <include layout="@layout/custom_icon_quick" />
 
-            <!-- more `custom_icon_item` will be added from code -->
+            <!-- more `custom_icon_quick` will be added from code -->
         </LinearLayout>
 
     </HorizontalScrollView>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="?android:attr/listDivider" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginStart="@dimen/icon_margin_left"
+            android:layout_marginTop="@dimen/icon_margin_top"
+            android:layout_marginEnd="@dimen/icon_margin_right"
+            android:layout_marginBottom="@dimen/icon_margin_bottom"
+            android:text="@string/custom_icon_preview" />
+
+        <ImageView
+            android:id="@+id/preview"
+            android:layout_width="@dimen/icon_width"
+            android:layout_height="@dimen/icon_height"
+            android:layout_marginStart="@dimen/icon_margin_left"
+            android:layout_marginTop="@dimen/icon_margin_top"
+            android:layout_marginEnd="@dimen/icon_margin_right"
+            android:layout_marginBottom="@dimen/icon_margin_bottom"
+            android:src="@drawable/ic_android" />
+
+        <Button
+            android:id="@android:id/button2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@android:string/cancel"
+            android:textAllCaps="false" />
+
+        <Button
+            android:id="@android:id/button1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@android:string/ok"
+            android:textAllCaps="false" />
+
+    </LinearLayout>
 
 </LinearLayout>

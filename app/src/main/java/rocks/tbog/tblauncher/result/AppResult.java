@@ -451,4 +451,13 @@ public class AppResult extends Result {
         appPojo.setCustomIcon(dbId);
         setDrawableCache(drawable);
     }
+
+    public void clearCustomIcon() {
+        appPojo.setCustomIcon(0);
+        setDrawableCache(null);
+    }
+
+    public long getCustomIcon() {
+        return appPojo.getCustomIcon();
+    }
 }

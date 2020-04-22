@@ -28,6 +28,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
 import androidx.fragment.app.DialogFragment;
 
 import java.util.ArrayList;
@@ -44,6 +45,7 @@ public class CustomIconDialog extends DialogFragment {
     private Drawable mSelectedDrawable = null;
     private GridView mIconGrid;
     private TextView mSearch;
+    private ImageView mPreview;
     private OnDismissListener mOnDismissListener = null;
     private OnConfirmListener mOnConfirmListener = null;
 
@@ -52,7 +54,7 @@ public class CustomIconDialog extends DialogFragment {
     }
 
     public interface OnConfirmListener {
-        void onConfirm(@NonNull Drawable icon);
+        void onConfirm(@Nullable Drawable icon);
     }
 
     void setOnDismissListener(OnDismissListener listener) {
@@ -101,6 +103,9 @@ public class CustomIconDialog extends DialogFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        Context context = getContext();
+        assert context != null;
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             view.setClipToOutline(true);
         }
@@ -109,9 +114,12 @@ public class CustomIconDialog extends DialogFragment {
         IconAdapter iconAdapter = new IconAdapter(mIconData);
         mIconGrid.setAdapter(iconAdapter);
 
-        iconAdapter.setOnItemClickListener((adapter, v, position) -> mSelectedDrawable = adapter.getItem(position).getIcon());
+        iconAdapter.setOnItemClickListener((adapter, v, position) -> {
+            mSelectedDrawable = adapter.getItem(position).getIcon();
+            mPreview.setImageDrawable(mSelectedDrawable);
+        });
 
-        mSearch = view.findViewById(R.id.searchIcon);
+        mSearch = view.findViewById(R.id.search);
         mSearch.addTextChangedListener(new TextWatcher() {
             public void afterTextChanged(Editable s) {
                 // Auto left-trim text.
@@ -127,101 +135,123 @@ public class CustomIconDialog extends DialogFragment {
             }
         });
 
+        Bundle args = getArguments() != null ? getArguments() : new Bundle();
+        String name = args.getString("componentName", "");
+        long customIcon = args.getLong("customIcon", 0);
+
+        IconsHandler iconsHandler = TBApplication.getApplication(context).getIconsHandler();
+        ComponentName cn = UserHandleCompat.unflattenComponentName(name);
+        UserHandleCompat userHandle = UserHandleCompat.fromComponentName(context, name);
+
+        // Preview
+        {
+            mPreview = view.findViewById(R.id.preview);
+            Drawable drawable = customIcon != 0 ? iconsHandler.getCustomIcon(name, customIcon) : null;
+            if (drawable == null)
+                drawable = iconsHandler.getDrawableIconForPackage(cn, userHandle);
+            mPreview.setImageDrawable(drawable);
+        }
+
         // OK button
         {
             View button = view.findViewById(android.R.id.button1);
             button.setOnClickListener(v -> {
                 if (mOnConfirmListener != null) {
-                    if (mSelectedDrawable != null) {
-                        mOnConfirmListener.onConfirm(mSelectedDrawable);
-                    }
+                    mOnConfirmListener.onConfirm(mSelectedDrawable);
                 }
                 dismiss();
             });
         }
 
+        // CANCEL button
+        {
+            View button = view.findViewById(android.R.id.button2);
+            button.setOnClickListener(v -> dismiss());
+        }
+
+        ViewGroup quickList = view.findViewById(R.id.quickList);
+
         // add default icon
         {
-            Context context = getContext();
-            assert context != null;
-            String name = getArguments().getString("componentName");
-            assert name != null;
-            ImageView icon = view.findViewById(R.id.defaultIcon);
-            IconsHandler iconsHandler = TBApplication.getApplication(context).getIconsHandler();
-            IconPack iconPack = iconsHandler.getCurrentIconPack();
-            ComponentName cn = UserHandleCompat.unflattenComponentName(name);
-            Drawable drawable = iconPack != null ? iconPack.getComponentDrawable(cn.toString()) : null;
-            if (drawable == null) {
-                UserHandleCompat userHandle = UserHandleCompat.fromComponentName(context, name);
-                drawable = iconsHandler.getSystemIconPack().getDefaultAppDrawable(context, cn, userHandle);
-                if (iconPack != null)
-                    drawable = iconPack.generateBitmap(context, drawable);
-                else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    drawable = DrawableUtils.applyIconMaskShape(context, drawable);
-                }
-                if (!(drawable instanceof BitmapDrawable))
-                    drawable = new BitmapDrawable(context.getResources(), DrawableUtils.drawableToBitmap(drawable));
-            }
+            Drawable drawable = iconsHandler.getDrawableIconForPackage(cn, userHandle);
 
+            ImageView icon = quickList.findViewById(android.R.id.icon);
             icon.setImageDrawable(drawable);
-            icon.setOnClickListener(v -> mSelectedDrawable = ((ImageView) v).getDrawable());
+            icon.setOnClickListener(v -> {
+                mSelectedDrawable = null;
+                mPreview.setImageDrawable(((ImageView) v).getDrawable());
+            });
+            ((TextView) quickList.findViewById(android.R.id.text1)).setText(R.string.default_icon);
+        }
+        IconPack iconPack = iconsHandler.getCurrentIconPack();
 
-            ViewGroup parent = (ViewGroup) icon.getParent();
-
-            // add getActivityIcon(componentName)
-            drawable = null;
+        // add getActivityIcon(componentName)
+        {
+            Drawable drawable = null;
             try {
                 drawable = context.getPackageManager().getActivityIcon(UserHandleCompat.unflattenComponentName(name));
             } catch (PackageManager.NameNotFoundException ignored) {
             }
             if (drawable != null) {
-                addQuickOption(drawable, parent);
+                addQuickOption(R.string.custom_icon_activity, drawable, quickList);
                 if (iconPack != null)
-                    addQuickOption(iconPack.generateBitmap(context, drawable), parent);
+                    addQuickOption(R.string.custom_icon_activity_with_pack, iconPack.generateBitmap(context, drawable), quickList);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                    addQuickOption(DrawableUtils.applyIconMaskShape(context, drawable), parent);
+                    addQuickOption(R.string.custom_icon_activity_adaptive, DrawableUtils.applyIconMaskShape(context, drawable), quickList);
             }
+        }
 
-            // add getApplicationIcon(packageName)
-            drawable = null;
+        // add getApplicationIcon(packageName)
+        {
+            Drawable drawable = null;
             try {
                 drawable = context.getPackageManager().getApplicationIcon(UserHandleCompat.getPackageName(name));
             } catch (PackageManager.NameNotFoundException ignored) {
             }
             if (drawable != null) {
-                addQuickOption(drawable, parent);
+                addQuickOption(R.string.custom_icon_application, drawable, quickList);
                 if (iconPack != null)
-                    addQuickOption(iconPack.generateBitmap(context, drawable), parent);
+                    addQuickOption(R.string.custom_icon_application_with_pack, iconPack.generateBitmap(context, drawable), quickList);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                    addQuickOption(DrawableUtils.applyIconMaskShape(context, drawable), parent);
+                    addQuickOption(R.string.custom_icon_application_adaptive, DrawableUtils.applyIconMaskShape(context, drawable), quickList);
             }
+        }
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                UserHandleCompat userHandle = UserHandleCompat.fromComponentName(context, name);
-                LauncherApps launcher = (LauncherApps) context.getSystemService(Context.LAUNCHER_APPS_SERVICE);
-                List<LauncherActivityInfo> icons = launcher.getActivityList(cn.getPackageName(), userHandle.getRealHandle());
-                for (LauncherActivityInfo info : icons) {
-                    drawable = info.getBadgedIcon(0);
+        // add Activity BadgedIcon
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            LauncherApps launcher = (LauncherApps) context.getSystemService(Context.LAUNCHER_APPS_SERVICE);
+            List<LauncherActivityInfo> icons = launcher.getActivityList(cn.getPackageName(), userHandle.getRealHandle());
+            for (LauncherActivityInfo info : icons) {
+                Drawable drawable = info.getBadgedIcon(0);
 
-                    addQuickOption(drawable, parent);
-                    if (iconPack != null)
-                        addQuickOption(iconPack.generateBitmap(context, drawable), parent);
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                        addQuickOption(DrawableUtils.applyIconMaskShape(context, drawable), parent);
-                    break;
-                }
+                addQuickOption(R.string.custom_icon_badged, drawable, quickList);
+                if (iconPack != null)
+                    addQuickOption(R.string.custom_icon_badged_with_pack, iconPack.generateBitmap(context, drawable), quickList);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                    addQuickOption(R.string.custom_icon_badged_adaptive, DrawableUtils.applyIconMaskShape(context, drawable), quickList);
+                break;
             }
         }
     }
 
-    private void addQuickOption(Drawable drawable, ViewGroup parent) {
+
+    private void addQuickOption(@StringRes int textId, Drawable drawable, ViewGroup parent) {
         if (!(drawable instanceof BitmapDrawable))
             return;
 
-        ImageView icon = (ImageView) LayoutInflater.from(parent.getContext()).inflate(R.layout.custom_icon_item, parent, false);
+        ViewGroup layout = (ViewGroup) LayoutInflater.from(parent.getContext()).inflate(R.layout.custom_icon_quick, parent, false);
+        ImageView icon = layout.findViewById(android.R.id.icon);
+        TextView text = layout.findViewById(android.R.id.text1);
+
         icon.setImageDrawable(drawable);
-        icon.setOnClickListener(v -> mSelectedDrawable = ((ImageView) v).getDrawable());
-        parent.addView(icon);
+        icon.setOnClickListener(v -> {
+            mSelectedDrawable = ((ImageView) v).getDrawable();
+            mPreview.setImageDrawable(mSelectedDrawable);
+        });
+
+        text.setText(textId);
+
+        parent.addView(layout);
     }
 
     @Override
@@ -243,7 +273,9 @@ public class CustomIconDialog extends DialogFragment {
                     mIconData.add(new IconData(iconPack, info));
             }
         }
-        ((BaseAdapter)mIconGrid.getAdapter()).notifyDataSetChanged();
+        mSearch.setVisibility(mIconData.isEmpty() ? View.GONE : View.VISIBLE);
+        mIconGrid.setVisibility(mIconData.isEmpty() ? View.GONE : View.VISIBLE);
+        ((BaseAdapter) mIconGrid.getAdapter()).notifyDataSetChanged();
     }
 
     static class IconData {
@@ -304,12 +336,8 @@ public class CustomIconDialog extends DialogFragment {
 
             IconData contact = getItem(position);
 
-            holder.icon.clearAnimation();
-            holder.icon.setScaleX(1.f);
-            holder.icon.setScaleY(1.f);
             holder.icon.setImageDrawable(contact.getIcon());
             holder.icon.setOnClickListener(v -> {
-                v.animate().scaleX(1.5f).scaleY(1.5f).start();
                 if (mOnItemClickListener != null)
                     mOnItemClickListener.onItemClick(IconAdapter.this, v, position);
             });

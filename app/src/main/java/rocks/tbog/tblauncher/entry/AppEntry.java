@@ -90,4 +90,8 @@ public final class AppEntry extends EntryWithTags {
     public void setCustomIcon(long dbId) {
         customIcon = dbId;
     }
+
+    public long getCustomIcon() {
+        return customIcon;
+    }
 }

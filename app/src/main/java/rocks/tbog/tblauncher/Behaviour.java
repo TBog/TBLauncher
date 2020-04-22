@@ -506,13 +506,17 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         {
             Bundle args = new Bundle();
             args.putString("componentName", appResult.getComponentName());
+            args.putLong("customIcon", appResult.getCustomIcon());
             mCustomIconDialog.setArguments(args);
         }
         // OnDismiss: We assume the mResultLayout was visible
         mCustomIconDialog.setOnDismissListener(dlg -> mResultLayout.setVisibility(View.VISIBLE));
 
         mCustomIconDialog.setOnConfirmListener(drawable -> {
-            TBApplication.getApplication(mTBLauncherActivity).getIconsHandler().changeAppIcon(appResult, drawable);
+            if (drawable == null)
+                TBApplication.getApplication(mTBLauncherActivity).getIconsHandler().restoreAppIcon(appResult);
+            else
+                TBApplication.getApplication(mTBLauncherActivity).getIconsHandler().changeAppIcon(appResult, drawable);
             // force a result refresh to update the icon in the view
             //TODO: find a better way to update the result icon
             updateSearchRecords();

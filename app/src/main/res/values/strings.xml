@@ -75,5 +75,16 @@
     <string name="app_rename_title">Choose a custom name for this application</string>
     <string name="app_rename_confirmation">App name is now %s</string>
     <string name="custom_icon_hint">Filter by name</string>
+    <string name="default_icon">default icon</string>
+    <string name="custom_icon_application">application</string>
+    <string name="custom_icon_application_with_pack">application with pack</string>
+    <string name="custom_icon_application_adaptive">application adaptive</string>
+    <string name="custom_icon_activity">activity</string>
+    <string name="custom_icon_activity_with_pack">activity with pack</string>
+    <string name="custom_icon_activity_adaptive">activity adaptive</string>
+    <string name="custom_icon_badged">badged</string>
+    <string name="custom_icon_badged_with_pack">badged with pack</string>
+    <string name="custom_icon_badged_adaptive">badged adaptive</string>
+    <string name="custom_icon_preview">Selection\npreview</string>
 
 </resources>
