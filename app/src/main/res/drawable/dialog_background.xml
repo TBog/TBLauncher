@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- fake the dialog margin with padding -->
+<inset xmlns:android="http://schemas.android.com/apk/res/android"
+    android:insetLeft="@dimen/result_margin_horizontal"
+    android:insetTop="@dimen/result_margin_vertical"
+    android:insetRight="@dimen/result_margin_horizontal"
+    android:insetBottom="@dimen/result_margin_vertical">
+
+    <!-- move the 1dp stoke outside -->
+    <inset
+        android:insetLeft="-1dp"
+        android:insetTop="-1dp"
+        android:insetRight="-1dp"
+        android:insetBottom="-1dp">
+        <shape>
+            <solid android:color="#4cFFFFFF" />
+            <stroke
+                android:width="1dp"
+                android:color="@android:color/black" />
+            <corners android:radius="@dimen/result_corner_radius" />
+        </shape>
+    </inset>
+
+</inset>

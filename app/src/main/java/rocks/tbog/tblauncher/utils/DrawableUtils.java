@@ -30,7 +30,7 @@ public class DrawableUtils {
 
     // https://stackoverflow.com/questions/3035692/how-to-convert-a-drawable-to-a-bitmap
 
-    static Bitmap drawableToBitmap(@NonNull Drawable drawable) {
+    public static Bitmap drawableToBitmap(@NonNull Drawable drawable) {
         Bitmap bitmap;
 
         if (drawable instanceof BitmapDrawable) {

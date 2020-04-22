@@ -62,10 +62,6 @@ public class SystemIconPack implements IIconPack {
             Log.e(TAG, "Unable to find component " + componentName.toString() + e);
             return new ColorDrawable(Color.WHITE);
         }
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            return DrawableUtils.applyIconMaskShape(ctx, drawable);
-        }
         return drawable;
     }
 }

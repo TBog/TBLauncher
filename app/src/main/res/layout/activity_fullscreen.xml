@@ -13,15 +13,16 @@
         android:id="@+id/notificationBackground"
         android:layout_width="match_parent"
         android:layout_height="50dp"
-        android:src="@drawable/notification_bar_background"
-        android:contentDescription="@null" />
+        android:contentDescription="@null"
+        android:src="@drawable/notification_bar_background" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
         android:fitsSystemWindows="true"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        tools:layout_marginTop="50dp">
         <!-- This Layout insets its children based on system windows using
              android:fitsSystemWindows.
              This is the only way to resize the result list and move the

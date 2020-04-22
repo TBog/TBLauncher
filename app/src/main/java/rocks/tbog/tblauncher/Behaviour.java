@@ -517,7 +517,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             //TODO: find a better way to update the result icon
             updateSearchRecords();
         });
-        mCustomIconDialog.show(mTBLauncherActivity.getSupportFragmentManager(), "custom_icon");
+        mCustomIconDialog.show(mTBLauncherActivity.getSupportFragmentManager(), "custom_icon_dialog");
     }
 
     private boolean isCustomIconDialogVisible() {

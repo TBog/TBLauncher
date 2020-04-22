@@ -19,6 +19,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.preference.PreferenceManager;
 
+import android.os.Build;
 import android.util.Log;
 
 import java.io.File;
@@ -30,6 +31,7 @@ import java.util.List;
 import rocks.tbog.tblauncher.db.AppRecord;
 import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.result.AppResult;
+import rocks.tbog.tblauncher.utils.DrawableUtils;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 
 /**
@@ -127,7 +129,11 @@ public class IconsHandler {
     public Drawable getDrawableIconForPackage(ComponentName componentName, UserHandleCompat userHandle) {
         // system icons, nothing to do
         if (mIconPack == null) {
-            return mSystemPack.getDefaultAppDrawable(ctx, componentName, userHandle);
+            Drawable drawable = mSystemPack.getDefaultAppDrawable(ctx, componentName, userHandle);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                return DrawableUtils.applyIconMaskShape(ctx, drawable);
+            }
+
         }
 
         // Search first in cache
@@ -146,19 +152,7 @@ public class IconsHandler {
 
         // apply icon pack back, mask and front over the system drawable
         Drawable systemIcon = mSystemPack.getDefaultAppDrawable(ctx, componentName, userHandle);
-        BitmapDrawable generated;
-        if (systemIcon instanceof BitmapDrawable) {
-            generated = mIconPack.generateBitmap((BitmapDrawable) systemIcon);
-        } else {
-            Bitmap bitmap;
-            if (systemIcon.getIntrinsicWidth() <= 0 || systemIcon.getIntrinsicHeight() <= 0)
-                bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888); // Single color bitmap will be created of 1x1 pixel
-            else
-                bitmap = Bitmap.createBitmap(systemIcon.getIntrinsicWidth(), systemIcon.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-            systemIcon.setBounds(0, 0, bitmap.getWidth(), bitmap.getHeight());
-            systemIcon.draw(new Canvas(bitmap));
-            generated = mIconPack.generateBitmap(new BitmapDrawable(this.ctx.getResources(), bitmap));
-        }
+        BitmapDrawable generated = mIconPack.generateBitmap(ctx, systemIcon);
         storeDrawable(cacheGetFileName(componentName.toString()), generated);
         return generated;
     }

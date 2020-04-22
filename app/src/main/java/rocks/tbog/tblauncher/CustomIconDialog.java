@@ -1,10 +1,16 @@
 package rocks.tbog.tblauncher;
 
+import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.pm.LauncherActivityInfo;
+import android.content.pm.LauncherApps;
+import android.content.pm.PackageManager;
 import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -14,6 +20,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.BaseAdapter;
+import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -21,21 +29,20 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
-import androidx.recyclerview.widget.RecyclerView;
-import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
+import rocks.tbog.tblauncher.utils.DrawableUtils;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 
 public class CustomIconDialog extends DialogFragment {
     private List<IconData> mIconData = new ArrayList<>();
     private Drawable mSelectedDrawable = null;
-    private RecyclerView mIconGrid;
+    private GridView mIconGrid;
     private TextView mSearch;
     private OnDismissListener mOnDismissListener = null;
     private OnConfirmListener mOnConfirmListener = null;
@@ -69,14 +76,20 @@ public class CustomIconDialog extends DialogFragment {
         super.onDismiss(dialog);
     }
 
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+        return super.onCreateDialog(savedInstanceState);
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.custom_icon, container, false);
+        View root = inflater.inflate(R.layout.custom_icon_dialog, container, false);
         getDialog().requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         WindowManager.LayoutParams lp = getDialog().getWindow().getAttributes();
-        lp.dimAmount = 0.5f;
+        lp.dimAmount = 0.7f;
         getDialog().getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
         getDialog().setCanceledOnTouchOutside(true);
 
@@ -88,20 +101,15 @@ public class CustomIconDialog extends DialogFragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            view.setClipToOutline(true);
+        }
+
         mIconGrid = view.findViewById(R.id.iconGrid);
         IconAdapter iconAdapter = new IconAdapter(mIconData);
         mIconGrid.setAdapter(iconAdapter);
 
-        iconAdapter.setOnItemClickListener(new IconAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(IconAdapter adapter, View view, int position) {
-                mSelectedDrawable = adapter.getItem(position).getIcon();
-            }
-        });
-
-        // First param is number of columns and second param is orientation i.e Vertical or Horizontal
-        StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(6, StaggeredGridLayoutManager.VERTICAL);
-        mIconGrid.setLayoutManager(layoutManager);
+        iconAdapter.setOnItemClickListener((adapter, v, position) -> mSelectedDrawable = adapter.getItem(position).getIcon());
 
         mSearch = view.findViewById(R.id.searchIcon);
         mSearch.addTextChangedListener(new TextWatcher() {
@@ -134,19 +142,86 @@ public class CustomIconDialog extends DialogFragment {
 
         // add default icon
         {
+            Context context = getContext();
+            assert context != null;
             String name = getArguments().getString("componentName");
+            assert name != null;
             ImageView icon = view.findViewById(R.id.defaultIcon);
-            IconsHandler iconsHandler = TBApplication.getApplication(getContext()).getIconsHandler();
-            Drawable drawable = iconsHandler.getCurrentIconPack().getComponentDrawable(name);
+            IconsHandler iconsHandler = TBApplication.getApplication(context).getIconsHandler();
+            IconPack iconPack = iconsHandler.getCurrentIconPack();
+            ComponentName cn = UserHandleCompat.unflattenComponentName(name);
+            Drawable drawable = iconPack != null ? iconPack.getComponentDrawable(cn.toString()) : null;
             if (drawable == null) {
-                UserHandleCompat userHandle = UserHandleCompat.fromComponentName(getContext(), name);
-                ComponentName cn = UserHandleCompat.unflattenComponentName(name);
-                drawable = iconsHandler.getSystemIconPack().getDefaultAppDrawable(getContext(), cn, userHandle);
+                UserHandleCompat userHandle = UserHandleCompat.fromComponentName(context, name);
+                drawable = iconsHandler.getSystemIconPack().getDefaultAppDrawable(context, cn, userHandle);
+                if (iconPack != null)
+                    drawable = iconPack.generateBitmap(context, drawable);
+                else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    drawable = DrawableUtils.applyIconMaskShape(context, drawable);
+                }
+                if (!(drawable instanceof BitmapDrawable))
+                    drawable = new BitmapDrawable(context.getResources(), DrawableUtils.drawableToBitmap(drawable));
             }
 
             icon.setImageDrawable(drawable);
             icon.setOnClickListener(v -> mSelectedDrawable = ((ImageView) v).getDrawable());
+
+            ViewGroup parent = (ViewGroup) icon.getParent();
+
+            // add getActivityIcon(componentName)
+            drawable = null;
+            try {
+                drawable = context.getPackageManager().getActivityIcon(UserHandleCompat.unflattenComponentName(name));
+            } catch (PackageManager.NameNotFoundException ignored) {
+            }
+            if (drawable != null) {
+                addQuickOption(drawable, parent);
+                if (iconPack != null)
+                    addQuickOption(iconPack.generateBitmap(context, drawable), parent);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                    addQuickOption(DrawableUtils.applyIconMaskShape(context, drawable), parent);
+            }
+
+            // add getApplicationIcon(packageName)
+            drawable = null;
+            try {
+                drawable = context.getPackageManager().getApplicationIcon(UserHandleCompat.getPackageName(name));
+            } catch (PackageManager.NameNotFoundException ignored) {
+            }
+            if (drawable != null) {
+                addQuickOption(drawable, parent);
+                if (iconPack != null)
+                    addQuickOption(iconPack.generateBitmap(context, drawable), parent);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                    addQuickOption(DrawableUtils.applyIconMaskShape(context, drawable), parent);
+            }
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                UserHandleCompat userHandle = UserHandleCompat.fromComponentName(context, name);
+                LauncherApps launcher = (LauncherApps) context.getSystemService(Context.LAUNCHER_APPS_SERVICE);
+                List<LauncherActivityInfo> icons = launcher.getActivityList(cn.getPackageName(), userHandle.getRealHandle());
+                for (LauncherActivityInfo info : icons) {
+                    drawable = info.getBadgedIcon(0);
+
+                    addQuickOption(drawable, parent);
+                    if (iconPack != null)
+                        addQuickOption(iconPack.generateBitmap(context, drawable), parent);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                        addQuickOption(DrawableUtils.applyIconMaskShape(context, drawable), parent);
+                    break;
+                }
+            }
         }
+    }
+
+    private void addQuickOption(Drawable drawable, ViewGroup parent) {
+        if (!(drawable instanceof BitmapDrawable))
+            return;
+
+        ImageView icon = (ImageView) LayoutInflater.from(parent.getContext()).inflate(R.layout.custom_icon_item, parent, false);
+        icon.setImageDrawable(drawable);
+        icon.setOnClickListener(v -> mSelectedDrawable = ((ImageView) v).getDrawable());
+        parent.addView(icon);
     }
 
     @Override
@@ -168,7 +243,7 @@ public class CustomIconDialog extends DialogFragment {
                     mIconData.add(new IconData(iconPack, info));
             }
         }
-        mIconGrid.getAdapter().notifyDataSetChanged();
+        ((BaseAdapter)mIconGrid.getAdapter()).notifyDataSetChanged();
     }
 
     static class IconData {
@@ -185,8 +260,7 @@ public class CustomIconDialog extends DialogFragment {
         }
     }
 
-    static class IconAdapter extends RecyclerView.Adapter<IconAdapter.ViewHolder> {
-
+    static class IconAdapter extends BaseAdapter {
         private final List<IconData> mIcons;
         private OnItemClickListener mOnItemClickListener = null;
 
@@ -194,54 +268,63 @@ public class CustomIconDialog extends DialogFragment {
             void onItemClick(IconAdapter adapter, View view, int position);
         }
 
-        IconAdapter(List<IconData> icons) {
-            mIcons = icons;
-            setHasStableIds(true);
-        }
-
-        IconData getItem(int position) {
-            return mIcons.get(position);
+        IconAdapter(@NonNull List<IconData> objects) {
+            mIcons = objects;
         }
 
         void setOnItemClickListener(OnItemClickListener listener) {
             mOnItemClickListener = listener;
         }
 
-        @NonNull
         @Override
-        public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            Context context = parent.getContext();
-            LayoutInflater inflater = LayoutInflater.from(context);
-
-            // Inflate the custom layout
-            View contactView = inflater.inflate(R.layout.custom_icon_item, parent, false);
-
-            // Return a new holder instance
-            return new ViewHolder(contactView);
+        public IconData getItem(int position) {
+            return mIcons.get(position);
         }
 
         @Override
-        public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-            // Get the data model based on position
-            IconData contact = mIcons.get(position);
+        public int getCount() {
+            return mIcons.size();
+        }
+
+        @Override
+        public long getItemId(int position) {
+            return getItem(position).hashCode();
+        }
+
+        @NonNull
+        @Override
+        public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
+            final View view;
+            if (convertView == null) {
+                view = LayoutInflater.from(parent.getContext()).inflate(R.layout.custom_icon_item, parent, false);
+            } else {
+                view = convertView;
+            }
+            ViewHolder holder = view.getTag() instanceof ViewHolder ? (ViewHolder) view.getTag() : new ViewHolder(view);
+
+            IconData contact = getItem(position);
 
             holder.icon.clearAnimation();
             holder.icon.setScaleX(1.f);
             holder.icon.setScaleY(1.f);
             holder.icon.setImageDrawable(contact.getIcon());
-            holder.icon.setOnClickListener(view -> {
-                view.animate().scaleX(1.5f).scaleY(1.5f).start();
+            holder.icon.setOnClickListener(v -> {
+                v.animate().scaleX(1.5f).scaleY(1.5f).start();
                 if (mOnItemClickListener != null)
-                    mOnItemClickListener.onItemClick(IconAdapter.this, view, position);
+                    mOnItemClickListener.onItemClick(IconAdapter.this, v, position);
             });
             holder.icon.setOnLongClickListener(v -> {
                 displayToast(v, contact.drawableInfo.drawableName);
                 return true;
             });
+
+            return view;
         }
 
-        // v is the Button view that you want the Toast to appear above
-        // and messageId is the id of your string resource for the message
+        /**
+         * @param v       is the Button view that you want the Toast to appear above
+         * @param message is the string for the message
+         */
 
         private void displayToast(View v, CharSequence message) {
             int xOffset = 0;
@@ -281,24 +364,11 @@ public class CustomIconDialog extends DialogFragment {
             toast.show();
         }
 
-        @Override
-        public int getItemCount() {
-            return mIcons.size();
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return mIcons.get(position).hashCode();
-        }
-
-        // Provide a direct reference to each of the views within a data item
-        // Used to cache the views within the item layout for fast access
-        static class ViewHolder extends RecyclerView.ViewHolder {
+        static class ViewHolder {
             ImageView icon;
 
-            public ViewHolder(View itemView) {
-                super(itemView);
-
+            ViewHolder(View itemView) {
+                itemView.setTag(this);
                 icon = itemView.findViewById(android.R.id.icon);
             }
         }

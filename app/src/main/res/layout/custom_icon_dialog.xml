@@ -1,25 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/dialog_background"
+    android:clipToPadding="true"
     android:orientation="vertical"
+    android:clipChildren="true"
     android:paddingHorizontal="@dimen/result_margin_horizontal"
     android:paddingVertical="@dimen/result_margin_vertical">
 
-    <androidx.recyclerview.widget.RecyclerView
+    <GridView
         android:id="@+id/iconGrid"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_gravity="center"
         android:layout_weight="1"
-        app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-        app:reverseLayout="true"
-        tools:context="rocks.tbog.tblauncher.CustomIconDialog"
+        android:columnWidth="@dimen/custom_icon_column_width"
+        android:numColumns="auto_fit"
+        android:verticalSpacing="1dp"
+        android:horizontalSpacing="1dp"
+        android:stretchMode="spacingWidth"
         tools:itemCount="20"
-        tools:listitem="@layout/custom_icon_item"
-        tools:spanCount="6" />
+        android:gravity="center"
+        tools:listitem="@layout/custom_icon_item"/>
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -57,6 +60,7 @@
             android:layout_height="match_parent"
             android:orientation="horizontal">
 
+            <!-- code expects the parent of @+id/defaultIcon to be a ViewGroup -->
             <include
                 android:id="@+id/defaultIcon"
                 layout="@layout/custom_icon_item" />

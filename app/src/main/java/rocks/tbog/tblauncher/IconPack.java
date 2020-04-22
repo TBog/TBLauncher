@@ -1,5 +1,6 @@
 package rocks.tbog.tblauncher;
 
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
@@ -110,6 +111,22 @@ public class IconPack implements IIconPack {
     private Bitmap getBitmap(@NonNull DrawableInfo drawableInfo) {
         Drawable drawable = getDrawable(drawableInfo);
         return Utilities.drawableToBitmap(drawable);
+    }
+
+    BitmapDrawable generateBitmap(Context ctx, Drawable systemIcon)
+    {
+        if (systemIcon instanceof BitmapDrawable) {
+            return generateBitmap((BitmapDrawable) systemIcon);
+        }
+
+        Bitmap bitmap;
+        if (systemIcon.getIntrinsicWidth() <= 0 || systemIcon.getIntrinsicHeight() <= 0)
+            bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888); // Single color bitmap will be created of 1x1 pixel
+        else
+            bitmap = Bitmap.createBitmap(systemIcon.getIntrinsicWidth(), systemIcon.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
+        systemIcon.setBounds(0, 0, bitmap.getWidth(), bitmap.getHeight());
+        systemIcon.draw(new Canvas(bitmap));
+        return generateBitmap(new BitmapDrawable(ctx.getResources(), bitmap));
     }
 
     @NonNull

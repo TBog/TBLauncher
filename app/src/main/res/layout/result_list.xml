@@ -10,15 +10,14 @@
     android:background="?attr/listBackgroundColor"
     android:elevation="2dp"
     tools:ignore="UnusedAttribute"
-    tools:layout_height="match_parent">
+    tools:showIn="@layout/activity_fullscreen">
 
     <rocks.tbog.tblauncher.ui.AnimatedListView
         android:id="@+id/resultList"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="top|center_horizontal"
-        android:cacheColorHint="@android:color/transparent"
         android:background="@null"
+        android:cacheColorHint="@android:color/transparent"
         android:divider="?attr/dividerDrawable"
         android:dividerHeight="1dp"
         android:stackFromBottom="true"
@@ -29,6 +28,6 @@
         android:id="@+id/listEdgeEffect"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="center_horizontal|bottom" />
+        tools:visibility="gone" />
 
 </FrameLayout>

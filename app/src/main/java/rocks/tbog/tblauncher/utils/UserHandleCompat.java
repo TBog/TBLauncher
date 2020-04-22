@@ -8,6 +8,8 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
 
+import androidx.annotation.NonNull;
+
 
 /**
  * Wrapper class for `android.os.UserHandle` that works with all Android versions
@@ -49,7 +51,8 @@ public class UserHandleCompat {
         return new UserHandleCompat();
     }
 
-    public static ComponentName unflattenComponentName(String name) {
+    @NonNull
+    public static ComponentName unflattenComponentName(@NonNull String name) {
         return new ComponentName(getPackageName(name), getActivityName(name));
     }
 
@@ -97,14 +100,14 @@ public class UserHandleCompat {
         return addUserSuffixToString(packageName + "/" + activityName, '#');
     }
 
-    public static String getPackageName(String componentName) {
+    public static String getPackageName(@NonNull String componentName) {
         int index = componentName.indexOf('/');
         if (index > 0)
             return componentName.substring(0, index);
         return "";
     }
 
-    public static String getActivityName(String componentName) {
+    public static String getActivityName(@NonNull String componentName) {
         int start = componentName.indexOf('/') + 1;
         int end = componentName.lastIndexOf('#');
         if (end == -1)
@@ -115,7 +118,7 @@ public class UserHandleCompat {
         return "";
     }
 
-    public static long getUserSerial(String componentName) {
+    public static long getUserSerial(@NonNull String componentName) {
         int index = componentName.indexOf('#') + 1;
         if (index > 0 && index < componentName.length()) {
             try {
