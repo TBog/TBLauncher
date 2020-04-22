@@ -22,7 +22,7 @@ import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.dataprovider.ShortcutsProvider;
 import rocks.tbog.tblauncher.db.ShortcutRecord;
-import rocks.tbog.tblauncher.utils.UserHandle;
+import rocks.tbog.tblauncher.utils.UserHandleCompat;
 
 @TargetApi(Build.VERSION_CODES.O)
 public class SaveAllOreoShortcutsAsync extends AsyncTask<Void, Integer, Boolean> {
@@ -74,7 +74,7 @@ public class SaveAllOreoShortcutsAsync extends AsyncTask<Void, Integer, Boolean>
 
         for (ShortcutInfo shortcutInfo : shortcuts) {
 
-            UserHandle user = new UserHandle(manager.getSerialNumberForUser(shortcutInfo.getUserHandle()), shortcutInfo.getUserHandle());
+            UserHandleCompat user = new UserHandleCompat(manager.getSerialNumberForUser(shortcutInfo.getUserHandle()), shortcutInfo.getUserHandle());
             boolean isExcluded = excludedAppList.contains(user.getComponentName(shortcutInfo.getPackage(), shortcutInfo.getActivity().getClassName()));
 
             // Skip shortcut if app is excluded

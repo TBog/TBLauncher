@@ -9,5 +9,5 @@ interface IIconPack {
     String getPackPackageName();
     void load(PackageManager packageManager);
     @Nullable
-    Drawable getComponentNameDrawable(String componentName);
+    Drawable getComponentDrawable(String componentName);
 }

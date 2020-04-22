@@ -17,7 +17,7 @@ import androidx.annotation.Nullable;
 import java.util.List;
 
 import rocks.tbog.tblauncher.utils.DrawableUtils;
-import rocks.tbog.tblauncher.utils.UserHandle;
+import rocks.tbog.tblauncher.utils.UserHandleCompat;
 
 public class SystemIconPack implements IIconPack {
 
@@ -34,12 +34,12 @@ public class SystemIconPack implements IIconPack {
 
     @Nullable
     @Override
-    public Drawable getComponentNameDrawable(String componentName) {
+    public Drawable getComponentDrawable(String componentName) {
         return null;
     }
 
     @NonNull
-    public Drawable getDefaultAppDrawable(@NonNull Context ctx, @NonNull ComponentName componentName, @NonNull UserHandle userHandle) {
+    public Drawable getDefaultAppDrawable(@NonNull Context ctx, @NonNull ComponentName componentName, @NonNull UserHandleCompat userHandle) {
         Drawable drawable = null;
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {

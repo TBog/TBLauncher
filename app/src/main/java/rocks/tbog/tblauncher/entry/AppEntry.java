@@ -15,7 +15,7 @@ import java.util.List;
 
 import rocks.tbog.tblauncher.IconsHandler;
 import rocks.tbog.tblauncher.TBApplication;
-import rocks.tbog.tblauncher.utils.UserHandle;
+import rocks.tbog.tblauncher.utils.UserHandleCompat;
 
 public final class AppEntry extends EntryWithTags {
 
@@ -24,13 +24,13 @@ public final class AppEntry extends EntryWithTags {
     @NonNull
     public final String activityName;
     @NonNull
-    private final UserHandle userHandle;
+    private final UserHandleCompat userHandle;
 
     private long customIcon = 0;
     private boolean excluded = false;
     private boolean excludedFromHistory = false;
 
-    public AppEntry(String id, @NonNull String packageName, @NonNull String activityName, @NonNull UserHandle userHandle) {
+    public AppEntry(String id, @NonNull String packageName, @NonNull String activityName, @NonNull UserHandleCompat userHandle) {
         super(id);
 
         this.packageName = packageName;

@@ -101,6 +101,9 @@ public class AppResult extends Result {
     public String getPackageName() {
         return appPojo.packageName;
     }
+    public String getComponentName() {
+        return appPojo.getComponentName();
+    }
 
     @Override
     protected ListPopup buildPopupMenu(Context context, ArrayAdapter<ListPopup.Item> adapter, final ResultAdapter parent, View parentView) {
@@ -191,7 +194,7 @@ public class AppResult extends Result {
                 launchRenameDialog(context, parent, appPojo);
                 return true;
             case R.string.menu_custom_icon:
-                launchCustomIconDialog(context, appPojo);
+                launchCustomIconDialog(context);
                 return true;
         }
 
@@ -314,9 +317,9 @@ public class AppResult extends Result {
         ((TextView)dialog.findViewById(R.id.rename)).setHint(appPojo.getName());
     }
 
-    private void launchCustomIconDialog(final Context context, final AppEntry app)
+    private void launchCustomIconDialog(final Context context)
     {
-        TBApplication.behaviour(context).launchCustomIconDialog(app);
+        TBApplication.behaviour(context).launchCustomIconDialog(this);
     }
 
     /**
@@ -442,5 +445,10 @@ public class AppResult extends Result {
         int[] l = new int[2];
         v.getLocationOnScreen(l);
         return new Rect(l[0], l[1], l[0] + v.getWidth(), l[1] + v.getHeight());
+    }
+
+    public void setCustomIcon(long dbId, Drawable drawable) {
+        appPojo.setCustomIcon(dbId);
+        setDrawableCache(drawable);
     }
 }

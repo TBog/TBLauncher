@@ -45,7 +45,7 @@ import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.ShortcutEntry;
 import rocks.tbog.tblauncher.searcher.Searcher;
 import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
-import rocks.tbog.tblauncher.utils.UserHandle;
+import rocks.tbog.tblauncher.utils.UserHandleCompat;
 
 public class DataHandler extends BroadcastReceiver
         implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -593,7 +593,7 @@ public class DataHandler extends BroadcastReceiver
         PreferenceManager.getDefaultSharedPreferences(context).edit().putStringSet("excluded-apps", newExcluded).apply();
     }
 
-    public void removeFromExcluded(UserHandle user) {
+    public void removeFromExcluded(UserHandleCompat user) {
         // This is only intended for apps from foreign-profiles
         if (user.isCurrentUser()) {
             return;
@@ -747,7 +747,7 @@ public class DataHandler extends BroadcastReceiver
     }
 
     @SuppressWarnings("StringSplitter")
-    public void removeFromFavorites(UserHandle user) {
+    public void removeFromFavorites(UserHandleCompat user) {
         // This is only intended for apps from foreign-profiles
         if (user.isCurrentUser()) {
             return;
@@ -817,8 +817,8 @@ public class DataHandler extends BroadcastReceiver
         DBHelper.setCustomAppName(context, app.getComponentName(), newName);
     }
 
-    public AppRecord setCustomAppIcon(AppEntry app) {
-        return DBHelper.setCustomAppIcon(context, app.getComponentName());
+    public AppRecord setCustomAppIcon(String componentName) {
+        return DBHelper.setCustomAppIcon(context, componentName);
     }
 
 //    public TagsHandler getTagsHandler() {

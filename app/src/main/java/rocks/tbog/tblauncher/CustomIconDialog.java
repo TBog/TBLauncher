@@ -1,5 +1,6 @@
 package rocks.tbog.tblauncher;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Rect;
@@ -29,10 +30,11 @@ import java.util.List;
 
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
+import rocks.tbog.tblauncher.utils.UserHandleCompat;
 
 public class CustomIconDialog extends DialogFragment {
     private List<IconData> mIconData = new ArrayList<>();
-    private IconData mSelected = null;
+    private Drawable mSelectedDrawable = null;
     private RecyclerView mIconGrid;
     private TextView mSearch;
     private OnDismissListener mOnDismissListener = null;
@@ -70,7 +72,6 @@ public class CustomIconDialog extends DialogFragment {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        //return super.onCreateView(inflater, container, savedInstanceState);
         View root = inflater.inflate(R.layout.custom_icon, container, false);
         getDialog().requestWindowFeature(Window.FEATURE_NO_TITLE);
 
@@ -94,7 +95,7 @@ public class CustomIconDialog extends DialogFragment {
         iconAdapter.setOnItemClickListener(new IconAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(IconAdapter adapter, View view, int position) {
-                mSelected = adapter.getItem(position);
+                mSelectedDrawable = adapter.getItem(position).getIcon();
             }
         });
 
@@ -118,15 +119,34 @@ public class CustomIconDialog extends DialogFragment {
             }
         });
 
-        View button = view.findViewById(android.R.id.button1);
-        button.setOnClickListener(v -> {
-            if (mOnConfirmListener != null && mSelected != null) {
-                Drawable drawable = mSelected.iconPack.getDrawable(mSelected.drawableInfo);
-                if (drawable != null)
-                    mOnConfirmListener.onConfirm(drawable);
+        // OK button
+        {
+            View button = view.findViewById(android.R.id.button1);
+            button.setOnClickListener(v -> {
+                if (mOnConfirmListener != null) {
+                    if (mSelectedDrawable != null) {
+                        mOnConfirmListener.onConfirm(mSelectedDrawable);
+                    }
+                }
+                dismiss();
+            });
+        }
+
+        // add default icon
+        {
+            String name = getArguments().getString("componentName");
+            ImageView icon = view.findViewById(R.id.defaultIcon);
+            IconsHandler iconsHandler = TBApplication.getApplication(getContext()).getIconsHandler();
+            Drawable drawable = iconsHandler.getCurrentIconPack().getComponentDrawable(name);
+            if (drawable == null) {
+                UserHandleCompat userHandle = UserHandleCompat.fromComponentName(getContext(), name);
+                ComponentName cn = UserHandleCompat.unflattenComponentName(name);
+                drawable = iconsHandler.getSystemIconPack().getDefaultAppDrawable(getContext(), cn, userHandle);
             }
-            dismiss();
-        });
+
+            icon.setImageDrawable(drawable);
+            icon.setOnClickListener(v -> mSelectedDrawable = ((ImageView) v).getDrawable());
+        }
     }
 
     @Override

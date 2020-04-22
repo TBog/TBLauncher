@@ -24,13 +24,13 @@ import android.util.Log;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
 import rocks.tbog.tblauncher.db.AppRecord;
 import rocks.tbog.tblauncher.entry.AppEntry;
-import rocks.tbog.tblauncher.utils.UserHandle;
+import rocks.tbog.tblauncher.result.AppResult;
+import rocks.tbog.tblauncher.utils.UserHandleCompat;
 
 /**
  * Inspired from http://stackoverflow.com/questions/31490630/how-to-load-icon-from-icon-pack
@@ -124,7 +124,7 @@ public class IconsHandler {
      * Get or generate icon for an app
      */
     @SuppressWarnings("CatchAndPrintStackTrace")
-    public Drawable getDrawableIconForPackage(ComponentName componentName, UserHandle userHandle) {
+    public Drawable getDrawableIconForPackage(ComponentName componentName, UserHandleCompat userHandle) {
         // system icons, nothing to do
         if (mIconPack == null) {
             return mSystemPack.getDefaultAppDrawable(ctx, componentName, userHandle);
@@ -139,7 +139,7 @@ public class IconsHandler {
 
         // check the icon pack for a resource
         {
-            Drawable drawable = mIconPack.getComponentNameDrawable(componentName.toString());
+            Drawable drawable = mIconPack.getComponentDrawable(componentName.toString());
             if (drawable != null)
                 return drawable;
         }
@@ -196,6 +196,11 @@ public class IconsHandler {
         return mIconPack;
     }
 
+    @NonNull
+    public SystemIconPack getSystemIconPack() {
+        return mSystemPack;
+    }
+
     private boolean isDrawableInCache(String key) {
         File drawableFile = cacheGetFileName(key);
         return drawableFile.isFile();
@@ -210,8 +215,10 @@ public class IconsHandler {
                 fos.flush();
                 fos.close();
             } catch (Exception e) {
-                Log.e(TAG, "Unable to store drawable in cache " + e);
+                Log.e(TAG, "Unable to store drawable as " + drawableFile, e);
             }
+        } else {
+            Log.w(TAG, "Only BitmapDrawable can be stored! " + drawableFile);
         }
     }
 
@@ -237,7 +244,7 @@ public class IconsHandler {
 
     /**
      * create path for icons cache like this
-     * {cacheDir}/icons/{icons_pack_package_name}_{key_hash}.png
+     * {cacheDir}/icons/{icons_pack_package_name}_{componentName_hash}.png
      */
     private File cacheGetFileName(String key) {
         String iconsPackPackageName = mIconPack != null ? mIconPack.getPackPackageName() : "";
@@ -251,6 +258,10 @@ public class IconsHandler {
         return dir;
     }
 
+    /**
+     * create path for custom icons like this
+     * {cacheDir}/custom_icons/{DB row id}_{componentName_hash}.png
+     */
     private File customIconFileName(String componentName, long customIcon) {
         StringBuilder name = new StringBuilder();
         if (customIcon > 0) {
@@ -300,8 +311,9 @@ public class IconsHandler {
         return null;
     }
 
-    public void changeAppIcon(AppEntry appEntry, Drawable drawable) {
-        AppRecord appRecord = TBApplication.getApplication(ctx).getDataHandler().setCustomAppIcon(appEntry);
+    public void changeAppIcon(AppResult appResult, Drawable drawable) {
+        AppRecord appRecord = TBApplication.getApplication(ctx).getDataHandler().setCustomAppIcon(appResult.getComponentName());
         storeDrawable(customIconFileName(appRecord.componentName, appRecord.dbId), drawable);
+        appResult.setCustomIcon(appRecord.dbId, drawable);
     }
 }

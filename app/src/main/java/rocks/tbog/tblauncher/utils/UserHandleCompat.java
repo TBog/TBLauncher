@@ -1,26 +1,27 @@
 package rocks.tbog.tblauncher.utils;
 
 import android.annotation.TargetApi;
+import android.content.ComponentName;
 import android.content.Context;
 import android.os.Build;
 import android.os.Process;
-
-import androidx.annotation.RequiresApi;
+import android.os.UserHandle;
+import android.os.UserManager;
 
 
 /**
  * Wrapper class for `android.os.UserHandle` that works with all Android versions
  */
-public class UserHandle {
+public class UserHandleCompat {
     private final long serial;
     private final Object handle; // android.os.UserHandle on Android 4.2 and newer
 
-    public UserHandle() {
+    public UserHandleCompat() {
         this(0, null);
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
-    public UserHandle(long serial, android.os.UserHandle user) {
+    public UserHandleCompat(long serial, android.os.UserHandle user) {
         if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN_MR1) {
             // OS does not provide any APIs for multi-user support
             this.serial = 0;
@@ -35,6 +36,21 @@ public class UserHandle {
             this.serial = serial;
             this.handle = user;
         }
+    }
+
+    public static UserHandleCompat fromComponentName(Context ctx, String componentName) {
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            UserManager manager = (UserManager) ctx.getSystemService(Context.USER_SERVICE);
+            assert manager != null;
+            long serial = getUserSerial(componentName);
+            UserHandle handle = manager.getUserForSerialNumber(serial);
+            return new UserHandleCompat(serial, handle);
+        }
+        return new UserHandleCompat();
+    }
+
+    public static ComponentName unflattenComponentName(String name) {
+        return new ComponentName(getPackageName(name), getActivityName(name));
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
@@ -81,14 +97,14 @@ public class UserHandle {
         return addUserSuffixToString(packageName + "/" + activityName, '#');
     }
 
-    public String getPackageName(String componentName) {
+    public static String getPackageName(String componentName) {
         int index = componentName.indexOf('/');
         if (index > 0)
             return componentName.substring(0, index);
         return "";
     }
 
-    public String getActivityName(String componentName) {
+    public static String getActivityName(String componentName) {
         int start = componentName.indexOf('/') + 1;
         int end = componentName.lastIndexOf('#');
         if (end == -1)
@@ -97,6 +113,17 @@ public class UserHandle {
             return componentName.substring(start, end);
         }
         return "";
+    }
+
+    public static long getUserSerial(String componentName) {
+        int index = componentName.indexOf('#') + 1;
+        if (index > 0 && index < componentName.length()) {
+            try {
+                return Long.parseLong(componentName.substring(index));
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        return 0;
     }
 
     public String getBadgedLabelForUser(Context context, String label) {

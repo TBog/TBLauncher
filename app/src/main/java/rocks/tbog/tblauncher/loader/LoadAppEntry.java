@@ -21,7 +21,7 @@ import rocks.tbog.tblauncher.DataHandler;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.db.AppRecord;
 import rocks.tbog.tblauncher.entry.AppEntry;
-import rocks.tbog.tblauncher.utils.UserHandle;
+import rocks.tbog.tblauncher.utils.UserHandleCompat;
 
 public class LoadAppEntry extends LoadEntryItem<AppEntry> {
 
@@ -81,7 +81,7 @@ public class LoadAppEntry extends LoadEntryItem<AppEntry> {
             if (manager != null && launcher != null)
                 // Handle multi-profile support introduced in Android 5 (#542)
                 for (android.os.UserHandle profile : manager.getUserProfiles()) {
-                    UserHandle user = new UserHandle(manager.getSerialNumberForUser(profile), profile);
+                    UserHandleCompat user = new UserHandleCompat(manager.getSerialNumberForUser(profile), profile);
                     for (LauncherActivityInfo activityInfo : launcher.getActivityList(null, profile)) {
                         ApplicationInfo appInfo = activityInfo.getApplicationInfo();
 
@@ -98,7 +98,7 @@ public class LoadAppEntry extends LoadEntryItem<AppEntry> {
             mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
 
             for (ResolveInfo info : manager.queryIntentActivities(mainIntent, 0)) {
-                UserHandle user = new UserHandle();
+                UserHandleCompat user = new UserHandleCompat();
                 ApplicationInfo appInfo = info.activityInfo.applicationInfo;
 
                 String displayName = info.loadLabel(manager).toString();
@@ -131,7 +131,7 @@ public class LoadAppEntry extends LoadEntryItem<AppEntry> {
     }
 
     @NonNull
-    private AppEntry processApp(String appName, String packageName, String activityName, UserHandle user) {
+    private AppEntry processApp(String appName, String packageName, String activityName, UserHandleCompat user) {
         String componentName = user.getComponentName(packageName, activityName);
         AppRecord rec = dbApps.get(componentName);
         if (rec == null) {

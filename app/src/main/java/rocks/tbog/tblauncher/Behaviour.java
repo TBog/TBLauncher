@@ -7,6 +7,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.text.Editable;
@@ -33,6 +34,7 @@ import androidx.preference.PreferenceManager;
 import java.util.ArrayList;
 
 import rocks.tbog.tblauncher.entry.AppEntry;
+import rocks.tbog.tblauncher.result.AppResult;
 import rocks.tbog.tblauncher.result.Result;
 import rocks.tbog.tblauncher.result.ResultAdapter;
 import rocks.tbog.tblauncher.searcher.ISearchActivity;
@@ -493,18 +495,28 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         return false;
     }
 
-    public void launchCustomIconDialog(AppEntry appEntry) {
+    public void launchCustomIconDialog(AppResult appResult) {
         closeCustomIconDialog();
         // We assume the mResultLayout is visible
         mResultLayout.setVisibility(View.INVISIBLE);
 
-        if (mCustomIconDialog == null)
-            mCustomIconDialog = new CustomIconDialog();
+        if (mCustomIconDialog == null) mCustomIconDialog = new CustomIconDialog();
 
+        // set args
+        {
+            Bundle args = new Bundle();
+            args.putString("componentName", appResult.getComponentName());
+            mCustomIconDialog.setArguments(args);
+        }
         // OnDismiss: We assume the mResultLayout was visible
         mCustomIconDialog.setOnDismissListener(dlg -> mResultLayout.setVisibility(View.VISIBLE));
 
-        mCustomIconDialog.setOnConfirmListener(drawable -> TBApplication.getApplication(mTBLauncherActivity).getIconsHandler().changeAppIcon(appEntry, drawable));
+        mCustomIconDialog.setOnConfirmListener(drawable -> {
+            TBApplication.getApplication(mTBLauncherActivity).getIconsHandler().changeAppIcon(appResult, drawable);
+            // force a result refresh to update the icon in the view
+            //TODO: find a better way to update the result icon
+            updateSearchRecords();
+        });
         mCustomIconDialog.show(mTBLauncherActivity.getSupportFragmentManager(), "custom_icon");
     }
 

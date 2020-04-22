@@ -76,10 +76,17 @@ public class IconPack implements IIconPack {
     }
 
     @Nullable
-    public Drawable getComponentNameDrawable(String componentName) {
+    public Drawable getComponentDrawable(String componentName) {
         ArraySet<DrawableInfo> drawables = drawablesByComponent.get(componentName);
         DrawableInfo drawableInfo = drawables != null ? drawables.valueAt(0) : null;
         return drawableInfo != null ? getDrawable(drawableInfo) : null;
+    }
+
+    @Nullable
+    DrawableInfo getComponentDrawableInfo(String componentName)
+    {
+        ArraySet<DrawableInfo> drawables = drawablesByComponent.get(componentName);
+        return drawables != null ? drawables.valueAt(0) : null;
     }
 
     @Nullable

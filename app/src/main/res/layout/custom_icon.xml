@@ -43,4 +43,27 @@
             android:textAllCaps="false" />
     </LinearLayout>
 
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="?android:attr/listDivider" />
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <include
+                android:id="@+id/defaultIcon"
+                layout="@layout/custom_icon_item" />
+
+            <!-- more `custom_icon_item` will be added from code -->
+        </LinearLayout>
+
+    </HorizontalScrollView>
+
 </LinearLayout>

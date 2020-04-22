@@ -22,7 +22,7 @@ import rocks.tbog.tblauncher.loader.LoadAppEntry;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.searcher.Searcher;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
-import rocks.tbog.tblauncher.utils.UserHandle;
+import rocks.tbog.tblauncher.utils.UserHandleCompat;
 
 public class AppProvider extends Provider<AppEntry> {
 
@@ -37,7 +37,7 @@ public class AppProvider extends Provider<AppEntry> {
 
                 final UserManager manager = (UserManager) AppProvider.this.getSystemService(Context.USER_SERVICE);
                 assert manager != null;
-                UserHandle user = new UserHandle(manager.getSerialNumberForUser(profile), profile);
+                UserHandleCompat user = new UserHandleCompat(manager.getSerialNumberForUser(profile), profile);
 
                 TBApplication.getApplication(context).getDataHandler().removeFromExcluded(user);
                 TBApplication.getApplication(context).getDataHandler().removeFromFavorites(user);
