@@ -86,5 +86,7 @@
     <string name="custom_icon_badged_with_pack">badged with pack</string>
     <string name="custom_icon_badged_adaptive">badged adaptive</string>
     <string name="custom_icon_preview">Selection\npreview</string>
+    <string name="custom_name_set_default">Default name</string>
+    <string name="custom_name_rename">Rename</string>
 
 </resources>

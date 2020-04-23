@@ -813,8 +813,13 @@ public class DataHandler extends BroadcastReceiver
             DBHelper.deleteApps(context, appRecords);
     }
 
-    public void renameApp(AppEntry app, String newName) {
-        DBHelper.setCustomAppName(context, app.getComponentName(), newName);
+    public void renameApp(String componentName, String newName) {
+        DBHelper.setCustomAppName(context, componentName, newName);
+    }
+
+    public void removeRenameApp(String componentName, String defaultName)
+    {
+        DBHelper.removeCustomAppName(context, componentName, defaultName);
     }
 
     public AppRecord setCustomAppIcon(String componentName) {

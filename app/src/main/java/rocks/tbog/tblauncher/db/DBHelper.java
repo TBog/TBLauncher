@@ -483,6 +483,24 @@ public class DBHelper {
         }
     }
 
+    public static void removeCustomAppName(Context context, String componentName, String defaultName) {
+        SQLiteDatabase db = getDatabase(context);
+        String sql = "UPDATE apps SET display_name=?,custom_flags=custom_flags&~? WHERE component_name=?";
+        try {
+            SQLiteStatement statement = db.compileStatement(sql);
+            statement.bindString(1, defaultName);
+            statement.bindLong(2, AppRecord.FLAG_CUSTOM_NAME);
+            statement.bindString(3, componentName);
+            int count = statement.executeUpdateDelete();
+            if (count != 1) {
+                Log.e(TAG, "Update name count = " + count);
+            }
+            statement.close();
+        } catch (Exception e) {
+            Log.e(TAG, "Insert or Update custom app name", e);
+        }
+    }
+
     @Nullable
     private static AppRecord getAppRecord(SQLiteDatabase db, String componentName)
     {

@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.LauncherActivityInfo;
 import android.content.pm.LauncherApps;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -101,6 +102,7 @@ public class AppResult extends Result {
     public String getPackageName() {
         return appPojo.packageName;
     }
+
     public String getComponentName() {
         return appPojo.getComponentName();
     }
@@ -191,7 +193,7 @@ public class AppResult extends Result {
                 launchEditTagsDialog(context, parent, appPojo);
                 return true;
             case R.string.menu_app_rename:
-                launchRenameDialog(context, parent, appPojo);
+                launchRenameDialog(context, parent);
                 return true;
             case R.string.menu_custom_icon:
                 launchCustomIconDialog(context);
@@ -275,7 +277,7 @@ public class AppResult extends Result {
 //        dialog.show();
     }
 
-    private void launchRenameDialog(final Context context, ResultAdapter parent, final AppEntry app) {
+    private void launchRenameDialog(final Context context, ResultAdapter parent) {
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(context.getResources().getString(R.string.app_rename_title));
 
@@ -285,17 +287,16 @@ public class AppResult extends Result {
             builder.setView(View.inflate(context, R.layout.rename_dialog, null));
         }
 
-        builder.setPositiveButton(android.R.string.ok, (dialog, which) -> {
-            EditText input = ((AlertDialog)dialog).findViewById(R.id.rename);
-            dialog.dismiss();
+        builder.setPositiveButton(R.string.custom_name_rename, (dialog, which) -> {
+            EditText input = ((AlertDialog) dialog).findViewById(R.id.rename);
 
             // Set new name
             String newName = input.getText().toString().trim();
-            app.setName(newName);
-            TBApplication.getApplication(context).getDataHandler().renameApp(appPojo, newName);
+            appPojo.setName(newName);
+            TBApplication.getApplication(context).getDataHandler().renameApp(appPojo.getComponentName(), newName);
 
             // Show toast message
-            String msg = context.getResources().getString(R.string.app_rename_confirmation, app.getName());
+            String msg = context.getResources().getString(R.string.app_rename_confirmation, appPojo.getName());
             Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
 
             // We'll need to reset the list view to its previous transcript mode,
@@ -303,6 +304,27 @@ public class AppResult extends Result {
             // Let's wait for half a second, that's ugly but we don't have any other option :(
 //            final Handler handler = new Handler();
 //            handler.postDelayed(() -> parent.updateTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL), 500);
+
+            dialog.dismiss();
+        });
+        builder.setNeutralButton(R.string.custom_name_set_default, (dialog, which) -> {
+            String name = null;
+            PackageManager pm = context.getPackageManager();
+            try {
+                ApplicationInfo applicationInfo = pm.getApplicationInfo(appPojo.packageName, 0);
+                name = applicationInfo.loadLabel(pm).toString();
+            } catch (NameNotFoundException ignored) {
+            }
+            if (name != null) {
+                appPojo.setName(name);
+                TBApplication.getApplication(context).getDataHandler().removeRenameApp(appPojo.getComponentName(), name);
+
+                // Show toast message
+                String msg = context.getResources().getString(R.string.app_rename_confirmation, appPojo.getName());
+                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
+            }
+
+            dialog.dismiss();
         });
         builder.setNegativeButton(android.R.string.cancel, (dialog, which) -> {
             dialog.cancel();
@@ -314,11 +336,10 @@ public class AppResult extends Result {
         AlertDialog dialog = builder.create();
         dialog.show();
         // call after dialog got inflated (show call)
-        ((TextView)dialog.findViewById(R.id.rename)).setHint(appPojo.getName());
+        ((TextView) dialog.findViewById(R.id.rename)).setHint(appPojo.getName());
     }
 
-    private void launchCustomIconDialog(final Context context)
-    {
+    private void launchCustomIconDialog(final Context context) {
         TBApplication.behaviour(context).launchCustomIconDialog(this);
     }
 
