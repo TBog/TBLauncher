@@ -10,6 +10,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
@@ -31,6 +32,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.fragment.app.DialogFragment;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -334,15 +336,15 @@ public class CustomIconDialog extends DialogFragment {
             }
             ViewHolder holder = view.getTag() instanceof ViewHolder ? (ViewHolder) view.getTag() : new ViewHolder(view);
 
-            IconData contact = getItem(position);
+            IconData content = getItem(position);
+            holder.setContent(content);
 
-            holder.icon.setImageDrawable(contact.getIcon());
             holder.icon.setOnClickListener(v -> {
                 if (mOnItemClickListener != null)
                     mOnItemClickListener.onItemClick(IconAdapter.this, v, position);
             });
             holder.icon.setOnLongClickListener(v -> {
-                displayToast(v, contact.drawableInfo.drawableName);
+                displayToast(v, content.drawableInfo.drawableName);
                 return true;
             });
 
@@ -394,10 +396,53 @@ public class CustomIconDialog extends DialogFragment {
 
         static class ViewHolder {
             ImageView icon;
+            AsyncLoad loader = null;
+
+            static class AsyncLoad extends AsyncTask<IconData, Void, Drawable> {
+                WeakReference<ViewHolder> holder;
+
+                AsyncLoad(ViewHolder holder) {
+                    this.holder = new WeakReference<>(holder);
+                }
+
+                @Override
+                protected void onPreExecute() {
+                    ViewHolder h = holder.get();
+                    if (h == null || h.loader != this)
+                        return;
+                    h.icon.setImageDrawable(null);
+                }
+
+                @Override
+                protected Drawable doInBackground(IconData... iconData) {
+                    return iconData[0].getIcon();
+                }
+
+                @Override
+                protected void onPostExecute(Drawable drawable) {
+                    ViewHolder h = holder.get();
+                    if (h == null || h.loader != this)
+                        return;
+                    h.loader = null;
+                    h.icon.setImageDrawable(drawable);
+                    h.icon.setScaleX(0f);
+                    h.icon.setScaleY(0f);
+                    h.icon.setRotation((drawable.hashCode() & 1) == 1 ? 180f : -180f);
+                    h.icon.animate().scaleX(1f).scaleY(1f).rotation(0f).start();
+                }
+            }
 
             ViewHolder(View itemView) {
                 itemView.setTag(this);
                 icon = itemView.findViewById(android.R.id.icon);
+            }
+
+            public void setContent(IconData content) {
+                if (loader != null)
+                    loader.cancel(true);
+                loader = new AsyncLoad(this);
+                loader.execute(content);
+                //icon.setImageDrawable(content.getIcon());
             }
         }
     }

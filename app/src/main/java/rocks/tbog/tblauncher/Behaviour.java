@@ -28,12 +28,10 @@ import android.widget.TextView;
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
-import androidx.fragment.app.FragmentManager;
 import androidx.preference.PreferenceManager;
 
 import java.util.ArrayList;
 
-import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.result.AppResult;
 import rocks.tbog.tblauncher.result.Result;
 import rocks.tbog.tblauncher.result.ResultAdapter;
@@ -457,10 +455,9 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         // We selected an item on the list, now we can cleanup the filter:
         if (!mSearchEditText.getText().toString().isEmpty()) {
             mSearchEditText.setText("");
-            displayClearOnInput();
-            hideSearchBar(0);
-            hideKeyboard();
         }
+        hideSearchBar(0);
+        hideKeyboard();
     }
 
     public void showContextMenu() {

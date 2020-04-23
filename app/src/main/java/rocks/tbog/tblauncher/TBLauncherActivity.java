@@ -189,14 +189,16 @@ public class TBLauncherActivity extends AppCompatActivity implements IResultList
             return true;
         switch (item.getItemId()) {
             case R.id.settings:
+                launchOccurred();
                 startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS));
                 return true;
             case R.id.wallpaper:
-                //hideKeyboard();
+                launchOccurred();
                 Intent intent = new Intent(Intent.ACTION_SET_WALLPAPER);
                 startActivity(Intent.createChooser(intent, getString(R.string.menu_wallpaper)));
                 return true;
             case R.id.preferences:
+                launchOccurred();
                 startActivity(new Intent(this, SettingsActivity.class));
                 return true;
         }
