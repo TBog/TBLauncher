@@ -39,7 +39,7 @@ public final class AppEntry extends EntryWithTags {
     }
 
     public String getComponentName() {
-        return userHandle.getComponentName(packageName, activityName);
+        return userHandle.getUserComponentName(packageName, activityName);
     }
 
     public boolean isExcluded() {

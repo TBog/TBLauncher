@@ -132,7 +132,7 @@ public class LoadAppEntry extends LoadEntryItem<AppEntry> {
 
     @NonNull
     private AppEntry processApp(String appName, String packageName, String activityName, UserHandleCompat user) {
-        String componentName = user.getComponentName(packageName, activityName);
+        String componentName = user.getUserComponentName(packageName, activityName);
         AppRecord rec = dbApps.get(componentName);
         if (rec == null) {
             rec = new AppRecord();

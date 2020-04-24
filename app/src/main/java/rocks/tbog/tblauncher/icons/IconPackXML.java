@@ -1,5 +1,6 @@
-package rocks.tbog.tblauncher;
+package rocks.tbog.tblauncher.icons;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -26,10 +27,11 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 
+import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
 
-public class IconPack implements IIconPack {
-    private final static String TAG = IconPack.class.getSimpleName();
+public class IconPackXML implements IconPack<IconPackXML.DrawableInfo> {
+    private final static String TAG = IconPackXML.class.getSimpleName();
     private final Map<String, ArraySet<DrawableInfo>> drawablesByComponent = new ArrayMap<>(0);
     private final ArraySet<DrawableInfo> drawableList = new ArraySet<>(0);
     // instance of a resource object of an icon pack
@@ -48,7 +50,7 @@ public class IconPack implements IIconPack {
 
     private boolean loaded;
 
-    public IconPack(String packageName) {
+    public IconPackXML(String packageName) {
         iconPackPackageName = packageName;
         loaded = false;
     }
@@ -72,8 +74,14 @@ public class IconPack implements IIconPack {
         loaded = true;
     }
 
-    Collection<DrawableInfo> getDrawableList() {
+    @Override
+    public Collection<DrawableInfo> getDrawableList() {
         return Collections.unmodifiableCollection(drawableList);
+    }
+
+    @Nullable
+    public Drawable getComponentDrawable(@NonNull Context ctx, @NonNull ComponentName componentName, @NonNull UserHandleCompat userHandle) {
+        return getComponentDrawable(componentName.toString());
     }
 
     @Nullable
@@ -83,23 +91,23 @@ public class IconPack implements IIconPack {
         return drawableInfo != null ? getDrawable(drawableInfo) : null;
     }
 
-    @Nullable
-    DrawableInfo getComponentDrawableInfo(String componentName)
-    {
-        ArraySet<DrawableInfo> drawables = drawablesByComponent.get(componentName);
-        return drawables != null ? drawables.valueAt(0) : null;
-    }
+//    @Nullable
+//    DrawableInfo getComponentDrawableInfo(String componentName) {
+//        ArraySet<DrawableInfo> drawables = drawablesByComponent.get(componentName);
+//        return drawables != null ? drawables.valueAt(0) : null;
+//    }
+//
+//    @Nullable
+//    Drawable getDrawable(String drawableName) {
+//        //Note: DrawableInfo does not use the drawableId for equals or hashCode
+//        int idx = drawableList.indexOf(new DrawableInfo(drawableName, 0));
+//        DrawableInfo drawableInfo = idx >= 0 ? drawableList.valueAt(idx) : null;
+//        return drawableInfo != null ? getDrawable(drawableInfo) : null;
+//    }
 
     @Nullable
-    Drawable getDrawable(String drawableName) {
-        //Note: DrawableInfo does not use the drawableId for equals or hashCode
-        int idx = drawableList.indexOf(new DrawableInfo(drawableName, 0));
-        DrawableInfo drawableInfo = idx >= 0 ? drawableList.valueAt(idx) : null;
-        return drawableInfo != null ? getDrawable(drawableInfo) : null;
-    }
-
-    @Nullable
-    Drawable getDrawable(@NonNull DrawableInfo drawableInfo) {
+    @Override
+    public Drawable getDrawable(@NonNull DrawableInfo drawableInfo) {
         try {
             return packResources.getDrawable(drawableInfo.drawableId);
         } catch (Resources.NotFoundException ignored) {
@@ -113,8 +121,9 @@ public class IconPack implements IIconPack {
         return Utilities.drawableToBitmap(drawable);
     }
 
-    BitmapDrawable generateBitmap(Context ctx, Drawable systemIcon)
-    {
+    @NonNull
+    @Override
+    public BitmapDrawable applyBackgroundAndMask(@NonNull Context ctx, @NonNull Drawable systemIcon) {
         if (systemIcon instanceof BitmapDrawable) {
             return generateBitmap((BitmapDrawable) systemIcon);
         }
@@ -130,7 +139,7 @@ public class IconPack implements IIconPack {
     }
 
     @NonNull
-    BitmapDrawable generateBitmap(@NonNull BitmapDrawable defaultBitmap) {
+    private BitmapDrawable generateBitmap(@NonNull BitmapDrawable defaultBitmap) {
 
         // if no support images in the icon pack return the bitmap itself
         if (backImages.size() == 0) {
@@ -274,12 +283,15 @@ public class IconPack implements IIconPack {
         }
     }
 
+
+    @NonNull
+    @Override
     public String getPackPackageName() {
         return iconPackPackageName;
     }
 
 
-    static class DrawableInfo {
+    public static class DrawableInfo {
         final String drawableName;
         final int drawableId;
 
@@ -299,6 +311,10 @@ public class IconPack implements IIconPack {
         @Override
         public int hashCode() {
             return Objects.hash(drawableName);
+        }
+
+        public String getDrawableName() {
+            return drawableName;
         }
     }
 

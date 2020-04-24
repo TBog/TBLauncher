@@ -26,7 +26,7 @@ public class DrawableUtils {
     private static final int SHAPE_CIRCLE = 1;
     private static final int SHAPE_SQUARE = 2;
     private static final int SHAPE_SQUIRCLE = 3;
-    private static final int SHAPE_TEARDROP = 4;
+    public static final int SHAPE_TEARDROP = 4;
 
     // https://stackoverflow.com/questions/3035692/how-to-convert-a-drawable-to-a-bitmap
 

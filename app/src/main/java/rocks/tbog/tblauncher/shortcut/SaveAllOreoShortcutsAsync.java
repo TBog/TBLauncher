@@ -75,7 +75,7 @@ public class SaveAllOreoShortcutsAsync extends AsyncTask<Void, Integer, Boolean>
         for (ShortcutInfo shortcutInfo : shortcuts) {
 
             UserHandleCompat user = new UserHandleCompat(manager.getSerialNumberForUser(shortcutInfo.getUserHandle()), shortcutInfo.getUserHandle());
-            boolean isExcluded = excludedAppList.contains(user.getComponentName(shortcutInfo.getPackage(), shortcutInfo.getActivity().getClassName()));
+            boolean isExcluded = excludedAppList.contains(user.getUserComponentName(shortcutInfo.getPackage(), shortcutInfo.getActivity().getClassName()));
 
             // Skip shortcut if app is excluded
             if (!excludedAppList.isEmpty() &&

@@ -37,6 +37,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+import rocks.tbog.tblauncher.icons.IconPack;
+import rocks.tbog.tblauncher.icons.IconPackXML;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.utils.DrawableUtils;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
@@ -185,7 +187,9 @@ public class CustomIconDialog extends DialogFragment {
             });
             ((TextView) quickList.findViewById(android.R.id.text1)).setText(R.string.default_icon);
         }
+
         IconPack iconPack = iconsHandler.getCurrentIconPack();
+        //IIconPack systemIconPack = iconsHandler.getSystemIconPack();
 
         // add getActivityIcon(componentName)
         {
@@ -197,7 +201,7 @@ public class CustomIconDialog extends DialogFragment {
             if (drawable != null) {
                 addQuickOption(R.string.custom_icon_activity, drawable, quickList);
                 if (iconPack != null)
-                    addQuickOption(R.string.custom_icon_activity_with_pack, iconPack.generateBitmap(context, drawable), quickList);
+                    addQuickOption(R.string.custom_icon_activity_with_pack, iconPack.applyBackgroundAndMask(context, drawable), quickList);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                     addQuickOption(R.string.custom_icon_activity_adaptive, DrawableUtils.applyIconMaskShape(context, drawable), quickList);
             }
@@ -213,7 +217,7 @@ public class CustomIconDialog extends DialogFragment {
             if (drawable != null) {
                 addQuickOption(R.string.custom_icon_application, drawable, quickList);
                 if (iconPack != null)
-                    addQuickOption(R.string.custom_icon_application_with_pack, iconPack.generateBitmap(context, drawable), quickList);
+                    addQuickOption(R.string.custom_icon_application_with_pack, iconPack.applyBackgroundAndMask(context, drawable), quickList);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                     addQuickOption(R.string.custom_icon_application_adaptive, DrawableUtils.applyIconMaskShape(context, drawable), quickList);
             }
@@ -228,7 +232,7 @@ public class CustomIconDialog extends DialogFragment {
 
                 addQuickOption(R.string.custom_icon_badged, drawable, quickList);
                 if (iconPack != null)
-                    addQuickOption(R.string.custom_icon_badged_with_pack, iconPack.generateBitmap(context, drawable), quickList);
+                    addQuickOption(R.string.custom_icon_badged_with_pack, iconPack.applyBackgroundAndMask(context, drawable), quickList);
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
                     addQuickOption(R.string.custom_icon_badged_adaptive, DrawableUtils.applyIconMaskShape(context, drawable), quickList);
                 break;
@@ -266,13 +270,15 @@ public class CustomIconDialog extends DialogFragment {
         mIconData.clear();
         IconsHandler iconsHandler = TBApplication.getApplication(getActivity()).getIconsHandler();
         IconPack iconPack = iconsHandler.getCurrentIconPack();
-        if (iconPack != null) {
-            StringNormalizer.Result normalized = StringNormalizer.normalizeWithResult(mSearch.getText(), true);
-            FuzzyScore fuzzyScore = new FuzzyScore(normalized.codePoints);
-            Collection<IconPack.DrawableInfo> drawables = iconPack.getDrawableList();
-            for (IconPack.DrawableInfo info : drawables) {
-                if (fuzzyScore.match(info.drawableName).match)
-                    mIconData.add(new IconData(iconPack, info));
+        if (iconPack instanceof IconPackXML) {
+            Collection<IconPackXML.DrawableInfo> drawables = ((IconPackXML) iconPack).getDrawableList();
+            if (drawables != null) {
+                StringNormalizer.Result normalized = StringNormalizer.normalizeWithResult(mSearch.getText(), true);
+                FuzzyScore fuzzyScore = new FuzzyScore(normalized.codePoints);
+                for (IconPackXML.DrawableInfo info : drawables) {
+                    if (fuzzyScore.match(info.getDrawableName()).match)
+                        mIconData.add(new IconData((IconPackXML) iconPack, info));
+                }
             }
         }
         mSearch.setVisibility(mIconData.isEmpty() ? View.GONE : View.VISIBLE);
@@ -281,10 +287,10 @@ public class CustomIconDialog extends DialogFragment {
     }
 
     static class IconData {
-        final IconPack.DrawableInfo drawableInfo;
-        final IconPack iconPack;
+        final IconPackXML.DrawableInfo drawableInfo;
+        final IconPackXML iconPack;
 
-        IconData(IconPack iconPack, IconPack.DrawableInfo drawableInfo) {
+        IconData(IconPackXML iconPack, IconPackXML.DrawableInfo drawableInfo) {
             this.iconPack = iconPack;
             this.drawableInfo = drawableInfo;
         }
@@ -344,7 +350,7 @@ public class CustomIconDialog extends DialogFragment {
                     mOnItemClickListener.onItemClick(IconAdapter.this, v, position);
             });
             holder.icon.setOnLongClickListener(v -> {
-                displayToast(v, content.drawableInfo.drawableName);
+                displayToast(v, content.drawableInfo.getDrawableName());
                 return true;
             });
 
