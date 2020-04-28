@@ -164,7 +164,6 @@ public class TBLauncherActivity extends AppCompatActivity implements IResultList
     }
 
 
-
     @Override
     public boolean onKeyDown(int keycode, @NonNull KeyEvent e) {
         // For devices with a physical menu button, we still want to display *our* contextual menu

@@ -195,7 +195,7 @@ public class CustomIconDialog extends DialogFragment {
         {
             Drawable drawable = null;
             try {
-                drawable = context.getPackageManager().getActivityIcon(UserHandleCompat.unflattenComponentName(name));
+                drawable = context.getPackageManager().getActivityIcon(cn);
             } catch (PackageManager.NameNotFoundException ignored) {
             }
             if (drawable != null) {

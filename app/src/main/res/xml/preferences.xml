@@ -89,13 +89,34 @@
                 android:title="@string/round_corners" />
         </androidx.preference.PreferenceCategory>
 
-        <androidx.preference.PreferenceCategory android:title="@string/misc">
-            <androidx.preference.SwitchPreference
-                android:defaultValue="false"
-                android:key="pref-swap-kiss-button-with-menu"
-                android:title="@string/swap_kiss_button_with_menu" />
-        </androidx.preference.PreferenceCategory>
+<!--        <androidx.preference.PreferenceCategory android:title="@string/misc">-->
+<!--            <androidx.preference.SwitchPreference-->
+<!--                android:defaultValue="false"-->
+<!--                android:key="pref-swap-kiss-button-with-menu"-->
+<!--                android:title="@string/swap_kiss_button_with_menu" />-->
+<!--        </androidx.preference.PreferenceCategory>-->
     </androidx.preference.PreferenceScreen>
+
+<!--    <androidx.preference.PreferenceScreen-->
+<!--        android:key="ui-custom-apps"-->
+<!--        android:summary="Custom app icons and names"-->
+<!--        android:title="Customized apps">-->
+
+<!--        &lt;!&ndash; Custom Icons &ndash;&gt;-->
+<!--        <androidx.preference.PreferenceCategory-->
+<!--            android:key="custom-icons-section"-->
+<!--            android:title="Icons">-->
+<!--            <androidx.preference.MultiSelectListPreference-->
+<!--                android:key="custom-icons-list"/>-->
+<!--        </androidx.preference.PreferenceCategory>-->
+
+<!--        &lt;!&ndash; Custom app name &ndash;&gt;-->
+<!--        <androidx.preference.PreferenceCategory-->
+<!--            android:key="custom-names-section"-->
+<!--            android:title="Names">-->
+<!--        </androidx.preference.PreferenceCategory>-->
+
+<!--    </androidx.preference.PreferenceScreen>-->
 
     <androidx.preference.Preference
         android:key="rate-app"

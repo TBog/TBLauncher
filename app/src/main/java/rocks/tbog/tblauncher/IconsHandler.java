@@ -10,9 +10,7 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
-import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
-import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.Log;
@@ -98,7 +96,7 @@ public class IconsHandler {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
                 return DrawableUtils.applyIconMaskShape(ctx, drawable);
             }
-
+            return drawable;
         }
 
         // Search first in cache
