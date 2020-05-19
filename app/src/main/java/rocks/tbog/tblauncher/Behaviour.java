@@ -502,7 +502,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         // set args
         {
             Bundle args = new Bundle();
-            args.putString("componentName", appResult.getComponentName());
+            args.putString("componentName", appResult.getUserComponentName());
             args.putLong("customIcon", appResult.getCustomIcon());
             mCustomIconDialog.setArguments(args);
         }

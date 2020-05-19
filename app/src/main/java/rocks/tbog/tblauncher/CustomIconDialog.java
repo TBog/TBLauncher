@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.pm.LauncherActivityInfo;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -30,6 +31,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
+import androidx.collection.ArraySet;
 import androidx.fragment.app.DialogFragment;
 
 import java.lang.ref.WeakReference;
@@ -175,9 +177,13 @@ public class CustomIconDialog extends DialogFragment {
 
         ViewGroup quickList = view.findViewById(R.id.quickList);
 
+        ArraySet<Bitmap> dSet = new ArraySet<>(3);
+
         // add default icon
         {
             Drawable drawable = iconsHandler.getDrawableIconForPackage(cn, userHandle);
+
+            checkDuplicateDrawable(dSet, drawable);
 
             ImageView icon = quickList.findViewById(android.R.id.icon);
             icon.setImageDrawable(drawable);
@@ -199,11 +205,13 @@ public class CustomIconDialog extends DialogFragment {
             } catch (PackageManager.NameNotFoundException ignored) {
             }
             if (drawable != null) {
-                addQuickOption(R.string.custom_icon_activity, drawable, quickList);
-                if (iconPack != null)
-                    addQuickOption(R.string.custom_icon_activity_with_pack, iconPack.applyBackgroundAndMask(context, drawable), quickList);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                    addQuickOption(R.string.custom_icon_activity_adaptive, DrawableUtils.applyIconMaskShape(context, drawable), quickList);
+                if (checkDuplicateDrawable(dSet, drawable)) {
+                    addQuickOption(R.string.custom_icon_activity, drawable, quickList);
+                    if (iconPack != null)
+                        addQuickOption(R.string.custom_icon_activity_with_pack, iconPack.applyBackgroundAndMask(context, drawable), quickList);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                        addQuickOption(R.string.custom_icon_activity_adaptive, DrawableUtils.applyIconMaskShape(context, drawable), quickList);
+                }
             }
         }
 
@@ -215,11 +223,13 @@ public class CustomIconDialog extends DialogFragment {
             } catch (PackageManager.NameNotFoundException ignored) {
             }
             if (drawable != null) {
-                addQuickOption(R.string.custom_icon_application, drawable, quickList);
-                if (iconPack != null)
-                    addQuickOption(R.string.custom_icon_application_with_pack, iconPack.applyBackgroundAndMask(context, drawable), quickList);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                    addQuickOption(R.string.custom_icon_application_adaptive, DrawableUtils.applyIconMaskShape(context, drawable), quickList);
+                if (checkDuplicateDrawable(dSet, drawable)) {
+                    addQuickOption(R.string.custom_icon_application, drawable, quickList);
+                    if (iconPack != null)
+                        addQuickOption(R.string.custom_icon_application_with_pack, iconPack.applyBackgroundAndMask(context, drawable), quickList);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                        addQuickOption(R.string.custom_icon_application_adaptive, DrawableUtils.applyIconMaskShape(context, drawable), quickList);
+                }
             }
         }
 
@@ -230,14 +240,29 @@ public class CustomIconDialog extends DialogFragment {
             for (LauncherActivityInfo info : icons) {
                 Drawable drawable = info.getBadgedIcon(0);
 
-                addQuickOption(R.string.custom_icon_badged, drawable, quickList);
-                if (iconPack != null)
-                    addQuickOption(R.string.custom_icon_badged_with_pack, iconPack.applyBackgroundAndMask(context, drawable), quickList);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                    addQuickOption(R.string.custom_icon_badged_adaptive, DrawableUtils.applyIconMaskShape(context, drawable), quickList);
-                break;
+                if (drawable != null) {
+                    if (checkDuplicateDrawable(dSet, drawable)) {
+                        addQuickOption(R.string.custom_icon_badged, drawable, quickList);
+                        if (iconPack != null)
+                            addQuickOption(R.string.custom_icon_badged_with_pack, iconPack.applyBackgroundAndMask(context, drawable), quickList);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                            addQuickOption(R.string.custom_icon_badged_adaptive, DrawableUtils.applyIconMaskShape(context, drawable), quickList);
+                    }
+                }
             }
         }
+    }
+
+    private boolean checkDuplicateDrawable(ArraySet<Bitmap> set, Drawable drawable) {
+        Bitmap b = null;
+        if (drawable instanceof BitmapDrawable)
+            b = ((BitmapDrawable) drawable).getBitmap();
+
+        if (set.contains(b))
+            return false;
+
+        set.add(b);
+        return true;
     }
 
 

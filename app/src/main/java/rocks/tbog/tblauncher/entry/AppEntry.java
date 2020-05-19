@@ -13,16 +13,16 @@ import androidx.annotation.RequiresApi;
 
 import java.util.List;
 
+import rocks.tbog.tblauncher.BuildConfig;
 import rocks.tbog.tblauncher.IconsHandler;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 
 public final class AppEntry extends EntryWithTags {
 
+    public static final String SCHEME = "app://";
     @NonNull
-    public final String packageName;
-    @NonNull
-    public final String activityName;
+    public final ComponentName componentName;
     @NonNull
     private final UserHandleCompat userHandle;
 
@@ -30,16 +30,21 @@ public final class AppEntry extends EntryWithTags {
     private boolean excluded = false;
     private boolean excludedFromHistory = false;
 
-    public AppEntry(String id, @NonNull String packageName, @NonNull String activityName, @NonNull UserHandleCompat userHandle) {
+    public AppEntry(@NonNull String id, @NonNull String packageName, @NonNull String className, @NonNull UserHandleCompat userHandle) {
         super(id);
-
-        this.packageName = packageName;
-        this.activityName = activityName;
+        if (BuildConfig.DEBUG && !id.startsWith(SCHEME)) {
+            throw new IllegalStateException("Invalid " + AppEntry.class.getSimpleName() + " id `" + id + "`");
+        }
+        this.componentName = new ComponentName(packageName, className);
         this.userHandle = userHandle;
     }
 
-    public String getComponentName() {
-        return userHandle.getUserComponentName(packageName, activityName);
+    public String getUserComponentName() {
+        return userHandle.getUserComponentName(componentName);
+    }
+
+    public String getPackageName() {
+        return componentName.getPackageName();
     }
 
     public boolean isExcluded() {
@@ -64,22 +69,22 @@ public final class AppEntry extends EntryWithTags {
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public List<LauncherActivityInfo> getActivityList(LauncherApps launcher) {
-        return launcher.getActivityList(packageName, userHandle.getRealHandle());
+        return launcher.getActivityList(componentName.getPackageName(), userHandle.getRealHandle());
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void launchAppDetails(LauncherApps launcher) {
-        launcher.startAppDetailsActivity(new ComponentName(packageName, activityName), userHandle.getRealHandle(), null, null);
+        launcher.startAppDetailsActivity(componentName, userHandle.getRealHandle(), null, null);
     }
 
     public Drawable getIconDrawable(Context context) {
         IconsHandler iconsHandler = TBApplication.getApplication(context).getIconsHandler();
         if (customIcon != 0) {
-            Drawable drawable = iconsHandler.getCustomIcon(getComponentName(), customIcon);
+            Drawable drawable = iconsHandler.getCustomIcon(getUserComponentName(), customIcon);
             if (drawable != null)
                 return drawable;
         }
-        return iconsHandler.getDrawableIconForPackage(new ComponentName(packageName, activityName), userHandle);
+        return iconsHandler.getDrawableIconForPackage(componentName, userHandle);
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
@@ -94,4 +99,5 @@ public final class AppEntry extends EntryWithTags {
     public long getCustomIcon() {
         return customIcon;
     }
+
 }

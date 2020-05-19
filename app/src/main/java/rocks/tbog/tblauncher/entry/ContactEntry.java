@@ -2,9 +2,11 @@ package rocks.tbog.tblauncher.entry;
 
 import android.net.Uri;
 
+import rocks.tbog.tblauncher.BuildConfig;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 
 public final class ContactEntry extends EntryItem {
+    public static final String SCHEME = "contact://";
     public final String lookupKey;
 
     public final String phone;
@@ -32,6 +34,9 @@ public final class ContactEntry extends EntryItem {
                         Uri icon, Boolean primary, int timesContacted, Boolean starred,
                         Boolean homeNumber) {
         super(id);
+        if (BuildConfig.DEBUG && !id.startsWith(SCHEME)) {
+            throw new IllegalStateException("Invalid " + ContactEntry.class.getSimpleName() + " id `" + id + "`");
+        }
         this.lookupKey = lookupKey;
         this.phone = phone;
         this.normalizedPhone = normalizedPhone;

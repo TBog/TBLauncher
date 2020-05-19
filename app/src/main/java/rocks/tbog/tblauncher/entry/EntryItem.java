@@ -11,7 +11,8 @@ public abstract class EntryItem {
     // Globally unique ID.
     // Usually starts with provider scheme, e.g. "app://" or "contact://" to
     // ensure unique constraint
-    public String id;
+    @NonNull
+    public final String id;
     // normalized name, for faster search
     public StringNormalizer.Result normalizedName = null;
     // Name for this Entry, e.g. app name
@@ -21,7 +22,7 @@ public abstract class EntryItem {
     // How relevant is this record? The higher, the most probable it will be displayed
     private int relevance = 0;
 
-    public EntryItem(String id) {
+    public EntryItem(@NonNull String id) {
         this.id = id;
     }
 

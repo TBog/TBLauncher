@@ -519,7 +519,7 @@ public class DataHandler extends BroadcastReceiver
 
         if (ShortcutUtil.areShortcutsEnabled(context)) {
             // Add all shortcuts for given package name to being excluded from history
-            List<ShortcutRecord> shortcutsList = DBHelper.getShortcuts(context, app.packageName);
+            List<ShortcutRecord> shortcutsList = DBHelper.getShortcuts(context, app.getPackageName());
             for (ShortcutRecord shortcut : shortcutsList) {
                 String id = ShortcutUtil.generateShortcutId(shortcut.name);
                 excluded.add(id);
@@ -542,7 +542,7 @@ public class DataHandler extends BroadcastReceiver
 
         if (ShortcutUtil.areShortcutsEnabled(context)) {
             // Add all shortcuts for given package name to being included in history
-            List<ShortcutRecord> shortcutsList = DBHelper.getShortcuts(context, app.packageName);
+            List<ShortcutRecord> shortcutsList = DBHelper.getShortcuts(context, app.getPackageName());
             for (ShortcutRecord shortcut : shortcutsList) {
                 String id = ShortcutUtil.generateShortcutId(shortcut.name);
                 excluded.remove(id);
@@ -557,7 +557,7 @@ public class DataHandler extends BroadcastReceiver
         // The set needs to be cloned and then edited,
         // modifying in place is not supported by putStringSet()
         Set<String> excluded = new HashSet<>(getExcluded());
-        excluded.add(app.getComponentName());
+        excluded.add(app.getUserComponentName());
         PreferenceManager.getDefaultSharedPreferences(context).edit().putStringSet("excluded-apps", excluded).apply();
         app.setExcluded(true);
 
@@ -566,19 +566,19 @@ public class DataHandler extends BroadcastReceiver
         dataHandler.removeFromFavorites(app.id);
 
         // Exclude shortcuts for this app
-        removeShortcuts(app.packageName);
+        removeShortcuts(app.getPackageName());
     }
 
     public void removeFromExcluded(AppEntry app) {
         // The set needs to be cloned and then edited,
         // modifying in place is not supported by putStringSet()
         Set<String> excluded = new HashSet<>(getExcluded());
-        excluded.remove(app.getComponentName());
+        excluded.remove(app.getUserComponentName());
         PreferenceManager.getDefaultSharedPreferences(context).edit().putStringSet("excluded-apps", excluded).apply();
         app.setExcluded(false);
 
         // Add shortcuts for this app
-        addShortcut(app.packageName);
+        addShortcut(app.getPackageName());
     }
 
     public void removeFromExcluded(String packageName) {

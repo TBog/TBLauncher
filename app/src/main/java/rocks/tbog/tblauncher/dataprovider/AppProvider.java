@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.Objects;
 
 import rocks.tbog.tblauncher.TBApplication;
+import rocks.tbog.tblauncher.broadcast.PackageAddedRemovedHandler;
 import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.loader.LoadAppEntry;
@@ -62,50 +63,50 @@ public class AppProvider extends Provider<AppEntry> {
                 @Override
                 public void onPackageAdded(String packageName, android.os.UserHandle user) {
                     if (!Process.myUserHandle().equals(user)) {
-//                        PackageAddedRemovedHandler.handleEvent(AppProvider.this,
-//                                "android.intent.action.PACKAGE_ADDED",
-//                                packageName, new UserHandle(manager.getSerialNumberForUser(user), user), false
-//                        );
+                        PackageAddedRemovedHandler.handleEvent(AppProvider.this,
+                                "android.intent.action.PACKAGE_ADDED",
+                                packageName, new UserHandleCompat(manager.getSerialNumberForUser(user), user), false
+                        );
                     }
                 }
 
                 @Override
                 public void onPackageChanged(String packageName, android.os.UserHandle user) {
                     if (!Process.myUserHandle().equals(user)) {
-//                        PackageAddedRemovedHandler.handleEvent(AppProvider.this,
-//                                "android.intent.action.PACKAGE_ADDED",
-//                                packageName, new UserHandle(manager.getSerialNumberForUser(user), user), true
-//                        );
+                        PackageAddedRemovedHandler.handleEvent(AppProvider.this,
+                                "android.intent.action.PACKAGE_ADDED",
+                                packageName, new UserHandleCompat(manager.getSerialNumberForUser(user), user), true
+                        );
                     }
                 }
 
                 @Override
                 public void onPackageRemoved(String packageName, android.os.UserHandle user) {
                     if (!Process.myUserHandle().equals(user)) {
-//                        PackageAddedRemovedHandler.handleEvent(AppProvider.this,
-//                                "android.intent.action.PACKAGE_REMOVED",
-//                                packageName, new UserHandle(manager.getSerialNumberForUser(user), user), false
-//                        );
+                        PackageAddedRemovedHandler.handleEvent(AppProvider.this,
+                                "android.intent.action.PACKAGE_REMOVED",
+                                packageName, new UserHandleCompat(manager.getSerialNumberForUser(user), user), false
+                        );
                     }
                 }
 
                 @Override
                 public void onPackagesAvailable(String[] packageNames, android.os.UserHandle user, boolean replacing) {
                     if (!Process.myUserHandle().equals(user)) {
-//                        PackageAddedRemovedHandler.handleEvent(AppProvider.this,
-//                                "android.intent.action.MEDIA_MOUNTED",
-//                                null, new UserHandle(manager.getSerialNumberForUser(user), user), false
-//                        );
+                        PackageAddedRemovedHandler.handleEvent(AppProvider.this,
+                                "android.intent.action.MEDIA_MOUNTED",
+                                null, new UserHandleCompat(manager.getSerialNumberForUser(user), user), false
+                        );
                     }
                 }
 
                 @Override
                 public void onPackagesUnavailable(String[] packageNames, android.os.UserHandle user, boolean replacing) {
                     if (!Process.myUserHandle().equals(user)) {
-//                        PackageAddedRemovedHandler.handleEvent(AppProvider.this,
-//                                "android.intent.action.MEDIA_UNMOUNTED",
-//                                null, new UserHandle(manager.getSerialNumberForUser(user), user), false
-//                        );
+                        PackageAddedRemovedHandler.handleEvent(AppProvider.this,
+                                "android.intent.action.MEDIA_UNMOUNTED",
+                                null, new UserHandleCompat(manager.getSerialNumberForUser(user), user), false
+                        );
                     }
                 }
             });
@@ -125,7 +126,7 @@ public class AppProvider extends Provider<AppEntry> {
         appChangedFilter.addAction(Intent.ACTION_MEDIA_REMOVED);
         appChangedFilter.addDataScheme("package");
         appChangedFilter.addDataScheme("file");
-//        this.registerReceiver(new PackageAddedRemovedHandler(), appChangedFilter);
+        this.registerReceiver(new PackageAddedRemovedHandler(), appChangedFilter);
 
         super.onCreate();
     }

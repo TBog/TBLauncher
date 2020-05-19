@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.provider.ContactsContract;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.core.app.ActivityCompat;
 
 import java.util.ArrayList;
@@ -23,7 +24,13 @@ import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 public class LoadContactsEntry extends LoadEntryItem<ContactEntry> {
 
     public LoadContactsEntry(Context context) {
-        super(context, "contact://");
+        super(context);
+    }
+
+    @NonNull
+    @Override
+    public String getScheme() {
+        return ContactEntry.SCHEME;
     }
 
     @Override
@@ -89,7 +96,7 @@ public class LoadContactsEntry extends LoadEntryItem<ContactEntry> {
                                 Long.parseLong(photoId));
                     }
 
-                    ContactEntry contact = new ContactEntry(pojoScheme + contactId + '/' + phone,
+                    ContactEntry contact = new ContactEntry(getScheme() + contactId + '/' + phone,
                             lookupKey, phone, normalizedPhone, icon, primary, timesContacted,
                             starred, false);
 

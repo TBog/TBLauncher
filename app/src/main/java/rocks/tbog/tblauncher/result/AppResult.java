@@ -31,24 +31,24 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.preference.PreferenceManager;
 
-import rocks.tbog.tblauncher.CustomIconDialog;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
-import rocks.tbog.tblauncher.TBLauncherActivity;
 import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
 
 public class AppResult extends Result {
-    private final AppEntry appPojo;
-    private final ComponentName className;
+    
     private Drawable icon = null;
 
-    AppResult(AppEntry appPojo) {
+    AppResult(@NonNull AppEntry appPojo) {
         super(appPojo);
-        this.appPojo = appPojo;
-
-        className = new ComponentName(appPojo.packageName, appPojo.activityName);
+    }
+    
+    @NonNull
+    private AppEntry appPojo()
+    {
+        return (AppEntry) pojo; 
     }
 
     @NonNull
@@ -62,13 +62,13 @@ public class AppResult extends Result {
 
         TextView appName = view.findViewById(R.id.item_app_name);
 
-        displayHighlighted(appPojo.normalizedName, appPojo.getName(), fuzzyScore, appName, context);
+        displayHighlighted(appPojo().normalizedName, appPojo().getName(), fuzzyScore, appName, context);
 
         TextView tagsView = view.findViewById(R.id.item_app_tag);
         // Hide tags view if tags are empty
-        if (appPojo.getTags().isEmpty()) {
+        if (appPojo().getTags().isEmpty()) {
             tagsView.setVisibility(View.GONE);
-//        } else if (displayHighlighted(appPojo.getNormalizedTags(), appPojo.getTags(),
+//        } else if (displayHighlighted(appPojo().getNormalizedTags(), appPojo().getTags(),
 //                fuzzyScore, tagsView, context) || prefs.getBoolean("tags-visible", true)) {
 //            tagsView.setVisibility(View.VISIBLE);
         } else {
@@ -77,7 +77,7 @@ public class AppResult extends Result {
 
         final ImageView appIcon = view.findViewById(R.id.item_app_icon);
         if (!prefs.getBoolean("icons-hide", false)) {
-            if (appIcon.getTag() instanceof ComponentName && className.equals(appIcon.getTag())) {
+            if (appIcon.getTag() instanceof ComponentName && appPojo().componentName.equals(appIcon.getTag())) {
                 icon = appIcon.getDrawable();
             }
             this.setAsyncDrawable(appIcon);
@@ -99,12 +99,8 @@ public class AppResult extends Result {
         return view;
     }
 
-    public String getPackageName() {
-        return appPojo.packageName;
-    }
-
-    public String getComponentName() {
-        return appPojo.getComponentName();
+    public String getUserComponentName() {
+        return appPojo().getUserComponentName();
     }
 
     @Override
@@ -127,15 +123,15 @@ public class AppResult extends Result {
             if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 LauncherApps launcher = (LauncherApps) context.getSystemService(Context.LAUNCHER_APPS_SERVICE);
                 assert launcher != null;
-                //LauncherActivityInfo info = launcher.getActivityList(this.appPojo.packageName, this.appPojo.userHandle.getRealHandle()).get(0);
-                LauncherActivityInfo info = appPojo.getActivityList(launcher).get(0);
+                //LauncherActivityInfo info = launcher.getActivityList(this.appPojo().packageName, this.appPojo().userHandle.getRealHandle()).get(0);
+                LauncherActivityInfo info = appPojo().getActivityList(launcher).get(0);
                 ai = info.getApplicationInfo();
 
             } else {
-                ai = context.getPackageManager().getApplicationInfo(this.appPojo.packageName, 0);
+                ai = context.getPackageManager().getApplicationInfo(this.appPojo().getPackageName(), 0);
             }
 
-            if ((ai.flags & ApplicationInfo.FLAG_SYSTEM) == 0 && appPojo.canUninstall()) {
+            if ((ai.flags & ApplicationInfo.FLAG_SYSTEM) == 0 && appPojo().canUninstall()) {
                 adapter.add(new ListPopup.Item(context, R.string.menu_app_uninstall));
             }
         } catch (NameNotFoundException | IndexOutOfBoundsException e) {
@@ -154,13 +150,13 @@ public class AppResult extends Result {
     protected boolean popupMenuClickHandler(final Context context, final ResultAdapter parent, int stringId, View parentView) {
         switch (stringId) {
             case R.string.menu_app_details:
-                launchAppDetails(context, appPojo);
+                launchAppDetails(context, appPojo());
                 return true;
             case R.string.menu_app_store:
-                launchAppStore(context, appPojo);
+                launchAppStore(context, appPojo());
                 return true;
             case R.string.menu_app_uninstall:
-                launchUninstall(context, appPojo);
+                launchUninstall(context, appPojo());
                 return true;
 //            case R.string.menu_app_hibernate:
 //                hibernate(context, appPojo);
@@ -177,10 +173,10 @@ public class AppResult extends Result {
                 popupExcludeMenu.setOnMenuItemClickListener(item -> {
                     switch (item.getGroupId()) {
                         case EXCLUDE_HISTORY_ID:
-                            excludeFromHistory(context, appPojo);
+                            excludeFromHistory(context, appPojo());
                             return true;
                         case EXCLUDE_KISS_ID:
-                            excludeFromKiss(context, appPojo, parent);
+                            excludeFromKiss(context, appPojo(), parent);
                             return true;
                     }
 
@@ -190,7 +186,7 @@ public class AppResult extends Result {
                 popupExcludeMenu.show();
                 return true;
             case R.string.menu_tags_edit:
-                launchEditTagsDialog(context, parent, appPojo);
+                launchEditTagsDialog(context, parent, appPojo());
                 return true;
             case R.string.menu_app_rename:
                 launchRenameDialog(context, parent);
@@ -236,7 +232,7 @@ public class AppResult extends Result {
 //        ArrayAdapter<String> adapter = new ArrayAdapter<>(context,
 //                android.R.layout.simple_dropdown_item_1line, KissApplication.getApplication(context).getDataHandler().getTagsHandler().getAllTagsAsArray());
 //        tagInput.setTokenizer(new SpaceTokenizer());
-//        tagInput.setText(appPojo.getTags());
+//        tagInput.setText(appPojo().getTags());
 //        tagInput.setAdapter(adapter);
 //        builder.setView(v);
 //
@@ -292,11 +288,11 @@ public class AppResult extends Result {
 
             // Set new name
             String newName = input.getText().toString().trim();
-            appPojo.setName(newName);
-            TBApplication.getApplication(context).getDataHandler().renameApp(appPojo.getComponentName(), newName);
+            appPojo().setName(newName);
+            TBApplication.getApplication(context).getDataHandler().renameApp(appPojo().getUserComponentName(), newName);
 
             // Show toast message
-            String msg = context.getResources().getString(R.string.app_rename_confirmation, appPojo.getName());
+            String msg = context.getResources().getString(R.string.app_rename_confirmation, appPojo().getName());
             Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
 
             // We'll need to reset the list view to its previous transcript mode,
@@ -311,16 +307,16 @@ public class AppResult extends Result {
             String name = null;
             PackageManager pm = context.getPackageManager();
             try {
-                ApplicationInfo applicationInfo = pm.getApplicationInfo(appPojo.packageName, 0);
+                ApplicationInfo applicationInfo = pm.getApplicationInfo(appPojo().getPackageName(), 0);
                 name = applicationInfo.loadLabel(pm).toString();
             } catch (NameNotFoundException ignored) {
             }
             if (name != null) {
-                appPojo.setName(name);
-                TBApplication.getApplication(context).getDataHandler().removeRenameApp(appPojo.getComponentName(), name);
+                appPojo().setName(name);
+                TBApplication.getApplication(context).getDataHandler().removeRenameApp(appPojo().getUserComponentName(), name);
 
                 // Show toast message
-                String msg = context.getResources().getString(R.string.app_rename_confirmation, appPojo.getName());
+                String msg = context.getResources().getString(R.string.app_rename_confirmation, appPojo().getName());
                 Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
             }
 
@@ -336,7 +332,7 @@ public class AppResult extends Result {
         AlertDialog dialog = builder.create();
         dialog.show();
         // call after dialog got inflated (show call)
-        ((TextView) dialog.findViewById(R.id.rename)).setHint(appPojo.getName());
+        ((TextView) dialog.findViewById(R.id.rename)).setText(appPojo().getName());
     }
 
     private void launchCustomIconDialog(final Context context) {
@@ -350,26 +346,26 @@ public class AppResult extends Result {
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             LauncherApps launcher = (LauncherApps) context.getSystemService(Context.LAUNCHER_APPS_SERVICE);
             assert launcher != null;
-            //launcher.startAppDetailsActivity(className, appPojo.userHandle.getRealHandle(), null, null);
-            appPojo.launchAppDetails(launcher);
+            //launcher.startAppDetailsActivity(className, appPojo().userHandle.getRealHandle(), null, null);
+            appPojo().launchAppDetails(launcher);
         } else {
             Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                    Uri.fromParts("package", app.packageName, null));
+                    Uri.fromParts("package", app.getPackageName(), null));
             context.startActivity(intent);
         }
     }
 
     private void launchAppStore(Context context, AppEntry app) {
         try {
-            context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + app.packageName)));
+            context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + app.getPackageName())));
         } catch (android.content.ActivityNotFoundException anfe) {
-            context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + app.packageName)));
+            context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + app.getPackageName())));
         }
     }
 
 //    private void hibernate(Context context, AppEntry app) {
 //        String msg = context.getResources().getString(R.string.toast_hibernate_completed);
-//        if (!KissApplication.getApplication(context).getRootHandler().hibernateApp(appPojo.packageName)) {
+//        if (!KissApplication.getApplication(context).getRootHandler().hibernateApp(appPojo().packageName)) {
 //            msg = context.getResources().getString(R.string.toast_hibernate_error);
 //        }
 //
@@ -381,7 +377,7 @@ public class AppResult extends Result {
      */
     private void launchUninstall(Context context, AppEntry app) {
         Intent intent = new Intent(Intent.ACTION_DELETE,
-                Uri.fromParts("package", app.packageName, null));
+                Uri.fromParts("package", app.getPackageName(), null));
         context.startActivity(intent);
     }
 
@@ -399,13 +395,13 @@ public class AppResult extends Result {
     public Drawable getDrawable(Context context) {
         synchronized (this) {
             //TODO: enable Google Calendar Icon
-//            if (GoogleCalendarIcon.GOOGLE_CALENDAR.equals(appPojo.packageName)) {
+//            if (GoogleCalendarIcon.GOOGLE_CALENDAR.equals(appPojo().packageName)) {
 //                // Google Calendar has a special treatment and displays a custom icon every day
-//                icon = GoogleCalendarIcon.getDrawable(context, appPojo.activityName);
+//                icon = GoogleCalendarIcon.getDrawable(context, appPojo().activityName);
 //            }
 
             if (icon == null) {
-                icon = appPojo.getIconDrawable(context);
+                icon = appPojo().getIconDrawable(context);
             }
 
             return icon;
@@ -438,11 +434,11 @@ public class AppResult extends Result {
                     }
                 }
 
-                launcher.startMainActivity(className, appPojo.getRealHandle(), sourceBounds, opts);
+                launcher.startMainActivity(appPojo().componentName, appPojo().getRealHandle(), sourceBounds, opts);
             } else {
                 Intent intent = new Intent(Intent.ACTION_MAIN);
                 intent.addCategory(Intent.CATEGORY_LAUNCHER);
-                intent.setComponent(className);
+                intent.setComponent(appPojo().componentName);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
 
                 if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
@@ -469,16 +465,16 @@ public class AppResult extends Result {
     }
 
     public void setCustomIcon(long dbId, Drawable drawable) {
-        appPojo.setCustomIcon(dbId);
+        appPojo().setCustomIcon(dbId);
         setDrawableCache(drawable);
     }
 
     public void clearCustomIcon() {
-        appPojo.setCustomIcon(0);
+        appPojo().setCustomIcon(0);
         setDrawableCache(null);
     }
 
     public long getCustomIcon() {
-        return appPojo.getCustomIcon();
+        return appPojo().getCustomIcon();
     }
 }

@@ -99,16 +99,18 @@ public class IconsHandler {
             return drawable;
         }
 
+        String componentString = componentName.toString();
+
         // Search first in cache
         {
-            Drawable cacheIcon = cacheGetDrawable(componentName.toString());
+            Drawable cacheIcon = cacheGetDrawable(componentString);
             if (cacheIcon != null)
                 return cacheIcon;
         }
 
         // check the icon pack for a resource
         {
-            Drawable drawable = mIconPack.getComponentDrawable(componentName.toString());
+            Drawable drawable = mIconPack.getComponentDrawable(componentString);
             if (drawable != null)
                 return drawable;
         }
@@ -277,13 +279,13 @@ public class IconsHandler {
     }
 
     public void changeAppIcon(AppResult appResult, Drawable drawable) {
-        AppRecord appRecord = TBApplication.getApplication(ctx).getDataHandler().setCustomAppIcon(appResult.getComponentName());
+        AppRecord appRecord = TBApplication.getApplication(ctx).getDataHandler().setCustomAppIcon(appResult.getUserComponentName());
         storeDrawable(customIconFileName(appRecord.componentName, appRecord.dbId), drawable);
         appResult.setCustomIcon(appRecord.dbId, drawable);
     }
 
     public void restoreAppIcon(AppResult appResult) {
-        AppRecord appRecord = TBApplication.getApplication(ctx).getDataHandler().removeCustomAppIcon(appResult.getComponentName());
+        AppRecord appRecord = TBApplication.getApplication(ctx).getDataHandler().removeCustomAppIcon(appResult.getUserComponentName());
         removeStoredDrawable(customIconFileName(appRecord.componentName, appRecord.dbId));
         appResult.clearCustomIcon();
     }

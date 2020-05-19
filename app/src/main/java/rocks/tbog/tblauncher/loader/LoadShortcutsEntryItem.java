@@ -2,6 +2,8 @@ package rocks.tbog.tblauncher.loader;
 
 import android.content.Context;
 
+import androidx.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,8 +17,14 @@ public class LoadShortcutsEntryItem extends LoadEntryItem<ShortcutEntry> {
     //private final TagsHandler tagsHandler;
 
     public LoadShortcutsEntryItem(Context context) {
-        super(context, ShortcutEntry.SCHEME);
+        super(context);
         //tagsHandler = TBApplication.getApplication(context).getDataHandler().getTagsHandler();
+    }
+
+    @NonNull
+    @Override
+    public String getScheme() {
+        return ShortcutEntry.SCHEME;
     }
 
     @Override

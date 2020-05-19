@@ -30,11 +30,17 @@ public class LoadAppEntry extends LoadEntryItem<AppEntry> {
     //private final TagsHandler tagsHandler;
 
     public LoadAppEntry(Context context) {
-        super(context, "app://");
+        super(context);
         //tagsHandler = TBApplication.getApplication(context).getDataHandler().getTagsHandler();
     }
 
-//    static class PendingAppList {
+    @NonNull
+    @Override
+    public String getScheme() {
+        return AppEntry.SCHEME;
+    }
+
+    //    static class PendingAppList {
 //        final ArrayList<AppRecord> appRecords = new ArrayList<>();
 //        final ArrayList<UserHandle> userHandles = new ArrayList<>();
 //
@@ -147,7 +153,7 @@ public class LoadAppEntry extends LoadEntryItem<AppEntry> {
 
         rec.flags |= AppRecord.FLAG_VALIDATED;
 
-        String id = pojoScheme + componentName;
+        String id = getScheme() + componentName;
 //        boolean isExcluded = excludedAppList.contains(componentName);
 //        boolean isExcludedFromHistory = excludedFromHistoryAppList.contains(id);
         AppEntry app = new AppEntry(id, packageName, activityName, user);

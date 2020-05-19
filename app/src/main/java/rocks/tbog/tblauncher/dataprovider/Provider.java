@@ -52,7 +52,7 @@ public abstract class Provider<T extends EntryItem> extends Service implements I
         Log.i(TAG, "Starting provider: " + this.getClass().getSimpleName());
 
         loader.setProvider(this);
-        this.pojoScheme = loader.getPojoScheme();
+        this.pojoScheme = loader.getScheme();
         loader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
