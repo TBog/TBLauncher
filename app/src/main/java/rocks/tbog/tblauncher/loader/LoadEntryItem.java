@@ -14,7 +14,7 @@ import rocks.tbog.tblauncher.entry.EntryItem;
 public abstract class LoadEntryItem<T extends EntryItem> extends AsyncTask<Void, Void, ArrayList<T>> {
 
     final WeakReference<Context> context;
-    private WeakReference<Provider<T>> provider;
+    private WeakReference<Provider<T>> weakProvider;
 
     LoadEntryItem(Context context) {
         super();
@@ -22,7 +22,7 @@ public abstract class LoadEntryItem<T extends EntryItem> extends AsyncTask<Void,
     }
 
     public void setProvider(Provider<T> provider) {
-        this.provider = new WeakReference<>(provider);
+        this.weakProvider = new WeakReference<>(provider);
     }
 
     @NonNull
@@ -31,8 +31,9 @@ public abstract class LoadEntryItem<T extends EntryItem> extends AsyncTask<Void,
     @Override
     protected void onPostExecute(ArrayList<T> result) {
         super.onPostExecute(result);
+        Provider<T> provider = weakProvider.get();
         if(provider != null) {
-            provider.get().loadOver(result);
+            provider.loadOver(result);
         }
     }
 

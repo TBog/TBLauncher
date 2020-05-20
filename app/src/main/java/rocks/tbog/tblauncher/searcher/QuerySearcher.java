@@ -1,6 +1,9 @@
 package rocks.tbog.tblauncher.searcher;
 
+import android.content.Context;
 import android.content.SharedPreferences;
+
+import androidx.annotation.WorkerThread;
 import androidx.preference.PreferenceManager;
 
 import java.util.HashMap;
@@ -67,21 +70,23 @@ public class QuerySearcher extends Searcher {
     /**
      * Called on the background thread
      */
+    @WorkerThread
     @Override
     protected Void doInBackground(Void... voids) {
-        ISearchActivity activity = activityWeakReference.get();
-        if (activity == null)
+        ISearchActivity searchActivity = activityWeakReference.get();
+        Context context = searchActivity != null ? searchActivity.getContext() : null;
+        if (context == null)
             return null;
 
         // Have we ever made the same query and selected something ?
-        List<ValuedHistoryRecord> lastIdsForQuery = DBHelper.getPreviousResultsForQuery(activity.getContext(), trimmedQuery);
+        List<ValuedHistoryRecord> lastIdsForQuery = DBHelper.getPreviousResultsForQuery(context, trimmedQuery);
         knownIds = new HashMap<>();
         for (ValuedHistoryRecord id : lastIdsForQuery) {
             knownIds.put(id.record, id.value);
         }
 
         // Request results via "addResult"
-        TBApplication.getApplication(activity.getContext()).getDataHandler().requestResults(trimmedQuery, this);
+        TBApplication.getApplication(context).getDataHandler().requestResults(trimmedQuery, this);
         return null;
     }
 

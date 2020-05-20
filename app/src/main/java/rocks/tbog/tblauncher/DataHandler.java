@@ -13,14 +13,13 @@ import android.content.pm.ShortcutInfo;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
-
-import androidx.preference.PreferenceManager;
-
 import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
+import androidx.preference.PreferenceManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,6 +30,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import rocks.tbog.tblauncher.dataprovider.AppCacheProvider;
 import rocks.tbog.tblauncher.dataprovider.AppProvider;
 import rocks.tbog.tblauncher.dataprovider.ContactsProvider;
 import rocks.tbog.tblauncher.dataprovider.IProvider;
@@ -94,7 +94,7 @@ public class DataHandler extends BroadcastReceiver
         // Connect to initial providers
         // Those are the complex providers, that are defined as Android services
         // to survive even if the app's UI is killed
-        // (this way, we don't need to reload the app list everytime for instance)
+        // (this way, we don't need to reload the app list as often)
         for (String providerName : PROVIDER_NAMES) {
             if (prefs.getBoolean("enable-" + providerName, true)) {
                 this.connectToProvider(providerName, 0);
@@ -234,11 +234,15 @@ public class DataHandler extends BroadcastReceiver
         }
 
         final ProviderEntry entry = new ProviderEntry();
+        // Add empty provider object to list of providers
+        this.providers.put(name, entry);
 
         // Connect and bind to provider service
         this.context.bindService(intent, new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName className, IBinder service) {
+                Log.i(TAG, "onServiceConnected " + className);
+
                 // We've bound to LocalService, cast the IBinder and get LocalService instance
                 Provider.LocalBinder binder = (Provider.LocalBinder) service;
                 IProvider provider = binder.getService();
@@ -254,11 +258,9 @@ public class DataHandler extends BroadcastReceiver
 
             @Override
             public void onServiceDisconnected(ComponentName arg0) {
+                Log.i(TAG, "onServiceDisconnected " + arg0);
             }
         }, Context.BIND_AUTO_CREATE);
-
-        // Add empty provider object to list of providers
-        this.providers.put(name, entry);
     }
 
     /**
@@ -327,15 +329,22 @@ public class DataHandler extends BroadcastReceiver
      * @param query    query to run
      * @param searcher the searcher currently running
      */
+    @WorkerThread
     public void requestResults(String query, Searcher searcher) {
         currentQuery = query;
-        for (ProviderEntry entry : this.providers.values()) {
+        for (Map.Entry<String, ProviderEntry> setEntry : this.providers.entrySet()) {
             if (searcher.isCancelled())
                 break;
-            if (entry.provider == null)
-                continue;
+            IProvider provider = setEntry.getValue().provider;
+            if (provider == null || !provider.isLoaded()) {
+                // if the apps provider has not finished yet, return the cached ones
+                if ("app".equals(setEntry.getKey()))
+                    provider = new AppCacheProvider(context, getCachedApps());
+                else
+                    continue;
+            }
             // Retrieve results for query:
-            entry.provider.requestResults(query, searcher);
+            provider.requestResults(query, searcher);
         }
     }
 
@@ -666,7 +675,6 @@ public class DataHandler extends BroadcastReceiver
 
         String favApps = PreferenceManager.getDefaultSharedPreferences(this.context).
                 getString("favorite-apps-list", "");
-        assert favApps != null;
 
         List<String> favAppsList = Arrays.asList(favApps.split(";"));
         ArrayList<EntryItem> favorites = new ArrayList<>(favAppsList.size());
@@ -817,8 +825,7 @@ public class DataHandler extends BroadcastReceiver
         DBHelper.setCustomAppName(context, componentName, newName);
     }
 
-    public void removeRenameApp(String componentName, String defaultName)
-    {
+    public void removeRenameApp(String componentName, String defaultName) {
         DBHelper.removeCustomAppName(context, componentName, defaultName);
     }
 

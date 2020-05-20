@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import androidx.annotation.CallSuper;
+import androidx.annotation.WorkerThread;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -49,6 +50,7 @@ public abstract class Searcher extends AsyncTask<Void, Result, Void> {
     /**
      * This is called from the background thread by the providers
      */
+    @WorkerThread
     public boolean addResult(EntryItem... pojos) {
         if (isCancelled())
             return false;

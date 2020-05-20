@@ -1,5 +1,7 @@
 package rocks.tbog.tblauncher.dataprovider;
 
+import androidx.annotation.WorkerThread;
+
 import java.util.List;
 
 import rocks.tbog.tblauncher.entry.EntryItem;
@@ -16,6 +18,7 @@ public interface IProvider {
      * @param s        Some string query (usually provided by an user)
      * @param searcher The receiver of results
      */
+    @WorkerThread
     void requestResults(String s, Searcher searcher);
 
     /**
