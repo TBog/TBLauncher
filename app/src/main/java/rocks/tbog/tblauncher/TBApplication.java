@@ -51,8 +51,8 @@ public class TBApplication extends Application {
         return getApplication(context).mCustomizeUI;
     }
 
-    public static void onDestroyActivity(TBLauncherActivity tbLauncherActivity) {
-        TBApplication tbApplication = getApplication(tbLauncherActivity);
+    public static void onDestroyActivity(TBLauncherActivity activity) {
+        TBApplication tbApplication = getApplication(activity);
 
         // to make sure we don't keep any references to activity or it's views
         tbApplication.mBehaviour = new Behaviour();
@@ -89,6 +89,10 @@ public class TBApplication extends Application {
             Intent i = new Intent(TBLauncherActivity.FULL_LOAD_OVER);
             sendBroadcast(i);
         }
+    }
+
+    public static IconsHandler iconsHandler(Context ctx) {
+        return getApplication(ctx).getIconsHandler();
     }
 
     public IconsHandler getIconsHandler() {

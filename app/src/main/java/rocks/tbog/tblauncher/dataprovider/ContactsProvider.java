@@ -1,8 +1,10 @@
 package rocks.tbog.tblauncher.dataprovider;
 
 import android.database.ContentObserver;
+import android.provider.ContactsContract;
 import android.util.Log;
 
+import rocks.tbog.tblauncher.Permission;
 import rocks.tbog.tblauncher.entry.ContactEntry;
 import rocks.tbog.tblauncher.loader.LoadContactsEntry;
 import rocks.tbog.tblauncher.normalizer.PhoneNormalizer;
@@ -31,11 +33,19 @@ public class ContactsProvider extends Provider<ContactEntry> {
     @Override
     public void onCreate() {
         super.onCreate();
-        //TODO: enable this
         // register content observer if we have permission
-//        if(Permission.checkContactPermission(this)) {
-//            getContentResolver().registerContentObserver(ContactsContract.Contacts.CONTENT_URI, false, cObserver);
-//        }
+        if(Permission.checkPermission(this, Permission.PERMISSION_READ_CONTACTS)) {
+            getContentResolver().registerContentObserver(ContactsContract.Contacts.CONTENT_URI, false, cObserver);
+        } else {
+            Permission.askPermission(Permission.PERMISSION_READ_CONTACTS, new Permission.PermissionResultListener() {
+                @Override
+                public void onGranted() {
+                    // Great! Reload the contact provider. We're done :)
+                    reload();
+                }
+                //TODO: try to remove contacts provider onDenied
+            });
+        }
     }
 
     @Override

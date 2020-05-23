@@ -3,8 +3,11 @@ package rocks.tbog.tblauncher.entry;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.view.View;
 
+import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.db.DBHelper;
+import rocks.tbog.tblauncher.utils.FuzzyScore;
 
 public final class ShortcutEntry extends EntryWithTags {
 
@@ -44,5 +47,19 @@ public final class ShortcutEntry extends EntryWithTags {
         }
 
         return BitmapFactory.decodeByteArray(iconBlob, 0, iconBlob.length);
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    // Result methods
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    @Override
+    public int getResultLayout() {
+        return R.layout.item_app;
+    }
+
+    @Override
+    public void displayResult(Context context, View view, FuzzyScore score) {
+
     }
 }

@@ -88,5 +88,7 @@
     <string name="custom_icon_preview">Selection\npreview</string>
     <string name="custom_name_set_default">Default name</string>
     <string name="custom_name_rename">Rename</string>
+    <string name="ui_item_contact_hint_message">Message</string>
+    <string name="ui_item_contact_hint_call">Call</string>
 
 </resources>

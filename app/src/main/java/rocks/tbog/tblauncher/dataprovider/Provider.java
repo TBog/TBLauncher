@@ -7,6 +7,8 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -27,6 +29,7 @@ public abstract class Provider<T extends EntryItem> extends Service implements I
      */
     List<T> pojos = new ArrayList<>();
     private boolean loaded = false;
+    private LoadEntryItem<T> loader = null;
     /**
      * Scheme used to build ids for the pojos created by this provider
      */
@@ -46,12 +49,16 @@ public abstract class Provider<T extends EntryItem> extends Service implements I
     }
 
 
-    void initialize(LoadEntryItem<T> loader) {
+    void initialize(@NonNull LoadEntryItem<T> loader) {
         start = System.currentTimeMillis();
+
+        if (this.loader != null)
+            this.loader.cancel(true);
 
         Log.i(TAG, "Starting provider: " + this.getClass().getSimpleName());
 
         loader.setProvider(this);
+        this.loader = loader;
         this.pojoScheme = loader.getScheme();
         loader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
@@ -75,6 +82,7 @@ public abstract class Provider<T extends EntryItem> extends Service implements I
         // Store results
         this.pojos = results;
         this.loaded = true;
+        this.loader = null;
 
         // Broadcast this event
         Intent i = new Intent(TBLauncherActivity.LOAD_OVER);

@@ -16,9 +16,8 @@ import java.util.concurrent.Executors;
 
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.entry.EntryItem;
-import rocks.tbog.tblauncher.result.Result;
 
-public abstract class Searcher extends AsyncTask<Void, Result, Void> {
+public abstract class Searcher extends AsyncTask<Void, EntryItem, Void> {
     // define a different thread than the default AsyncTask thread or else we will block everything else that uses AsyncTask while we search
     public static final ExecutorService SEARCH_THREAD = Executors.newSingleThreadExecutor();
     static final int DEFAULT_MAX_RESULTS = 50;
@@ -97,9 +96,9 @@ public abstract class Searcher extends AsyncTask<Void, Result, Void> {
             activity.clearAdapter();
         } else {
             PriorityQueue<EntryItem> queue = this.processedPojos;
-            ArrayList<Result> results = new ArrayList<>(queue.size());
+            ArrayList<EntryItem> results = new ArrayList<>(queue.size());
             while (queue.peek() != null) {
-                results.add(Result.fromPojo(activity, queue.poll()));
+                results.add(queue.poll());
             }
 
             activity.updateAdapter(results, isRefresh, query);

@@ -39,13 +39,12 @@ public class LoadContactsEntry extends LoadEntryItem<ContactEntry> {
 
         ArrayList<ContactEntry> contacts = new ArrayList<>();
         Context c = context.get();
-        if(c == null) {
+        if (c == null) {
             return contacts;
         }
 
         // Skip if we don't have permission to list contacts yet:(
-        if(!Permission.checkContactPermission(c)) {
-            //Permission.askContactPermission(activity);
+        if (!Permission.checkPermission(c, Permission.PERMISSION_READ_CONTACTS)) {
             return contacts;
         }
 
@@ -103,13 +102,11 @@ public class LoadContactsEntry extends LoadEntryItem<ContactEntry> {
                     contact.setName(name);
 
                     if (name != null) {
-                        if (mapContacts.containsKey(contact.lookupKey))
-                            mapContacts.get(contact.lookupKey).add(contact);
-                        else {
-                            Set<ContactEntry> phones = new HashSet<>();
-                            phones.add(contact);
-                            mapContacts.put(contact.lookupKey, phones);
+                        Set<ContactEntry> phones = mapContacts.get(contact.lookupKey);
+                        if (phones == null) {
+                            mapContacts.put(contact.lookupKey, phones = new HashSet<>());
                         }
+                        phones.add(contact);
                     }
                 }
             }
@@ -134,21 +131,50 @@ public class LoadContactsEntry extends LoadEntryItem<ContactEntry> {
                     String lookupKey = nickCursor.getString(lookupKeyIndex);
                     String nick = nickCursor.getString(nickNameIndex);
 
-                    if (nick != null && lookupKey != null && mapContacts.containsKey(lookupKey)) {
-                        for (ContactEntry contact : mapContacts.get(lookupKey)) {
-                            contact.setNickname(nick);
-                        }
+                    if (nick != null && lookupKey != null) {
+                        Set<ContactEntry> phones = mapContacts.get(lookupKey);
+                        if (phones != null)
+                            for (ContactEntry contact : phones) {
+                                contact.setNickname(nick);
+                            }
                     }
                 }
             }
             nickCursor.close();
         }
 
+//        Cursor imCursor = context.get().getContentResolver().query(ContactsContract.Data.CONTENT_URI
+//                , new String[]{ContactsContract.Data.LOOKUP_KEY, ContactsContract.CommonDataKinds.Phone.NUMBER}
+//                , ContactsContract.Data.MIMETYPE + "= ? AND " + ContactsContract.RawContacts.ACCOUNT_TYPE + "= ?"
+//                , new String[]{
+//                        ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE,
+//                        "com.whatsapp"
+//                }
+//                , null);
+//
+//        if(imCursor != null) {
+//            int lookupIndex = imCursor.getColumnIndex(ContactsContract.Data.LOOKUP_KEY);
+//            int phoneIndex = imCursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER);
+//            while (imCursor.moveToNext()) {
+//                String lookupKey = imCursor.getString(lookupIndex);
+//                String phone = imCursor.getString(phoneIndex);
+//
+//                if (phone != null && lookupKey != null && mapContacts.containsKey(lookupKey)) {
+//                    for (ContactsPojo contact : mapContacts.get(lookupKey)) {
+//                        if(contact.phone.equals(phone)) {
+//                            contact.hasIM = true;
+//                        }
+//                    }
+//                }
+//            }
+//            imCursor.close();
+//        }
+
         for (Set<ContactEntry> phones : mapContacts.values()) {
             // Find primary phone and add this one.
-            Boolean hasPrimary = false;
+            boolean hasPrimary = false;
             for (ContactEntry contact : phones) {
-                if (contact.primary) {
+                if (contact.isPrimary()) {
                     contacts.add(contact);
                     hasPrimary = true;
                     break;
@@ -159,10 +185,8 @@ public class LoadContactsEntry extends LoadEntryItem<ContactEntry> {
             if (!hasPrimary) {
                 HashSet<String> added = new HashSet<>(phones.size());
                 for (ContactEntry contact : phones) {
-                    if (!added.contains(contact.normalizedPhone.toString())) {
-                        added.add(contact.normalizedPhone.toString());
+                    if (added.add(contact.normalizedPhone.toString()))
                         contacts.add(contact);
-                    }
                 }
             }
         }

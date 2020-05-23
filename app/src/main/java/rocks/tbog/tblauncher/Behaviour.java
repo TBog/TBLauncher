@@ -32,13 +32,14 @@ import androidx.preference.PreferenceManager;
 
 import java.util.ArrayList;
 
-import rocks.tbog.tblauncher.result.AppResult;
-import rocks.tbog.tblauncher.result.Result;
+import rocks.tbog.tblauncher.entry.AppEntry;
+import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.result.ResultAdapter;
 import rocks.tbog.tblauncher.searcher.ISearchActivity;
 import rocks.tbog.tblauncher.searcher.QuerySearcher;
 import rocks.tbog.tblauncher.ui.AnimatedListView;
 import rocks.tbog.tblauncher.ui.KeyboardScrollHider;
+import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.ui.LoadingDrawable;
 import rocks.tbog.tblauncher.utils.SystemUiVisibility;
 
@@ -92,7 +93,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 
     private void initResultLayout(ViewGroup resultLayout) {
         mResultLayout = resultLayout;
-        mResultAdapter = new ResultAdapter(mTBLauncherActivity, new ArrayList<>());
+        mResultAdapter = new ResultAdapter(new ArrayList<>());
         mResultList = resultLayout.findViewById(R.id.resultList);
         mResultList.setAdapter(mResultAdapter);
         mResultList.setOnItemClickListener((parent, view, position, id) -> mResultAdapter.onClick(position, view));
@@ -367,7 +368,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     @Override
-    public void updateAdapter(ArrayList<Result> results, boolean isRefresh, String query) {
+    public void updateAdapter(ArrayList<EntryItem> results, boolean isRefresh, String query) {
         if (isRefresh) {
             // We're refreshing an existing dataset, do not reset scroll!
             temporarilyDisableTranscriptMode();
@@ -383,7 +384,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     @Override
-    public void removeResult(Result result) {
+    public void removeResult(EntryItem result) {
         mResultAdapter.removeResult(result);
         // Do not reset scroll, we want the remaining items to still be in view
         temporarilyDisableTranscriptMode();
@@ -451,6 +452,11 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         }
     }
 
+    /**
+     * Call this function when we're leaving the activity after clicking a search result
+     * to clear the search list.
+     * We can't use onPause(), since it may be called for a configuration change
+     */
     public void onLaunchOccurred() {
         // We selected an item on the list, now we can cleanup the filter:
         if (!mSearchEditText.getText().toString().isEmpty()) {
@@ -492,7 +498,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         return false;
     }
 
-    public void launchCustomIconDialog(AppResult appResult) {
+    public void launchCustomIconDialog(AppEntry appEntry) {
         closeCustomIconDialog();
         // We assume the mResultLayout is visible
         mResultLayout.setVisibility(View.INVISIBLE);
@@ -502,8 +508,8 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         // set args
         {
             Bundle args = new Bundle();
-            args.putString("componentName", appResult.getUserComponentName());
-            args.putLong("customIcon", appResult.getCustomIcon());
+            args.putString("componentName", appEntry.getUserComponentName());
+            args.putLong("customIcon", appEntry.getCustomIcon());
             mCustomIconDialog.setArguments(args);
         }
         // OnDismiss: We assume the mResultLayout was visible
@@ -511,9 +517,9 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 
         mCustomIconDialog.setOnConfirmListener(drawable -> {
             if (drawable == null)
-                TBApplication.getApplication(mTBLauncherActivity).getIconsHandler().restoreAppIcon(appResult);
+                TBApplication.getApplication(mTBLauncherActivity).getIconsHandler().restoreAppIcon(appEntry);
             else
-                TBApplication.getApplication(mTBLauncherActivity).getIconsHandler().changeAppIcon(appResult, drawable);
+                TBApplication.getApplication(mTBLauncherActivity).getIconsHandler().changeAppIcon(appEntry, drawable);
             // force a result refresh to update the icon in the view
             //TODO: find a better way to update the result icon
             updateSearchRecords();
@@ -528,5 +534,9 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     private void closeCustomIconDialog() {
         if (mCustomIconDialog != null && mCustomIconDialog.isVisible())
             mCustomIconDialog.dismiss();
+    }
+
+    public void registerPopup(ListPopup menu) {
+        mTBLauncherActivity.registerPopup(menu);
     }
 }

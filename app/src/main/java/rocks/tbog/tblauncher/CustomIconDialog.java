@@ -194,7 +194,7 @@ public class CustomIconDialog extends DialogFragment {
             ((TextView) quickList.findViewById(android.R.id.text1)).setText(R.string.default_icon);
         }
 
-        IconPack iconPack = iconsHandler.getCurrentIconPack();
+        IconPack iconPack = iconsHandler.getCustomIconPack();
         //IIconPack systemIconPack = iconsHandler.getSystemIconPack();
 
         // add getActivityIcon(componentName)
@@ -294,7 +294,7 @@ public class CustomIconDialog extends DialogFragment {
     private void refreshList() {
         mIconData.clear();
         IconsHandler iconsHandler = TBApplication.getApplication(getActivity()).getIconsHandler();
-        IconPack iconPack = iconsHandler.getCurrentIconPack();
+        IconPack iconPack = iconsHandler.getCustomIconPack();
         if (iconPack instanceof IconPackXML) {
             Collection<IconPackXML.DrawableInfo> drawables = ((IconPackXML) iconPack).getDrawableList();
             if (drawables != null) {

@@ -6,7 +6,7 @@ import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
 
-import rocks.tbog.tblauncher.result.Result;
+import rocks.tbog.tblauncher.entry.EntryItem;
 
 public interface ISearchActivity {
     void displayLoader(boolean b);
@@ -27,10 +27,10 @@ public interface ISearchActivity {
     /**
      * Called when searcher found results
      */
-    void updateAdapter(ArrayList<Result> results, boolean isRefresh, String query);
+    void updateAdapter(ArrayList<EntryItem> results, boolean isRefresh, String query);
 
     /**
      * Called when user removed/hidden app
      */
-    void removeResult(Result result);
+    void removeResult(EntryItem result);
 }

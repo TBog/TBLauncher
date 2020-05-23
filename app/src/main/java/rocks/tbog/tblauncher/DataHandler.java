@@ -62,6 +62,7 @@ public class DataHandler extends BroadcastReceiver
             //TODO: enable providers when ready
 //            "app", "contacts", "shortcuts"
             "app"
+            , "contacts"
     );
     //private TagsHandler tagsHandler;
     final private Context context;

@@ -21,14 +21,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.preference.PreferenceManager;
 
-import rocks.tbog.tblauncher.result.IResultList;
 import rocks.tbog.tblauncher.ui.BlockableListView;
 import rocks.tbog.tblauncher.ui.BottomPullEffectView;
 import rocks.tbog.tblauncher.ui.KeyboardScrollHider;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.DeviceUtils;
 
-public class TBLauncherActivity extends AppCompatActivity implements IResultList, ActivityCompat.OnRequestPermissionsResultCallback {
+public class TBLauncherActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback {
 
     /**
      * Whether or not the system UI should be auto-hidden after
@@ -62,6 +61,8 @@ public class TBLauncherActivity extends AppCompatActivity implements IResultList
      */
     private BroadcastReceiver mReceiver;
 
+    private Permission permissionManager;
+
 //    @Override
 //    public void onAttachedToWindow() {
 //        super.onAttachedToWindow();
@@ -94,6 +95,11 @@ public class TBLauncherActivity extends AppCompatActivity implements IResultList
          */
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
         //prefs = PreferenceManager.getDefaultSharedPreferences(this);
+
+        /*
+         * Permission Manager
+         */
+        permissionManager = new Permission(this);
 
         /*
          * Initialize data handler and start loading providers
@@ -188,16 +194,16 @@ public class TBLauncherActivity extends AppCompatActivity implements IResultList
             return true;
         switch (item.getItemId()) {
             case R.id.settings:
-                launchOccurred();
+                TBApplication.behaviour(this).onLaunchOccurred();
                 startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS));
                 return true;
             case R.id.wallpaper:
-                launchOccurred();
+                TBApplication.behaviour(this).onLaunchOccurred();
                 Intent intent = new Intent(Intent.ACTION_SET_WALLPAPER);
                 startActivity(Intent.createChooser(intent, getString(R.string.menu_wallpaper)));
                 return true;
             case R.id.preferences:
-                launchOccurred();
+                TBApplication.behaviour(this).onLaunchOccurred();
                 startActivity(new Intent(this, SettingsActivity.class));
                 return true;
         }
@@ -214,11 +220,6 @@ public class TBLauncherActivity extends AppCompatActivity implements IResultList
         super.onPostCreate(savedInstanceState);
 
         TBApplication.behaviour(this).onPostCreate();
-
-        if (!Permission.checkContactPermission(this)) {
-            Permission.askContactPermission(this);
-        }
-
     }
 
     @Override
@@ -241,17 +242,6 @@ public class TBLauncherActivity extends AppCompatActivity implements IResultList
 //        mHideHandler.postDelayed(mHideRunnable, delayMillis);
 //    }
 
-    /**
-     * Call this function when we're leaving the activity after clicking a search result
-     * to clear the search list.
-     * We can't use onPause(), since it may be called for a configuration change
-     */
-    @Override
-    public void launchOccurred() {
-        TBApplication.behaviour(this).onLaunchOccurred();
-    }
-
-    @Override
     public void registerPopup(ListPopup popup) {
         if (mPopup == popup)
             return;
@@ -262,7 +252,6 @@ public class TBLauncherActivity extends AppCompatActivity implements IResultList
         mHider.fixScroll();
     }
 
-    @Override
     public boolean dismissPopup() {
         if (mPopup != null) {
             mPopup.dismiss();
@@ -274,7 +263,7 @@ public class TBLauncherActivity extends AppCompatActivity implements IResultList
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        Permission.onRequestPermissionsResult(this, requestCode, permissions, grantResults);
+        permissionManager.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     @Override
