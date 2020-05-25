@@ -108,6 +108,8 @@ public final class AppEntry extends EntryWithTags {
             Drawable drawable = iconsHandler.getCustomIcon(getUserComponentName(), customIcon);
             if (drawable != null)
                 return drawable;
+            else
+                iconsHandler.restoreAppIcon(this);
         }
         return iconsHandler.getDrawableIconForPackage(componentName, userHandle);
     }

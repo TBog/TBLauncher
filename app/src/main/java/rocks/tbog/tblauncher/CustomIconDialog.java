@@ -208,9 +208,11 @@ public class CustomIconDialog extends DialogFragment {
                 if (checkDuplicateDrawable(dSet, drawable)) {
                     addQuickOption(R.string.custom_icon_activity, drawable, quickList);
                     if (iconPack != null)
-                        addQuickOption(R.string.custom_icon_activity_with_pack, iconPack.applyBackgroundAndMask(context, drawable), quickList);
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                        addQuickOption(R.string.custom_icon_activity_adaptive, DrawableUtils.applyIconMaskShape(context, drawable), quickList);
+                        addQuickOption(R.string.custom_icon_activity_with_pack, iconPack.applyBackgroundAndMask(context, drawable, true), quickList);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        addQuickOption(R.string.custom_icon_activity_adaptive, DrawableUtils.applyIconMaskShape(context, drawable, true), quickList);
+                        addQuickOption(R.string.custom_icon_activity_adaptive_fill, DrawableUtils.applyIconMaskShape(context, drawable, false), quickList);
+                    }
                 }
             }
         }
@@ -226,9 +228,11 @@ public class CustomIconDialog extends DialogFragment {
                 if (checkDuplicateDrawable(dSet, drawable)) {
                     addQuickOption(R.string.custom_icon_application, drawable, quickList);
                     if (iconPack != null)
-                        addQuickOption(R.string.custom_icon_application_with_pack, iconPack.applyBackgroundAndMask(context, drawable), quickList);
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                        addQuickOption(R.string.custom_icon_application_adaptive, DrawableUtils.applyIconMaskShape(context, drawable), quickList);
+                        addQuickOption(R.string.custom_icon_application_with_pack, iconPack.applyBackgroundAndMask(context, drawable, true), quickList);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        addQuickOption(R.string.custom_icon_application_adaptive, DrawableUtils.applyIconMaskShape(context, drawable, true), quickList);
+                        addQuickOption(R.string.custom_icon_application_adaptive_fill, DrawableUtils.applyIconMaskShape(context, drawable, false), quickList);
+                    }
                 }
             }
         }
@@ -236,6 +240,7 @@ public class CustomIconDialog extends DialogFragment {
         // add Activity BadgedIcon
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             LauncherApps launcher = (LauncherApps) context.getSystemService(Context.LAUNCHER_APPS_SERVICE);
+            assert launcher != null;
             List<LauncherActivityInfo> icons = launcher.getActivityList(cn.getPackageName(), userHandle.getRealHandle());
             for (LauncherActivityInfo info : icons) {
                 Drawable drawable = info.getBadgedIcon(0);
@@ -244,9 +249,11 @@ public class CustomIconDialog extends DialogFragment {
                     if (checkDuplicateDrawable(dSet, drawable)) {
                         addQuickOption(R.string.custom_icon_badged, drawable, quickList);
                         if (iconPack != null)
-                            addQuickOption(R.string.custom_icon_badged_with_pack, iconPack.applyBackgroundAndMask(context, drawable), quickList);
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
-                            addQuickOption(R.string.custom_icon_badged_adaptive, DrawableUtils.applyIconMaskShape(context, drawable), quickList);
+                            addQuickOption(R.string.custom_icon_badged_with_pack, iconPack.applyBackgroundAndMask(context, drawable, true), quickList);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            addQuickOption(R.string.custom_icon_badged_adaptive, DrawableUtils.applyIconMaskShape(context, drawable, true), quickList);
+                            addQuickOption(R.string.custom_icon_badged_adaptive_fill, DrawableUtils.applyIconMaskShape(context, drawable, false), quickList);
+                        }
                     }
                 }
             }

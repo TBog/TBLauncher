@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.PorterDuff;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.preference.PreferenceManager;
@@ -21,6 +22,7 @@ import java.io.InputStream;
 import rocks.tbog.tblauncher.BuildConfig;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
+import rocks.tbog.tblauncher.icons.IconPack;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.result.ResultHelper;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
@@ -200,9 +202,10 @@ public final class ContactEntry extends EntryItem {
             if (drawable == null) {
                 drawable = ContextCompat.getDrawable(ctx, R.drawable.ic_contact);
                 if (drawable == null)
-                    return null;
+                    drawable = new ColorDrawable(UIColors.getPrimaryColor(ctx));
             }
-            return TBApplication.iconsHandler(ctx).getIconPack().applyBackgroundAndMask(ctx, drawable);
+            IconPack iconPack = TBApplication.iconsHandler(ctx).getIconPack();
+            return iconPack.applyBackgroundAndMask(ctx, drawable, false);
         }
     }
 

@@ -12,11 +12,11 @@ import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
 import androidx.preference.PreferenceManager;
 
 import java.io.File;
@@ -47,7 +47,6 @@ public class IconsHandler {
     private IconPackXML mIconPack = null;
     private SystemIconPack mSystemPack = new SystemIconPack();
 
-
     public IconsHandler(Context ctx) {
         super();
         this.ctx = ctx;
@@ -63,7 +62,8 @@ public class IconsHandler {
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
         loadIconsPack(prefs.getString("icons-pack", "default"));
-
+        String shape = prefs.getString("adaptive-shape", String.valueOf(DrawableUtils.SHAPE_SYSTEM));
+        mSystemPack.setShape(Integer.parseInt(shape));
     }
 
     /**
@@ -86,17 +86,29 @@ public class IconsHandler {
         mIconPack.load(ctx.getPackageManager());
     }
 
+
+    void setAdaptiveShape(@Nullable String shapePref) {
+        int shape;
+        try {
+            shape = Integer.parseInt(shapePref);
+        } catch (Exception ignored)
+        {
+            shape = DrawableUtils.SHAPE_SYSTEM;
+        }
+        mSystemPack.setShape(shape);
+    }
+
     /**
      * Get or generate icon for an app
      */
+    @WorkerThread
     public Drawable getDrawableIconForPackage(ComponentName componentName, UserHandleCompat userHandle) {
         // system icons, nothing to do
         if (mIconPack == null) {
             Drawable drawable = mSystemPack.getComponentDrawable(ctx, componentName, userHandle);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                return DrawableUtils.applyIconMaskShape(ctx, drawable);
-            }
-            return drawable;
+            if (drawable == null)
+                return null;
+            return mSystemPack.applyBackgroundAndMask(ctx, drawable, true);
         }
 
         String componentString = componentName.toString();
@@ -119,9 +131,10 @@ public class IconsHandler {
         Drawable systemIcon = mSystemPack.getComponentDrawable(ctx, componentName, userHandle);
         if (systemIcon == null)
             return null;
-        BitmapDrawable generated = mIconPack.applyBackgroundAndMask(ctx, systemIcon);
-        storeDrawable(cacheGetFileName(componentName.toString()), generated);
-        return generated;
+        Drawable drawable = mIconPack.applyBackgroundAndMask(ctx, systemIcon, true);
+        if (drawable instanceof BitmapDrawable)
+            storeDrawable(cacheGetFileName(componentName.toString()), drawable);
+        return drawable;
     }
 
     /**
@@ -270,14 +283,15 @@ public class IconsHandler {
     }
 
     public Drawable getCustomIcon(String componentName, long customIcon) {
+        File file = customIconFileName(componentName, customIcon);
         try {
-            FileInputStream fis = new FileInputStream(customIconFileName(componentName, customIcon));
+            FileInputStream fis = new FileInputStream(file);
             BitmapDrawable drawable =
                     new BitmapDrawable(this.ctx.getResources(), BitmapFactory.decodeStream(fis));
             fis.close();
             return drawable;
         } catch (Exception e) {
-            Log.e(TAG, "Unable to get custom icon " + e);
+            Log.e(TAG, "Unable to get custom icon " + file, e);
         }
 
         return null;
@@ -294,4 +308,5 @@ public class IconsHandler {
         removeStoredDrawable(customIconFileName(appRecord.componentName, appRecord.dbId));
         appEntry.clearCustomIcon();
     }
+
 }

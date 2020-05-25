@@ -312,6 +312,8 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     @Override
     public void displayLoader(boolean display) {
 //        int animationDuration = mTBLauncherActivity.getResources().getInteger(android.R.integer.config_longAnimTime);
+        if (mLauncherButton == null)
+            return;
 
         Drawable loadingDrawable = mLauncherButton.getDrawable();
         if (loadingDrawable instanceof Animatable) {
@@ -417,7 +419,8 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     public void updateSearchRecords() {
-        updateSearchRecords(true, mSearchEditText.getText().toString());
+        if (mSearchEditText != null)
+            updateSearchRecords(true, mSearchEditText.getText().toString());
     }
 
     /**

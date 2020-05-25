@@ -10,8 +10,10 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
+import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.util.ArrayMap;
 import android.util.Log;
 
@@ -28,6 +30,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 
+import rocks.tbog.tblauncher.utils.DrawableUtils;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
 
@@ -126,7 +129,12 @@ public class IconPackXML implements IconPack<IconPackXML.DrawableInfo> {
 
     @NonNull
     @Override
-    public BitmapDrawable applyBackgroundAndMask(@NonNull Context ctx, @NonNull Drawable systemIcon) {
+    public Drawable applyBackgroundAndMask(@NonNull Context ctx, @NonNull Drawable systemIcon, boolean fitInside) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            if(systemIcon instanceof AdaptiveIconDrawable)
+                return DrawableUtils.applyIconMaskShape(ctx, systemIcon, fitInside);
+        }
+
         if (systemIcon instanceof BitmapDrawable) {
             return generateBitmap((BitmapDrawable) systemIcon);
         }
