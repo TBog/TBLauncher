@@ -167,6 +167,7 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
         }
 
         TBApplication.ui(this).onResume();
+        TBApplication.behaviour(this).onResume();
     }
 
 

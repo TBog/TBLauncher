@@ -157,7 +157,7 @@ public final class ContactEntry extends EntryItem {
 
             messageButton.setOnClickListener(v -> {
                 ResultHelper.recordLaunch(this, context);
-                ResultHelper.launchMessaging(this, v.getContext());
+                ResultHelper.launchMessaging(this, v);
             });
 
             if (homeNumber)

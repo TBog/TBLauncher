@@ -41,6 +41,7 @@ import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
+import rocks.tbog.tblauncher.utils.Utilities;
 
 public final class AppEntry extends EntryWithTags {
 
@@ -279,40 +280,37 @@ public final class AppEntry extends EntryWithTags {
     public void doLaunch(@NonNull View v) {
         Context context = v.getContext();
         try {
-            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 LauncherApps launcher = (LauncherApps) context.getSystemService(Context.LAUNCHER_APPS_SERVICE);
                 assert launcher != null;
-                Rect sourceBounds = null;
+                View potentialIcon = null;
                 Bundle opts = null;
 
-                if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    // We're on a modern Android and can display activity animations
-                    // If AppResult, find the icon
-                    View potentialIcon = v.findViewById(R.id.item_app_icon);
-                    if (potentialIcon == null) {
-                        // If favorite, find the icon
-                        potentialIcon = v.findViewById(R.id.favorite);
-                    }
+                // We're on a modern Android and can display activity animations
+                // If AppResult, find the icon
+                potentialIcon = v.findViewById(R.id.item_app_icon);
+                if (potentialIcon == null) {
+                    // If favorite, find the icon
+                    potentialIcon = v.findViewById(R.id.favorite);
+                }
 
-                    if (potentialIcon != null) {
-                        sourceBounds = getViewBounds(potentialIcon);
-
-                        // If we got an icon, we create options to get a nice animation
+                if (potentialIcon != null) {
+                    // If we got an icon, we create options to get a nice animation
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                         opts = ActivityOptions.makeClipRevealAnimation(potentialIcon, 0, 0, potentialIcon.getMeasuredWidth(), potentialIcon.getMeasuredHeight()).toBundle();
                     }
                 }
+                if (opts == null && potentialIcon != null)
+                    ActivityOptions.makeScaleUpAnimation(potentialIcon, 0, 0, potentialIcon.getMeasuredWidth(), potentialIcon.getMeasuredHeight());
 
+                Rect sourceBounds = Utilities.getOnScreenRect(potentialIcon);
                 launcher.startMainActivity(componentName, getRealHandle(), sourceBounds, opts);
             } else {
                 Intent intent = new Intent(Intent.ACTION_MAIN);
                 intent.addCategory(Intent.CATEGORY_LAUNCHER);
                 intent.setComponent(componentName);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
-
-                if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-                    intent.setSourceBounds(getViewBounds(v));
-                }
-
+                Utilities.setIntentSourceBounds(intent, v);
                 context.startActivity(intent);
             }
         } catch (ActivityNotFoundException | NullPointerException | SecurityException e) {
@@ -417,16 +415,6 @@ public final class AppEntry extends EntryWithTags {
         Intent intent = new Intent(Intent.ACTION_DELETE,
                 Uri.fromParts("package", getPackageName(), null));
         context.startActivity(intent);
-    }
-
-    private Rect getViewBounds(@NonNull View v) {
-//        if (v == null) {
-//            return null;
-//        }
-
-        int[] l = new int[2];
-        v.getLocationOnScreen(l);
-        return new Rect(l[0], l[1], l[0] + v.getWidth(), l[1] + v.getHeight());
     }
 
     private static class AsyncSetEntryIcon extends ResultViewHelper.AsyncSetEntryDrawable {

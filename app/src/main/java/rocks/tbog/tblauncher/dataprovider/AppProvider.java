@@ -49,6 +49,7 @@ public class AppProvider extends Provider<AppEntry> {
             }
         }
     };
+    final PackageAddedRemovedHandler mPackageAddedRemovedHandler = new PackageAddedRemovedHandler();
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     static class AppsCallback extends LauncherApps.Callback {
@@ -147,7 +148,7 @@ public class AppProvider extends Provider<AppEntry> {
         appChangedFilter.addAction(Intent.ACTION_MEDIA_REMOVED);
         appChangedFilter.addDataScheme("package");
         appChangedFilter.addDataScheme("file");
-        this.registerReceiver(new PackageAddedRemovedHandler(), appChangedFilter);
+        this.registerReceiver(mPackageAddedRemovedHandler, appChangedFilter);
 
         super.onCreate();
     }
@@ -155,6 +156,7 @@ public class AppProvider extends Provider<AppEntry> {
     @Override
     public void onDestroy() {
         unregisterReceiver(mProfileReceiver);
+        unregisterReceiver(mPackageAddedRemovedHandler);
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
             LauncherApps launcher = (LauncherApps) this.getSystemService(Context.LAUNCHER_APPS_SERVICE);
             assert launcher != null;

@@ -1,5 +1,6 @@
 package rocks.tbog.tblauncher;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.PorterDuff;
@@ -25,7 +26,7 @@ import rocks.tbog.tblauncher.utils.UIColors;
 
 public class CustomizeUI {
     private TBLauncherActivity mTBLauncherActivity;
-    private SharedPreferences mPref;
+    private SharedPreferences mPref = null;
     private ImageView mNotificationBackground;
     private ViewGroup mSearchBarContainer;
     private SearchEditText mSearchBar;
@@ -148,5 +149,9 @@ public class CustomizeUI {
         }
         //drawable.setColorFilter(new PorterDuffColorFilter(UIColors.setAlpha(color, alpha), PorterDuff.Mode.MULTIPLY));
         mResultLayout.setBackground(drawable);
+    }
+
+    public Context getContext() {
+        return mTBLauncherActivity;
     }
 }

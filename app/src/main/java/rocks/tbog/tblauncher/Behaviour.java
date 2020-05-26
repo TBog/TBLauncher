@@ -431,7 +431,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
      * @param isRefresh whether the query is refreshing the existing result, or is a completely new query
      * @param query     the query on which to search
      */
-    private void updateSearchRecords(boolean isRefresh, String query) {
+    private void updateSearchRecords(boolean isRefresh, @NonNull String query) {
 //        if (isRefresh && isViewingAllApps()) {
 //            // Refreshing while viewing all apps (for instance app installed or uninstalled in the background)
 //            Searcher searcher = new ApplicationsSearcher(this);
@@ -541,5 +541,18 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 
     public void registerPopup(ListPopup menu) {
         mTBLauncherActivity.registerPopup(menu);
+    }
+
+    public void onResume() {
+        if (mSearchEditText.getText().length() > 0) {
+            showSearchBar();
+            showKeyboard();
+            mSearchEditText.postDelayed(this::showKeyboard, UI_ANIMATION_DELAY);
+        }
+        else
+        {
+            hideKeyboard();
+            hideSearchBar();
+        }
     }
 }

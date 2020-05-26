@@ -18,6 +18,7 @@ import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.db.DBHelper;
 import rocks.tbog.tblauncher.entry.ContactEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
+import rocks.tbog.tblauncher.utils.Utilities;
 
 public class ResultHelper {
     private ResultHelper() {
@@ -81,21 +82,25 @@ public class ResultHelper {
         Toast.makeText(context, String.format(msg, pojo.getName()), Toast.LENGTH_SHORT).show();
     }
 
-    public static void launchMessaging(ContactEntry contactPojo, Context context) {
+    public static void launchMessaging(ContactEntry contactPojo, View v) {
+        Context context = v.getContext();
+        TBApplication.behaviour(context).onLaunchOccurred();
+
         String url = "sms:" + Uri.encode(contactPojo.phone);
         Intent i = new Intent(Intent.ACTION_SENDTO, Uri.parse(url));
+        Utilities.setIntentSourceBounds(i, v);
         i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(i);
     }
 
     public static void launchContactView(ContactEntry contactPojo, Context context, View v) {
+        TBApplication.behaviour(context).onLaunchOccurred();
+
         Intent action = new Intent(Intent.ACTION_VIEW);
 
         action.setData(Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI,
                 String.valueOf(contactPojo.lookupKey)));
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-            action.setSourceBounds(v.getClipBounds());
-        }
+        Utilities.setIntentSourceBounds(action, v);
 
         action.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         action.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
@@ -103,14 +108,13 @@ public class ResultHelper {
     }
 
     public static void launchCall(Context context, View v, String phone) {
+        TBApplication.behaviour(context).onLaunchOccurred();
+
         Intent phoneIntent = new Intent(Intent.ACTION_CALL);
         phoneIntent.setData(Uri.parse("tel:" + Uri.encode(phone)));
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
-            phoneIntent.setSourceBounds(v.getClipBounds());
-        }
+        Utilities.setIntentSourceBounds(phoneIntent, v);
 
         phoneIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-
 
         // Make sure we have permission to call someone as this is considered a dangerous permission
         if (!Permission.checkPermission(context, Permission.PERMISSION_CALL_PHONE)) {

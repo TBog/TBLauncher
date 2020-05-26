@@ -2,12 +2,15 @@ package rocks.tbog.tblauncher.utils;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.view.View;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
@@ -21,6 +24,8 @@ import rocks.tbog.tblauncher.ui.CutoutFactory;
 import rocks.tbog.tblauncher.ui.ICutout;
 
 public class Utilities {
+    private final static int[] ON_SCREEN_POS = new int[2];
+    private final static Rect ON_SCREEN_RECT = new Rect();
 
     // https://stackoverflow.com/questions/3035692/how-to-convert-a-drawable-to-a-bitmap
     @NonNull
@@ -68,6 +73,24 @@ public class Utilities {
                 return callback.getDrawable(context);
             }
         }.execute();
+    }
+
+    public static void setIntentSourceBounds(@NonNull Intent intent, @NonNull View v) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
+            v.getLocationOnScreen(ON_SCREEN_POS);
+            ON_SCREEN_RECT.set(ON_SCREEN_POS[0], ON_SCREEN_POS[1], ON_SCREEN_POS[0] + v.getWidth(), ON_SCREEN_POS[1] + v.getHeight());
+            intent.setSourceBounds(ON_SCREEN_RECT);
+        }
+    }
+
+    @Nullable
+    public static Rect getOnScreenRect(@Nullable View v)
+    {
+        if (v == null)
+            return null;
+        v.getLocationOnScreen(ON_SCREEN_POS);
+        ON_SCREEN_RECT.set(ON_SCREEN_POS[0], ON_SCREEN_POS[1], ON_SCREEN_POS[0] + v.getWidth(), ON_SCREEN_POS[1] + v.getHeight());
+        return ON_SCREEN_RECT;
     }
 
     public interface GetDrawable {

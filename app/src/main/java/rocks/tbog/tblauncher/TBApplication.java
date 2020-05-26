@@ -55,8 +55,10 @@ public class TBApplication extends Application {
         TBApplication tbApplication = getApplication(activity);
 
         // to make sure we don't keep any references to activity or it's views
-        tbApplication.mBehaviour = new Behaviour();
-        tbApplication.mCustomizeUI = new CustomizeUI();
+        if (tbApplication.mBehaviour.getContext() == activity)
+            tbApplication.mBehaviour = new Behaviour();
+        if (tbApplication.mCustomizeUI.getContext() == activity)
+            tbApplication.mCustomizeUI = new CustomizeUI();
     }
 
     public static void runTask(Context context, Searcher task) {
