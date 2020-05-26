@@ -45,6 +45,7 @@ import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.utils.DrawableUtils;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
+import rocks.tbog.tblauncher.utils.Utilities;
 
 public class CustomIconDialog extends DialogFragment {
     private List<IconData> mIconData = new ArrayList<>();
@@ -152,10 +153,16 @@ public class CustomIconDialog extends DialogFragment {
         // Preview
         {
             mPreview = view.findViewById(R.id.preview);
-            Drawable drawable = customIcon != 0 ? iconsHandler.getCustomIcon(name, customIcon) : null;
-            if (drawable == null)
-                drawable = iconsHandler.getDrawableIconForPackage(cn, userHandle);
-            mPreview.setImageDrawable(drawable);
+//            Drawable drawable = customIcon != 0 ? iconsHandler.getCustomIcon(name, customIcon) : null;
+//            if (drawable == null)
+//                drawable = iconsHandler.getDrawableIconForPackage(cn, userHandle);
+//            mPreview.setImageDrawable(drawable);
+            Utilities.setIconAsync(mPreview, ctx -> {
+                Drawable drawable = customIcon != 0 ? iconsHandler.getCustomIcon(name, customIcon) : null;
+                if (drawable == null)
+                    drawable = iconsHandler.getDrawableIconForPackage(cn, userHandle);
+                return drawable;
+            });
         }
 
         // OK button
@@ -175,6 +182,11 @@ public class CustomIconDialog extends DialogFragment {
             button.setOnClickListener(v -> dismiss());
         }
 
+        setQuickList(iconsHandler, view, cn, userHandle);
+    }
+
+    private void setQuickList(IconsHandler iconsHandler, View view, ComponentName cn, UserHandleCompat userHandle) {
+        Context context = view.getContext();
         ViewGroup quickList = view.findViewById(R.id.quickList);
 
         ArraySet<Bitmap> dSet = new ArraySet<>(3);
@@ -221,7 +233,7 @@ public class CustomIconDialog extends DialogFragment {
         {
             Drawable drawable = null;
             try {
-                drawable = context.getPackageManager().getApplicationIcon(UserHandleCompat.getPackageName(name));
+                drawable = context.getPackageManager().getApplicationIcon(cn.getPackageName());
             } catch (PackageManager.NameNotFoundException ignored) {
             }
             if (drawable != null) {

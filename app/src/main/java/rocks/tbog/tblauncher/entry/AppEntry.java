@@ -161,7 +161,7 @@ public final class AppEntry extends EntryWithTags {
 
         final ImageView appIcon = view.findViewById(R.id.item_app_icon);
         if (!prefs.getBoolean("icons-hide", false)) {
-            ResultViewHelper.setIconAsync(this, new AsyncSetIcon(appIcon));
+            ResultViewHelper.setIconAsync(this, new AsyncSetEntryIcon(appIcon));
         } else {
             appIcon.setImageDrawable(null);
         }
@@ -429,8 +429,8 @@ public final class AppEntry extends EntryWithTags {
         return new Rect(l[0], l[1], l[0] + v.getWidth(), l[1] + v.getHeight());
     }
 
-    private static class AsyncSetIcon extends ResultViewHelper.AsyncSetDrawable {
-        AsyncSetIcon(ImageView image) {
+    private static class AsyncSetEntryIcon extends ResultViewHelper.AsyncSetEntryDrawable {
+        AsyncSetEntryIcon(ImageView image) {
             super(image);
         }
 

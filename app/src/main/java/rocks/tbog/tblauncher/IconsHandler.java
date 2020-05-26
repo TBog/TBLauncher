@@ -8,10 +8,14 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
+import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Path;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -91,8 +95,7 @@ public class IconsHandler {
         int shape;
         try {
             shape = Integer.parseInt(shapePref);
-        } catch (Exception ignored)
-        {
+        } catch (Exception ignored) {
             shape = DrawableUtils.SHAPE_SYSTEM;
         }
         mSystemPack.setShape(shape);
@@ -309,4 +312,25 @@ public class IconsHandler {
         appEntry.clearCustomIcon();
     }
 
+    public Drawable applyContactMask(@NonNull Context ctx, @NonNull Drawable drawable) {
+        if (mIconPack.hasMask()) {
+            return mIconPack.applyBackgroundAndMask(ctx, drawable, false);
+        }
+        Drawable output = mSystemPack.applyBackgroundAndMask(ctx, drawable, false);
+
+        // if nothing changed then make it a circle
+        if (output == drawable) {
+            int size = ctx.getResources().getDimensionPixelSize(R.dimen.icon_height);
+            Bitmap b = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+            Canvas c = new Canvas(b);
+            Path path = new Path();
+            int h = size / 2;
+            path.addCircle(h, h, h, Path.Direction.CCW);
+            c.clipPath(path);
+            drawable.setBounds(0, 0, c.getWidth(), c.getHeight());
+            drawable.draw(c);
+            output = new BitmapDrawable(ctx.getResources(), b);
+        }
+        return output;
+    }
 }

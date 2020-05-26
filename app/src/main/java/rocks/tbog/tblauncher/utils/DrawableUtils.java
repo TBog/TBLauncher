@@ -124,7 +124,7 @@ public class DrawableUtils {
                 iconOffset = Math.round(marginPercent * icon.getIntrinsicHeight());
             } else {
                 // we don't have antialiasing when clipping so we make the icon bigger and let the View downscale
-                iconSize = 2 * ctx.getResources().getDimensionPixelSize(R.dimen.icon_height);
+                    iconSize = 2 * ctx.getResources().getDimensionPixelSize(R.dimen.icon_height);
             }
 
             outputBitmap = Bitmap.createBitmap(iconSize, iconSize, Bitmap.Config.ARGB_8888);

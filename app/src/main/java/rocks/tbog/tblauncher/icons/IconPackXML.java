@@ -80,6 +80,11 @@ public class IconPackXML implements IconPack<IconPackXML.DrawableInfo> {
         loaded = true;
     }
 
+    public boolean hasMask()
+    {
+        return maskImage != null;
+    }
+
     @Override
     public Collection<DrawableInfo> getDrawableList() {
         return Collections.unmodifiableCollection(drawableList);

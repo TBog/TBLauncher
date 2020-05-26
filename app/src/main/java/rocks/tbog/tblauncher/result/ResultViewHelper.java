@@ -17,7 +17,6 @@ import java.lang.ref.WeakReference;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
-import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
@@ -65,17 +64,17 @@ public final class ResultViewHelper {
         return true;
     }
 
-    public static void setIconAsync(@NonNull EntryItem entry, @NonNull AsyncSetDrawable task) {
+    public static void setIconAsync(@NonNull EntryItem entry, @NonNull AsyncSetEntryDrawable task) {
         task.executeOnExecutor(iconAsyncExecutor, entry);
     }
 
-    public static abstract class AsyncSetDrawable extends AsyncTask<EntryItem, Void, Drawable> {
+    public static abstract class AsyncSetEntryDrawable extends AsyncTask<EntryItem, Void, Drawable> {
         final WeakReference<ImageView> weakImage;
 
-        protected AsyncSetDrawable(@NonNull ImageView image) {
+        protected AsyncSetEntryDrawable(@NonNull ImageView image) {
             super();
-            if ( image.getTag() instanceof AsyncSetDrawable )
-                ((AsyncSetDrawable)image.getTag()).cancel(true);
+            if ( image.getTag() instanceof AsyncSetEntryDrawable)
+                ((AsyncSetEntryDrawable)image.getTag()).cancel(true);
             image.setTag(this);
             image.setImageResource(android.R.color.transparent);
             this.weakImage = new WeakReference<>(image);

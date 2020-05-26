@@ -22,7 +22,6 @@ import java.io.InputStream;
 import rocks.tbog.tblauncher.BuildConfig;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
-import rocks.tbog.tblauncher.icons.IconPack;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.result.ResultHelper;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
@@ -122,7 +121,7 @@ public final class ContactEntry extends EntryItem {
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         if (!prefs.getBoolean("icons-hide", false)) {
-            ResultViewHelper.setIconAsync(this, new AsyncSetIcon(contactIcon));
+            ResultViewHelper.setIconAsync(this, new AsyncSetEntryIcon(contactIcon));
         } else {
             contactIcon.setImageDrawable(null);
         }
@@ -185,8 +184,8 @@ public final class ContactEntry extends EntryItem {
         }
     }
 
-    private static class AsyncSetIcon extends ResultViewHelper.AsyncSetDrawable {
-        AsyncSetIcon(ImageView image) {
+    private static class AsyncSetEntryIcon extends ResultViewHelper.AsyncSetEntryDrawable {
+        AsyncSetEntryIcon(ImageView image) {
             super(image);
         }
 
@@ -204,8 +203,7 @@ public final class ContactEntry extends EntryItem {
                 if (drawable == null)
                     drawable = new ColorDrawable(UIColors.getPrimaryColor(ctx));
             }
-            IconPack iconPack = TBApplication.iconsHandler(ctx).getIconPack();
-            return iconPack.applyBackgroundAndMask(ctx, drawable, false);
+            return TBApplication.iconsHandler(ctx).applyContactMask(ctx, drawable);
         }
     }
 

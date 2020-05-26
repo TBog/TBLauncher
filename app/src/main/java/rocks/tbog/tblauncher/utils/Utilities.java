@@ -1,15 +1,22 @@
 package rocks.tbog.tblauncher.utils;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.AsyncTask;
 import android.os.Build;
+import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
 
+import java.lang.ref.WeakReference;
+
+import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.ui.CutoutFactory;
 import rocks.tbog.tblauncher.ui.ICutout;
 
@@ -53,4 +60,58 @@ public class Utilities {
 
         return cutout == null ? CutoutFactory.getNoCutout() : cutout;
     }
+
+    public static void setIconAsync(@NonNull ImageView image, @NonNull GetDrawable callback) {
+        new Utilities.AsyncSetDrawable(image) {
+            @Override
+            protected Drawable getDrawable(Context context) {
+                return callback.getDrawable(context);
+            }
+        }.execute();
+    }
+
+    public interface GetDrawable {
+        @Nullable
+        Drawable getDrawable(@NonNull Context context);
+    }
+
+    public static abstract class AsyncSetDrawable extends AsyncTask<Void, Void, Drawable> {
+        final WeakReference<ImageView> weakImage;
+
+        protected AsyncSetDrawable(@NonNull ImageView image) {
+            super();
+            if (image.getTag() instanceof ResultViewHelper.AsyncSetEntryDrawable)
+                ((ResultViewHelper.AsyncSetEntryDrawable) image.getTag()).cancel(true);
+            image.setTag(this);
+            image.setImageResource(android.R.color.transparent);
+            this.weakImage = new WeakReference<>(image);
+        }
+
+        @Override
+        protected Drawable doInBackground(Void... voids) {
+            ImageView image = weakImage.get();
+            if (isCancelled() || image == null || image.getTag() != this) {
+                weakImage.clear();
+                return null;
+            }
+
+            Context ctx = image.getContext();
+            return getDrawable(ctx);
+        }
+
+        @WorkerThread
+        protected abstract Drawable getDrawable(Context context);
+
+        @Override
+        protected void onPostExecute(Drawable drawable) {
+            ImageView image = weakImage.get();
+            if (image == null || drawable == null) {
+                weakImage.clear();
+                return;
+            }
+            image.setImageDrawable(drawable);
+            image.setTag(null);
+        }
+    }
+
 }
