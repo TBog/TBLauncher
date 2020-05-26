@@ -121,7 +121,7 @@ public final class ContactEntry extends EntryItem {
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         if (!prefs.getBoolean("icons-hide", false)) {
-            ResultViewHelper.setIconAsync(this, new AsyncSetEntryIcon(contactIcon));
+            ResultViewHelper.setIconAsync(this, contactIcon, AsyncSetEntryIcon.class);
         } else {
             contactIcon.setImageDrawable(null);
         }
@@ -184,8 +184,8 @@ public final class ContactEntry extends EntryItem {
         }
     }
 
-    private static class AsyncSetEntryIcon extends ResultViewHelper.AsyncSetEntryDrawable {
-        AsyncSetEntryIcon(ImageView image) {
+    public static class AsyncSetEntryIcon extends ResultViewHelper.AsyncSetEntryDrawable {
+        public AsyncSetEntryIcon(ImageView image) {
             super(image);
         }
 

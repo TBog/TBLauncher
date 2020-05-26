@@ -1,13 +1,16 @@
 package rocks.tbog.tblauncher;
 
 import android.app.Application;
+import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.database.sqlite.SQLiteDatabase;
 
 import androidx.preference.PreferenceManager;
 
+import rocks.tbog.tblauncher.db.DBHelper;
 import rocks.tbog.tblauncher.searcher.Searcher;
 
 public class TBApplication extends Application {
@@ -32,6 +35,10 @@ public class TBApplication extends Application {
      */
     private CustomizeUI mCustomizeUI = new CustomizeUI();
 
+    /**
+     * We store a number of drawables in memory for fast redraw
+     */
+    private DrawableCache mDrawableCache = new DrawableCache();
 
     @Override
     public void onCreate() {
@@ -49,6 +56,10 @@ public class TBApplication extends Application {
 
     public static CustomizeUI ui(Context context) {
         return getApplication(context).mCustomizeUI;
+    }
+
+    public static DrawableCache drawableCache(Context context) {
+        return getApplication(context).mDrawableCache;
     }
 
     public static void onDestroyActivity(TBLauncherActivity activity) {
@@ -134,5 +145,22 @@ public class TBApplication extends Application {
 
     public void requireLayoutUpdate() {
         bLayoutUpdateRequired = true;
+    }
+
+    /**
+     * Release memory when the UI becomes hidden or when system resources become low.
+     * @param level the memory-related event that was raised.
+     */
+    @Override
+    public void onTrimMemory(int level) {
+        super.onTrimMemory(level);
+
+        if (level >= ComponentCallbacks2.TRIM_MEMORY_BACKGROUND) {
+            // the process had been showing a user interface, and is no longer doing so
+            mDrawableCache.clearCache();
+        } else if (level >= ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) {
+            // this is called every time the screen is off
+            SQLiteDatabase.releaseMemory();
+        }
     }
 }

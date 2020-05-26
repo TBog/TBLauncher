@@ -15,7 +15,6 @@ import android.graphics.Canvas;
 import android.graphics.Path;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -313,7 +312,7 @@ public class IconsHandler {
     }
 
     public Drawable applyContactMask(@NonNull Context ctx, @NonNull Drawable drawable) {
-        if (mIconPack.hasMask()) {
+        if (mIconPack != null && mIconPack.hasMask()) {
             return mIconPack.applyBackgroundAndMask(ctx, drawable, false);
         }
         Drawable output = mSystemPack.applyBackgroundAndMask(ctx, drawable, false);

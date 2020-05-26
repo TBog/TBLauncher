@@ -260,9 +260,11 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     break;
                 case "icons-pack":
                     TBApplication.getApplication(activity).getIconsHandler().loadIconsPack(sharedPreferences.getString(key, "default"));
+                    TBApplication.drawableCache(activity).clearCache();
                     break;
                 case "adaptive-shape":
                     TBApplication.getApplication(activity).getIconsHandler().setAdaptiveShape(sharedPreferences.getString(key, null));
+                    TBApplication.drawableCache(activity).clearCache();
                     break;
             }
         }
