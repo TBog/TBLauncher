@@ -263,7 +263,7 @@ public final class AppEntry extends EntryWithTags {
 //                popupExcludeMenu.show();
                 return true;
             case R.string.menu_tags_edit:
-                launchEditTagsDialog(context);
+                TBApplication.behaviour(context).launchEditTagsDialog(this);
                 return true;
             case R.string.menu_app_rename:
                 launchRenameDialog(context);
@@ -318,9 +318,6 @@ public final class AppEntry extends EntryWithTags {
             // (null pointer exception can be thrown on Lollipop+ when app is missing)
             Toast.makeText(context, R.string.application_not_found, Toast.LENGTH_LONG).show();
         }
-    }
-
-    private void launchEditTagsDialog(@NonNull Context context) {
     }
 
     private void launchRenameDialog(@NonNull Context context) {

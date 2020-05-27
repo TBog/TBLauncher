@@ -34,10 +34,12 @@ import java.util.ArrayList;
 
 import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
+import rocks.tbog.tblauncher.entry.EntryWithTags;
 import rocks.tbog.tblauncher.result.ResultAdapter;
 import rocks.tbog.tblauncher.searcher.ISearchActivity;
 import rocks.tbog.tblauncher.searcher.QuerySearcher;
 import rocks.tbog.tblauncher.ui.AnimatedListView;
+import rocks.tbog.tblauncher.ui.DialogFragment;
 import rocks.tbog.tblauncher.ui.KeyboardScrollHider;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.ui.LoadingDrawable;
@@ -54,7 +56,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
 
     private TBLauncherActivity mTBLauncherActivity = null;
-    private CustomIconDialog mCustomIconDialog = null;
+    private DialogFragment mCustomDialog = null;
 
     private boolean bSearchBarHidden;
 
@@ -502,23 +504,23 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     public void launchCustomIconDialog(AppEntry appEntry) {
-        closeCustomIconDialog();
+        CustomIconDialog dialog = new CustomIconDialog();
+        openCustomDialog(dialog);
+
         // We assume the mResultLayout is visible
         mResultLayout.setVisibility(View.INVISIBLE);
-
-        if (mCustomIconDialog == null) mCustomIconDialog = new CustomIconDialog();
 
         // set args
         {
             Bundle args = new Bundle();
             args.putString("componentName", appEntry.getUserComponentName());
             args.putLong("customIcon", appEntry.getCustomIcon());
-            mCustomIconDialog.setArguments(args);
+            dialog.setArguments(args);
         }
         // OnDismiss: We assume the mResultLayout was visible
-        mCustomIconDialog.setOnDismissListener(dlg -> mResultLayout.setVisibility(View.VISIBLE));
+        dialog.setOnDismissListener(dlg -> mResultLayout.setVisibility(View.VISIBLE));
 
-        mCustomIconDialog.setOnConfirmListener(drawable -> {
+        dialog.setOnConfirmListener(drawable -> {
             if (drawable == null)
                 TBApplication.getApplication(mTBLauncherActivity).getIconsHandler().restoreAppIcon(appEntry);
             else
@@ -527,16 +529,26 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             //TODO: find a better way to update the result icon
             updateSearchRecords();
         });
-        mCustomIconDialog.show(mTBLauncherActivity.getSupportFragmentManager(), "custom_icon_dialog");
+        dialog.show(mTBLauncherActivity.getSupportFragmentManager(), "custom_icon_dialog");
+    }
+
+    public void launchEditTagsDialog(EntryWithTags entry) {
+        closeCustomDialog();
     }
 
     private boolean isCustomIconDialogVisible() {
-        return mCustomIconDialog != null && mCustomIconDialog.isVisible();
+        return mCustomDialog != null && mCustomDialog.isVisible();
     }
 
-    private void closeCustomIconDialog() {
-        if (mCustomIconDialog != null && mCustomIconDialog.isVisible())
-            mCustomIconDialog.dismiss();
+    private void openCustomDialog(DialogFragment dialog)
+    {
+        closeCustomDialog();
+        mCustomDialog = dialog;
+    }
+
+    private void closeCustomDialog() {
+        if (mCustomDialog != null && mCustomDialog.isVisible())
+            mCustomDialog.dismiss();
     }
 
     public void registerPopup(ListPopup menu) {
@@ -548,9 +560,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             showSearchBar();
             showKeyboard();
             mSearchEditText.postDelayed(this::showKeyboard, UI_ANIMATION_DELAY);
-        }
-        else
-        {
+        } else {
             hideKeyboard();
             hideSearchBar();
         }

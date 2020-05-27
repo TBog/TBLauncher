@@ -1,9 +1,7 @@
 package rocks.tbog.tblauncher;
 
-import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.pm.LauncherActivityInfo;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
@@ -20,8 +18,6 @@ import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
-import android.view.WindowManager;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -32,7 +28,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.collection.ArraySet;
-import androidx.fragment.app.DialogFragment;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -42,69 +37,23 @@ import java.util.List;
 import rocks.tbog.tblauncher.icons.IconPack;
 import rocks.tbog.tblauncher.icons.IconPackXML;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
+import rocks.tbog.tblauncher.ui.DialogFragment;
 import rocks.tbog.tblauncher.utils.DrawableUtils;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
 
-public class CustomIconDialog extends DialogFragment {
+public class CustomIconDialog extends DialogFragment<Drawable> {
     private List<IconData> mIconData = new ArrayList<>();
     private Drawable mSelectedDrawable = null;
     private GridView mIconGrid;
     private TextView mSearch;
     private ImageView mPreview;
-    private OnDismissListener mOnDismissListener = null;
-    private OnConfirmListener mOnConfirmListener = null;
-
-    public interface OnDismissListener {
-        void onDismiss(@NonNull CustomIconDialog dialog);
-    }
-
-    public interface OnConfirmListener {
-        void onConfirm(@Nullable Drawable icon);
-    }
-
-    void setOnDismissListener(OnDismissListener listener) {
-        mOnDismissListener = listener;
-    }
-
-    void setOnConfirmListener(OnConfirmListener listener) {
-        mOnConfirmListener = listener;
-    }
 
     @Override
-    public void onCreate(@Nullable Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setStyle(DialogFragment.STYLE_NO_FRAME, 0);
+    protected int layoutRes() {
+        return R.layout.custom_icon_dialog;
     }
-
-    @Override
-    public void onDismiss(@NonNull DialogInterface dialog) {
-        if (mOnDismissListener != null)
-            mOnDismissListener.onDismiss(this);
-        super.onDismiss(dialog);
-    }
-
-    @NonNull
-    @Override
-    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        return super.onCreateDialog(savedInstanceState);
-    }
-
-    @Nullable
-    @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View root = inflater.inflate(R.layout.custom_icon_dialog, container, false);
-        getDialog().requestWindowFeature(Window.FEATURE_NO_TITLE);
-
-        WindowManager.LayoutParams lp = getDialog().getWindow().getAttributes();
-        lp.dimAmount = 0.7f;
-        getDialog().getWindow().addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
-        getDialog().setCanceledOnTouchOutside(true);
-
-        return root;
-    }
-
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
@@ -169,9 +118,7 @@ public class CustomIconDialog extends DialogFragment {
         {
             View button = view.findViewById(android.R.id.button1);
             button.setOnClickListener(v -> {
-                if (mOnConfirmListener != null) {
-                    mOnConfirmListener.onConfirm(mSelectedDrawable);
-                }
+                onConfirm(mSelectedDrawable);
                 dismiss();
             });
         }
@@ -182,6 +129,7 @@ public class CustomIconDialog extends DialogFragment {
             button.setOnClickListener(v -> dismiss());
         }
 
+        //TODO: move this in an async task
         setQuickList(iconsHandler, view, cn, userHandle);
     }
 
@@ -492,7 +440,6 @@ public class CustomIconDialog extends DialogFragment {
                     loader.cancel(true);
                 loader = new AsyncLoad(this);
                 loader.execute(content);
-                //icon.setImageDrawable(content.getIcon());
             }
         }
     }
