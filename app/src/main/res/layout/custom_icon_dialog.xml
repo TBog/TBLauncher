@@ -75,13 +75,23 @@
         android:gravity="center"
         android:orientation="horizontal">
 
-        <TextView
+        <Button
+            android:id="@android:id/button2"
             android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@android:string/cancel"
+            android:textAllCaps="false" />
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_weight="1"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/icon_margin_left"
             android:layout_marginTop="@dimen/icon_margin_top"
             android:layout_marginEnd="@dimen/icon_margin_right"
             android:layout_marginBottom="@dimen/icon_margin_bottom"
+            android:textAlignment="textEnd"
+            android:gravity="center_vertical|end"
             android:text="@string/custom_icon_preview" />
 
         <ImageView
@@ -92,14 +102,8 @@
             android:layout_marginTop="@dimen/icon_margin_top"
             android:layout_marginEnd="@dimen/icon_margin_right"
             android:layout_marginBottom="@dimen/icon_margin_bottom"
-            android:src="@drawable/ic_android" />
-
-        <Button
-            android:id="@android:id/button2"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@android:string/cancel"
-            android:textAllCaps="false" />
+            android:src="@drawable/ic_android"
+            android:contentDescription="@string/icon_preview" />
 
         <Button
             android:id="@android:id/button1"

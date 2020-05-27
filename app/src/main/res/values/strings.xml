@@ -94,5 +94,6 @@
     <string name="ui_item_contact_hint_message">Message</string>
     <string name="ui_item_contact_hint_call">Call</string>
     <string name="adaptive_shape_name">Adaptive icon shape</string>
+    <string name="icon_preview">Preview</string>
 
 </resources>
