@@ -48,7 +48,7 @@ public class ShortcutsProvider extends Provider<ShortcutEntry> {
         for (ShortcutEntry pojo : pojos) {
             matchInfo = fuzzyScore.match(pojo.normalizedName.codePoints);
             match = matchInfo.match;
-            pojo.setRelevance(matchInfo.score);
+            pojo.setRelevance(pojo.normalizedName, matchInfo);
 
             // TODO: enable tags
             // check relevance for tags

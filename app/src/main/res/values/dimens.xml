@@ -36,4 +36,8 @@
 
     <dimen name="popup_title">12sp</dimen>
     <dimen name="custom_icon_column_width">68dp</dimen> <!-- icon_width + 2 * result_margin_horizontal -->
+
+    <dimen name="edit_tag_size">12sp</dimen>
+    <dimen name="edit_tag_padding">6sp</dimen>
+
 </resources>

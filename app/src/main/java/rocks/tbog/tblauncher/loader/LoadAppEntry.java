@@ -19,6 +19,7 @@ import java.util.Map;
 
 import rocks.tbog.tblauncher.DataHandler;
 import rocks.tbog.tblauncher.TBApplication;
+import rocks.tbog.tblauncher.TagsHandler;
 import rocks.tbog.tblauncher.db.AppRecord;
 import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
@@ -27,11 +28,11 @@ public class LoadAppEntry extends LoadEntryItem<AppEntry> {
 
     private HashMap<String, AppRecord> dbApps = null;
     private ArrayList<AppRecord> pendingChanges = null;
-    //private final TagsHandler tagsHandler;
+    private final TagsHandler tagsHandler;
 
     public LoadAppEntry(Context context) {
         super(context);
-        //tagsHandler = TBApplication.getApplication(context).getDataHandler().getTagsHandler();
+        tagsHandler = TBApplication.tagsHandler(context);
     }
 
     @NonNull
@@ -164,7 +165,7 @@ public class LoadAppEntry extends LoadEntryItem<AppEntry> {
             app.setName(user.getBadgedLabelForUser(context.get(), appName));
         if (rec.hasCustomIcon())
             app.setCustomIcon(rec.dbId);
-        //app.setTags(tagsHandler.getTags(app.id));
+        app.setTags(tagsHandler.getTags(app.id));
 
         return app;
     }

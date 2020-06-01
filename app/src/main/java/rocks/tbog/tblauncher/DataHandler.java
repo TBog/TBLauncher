@@ -797,7 +797,8 @@ public class DataHandler extends BroadcastReceiver
         }
     }
 
-    private EntryItem getPojo(String id) {
+    @Nullable
+    EntryItem getPojo(@NonNull String id) {
         // Ask all providers if they know this id
         for (ProviderEntry entry : this.providers.values()) {
             if (entry.provider != null && entry.provider.mayFindById(id)) {

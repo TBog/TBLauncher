@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="alias_phone">dial,call,phone</string>
+    <string name="alias_contacts">contacts,people,relations</string>
+    <string name="alias_web">Internet,web,browser</string>
+    <string name="alias_mail">mail,email,e-mail</string>
+    <string name="alias_market">market,store,app center</string>
+    <string name="alias_clock">clock,alarm,timer,stopwatch</string>
+    <string name="alias_messaging">text message,compose,SMS,MMS,messaging</string>
+</resources>

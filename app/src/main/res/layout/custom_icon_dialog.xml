@@ -25,7 +25,6 @@
         tools:listitem="@layout/custom_icon_item" />
 
     <LinearLayout
-        android:id="@+id/searchBarContainer"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center">
@@ -36,7 +35,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:autofillHints="application,text"
-            android:hint="@string/custom_icon_hint"
+            android:hint="@string/hint_custom_icon"
             android:inputType="textAutoCorrect" />
 
     </LinearLayout>
@@ -103,7 +102,7 @@
             android:layout_marginEnd="@dimen/icon_margin_right"
             android:layout_marginBottom="@dimen/icon_margin_bottom"
             android:src="@drawable/ic_android"
-            android:contentDescription="@string/icon_preview" />
+            android:contentDescription="@string/cd_icon_preview" />
 
         <Button
             android:id="@android:id/button1"

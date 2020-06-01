@@ -5,6 +5,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.view.View;
 
+import androidx.annotation.NonNull;
+
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.db.DBHelper;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
@@ -59,7 +61,8 @@ public final class ShortcutEntry extends EntryWithTags {
     }
 
     @Override
-    public void displayResult(Context context, View view, FuzzyScore score) {
-
+    public void displayResult(@NonNull View view) {
+        Context context = view.getContext();
+        throw new RuntimeException("Not implemented");
     }
 }

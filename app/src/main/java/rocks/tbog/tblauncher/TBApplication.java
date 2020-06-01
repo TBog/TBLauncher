@@ -10,7 +10,6 @@ import android.database.sqlite.SQLiteDatabase;
 
 import androidx.preference.PreferenceManager;
 
-import rocks.tbog.tblauncher.db.DBHelper;
 import rocks.tbog.tblauncher.searcher.Searcher;
 
 public class TBApplication extends Application {
@@ -18,6 +17,7 @@ public class TBApplication extends Application {
     public static final int TOUCH_DELAY = 120;
     private DataHandler dataHandler;
     private IconsHandler iconsPackHandler;
+    private TagsHandler tagsHandler = null;
     private boolean bLayoutUpdateRequired = false;
 
     /**
@@ -60,6 +60,13 @@ public class TBApplication extends Application {
 
     public static DrawableCache drawableCache(Context context) {
         return getApplication(context).mDrawableCache;
+    }
+
+    public static TagsHandler tagsHandler(Context context) {
+        TBApplication app = getApplication(context);
+        if (app.tagsHandler == null)
+            app.tagsHandler = new TagsHandler(app);
+        return app.tagsHandler;
     }
 
     public static void onDestroyActivity(TBLauncherActivity activity) {
@@ -149,6 +156,7 @@ public class TBApplication extends Application {
 
     /**
      * Release memory when the UI becomes hidden or when system resources become low.
+     *
      * @param level the memory-related event that was raised.
      */
     @Override

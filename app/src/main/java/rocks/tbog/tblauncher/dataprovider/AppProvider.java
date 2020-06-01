@@ -9,6 +9,7 @@ import android.os.Build;
 import android.os.Process;
 import android.os.UserManager;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.WorkerThread;
 
@@ -20,6 +21,7 @@ import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.broadcast.PackageAddedRemovedHandler;
 import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
+import rocks.tbog.tblauncher.entry.EntryWithTags;
 import rocks.tbog.tblauncher.loader.LoadAppEntry;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.searcher.Searcher;
@@ -187,6 +189,13 @@ public class AppProvider extends Provider<AppEntry> {
         }
 
         FuzzyScore fuzzyScore = new FuzzyScore(queryNormalized.codePoints);
+
+        checkAppResults(pojos, fuzzyScore, searcher);
+    }
+
+    @WorkerThread
+    static void checkAppResults(Iterable<AppEntry> pojos, FuzzyScore fuzzyScore, Searcher searcher)
+    {
         FuzzyScore.MatchInfo matchInfo;
         boolean match;
 
@@ -197,22 +206,23 @@ public class AppProvider extends Provider<AppEntry> {
 
             matchInfo = fuzzyScore.match(pojo.normalizedName.codePoints);
             match = matchInfo.match;
-            pojo.setRelevance(matchInfo.score);
+            pojo.setRelevance(pojo.normalizedName, matchInfo);
 
             // check relevance for tags
-//            if (pojo.getNormalizedTags() != null) {
-//                matchInfo = fuzzyScore.match(pojo.getNormalizedTags().codePoints);
-//                if (matchInfo.match && (!match || matchInfo.score > pojo.relevance)) {
-//                    match = true;
-//                    pojo.relevance = matchInfo.score;
-//                }
-//            }
+            for (EntryWithTags.TagDetails tag : pojo.getTags()) {
+                matchInfo = fuzzyScore.match(tag.normalized.codePoints);
+                if (matchInfo.match && (!match || matchInfo.score > pojo.getRelevance())) {
+                    match = true;
+                    pojo.setRelevance(tag.normalized, matchInfo);
+                }
+            }
 
             if (match && !searcher.addResult(pojo)) {
                 return;
             }
         }
     }
+
 
     /**
      * Return a Pojo
@@ -221,7 +231,7 @@ public class AppProvider extends Provider<AppEntry> {
      * @return an AppPojo, or null
      */
     @Override
-    public EntryItem findById(String id) {
+    public EntryItem findById(@NonNull String id) {
         for (EntryItem pojo : pojos) {
             if (pojo.id.equals(id)) {
                 return pojo;
@@ -235,7 +245,7 @@ public class AppProvider extends Provider<AppEntry> {
         ArrayList<AppEntry> records = new ArrayList<>(pojos.size());
 
         for (AppEntry pojo : pojos) {
-            pojo.setRelevance(0);
+            pojo.resetRelevance();
             records.add(pojo);
         }
         return records;
@@ -245,9 +255,10 @@ public class AppProvider extends Provider<AppEntry> {
         ArrayList<AppEntry> records = new ArrayList<>(pojos.size());
 
         for (AppEntry pojo : pojos) {
-            if (pojo.isExcluded()) continue;
+            if (pojo.isExcluded())
+                continue;
 
-            pojo.setRelevance(0);
+            pojo.resetRelevance();
             records.add(pojo);
         }
         return records;

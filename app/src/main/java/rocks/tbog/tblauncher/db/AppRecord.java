@@ -1,6 +1,6 @@
 package rocks.tbog.tblauncher.db;
 
-public class AppRecord {
+public final class AppRecord {
     public static final int FLAG_DEFAULT_NAME = 1;
     public static final int FLAG_CUSTOM_NAME = 1 << 1;
     public static final int FLAG_CUSTOM_ICON = 1 << 2;
@@ -26,13 +26,4 @@ public class AppRecord {
     public int getFlagsDB() {
         return flags & MASK_SAVE_DB_FLAGS;
     }
-
-//    private AppRecord() {
-//        super();
-//    }
-//
-//    public static class Builder
-//    {
-//        public static
-//    }
 }

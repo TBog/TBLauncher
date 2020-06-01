@@ -99,21 +99,22 @@ public final class ContactEntry extends EntryItem {
     }
 
     @Override
-    public void displayResult(@NonNull Context context, @NonNull View view, FuzzyScore fuzzyScore) {
+    public void displayResult(@NonNull View view) {
+        Context context = view.getContext();
         // Contact name
         TextView contactName = view.findViewById(R.id.item_contact_name);
-        ResultViewHelper.displayHighlighted(normalizedName, getName(), fuzzyScore, contactName, context);
+        ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, contactName);
 
         // Contact phone
         TextView contactPhone = view.findViewById(R.id.item_contact_phone);
-        ResultViewHelper.displayHighlighted(normalizedPhone, phone, fuzzyScore, contactPhone, context);
+        ResultViewHelper.displayHighlighted(relevanceSource, normalizedPhone, phone, relevance, contactPhone);
 
         // Contact nickname
         TextView contactNickname = view.findViewById(R.id.item_contact_nickname);
         if (getNickname().isEmpty()) {
             contactNickname.setVisibility(View.GONE);
         } else {
-            ResultViewHelper.displayHighlighted(normalizedNickname, getNickname(), fuzzyScore, contactNickname, context);
+            ResultViewHelper.displayHighlighted(relevanceSource, normalizedNickname, getNickname(), relevance, contactNickname);
         }
 
         // Contact photo

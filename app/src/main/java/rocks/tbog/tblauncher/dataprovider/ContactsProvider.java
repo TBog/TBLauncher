@@ -34,7 +34,7 @@ public class ContactsProvider extends Provider<ContactEntry> {
     public void onCreate() {
         super.onCreate();
         // register content observer if we have permission
-        if(Permission.checkPermission(this, Permission.PERMISSION_READ_CONTACTS)) {
+        if (Permission.checkPermission(this, Permission.PERMISSION_READ_CONTACTS)) {
             getContentResolver().registerContentObserver(ContactsContract.Contacts.CONTENT_URI, false, cObserver);
         } else {
             Permission.askPermission(Permission.PERMISSION_READ_CONTACTS, new Permission.PermissionResultListener() {
@@ -70,13 +70,13 @@ public class ContactsProvider extends Provider<ContactEntry> {
         for (ContactEntry pojo : pojos) {
             matchInfo = fuzzyScore.match(pojo.normalizedName.codePoints);
             match = matchInfo.match;
-            pojo.setRelevance(matchInfo.score);
+            pojo.setRelevance(pojo.normalizedName, matchInfo);
 
             if (pojo.normalizedNickname != null) {
                 matchInfo = fuzzyScore.match(pojo.normalizedNickname.codePoints);
                 if (matchInfo.match && (!match || matchInfo.score > pojo.getRelevance())) {
                     match = true;
-                    pojo.setRelevance(matchInfo.score);
+                    pojo.setRelevance(pojo.normalizedNickname, matchInfo);
                 }
             }
 
@@ -84,16 +84,15 @@ public class ContactsProvider extends Provider<ContactEntry> {
                 // search for the phone number
                 matchInfo = fuzzyScore.match(pojo.normalizedPhone.codePoints);
                 match = matchInfo.match;
-                pojo.setRelevance(matchInfo.score);
+                pojo.setRelevance(pojo.normalizedPhone, matchInfo);
             }
 
             if (match) {
-                int relevance = pojo.getRelevance();
-                relevance += Math.min(30, pojo.timesContacted);
+                int boost = Math.min(30, pojo.timesContacted);
                 if (pojo.starred) {
-                    relevance += 40;
+                    boost += 40;
                 }
-                pojo.setRelevance(relevance);
+                pojo.boostRelevance(boost);
                 if (!searcher.addResult(pojo))
                     return;
             }

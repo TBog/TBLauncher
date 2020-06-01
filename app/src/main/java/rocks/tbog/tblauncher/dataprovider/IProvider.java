@@ -1,5 +1,6 @@
 package rocks.tbog.tblauncher.dataprovider;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 
 import java.util.List;
@@ -47,7 +48,7 @@ public interface IProvider {
      * @return true if the provider can handle the query ; does not guarantee it
      * will!
      */
-    boolean mayFindById(String id);
+    boolean mayFindById(@NonNull String id);
 
     /**
      * Try to find a record by its id
@@ -55,7 +56,7 @@ public interface IProvider {
      * @param id id we're looking for
      * @return null if not found
      */
-    EntryItem findById(String id);
+    EntryItem findById(@NonNull String id);
 
     /**
      * Get a list of all pojos, do not modify this list!

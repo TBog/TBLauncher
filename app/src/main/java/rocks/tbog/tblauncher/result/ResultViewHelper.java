@@ -1,17 +1,23 @@
 package rocks.tbog.tblauncher.result;
 
 import android.content.Context;
+import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.text.Spannable;
 import android.text.SpannableString;
+import android.text.SpannableStringBuilder;
+import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
+import android.text.style.StyleSpan;
 import android.util.Log;
 import android.util.Pair;
+import android.util.Printer;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 
 import java.lang.ref.WeakReference;
@@ -22,6 +28,7 @@ import java.util.concurrent.Executors;
 
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.entry.EntryItem;
+import rocks.tbog.tblauncher.entry.EntryWithTags;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
 import rocks.tbog.tblauncher.utils.UIColors;
@@ -32,46 +39,76 @@ public final class ResultViewHelper {
     private static final String TAG = "RVH";
 
     private ResultViewHelper() {
-        // this is a static class
+        // this is a namespace
+    }
+
+    private static SpannableString highlightText(StringNormalizer.Result normalized, String text, FuzzyScore.MatchInfo matchInfo, int color) {
+        SpannableString enriched = new SpannableString(text);
+
+        for (Pair<Integer, Integer> position : matchInfo.getMatchedSequences()) {
+            enriched.setSpan(
+                    new ForegroundColorSpan(color),
+                    normalized.mapPosition(position.first),
+                    normalized.mapPosition(position.second),
+                    Spannable.SPAN_INCLUSIVE_EXCLUSIVE
+            );
+        }
+
+        return enriched;
     }
 
     /**
      * Highlight text
      *
-     * @param normalized the mapping and code points of the text
-     * @param text       the visible text that gets highlighted
-     * @param fuzzyScore function to compute matched sequences //TODO: send the FuzzyScore.MatchInfo
-     * @param view       TextView that gets the highlighted text
-     * @param context    used for getting colors
+     * @param relevance  the mapping and code points of the matched text
+     * @param normText   the mapping and code points of the provided text
+     * @param text       provided visible text that may need highlighting
+     * @param matchInfo  matched sequences
+     * @param view       TextView that gets the text
      * @return if the text got any matches
      */
-    public static boolean displayHighlighted(StringNormalizer.Result normalized, String text, FuzzyScore fuzzyScore,
-                                             TextView view, Context context) {
-        FuzzyScore.MatchInfo matchInfo = fuzzyScore.match(normalized.codePoints);
-
-        if (!matchInfo.match) {
+    public static boolean displayHighlighted(@Nullable StringNormalizer.Result relevance, StringNormalizer.Result normText,
+                                             String text, @Nullable FuzzyScore.MatchInfo matchInfo,
+                                             TextView view) {
+        if (matchInfo == null || !matchInfo.match || !normText.equals(relevance)) {
             view.setText(text);
             return false;
         }
 
-        SpannableString enriched = new SpannableString(text);
-        int primaryColor = UIColors.getPrimaryColor(context);
+        int color = UIColors.getPrimaryColor(view.getContext());
+        view.setText(highlightText(normText, text, matchInfo, color));
 
-        for (Pair<Integer, Integer> position : matchInfo.getMatchedSequences()) {
-            enriched.setSpan(
-                    new ForegroundColorSpan(primaryColor),
-                    normalized.mapPosition(position.first),
-                    normalized.mapPosition(position.second),
-                    Spannable.SPAN_INCLUSIVE_INCLUSIVE
-            );
-        }
-        view.setText(enriched);
         return true;
     }
 
-//    public static void setIconAsync(@NonNull EntryItem entry, @NonNull AsyncSetEntryDrawable task) {
-//        task.executeOnExecutor(iconAsyncExecutor, entry);
-//    }
+    public static boolean displayHighlighted(StringNormalizer.Result normalized, Iterable<EntryWithTags.TagDetails> tags,
+                                             @Nullable FuzzyScore.MatchInfo matchInfo, TextView view, Context context) {
+//        final StringBuilder debug = new StringBuilder();
+//        Printer debugPrint = x -> debug.append(x).append("\n");
+        boolean matchFound = false;
+
+        int color = UIColors.getPrimaryColor(context);
+        SpannableStringBuilder builder = new SpannableStringBuilder();
+        boolean first = true;
+        for (EntryWithTags.TagDetails tag : tags) {
+            if (!first)
+                builder.append(" \u2223 ");
+            first = false;
+            if (matchInfo != null && matchInfo.match && tag.normalized.equals(normalized)) {
+                builder.append(highlightText(tag.normalized, tag.name, matchInfo, color));
+                matchFound = true;
+
+//                debug.setLength(0);
+//                TextUtils.dumpSpans(builder, debugPrint, "");
+            } else {
+                builder.append(tag.name);
+            }
+        }
+
+        view.setText(builder);
+
+        return matchFound;
+    }
 
     public static void setIconAsync(@NonNull EntryItem entry, @NonNull ImageView appIcon, @NonNull Class<? extends AsyncSetEntryDrawable> asyncSetEntryIconClass) {
         Drawable cache = TBApplication.drawableCache(appIcon.getContext()).getCachedDrawable(entry.id);

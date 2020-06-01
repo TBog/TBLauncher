@@ -81,7 +81,7 @@
         android:layout_centerVertical="true"
         android:layout_toStartOf="@+id/item_contact_action_phone"
         android:background="?attr/appSelectableItemBackground"
-        android:contentDescription="@string/ui_item_contact_hint_message"
+        android:contentDescription="@string/cd_item_contact_message"
         android:src="@drawable/ic_message" />
 
     <ImageButton
@@ -91,7 +91,7 @@
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
         android:background="?attr/appSelectableItemBackground"
-        android:contentDescription="@string/ui_item_contact_hint_call"
+        android:contentDescription="@string/cd_item_contact_call"
         android:src="@drawable/ic_phone" />
 
 </RelativeLayout>

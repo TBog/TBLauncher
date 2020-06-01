@@ -56,7 +56,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
 
     private TBLauncherActivity mTBLauncherActivity = null;
-    private DialogFragment mCustomDialog = null;
+    private DialogFragment mFragmentDialog = null;
 
     private boolean bSearchBarHidden;
 
@@ -372,17 +372,17 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     @Override
-    public void updateAdapter(ArrayList<EntryItem> results, boolean isRefresh, String query) {
+    public void updateAdapter(ArrayList<EntryItem> results, boolean isRefresh) {
         if (isRefresh) {
             // We're refreshing an existing dataset, do not reset scroll!
             temporarilyDisableTranscriptMode();
         }
         if (isCustomIconDialogVisible()) {
-            mResultAdapter.updateResults(results, query);
+            mResultAdapter.updateResults(results);
         } else {
             mResultLayout.setVisibility(View.VISIBLE);
             mResultList.prepareChangeAnim();
-            mResultAdapter.updateResults(results, query);
+            mResultAdapter.updateResults(results);
             mResultList.animateChange();
         }
     }
@@ -505,7 +505,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 
     public void launchCustomIconDialog(AppEntry appEntry) {
         CustomIconDialog dialog = new CustomIconDialog();
-        openCustomDialog(dialog);
+        openFragmentDialog(dialog);
 
         // We assume the mResultLayout is visible
         mResultLayout.setVisibility(View.INVISIBLE);
@@ -533,22 +533,38 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     public void launchEditTagsDialog(EntryWithTags entry) {
-        closeCustomDialog();
+        EditTagsDialog dialog = new EditTagsDialog();
+        openFragmentDialog(dialog);
+
+        // set args
+        {
+            Bundle args = new Bundle();
+            args.putString("entryId", entry.id);
+            args.putString("entryName", entry.getName());
+            dialog.setArguments(args);
+        }
+
+        dialog.setOnConfirmListener(newTags -> {
+            TBApplication.tagsHandler(mTBLauncherActivity).setTags(entry, newTags);
+            //TODO: find a better way to update the views
+            updateSearchRecords();
+        });
+
+        dialog.show(mTBLauncherActivity.getSupportFragmentManager(), "edit_tags_dialog");
     }
 
     private boolean isCustomIconDialogVisible() {
-        return mCustomDialog != null && mCustomDialog.isVisible();
+        return mFragmentDialog != null && mFragmentDialog.isVisible();
     }
 
-    private void openCustomDialog(DialogFragment dialog)
-    {
-        closeCustomDialog();
-        mCustomDialog = dialog;
+    private void openFragmentDialog(DialogFragment dialog) {
+        closeFragmentDialog();
+        mFragmentDialog = dialog;
     }
 
-    private void closeCustomDialog() {
-        if (mCustomDialog != null && mCustomDialog.isVisible())
-            mCustomDialog.dismiss();
+    private void closeFragmentDialog() {
+        if (mFragmentDialog != null && mFragmentDialog.isVisible())
+            mFragmentDialog.dismiss();
     }
 
     public void registerPopup(ListPopup menu) {

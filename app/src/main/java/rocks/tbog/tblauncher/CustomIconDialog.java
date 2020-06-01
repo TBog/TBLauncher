@@ -44,7 +44,7 @@ import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public class CustomIconDialog extends DialogFragment<Drawable> {
-    private List<IconData> mIconData = new ArrayList<>();
+    private final List<IconData> mIconData = new ArrayList<>();
     private Drawable mSelectedDrawable = null;
     private GridView mIconGrid;
     private TextView mSearch;

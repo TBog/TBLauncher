@@ -25,7 +25,6 @@ import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
 
 public class ResultAdapter extends BaseAdapter implements SectionIndexer {
-    private FuzzyScore fuzzyScore;
 
     /**
      * Array list containing all the results currently displayed
@@ -39,7 +38,6 @@ public class ResultAdapter extends BaseAdapter implements SectionIndexer {
 
     public ResultAdapter(ArrayList<EntryItem> results) {
         this.results = results;
-        this.fuzzyScore = null;
     }
 
     @Override
@@ -96,7 +94,7 @@ public class ResultAdapter extends BaseAdapter implements SectionIndexer {
             LayoutInflater inflater = LayoutInflater.from(context);
             convertView = inflater.inflate(entryItem.getResultLayout(), parent, false);
         }
-        entryItem.displayResult(context, convertView, fuzzyScore);
+        entryItem.displayResult(convertView);
         return convertView;
     }
 
@@ -150,14 +148,10 @@ public class ResultAdapter extends BaseAdapter implements SectionIndexer {
      * Should be called only from Behaviour.
      *
      * @param results new list of results
-     * @param query   used to generate detailed match indices
      */
-    public void updateResults(List<EntryItem> results, String query) {
+    public void updateResults(List<EntryItem> results) {
         this.results.clear();
         this.results.addAll(results);
-        StringNormalizer.Result queryNormalized = StringNormalizer.normalizeWithResult(query, false);
-
-        fuzzyScore = new FuzzyScore(queryNormalized.codePoints, true);
         notifyDataSetChanged();
     }
 

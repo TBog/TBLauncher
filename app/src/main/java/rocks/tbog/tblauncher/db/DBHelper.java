@@ -8,17 +8,20 @@ import android.database.sqlite.SQLiteStatement;
 import android.text.TextUtils;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import rocks.tbog.tblauncher.DataHandler;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.entry.AppEntry;
+import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.ShortcutEntry;
 
 public class DBHelper {
@@ -363,51 +366,58 @@ public class DBHelper {
     }
 
     /**
-     * Insert new tags for given id
+     * Insert new tag for given {@link rocks.tbog.tblauncher.entry.EntryItem}
      *
      * @param context android context
-     * @param tag     tag to insert
-     * @param record  record to insert
+     * @param tag     tag name to insert
+     * @param entry   EntryItem
      */
-    public static void insertTagsForId(Context context, String tag, String record) {
+    public static void addTag(Context context, String tag, EntryItem entry) {
         SQLiteDatabase db = getDatabase(context);
         ContentValues values = new ContentValues();
         values.put("tag", tag);
-        values.put("record", record);
+        values.put("record", entry.id);
         db.insert("tags", null, values);
     }
 
 
-    /* Delete
+    /**
+     * Delete a tag from a given {@link rocks.tbog.tblauncher.entry.EntryItem}
      *
      * @param context android context
-     * @param tag   query to insert
-     * @param record  record to insert
+     * @param tag     tag name to remove
+     * @param entry   EntryItem
      */
-    public static void deleteTagsForId(Context context, String record) {
+    public static void removeTag(Context context, String tag, EntryItem entry) {
         SQLiteDatabase db = getDatabase(context);
 
-        db.delete("tags", "record = ?", new String[]{record});
+        db.delete("tags", "tag = ? AND record = ?", new String[]{tag, entry.id});
     }
 
-    public static Map<String, String> loadTags(Context context) {
-        Map<String, String> records = new HashMap<>();
+    /**
+     * @param context android context
+     * @return HashMap with EntryItem id as key and an ArrayList of tags for each
+     */
+    @NonNull
+    public static Map<String, List<String>> loadTags(Context context) {
+        Map<String, List<String>> records;
         SQLiteDatabase db = getDatabase(context);
-
-        Cursor cursor = db.query("tags", new String[]{"record", "tag"}, null, null, null, null, null);
-
-        cursor.moveToFirst();
-        while (!cursor.isAfterLast()) {
-            String id = cursor.getString(0);
-            String tags = cursor.getString(1);
-            records.put(id, tags);
-            cursor.moveToNext();
+        try (Cursor cursor = db.query("tags", new String[]{"record", "tag"},
+                null, null, null, null, null)) {
+            records = new HashMap<>(cursor.getCount());
+            while (cursor.moveToNext()) {
+                String id = cursor.getString(0);
+                String tag = cursor.getString(1);
+                List<String> tagList = records.get(id);
+                if (tagList == null)
+                    records.put(id, tagList = new ArrayList<>());
+                tagList.add(tag);
+            }
         }
-        cursor.close();
         return records;
-
     }
 
+    @NonNull
     public static HashMap<String, AppRecord> getAppsData(Context context) {
         HashMap<String, AppRecord> records;
         SQLiteDatabase db = getDatabase(context);
@@ -501,8 +511,7 @@ public class DBHelper {
     }
 
     @Nullable
-    private static AppRecord getAppRecord(SQLiteDatabase db, String componentName)
-    {
+    private static AppRecord getAppRecord(SQLiteDatabase db, String componentName) {
         String[] selArgs = new String[]{componentName};
         try (Cursor cursor = db.query("apps", TABLE_COLUMNS_APPS,
                 "component_name=?", selArgs, null, null, null)) {

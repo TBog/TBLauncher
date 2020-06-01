@@ -97,7 +97,7 @@ public abstract class Provider<T extends EntryItem> extends Service implements I
      * @return true if the provider can handle the query ; does not guarantee it
      * will!
      */
-    public boolean mayFindById(String id) {
+    public boolean mayFindById(@NonNull String id) {
         return id.startsWith(pojoScheme);
     }
 
@@ -107,7 +107,7 @@ public abstract class Provider<T extends EntryItem> extends Service implements I
      * @param id id we're looking for
      * @return null if not found
      */
-    public EntryItem findById(String id) {
+    public EntryItem findById(@NonNull String id) {
         for (EntryItem pojo : pojos) {
             if (pojo.id.equals(id)) {
                 return pojo;

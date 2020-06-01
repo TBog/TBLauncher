@@ -20,7 +20,7 @@ import rocks.tbog.tblauncher.entry.EntryItem;
 public abstract class Searcher extends AsyncTask<Void, EntryItem, Void> {
     // define a different thread than the default AsyncTask thread or else we will block everything else that uses AsyncTask while we search
     public static final ExecutorService SEARCH_THREAD = Executors.newSingleThreadExecutor();
-    static final int DEFAULT_MAX_RESULTS = 50;
+    static final int INITIAL_CAPACITY = 50;
     final WeakReference<ISearchActivity> activityWeakReference;
     private final PriorityQueue<EntryItem> processedPojos;
     private long start;
@@ -39,11 +39,7 @@ public abstract class Searcher extends AsyncTask<Void, EntryItem, Void> {
     }
 
     PriorityQueue<EntryItem> getPojoProcessor(ISearchActivity activity) {
-        return new PriorityQueue<>(DEFAULT_MAX_RESULTS, new EntryItem.RelevanceComparator());
-    }
-
-    int getMaxResultCount() {
-        return DEFAULT_MAX_RESULTS;
+        return new PriorityQueue<>(INITIAL_CAPACITY, new EntryItem.RelevanceComparator());
     }
 
     /**
@@ -59,9 +55,9 @@ public abstract class Searcher extends AsyncTask<Void, EntryItem, Void> {
             return false;
 
         Collections.addAll(this.processedPojos, pojos);
-        int maxResults = getMaxResultCount();
-        while (this.processedPojos.size() > maxResults)
-            this.processedPojos.poll();
+//        int maxResults = getMaxResultCount();
+//        while (this.processedPojos.size() > maxResults)
+//            this.processedPojos.poll();
 
         return true;
     }
@@ -101,7 +97,7 @@ public abstract class Searcher extends AsyncTask<Void, EntryItem, Void> {
                 results.add(queue.poll());
             }
 
-            activity.updateAdapter(results, isRefresh, query);
+            activity.updateAdapter(results, isRefresh);
         }
 
         activity.resetTask();

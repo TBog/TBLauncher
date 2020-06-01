@@ -2,7 +2,10 @@ package rocks.tbog.tblauncher.utils;
 
 import android.util.Pair;
 
+import androidx.annotation.NonNull;
+
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -67,7 +70,7 @@ public class FuzzyScore {
     }
 
     public FuzzyScore(int[] pattern) {
-        this(pattern, false);
+        this(pattern, true);
     }
 
     public void setAdjacencyBonus(int adjacency_bonus) {
@@ -248,8 +251,16 @@ public class FuzzyScore {
             matchedIndices = new ArrayList<>(patternLength);
         }
 
+        public MatchInfo(@NonNull MatchInfo o)
+        {
+            score = o.score;
+            match = o.match;
+            matchedIndices = o.matchedIndices != null ? new ArrayList<>(o.matchedIndices) : null;
+        }
+
         public List<Pair<Integer, Integer>> getMatchedSequences() {
-            assert this.matchedIndices != null;
+            if (matchedIndices == null)
+                return Collections.emptyList();
             // compute pair match indices
             List<Pair<Integer, Integer>> positions = new ArrayList<>(this.matchedIndices.size());
             int start = this.matchedIndices.get(0);

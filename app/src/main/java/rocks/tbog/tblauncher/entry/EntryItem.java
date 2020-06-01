@@ -1,17 +1,15 @@
 package rocks.tbog.tblauncher.entry;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
-import android.widget.ListAdapter;
 
 import androidx.annotation.CallSuper;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.preference.PreferenceManager;
-
-import java.util.Comparator;
 
 import rocks.tbog.tblauncher.BuildConfig;
 import rocks.tbog.tblauncher.R;
@@ -23,6 +21,7 @@ import rocks.tbog.tblauncher.utils.FuzzyScore;
 
 public abstract class EntryItem {
 
+    private static final String TAG = EntryItem.class.getSimpleName();
     // Globally unique ID.
     // Usually starts with provider scheme, e.g. "app://" or "contact://" to
     // ensure unique constraint
@@ -34,8 +33,10 @@ public abstract class EntryItem {
     @NonNull
     private
     String name = "";
+
     // How relevant is this record? The higher, the most probable it will be displayed
-    private int relevance = 0;
+    protected FuzzyScore.MatchInfo relevance = null;
+    protected StringNormalizer.Result relevanceSource = null;
 
     public EntryItem(@NonNull String id) {
         this.id = id;
@@ -76,11 +77,22 @@ public abstract class EntryItem {
     }
 
     public int getRelevance() {
-        return relevance;
+        return relevance == null ? 0 : relevance.score;
     }
 
-    public void setRelevance(int relevance) {
-        this.relevance = relevance;
+    public void setRelevance(StringNormalizer.Result normalizedName, FuzzyScore.MatchInfo matchInfo) {
+        this.relevanceSource = normalizedName;
+        this.relevance = new FuzzyScore.MatchInfo(matchInfo);
+    }
+
+    public void boostRelevance(int boost) {
+        if (relevance != null)
+            relevance.score += boost;
+    }
+
+    public void resetRelevance() {
+        this.relevanceSource = null;
+        this.relevance = null;
     }
 
     /**
@@ -94,14 +106,14 @@ public abstract class EntryItem {
     @LayoutRes
     public abstract int getResultLayout();
 
-    public abstract void displayResult(Context context, View view, FuzzyScore score);
+    public abstract void displayResult(@NonNull View view);
 
     public static class RelevanceComparator implements java.util.Comparator<EntryItem> {
         @Override
         public int compare(EntryItem lhs, EntryItem rhs) {
             if (lhs.getRelevance() == rhs.getRelevance()) {
-                if (lhs.normalizedName != null && rhs.normalizedName != null)
-                    return lhs.normalizedName.compareTo(rhs.normalizedName);
+                if (lhs.relevanceSource != null && rhs.relevanceSource != null)
+                    return lhs.relevanceSource.compareTo(rhs.relevanceSource);
                 else
                     return lhs.name.compareTo(rhs.name);
             }

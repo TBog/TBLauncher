@@ -142,20 +142,20 @@ public final class AppEntry extends EntryWithTags {
     }
 
     @Override
-    public void displayResult(@NonNull Context context, @NonNull View view, FuzzyScore fuzzyScore) {
+    public void displayResult(@NonNull View view) {
+        Context context = view.getContext();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 
         TextView appName = view.findViewById(R.id.item_app_name);
-
-        ResultViewHelper.displayHighlighted(normalizedName, getName(), fuzzyScore, appName, context);
+        ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, appName);
 
         TextView tagsView = view.findViewById(R.id.item_app_tag);
         // Hide tags view if tags are empty
         if (getTags().isEmpty()) {
             tagsView.setVisibility(View.GONE);
-//        } else if (displayHighlighted(appPojo.getNormalizedTags(), appPojo.getTags(),
-//                fuzzyScore, tagsView, context) || prefs.getBoolean("tags-visible", true)) {
-//            tagsView.setVisibility(View.VISIBLE);
+        } else if (ResultViewHelper.displayHighlighted(relevanceSource, getTags(), relevance, tagsView, context)
+                || prefs.getBoolean("tags-visible", true)) {
+            tagsView.setVisibility(View.VISIBLE);
         } else {
             tagsView.setVisibility(View.GONE);
         }

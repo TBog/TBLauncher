@@ -3,6 +3,7 @@ package rocks.tbog.tblauncher.dataprovider;
 import android.content.ComponentName;
 import android.content.Context;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 
 import java.lang.reflect.Array;
@@ -37,9 +38,9 @@ public class AppCacheProvider implements IProvider {
             return;
         }
 
-        FuzzyScore fuzzyScore = new FuzzyScore(queryNormalized.codePoints);
-        FuzzyScore.MatchInfo matchInfo;
-        boolean match;
+        //FuzzyScore fuzzyScore = new FuzzyScore(queryNormalized.codePoints);
+        //FuzzyScore.MatchInfo matchInfo;
+        //boolean match;
 
         ArrayList<AppEntry> pojos = new ArrayList<>(apps.size());
 
@@ -60,28 +61,9 @@ public class AppCacheProvider implements IProvider {
             //app.setTags(tagsHandler.getTags(app.id));
         }
 
-        for (AppEntry pojo : pojos) {
-            if (pojo.isExcluded()) {
-                continue;
-            }
+        FuzzyScore fuzzyScore = new FuzzyScore(queryNormalized.codePoints);
 
-            matchInfo = fuzzyScore.match(pojo.normalizedName.codePoints);
-            match = matchInfo.match;
-            pojo.setRelevance(matchInfo.score);
-
-            // check relevance for tags
-//            if (pojo.getNormalizedTags() != null) {
-//                matchInfo = fuzzyScore.match(pojo.getNormalizedTags().codePoints);
-//                if (matchInfo.match && (!match || matchInfo.score > pojo.relevance)) {
-//                    match = true;
-//                    pojo.relevance = matchInfo.score;
-//                }
-//            }
-
-            if (match && !searcher.addResult(pojo)) {
-                return;
-            }
-        }
+        AppProvider.checkAppResults(pojos, fuzzyScore, searcher);
     }
 
     @Override
@@ -95,12 +77,12 @@ public class AppCacheProvider implements IProvider {
     }
 
     @Override
-    public boolean mayFindById(String id) {
+    public boolean mayFindById(@NonNull String id) {
         return false;
     }
 
     @Override
-    public EntryItem findById(String id) {
+    public EntryItem findById(@NonNull String id) {
         return null;
     }
 

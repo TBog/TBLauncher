@@ -1,6 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">TBLauncher</string>
-    <string name="ui_search_hint">Search apps, contacts, …</string>
+    <string name="hint_ui_search">Search apps, contacts, …</string>
 
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
@@ -17,8 +17,8 @@
     <string name="menu_favorites_remove">Remove favorite</string>
     <string name="stub_application">App Name</string>
     <string name="stub_app_tag">app tag list</string>
-    <string name="main_menu">Menu</string>
-    <string name="main_clear">Clear search bar</string>
+    <string name="cd_main_menu">Menu</string>
+    <string name="cd_main_clear">Clear search bar</string>
     <string name="permission_denied">Permission has been denied</string>
     <string name="menu_exclude">Exclude app …</string>
     <string name="menu_tags_edit">Add or edit tags…</string>
@@ -74,7 +74,7 @@
     <string name="menu_custom_icon">Change icon</string>
     <string name="app_rename_title">Choose a custom name for this application</string>
     <string name="app_rename_confirmation">App name is now %s</string>
-    <string name="custom_icon_hint">Filter by name</string>
+    <string name="hint_custom_icon">Filter by name</string>
     <string name="default_icon">default icon</string>
     <string name="custom_icon_application">application</string>
     <string name="custom_icon_application_with_pack">application with pack</string>
@@ -91,9 +91,12 @@
     <string name="custom_icon_preview">Selection\npreview</string>
     <string name="custom_name_set_default">Default name</string>
     <string name="custom_name_rename">Rename</string>
-    <string name="ui_item_contact_hint_message">Message</string>
-    <string name="ui_item_contact_hint_call">Call</string>
+    <string name="cd_item_contact_message">Message</string>
+    <string name="cd_item_contact_call">Call</string>
     <string name="adaptive_shape_name">Adaptive icon shape</string>
-    <string name="icon_preview">Preview</string>
+    <string name="cd_icon_preview">Preview</string>
+    <string name="hint_new_tag">add tag</string>
+    <string name="cd_add_tag">Add tag</string>
+    <string name="cd_remove_tag">Remove tag</string>
 
 </resources>
