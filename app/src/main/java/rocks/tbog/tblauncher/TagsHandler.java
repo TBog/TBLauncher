@@ -224,7 +224,8 @@ public class TagsHandler {
 
     public void setTags(EntryWithTags entry, Set<String> tags) {
         if (tags == null || tags.isEmpty()) {
-            for (String tag : getTags(entry.id))
+            ArrayList<String> tagsToRemove = new ArrayList<>(getTags(entry.id));
+            for (String tag : tagsToRemove)
                 removeTag(entry, tag);
         }
         else {

@@ -5,10 +5,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.view.inputmethod.EditorInfo;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -18,12 +19,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.collection.ArraySet;
 
-import java.util.ArrayList;
 import java.util.Set;
 
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.ui.DialogFragment;
-import rocks.tbog.tblauncher.utils.FuzzyScore;
 
 public class EditTagsDialog extends DialogFragment<Set<String>> {
 
@@ -61,6 +60,8 @@ public class EditTagsDialog extends DialogFragment<Set<String>> {
         GridView gridView = view.findViewById(R.id.grid);
         gridView.setAdapter(mAdapter);
 
+        mAdapter.setOnItemClickListener((adapter, v, position) -> removeTag(adapter.getItem(position)));
+
         // initialize new tag EditView
         mNewTag = view.findViewById(R.id.newTag);
         mNewTag.addTextChangedListener(new TextWatcher() {
@@ -76,13 +77,29 @@ public class EditTagsDialog extends DialogFragment<Set<String>> {
             public void onTextChanged(CharSequence s, int start, int before, int count) {
             }
         });
+        mNewTag.setOnEditorActionListener((v, actionId, event) -> {
+            if (event == null) {
+                if (actionId != EditorInfo.IME_ACTION_NONE) {
+                    addTag(mNewTag.getText().toString());
+                    return true;
+                }
+            } else if (event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
+                if (event.getAction() == KeyEvent.ACTION_UP) {
+                    String tag = mNewTag.getText().toString();
+                    addTag(tag);
+                }
+                return true;
+            }
+            return false;
+        });
 
         // initialize add tag button
         ImageView addTag = view.findViewById(R.id.addTag);
-        addTag.setOnClickListener(v -> {
+        addTag.setOnClickListener(v ->
+
+        {
             String tag = mNewTag.getText().toString();
-            mTagList.add(tag);
-            mAdapter.notifyDataSetChanged();
+            addTag(tag);
         });
 
         // OK button
@@ -99,6 +116,19 @@ public class EditTagsDialog extends DialogFragment<Set<String>> {
             View button = view.findViewById(android.R.id.button2);
             button.setOnClickListener(v -> dismiss());
         }
+    }
+
+    private void addTag(String tag) {
+        if (tag.length() == 0)
+            return;
+        mTagList.add(tag);
+        mAdapter.notifyDataSetChanged();
+        mNewTag.setText("");
+    }
+
+    private void removeTag(String tag) {
+        mTagList.remove(tag);
+        mAdapter.notifyDataSetChanged();
     }
 
     @Override
