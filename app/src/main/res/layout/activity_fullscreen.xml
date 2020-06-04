@@ -12,7 +12,8 @@
     <ImageView
         android:id="@+id/notificationBackground"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="30dp"
+        android:layout_gravity="top"
         android:contentDescription="@null"
         android:src="@drawable/notification_bar_background" />
 
@@ -22,7 +23,7 @@
         android:clipToPadding="false"
         android:fitsSystemWindows="true"
         android:orientation="vertical"
-        tools:layout_marginTop="50dp">
+        tools:layout_marginTop="30dp">
         <!-- This Layout insets its children based on system windows using
              android:fitsSystemWindows.
              This is the only way to resize the result list and move the
@@ -31,7 +32,25 @@
 
         <include layout="@layout/result_list" />
 
+        <LinearLayout
+            android:id="@+id/quickList"
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/bar_height"
+            android:background="@null"
+            android:gravity="center"
+            android:orientation="horizontal" />
+
         <include layout="@layout/search_bar" />
+
     </LinearLayout>
+
+    <!--    <ImageView-->
+    <!--        android:id="@+id/keyboardBackground"-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="0dp"-->
+    <!--        android:contentDescription="@null"-->
+    <!--        android:layout_gravity="bottom"-->
+    <!--        android:src="@android:color/black" />-->
+
 
 </FrameLayout>

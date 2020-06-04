@@ -18,6 +18,8 @@
         android:layout_height="match_parent"
         android:background="@null"
         android:cacheColorHint="@android:color/transparent"
+        android:clipChildren="false"
+        android:clipToPadding="false"
         android:divider="?attr/dividerDrawable"
         android:dividerHeight="1dp"
         android:stackFromBottom="true"

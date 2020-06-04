@@ -51,6 +51,7 @@ public class CustomizeUI {
         setNotificationBarColor();
         setSearchBarPref();
         setResultListPref();
+        TBApplication.quickList(getContext()).onResume(mPref);
     }
 
     private void setNotificationBarColor() {

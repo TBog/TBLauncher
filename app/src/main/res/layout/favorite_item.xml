@@ -16,7 +16,7 @@
         android:layout_height="match_parent"
         android:layout_gravity="center"
         android:contentDescription="@null"
-        tools:src="@drawable/ic_contact" />
+        tools:src="@drawable/ic_contact_placeholder" />
 
     <ImageView
         android:id="@+id/item_notification_dot"

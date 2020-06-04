@@ -71,8 +71,14 @@ public class SliderDialog extends PreferenceDialogFragmentCompat {
         }
         seekBar.setProgress((Integer) preference.getValue());
 
-        if ("search-bar-size".equals(key))
-            ((TextView) root.findViewById(android.R.id.text1)).setText(R.string.search_bar_size);
+        switch (key) {
+            case "search-bar-size":
+                ((TextView) root.findViewById(android.R.id.text1)).setText(R.string.search_bar_size);
+                break;
+            case "quick-list-size":
+                ((TextView) root.findViewById(android.R.id.text1)).setText(R.string.quick_list_size);
+                break;
+        }
 
         mTextView2 = root.findViewById(android.R.id.text2);
         mTextView2.setText( mTextView2.getResources().getString(R.string.value, seekBar.getProgress()) );

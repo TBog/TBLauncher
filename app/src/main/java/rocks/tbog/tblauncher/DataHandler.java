@@ -102,10 +102,19 @@ public class DataHandler extends BroadcastReceiver
             }
         }
 
-//        // Some basic providers are defined directly,
-//        // as we don't need the overhead of a service for them
-//        // Those providers don't expose a service connection,
-//        // and you can't bind / unbind to them dynamically.
+        /*
+         * Some basic providers are defined directly, as we don't need the overhead of a service
+         * for them. These providers don't expose a service connection, and you can't bind / unbind
+         * to them dynamically.
+         */
+
+        // QuickListProvider
+        {
+//            ProviderEntry providerEntry = new ProviderEntry();
+//            providerEntry.provider = new QuickListProvider();
+//            providers.put("quickList", providerEntry);
+        }
+
 //        ProviderEntry calculatorEntry = new ProviderEntry();
 //        calculatorEntry.provider = new CalculatorProvider();
 //        this.providers.put("calculator", calculatorEntry);

@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.preference.PreferenceManager;
+import android.util.Log;
 
 import rocks.tbog.tblauncher.DataHandler;
 import rocks.tbog.tblauncher.TBApplication;
@@ -22,6 +23,8 @@ public class PackageAddedRemovedHandler extends BroadcastReceiver {
 
     public static void handleEvent(Context ctx, String action, String packageName, UserHandleCompat user, boolean replacing) {
         DataHandler dataHandler = TBApplication.getApplication(ctx).getDataHandler();
+
+        Log.i("Pack", action + " " + packageName + " isCurrentUser:" + user.isCurrentUser());
 
         if (PreferenceManager.getDefaultSharedPreferences(ctx).getBoolean("enable-app-history", true)) {
             // Insert into history new packages (not updated ones)

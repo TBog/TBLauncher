@@ -73,7 +73,7 @@ public class AppCacheProvider implements IProvider {
 
     @Override
     public boolean isLoaded() {
-        return false;
+        return true;
     }
 
     @Override

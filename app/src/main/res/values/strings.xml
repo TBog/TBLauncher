@@ -98,5 +98,10 @@
     <string name="hint_new_tag">add tag</string>
     <string name="cd_add_tag">Add tag</string>
     <string name="cd_remove_tag">Remove tag</string>
+    <string name="title_features">Features</string>
+    <string name="features_summary">Toggle and customize app features</string>
+    <string name="quick_list_section">Quick-List</string>
+    <string name="quick_list_enabled">Use quick list</string>
+    <string name="quick_list_size">Bar height</string>
 
 </resources>

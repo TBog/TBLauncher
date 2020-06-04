@@ -31,9 +31,14 @@ public class TBApplication extends Application {
     private Behaviour mBehaviour = new Behaviour();
 
     /**
-     * Everything that has to do with the UI customization
+     * Everything that has to do with the UI customization (drawables and colors)
      */
     private CustomizeUI mCustomizeUI = new CustomizeUI();
+
+    /**
+     * The favorite / quick access bar
+     */
+    private QuickList mQuickList = new QuickList();
 
     /**
      * We store a number of drawables in memory for fast redraw
@@ -50,12 +55,20 @@ public class TBApplication extends Application {
         return (TBApplication) context.getApplicationContext();
     }
 
+    public Behaviour behaviour() {
+        return mBehaviour;
+    }
+
     public static Behaviour behaviour(Context context) {
         return getApplication(context).mBehaviour;
     }
 
     public static CustomizeUI ui(Context context) {
         return getApplication(context).mCustomizeUI;
+    }
+
+    public static QuickList quickList(Context context) {
+        return getApplication(context).mQuickList;
     }
 
     public static DrawableCache drawableCache(Context context) {
@@ -77,6 +90,8 @@ public class TBApplication extends Application {
             tbApplication.mBehaviour = new Behaviour();
         if (tbApplication.mCustomizeUI.getContext() == activity)
             tbApplication.mCustomizeUI = new CustomizeUI();
+        if (tbApplication.mQuickList.getContext() == activity)
+            tbApplication.mQuickList = new QuickList();
     }
 
     public static void runTask(Context context, Searcher task) {

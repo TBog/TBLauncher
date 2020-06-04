@@ -21,6 +21,7 @@ class DB extends SQLiteOpenHelper {
         createTags(database);
         addTimeStamps(database);
         addAppsTable(database);
+        createQuickList(database);
     }
 
     private void createTags(SQLiteDatabase database) {
@@ -37,6 +38,11 @@ class DB extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE apps ( _id INTEGER PRIMARY KEY AUTOINCREMENT, display_name TEXT NOT NULL DEFAULT '', component_name TEXT NOT NULL UNIQUE, custom_flags INTEGER DEFAULT 0 )");
         db.execSQL("CREATE INDEX index_component ON apps(component_name);");
     }
+
+    private void createQuickList(SQLiteDatabase db) {
+        //db.execSQL("CREATE TABLE \"quick list\" (_id INTEGER PRIMARY KEY AUTOINCREMENT, \"name\" TEXT NOT NULL DEFAULT '', )");
+    }
+
     @Override
     public void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {
         Log.d("onUpgrade", "Updating database from version " + oldVersion + " to version " + newVersion);
@@ -58,6 +64,9 @@ class DB extends SQLiteOpenHelper {
                     // fall through
                 case 6:
                     addAppsTable(database);
+                    // fall through
+                case 7:
+                    createQuickList(database);
                 default:
                     break;
             }

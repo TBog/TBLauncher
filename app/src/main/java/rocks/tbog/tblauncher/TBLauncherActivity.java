@@ -143,6 +143,7 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
         // call after all views are set
         TBApplication.behaviour(this).onCreateActivity(this);
         TBApplication.ui(this).onCreateActivity(this);
+        TBApplication.quickList(this).onCreateActivity(this);
     }
 
     @Override

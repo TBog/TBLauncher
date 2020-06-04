@@ -6,35 +6,38 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Filter;
+import android.widget.Filterable;
 import android.widget.SectionIndexer;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.entry.ContactEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
-import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.ui.ListPopup;
-import rocks.tbog.tblauncher.utils.FuzzyScore;
 
-public class ResultAdapter extends BaseAdapter implements SectionIndexer {
+public class ResultAdapter extends BaseAdapter implements SectionIndexer, Filterable {
 
     /**
      * Array list containing all the results currently displayed
      */
-    private List<EntryItem> results;
+    @NonNull
+    private final List<EntryItem> results;
+    @Nullable
+    private List<EntryItem> resultsOriginal = null;
 
     // Mapping from letter to a position (only used for fast scroll, when viewing app list)
     private HashMap<String, Integer> alphaIndexer = new HashMap<>();
     // List of available sections (only used for fast scroll)
     private String[] sections = new String[0];
+    private Filter mFilter = new FilterById();
 
     public ResultAdapter(ArrayList<EntryItem> results) {
         this.results = results;
@@ -141,6 +144,8 @@ public class ResultAdapter extends BaseAdapter implements SectionIndexer {
      */
     public void removeResult(EntryItem result) {
         results.remove(result);
+        if (resultsOriginal != null)
+            resultsOriginal.remove(result);
         notifyDataSetChanged();
     }
 
@@ -149,7 +154,8 @@ public class ResultAdapter extends BaseAdapter implements SectionIndexer {
      *
      * @param results new list of results
      */
-    public void updateResults(List<EntryItem> results) {
+    public void updateResults(List<? extends EntryItem> results) {
+        resultsOriginal = null;
         this.results.clear();
         this.results.addAll(results);
         notifyDataSetChanged();
@@ -201,7 +207,6 @@ public class ResultAdapter extends BaseAdapter implements SectionIndexer {
 //            sections[i] = entries.get(i).getKey();
 //        }
 //    }
-
     @Override
     public Object[] getSections() {
         return sections;
@@ -234,5 +239,48 @@ public class ResultAdapter extends BaseAdapter implements SectionIndexer {
         // so we just return the before-last section
         // See #1005
         return sections.length - 2;
+    }
+
+    @Override
+    public Filter getFilter() {
+        if (resultsOriginal == null)
+            resultsOriginal = new ArrayList<>(results);
+        return mFilter;
+    }
+
+    private class FilterById extends Filter {
+
+        //Invoked in a worker thread to filter the data according to the constraint.
+        @Override
+        protected FilterResults performFiltering(CharSequence constraint) {
+            if (constraint == null || constraint.length() == 0 || resultsOriginal == null)
+                return null;
+            String schema = constraint.toString();
+            ArrayList<EntryItem> filterList = new ArrayList<>();
+            for (EntryItem entryItem : resultsOriginal) {
+                if (entryItem.id.startsWith(schema))
+                    filterList.add(entryItem);
+            }
+            FilterResults filterResults = new FilterResults();
+            filterResults.values = filterList;
+            filterResults.count = filterList.size();
+            return filterResults;
+        }
+
+        //Invoked in the UI thread to publish the filtering results in the user interface.
+        @SuppressWarnings("unchecked")
+        @Override
+        protected void publishResults(CharSequence constraint, FilterResults filterResults) {
+            if (filterResults != null) {
+                results.clear();
+                results.addAll((List<EntryItem>) filterResults.values);
+                notifyDataSetChanged();
+            } else if (resultsOriginal != null) {
+                results.clear();
+                results.addAll(resultsOriginal);
+                resultsOriginal = null;
+                notifyDataSetChanged();
+            }
+        }
     }
 }

@@ -25,7 +25,6 @@ import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.result.ResultHelper;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
-import rocks.tbog.tblauncher.utils.FuzzyScore;
 import rocks.tbog.tblauncher.utils.UIColors;
 
 public final class ContactEntry extends EntryItem {
@@ -200,7 +199,7 @@ public final class ContactEntry extends EntryItem {
                 } catch (FileNotFoundException ignored) {
                 }
             if (drawable == null) {
-                drawable = ContextCompat.getDrawable(ctx, R.drawable.ic_contact);
+                drawable = ContextCompat.getDrawable(ctx, R.drawable.ic_contact_placeholder);
                 if (drawable == null)
                     drawable = new ColorDrawable(UIColors.getPrimaryColor(ctx));
             }

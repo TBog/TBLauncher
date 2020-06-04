@@ -31,6 +31,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.preference.PreferenceManager;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
@@ -56,7 +57,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
 
     private TBLauncherActivity mTBLauncherActivity = null;
-    private DialogFragment mFragmentDialog = null;
+    private DialogFragment<?> mFragmentDialog = null;
 
     private boolean bSearchBarHidden;
 
@@ -223,13 +224,9 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                 .setInterpolator(new LinearInterpolator())
                 .start();
 
+        mSearchBarContainer.setVisibility(View.VISIBLE);
         mSearchBarContainer.animate()
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationStart(Animator animation) {
-                        mSearchBarContainer.setVisibility(View.VISIBLE);
-                    }
-                })
+                .setListener(null)
                 .setStartDelay(0)
                 .alpha(1f)
                 .translationY(0f)
@@ -237,6 +234,8 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                 .setInterpolator(new DecelerateInterpolator())
                 .start();
         bSearchBarHidden = false;
+
+        TBApplication.quickList(getContext()).showQuickList();
 
         // Schedule a runnable to display UI elements after a delay
         mHideHandler.removeCallbacks(mHidePart2Runnable);
@@ -278,6 +277,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         clearAdapter();
         bSearchBarHidden = true;
 
+        TBApplication.quickList(getContext()).hideQuickList();
 
         // Schedule a runnable to remove the status and navigation bar after a delay
         mHideHandler.removeCallbacks(mShowPart2Runnable);
@@ -369,10 +369,12 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     public void clearAdapter() {
         mResultAdapter.clear();
         mResultLayout.setVisibility(View.INVISIBLE);
+        TBApplication.quickList(getContext()).adapterCleared();
+        displayClearOnInput();
     }
 
     @Override
-    public void updateAdapter(ArrayList<EntryItem> results, boolean isRefresh) {
+    public void updateAdapter(List<? extends EntryItem> results, boolean isRefresh) {
         if (isRefresh) {
             // We're refreshing an existing dataset, do not reset scroll!
             temporarilyDisableTranscriptMode();
@@ -385,6 +387,9 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             mResultAdapter.updateResults(results);
             mResultList.animateChange();
         }
+        TBApplication.quickList(getContext()).adapterUpdated();
+        mClearButton.setVisibility(View.VISIBLE);
+        mMenuButton.setVisibility(View.INVISIBLE);
     }
 
     @Override
@@ -392,6 +397,12 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         mResultAdapter.removeResult(result);
         // Do not reset scroll, we want the remaining items to still be in view
         temporarilyDisableTranscriptMode();
+    }
+
+    @Override
+    public void filterResults(String text) {
+        mResultList.prepareChangeAnim();
+        mResultAdapter.getFilter().filter(text, count -> mResultList.animateChange());
     }
 
     /**
@@ -464,7 +475,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
      */
     public void onLaunchOccurred() {
         // We selected an item on the list, now we can cleanup the filter:
-        if (!mSearchEditText.getText().toString().isEmpty()) {
+        if (mSearchEditText.getText().length() > 0) {
             mSearchEditText.setText("");
         }
         hideSearchBar(0);
@@ -557,7 +568,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         return mFragmentDialog != null && mFragmentDialog.isVisible();
     }
 
-    private void openFragmentDialog(DialogFragment dialog) {
+    private void openFragmentDialog(DialogFragment<?> dialog) {
         closeFragmentDialog();
         mFragmentDialog = dialog;
     }
@@ -581,4 +592,5 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             hideSearchBar();
         }
     }
+
 }

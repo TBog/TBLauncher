@@ -209,6 +209,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "search-bar-alpha":
                     case "result-list-alpha":
                     case "search-bar-size":
+                    case "quick-list-size":
                         dialogFragment = SliderDialog.newInstance(key);
                         break;
                     default:

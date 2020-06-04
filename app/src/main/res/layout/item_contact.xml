@@ -17,13 +17,14 @@
         android:layout_centerVertical="true"
         android:layout_marginEnd="@dimen/icon_margin_right"
         android:importantForAccessibility="no"
-        android:src="@drawable/ic_contact"
+        android:src="@drawable/ic_contact_placeholder"
         tools:ignore="ContentDescription" />
 
     <TextView
         android:id="@+id/item_contact_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_alignTop="@id/item_contact_icon"
         android:layout_toStartOf="@+id/item_contact_action_message"
         android:layout_toEndOf="@+id/item_contact_icon"
         android:ellipsize="end"
@@ -44,6 +45,8 @@
         android:layout_height="wrap_content"
         android:layout_below="@id/item_contact_name"
         android:layout_alignStart="@id/item_contact_name"
+        android:layout_alignBottom="@id/item_contact_icon"
+        android:gravity="center_vertical"
         android:importantForAccessibility="no"
         android:paddingEnd="2dp"
         android:shadowColor="?attr/resultShadowColor"
@@ -76,8 +79,8 @@
 
     <ImageButton
         android:id="@+id/item_contact_action_message"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="@dimen/icon_width"
+        android:layout_height="@dimen/icon_height"
         android:layout_centerVertical="true"
         android:layout_toStartOf="@+id/item_contact_action_phone"
         android:background="?attr/appSelectableItemBackground"
@@ -86,8 +89,8 @@
 
     <ImageButton
         android:id="@+id/item_contact_action_phone"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="@dimen/icon_width"
+        android:layout_height="@dimen/icon_height"
         android:layout_alignParentEnd="true"
         android:layout_centerVertical="true"
         android:background="?attr/appSelectableItemBackground"
