@@ -62,13 +62,8 @@ public class SliderDialog extends PreferenceDialogFragmentCompat {
         preference.setValue(preference.getSharedPreferences().getInt(key, 255));
 
         SeekBar seekBar = root.findViewById(R.id.seekBar); // seekBar default minimum is set to 0
-        switch (key) {
-            case "notification-bar-alpha":
-            case "search-bar-alpha":
-            case "result-list-alpha":
-                seekBar.setMax(255);
-                break;
-        }
+        if (key.endsWith("-alpha"))
+            seekBar.setMax(255);
         seekBar.setProgress((Integer) preference.getValue());
 
         switch (key) {
@@ -81,12 +76,12 @@ public class SliderDialog extends PreferenceDialogFragmentCompat {
         }
 
         mTextView2 = root.findViewById(android.R.id.text2);
-        mTextView2.setText( mTextView2.getResources().getString(R.string.value, seekBar.getProgress()) );
+        mTextView2.setText(mTextView2.getResources().getString(R.string.value, seekBar.getProgress()));
 
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                mTextView2.setText( mTextView2.getResources().getString(R.string.value, progress) );
+                mTextView2.setText(mTextView2.getResources().getString(R.string.value, progress));
             }
 
             @Override

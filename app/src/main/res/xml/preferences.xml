@@ -96,6 +96,27 @@
                 android:title="@string/round_corners" />
         </androidx.preference.PreferenceCategory>
 
+        <!-- Quick list -->
+        <androidx.preference.PreferenceCategory
+            android:key="quick-list-section"
+            android:title="@string/quick_list_section">
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:dialogLayout="@layout/pref_color"
+                android:key="quick-list-color"
+                android:title="@string/color" />
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="127"
+                android:dialogLayout="@layout/pref_alpha"
+                android:key="quick-list-alpha"
+                android:title="@string/alpha" />
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@integer/default_bar_size"
+                android:dialogLayout="@layout/pref_alpha"
+                android:key="quick-list-size"
+                android:title="@string/quick_list_size" />
+        </androidx.preference.PreferenceCategory>
+
         <!--        <androidx.preference.PreferenceCategory android:title="@string/misc">-->
         <!--            <androidx.preference.SwitchPreference-->
         <!--                android:defaultValue="false"-->
@@ -120,6 +141,7 @@
                 android:title="@string/quick_list_enabled" />
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@integer/default_bar_size"
+                android:dependency="quick-list-enabled"
                 android:dialogLayout="@layout/pref_alpha"
                 android:key="quick-list-size"
                 android:title="@string/quick_list_size" />

@@ -19,6 +19,7 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceScreen;
 
 import rocks.tbog.tblauncher.preference.CustomDialogPreference;
@@ -116,8 +117,22 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 removePreference("black-notification-icons");
             }
 
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+
+            // quick-list
+            {
+                Preference pref = findPreference("quick-list-enabled");
+                // if we don't have the toggle in this screen we need to apply dependency by hand
+                if (pref == null) {
+                    // only show the category if we use the quick list
+                    Preference section = findPreference("quick-list-section");
+                    if (section != null)
+                        section.setVisible(sharedPreferences.getBoolean("quick-list-enabled", true));
+                }
+            }
+
             final ListPreference iconsPack = findPreference("icons-pack");
-            if ( iconsPack != null )
+            if (iconsPack != null)
                 iconsPack.setEnabled(false);
 
             Runnable iconsPackLoad = () -> {
@@ -203,12 +218,14 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "notification-bar-color":
                     case "search-bar-color":
                     case "result-list-color":
+                    case "quick-list-color":
                         dialogFragment = PaletteDialog.newInstance(key);
                         break;
                     case "notification-bar-alpha":
                     case "search-bar-alpha":
                     case "result-list-alpha":
                     case "search-bar-size":
+                    case "quick-list-alpha":
                     case "quick-list-size":
                         dialogFragment = SliderDialog.newInstance(key);
                         break;
@@ -232,7 +249,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-            SettingsActivity activity = (SettingsActivity)getActivity();
+            SettingsActivity activity = (SettingsActivity) getActivity();
             if (activity == null)
                 return;
 
