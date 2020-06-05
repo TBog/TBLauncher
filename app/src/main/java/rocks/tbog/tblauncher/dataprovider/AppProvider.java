@@ -208,12 +208,14 @@ public class AppProvider extends Provider<AppEntry> {
             match = matchInfo.match;
             pojo.setRelevance(pojo.normalizedName, matchInfo);
 
-            // check relevance for tags
-            for (EntryWithTags.TagDetails tag : pojo.getTags()) {
-                matchInfo = fuzzyScore.match(tag.normalized.codePoints);
-                if (matchInfo.match && (!match || matchInfo.score > pojo.getRelevance())) {
-                    match = true;
-                    pojo.setRelevance(tag.normalized, matchInfo);
+            if (searcher.tagsEnabled()) {
+                // check relevance for tags
+                for (EntryWithTags.TagDetails tag : pojo.getTags()) {
+                    matchInfo = fuzzyScore.match(tag.normalized.codePoints);
+                    if (matchInfo.match && (!match || matchInfo.score > pojo.getRelevance())) {
+                        match = true;
+                        pojo.setRelevance(tag.normalized, matchInfo);
+                    }
                 }
             }
 

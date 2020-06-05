@@ -23,6 +23,7 @@ public abstract class Searcher extends AsyncTask<Void, EntryItem, Void> {
     static final int INITIAL_CAPACITY = 50;
     final WeakReference<ISearchActivity> activityWeakReference;
     private final PriorityQueue<EntryItem> processedPojos;
+    private boolean tagsEnabled;
     private long start;
     /**
      * Set to true when we are simply refreshing current results (scroll will not be reset)
@@ -36,6 +37,7 @@ public abstract class Searcher extends AsyncTask<Void, EntryItem, Void> {
         this.query = query;
         this.activityWeakReference = new WeakReference<>(activity);
         this.processedPojos = getPojoProcessor(activity);
+        this.tagsEnabled = activity.tagsEnabled();
     }
 
     PriorityQueue<EntryItem> getPojoProcessor(ISearchActivity activity) {
@@ -108,5 +110,9 @@ public abstract class Searcher extends AsyncTask<Void, EntryItem, Void> {
 
     public void setRefresh(boolean refresh) {
         isRefresh = refresh;
+    }
+
+    public boolean tagsEnabled() {
+        return tagsEnabled;
     }
 }

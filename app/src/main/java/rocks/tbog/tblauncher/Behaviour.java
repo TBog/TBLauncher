@@ -405,6 +405,11 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         mResultAdapter.getFilter().filter(text, count -> mResultList.animateChange());
     }
 
+    @Override
+    public boolean tagsEnabled() {
+        return mPref.getBoolean("fuzzy-search-tags", true);
+    }
+
     /**
      * transcriptMode on the listView decides when to scroll back to the first item.
      * The value we have by default, TRANSCRIPT_MODE_ALWAYS_SCROLL, means that on every new search,

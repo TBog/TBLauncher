@@ -2,10 +2,16 @@ package rocks.tbog.tblauncher.preference;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.drawable.ColorDrawable;
 import android.util.AttributeSet;
-import android.util.TypedValue;
+import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.Nullable;
+import androidx.preference.PreferenceViewHolder;
+
+import rocks.tbog.tblauncher.R;
 
 public class CustomDialogPreference extends androidx.preference.DialogPreference {
 
@@ -71,9 +77,33 @@ public class CustomDialogPreference extends androidx.preference.DialogPreference
     protected Object onGetDefaultValue(TypedArray a, int index) {
         try {
             return a.getInteger(index, 0);
-        } catch (UnsupportedOperationException e)
-        {
+        } catch (UnsupportedOperationException e) {
             return a.getString(index);
+        }
+    }
+
+    @Override
+    public void onBindViewHolder(PreferenceViewHolder holder) {
+        super.onBindViewHolder(holder);
+        Object value = getSharedPreferences().getAll().get(getKey());
+
+        {
+            View view = holder.findViewById(R.id.prefColorPreview);
+            if (view instanceof ImageView) {
+                ColorDrawable color = null;
+                if (value instanceof Integer)
+                    color = new ColorDrawable((Integer) value);
+                ((ImageView) view).setImageDrawable(color);
+            }
+        }
+        {
+            View view = holder.findViewById(R.id.prefAlphaPreview);
+            if (view instanceof TextView) {
+                String text = null;
+                if (value instanceof Integer)
+                    text = ((Integer) value) * 100 / 255 + "%";
+                ((TextView) view).setText(text);
+            }
         }
     }
 }

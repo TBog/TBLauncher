@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    android:key="feature-holder"
+    android:summary="@string/features_summary"
+    android:title="@string/title_features">
+
+    <!-- Quick List -->
+    <androidx.preference.PreferenceCategory
+        android:key="quick-list-section"
+        android:title="@string/quick_list_section">
+
+        <androidx.preference.SwitchPreference
+            android:defaultValue="true"
+            android:key="quick-list-enabled"
+            android:title="@string/quick_list_enabled" />
+        <rocks.tbog.tblauncher.preference.CustomDialogPreference
+            android:defaultValue="@integer/default_bar_size"
+            android:dependency="quick-list-enabled"
+            android:dialogLayout="@layout/pref_alpha"
+            android:key="quick-list-size"
+            android:title="@string/quick_list_size" />
+
+    </androidx.preference.PreferenceCategory>
+
+    <!-- Tags -->
+    <androidx.preference.PreferenceCategory
+        android:key="tags-section"
+        android:title="@string/tags_section">
+
+        <androidx.preference.SwitchPreference
+            android:defaultValue="true"
+            android:key="tags-enabled"
+            android:title="@string/tags_enabled" />
+        <androidx.preference.SwitchPreference
+            android:defaultValue="true"
+            android:dependency="tags-enabled"
+            android:key="fuzzy-search-tags"
+            android:title="@string/fuzzy_search_tags" />
+
+    </androidx.preference.PreferenceCategory>
+
+    <!-- Icons -->
+    <androidx.preference.PreferenceCategory
+        android:key="icons-section"
+        android:title="@string/icons_section">
+
+        <androidx.preference.SwitchPreference
+            android:defaultValue="true"
+            android:key="icons-visible"
+            android:title="@string/icons_visible" />
+
+    </androidx.preference.PreferenceCategory>
+
+
+</androidx.preference.PreferenceScreen>

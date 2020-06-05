@@ -120,10 +120,12 @@ public final class ContactEntry extends EntryItem {
         ImageView contactIcon = view.findViewById(R.id.item_contact_icon);
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        if (!prefs.getBoolean("icons-hide", false)) {
+        if (prefs.getBoolean("icons-visible", true)) {
+            contactIcon.setVisibility(View.VISIBLE);
             ResultViewHelper.setIconAsync(this, contactIcon, AsyncSetEntryIcon.class);
         } else {
             contactIcon.setImageDrawable(null);
+            contactIcon.setVisibility(View.GONE);
         }
 
 //        contactIcon.assignContactUri(Uri.withAppendedPath(

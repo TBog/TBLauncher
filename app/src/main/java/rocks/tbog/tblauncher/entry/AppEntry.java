@@ -154,17 +154,20 @@ public final class AppEntry extends EntryWithTags {
         if (getTags().isEmpty()) {
             tagsView.setVisibility(View.GONE);
         } else if (ResultViewHelper.displayHighlighted(relevanceSource, getTags(), relevance, tagsView, context)
-                || prefs.getBoolean("tags-visible", true)) {
+                || prefs.getBoolean("tags-enabled", true)) {
             tagsView.setVisibility(View.VISIBLE);
         } else {
             tagsView.setVisibility(View.GONE);
         }
 
-        final ImageView appIcon = view.findViewById(R.id.item_app_icon);
-        if (!prefs.getBoolean("icons-hide", false)) {
+        View iconContainer = view.findViewById(R.id.item_icon_container);
+        ImageView appIcon = view.findViewById(R.id.item_app_icon);
+        if (prefs.getBoolean("icons-visible", true)) {
+            iconContainer.setVisibility(View.VISIBLE);
             ResultViewHelper.setIconAsync(this, appIcon, AsyncSetEntryIcon.class);
         } else {
             appIcon.setImageDrawable(null);
+            iconContainer.setVisibility(View.GONE);
         }
 
         //TODO: enable notification badges

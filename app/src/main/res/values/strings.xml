@@ -41,7 +41,7 @@
     <string name="misc">Misc</string>
     <string name="notification_bar_section">Notification bar</string>
     <string name="color">Color</string>
-    <string name="alpha">Transparency</string>
+    <string name="alpha">Opacity</string>
     <string name="gradient">Gradient</string>
     <string name="black_notification_icons">Dark icons</string>
     <string name="transparent_search_bar">Transparent search bar</string>
@@ -103,5 +103,10 @@
     <string name="quick_list_section">Quick-List</string>
     <string name="quick_list_enabled">Use quick list</string>
     <string name="quick_list_size">Bar height</string>
+    <string name="tags_section">Tags</string>
+    <string name="fuzzy_search_tags">Fuzzy-search tags</string>
+    <string name="tags_enabled">Use tags for apps</string>
+    <string name="icons_section">Icons</string>
+    <string name="icons_visible">Show Icons</string>
 
 </resources>

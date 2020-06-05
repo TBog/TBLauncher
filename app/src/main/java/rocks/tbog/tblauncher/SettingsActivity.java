@@ -21,6 +21,7 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceScreen;
+import androidx.preference.SwitchPreference;
 
 import rocks.tbog.tblauncher.preference.CustomDialogPreference;
 import rocks.tbog.tblauncher.preference.PaletteDialog;
@@ -111,7 +112,10 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-            setPreferencesFromResource(R.xml.preferences, rootKey);
+            if ("feature-holder".equals(rootKey))
+                setPreferencesFromResource(R.xml.preference_features, rootKey);
+            else
+                setPreferencesFromResource(R.xml.preferences, rootKey);
 
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
                 removePreference("black-notification-icons");
@@ -256,6 +260,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             if (PREF_THAT_REQUIRE_LAYOUT_UPDATE.contains(key))
                 TBApplication.getApplication(activity).requireLayoutUpdate();
 
+            // rebind and relayout all visible views because I can't find how to rebind only the current view
+            getListView().getAdapter().notifyDataSetChanged();
+
             switch (key) {
                 case "notification-bar-color":
                 case "notification-bar-alpha": {
@@ -284,6 +291,15 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     TBApplication.getApplication(activity).getIconsHandler().setAdaptiveShape(sharedPreferences.getString(key, null));
                     TBApplication.drawableCache(activity).clearCache();
                     break;
+                case "tags-enabled": {
+                    boolean useTags = sharedPreferences.getBoolean("tags-enabled", true);
+                    SwitchPreference preference = findPreference("fuzzy-search-tags");
+                    if (preference != null)
+                        preference.setChecked(useTags);
+                    else
+                        sharedPreferences.edit().putBoolean("fuzzy-search-tags", useTags).apply();
+                }
+                break;
             }
         }
     }

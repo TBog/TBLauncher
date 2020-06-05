@@ -9,6 +9,7 @@
     android:orientation="horizontal">
 
     <FrameLayout
+        android:id="@+id/item_icon_container"
         android:layout_width="@dimen/icon_width"
         android:layout_height="@dimen/icon_height"
         android:layout_gravity="start|center_vertical"

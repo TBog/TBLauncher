@@ -39,4 +39,10 @@ public interface ISearchActivity {
      * @param text to filter for
      */
     void filterResults(String text);
+
+    /**
+     * Should we search the tags?
+     * @return true if tags should be searched
+     */
+    boolean tagsEnabled();
 }
