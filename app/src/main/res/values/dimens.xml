@@ -2,6 +2,8 @@
 <resources>
     <dimen name="icon_width">48dp</dimen>
     <dimen name="icon_height">48dp</dimen>
+    <dimen name="subicon_width">22dp</dimen>
+    <dimen name="subicon_height">22dp</dimen>
 
     <dimen name="pref_preview_width">32dp</dimen>
     <dimen name="pref_preview_height">32dp</dimen>

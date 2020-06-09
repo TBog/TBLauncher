@@ -10,6 +10,7 @@ import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.PopupWindow;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 
 import rocks.tbog.tblauncher.R;
@@ -21,7 +22,7 @@ public class ListPopup extends PopupWindow {
     private OnItemClickListener mItemClickListener;
     private DataSetObserver mObserver;
     private ListAdapter mAdapter;
-//    private SystemUiVisibilityHelper mSystemUiVisibilityHelper;
+    //    private SystemUiVisibilityHelper mSystemUiVisibilityHelper;
     private boolean dismissOnClick = true;
 
     public ListPopup(Context context) {
@@ -37,7 +38,7 @@ public class ListPopup extends PopupWindow {
         mClickListener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if ( dismissOnClick )
+                if (dismissOnClick)
                     dismiss();
                 if (mItemClickListener != null) {
                     LinearLayout layout = getLinearLayout();
@@ -82,8 +83,7 @@ public class ListPopup extends PopupWindow {
         return mAdapter;
     }
 
-    public void setDismissOnItemClick(boolean dismissOnClick )
-    {
+    public void setDismissOnItemClick(boolean dismissOnClick) {
         this.dismissOnClick = dismissOnClick;
     }
 
@@ -195,6 +195,9 @@ public class ListPopup extends PopupWindow {
         boolean onItemLongClick(ListAdapter adapter, View view, int position);
     }
 
+    /**
+     * Use `Item` for fast prototyping in an `ArrayAdapter<ListPopup.Item>`
+     */
     public static class Item {
         @StringRes
         public final int stringId;
@@ -213,6 +216,7 @@ public class ListPopup extends PopupWindow {
             this.string = string;
         }
 
+        @NonNull
         @Override
         public String toString() {
             return this.string;

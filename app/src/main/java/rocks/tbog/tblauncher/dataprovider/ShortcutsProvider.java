@@ -4,6 +4,7 @@ import android.widget.Toast;
 
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.entry.EntryItem;
+import rocks.tbog.tblauncher.entry.EntryWithTags;
 import rocks.tbog.tblauncher.entry.ShortcutEntry;
 import rocks.tbog.tblauncher.loader.LoadShortcutsEntryItem;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
@@ -22,9 +23,8 @@ public class ShortcutsProvider extends Provider<ShortcutEntry> {
 
         try {
             this.initialize(new LoadShortcutsEntryItem(this));
-        }
-        catch(IllegalStateException e) {
-            if(!notifiedKissNotDefaultLauncher) {
+        } catch (IllegalStateException e) {
+            if (!notifiedKissNotDefaultLauncher) {
                 // Only display this message once per process
                 Toast.makeText(this, R.string.unable_to_initialize_shortcuts, Toast.LENGTH_LONG).show();
             }
@@ -50,15 +50,16 @@ public class ShortcutsProvider extends Provider<ShortcutEntry> {
             match = matchInfo.match;
             pojo.setRelevance(pojo.normalizedName, matchInfo);
 
-            // TODO: enable tags
-            // check relevance for tags
-//            if (pojo.getNormalizedTags() != null) {
-//                matchInfo = fuzzyScore.match(pojo.getNormalizedTags().codePoints);
-//                if (matchInfo.match && (!match || matchInfo.score > pojo.relevance)) {
-//                    match = true;
-//                    pojo.relevance = matchInfo.score;
-//                }
-//            }
+            if (searcher.tagsEnabled()) {
+                // check relevance for tags
+                for (EntryWithTags.TagDetails tag : pojo.getTags()) {
+                    matchInfo = fuzzyScore.match(tag.normalized.codePoints);
+                    if (matchInfo.match && (!match || matchInfo.score > pojo.getRelevance())) {
+                        match = true;
+                        pojo.setRelevance(tag.normalized, matchInfo);
+                    }
+                }
+            }
 
             if (match && !searcher.addResult(pojo)) {
                 return;

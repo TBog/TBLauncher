@@ -7,6 +7,8 @@ import androidx.annotation.NonNull;
 import java.util.ArrayList;
 import java.util.List;
 
+import rocks.tbog.tblauncher.TBApplication;
+import rocks.tbog.tblauncher.TagsHandler;
 import rocks.tbog.tblauncher.db.DBHelper;
 import rocks.tbog.tblauncher.db.ShortcutRecord;
 import rocks.tbog.tblauncher.entry.ShortcutEntry;
@@ -14,11 +16,11 @@ import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
 
 public class LoadShortcutsEntryItem extends LoadEntryItem<ShortcutEntry> {
 
-    //private final TagsHandler tagsHandler;
+    private final TagsHandler tagsHandler;
 
     public LoadShortcutsEntryItem(Context context) {
         super(context);
-        //tagsHandler = TBApplication.getApplication(context).getDataHandler().getTagsHandler();
+        tagsHandler = TBApplication.tagsHandler(context);
     }
 
     @NonNull
@@ -42,7 +44,7 @@ public class LoadShortcutsEntryItem extends LoadEntryItem<ShortcutEntry> {
             ShortcutEntry pojo = new ShortcutEntry(id, shortcutRecord.dbId, shortcutRecord.packageName, shortcutRecord.intentUri);
 
             pojo.setName(shortcutRecord.name);
-            //pojo.setTags(tagsHandler.getTags(pojo.id));
+            pojo.setTags(tagsHandler.getTags(pojo.id));
 
             pojos.add(pojo);
         }

@@ -63,6 +63,7 @@ public class DataHandler extends BroadcastReceiver
 //            "app", "contacts", "shortcuts"
             "app"
             , "contacts"
+            , "shortcuts"
     );
     //private TagsHandler tagsHandler;
     final private Context context;

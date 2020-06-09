@@ -85,6 +85,10 @@
         <item name="dividerDrawable">@null</item>
         <item name="textShadowRadius">3</item>
         <item name="colorControlHighlight">@color/colorAccent</item>
+
+        <item name="android:listPreferredItemHeight">54dp</item> <!-- 64dp -->
+        <item name="android:listPreferredItemHeightSmall">40dp</item> <!-- 48dp -->
+        <item name="android:listPreferredItemHeightLarge">67dp</item> <!-- 80dp -->
     </style>
 
 <!--    <style name="AppThemeSemiTransparent" parent="AppThemeLight">-->

@@ -21,6 +21,7 @@ import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.entry.ContactEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
+import rocks.tbog.tblauncher.entry.ShortcutEntry;
 import rocks.tbog.tblauncher.ui.ListPopup;
 
 public class ResultAdapter extends BaseAdapter implements SectionIndexer, Filterable {
@@ -45,7 +46,7 @@ public class ResultAdapter extends BaseAdapter implements SectionIndexer, Filter
 
     @Override
     public int getViewTypeCount() {
-        return 3;
+        return 4;
     }
 
     @Override
@@ -61,8 +62,8 @@ public class ResultAdapter extends BaseAdapter implements SectionIndexer, Filter
 //            return 3;
 //        else if (results.get(position) instanceof PhoneResult)
 //            return 4;
-//        else if (results.get(position) instanceof ShortcutsResult)
-//            return 5;
+        else if (results.get(position) instanceof ShortcutEntry)
+            return 3;
         return super.getItemViewType(position); // return 0;
     }
 

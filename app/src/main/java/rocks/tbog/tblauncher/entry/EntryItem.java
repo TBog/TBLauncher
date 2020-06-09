@@ -1,9 +1,7 @@
 package rocks.tbog.tblauncher.entry;
 
 import android.content.Context;
-import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
 
 import androidx.annotation.CallSuper;
 import androidx.annotation.LayoutRes;
@@ -16,6 +14,7 @@ import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.result.ResultAdapter;
 import rocks.tbog.tblauncher.result.ResultHelper;
+import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
 
@@ -130,14 +129,15 @@ public abstract class EntryItem {
      *
      * @return an inflated, listener-free PopupMenu
      */
-    ListPopup buildPopupMenu(Context context, ArrayAdapter<ListPopup.Item> adapter, final ResultAdapter parent, View parentView) {
-        adapter.add(new ListPopup.Item(context, R.string.menu_remove));
-        adapter.add(new ListPopup.Item(context, R.string.menu_favorites_add));
-        adapter.add(new ListPopup.Item(context, R.string.menu_favorites_remove));
+    ListPopup buildPopupMenu(Context context, LinearAdapter adapter, final ResultAdapter parent, View parentView) {
+        adapter.add(new LinearAdapter.ItemTitle(context, R.string.popup_title_hist_fav));
+        adapter.add(new LinearAdapter.Item(context, R.string.menu_remove));
+        adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_add));
+        adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_remove));
         return inflatePopupMenu(adapter, context);
     }
 
-    ListPopup inflatePopupMenu(@NonNull ArrayAdapter<ListPopup.Item> adapter, @NonNull Context context) {
+    ListPopup inflatePopupMenu(@NonNull LinearAdapter adapter, @NonNull Context context) {
         ListPopup menu = new ListPopup(context);
         menu.setAdapter(adapter);
 
@@ -147,22 +147,25 @@ public abstract class EntryItem {
                 getString("favorite-apps-list", "");
         if (favApps.contains(id + ";")) {
             for (int i = 0; i < adapter.getCount(); i += 1) {
-                ListPopup.Item item = adapter.getItem(i);
-                assert item != null;
-                if (item.stringId == R.string.menu_favorites_add)
-                    adapter.remove(item);
+                LinearAdapter.MenuItem item = adapter.getItem(i);
+                if (item instanceof LinearAdapter.Item) {
+                    if (((LinearAdapter.Item) item).stringId == R.string.menu_favorites_add)
+                        adapter.remove(item);
+                }
             }
         } else {
             for (int i = 0; i < adapter.getCount(); i += 1) {
-                ListPopup.Item item = adapter.getItem(i);
-                assert item != null;
-                if (item.stringId == R.string.menu_favorites_remove)
-                    adapter.remove(item);
+                LinearAdapter.MenuItem item = adapter.getItem(i);
+                if (item instanceof LinearAdapter.Item) {
+                    if (((LinearAdapter.Item) item).stringId == R.string.menu_favorites_remove)
+                        adapter.remove(item);
+                }
             }
         }
 
         if (BuildConfig.DEBUG) {
-            adapter.add(new ListPopup.Item("Relevance: " + getRelevance()));
+            adapter.add(new LinearAdapter.ItemTitle("Debug info"));
+            adapter.add(new LinearAdapter.ItemString("Relevance: " + getRelevance()));
         }
 
         return menu;
@@ -175,12 +178,16 @@ public abstract class EntryItem {
      */
     @NonNull
     public ListPopup getPopupMenu(final Context context, final ResultAdapter resultAdapter, final View parentView) {
-        ArrayAdapter<ListPopup.Item> menuAdapter = new ArrayAdapter<>(context, R.layout.popup_list_item);
+        LinearAdapter menuAdapter = new LinearAdapter();
         ListPopup menu = buildPopupMenu(context, menuAdapter, resultAdapter, parentView);
 
         menu.setOnItemClickListener((adapter, view, position) -> {
-            @StringRes int stringId = ((ListPopup.Item) adapter.getItem(position)).stringId;
-            popupMenuClickHandler(view.getContext(), resultAdapter, stringId);
+            LinearAdapter.MenuItem item = ((LinearAdapter) adapter).getItem(position);
+            @StringRes int stringId = 0;
+            if (item instanceof LinearAdapter.Item) {
+                stringId = ((LinearAdapter.Item) adapter.getItem(position)).stringId;
+            }
+            popupMenuClickHandler(view.getContext(), item, stringId);
         });
 
         return menu;
@@ -193,10 +200,10 @@ public abstract class EntryItem {
      * @return Works in the same way as onOptionsItemSelected, return true if the action has been handled, false otherwise
      */
     @CallSuper
-    boolean popupMenuClickHandler(@NonNull Context context, @NonNull ResultAdapter resultAdapter, @StringRes int stringId) {
+    boolean popupMenuClickHandler(@NonNull Context context, @NonNull LinearAdapter.MenuItem item, @StringRes int stringId) {
         switch (stringId) {
             case R.string.menu_remove:
-                ResultHelper.removeFromResultsAndHistory(this, context, resultAdapter);
+                ResultHelper.removeFromResultsAndHistory(this, context);
                 return true;
             case R.string.menu_favorites_add:
                 ResultHelper.launchAddToFavorites(context, this);

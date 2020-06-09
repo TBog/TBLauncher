@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.Build;
 import android.provider.ContactsContract;
 import android.util.Log;
 import android.view.View;
@@ -56,9 +55,8 @@ public class ResultHelper {
      * Remove the current result from the list
      *
      * @param context android context
-     * @param parent  adapter on which to remove the item
      */
-    public static void removeFromResultsAndHistory(@NonNull EntryItem pojo, @NonNull Context context, @NonNull ResultAdapter parent) {
+    public static void removeFromResultsAndHistory(@NonNull EntryItem pojo, @NonNull Context context) {
         removeFromHistory(pojo, context);
         Toast.makeText(context, R.string.removed_item, Toast.LENGTH_SHORT).show();
         //parent.removeResult(context, this);

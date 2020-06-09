@@ -174,7 +174,7 @@ public final class ContactEntry extends EntryItem {
     }
 
     @Override
-    public void doLaunch(View v) {
+    public void doLaunch(@NonNull View v) {
         Context context = v.getContext();
         SharedPreferences settingPrefs = PreferenceManager.getDefaultSharedPreferences(v.getContext());
         boolean callContactOnClick = settingPrefs.getBoolean("call-contact-on-click", false);

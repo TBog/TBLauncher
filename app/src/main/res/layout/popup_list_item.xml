@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@android:id/text1"
     android:layout_width="match_parent"
     android:layout_height="?android:attr/listPreferredItemHeightSmall"
     android:background="?android:attr/listChoiceBackgroundIndicator"
     android:gravity="center_vertical"
-    android:paddingEnd="8dip"
-    android:paddingStart="8dip"
-    android:textAppearance="?android:attr/textAppearanceSmallPopupMenu" />
+    android:paddingStart="?android:attr/listPreferredItemPaddingLeft"
+    android:paddingEnd="?android:attr/listPreferredItemPaddingRight"
+    android:textAppearance="?android:attr/textAppearanceSmallPopupMenu"
+    tools:text="@string/menu_favorites_add" />

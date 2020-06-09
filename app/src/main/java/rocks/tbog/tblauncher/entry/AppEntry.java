@@ -18,7 +18,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -38,8 +37,8 @@ import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.result.ResultAdapter;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
+import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
-import rocks.tbog.tblauncher.utils.FuzzyScore;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
 
@@ -183,18 +182,26 @@ public final class AppEntry extends EntryWithTags {
     }
 
     @Override
-    protected ListPopup buildPopupMenu(Context context, ArrayAdapter<ListPopup.Item> adapter, final ResultAdapter parent, View parentView) {
+    protected ListPopup buildPopupMenu(Context context, LinearAdapter adapter, final ResultAdapter resultAdapter, View parentView) {
 //        if (!(context instanceof TBLauncherActivity) || ((TBLauncherActivity) context).isViewingSearchResults()) {
 //            adapter.add(new ListPopup.Item(context, R.string.menu_remove));
 //        }
-        adapter.add(new ListPopup.Item(context, R.string.menu_exclude));
-        adapter.add(new ListPopup.Item(context, R.string.menu_favorites_add));
-        adapter.add(new ListPopup.Item(context, R.string.menu_tags_edit));
-        adapter.add(new ListPopup.Item(context, R.string.menu_app_rename));
-        adapter.add(new ListPopup.Item(context, R.string.menu_custom_icon));
-        adapter.add(new ListPopup.Item(context, R.string.menu_favorites_remove));
-        adapter.add(new ListPopup.Item(context, R.string.menu_app_details));
-        adapter.add(new ListPopup.Item(context, R.string.menu_app_store));
+        adapter.add(new LinearAdapter.ItemTitle(context, R.string.popup_title_hist_fav));
+        adapter.add(new LinearAdapter.Item(context, R.string.menu_exclude));
+        adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_add));
+        adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_remove));
+
+        adapter.add(new LinearAdapter.ItemTitle(context, R.string.popup_title_customize));
+        if (getTags().isEmpty())
+            adapter.add(new LinearAdapter.Item(context, R.string.menu_tags_add));
+        else
+            adapter.add(new LinearAdapter.Item(context, R.string.menu_tags_edit));
+        adapter.add(new LinearAdapter.Item(context, R.string.menu_app_rename));
+        adapter.add(new LinearAdapter.Item(context, R.string.menu_custom_icon));
+
+        adapter.add(new LinearAdapter.ItemTitle(context, R.string.popup_title_link));
+        adapter.add(new LinearAdapter.Item(context, R.string.menu_app_details));
+        adapter.add(new LinearAdapter.Item(context, R.string.menu_app_store));
 
         try {
             // app installed under /system can't be uninstalled
@@ -211,7 +218,7 @@ public final class AppEntry extends EntryWithTags {
             }
 
             if ((ai.flags & ApplicationInfo.FLAG_SYSTEM) == 0 && canUninstall()) {
-                adapter.add(new ListPopup.Item(context, R.string.menu_app_uninstall));
+                adapter.add(new LinearAdapter.Item(context, R.string.menu_app_uninstall));
             }
         } catch (PackageManager.NameNotFoundException | IndexOutOfBoundsException e) {
             // should not happen
@@ -226,7 +233,7 @@ public final class AppEntry extends EntryWithTags {
     }
 
     @Override
-    protected boolean popupMenuClickHandler(final Context context, final ResultAdapter parent, int stringId) {
+    protected boolean popupMenuClickHandler(@NonNull final Context context, final LinearAdapter.MenuItem item, int stringId) {
         switch (stringId) {
             case R.string.menu_app_details:
                 launchAppDetails(context);
@@ -265,6 +272,7 @@ public final class AppEntry extends EntryWithTags {
 //
 //                popupExcludeMenu.show();
                 return true;
+            case R.string.menu_tags_add:
             case R.string.menu_tags_edit:
                 TBApplication.behaviour(context).launchEditTagsDialog(this);
                 return true;
@@ -276,7 +284,7 @@ public final class AppEntry extends EntryWithTags {
                 return true;
         }
 
-        return super.popupMenuClickHandler(context, parent, stringId);
+        return super.popupMenuClickHandler(context, item, stringId);
     }
 
     @Override
