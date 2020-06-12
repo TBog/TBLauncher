@@ -11,6 +11,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.LauncherActivityInfo;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
+import android.content.pm.ShortcutInfo;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -37,10 +38,15 @@ import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.result.ResultAdapter;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
+import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
+
+import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_DYNAMIC;
+import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_MANIFEST;
+import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_PINNED;
 
 public final class AppEntry extends EntryWithTags {
 
@@ -181,11 +187,34 @@ public final class AppEntry extends EntryWithTags {
 //        }
     }
 
+    static class ShortcutItem extends LinearAdapter.ItemString {
+        @NonNull
+        ShortcutInfo shortcutInfo;
+
+        public ShortcutItem(@NonNull String string, @NonNull ShortcutInfo info) {
+            super(string);
+            shortcutInfo = info;
+        }
+    }
+
     @Override
     protected ListPopup buildPopupMenu(Context context, LinearAdapter adapter, final ResultAdapter resultAdapter, View parentView) {
 //        if (!(context instanceof TBLauncherActivity) || ((TBLauncherActivity) context).isViewingSearchResults()) {
 //            adapter.add(new ListPopup.Item(context, R.string.menu_remove));
 //        }
+
+        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            List<ShortcutInfo> list = ShortcutUtil.getShortcut(context, getPackageName(), FLAG_MATCH_MANIFEST | FLAG_MATCH_PINNED | FLAG_MATCH_DYNAMIC);
+            for (ShortcutInfo info : list) {
+                CharSequence label = info.getLongLabel();
+                if (label == null)
+                    label = info.getShortLabel();
+                if (label == null)
+                    continue;
+                adapter.add(new ShortcutItem(label.toString(), info));
+            }
+        }
+
         adapter.add(new LinearAdapter.ItemTitle(context, R.string.popup_title_hist_fav));
         adapter.add(new LinearAdapter.Item(context, R.string.menu_exclude));
         adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_add));
@@ -233,7 +262,15 @@ public final class AppEntry extends EntryWithTags {
     }
 
     @Override
-    protected boolean popupMenuClickHandler(@NonNull final Context context, final LinearAdapter.MenuItem item, int stringId) {
+    protected boolean popupMenuClickHandler(@NonNull final Context context, @NonNull LinearAdapter.MenuItem item, int stringId) {
+        if (item instanceof ShortcutItem) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                final LauncherApps launcherApps = (LauncherApps) context.getSystemService(Context.LAUNCHER_APPS_SERVICE);
+                assert launcherApps != null;
+                launcherApps.startShortcut(((ShortcutItem) item).shortcutInfo, null, null);
+            }
+            return true;
+        }
         switch (stringId) {
             case R.string.menu_app_details:
                 launchAppDetails(context);

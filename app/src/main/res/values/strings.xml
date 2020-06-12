@@ -73,9 +73,12 @@
     <string name="icons_pack_default_name">System icons</string>
     <string name="value">value %d</string>
     <string name="menu_app_rename">Rename app</string>
+    <string name="menu_shortcut_rename">Rename shortcut</string>
     <string name="menu_custom_icon">Change icon</string>
     <string name="app_rename_title">Choose a custom name for this application</string>
+    <string name="shortcut_rename_title">Choose a custom name for this shortcut</string>
     <string name="app_rename_confirmation">App name is now %s</string>
+    <string name="shortcut_rename_confirmation">Shortcut name is now %s</string>
     <string name="hint_custom_icon">Filter by name</string>
     <string name="default_icon">default icon</string>
     <string name="custom_icon_application">application</string>
@@ -113,5 +116,8 @@
     <string name="popup_title_hist_fav">Preferences</string>
     <string name="popup_title_customize">Customize</string>
     <string name="popup_title_link">Links</string>
+    <string name="shortcuts_no_host_permission">This is not your main launcher anymore and can\'t access your shortcuts.</string>
+    <string name="pin_shortcut_message">Do you want to add this shortcut?</string>
+    <string name="pin_shortcut_label">Choose shortcut label</string>
 
 </resources>

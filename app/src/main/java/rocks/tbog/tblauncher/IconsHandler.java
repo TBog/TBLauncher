@@ -8,18 +8,22 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.CompressFormat;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Path;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.preference.PreferenceManager;
 
 import java.io.File;
@@ -34,6 +38,7 @@ import rocks.tbog.tblauncher.icons.IconPack;
 import rocks.tbog.tblauncher.icons.IconPackXML;
 import rocks.tbog.tblauncher.icons.SystemIconPack;
 import rocks.tbog.tblauncher.utils.DrawableUtils;
+import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 
 /**
@@ -116,11 +121,11 @@ public class IconsHandler {
         String componentString = componentName.toString();
 
         // Search first in cache
-        {
-            Drawable cacheIcon = cacheGetDrawable(componentString);
-            if (cacheIcon != null)
-                return cacheIcon;
-        }
+//        {
+//            Drawable cacheIcon = cacheGetDrawable(componentString);
+//            if (cacheIcon != null)
+//                return cacheIcon;
+//        }
 
         // check the icon pack for a resource
         {
@@ -134,8 +139,8 @@ public class IconsHandler {
         if (systemIcon == null)
             return null;
         Drawable drawable = mIconPack.applyBackgroundAndMask(ctx, systemIcon, true);
-        if (drawable instanceof BitmapDrawable)
-            storeDrawable(cacheGetFileName(componentName.toString()), drawable);
+//        if (drawable instanceof BitmapDrawable)
+//            storeDrawable(cacheGetFileName(componentName.toString()), drawable);
         return drawable;
     }
 
@@ -179,26 +184,26 @@ public class IconsHandler {
         return mIconPack != null ? mIconPack : mSystemPack;
     }
 
-    private boolean isDrawableInCache(String key) {
-        File drawableFile = cacheGetFileName(key);
-        return drawableFile.isFile();
-    }
+//    private boolean isDrawableInCache(String key) {
+//        File drawableFile = cacheGetFileName(key);
+//        return drawableFile.isFile();
+//    }
 
-    private void storeDrawable(@NonNull File drawableFile, Drawable drawable) {
-        if (drawable instanceof BitmapDrawable) {
-            FileOutputStream fos;
-            try {
-                fos = new FileOutputStream(drawableFile);
-                ((BitmapDrawable) drawable).getBitmap().compress(CompressFormat.PNG, 100, fos);
-                fos.flush();
-                fos.close();
-            } catch (Exception e) {
-                Log.e(TAG, "Unable to store drawable as " + drawableFile, e);
-            }
-        } else {
-            Log.w(TAG, "Only BitmapDrawable can be stored! " + drawableFile);
-        }
-    }
+//    private void storeDrawable(@NonNull File drawableFile, Drawable drawable) {
+//        if (drawable instanceof BitmapDrawable) {
+//            FileOutputStream fos;
+//            try {
+//                fos = new FileOutputStream(drawableFile);
+//                ((BitmapDrawable) drawable).getBitmap().compress(CompressFormat.PNG, 100, fos);
+//                fos.flush();
+//                fos.close();
+//            } catch (Exception e) {
+//                Log.e(TAG, "Unable to store drawable as " + drawableFile, e);
+//            }
+//        } else {
+//            Log.w(TAG, "Only BitmapDrawable can be stored! " + drawableFile);
+//        }
+//    }
 
     private void removeStoredDrawable(@NonNull File drawableFile) {
         try {
@@ -209,35 +214,35 @@ public class IconsHandler {
         }
     }
 
-    private Drawable cacheGetDrawable(String key) {
+//    private Drawable cacheGetDrawable(String key) {
+//
+//        if (!isDrawableInCache(key)) {
+//            return null;
+//        }
+//
+//        FileInputStream fis;
+//        try {
+//            fis = new FileInputStream(cacheGetFileName(key));
+//            BitmapDrawable drawable =
+//                    new BitmapDrawable(this.ctx.getResources(), BitmapFactory.decodeStream(fis));
+//            fis.close();
+//            return drawable;
+//        } catch (Exception e) {
+//            Log.e(TAG, "Unable to get drawable from cache " + e);
+//        }
+//
+//        return null;
+//    }
 
-        if (!isDrawableInCache(key)) {
-            return null;
-        }
-
-        FileInputStream fis;
-        try {
-            fis = new FileInputStream(cacheGetFileName(key));
-            BitmapDrawable drawable =
-                    new BitmapDrawable(this.ctx.getResources(), BitmapFactory.decodeStream(fis));
-            fis.close();
-            return drawable;
-        } catch (Exception e) {
-            Log.e(TAG, "Unable to get drawable from cache " + e);
-        }
-
-        return null;
-    }
-
-    /**
-     * create path for icons cache like this
-     * {cacheDir}/icons/{icons_pack_package_name}_{componentName_hash}.png
-     */
-    private File cacheGetFileName(String key) {
-        String iconsPackPackageName = mIconPack != null ? mIconPack.getPackPackageName() : "";
-        return new File(getIconsCacheDir(), iconsPackPackageName + "_" + key.hashCode() + ".png");
-    }
-
+    //    /**
+//     * create path for icons cache like this
+//     * {cacheDir}/icons/{icons_pack_package_name}_{componentName_hash}.png
+//     */
+//    private File cacheGetFileName(String key) {
+//        String iconsPackPackageName = mIconPack != null ? mIconPack.getPackPackageName() : "";
+//        return new File(getIconsCacheDir(), iconsPackPackageName + "_" + key.hashCode() + ".png");
+//    }
+//
     private File getIconsCacheDir() {
         File dir = new File(this.ctx.getCacheDir(), "icons");
         if (!dir.exists() && !dir.mkdir())
@@ -278,10 +283,13 @@ public class IconsHandler {
         if (fileList != null) {
             for (File item : fileList) {
                 if (!item.delete()) {
-                    Log.w(TAG, "Failed to delete file: " + item.getAbsolutePath());
+                    Log.w(TAG, "Failed to delete cacheIcon: " + item.getAbsolutePath());
                 }
             }
         }
+
+        if (!cacheDir.delete())
+            Log.w(TAG, "Failed to delete cacheDir: " + cacheDir.getAbsolutePath());
     }
 
     public Drawable getCustomIcon(String componentName, long customIcon) {
@@ -301,7 +309,7 @@ public class IconsHandler {
 
     public void changeAppIcon(AppEntry appEntry, Drawable drawable) {
         AppRecord appRecord = TBApplication.getApplication(ctx).getDataHandler().setCustomAppIcon(appEntry.getUserComponentName());
-        storeDrawable(customIconFileName(appRecord.componentName, appRecord.dbId), drawable);
+        //storeDrawable(customIconFileName(appRecord.componentName, appRecord.dbId), drawable);
         appEntry.setCustomIcon(appRecord.dbId);
     }
 
@@ -331,5 +339,22 @@ public class IconsHandler {
             output = new BitmapDrawable(ctx.getResources(), b);
         }
         return output;
+    }
+
+    @NonNull
+    public Drawable getDefaultActivityIcon(Context context) {
+        Resources resources = context.getResources();
+
+        int iconId = (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O)
+                ? android.R.drawable.sym_def_app_icon
+                : android.R.mipmap.sym_def_app_icon;
+
+        Drawable d = null;
+        try {
+            d = ResourcesCompat.getDrawable(resources, iconId, context.getTheme());
+        } catch (Resources.NotFoundException ignored) {
+        }
+
+        return (d == null) ? new ColorDrawable(UIColors.getPrimaryColor(context)) : d;
     }
 }

@@ -23,7 +23,7 @@ import rocks.tbog.tblauncher.db.ShortcutRecord;
 @TargetApi(Build.VERSION_CODES.O)
 public class SaveSingleOreoShortcutAsync extends AsyncTask<Void, Integer, Boolean> {
 
-    private static String TAG = "SaveAllOreoShortcutsAsync";
+    private static final String TAG = "OreoShortcutAsync";
     private final WeakReference<Context> context;
     private final WeakReference<DataHandler> dataHandler;
     private Intent intent;
@@ -39,7 +39,7 @@ public class SaveSingleOreoShortcutAsync extends AsyncTask<Void, Integer, Boolea
     protected Boolean doInBackground(Void... voids) {
 
         final LauncherApps.PinItemRequest pinItemRequest = intent.getParcelableExtra(LauncherApps.EXTRA_PIN_ITEM_REQUEST);
-        final ShortcutInfo shortcutInfo = pinItemRequest.getShortcutInfo();
+        final ShortcutInfo shortcutInfo = pinItemRequest != null ? pinItemRequest.getShortcutInfo() : null;
 
         if (shortcutInfo == null) {
             cancel(true);
@@ -64,17 +64,15 @@ public class SaveSingleOreoShortcutAsync extends AsyncTask<Void, Integer, Boolea
             return null;
         }
 
-        // Add shortcut to the DataHandler
-        if(dataHandler.addShortcut(record)){
-            try {
-                pinItemRequest.accept();
-            }
-            catch(IllegalStateException e) {
+        try {
+            if (!pinItemRequest.accept())
                 return false;
-            }
-            return true;
+        } catch (IllegalStateException e) {
+            return false;
         }
-        return false;
+
+        // Add shortcut to the DataHandler
+        return dataHandler.addShortcut(record);
     }
 
     @Override

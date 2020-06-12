@@ -249,57 +249,78 @@ public class DBHelper {
         return -1 != db.insert("apps", null, values);
     }
 
-    public static boolean insertShortcut(Context context, ShortcutRecord shortcut) {
+    public static boolean insertShortcut(@NonNull Context context, @NonNull ShortcutRecord shortcut) {
         SQLiteDatabase db = getDatabase(context);
         // Do not add duplicate shortcuts
-        Cursor cursor = db.query("shortcuts", new String[]{"package", "intent_uri"},
-                "package = ? AND intent_uri = ?", new String[]{shortcut.packageName, shortcut.intentUri}, null, null, null, null);
-        if (cursor.moveToFirst()) {
+        Cursor cursor = db.query("shortcuts", new String[]{"package", "info_data"},
+                "package = ? AND info_data = ?", new String[]{shortcut.packageName, shortcut.infoData}, null, null, null, null);
+        // cursor contains duplicates
+        if (cursor.getCount() > 0) {
             return false;
         }
         cursor.close();
 
         ContentValues values = new ContentValues();
-        values.put("name", shortcut.name);
+        values.put("name", shortcut.displayName);
         values.put("package", shortcut.packageName);
-        values.put("icon", (String) null); // Legacy field (for shortcuts before Oreo), not used anymore (we use icon_blob).
-        values.put("intent_uri", shortcut.intentUri);
-        values.put("icon_blob", shortcut.icon_blob);
+        values.put("info_data", shortcut.infoData);
+        values.put("icon_png", shortcut.iconPng);
+        values.put("custom_flags", shortcut.getFlagsDB());
 
         db.insert("shortcuts", null, values);
         return true;
     }
 
-    public static void removeShortcut(Context context, ShortcutEntry shortcut) {
+    public static void removeShortcut(@NonNull Context context, @NonNull ShortcutEntry shortcut) {
         SQLiteDatabase db = getDatabase(context);
-        db.delete("shortcuts", "package = ? AND intent_uri = ?", new String[]{shortcut.packageName, shortcut.intentUri});
+        db.delete("shortcuts", "package = ? AND info_data = ?", new String[]{shortcut.packageName, shortcut.shortcutData});
+    }
+
+    public static void renameShortcut(@NonNull Context context, @NonNull ShortcutEntry shortcut, String newName) {
+        SQLiteDatabase db = getDatabase(context);
+        String sql = "UPDATE \"shortcuts\" SET \"name\"=? WHERE \"package\"=? AND \"info_data\"=?";
+        try {
+            SQLiteStatement statement = db.compileStatement(sql);
+            statement.bindString(1, newName);
+            statement.bindString(2, shortcut.packageName);
+            statement.bindString(3, shortcut.shortcutData);
+            int count = statement.executeUpdateDelete();
+            if (count != 1) {
+                Log.e(TAG, "Update name count = " + count);
+            }
+            statement.close();
+        } catch (Exception e) {
+            Log.e(TAG, "rename shortcut", e);
+        }
     }
 
     /**
      * Retrieve a list of all shortcuts for current package name, without icons.
+     * Useful when we remove an app and need to also remove the shortcuts for it.
      */
-    public static ArrayList<ShortcutRecord> getShortcuts(Context context, String packageName) {
+    @NonNull
+    public static List<ShortcutRecord> getShortcuts(@NonNull Context context, @NonNull String packageName) {
         SQLiteDatabase db = getDatabase(context);
 
-        // Cursor query (String table, String[] columns, String selection,
-        // String[] selectionArgs, String groupBy, String having, String
-        // orderBy)
-        Cursor cursor = db.query("shortcuts", new String[]{"name", "package", "intent_uri"},
-                "package = ?", new String[]{packageName}, null, null, null);
-        cursor.moveToFirst();
+        ArrayList<ShortcutRecord> records;
+        try (Cursor cursor = db.query("shortcuts",
+                new String[]{"_id", "name", "package", "info_data", "custom_flags"},
+                "package = ?", new String[]{packageName},
+                null, null, null)) {
 
-        ArrayList<ShortcutRecord> records = new ArrayList<>();
-        while (!cursor.isAfterLast()) {
-            ShortcutRecord entry = new ShortcutRecord();
+            records = new ArrayList<>(cursor.getCount());
+            while (cursor.moveToNext()) {
+                ShortcutRecord entry = new ShortcutRecord();
 
-            entry.name = cursor.getString(0);
-            entry.packageName = cursor.getString(1);
-            entry.intentUri = cursor.getString(2);
+                entry.dbId = cursor.getLong(0);
+                entry.displayName = cursor.getString(1);
+                entry.packageName = cursor.getString(2);
+                entry.infoData = cursor.getString(3);
+                entry.flags = cursor.getInt(4);
 
-            records.add(entry);
-            cursor.moveToNext();
+                records.add(entry);
+            }
         }
-        cursor.close();
 
         return records;
     }
@@ -307,44 +328,44 @@ public class DBHelper {
     /**
      * Retrieve a list of all shortcuts, without icons.
      */
-    public static ArrayList<ShortcutRecord> getShortcuts(Context context) {
+    @NonNull
+    public static ArrayList<ShortcutRecord> getShortcuts(@NonNull Context context) {
         SQLiteDatabase db = getDatabase(context);
 
-        // Cursor query (String table, String[] columns, String selection,
-        // String[] selectionArgs, String groupBy, String having, String
-        // orderBy)
-        Cursor cursor = db.query("shortcuts", new String[]{"_id", "name", "package", "intent_uri"},
-                null, null, null, null, null);
-        cursor.moveToFirst();
+        ArrayList<ShortcutRecord> records;
+        try (Cursor cursor = db.query("shortcuts",
+                new String[]{"_id", "name", "package", "info_data", "custom_flags"},
+                null, null, null, null, null)) {
 
-        ArrayList<ShortcutRecord> records = new ArrayList<>(cursor.getCount());
-        while (!cursor.isAfterLast()) {
-            ShortcutRecord entry = new ShortcutRecord();
+            records = new ArrayList<>(cursor.getCount());
+            while (cursor.moveToNext()) {
+                ShortcutRecord entry = new ShortcutRecord();
 
-            entry.dbId = cursor.getInt(0);
-            entry.name = cursor.getString(1);
-            entry.packageName = cursor.getString(2);
-            entry.intentUri = cursor.getString(3);
+                entry.dbId = cursor.getLong(0);
+                entry.displayName = cursor.getString(1);
+                entry.packageName = cursor.getString(2);
+                entry.infoData = cursor.getString(3);
+                entry.flags = cursor.getInt(4);
 
-            records.add(entry);
-            cursor.moveToNext();
+                records.add(entry);
+            }
         }
-        cursor.close();
 
         return records;
     }
 
-    public static byte[] getShortcutIcon(Context context, int dbId) {
+    @Nullable
+    public static byte[] getShortcutIcon(@NonNull Context context, long dbId) {
         SQLiteDatabase db = getDatabase(context);
 
-        // Cursor query (String table, String[] columns, String selection,
-        // String[] selectionArgs, String groupBy, String having, String
-        // orderBy)
-        Cursor cursor = db.query("shortcuts", new String[]{"icon_blob"},
-                "_id = ?", new String[]{Integer.toString(dbId)}, null, null, null);
+        Cursor cursor = db.query("shortcuts", new String[]{"icon_png"},
+                "_id = ?", new String[]{Long.toString(dbId)},
+                null, null, null);
 
-        cursor.moveToFirst();
-        byte[] iconBlob = cursor.getBlob(0);
+        byte[] iconBlob = null;
+        if (cursor.moveToNext()) {
+            iconBlob = cursor.getBlob(0);
+        }
         cursor.close();
         return iconBlob;
     }
@@ -356,13 +377,14 @@ public class DBHelper {
         SQLiteDatabase db = getDatabase(context);
 
         // remove shortcuts
-        db.delete("shortcuts", "package LIKE ?", new String[]{"%" + packageName + "%"});
+        db.delete("shortcuts", "package = ?", new String[]{packageName});
     }
 
     public static void removeAllShortcuts(Context context) {
         SQLiteDatabase db = getDatabase(context);
         // delete whole table
         db.delete("shortcuts", null, null);
+        //db.execSQL("vacuum"); //https://www.sqlitetutorial.net/sqlite-vacuum/
     }
 
     /**

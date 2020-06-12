@@ -9,6 +9,8 @@ import android.util.Log;
 import rocks.tbog.tblauncher.DataHandler;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.dataprovider.AppProvider;
+import rocks.tbog.tblauncher.dataprovider.ShortcutsProvider;
+import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 
 /**
@@ -36,11 +38,9 @@ public class PackageAddedRemovedHandler extends BroadcastReceiver {
                     return;
                 }
 
-                String className = launchIntent.getComponent().getClassName();
-                String pojoID = user.getUserComponentName(packageName, className);
+                String pojoID = AppEntry.SCHEME + user.getUserComponentName(launchIntent.getComponent());
+
                 dataHandler.addToHistory(pojoID);
-                // Add shortcut
-                dataHandler.addShortcut(packageName);
             }
         }
 
@@ -50,12 +50,20 @@ public class PackageAddedRemovedHandler extends BroadcastReceiver {
             dataHandler.removeFromExcluded(packageName);
         }
 
+        // This may be an icon pack, reload packs
         TBApplication.getApplication(ctx).resetIconsHandler();
 
         // Reload application list
-        final AppProvider provider = dataHandler.getAppProvider();
-        if (provider != null) {
-            provider.reload();
+        {
+            final AppProvider provider = dataHandler.getAppProvider();
+            if (provider != null)
+                provider.reload();
+        }
+        // Reload shortcuts list
+        {
+            final ShortcutsProvider provider = dataHandler.getShortcutsProvider();
+            if (provider != null)
+                provider.reload();
         }
     }
 
@@ -65,7 +73,7 @@ public class PackageAddedRemovedHandler extends BroadcastReceiver {
         String packageName = intent.getData() != null ? intent.getData().getSchemeSpecificPart() : null;
 
         if (packageName == null || packageName.equalsIgnoreCase(ctx.getPackageName())) {
-            // When running KISS locally, sending a new version of the APK immediately triggers a "package removed" for fr.neamar.kiss,
+            // When running locally, sending a new version of the APK immediately triggers a "package removed"
             // There is no need to handle this event.
             // Discarding it makes startup time much faster locally as apps don't have to be loaded twice.
             return;

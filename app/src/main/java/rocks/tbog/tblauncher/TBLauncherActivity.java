@@ -171,7 +171,17 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
         TBApplication.behaviour(this).onResume();
     }
 
-
+    @Override
+    protected void onNewIntent(Intent intent) {
+        setIntent(intent);
+        super.onNewIntent(intent);
+        // This is called when the user press Home again while already browsing MainActivity
+        // onResume() will be called right after, hiding the kissbar if any.
+        // http://developer.android.com/reference/android/app/Activity.html#onNewIntent(android.content.Intent)
+        // Animation can't happen in this method, since the activity is not resumed yet, so they'll happen in the onResume()
+        // https://github.com/Neamar/KISS/issues/569
+        TBApplication.behaviour(this).onNewIntent();
+    }
     @Override
     public boolean onKeyDown(int keycode, @NonNull KeyEvent e) {
         // For devices with a physical menu button, we still want to display *our* contextual menu

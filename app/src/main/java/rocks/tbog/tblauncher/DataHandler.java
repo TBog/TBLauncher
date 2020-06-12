@@ -1,6 +1,5 @@
 package rocks.tbog.tblauncher;
 
-import android.annotation.TargetApi;
 import android.app.KeyguardManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -444,11 +443,16 @@ public class DataHandler extends BroadcastReceiver
     }
 
     public boolean addShortcut(ShortcutRecord record) {
-        Log.d(TAG, "Adding shortcut for " + record.packageName);
-        return DBHelper.insertShortcut(this.context, record);
+        Log.d(TAG, "Adding shortcut " + record.displayName + " for " + record.packageName);
+        if (DBHelper.insertShortcut(this.context, record)) {
+            ShortcutsProvider provider = getShortcutsProvider();
+            if (provider != null)
+                provider.reload();
+            return true;
+        }
+        return false;
     }
 
-    @TargetApi(Build.VERSION_CODES.O)
     public void addShortcut(String packageName) {
 
         if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
@@ -487,6 +491,10 @@ public class DataHandler extends BroadcastReceiver
         removeFromFavorites(shortcut.id);
         DBHelper.removeShortcut(this.context, shortcut);
 
+        if (shortcut.mShortcutInfo != null) {
+            ShortcutUtil.removeShortcut(context, shortcut.mShortcutInfo);
+        }
+
         if (this.getShortcutsProvider() != null) {
             this.getShortcutsProvider().reload();
         }
@@ -500,7 +508,7 @@ public class DataHandler extends BroadcastReceiver
         // Remove all shortcuts from favorites for given package name
         List<ShortcutRecord> shortcutsList = DBHelper.getShortcuts(context, packageName);
         for (ShortcutRecord shortcut : shortcutsList) {
-            String id = ShortcutUtil.generateShortcutId(shortcut.name);
+            String id = ShortcutEntry.generateShortcutId(shortcut.displayName);
             removeFromFavorites(id);
         }
 
@@ -541,7 +549,7 @@ public class DataHandler extends BroadcastReceiver
             // Add all shortcuts for given package name to being excluded from history
             List<ShortcutRecord> shortcutsList = DBHelper.getShortcuts(context, app.getPackageName());
             for (ShortcutRecord shortcut : shortcutsList) {
-                String id = ShortcutUtil.generateShortcutId(shortcut.name);
+                String id = ShortcutEntry.generateShortcutId(shortcut.displayName);
                 excluded.add(id);
             }
             // Refresh shortcuts
@@ -564,7 +572,7 @@ public class DataHandler extends BroadcastReceiver
             // Add all shortcuts for given package name to being included in history
             List<ShortcutRecord> shortcutsList = DBHelper.getShortcuts(context, app.getPackageName());
             for (ShortcutRecord shortcut : shortcutsList) {
-                String id = ShortcutUtil.generateShortcutId(shortcut.name);
+                String id = ShortcutEntry.generateShortcutId(shortcut.displayName);
                 excluded.remove(id);
             }
         }
@@ -847,6 +855,10 @@ public class DataHandler extends BroadcastReceiver
 
     public AppRecord removeCustomAppIcon(String componentName) {
         return DBHelper.removeCustomAppIcon(context, componentName);
+    }
+
+    public void renameShortcut(ShortcutEntry shortcutEntry, String newName) {
+        DBHelper.renameShortcut(context, shortcutEntry, newName);
     }
 
 //    public TagsHandler getTagsHandler() {

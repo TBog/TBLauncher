@@ -4,7 +4,9 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.LauncherApps;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
@@ -12,6 +14,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
 import android.view.View;
@@ -39,6 +42,7 @@ import rocks.tbog.tblauncher.entry.EntryWithTags;
 import rocks.tbog.tblauncher.result.ResultAdapter;
 import rocks.tbog.tblauncher.searcher.ISearchActivity;
 import rocks.tbog.tblauncher.searcher.QuerySearcher;
+import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
 import rocks.tbog.tblauncher.ui.AnimatedListView;
 import rocks.tbog.tblauncher.ui.DialogFragment;
 import rocks.tbog.tblauncher.ui.KeyboardScrollHider;
@@ -55,6 +59,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     private static final int UI_ANIMATION_DELAY = 300;
     private static final int UI_ANIMATION_DURATION = 200;
     private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
+    private static final String TAG = Behaviour.class.getSimpleName();
 
     private TBLauncherActivity mTBLauncherActivity = null;
     private DialogFragment<?> mFragmentDialog = null;
@@ -243,46 +248,59 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     private void hideSearchBar() {
-        hideSearchBar(UI_ANIMATION_DELAY);
+        hideSearchBar(UI_ANIMATION_DELAY, true);
     }
 
-    private void hideSearchBar(int delay) {
+    private void hideSearchBar(boolean animate) {
+        hideSearchBar(0, animate);
+    }
+
+    private void hideSearchBar(int startDelay, boolean animate) {
         // Hide UI first
         ActionBar actionBar = mTBLauncherActivity != null ? mTBLauncherActivity.getSupportActionBar() : null;
         if (actionBar != null) {
             actionBar.hide();
         }
 
-        mNotificationBackground.animate()
-                .translationY(-mNotificationBackground.getLayoutParams().height)
-                .setStartDelay(delay)
-                .setDuration(UI_ANIMATION_DURATION)
-                .setInterpolator(new AccelerateInterpolator())
-                .start();
-
+        if (animate)
+            mNotificationBackground.animate()
+                    .translationY(-mNotificationBackground.getLayoutParams().height)
+                    .setStartDelay(startDelay)
+                    .setDuration(UI_ANIMATION_DURATION)
+                    .setInterpolator(new AccelerateInterpolator())
+                    .start();
+        else {
+            mNotificationBackground.setTranslationY(-mNotificationBackground.getLayoutParams().height);
+        }
         //TODO: animate mResultLayout to fill the space freed by mSearchBarContainer
-        mSearchBarContainer.animate()
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        mSearchBarContainer.setVisibility(View.INVISIBLE);
-                    }
-                })
-                .setStartDelay(delay)
-                .alpha(0f)
-                .translationY(mSearchBarContainer.getHeight() * 2f)
-                .setDuration(UI_ANIMATION_DURATION)
-                .setInterpolator(new AccelerateInterpolator())
-                .start();
+        if (animate)
+            mSearchBarContainer.animate()
+                    .setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            mSearchBarContainer.setVisibility(View.INVISIBLE);
+                        }
+                    })
+                    .setStartDelay(startDelay)
+                    .alpha(0f)
+                    .translationY(mSearchBarContainer.getHeight() * 2f)
+                    .setDuration(UI_ANIMATION_DURATION)
+                    .setInterpolator(new AccelerateInterpolator())
+                    .start();
+        else {
+            mSearchBarContainer.setAlpha(0f);
+            mSearchBarContainer.setTranslationY(mSearchBarContainer.getHeight() * 2f);
+            mSearchBarContainer.setVisibility(View.INVISIBLE);
+        }
         clearAdapter();
         bSearchBarHidden = true;
 
-        TBApplication.quickList(getContext()).hideQuickList();
+        TBApplication.quickList(getContext()).hideQuickList(animate);
 
         // Schedule a runnable to remove the status and navigation bar after a delay
         mHideHandler.removeCallbacks(mShowPart2Runnable);
         //mHideHandler.post(mHidePart2Runnable);
-        mHideHandler.postDelayed(mHidePart2Runnable, delay);
+        mHideHandler.postDelayed(mHidePart2Runnable, startDelay);
     }
 
     public void showKeyboard() {
@@ -483,7 +501,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         if (mSearchEditText.getText().length() > 0) {
             mSearchEditText.setText("");
         }
-        hideSearchBar(0);
+        hideSearchBar(0, true);
         hideKeyboard();
     }
 
@@ -515,7 +533,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             return true;
         //mHider.fixScroll();
         mSearchEditText.setText("");
-        hideSearchBar(0);
+        hideSearchBar(0, true);
         return false;
     }
 
@@ -588,14 +606,30 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     public void onResume() {
+        Log.i(TAG, "onResume");
         if (mSearchEditText.getText().length() > 0) {
             showSearchBar();
             showKeyboard();
             mSearchEditText.postDelayed(this::showKeyboard, UI_ANIMATION_DELAY);
-        } else {
-            hideKeyboard();
-            hideSearchBar();
         }
     }
 
+    public void onNewIntent() {
+        Log.i(TAG, "onNewIntent");
+        if (mSearchEditText.getText().length() > 0) {
+            mSearchEditText.setText("");
+            hideKeyboard();
+            hideSearchBar(false);
+        }
+
+        Intent intent = mTBLauncherActivity.getIntent();
+        if (intent != null) {
+            final String action = intent.getAction();
+            if (LauncherApps.ACTION_CONFIRM_PIN_SHORTCUT.equals(action)) {
+                // Save single shortcut via a pin request
+                ShortcutUtil.addShortcut(mTBLauncherActivity, intent);
+            }
+        }
+
+    }
 }

@@ -8,7 +8,7 @@ import android.util.Log;
 class DB extends SQLiteOpenHelper {
 
     private final static String DB_NAME = "kiss.s3db";
-    private final static int DB_VERSION = 6;
+    private final static int DB_VERSION = 7;
 
     DB(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -17,15 +17,15 @@ class DB extends SQLiteOpenHelper {
     @Override
     public void onCreate(SQLiteDatabase database) {
         database.execSQL("CREATE TABLE history ( _id INTEGER PRIMARY KEY AUTOINCREMENT, \"query\" TEXT, record TEXT NOT NULL)");
-        database.execSQL("CREATE TABLE shortcuts ( _id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT NOT NULL, package TEXT, icon TEXT, intent_uri TEXT NOT NULL, icon_blob BLOB)");
         createTags(database);
         addTimeStamps(database);
         addAppsTable(database);
-        createQuickList(database);
+        //createQuickList(database);
+        createShortcutsTable(database);
     }
 
     private void createTags(SQLiteDatabase database) {
-        database.execSQL("CREATE TABLE tags ( _id INTEGER PRIMARY KEY AUTOINCREMENT, tag TEXT NOT NULL, record TEXT NOT NULL)");
+        database.execSQL("CREATE TABLE tags (tag TEXT NOT NULL, record TEXT NOT NULL)");
         database.execSQL("CREATE INDEX idx_tags_record ON tags(record);");
     }
 
@@ -33,14 +33,17 @@ class DB extends SQLiteOpenHelper {
         database.execSQL("ALTER TABLE history ADD COLUMN timeStamp INTEGER DEFAULT 0  NOT NULL");
     }
 
-    private void addAppsTable(SQLiteDatabase db)
-    {
+    private void addAppsTable(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE apps ( _id INTEGER PRIMARY KEY AUTOINCREMENT, display_name TEXT NOT NULL DEFAULT '', component_name TEXT NOT NULL UNIQUE, custom_flags INTEGER DEFAULT 0 )");
         db.execSQL("CREATE INDEX index_component ON apps(component_name);");
     }
 
-    private void createQuickList(SQLiteDatabase db) {
-        //db.execSQL("CREATE TABLE \"quick list\" (_id INTEGER PRIMARY KEY AUTOINCREMENT, \"name\" TEXT NOT NULL DEFAULT '', )");
+//    private void createQuickList(SQLiteDatabase db) {
+//        db.execSQL("CREATE TABLE \"quick list\" (_id INTEGER PRIMARY KEY AUTOINCREMENT, \"name\" TEXT NOT NULL DEFAULT '', )");
+//    }
+
+    private void createShortcutsTable(SQLiteDatabase db) {
+        db.execSQL("CREATE TABLE 'shortcuts' ( _id INTEGER PRIMARY KEY AUTOINCREMENT, 'name' TEXT NOT NULL, 'package' TEXT, 'info_data' TEXT, 'icon_png' BLOB, 'custom_flags' INTEGER DEFAULT 0)");
     }
 
     @Override
@@ -61,12 +64,19 @@ class DB extends SQLiteOpenHelper {
                     // fall through
                 case 5:
                     addTimeStamps(database);
-                    // fall through
-                case 6:
                     addAppsTable(database);
                     // fall through
+                case 6:
+                    database.execSQL("DROP TABLE 'shortcuts'");
+                    createShortcutsTable(database);
+                    database.execSQL("DROP TABLE 'tags'");
+                    createTags(database);
+                    // fall through
                 case 7:
-                    createQuickList(database);
+                    //createQuickList(database);
+                    // fall through
+                case 8:
+                    // fall through
                 default:
                     break;
             }

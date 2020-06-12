@@ -77,7 +77,23 @@
                 android:value=".TBLauncherActivity" />
         </activity>
 
-        <meta-data android:name="android.max_aspect" android:value="3"/>
+        <activity
+            android:name="PinShortcutConfirm"
+            android:allowTaskReparenting="true"
+            android:excludeFromRecents="true"
+            android:exported="false"
+            android:launchMode="singleInstance"
+            android:noHistory="true"
+            android:theme="@android:style/Theme.Material.Dialog"
+            tools:ignore="NewApi">
+            <intent-filter>
+                <action android:name="android.content.pm.action.CONFIRM_PIN_SHORTCUT" />
+            </intent-filter>
+        </activity>
+
+        <meta-data
+            android:name="android.max_aspect"
+            android:value="3" />
 
         <service android:name=".dataprovider.AppProvider" />
         <service android:name=".dataprovider.ContactsProvider" />

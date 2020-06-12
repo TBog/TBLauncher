@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.sqlite.SQLiteDatabase;
 
+import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 
 import rocks.tbog.tblauncher.searcher.Searcher;
@@ -108,7 +109,7 @@ public class TBApplication extends Application {
         }
     }
 
-
+    @NonNull
     public DataHandler getDataHandler() {
         if (dataHandler == null) {
             dataHandler = new DataHandler(this);

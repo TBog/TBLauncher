@@ -35,6 +35,26 @@ public class EditTagsDialog extends DialogFragment<Set<String>> {
         return R.layout.edit_tags_dialog;
     }
 
+    @Nullable
+    @Override
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        ViewGroup root = (ViewGroup) super.onCreateView(inflater, container, savedInstanceState);
+        assert root != null;
+        Context context = inflater.getContext();
+
+        // make a layout for the entry we are changing
+        Bundle args = getArguments() != null ? getArguments() : new Bundle();
+        String entryId = args.getString("entryId", "");
+        EntryItem entry = TBApplication.getApplication(context).getDataHandler().getPojo(entryId);
+        if (entry != null) {
+            View entryView = inflater.inflate(entry.getResultLayout(), root, false);
+            entryView.setId(R.id.preview);
+            root.addView(entryView, 0);
+        }
+
+        return root;
+    }
+
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
@@ -52,8 +72,11 @@ public class EditTagsDialog extends DialogFragment<Set<String>> {
 
         // show the app we are changing
         EntryItem entry = TBApplication.getApplication(context).getDataHandler().getPojo(entryId);
-        if (entry != null)
-            entry.displayResult(view.findViewById(R.id.entry));
+        if (entry == null) {
+            dismiss();
+            return;
+        }
+        entry.displayResult(view.findViewById(R.id.preview));
 
         // prepare the grid with all the tags
         mAdapter = new TagsAdapter(mTagList);

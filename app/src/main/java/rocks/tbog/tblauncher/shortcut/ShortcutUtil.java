@@ -11,19 +11,24 @@ import android.content.pm.ShortcutInfo;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.os.Process;
+import android.os.UserHandle;
 import android.os.UserManager;
+
+import androidx.annotation.NonNull;
+import androidx.annotation.WorkerThread;
 import androidx.preference.PreferenceManager;
+
 import android.text.TextUtils;
 import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 
 import rocks.tbog.tblauncher.db.DBHelper;
 import rocks.tbog.tblauncher.db.ShortcutRecord;
-import rocks.tbog.tblauncher.entry.ShortcutEntry;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_MANIFEST;
@@ -34,16 +39,9 @@ public class ShortcutUtil {
     final static private String TAG = "ShortcutUtil";
 
     /**
-     * @return shortcut id generated from shortcut name
-     */
-    public static String generateShortcutId(String shortcutName){
-        return ShortcutEntry.SCHEME + shortcutName.toLowerCase(Locale.ROOT);
-    }
-
-    /**
      * @return true if shortcuts are enabled in settings and android version is higher or equals android 8
      */
-    public static boolean areShortcutsEnabled(Context context){
+    public static boolean areShortcutsEnabled(Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         return android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.O &&
                 prefs.getBoolean("enable-shortcuts", true);
@@ -53,7 +51,7 @@ public class ShortcutUtil {
     /**
      * Save all oreo shortcuts to DB
      */
-    public static void addAllShortcuts(Context context){
+    public static void addAllShortcuts(Context context) {
         new SaveAllOreoShortcutsAsync(context).execute();
     }
 
@@ -61,14 +59,14 @@ public class ShortcutUtil {
      * Save single shortcut to DB via pin request
      */
     @TargetApi(Build.VERSION_CODES.O)
-    public static void addShortcut(Context context, Intent intent){
+    public static void addShortcut(Context context, Intent intent) {
         new SaveSingleOreoShortcutAsync(context, intent).execute();
     }
 
     /**
      * Remove all shortcuts saved in the database
      */
-    public static void removeAllShortcuts(Context context){
+    public static void removeAllShortcuts(Context context) {
         DBHelper.removeAllShortcuts(context);
     }
 
@@ -80,27 +78,36 @@ public class ShortcutUtil {
         return getShortcut(context, null);
     }
 
+    @TargetApi(Build.VERSION_CODES.O)
+    public static List<ShortcutInfo> getShortcut(Context context, String packageName) {
+        return getShortcut(context, packageName, FLAG_MATCH_MANIFEST | FLAG_MATCH_PINNED);
+    }
+
     /**
      * @return all shortcuts for given package name
      */
     @TargetApi(Build.VERSION_CODES.O)
-    public static List<ShortcutInfo> getShortcut(Context context, String packageName) {
+    public static List<ShortcutInfo> getShortcut(Context context, String packageName, int queryFlags) {
         List<ShortcutInfo> shortcutInfoList = new ArrayList<>();
 
         UserManager manager = (UserManager) context.getSystemService(Context.USER_SERVICE);
+        assert manager != null;
         LauncherApps launcherApps = (LauncherApps) context.getSystemService(Context.LAUNCHER_APPS_SERVICE);
+        assert launcherApps != null;
+        if (launcherApps.hasShortcutHostPermission()) {
+            LauncherApps.ShortcutQuery shortcutQuery = new LauncherApps.ShortcutQuery();
+            shortcutQuery.setQueryFlags(queryFlags);
 
-        LauncherApps.ShortcutQuery shortcutQuery = new LauncherApps.ShortcutQuery();
-        shortcutQuery.setQueryFlags(FLAG_MATCH_MANIFEST | FLAG_MATCH_PINNED);
+            if (!TextUtils.isEmpty(packageName)) {
+                shortcutQuery.setPackage(packageName);
+            }
 
-        if(!TextUtils.isEmpty(packageName)){
-            shortcutQuery.setPackage(packageName);
+            for (android.os.UserHandle profile : manager.getUserProfiles()) {
+                List<ShortcutInfo> list = launcherApps.getShortcuts(shortcutQuery, profile);
+                if (list != null)
+                    shortcutInfoList.addAll(list);
+            }
         }
-
-        for (android.os.UserHandle profile : manager.getUserProfiles()) {
-            shortcutInfoList.addAll(launcherApps.getShortcuts(shortcutQuery, profile));
-        }
-
         return shortcutInfoList;
     }
 
@@ -108,33 +115,30 @@ public class ShortcutUtil {
      * Create ShortcutPojo from ShortcutInfo
      */
     @TargetApi(Build.VERSION_CODES.O)
-    public static ShortcutRecord createShortcutRecord(Context context, ShortcutInfo shortcutInfo, boolean includePackageName){
+    public static ShortcutRecord createShortcutRecord(Context context, ShortcutInfo shortcutInfo, boolean includePackageName) {
         ShortcutRecord record = new ShortcutRecord();
         record.packageName = shortcutInfo.getPackage();
-        record.intentUri = ShortcutEntry.OREO_PREFIX + shortcutInfo.getId();
+        record.infoData = shortcutInfo.getId();
+        record.flags |= ShortcutRecord.FLAG_OREO;
 
         LauncherApps launcherApps = (LauncherApps) context.getSystemService(Context.LAUNCHER_APPS_SERVICE);
+        assert launcherApps != null;
         final Drawable iconDrawable = launcherApps.getShortcutIconDrawable(shortcutInfo, 0);
-        Bitmap icon = iconDrawable == null ? null : Utilities.drawableToBitmap(iconDrawable);
-        if (icon != null) {
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            icon.compress(Bitmap.CompressFormat.PNG, 100, baos);
-            record.icon_blob = baos.toByteArray();
-        }
+        record.iconPng = iconDrawable != null ? getIconBlob(iconDrawable) : null;
 
-        String appName = getAppNameFromPackageName(context, shortcutInfo.getPackage());
+        String appName = includePackageName ? getAppNameFromPackageName(context, shortcutInfo.getPackage()) : null;
 
         if (shortcutInfo.getShortLabel() != null) {
-            if(includePackageName && !TextUtils.isEmpty(appName)){
-                record.name = appName + ": " + shortcutInfo.getShortLabel().toString();
+            if (!TextUtils.isEmpty(appName)) {
+                record.displayName = appName + ": " + shortcutInfo.getShortLabel().toString();
             } else {
-                record.name = shortcutInfo.getShortLabel().toString();
+                record.displayName = shortcutInfo.getShortLabel().toString();
             }
         } else if (shortcutInfo.getLongLabel() != null) {
-            if(includePackageName && !TextUtils.isEmpty(appName)){
-                record.name = appName + ": " + shortcutInfo.getLongLabel().toString();
+            if (!TextUtils.isEmpty(appName)) {
+                record.displayName = appName + ": " + shortcutInfo.getLongLabel().toString();
             } else {
-                record.name =shortcutInfo.getLongLabel().toString();
+                record.displayName = shortcutInfo.getLongLabel().toString();
             }
         } else {
             Log.d(TAG, "Invalid shortcut for " + record.packageName + ", ignoring");
@@ -145,21 +149,62 @@ public class ShortcutUtil {
     }
 
     /**
-     *
      * @return App name from package name
      */
-    public static String getAppNameFromPackageName(Context context, String Packagename) {
+    @NonNull
+    public static String getAppNameFromPackageName(Context context, String packageName) {
         try {
             PackageManager packageManager = context.getPackageManager();
-            ApplicationInfo info = packageManager.getApplicationInfo(Packagename, PackageManager.GET_META_DATA);
-            String appName = (String) packageManager.getApplicationLabel(info);
-            return appName;
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
+            ApplicationInfo info = packageManager.getApplicationInfo(packageName, PackageManager.GET_META_DATA);
+            return packageManager.getApplicationLabel(info).toString();
+        } catch (PackageManager.NameNotFoundException ignored) {
             return "";
         }
     }
 
+    @NonNull
+    public static byte[] getIconBlob(@NonNull Drawable iconDrawable) {
+        Bitmap icon = Utilities.drawableToBitmap(iconDrawable);
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        // Can't user WEBP compression because from API v18 to v21 there is no alpha encoding
+        // see: https://stackoverflow.com/questions/38753798/android-webp-encoding-in-api-v18-and-above-bitmap-compressbitmap-compressforma
+        icon.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
+        return outputStream.toByteArray();
+    }
 
+    /**
+     * Removes the given shortcut from the current list of pinned shortcuts.
+     * (Should run on background thread)
+     */
+    @WorkerThread
+    public static void removeShortcut(@NonNull Context context, @NonNull ShortcutInfo shortcutInfo) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+            LauncherApps launcherApps = (LauncherApps) context.getSystemService(Context.LAUNCHER_APPS_SERVICE);
+            assert launcherApps != null;
+            String packageName = shortcutInfo.getPackage();
+            String id = shortcutInfo.getId();
+            UserHandle user = shortcutInfo.getUserHandle();
 
+            // query for pinned shortcuts
+            List<String> shortcutIds;
+            {
+                LauncherApps.ShortcutQuery q = new LauncherApps.ShortcutQuery();
+                q.setQueryFlags(LauncherApps.ShortcutQuery.FLAG_MATCH_PINNED);
+                List<ShortcutInfo> shortcutInfos = launcherApps.getShortcuts(q, Process.myUserHandle());
+                if (shortcutInfos == null)
+                    shortcutInfos = Collections.emptyList();
+                shortcutIds = new ArrayList<>(shortcutInfos.size());
+                for (ShortcutInfo info : shortcutInfos)
+                    shortcutIds.add(info.getId());
+            }
+
+            // unpin the shortcut
+            shortcutIds.remove(id);
+            try {
+                launcherApps.pinShortcuts(packageName, shortcutIds, user);
+            } catch (SecurityException | IllegalStateException e) {
+                Log.w(TAG, "Failed to unpin shortcut", e);
+            }
+        }
+    }
 }

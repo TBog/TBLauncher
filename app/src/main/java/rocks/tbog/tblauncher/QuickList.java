@@ -2,16 +2,18 @@ package rocks.tbog.tblauncher;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
+import android.animation.ArgbEvaluator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.PaintDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
-import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -19,24 +21,28 @@ import android.widget.TextView;
 
 import androidx.core.content.ContextCompat;
 
-import java.util.ArrayList;
 import java.util.List;
 
-import rocks.tbog.tblauncher.dataprovider.AppProvider;
-import rocks.tbog.tblauncher.dataprovider.ContactsProvider;
+import rocks.tbog.tblauncher.dataprovider.Provider;
 import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.entry.ContactEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
+import rocks.tbog.tblauncher.entry.ShortcutEntry;
 import rocks.tbog.tblauncher.utils.UIColors;
 
 public class QuickList {
     private TBLauncherActivity mTBLauncherActivity;
     private boolean mIsEnabled = true;
     private LinearLayout mQuickList;
-    private boolean bListVisible = false;
-    private boolean bAppToggleOn = false;
-    private boolean bContactToggleOn = false;
+
+    // bAdapterEmpty is true when no search results are displayed
     private boolean bAdapterEmpty = true;
+
+    // is any filter activated?
+    private boolean bFilterOn = false;
+
+    // last filter scheme, used for better toggle behaviour
+    private String mLastFilter = null;
 
 //    @SuppressWarnings("TypeParameterUnusedInFormals")
 //    private <T extends View> T findViewById(@IdRes int id) {
@@ -66,12 +72,10 @@ public class QuickList {
             Drawable drawable = ContextCompat.getDrawable(getContext(), R.drawable.ic_android);
             ((ImageView) filter.findViewById(android.R.id.icon)).setImageDrawable(drawable);
             ((TextView) filter.findViewById(android.R.id.text1)).setText("Applications");
-            filter.setOnClickListener(v -> {
-                //TBApplication.behaviour(v.getContext()).resultListVisible()
-            });
             mQuickList.addView(filter);
 
-            filter.setOnClickListener(this::toggleApps);
+            filter.setOnClickListener(v -> toggleFilter(v, TBApplication.getApplication(v.getContext()).getDataHandler().getAppProvider()));
+            filter.setTag(R.id.tag_scheme, AppEntry.SCHEME);
         }
         // contacts filter
         {
@@ -81,59 +85,97 @@ public class QuickList {
             ((TextView) filter.findViewById(android.R.id.text1)).setText("Contacts");
             mQuickList.addView(filter);
 
-            filter.setOnClickListener(this::toggleContacts);
+            filter.setOnClickListener(v -> toggleFilter(v, TBApplication.getApplication(v.getContext()).getDataHandler().getContactsProvider()));
+            filter.setTag(R.id.tag_scheme, ContactEntry.SCHEME);
+        }
+        // pinned shortcuts filter
+        {
+            View filter = LayoutInflater.from(getContext()).inflate(R.layout.item_quick_list, mQuickList, false);
+            Drawable drawable = ContextCompat.getDrawable(getContext(), R.drawable.ic_send);
+            ((ImageView) filter.findViewById(android.R.id.icon)).setImageDrawable(drawable);
+            ((TextView) filter.findViewById(android.R.id.text1)).setText("Shortcuts");
+            mQuickList.addView(filter);
+
+            filter.setOnClickListener(v -> toggleFilter(v, TBApplication.getApplication(v.getContext()).getDataHandler().getShortcutsProvider()));
+            filter.setTag(R.id.tag_scheme, ShortcutEntry.SCHEME);
         }
     }
 
-    private void toggleApps(View v) {
-        TBApplication app = TBApplication.getApplication(v.getContext());
+    private void toggleFilter(View v, Provider<? extends EntryItem> provider) {
+        Context ctx = v.getContext();
+        TBApplication app = TBApplication.getApplication(ctx);
+
+        // if there is no search we need to filter, just show all matching entries
         if (bAdapterEmpty) {
-            if (bAppToggleOn) {
+            if (bFilterOn && provider != null && mLastFilter == provider.getScheme()) {
                 app.behaviour().clearAdapter();
-                bAppToggleOn = false;
+                bFilterOn = false;
             } else {
-                AppProvider appProvider = app.getDataHandler().getAppProvider();
                 List<? extends EntryItem> list;
-                list = appProvider != null ? appProvider.getPojos() : null;
-                if (list != null)
+                list = provider != null ? provider.getPojos() : null;
+                if (list != null) {
                     app.behaviour().updateAdapter(list, false);
-                bAppToggleOn = true;
+                    mLastFilter = provider.getScheme();
+                    bFilterOn = true;
+                } else {
+                    bFilterOn = false;
+                }
             }
-            // updateAdapter will change `bAdapterEmpty` and we change it back
+            // updateAdapter will change `bAdapterEmpty` and we change it back because we want
+            // bAdapterEmpty to represent a search we need to filter
             bAdapterEmpty = true;
-        } else if (bAppToggleOn) {
-            bAppToggleOn = false;
+        } else if (bFilterOn && (provider == null || mLastFilter == provider.getScheme())) {
+            animToggleOff();
+            bFilterOn = false;
             app.behaviour().filterResults(null);
-        } else {
-            bAppToggleOn = true;
-            bContactToggleOn = false;
-            app.behaviour().filterResults(AppEntry.SCHEME);
+        } else if (provider != null) {
+            animToggleOff();
+            bFilterOn = true;
+            mLastFilter = provider.getScheme();
+            app.behaviour().filterResults(provider.getScheme());
+        }
+
+        // show what is currently toggled
+        if (bFilterOn) {
+            animToggleOn(v);
         }
     }
 
-    private void toggleContacts(View v) {
-        TBApplication app = TBApplication.getApplication(v.getContext());
-        if (bAdapterEmpty) {
-            if (bContactToggleOn) {
-                app.behaviour().clearAdapter();
-                bContactToggleOn = false;
-            } else {
-                ContactsProvider contactsProvider = app.getDataHandler().getContactsProvider();
-                List<? extends EntryItem> list;
-                list = contactsProvider != null ? contactsProvider.getPojos() : null;
-                if (list != null)
-                    app.behaviour().updateAdapter(list, false);
-                bContactToggleOn = true;
-            }
-            // updateAdapter will change `bAdapterEmpty` and we change it back
-            bAdapterEmpty = true;
-        } else if (bContactToggleOn) {
-            bContactToggleOn = false;
-            app.behaviour().filterResults(null);
+    private void animToggleOn(View v) {
+        if (v.getTag(R.id.tag_anim) instanceof ValueAnimator) {
+            ValueAnimator colorAnim = (ValueAnimator) v.getTag(R.id.tag_anim);
+            colorAnim.start();
         } else {
-            bAppToggleOn = false;
-            bContactToggleOn = true;
-            app.behaviour().filterResults(ContactEntry.SCHEME);
+            int colorTo = UIColors.getPrimaryColor(v.getContext());
+            int colorFrom = v.getBackground() instanceof ColorDrawable ? ((ColorDrawable) v.getBackground()).getColor() : (colorTo & 0x00FFFFFF);
+            ValueAnimator colorAnim = ValueAnimator.ofObject(new ArgbEvaluator(), colorFrom, colorTo);
+            colorAnim.addUpdateListener(animator -> v.setBackgroundColor((int) animator.getAnimatedValue()));
+//            colorAnim.addListener(new AnimatorListenerAdapter() {
+//                @Override
+//                public void onAnimationEnd(Animator animation, boolean isReverse) {
+//                    if (isReverse)
+//                        mLastFilter = null;
+//                }
+//            });
+            colorAnim.start();
+            v.setTag(R.id.tag_anim, colorAnim);
+        }
+    }
+
+    private void animToggleOff() {
+        if (!bFilterOn)
+            return;
+        int n = mQuickList.getChildCount();
+        for (int i = 0; i < n; i += 1) {
+            View view = mQuickList.getChildAt(i);
+            if (mLastFilter == null || mLastFilter == view.getTag(R.id.tag_scheme)) {
+                if (view.getTag(R.id.tag_anim) instanceof ValueAnimator) {
+                    ValueAnimator colorAnim = (ValueAnimator) view.getTag(R.id.tag_anim);
+                    colorAnim.reverse();
+                } else {
+                    view.setBackgroundColor(UIColors.getPrimaryColor(mQuickList.getContext()) & 0x00FFFFFF);
+                }
+            }
         }
     }
 
@@ -152,19 +194,26 @@ public class QuickList {
         }
     }
 
-    public void hideQuickList() {
+    public void hideQuickList(boolean animate) {
         if (isQuickListEnabled()) {
-            mQuickList.setVisibility(View.VISIBLE);
-            mQuickList.animate()
-                    .scaleY(0f)
-                    .setListener(new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            mQuickList.setVisibility(View.GONE);
-                        }
-                    })
-                    .setInterpolator(new DecelerateInterpolator())
-                    .start();
+            mLastFilter = null;
+            animToggleOff();
+            if (animate) {
+                mQuickList.setVisibility(View.VISIBLE);
+                mQuickList.animate()
+                        .scaleY(0f)
+                        .setListener(new AnimatorListenerAdapter() {
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                mQuickList.setVisibility(View.GONE);
+                            }
+                        })
+                        .setInterpolator(new DecelerateInterpolator())
+                        .start();
+            } else {
+                mQuickList.setScaleY(0f);
+                mQuickList.setVisibility(View.GONE);
+            }
         } else {
             mQuickList.setVisibility(View.GONE);
         }
@@ -204,16 +253,14 @@ public class QuickList {
     }
 
     public void adapterCleared() {
-        bAppToggleOn = false;
-        bContactToggleOn = false;
-
+        animToggleOff();
+        bFilterOn = false;
         bAdapterEmpty = true;
     }
 
     public void adapterUpdated() {
-        bAppToggleOn = false;
-        bContactToggleOn = false;
-
+        animToggleOff();
+        bFilterOn = false;
         bAdapterEmpty = false;
     }
 }

@@ -10,11 +10,13 @@
     android:paddingHorizontal="@dimen/result_margin_horizontal"
     android:paddingVertical="@dimen/result_margin_vertical">
 
-    <include
-        android:id="@+id/entry"
-        layout="@layout/item_app"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+    <!-- Code will inflate a preview of the entry here -->
+    <!--    <include-->
+    <!--        tools:targetApi=""-->
+    <!--        android:id="@+id/entry"-->
+    <!--        layout="@layout/item_app"-->
+    <!--        android:layout_width="match_parent"-->
+    <!--        android:layout_height="wrap_content" />-->
 
     <GridView
         android:id="@+id/grid"

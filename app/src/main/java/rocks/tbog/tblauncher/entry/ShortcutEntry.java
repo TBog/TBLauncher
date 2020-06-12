@@ -1,48 +1,82 @@
 package rocks.tbog.tblauncher.entry;
 
+import android.annotation.TargetApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.pm.ShortcutInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AlertDialog;
 import androidx.preference.PreferenceManager;
 
 import java.net.URISyntaxException;
 import java.util.List;
+import java.util.Locale;
 
 import rocks.tbog.tblauncher.R;
+import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.db.DBHelper;
 import rocks.tbog.tblauncher.result.ResultAdapter;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
+import rocks.tbog.tblauncher.utils.Utilities;
+
 
 public final class ShortcutEntry extends EntryWithTags {
 
     public static final String SCHEME = "shortcut://";
-    public static final String OREO_PREFIX = "oreo-shortcut/";
 
-    private final int dbId;
+    private final long dbId;
+    @NonNull
     public final String packageName;
-    public final String intentUri;// TODO: 15/10/18 Use boolean instead of prefix for Oreo shortcuts
+    @NonNull
+    public final String shortcutData;
+    @Nullable
+    public final ShortcutInfo mShortcutInfo;
 
-    public ShortcutEntry(String id, int dbId, String packageName, String intentUri) {
+    public ShortcutEntry(@NonNull String id, long dbId, @NonNull String packageName, @NonNull String shortcutData) {
         super(id);
 
         this.dbId = dbId;
         this.packageName = packageName;
-        this.intentUri = intentUri;
+        this.shortcutData = shortcutData;
+        mShortcutInfo = null;
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.N_MR1)
+    public ShortcutEntry(@NonNull ShortcutInfo shortcutInfo) {
+        super(ShortcutEntry.SCHEME + shortcutInfo.getId());
+
+        dbId = 0;
+        packageName = shortcutInfo.getPackage();
+        shortcutData = shortcutInfo.getId();
+        mShortcutInfo = shortcutInfo;
+    }
+
+    /**
+     * @return shortcut id generated from shortcut name
+     */
+    public static String generateShortcutId(String shortcutName) {
+        return SCHEME + shortcutName.toLowerCase(Locale.ROOT);
     }
 
     /**
@@ -50,12 +84,12 @@ public final class ShortcutEntry extends EntryWithTags {
      * and the Android system is responsible for safekeeping the Intent
      */
     public boolean isOreoShortcut() {
-        return intentUri.contains(ShortcutEntry.OREO_PREFIX);
+        return mShortcutInfo != null;
     }
 
     public String getOreoId() {
         // Oreo shortcuts encode their id in the unused intentUri field
-        return intentUri.replace(ShortcutEntry.OREO_PREFIX, "");
+        return shortcutData;
     }
 
     public Bitmap getIcon(Context context) {
@@ -105,9 +139,12 @@ public final class ShortcutEntry extends EntryWithTags {
         final PackageManager packageManager = context.getPackageManager();
         Drawable appDrawable = null;
         try {
-            Intent intent = Intent.parseUri(intentUri, 0);
-            List<ResolveInfo> packages = packageManager.queryIntentActivities(intent, 0);
-            if (packages.size() > 0) {
+            List<ResolveInfo> packages = null;
+            if (!isOreoShortcut()) {
+                Intent intent = Intent.parseUri(shortcutData, 0);
+                packages = packageManager.queryIntentActivities(intent, 0);
+            }
+            if (packages != null && !packages.isEmpty()) {
                 ResolveInfo mainPackage = packages.get(0);
                 String packageName = mainPackage.activityInfo.applicationInfo.packageName;
                 String activityName = mainPackage.activityInfo.name;
@@ -116,15 +153,10 @@ public final class ShortcutEntry extends EntryWithTags {
             } else {
                 // Can't make sense of the intent URI (Oreo shortcut, or a shortcut from an activity that was removed from an installed app)
                 // Retrieve app icon
-                try {
-                    appDrawable = packageManager.getApplicationIcon(packageName);
-                } catch (PackageManager.NameNotFoundException e) {
-                    e.printStackTrace();
-                }
+                appDrawable = packageManager.getApplicationIcon(packageName);
             }
         } catch (PackageManager.NameNotFoundException | URISyntaxException e) {
             Log.e("Shortcut", "get shortcut icon", e);
-            return;
         }
 
         if (prefs.getBoolean("icons-visible", true)) {
@@ -136,7 +168,7 @@ public final class ShortcutEntry extends EntryWithTags {
             } else {
                 // No icon for this shortcut, use app icon
                 shortcutIcon.setImageDrawable(appDrawable);
-                appIcon.setImageResource(android.R.drawable.ic_menu_send);
+                appIcon.setImageResource(R.drawable.ic_send);
             }
             if (!prefs.getBoolean("subicon-visible", true)) {
                 appIcon.setVisibility(View.GONE);
@@ -148,8 +180,71 @@ public final class ShortcutEntry extends EntryWithTags {
     }
 
     @Override
+    public void doLaunch(@NonNull View view) {
+        Context context = view.getContext();
+        if (isOreoShortcut()) {
+            // Oreo shortcuts
+            doOreoLaunch(context, view);
+        } else {
+            // Pre-oreo shortcuts
+            try {
+                Intent intent = Intent.parseUri(shortcutData, Intent.URI_INTENT_SCHEME);
+                Utilities.setIntentSourceBounds(intent, view);
+
+                context.startActivity(intent);
+            } catch (Exception e) {
+                // Application was just removed?
+                Toast.makeText(context, R.string.application_not_found, Toast.LENGTH_LONG).show();
+            }
+        }
+    }
+
+    @TargetApi(Build.VERSION_CODES.O)
+    private void doOreoLaunch(Context context, View v) {
+        final LauncherApps launcherApps = (LauncherApps) context.getSystemService(Context.LAUNCHER_APPS_SERVICE);
+        assert launcherApps != null;
+
+        // Only the default launcher is allowed to start shortcuts
+        if (!launcherApps.hasShortcutHostPermission()) {
+            Toast.makeText(context, context.getString(R.string.shortcuts_no_host_permission), Toast.LENGTH_LONG).show();
+            return;
+        }
+
+        if (mShortcutInfo != null) {
+            launcherApps.startShortcut(mShortcutInfo, Utilities.getOnScreenRect(v), null);
+            return;
+        }
+
+//        LauncherApps.ShortcutQuery query = new LauncherApps.ShortcutQuery();
+//        query.setPackage(packageName);
+//        query.setShortcutIds(Collections.singletonList(getOreoId()));
+//        query.setQueryFlags(FLAG_MATCH_DYNAMIC | FLAG_MATCH_MANIFEST | FLAG_MATCH_PINNED);
+//
+//        List<UserHandle> userHandles = launcherApps.getProfiles();
+//
+//        // Find the correct UserHandle, and launch the shortcut.
+//        for (UserHandle userHandle : userHandles) {
+//            List<ShortcutInfo> shortcuts = launcherApps.getShortcuts(query, userHandle);
+//            if (shortcuts != null && shortcuts.size() > 0 && shortcuts.get(0).isEnabled()) {
+//                launcherApps.startShortcut(shortcuts.get(0), Utilities.getOnScreenRect(v), null);
+//                return;
+//            }
+//        }
+
+        // Application removed? Invalid shortcut? Shortcut to an app on an unmounted SD card?
+        Toast.makeText(context, R.string.application_not_found, Toast.LENGTH_LONG).show();
+    }
+
+    @Override
     ListPopup buildPopupMenu(Context context, LinearAdapter adapter, ResultAdapter parent, View parentView) {
         adapter.add(new LinearAdapter.Item(context, R.string.menu_remove_shortcut));
+        adapter.add(new LinearAdapter.ItemTitle(context, R.string.popup_title_customize));
+        if (getTags().isEmpty())
+            adapter.add(new LinearAdapter.Item(context, R.string.menu_tags_add));
+        else
+            adapter.add(new LinearAdapter.Item(context, R.string.menu_tags_edit));
+        adapter.add(new LinearAdapter.Item(context, R.string.menu_shortcut_rename));
+        //adapter.add(new LinearAdapter.Item(context, R.string.menu_custom_icon));
         return inflatePopupMenu(adapter, context);
     }
 
@@ -157,8 +252,53 @@ public final class ShortcutEntry extends EntryWithTags {
     boolean popupMenuClickHandler(@NonNull Context context, @NonNull LinearAdapter.MenuItem item, int stringId) {
         switch (stringId) {
             case R.string.menu_remove_shortcut:
+                TBApplication.getApplication(context).getDataHandler().removeShortcut(this);
+                //TODO: update the adapter now, don't wait for the shortcut reload to finish
+                Toast.makeText(context, "Shortcut `" + getName() + "` removed.\nPlease wait for the action to propagate", Toast.LENGTH_LONG).show();
+                return true;
+            case R.string.menu_tags_add:
+            case R.string.menu_tags_edit:
+                TBApplication.behaviour(context).launchEditTagsDialog(this);
+                return true;
+            case R.string.menu_shortcut_rename:
+                launchRenameDialog(context);
                 return true;
         }
         return super.popupMenuClickHandler(context, item, stringId);
+    }
+
+    private void launchRenameDialog(@NonNull Context context) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle(context.getResources().getString(R.string.shortcut_rename_title));
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            builder.setView(R.layout.rename_dialog);
+        } else {
+            builder.setView(View.inflate(context, R.layout.rename_dialog, null));
+        }
+
+        builder.setPositiveButton(R.string.custom_name_rename, (dialog, which) -> {
+            EditText input = ((AlertDialog) dialog).findViewById(R.id.rename);
+
+            // Set new name
+            String newName = input.getText().toString().trim();
+            setName(newName);
+            TBApplication.getApplication(context).getDataHandler().renameShortcut(this, newName);
+
+            // Show toast message
+            String msg = context.getResources().getString(R.string.shortcut_rename_confirmation, getName());
+            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
+
+            dialog.dismiss();
+        });
+        builder.setNegativeButton(android.R.string.cancel, (dialog, which) -> {
+            dialog.cancel();
+        });
+
+        //parent.updateTranscriptMode(AbsListView.TRANSCRIPT_MODE_DISABLED);
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        // call after dialog got inflated (show call)
+        ((TextView) dialog.findViewById(R.id.rename)).setText(getName());
     }
 }

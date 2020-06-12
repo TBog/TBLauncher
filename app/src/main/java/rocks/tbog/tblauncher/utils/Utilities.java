@@ -3,6 +3,8 @@ package rocks.tbog.tblauncher.utils;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Rect;
@@ -55,6 +57,30 @@ public class Utilities {
         return bitmap;
     }
 
+    /**
+     * Returns a drawable suitable for the all apps view. If the package or the resource do not
+     * exist, it returns null.
+     */
+    public static Drawable createIconDrawable(Intent.ShortcutIconResource iconRes, Context context) {
+        PackageManager packageManager = context.getPackageManager();
+        // the resource
+        try {
+            Resources resources = packageManager.getResourcesForApplication(iconRes.packageName);
+            final int id = resources.getIdentifier(iconRes.resourceName, null, null);
+            return resources.getDrawableForDensity(id, 0);
+        } catch (Exception e) {
+            // Icon not found.
+        }
+        return null;
+    }
+
+    /**
+     * Returns a drawable which is of the appropriate size to be displayed as an icon
+     */
+    public static Drawable createIconDrawable(Bitmap icon, Context context) {
+        return new BitmapDrawable(context.getResources(), icon);
+    }
+
     @NonNull
     public static ICutout getNotchCutout(Activity activity) {
         ICutout cutout;
@@ -84,8 +110,7 @@ public class Utilities {
     }
 
     @Nullable
-    public static Rect getOnScreenRect(@Nullable View v)
-    {
+    public static Rect getOnScreenRect(@Nullable View v) {
         if (v == null)
             return null;
         v.getLocationOnScreen(ON_SCREEN_POS);
