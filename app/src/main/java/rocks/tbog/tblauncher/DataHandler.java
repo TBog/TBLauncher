@@ -861,6 +861,22 @@ public class DataHandler extends BroadcastReceiver
         DBHelper.renameShortcut(context, shortcutEntry, newName);
     }
 
+    public void reloadProviders() {
+        allProvidersHaveLoaded = false;
+
+        start = System.currentTimeMillis();
+
+        IntentFilter intentFilter = new IntentFilter(TBLauncherActivity.LOAD_OVER);
+        this.context.registerReceiver(this, intentFilter);
+
+        Intent i = new Intent(TBLauncherActivity.START_LOAD);
+        this.context.sendBroadcast(i);
+
+        for (ProviderEntry entry : this.providers.values()) {
+            entry.provider.reload();
+        }
+    }
+
 //    public TagsHandler getTagsHandler() {
 //        if (tagsHandler == null) {
 //            tagsHandler = new TagsHandler(context);

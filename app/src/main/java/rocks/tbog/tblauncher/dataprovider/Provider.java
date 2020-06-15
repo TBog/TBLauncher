@@ -64,6 +64,7 @@ public abstract class Provider<T extends EntryItem> extends Service implements I
     }
 
     public void reload() {
+        loaded = false;
         // Handled at subclass level
         if (pojos.size() > 0) {
             Log.v(TAG, "Reloading provider: " + this.getClass().getSimpleName());
@@ -89,8 +90,7 @@ public abstract class Provider<T extends EntryItem> extends Service implements I
         this.sendBroadcast(i);
     }
 
-    public String getScheme()
-    {
+    public String getScheme() {
         return pojoScheme;
     }
 

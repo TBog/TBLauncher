@@ -110,11 +110,12 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
         mReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
-                //noinspection ConstantConditions
-                if (intent.getAction().equalsIgnoreCase(LOAD_OVER)) {
+                if (START_LOAD.equalsIgnoreCase(intent.getAction())) {
+                    TBApplication.behaviour(TBLauncherActivity.this).displayLoader(true);
+                } else if (LOAD_OVER.equalsIgnoreCase(intent.getAction())) {
                     //updateSearchRecords(true);
                     TBApplication.behaviour(TBLauncherActivity.this).updateSearchRecords();
-                } else if (intent.getAction().equalsIgnoreCase(FULL_LOAD_OVER)) {
+                } else if (FULL_LOAD_OVER.equalsIgnoreCase(intent.getAction())) {
                     Log.v(TAG, "All providers are done loading.");
 
                     TBApplication.behaviour(TBLauncherActivity.this).displayLoader(false);

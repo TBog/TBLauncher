@@ -43,11 +43,12 @@ public class LoadShortcutsEntryItem extends LoadEntryItem<ShortcutEntry> {
 
     @Override
     protected ArrayList<ShortcutEntry> doInBackground(Void... arg0) {
-        if (context.get() == null) {
+        Context ctx = context.get();
+        if (ctx == null) {
             return new ArrayList<>();
         }
 
-        List<ShortcutRecord> records = DBHelper.getShortcuts(context.get());
+        List<ShortcutRecord> records = DBHelper.getShortcuts(ctx);
         ArrayList<ShortcutEntry> pojos = new ArrayList<>(records.size());
 
         HashMap<String, ShortcutRecord> oreoMap = new HashMap<>();
