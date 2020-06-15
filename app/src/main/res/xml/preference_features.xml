@@ -13,6 +13,13 @@
             android:defaultValue="true"
             android:key="quick-list-enabled"
             android:title="@string/quick_list_enabled" />
+
+        <androidx.preference.SwitchPreference
+            android:defaultValue="true"
+            android:dependency="quick-list-enabled"
+            android:key="quick-list-always-visible"
+            android:title="@string/quick_list_always_visible" />
+
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
             android:defaultValue="@integer/default_bar_size"
             android:dependency="quick-list-enabled"

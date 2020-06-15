@@ -119,5 +119,6 @@
     <string name="shortcuts_no_host_permission">This is not your main launcher anymore and can\'t access your shortcuts.</string>
     <string name="pin_shortcut_message">Do you want to add this shortcut?</string>
     <string name="pin_shortcut_label">Choose shortcut label</string>
+    <string name="quick_list_always_visible">Always visible</string>
 
 </resources>

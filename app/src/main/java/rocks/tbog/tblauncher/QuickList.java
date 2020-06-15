@@ -10,6 +10,7 @@ import android.content.res.Resources;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.PaintDrawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -33,6 +34,7 @@ import rocks.tbog.tblauncher.utils.UIColors;
 public class QuickList {
     private TBLauncherActivity mTBLauncherActivity;
     private boolean mIsEnabled = true;
+    private boolean mAlwaysVisible = true;
     private LinearLayout mQuickList;
 
     // bAdapterEmpty is true when no search results are displayed
@@ -184,22 +186,25 @@ public class QuickList {
     }
 
     public void showQuickList() {
+        if (mAlwaysVisible)
+            show();
+    }
+
+    private void show() {
         if (isQuickListEnabled()) {
-            mQuickList.setVisibility(View.VISIBLE);
             mQuickList.animate()
                     .scaleY(1f)
                     .setListener(null)
                     .setInterpolator(new AccelerateDecelerateInterpolator())
                     .start();
+            mQuickList.setVisibility(View.VISIBLE);
         }
     }
 
     public void hideQuickList(boolean animate) {
         if (isQuickListEnabled()) {
-            mLastFilter = null;
             animToggleOff();
             if (animate) {
-                mQuickList.setVisibility(View.VISIBLE);
                 mQuickList.animate()
                         .scaleY(0f)
                         .setListener(new AnimatorListenerAdapter() {
@@ -210,6 +215,7 @@ public class QuickList {
                         })
                         .setInterpolator(new DecelerateInterpolator())
                         .start();
+                mQuickList.setVisibility(View.VISIBLE);
             } else {
                 mQuickList.setScaleY(0f);
                 mQuickList.setVisibility(View.GONE);
@@ -222,6 +228,7 @@ public class QuickList {
     public void onResume(SharedPreferences pref) {
         Resources resources = mQuickList.getResources();
         mIsEnabled = pref.getBoolean("quick-list-enabled", true);
+        mAlwaysVisible = pref.getBoolean("quick-list-always-visible", true);
 
         // size
         int percent = pref.getInt("quick-list-size", 0);
@@ -256,9 +263,12 @@ public class QuickList {
         animToggleOff();
         bFilterOn = false;
         bAdapterEmpty = true;
+        if (!mAlwaysVisible)
+            hideQuickList(true);
     }
 
     public void adapterUpdated() {
+        show();
         animToggleOff();
         bFilterOn = false;
         bAdapterEmpty = false;
