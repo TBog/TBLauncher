@@ -163,6 +163,21 @@
 
     <!--    </androidx.preference.PreferenceScreen>-->
 
+
+    <androidx.preference.Preference
+        android:key="exit-app"
+        android:title="@string/exit_the_app">
+        <intent
+            android:action="android.intent.action.VIEW"
+
+            android:targetClass="rocks.tbog.tblauncher.TBLauncherActivity"
+            android:targetPackage="rocks.tbog.tblauncher">
+            <extra
+                android:name="preference"
+                android:value="exit" />
+        </intent>
+    </androidx.preference.Preference>
+
     <androidx.preference.Preference
         android:key="rate-app"
         android:title="@string/rate_the_app">
