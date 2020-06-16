@@ -19,6 +19,7 @@ import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
@@ -160,6 +161,8 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     public void onCreateActivity(TBLauncherActivity tbLauncherActivity) {
+//        int animationDuration = mTBLauncherActivity.getResources().getInteger(android.R.integer.config_longAnimTime);
+
         mTBLauncherActivity = tbLauncherActivity;
         mPref = PreferenceManager.getDefaultSharedPreferences(tbLauncherActivity);
 
@@ -309,29 +312,30 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         mSearchEditText.requestFocus();
         InputMethodManager mgr = (InputMethodManager) mTBLauncherActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
         assert mgr != null;
-        mgr.showSoftInput(mSearchEditText, InputMethodManager.SHOW_IMPLICIT);
-
-        //systemUiVisibilityHelper.onKeyboardVisibilityChanged(true);
+        mgr.showSoftInput(mSearchEditText, InputMethodManager.SHOW_FORCED);
+        mTBLauncherActivity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
     }
 
     public void hideKeyboard() {
         // Check if no view has focus:
+        InputMethodManager mgr = (InputMethodManager) mTBLauncherActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
+        assert mgr != null;
+        //mgr.showSoftInput(mSearchEditText, InputMethodManager.SHOW_IMPLICIT);
+        mgr.hideSoftInputFromWindow(mSearchEditText.getWindowToken(), 0);
+
         View view = mTBLauncherActivity.getCurrentFocus();
         if (view != null) {
-            InputMethodManager inputManager = (InputMethodManager) mTBLauncherActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
-            //noinspection ConstantConditions
-            inputManager.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+            mgr.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
         }
 
-        //systemUiVisibilityHelper.onKeyboardVisibilityChanged(false);
         mTBLauncherActivity.dismissPopup();
 
         mSearchEditText.clearFocus();
+        mTBLauncherActivity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
     }
 
     @Override
     public void displayLoader(boolean display) {
-//        int animationDuration = mTBLauncherActivity.getResources().getInteger(android.R.integer.config_longAnimTime);
         if (mLauncherButton == null)
             return;
 
@@ -342,34 +346,6 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             else
                 ((Animatable) loadingDrawable).stop();
         }
-
-//        // Do not display animation if launcher button is already visible
-//        if (!display && mLauncherButton.getVisibility() == View.INVISIBLE) {
-//            mLauncherButton.setVisibility(View.VISIBLE);
-//
-//            // Animate transition from loader to launch button
-//            mLauncherButton.setAlpha(0f);
-//            mLauncherButton.animate()
-//                    .alpha(1f)
-//                    .setDuration(animationDuration)
-//                    .setListener(null);
-////            mLoaderSpinner.animate()
-////                    .alpha(0f)
-////                    .setDuration(animationDuration)
-////                    .setListener(new AnimatorListenerAdapter() {
-////                        @Override
-////                        public void onAnimationEnd(Animator animation) {
-////                            mLoaderSpinner.setVisibility(View.GONE);
-////                            mLoaderSpinner.setAlpha(1f);
-////                        }
-////                    });
-//
-//            //mLoader.setVisibility(View.GONE);
-//        } else if (display) {
-//            mLauncherButton.setVisibility(View.INVISIBLE);
-//
-//            //mLoaderSpinner.setVisibility(View.VISIBLE);
-//        }
     }
 
     @NonNull
@@ -607,7 +583,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 
     public void onResume() {
         Log.i(TAG, "onResume");
-        if (mSearchEditText.getText().length() > 0) {
+        if (!bSearchBarHidden) {
             showSearchBar();
             showKeyboard();
             mSearchEditText.postDelayed(this::showKeyboard, UI_ANIMATION_DELAY);
@@ -631,5 +607,11 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             }
         }
 
+    }
+
+    public void onWindowFocusChanged(boolean hasFocus) {
+        Log.i(TAG, "onWindowFocusChanged " + hasFocus);
+        if (!bSearchBarHidden)
+            showKeyboard();
     }
 }

@@ -248,7 +248,13 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
         super.onBackPressed();
     }
 
-//    /**
+    @Override
+    public void onWindowFocusChanged(boolean hasFocus) {
+        super.onWindowFocusChanged(hasFocus);
+        TBApplication.behaviour(this).onWindowFocusChanged(hasFocus);
+    }
+
+    //    /**
 //     * Schedules a call to hide() in delay milliseconds, canceling any
 //     * previously scheduled calls.
 //     */
