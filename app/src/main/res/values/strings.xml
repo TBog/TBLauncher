@@ -65,7 +65,7 @@
 
     <!-- Content Description -->
     <string name="cd_show_all_apps">Show all applications</string>
-    <string name="select_alpha">Drag the slider to select the desired transparency</string>
+    <string name="select_alpha">Drag the slider to select the desired opacity</string>
     <string name="search_bar_section">Search bar</string>
     <string name="search_bar_size">Bar and text size</string>
     <string name="result_list_section">Result list</string>
@@ -121,5 +121,10 @@
     <string name="pin_shortcut_label">Choose shortcut label</string>
     <string name="quick_list_always_visible">Always visible</string>
     <string name="exit_the_app">Close launcher</string>
+    <string name="exit_the_app_confirm">Are you sure you want to close the launcher?</string>
+    <string name="exit_the_app_description">The system will open your default launcher of ask which to open afterwards.</string>
+    <string name="reset_default_launcher_confirm">Are you sure you want to change the default launcher?</string>
+    <string name="reset_default_launcher_description">The system will ask for an application to open when you press the home button. Please press the "Always" option to make your selection the default.</string>
+    <string name="reset_default_launcher">Change default launcher</string>
 
 </resources>

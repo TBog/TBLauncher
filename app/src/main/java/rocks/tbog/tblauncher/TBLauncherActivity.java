@@ -177,12 +177,6 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
         setIntent(intent);
         super.onNewIntent(intent);
 
-        String pref = intent.getStringExtra("preference");
-        if ("exit".equals(pref)) {
-            System.exit(0);
-            return;
-        }
-
         // This is called when the user press Home again while already browsing MainActivity
         // onResume() will be called right after, hiding the kissbar if any.
         // http://developer.android.com/reference/android/app/Activity.html#onNewIntent(android.content.Intent)

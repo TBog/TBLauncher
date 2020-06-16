@@ -164,19 +164,15 @@
     <!--    </androidx.preference.PreferenceScreen>-->
 
 
-    <androidx.preference.Preference
-        android:key="exit-app"
-        android:title="@string/exit_the_app">
-        <intent
-            android:action="android.intent.action.VIEW"
+    <rocks.tbog.tblauncher.preference.CustomDialogPreference
+        android:key="reset-default-launcher"
+        android:dialogLayout="@layout/pref_confirm"
+        android:title="@string/reset_default_launcher"/>
 
-            android:targetClass="rocks.tbog.tblauncher.TBLauncherActivity"
-            android:targetPackage="rocks.tbog.tblauncher">
-            <extra
-                android:name="preference"
-                android:value="exit" />
-        </intent>
-    </androidx.preference.Preference>
+    <rocks.tbog.tblauncher.preference.CustomDialogPreference
+        android:key="exit-app"
+        android:dialogLayout="@layout/pref_confirm"
+        android:title="@string/exit_the_app"/>
 
     <androidx.preference.Preference
         android:key="rate-app"

@@ -23,6 +23,7 @@ import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceScreen;
 import androidx.preference.SwitchPreference;
 
+import rocks.tbog.tblauncher.preference.ConfirmDialog;
 import rocks.tbog.tblauncher.preference.CustomDialogPreference;
 import rocks.tbog.tblauncher.preference.PaletteDialog;
 import rocks.tbog.tblauncher.preference.SliderDialog;
@@ -232,6 +233,10 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "quick-list-alpha":
                     case "quick-list-size":
                         dialogFragment = SliderDialog.newInstance(key);
+                        break;
+                    case "exit-app":
+                    case "reset-default-launcher":
+                        dialogFragment = ConfirmDialog.newInstance(key);
                         break;
                     default:
                         throw new RuntimeException("CustomDialogPreference \"" + key + "\" has no dialog defined");
