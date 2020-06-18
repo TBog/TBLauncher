@@ -41,6 +41,12 @@ public interface IProvider {
     boolean isLoaded();
 
     /**
+     * Return true to reload this after all other providers
+     * @return true if this should receive a reload after all other providers loaded
+     */
+    boolean loadLast();
+
+    /**
      * Tells whether or not this provider may be able to find the pojo with
      * specified id
      *

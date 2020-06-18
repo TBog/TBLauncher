@@ -18,7 +18,7 @@ import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.loader.LoadEntryItem;
 
 public abstract class Provider<T extends EntryItem> extends Service implements IProvider {
-    private final static String TAG = "Provider";
+    final static String TAG = "Provider";
 
     /**
      * Binder given to clients
@@ -63,6 +63,7 @@ public abstract class Provider<T extends EntryItem> extends Service implements I
         loader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
+    @Override
     public void reload() {
         loaded = false;
         // Handled at subclass level
@@ -71,8 +72,14 @@ public abstract class Provider<T extends EntryItem> extends Service implements I
         }
     }
 
+    @Override
     public boolean isLoaded() {
         return this.loaded;
+    }
+
+    @Override
+    public boolean loadLast() {
+        return false;
     }
 
     public void loadOver(ArrayList<T> results) {

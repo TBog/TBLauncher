@@ -12,7 +12,6 @@ import android.content.pm.ShortcutInfo;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
-import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -32,11 +31,14 @@ import java.util.Set;
 import rocks.tbog.tblauncher.dataprovider.AppCacheProvider;
 import rocks.tbog.tblauncher.dataprovider.AppProvider;
 import rocks.tbog.tblauncher.dataprovider.ContactsProvider;
+import rocks.tbog.tblauncher.dataprovider.FavProvider;
+import rocks.tbog.tblauncher.dataprovider.FilterProvider;
 import rocks.tbog.tblauncher.dataprovider.IProvider;
 import rocks.tbog.tblauncher.dataprovider.Provider;
 import rocks.tbog.tblauncher.dataprovider.ShortcutsProvider;
 import rocks.tbog.tblauncher.db.AppRecord;
 import rocks.tbog.tblauncher.db.DBHelper;
+import rocks.tbog.tblauncher.db.FavRecord;
 import rocks.tbog.tblauncher.db.ShortcutRecord;
 import rocks.tbog.tblauncher.db.ValuedHistoryRecord;
 import rocks.tbog.tblauncher.entry.AppEntry;
@@ -64,7 +66,7 @@ public class DataHandler extends BroadcastReceiver
             , "contacts"
             , "shortcuts"
     );
-    //private TagsHandler tagsHandler;
+
     final private Context context;
     private String currentQuery;
     private final Map<String, ProviderEntry> providers = new HashMap<>();
@@ -110,9 +112,14 @@ public class DataHandler extends BroadcastReceiver
 
         // QuickListProvider
         {
-//            ProviderEntry providerEntry = new ProviderEntry();
-//            providerEntry.provider = new QuickListProvider();
-//            providers.put("quickList", providerEntry);
+            ProviderEntry providerEntry = new ProviderEntry();
+            providerEntry.provider = new FilterProvider(context);
+            providers.put("filters", providerEntry);
+        }
+        {
+            ProviderEntry providerEntry = new ProviderEntry();
+            providerEntry.provider = new FavProvider(context);
+            providers.put("favorites", providerEntry);
         }
 
 //        ProviderEntry calculatorEntry = new ProviderEntry();
@@ -254,7 +261,7 @@ public class DataHandler extends BroadcastReceiver
                 Log.i(TAG, "onServiceConnected " + className);
 
                 // We've bound to LocalService, cast the IBinder and get LocalService instance
-                Provider.LocalBinder binder = (Provider.LocalBinder) service;
+                Provider<?>.LocalBinder binder = (Provider<?>.LocalBinder) service;
                 IProvider provider = binder.getService();
 
                 // Update provider info so that it contains something useful
@@ -299,7 +306,6 @@ public class DataHandler extends BroadcastReceiver
      * Called when some event occurred that makes us believe that all data providers
      * might be ready now
      */
-    @SuppressWarnings("CatchAndPrintStackTrace")
     private void handleProviderLoaded() {
         if (this.allProvidersHaveLoaded) {
             return;
@@ -307,7 +313,25 @@ public class DataHandler extends BroadcastReceiver
 
         // Make sure that all providers are fully connected
         for (ProviderEntry entry : this.providers.values()) {
-            if (entry.provider == null || !entry.provider.isLoaded()) {
+            if (entry.provider == null)
+                return;
+            // skip loadLast providers from this check
+            if (entry.provider.loadLast())
+                continue;
+            if (!entry.provider.isLoaded()) {
+                return;
+            }
+        }
+        // Now check loadLast providers
+        for (ProviderEntry entry : this.providers.values()) {
+            if (entry.provider == null)
+                return;
+            // reload providers that need to be loaded last
+            if (entry.provider.loadLast()) {
+                entry.provider.reload();
+                continue;
+            }
+            if (!entry.provider.isLoaded()) {
                 return;
             }
         }
@@ -323,7 +347,7 @@ public class DataHandler extends BroadcastReceiver
             Intent i = new Intent(TBLauncherActivity.FULL_LOAD_OVER);
             this.context.sendBroadcast(i);
         } catch (IllegalArgumentException e) {
-            e.printStackTrace();
+            Log.e(TAG, "send FULL_LOAD_OVER", e);
         }
     }
 
@@ -488,7 +512,7 @@ public class DataHandler extends BroadcastReceiver
 
     public void removeShortcut(ShortcutEntry shortcut) {
         // Also remove shortcut from favorites
-        removeFromFavorites(shortcut.id);
+        removeFromFavorites(shortcut);
         DBHelper.removeShortcut(this.context, shortcut);
 
         if (shortcut.mShortcutInfo != null) {
@@ -509,7 +533,9 @@ public class DataHandler extends BroadcastReceiver
         List<ShortcutRecord> shortcutsList = DBHelper.getShortcuts(context, packageName);
         for (ShortcutRecord shortcut : shortcutsList) {
             String id = ShortcutEntry.generateShortcutId(shortcut.displayName);
-            removeFromFavorites(id);
+            EntryItem entry = getPojo(id);
+            if (entry != null)
+                removeFromFavorites(entry);
         }
 
         DBHelper.removeShortcuts(this.context, packageName);
@@ -539,75 +565,75 @@ public class DataHandler extends BroadcastReceiver
         return excluded;
     }
 
-    public void addToExcludedFromHistory(AppEntry app) {
-        // The set needs to be cloned and then edited,
-        // modifying in place is not supported by putStringSet()
-        Set<String> excluded = new HashSet<>(getExcludedFromHistory());
-        excluded.add(app.id);
+//    public void addToExcludedFromHistory(AppEntry app) {
+//        // The set needs to be cloned and then edited,
+//        // modifying in place is not supported by putStringSet()
+//        Set<String> excluded = new HashSet<>(getExcludedFromHistory());
+//        excluded.add(app.id);
+//
+//        if (ShortcutUtil.areShortcutsEnabled(context)) {
+//            // Add all shortcuts for given package name to being excluded from history
+//            List<ShortcutRecord> shortcutsList = DBHelper.getShortcuts(context, app.getPackageName());
+//            for (ShortcutRecord shortcut : shortcutsList) {
+//                String id = ShortcutEntry.generateShortcutId(shortcut.displayName);
+//                excluded.add(id);
+//            }
+//            // Refresh shortcuts
+//            if (!shortcutsList.isEmpty() && this.getShortcutsProvider() != null) {
+//                this.getShortcutsProvider().reload();
+//            }
+//        }
+//
+//        PreferenceManager.getDefaultSharedPreferences(context).edit().putStringSet("excluded-apps-from-history", excluded).apply();
+//        app.setExcludedFromHistory(true);
+//    }
 
-        if (ShortcutUtil.areShortcutsEnabled(context)) {
-            // Add all shortcuts for given package name to being excluded from history
-            List<ShortcutRecord> shortcutsList = DBHelper.getShortcuts(context, app.getPackageName());
-            for (ShortcutRecord shortcut : shortcutsList) {
-                String id = ShortcutEntry.generateShortcutId(shortcut.displayName);
-                excluded.add(id);
-            }
-            // Refresh shortcuts
-            if (!shortcutsList.isEmpty() && this.getShortcutsProvider() != null) {
-                this.getShortcutsProvider().reload();
-            }
-        }
+//    public void removeFromExcludedFromHistory(AppEntry app) {
+//        // The set needs to be cloned and then edited,
+//        // modifying in place is not supported by putStringSet()
+//        Set<String> excluded = new HashSet<>(getExcludedFromHistory());
+//        excluded.remove(app.id);
+//
+//        if (ShortcutUtil.areShortcutsEnabled(context)) {
+//            // Add all shortcuts for given package name to being included in history
+//            List<ShortcutRecord> shortcutsList = DBHelper.getShortcuts(context, app.getPackageName());
+//            for (ShortcutRecord shortcut : shortcutsList) {
+//                String id = ShortcutEntry.generateShortcutId(shortcut.displayName);
+//                excluded.remove(id);
+//            }
+//        }
+//
+//        PreferenceManager.getDefaultSharedPreferences(context).edit().putStringSet("excluded-apps-from-history", excluded).apply();
+//        app.setExcludedFromHistory(false);
+//    }
 
-        PreferenceManager.getDefaultSharedPreferences(context).edit().putStringSet("excluded-apps-from-history", excluded).apply();
-        app.setExcludedFromHistory(true);
-    }
+//    public void addToExcluded(AppEntry app) {
+//        // The set needs to be cloned and then edited,
+//        // modifying in place is not supported by putStringSet()
+//        Set<String> excluded = new HashSet<>(getExcluded());
+//        excluded.add(app.getUserComponentName());
+//        PreferenceManager.getDefaultSharedPreferences(context).edit().putStringSet("excluded-apps", excluded).apply();
+//        app.setExcluded(true);
+//
+//        // Ensure it's removed from favorites too
+//        DataHandler dataHandler = TBApplication.getApplication(context).getDataHandler();
+//        dataHandler.removeFromFavorites(app.id);
+//
+//        // Exclude shortcuts for this app
+//        removeShortcuts(app.getPackageName());
+//    }
 
-    public void removeFromExcludedFromHistory(AppEntry app) {
-        // The set needs to be cloned and then edited,
-        // modifying in place is not supported by putStringSet()
-        Set<String> excluded = new HashSet<>(getExcludedFromHistory());
-        excluded.remove(app.id);
-
-        if (ShortcutUtil.areShortcutsEnabled(context)) {
-            // Add all shortcuts for given package name to being included in history
-            List<ShortcutRecord> shortcutsList = DBHelper.getShortcuts(context, app.getPackageName());
-            for (ShortcutRecord shortcut : shortcutsList) {
-                String id = ShortcutEntry.generateShortcutId(shortcut.displayName);
-                excluded.remove(id);
-            }
-        }
-
-        PreferenceManager.getDefaultSharedPreferences(context).edit().putStringSet("excluded-apps-from-history", excluded).apply();
-        app.setExcludedFromHistory(false);
-    }
-
-    public void addToExcluded(AppEntry app) {
-        // The set needs to be cloned and then edited,
-        // modifying in place is not supported by putStringSet()
-        Set<String> excluded = new HashSet<>(getExcluded());
-        excluded.add(app.getUserComponentName());
-        PreferenceManager.getDefaultSharedPreferences(context).edit().putStringSet("excluded-apps", excluded).apply();
-        app.setExcluded(true);
-
-        // Ensure it's removed from favorites too
-        DataHandler dataHandler = TBApplication.getApplication(context).getDataHandler();
-        dataHandler.removeFromFavorites(app.id);
-
-        // Exclude shortcuts for this app
-        removeShortcuts(app.getPackageName());
-    }
-
-    public void removeFromExcluded(AppEntry app) {
-        // The set needs to be cloned and then edited,
-        // modifying in place is not supported by putStringSet()
-        Set<String> excluded = new HashSet<>(getExcluded());
-        excluded.remove(app.getUserComponentName());
-        PreferenceManager.getDefaultSharedPreferences(context).edit().putStringSet("excluded-apps", excluded).apply();
-        app.setExcluded(false);
-
-        // Add shortcuts for this app
-        addShortcut(app.getPackageName());
-    }
+//    public void removeFromExcluded(AppEntry app) {
+//        // The set needs to be cloned and then edited,
+//        // modifying in place is not supported by putStringSet()
+//        Set<String> excluded = new HashSet<>(getExcluded());
+//        excluded.remove(app.getUserComponentName());
+//        PreferenceManager.getDefaultSharedPreferences(context).edit().putStringSet("excluded-apps", excluded).apply();
+//        app.setExcluded(false);
+//
+//        // Add shortcuts for this app
+//        addShortcut(app.getPackageName());
+//    }
 
     public void removeFromExcluded(String packageName) {
         Set<String> excluded = getExcluded();
@@ -678,6 +704,12 @@ public class DataHandler extends BroadcastReceiver
         return (entry != null) ? ((AppProvider) entry.provider) : null;
     }
 
+    @Nullable
+    public FavProvider getFavProvider() {
+        ProviderEntry entry = this.providers.get("favorites");
+        return (entry != null) ? ((FavProvider) entry.provider) : null;
+    }
+
 //    @Nullable
 //    public SearchProvider getSearchProvider() {
 //        ProviderEntry entry = this.providers.get("search");
@@ -685,92 +717,61 @@ public class DataHandler extends BroadcastReceiver
 //    }
 
     /**
-     * Return most used items.<br />
-     * May return null if no items were ever selected (app first use)
+     * Return a list of records that the user marked as favorite
      *
-     * @return favorites' pojo
+     * @return list of {@link FavRecord}
      */
-    public ArrayList<EntryItem> getFavorites() {
-
-        String favApps = PreferenceManager.getDefaultSharedPreferences(this.context).
-                getString("favorite-apps-list", "");
-
-        List<String> favAppsList = Arrays.asList(favApps.split(";"));
-        ArrayList<EntryItem> favorites = new ArrayList<>(favAppsList.size());
-        // Find associated items
-        for (int i = 0; i < favAppsList.size(); i++) {
-            EntryItem pojo = getPojo(favAppsList.get(i));
-            if (pojo != null) {
-                favorites.add(pojo);
-            }
-        }
-
-        return favorites;
+    @NonNull
+    public ArrayList<FavRecord> getFavorites() {
+        return DBHelper.getFavorites(context);
     }
 
-    /**
-     * This method is used to set the specific position of an app in the fav array.
-     *
-     * @param context  The mainActivity context
-     * @param id       the app you want to set the position of
-     * @param position the new position of the fav
-     */
-    public void setFavoritePosition(TBLauncherActivity context, String id, int position) {
-        List<EntryItem> currentFavorites = getFavorites();
-        List<String> favAppsList = new ArrayList<>();
+//    /**
+//     * This method is used to set the specific position of an app in the fav array.
+//     *
+//     * @param context  The mainActivity context
+//     * @param id       the app you want to set the position of
+//     * @param position the new position of the fav
+//     */
+//    public void setFavoritePosition(TBLauncherActivity context, String id, int position) {
+//        List<EntryItem> currentFavorites = getFavorites();
+//        List<String> favAppsList = new ArrayList<>();
+//
+//        for (EntryItem pojo : currentFavorites) {
+//            favAppsList.add(pojo.getHistoryId());
+//        }
+//
+//        int currentPos = favAppsList.indexOf(id);
+//        if (currentPos == -1) {
+//            Log.e(TAG, "Couldn't find id in favAppsList");
+//            return;
+//        }
+//        // Clamp the position so we don't just extend past the end of the array.
+//        position = Math.min(position, favAppsList.size() - 1);
+//
+//        favAppsList.remove(currentPos);
+//        favAppsList.add(position, id);
+//
+//        String newFavList = TextUtils.join(";", favAppsList);
+//
+//        PreferenceManager.getDefaultSharedPreferences(context).edit()
+//                .putString("favorite-apps-list", newFavList + ";").apply();
+//
+//        //TODO: make this work
+//        //context.onFavoriteChange();
+//    }
 
-        for (EntryItem pojo : currentFavorites) {
-            favAppsList.add(pojo.getHistoryId());
-        }
-
-        int currentPos = favAppsList.indexOf(id);
-        if (currentPos == -1) {
-            Log.e(TAG, "Couldn't find id in favAppsList");
-            return;
-        }
-        // Clamp the position so we don't just extend past the end of the array.
-        position = Math.min(position, favAppsList.size() - 1);
-
-        favAppsList.remove(currentPos);
-        favAppsList.add(position, id);
-
-        String newFavList = TextUtils.join(";", favAppsList);
-
-        PreferenceManager.getDefaultSharedPreferences(context).edit()
-                .putString("favorite-apps-list", newFavList + ";").apply();
-
-        //TODO: make this work
-        //context.onFavoriteChange();
+    public void addToFavorites(EntryItem entry) {
+        FavRecord record = new FavRecord();
+        record.record = entry.id;
+        record.position = "0";
+        DBHelper.setFavorite(context, record);
     }
 
-    public void addToFavorites(String id) {
-        String favApps = PreferenceManager.getDefaultSharedPreferences(context).
-                getString("favorite-apps-list", "");
-
-        // Check if we are already a fav icon
-        assert favApps != null;
-        if (favApps.contains(id + ";")) {
-            //shouldn't happen
-            return;
-        }
-
-        PreferenceManager.getDefaultSharedPreferences(context).edit()
-                .putString("favorite-apps-list", favApps + id + ";").apply();
-    }
-
-    public void removeFromFavorites(String id) {
-        String favApps = PreferenceManager.getDefaultSharedPreferences(context).
-                getString("favorite-apps-list", "");
-
-        // Check if we are not already a fav icon
-        assert favApps != null;
-        if (!favApps.contains(id + ";")) {
-            //shouldn't happen
-            return;
-        }
-
-        PreferenceManager.getDefaultSharedPreferences(context).edit()
-                .putString("favorite-apps-list", favApps.replace(id + ";", "")).apply();
+    public void removeFromFavorites(EntryItem entry) {
+        FavRecord record = new FavRecord();
+        record.record = entry.id;
+        DBHelper.removeFavorite(context, record);
     }
 
     @SuppressWarnings("StringSplitter")
@@ -816,7 +817,7 @@ public class DataHandler extends BroadcastReceiver
     }
 
     @Nullable
-    EntryItem getPojo(@NonNull String id) {
+    public EntryItem getPojo(@NonNull String id) {
         // Ask all providers if they know this id
         for (ProviderEntry entry : this.providers.values()) {
             if (entry.provider != null && entry.provider.mayFindById(id)) {
@@ -876,17 +877,6 @@ public class DataHandler extends BroadcastReceiver
             entry.provider.reload();
         }
     }
-
-//    public TagsHandler getTagsHandler() {
-//        if (tagsHandler == null) {
-//            tagsHandler = new TagsHandler(context);
-//        }
-//        return tagsHandler;
-//    }
-
-//    public void resetTagsHandler() {
-//        tagsHandler = new TagsHandler(this.context);
-//    }
 
     static final class ProviderEntry {
         public IProvider provider = null;

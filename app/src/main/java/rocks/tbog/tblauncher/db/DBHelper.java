@@ -3,6 +3,7 @@ package rocks.tbog.tblauncher.db;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
+import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 import android.text.TextUtils;
@@ -28,6 +29,7 @@ public class DBHelper {
     private static final String TAG = DBHelper.class.getSimpleName();
     private static SQLiteDatabase database = null;
     private static final String[] TABLE_COLUMNS_APPS = new String[]{"_id", "display_name", "component_name", "custom_flags"};
+    private static final String[] TABLE_COLUMNS_FAVORITES = new String[]{"record", "position", "custom_flags"};
 
     private DBHelper() {
     }
@@ -587,5 +589,47 @@ public class DBHelper {
         }
 
         return getAppRecord(db, componentName);
+    }
+
+    public static void setFavorite(Context context, FavRecord fav) {
+        SQLiteDatabase db = getDatabase(context);
+
+        ContentValues values = new ContentValues();
+        values.put("record", fav.record);
+        values.put("position", fav.position);
+        values.put("custom_flags", fav.flags);
+
+//        int rows = db.update("favorites", values, "record=?", new String[]{fav.record});
+//        if (rows == 0)
+//            db.insertWithOnConflict("favorites", null, values, SQLiteDatabase.CONFLICT_REPLACE);
+        try {
+            db.replaceOrThrow("favorites", null, values);
+        } catch (SQLException e) {
+            Log.e(TAG, "setFavorite " + fav.record);
+        }
+    }
+
+    public static void removeFavorite(Context context, FavRecord fav) {
+        SQLiteDatabase db = getDatabase(context);
+
+        if (0 == db.delete("favorites", "record=?", new String[]{fav.record}))
+            Log.e(TAG, "removeFavorite " + fav.record);
+    }
+
+    @NonNull
+    public static ArrayList<FavRecord> getFavorites(@NonNull Context context) {
+        ArrayList<FavRecord> list;
+        SQLiteDatabase db = getDatabase(context);
+        try (Cursor c = db.query("favorites", TABLE_COLUMNS_FAVORITES, null, null, null, null, "position")) {
+            list = new ArrayList<>(c.getCount());
+            while (c.moveToNext()) {
+                FavRecord fav = new FavRecord();
+                fav.record = c.getString(0);
+                fav.position = c.getString(1);
+                fav.flags = c.getInt(2);
+                list.add(fav);
+            }
+        }
+        return list;
     }
 }

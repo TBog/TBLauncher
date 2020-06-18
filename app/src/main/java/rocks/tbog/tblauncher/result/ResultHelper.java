@@ -70,13 +70,13 @@ public class ResultHelper {
 
     public static void launchAddToFavorites(@NonNull Context context, EntryItem pojo) {
         String msg = context.getResources().getString(R.string.toast_favorites_added);
-        TBApplication.getApplication(context).getDataHandler().addToFavorites(pojo.getHistoryId());
+        TBApplication.getApplication(context).getDataHandler().addToFavorites(pojo);
         Toast.makeText(context, String.format(msg, pojo.getName()), Toast.LENGTH_SHORT).show();
     }
 
     public static void launchRemoveFromFavorites(@NonNull Context context, EntryItem pojo) {
         String msg = context.getResources().getString(R.string.toast_favorites_removed);
-        TBApplication.getApplication(context).getDataHandler().removeFromFavorites(pojo.getHistoryId());
+        TBApplication.getApplication(context).getDataHandler().removeFromFavorites(pojo);
         Toast.makeText(context, String.format(msg, pojo.getName()), Toast.LENGTH_SHORT).show();
     }
 

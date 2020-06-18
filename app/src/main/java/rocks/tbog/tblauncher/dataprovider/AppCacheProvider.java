@@ -77,6 +77,11 @@ public class AppCacheProvider implements IProvider {
     }
 
     @Override
+    public boolean loadLast() {
+        return false;
+    }
+
+    @Override
     public boolean mayFindById(@NonNull String id) {
         return false;
     }

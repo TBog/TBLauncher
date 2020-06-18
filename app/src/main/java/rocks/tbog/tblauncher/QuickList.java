@@ -8,27 +8,19 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
 import android.graphics.drawable.PaintDrawable;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.TextView;
-
-import androidx.core.content.ContextCompat;
 
 import java.util.List;
 
+import rocks.tbog.tblauncher.dataprovider.FavProvider;
 import rocks.tbog.tblauncher.dataprovider.Provider;
-import rocks.tbog.tblauncher.entry.AppEntry;
-import rocks.tbog.tblauncher.entry.ContactEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
-import rocks.tbog.tblauncher.entry.ShortcutEntry;
 import rocks.tbog.tblauncher.utils.UIColors;
 
 public class QuickList {
@@ -46,11 +38,6 @@ public class QuickList {
     // last filter scheme, used for better toggle behaviour
     private String mLastFilter = null;
 
-//    @SuppressWarnings("TypeParameterUnusedInFormals")
-//    private <T extends View> T findViewById(@IdRes int id) {
-//        return mTBLauncherActivity.findViewById(id);
-//    }
-
     public Context getContext() {
         return mTBLauncherActivity;
     }
@@ -62,48 +49,31 @@ public class QuickList {
         populateList();
     }
 
+    public void onFavoritesChanged() {
+        if (mQuickList == null)
+            return;
+        populateList();
+    }
+
     private void populateList() {
         mQuickList.removeAllViews();
         if (!isQuickListEnabled()) {
             mQuickList.setVisibility(View.GONE);
             return;
         }
-        // apps filter
-        {
-            View filter = LayoutInflater.from(getContext()).inflate(R.layout.item_quick_list, mQuickList, false);
-            Drawable drawable = ContextCompat.getDrawable(getContext(), R.drawable.ic_android);
-            ((ImageView) filter.findViewById(android.R.id.icon)).setImageDrawable(drawable);
-            ((TextView) filter.findViewById(android.R.id.text1)).setText("Applications");
-            mQuickList.addView(filter);
-
-            filter.setOnClickListener(v -> toggleFilter(v, TBApplication.getApplication(v.getContext()).getDataHandler().getAppProvider()));
-            filter.setTag(R.id.tag_scheme, AppEntry.SCHEME);
+        FavProvider provider = TBApplication.getApplication(getContext()).getDataHandler().getFavProvider();
+        List<? extends EntryItem> list = provider != null ? provider.getQuickList() : null;
+        if (list == null)
+            return;
+        for (EntryItem entry : list) {
+            View view = LayoutInflater.from(getContext()).inflate(entry.getResultLayout(), mQuickList, false);
+            entry.displayResult(view);
+            mQuickList.addView(view);
         }
-        // contacts filter
-        {
-            View filter = LayoutInflater.from(getContext()).inflate(R.layout.item_quick_list, mQuickList, false);
-            Drawable drawable = ContextCompat.getDrawable(getContext(), R.drawable.ic_contact);
-            ((ImageView) filter.findViewById(android.R.id.icon)).setImageDrawable(drawable);
-            ((TextView) filter.findViewById(android.R.id.text1)).setText("Contacts");
-            mQuickList.addView(filter);
-
-            filter.setOnClickListener(v -> toggleFilter(v, TBApplication.getApplication(v.getContext()).getDataHandler().getContactsProvider()));
-            filter.setTag(R.id.tag_scheme, ContactEntry.SCHEME);
-        }
-        // pinned shortcuts filter
-        {
-            View filter = LayoutInflater.from(getContext()).inflate(R.layout.item_quick_list, mQuickList, false);
-            Drawable drawable = ContextCompat.getDrawable(getContext(), R.drawable.ic_send);
-            ((ImageView) filter.findViewById(android.R.id.icon)).setImageDrawable(drawable);
-            ((TextView) filter.findViewById(android.R.id.text1)).setText("Shortcuts");
-            mQuickList.addView(filter);
-
-            filter.setOnClickListener(v -> toggleFilter(v, TBApplication.getApplication(v.getContext()).getDataHandler().getShortcutsProvider()));
-            filter.setTag(R.id.tag_scheme, ShortcutEntry.SCHEME);
-        }
+        mQuickList.setVisibility(mQuickList.getChildCount() == 0 ? View.GONE : View.VISIBLE);
     }
 
-    private void toggleFilter(View v, Provider<? extends EntryItem> provider) {
+    public void toggleFilter(View v, Provider<? extends EntryItem> provider) {
         Context ctx = v.getContext();
         TBApplication app = TBApplication.getApplication(ctx);
 
@@ -170,7 +140,7 @@ public class QuickList {
         int n = mQuickList.getChildCount();
         for (int i = 0; i < n; i += 1) {
             View view = mQuickList.getChildAt(i);
-            if (mLastFilter == null || mLastFilter == view.getTag(R.id.tag_scheme)) {
+            if (mLastFilter == null || mLastFilter == view.getTag(R.id.tag_filterScheme)) {
                 if (view.getTag(R.id.tag_anim) instanceof ValueAnimator) {
                     ValueAnimator colorAnim = (ValueAnimator) view.getTag(R.id.tag_anim);
                     colorAnim.reverse();

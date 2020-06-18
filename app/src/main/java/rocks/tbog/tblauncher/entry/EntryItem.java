@@ -35,6 +35,7 @@ public abstract class EntryItem {
 
     // How relevant is this record? The higher, the most probable it will be displayed
     protected FuzzyScore.MatchInfo relevance = null;
+    // Pointer to the normalizedName that the above relevance was calculated, used for highlighting
     protected StringNormalizer.Result relevanceSource = null;
 
     public EntryItem(@NonNull String id) {

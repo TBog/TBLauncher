@@ -126,5 +126,8 @@
     <string name="reset_default_launcher_confirm">Are you sure you want to change the default launcher?</string>
     <string name="reset_default_launcher_description">The system will ask for an application to open when you press the home button. Please press the "Always" option to make your selection the default.</string>
     <string name="reset_default_launcher">Change default launcher</string>
+    <string name="filter_apps">Applications</string>
+    <string name="filter_contacts">Contacts</string>
+    <string name="filter_shortcuts">Shortcuts</string>
 
 </resources>
