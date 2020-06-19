@@ -54,7 +54,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
         getSupportFragmentManager().addOnBackStackChangedListener(() -> {
             if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
-                setTitle(R.string.activity_settings);
+                setTitle(R.string.launcher_settings);
             }
         });
 

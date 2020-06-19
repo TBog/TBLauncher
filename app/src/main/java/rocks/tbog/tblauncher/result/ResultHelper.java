@@ -11,6 +11,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import rocks.tbog.tblauncher.Behaviour;
 import rocks.tbog.tblauncher.Permission;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
@@ -32,12 +33,17 @@ public class ResultHelper {
      * @param v    {@link View} that was touched
      */
     static void launch(@NonNull EntryItem pojo, @NonNull View v) {
+        TBApplication.behaviour(v.getContext()).beforeLaunchOccurred();
+
         Log.i("log", "Launching " + pojo.id);
 
         recordLaunch(pojo, v.getContext());
 
         // Launch
-        pojo.doLaunch(v);
+        v.postDelayed(() -> {
+            pojo.doLaunch(v);
+            TBApplication.behaviour(v.getContext()).afterLaunchOccurred();
+        }, Behaviour.LAUNCH_DELAY);
     }
 
     /**
@@ -82,17 +88,19 @@ public class ResultHelper {
 
     public static void launchMessaging(ContactEntry contactPojo, View v) {
         Context context = v.getContext();
-        TBApplication.behaviour(context).onLaunchOccurred();
+        TBApplication.behaviour(context).beforeLaunchOccurred();
 
         String url = "sms:" + Uri.encode(contactPojo.phone);
         Intent i = new Intent(Intent.ACTION_SENDTO, Uri.parse(url));
         Utilities.setIntentSourceBounds(i, v);
         i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         context.startActivity(i);
+
+        TBApplication.behaviour(context).afterLaunchOccurred();
     }
 
     public static void launchContactView(ContactEntry contactPojo, Context context, View v) {
-        TBApplication.behaviour(context).onLaunchOccurred();
+        TBApplication.behaviour(context).beforeLaunchOccurred();
 
         Intent action = new Intent(Intent.ACTION_VIEW);
 
@@ -103,10 +111,12 @@ public class ResultHelper {
         action.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         action.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK);
         context.startActivity(action);
+
+        TBApplication.behaviour(context).afterLaunchOccurred();
     }
 
     public static void launchCall(Context context, View v, String phone) {
-        TBApplication.behaviour(context).onLaunchOccurred();
+        TBApplication.behaviour(context).beforeLaunchOccurred();
 
         Intent phoneIntent = new Intent(Intent.ACTION_CALL);
         phoneIntent.setData(Uri.parse("tel:" + Uri.encode(phone)));
@@ -134,5 +144,7 @@ public class ResultHelper {
 
         // Pre-android 23, or we already have permission
         context.startActivity(phoneIntent);
+
+        TBApplication.behaviour(context).afterLaunchOccurred();
     }
 }

@@ -15,7 +15,6 @@ import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.HapticFeedbackConstants;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +30,7 @@ import android.widget.TextView;
 
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
+import androidx.annotation.StringRes;
 import androidx.appcompat.app.ActionBar;
 import androidx.preference.PreferenceManager;
 
@@ -47,6 +47,7 @@ import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
 import rocks.tbog.tblauncher.ui.AnimatedListView;
 import rocks.tbog.tblauncher.ui.DialogFragment;
 import rocks.tbog.tblauncher.ui.KeyboardScrollHider;
+import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.ui.LoadingDrawable;
 import rocks.tbog.tblauncher.utils.SystemUiVisibility;
@@ -60,6 +61,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     private static final int UI_ANIMATION_DELAY = 300;
     private static final int UI_ANIMATION_DURATION = 200;
     private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
+    public static final int LAUNCH_DELAY = 100;
     private static final String TAG = Behaviour.class.getSimpleName();
 
     private TBLauncherActivity mTBLauncherActivity = null;
@@ -182,9 +184,92 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         initLauncherButton(findViewById(R.id.launcherButton));
         initLauncherSearchEditText(findViewById(R.id.launcherSearch));
 
-        mTBLauncherActivity.registerForContextMenu(mMenuButton);
+        // menu button / 3 dot button actions
+        mMenuButton.setOnClickListener(v -> {
+            Context ctx = v.getContext();
+            ListPopup menu = getMenuPopup(ctx);
+            TBApplication.behaviour(ctx).registerPopup(menu);
+            menu.show(v);
+        });
+        mMenuButton.setOnLongClickListener(v -> {
+            Context ctx = v.getContext();
+            ListPopup menu = getMenuPopup(ctx);
+
+            // check if menu contains elements and if yes show it
+            if (!menu.getAdapter().isEmpty()) {
+                TBApplication.behaviour(ctx).registerPopup(menu);
+                menu.show(v);
+                return true;
+            }
+
+            return false;
+        });
+
+        // clear button actions
         mClearButton.setOnClickListener(v -> mSearchEditText.setText(""));
-        mMenuButton.setOnClickListener(View::showContextMenu);
+        mClearButton.setOnLongClickListener(v -> {
+            mSearchEditText.setText("");
+
+            Context ctx = v.getContext();
+            ListPopup menu = getMenuPopup(ctx);
+
+            // check if menu contains elements and if yes show it
+            if (!menu.getAdapter().isEmpty()) {
+                TBApplication.behaviour(ctx).registerPopup(menu);
+                menu.show(v);
+                return true;
+            }
+
+            return false;
+        });
+    }
+
+    private ListPopup getMenuPopup(Context ctx) {
+        ListPopup menu = new ListPopup(ctx);
+        LinearAdapter adapter = new LinearAdapter();
+        menu.setAdapter(adapter);
+
+        adapter.add(new LinearAdapter.Item(ctx, R.string.launcher_settings));
+        adapter.add(new LinearAdapter.Item(ctx, R.string.change_wallpaper));
+        //adapter.add(new LinearAdapter.Item(ctx, R.string.menu_widget_add));
+        adapter.add(new LinearAdapter.Item(ctx, R.string.android_settings));
+
+        menu.setOnItemClickListener((a, v, pos) -> {
+            Context c = v.getContext();
+            LinearAdapter.MenuItem item = ((LinearAdapter) a).getItem(pos);
+            @StringRes int stringId = 0;
+            if (item instanceof LinearAdapter.Item) {
+                stringId = ((LinearAdapter.Item) a.getItem(pos)).stringId;
+            }
+            switch (stringId) {
+                case R.string.launcher_settings:
+                    beforeLaunchOccurred();
+                    v.postDelayed(() -> {
+                        c.startActivity(new Intent(c, SettingsActivity.class));
+                        afterLaunchOccurred();
+                    }, LAUNCH_DELAY);
+                    break;
+                case R.string.change_wallpaper:
+                    beforeLaunchOccurred();
+                    v.postDelayed(() -> {
+                        Intent intent = new Intent(Intent.ACTION_SET_WALLPAPER);
+                        c.startActivity(Intent.createChooser(intent, c.getString(R.string.change_wallpaper)));
+                        afterLaunchOccurred();
+                    }, LAUNCH_DELAY);
+                    break;
+                case R.string.menu_widget_add:
+                    break;
+                case R.string.android_settings:
+                    beforeLaunchOccurred();
+                    v.postDelayed(() -> {
+                        c.startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS));
+                        afterLaunchOccurred();
+                    }, LAUNCH_DELAY);
+                    break;
+            }
+        });
+
+        return menu;
     }
 
     public void onPostCreate() {
@@ -307,6 +392,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     public void showKeyboard() {
+        Log.i(TAG, "Keyboard - SHOW");
         mTBLauncherActivity.dismissPopup();
 
         mSearchEditText.requestFocus();
@@ -317,16 +403,17 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     public void hideKeyboard() {
+        Log.i(TAG, "Keyboard - HIDE");
+
         // Check if no view has focus:
         InputMethodManager mgr = (InputMethodManager) mTBLauncherActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
         assert mgr != null;
-        //mgr.showSoftInput(mSearchEditText, InputMethodManager.SHOW_IMPLICIT);
-        mgr.hideSoftInputFromWindow(mSearchEditText.getWindowToken(), 0);
 
         View view = mTBLauncherActivity.getCurrentFocus();
         if (view != null) {
-            mgr.hideSoftInputFromWindow(view.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+            mgr.hideSoftInputFromWindow(view.getWindowToken(), 0);
         }
+        mgr.hideSoftInputFromWindow(mSearchEditText.getWindowToken(), InputMethodManager.HIDE_IMPLICIT_ONLY);
 
         mTBLauncherActivity.dismissPopup();
 
@@ -467,23 +554,22 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         }
     }
 
-    /**
-     * Call this function when we're leaving the activity after clicking a search result
-     * to clear the search list.
-     * We can't use onPause(), since it may be called for a configuration change
-     */
-    public void onLaunchOccurred() {
-        // We selected an item on the list, now we can cleanup the filter:
-        if (mSearchEditText.getText().length() > 0) {
-            mSearchEditText.setText("");
-        }
-        hideSearchBar(0, true);
+    public void beforeLaunchOccurred() {
         hideKeyboard();
     }
 
+    public void afterLaunchOccurred() {
+        mSearchEditText.postDelayed(() -> {
+            // We selected an item on the list, now we can cleanup the filter:
+            if (mSearchEditText.getText().length() > 0) {
+                mSearchEditText.setText("");
+            }
+            hideSearchBar(0, true);
+        }, UI_ANIMATION_DELAY);
+    }
+
     public void showContextMenu() {
-        mMenuButton.showContextMenu();
-        mMenuButton.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+        mMenuButton.performClick();
     }
 
     /**
@@ -611,7 +697,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 
     public void onWindowFocusChanged(boolean hasFocus) {
         Log.i(TAG, "onWindowFocusChanged " + hasFocus);
-        if (!bSearchBarHidden)
+        if (!bSearchBarHidden && hasFocus)
             showKeyboard();
     }
 }

@@ -8,11 +8,8 @@ import android.content.IntentFilter;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.ContextMenu;
 import android.view.KeyEvent;
-import android.view.MenuInflater;
 import android.view.MenuItem;
-import android.view.View;
 import android.view.WindowManager;
 import android.widget.PopupWindow;
 
@@ -194,35 +191,6 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
         }
 
         return super.onKeyDown(keycode, e);
-    }
-
-    @Override
-    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
-        super.onCreateContextMenu(menu, v, menuInfo);
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.menu_main, menu);
-    }
-
-    @Override
-    public boolean onContextItemSelected(@NonNull MenuItem item) {
-        if (super.onContextItemSelected(item))
-            return true;
-        switch (item.getItemId()) {
-            case R.id.settings:
-                TBApplication.behaviour(this).onLaunchOccurred();
-                startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS));
-                return true;
-            case R.id.wallpaper:
-                TBApplication.behaviour(this).onLaunchOccurred();
-                Intent intent = new Intent(Intent.ACTION_SET_WALLPAPER);
-                startActivity(Intent.createChooser(intent, getString(R.string.menu_wallpaper)));
-                return true;
-            case R.id.preferences:
-                TBApplication.behaviour(this).onLaunchOccurred();
-                startActivity(new Intent(this, SettingsActivity.class));
-                return true;
-        }
-        return false;
     }
 
     private void initKeyboardScrollHider(BottomPullEffectView listEdgeEffect, BlockableListView resultList) {

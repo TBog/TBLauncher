@@ -84,6 +84,10 @@ public class TBApplication extends Application {
         return app.tagsHandler;
     }
 
+    public static DataHandler dataHandler(Context context) {
+        return getApplication(context).getDataHandler();
+    }
+
     public static void onDestroyActivity(TBLauncherActivity activity) {
         TBApplication tbApplication = getApplication(activity);
 

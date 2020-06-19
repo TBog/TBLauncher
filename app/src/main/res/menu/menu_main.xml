@@ -3,11 +3,11 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/preferences"
-        android:title="@string/activity_settings"
+        android:title="@string/launcher_settings"
         app:showAsAction="never" />
     <item
         android:id="@+id/wallpaper"
-        android:title="@string/menu_wallpaper"
+        android:title="@string/change_wallpaper"
         app:showAsAction="never" />
     <item
         android:id="@+id/widget"
@@ -15,7 +15,7 @@
         app:showAsAction="never" />
     <item
         android:id="@+id/settings"
-        android:title="@string/menu_settings"
+        android:title="@string/android_settings"
         app:showAsAction="never" />
 
 </menu>

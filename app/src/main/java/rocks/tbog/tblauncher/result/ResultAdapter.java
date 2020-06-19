@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+import rocks.tbog.tblauncher.Behaviour;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.entry.ContactEntry;
@@ -109,15 +110,15 @@ public class ResultAdapter extends BaseAdapter implements SectionIndexer, Filter
             result = results.get(position);
             ResultHelper.launch(result, v);
         } catch (ArrayIndexOutOfBoundsException e) {
-            return;
+//            return;
         }
 
         // Record the launch after some period,
         // * to ensure the animation runs smoothly
         // * to avoid a flickering -- launchOccurred will refresh the list
         // Thus TOUCH_DELAY * 3
-        Handler handler = new Handler();
-        handler.postDelayed(() -> TBApplication.behaviour(v.getContext()).onLaunchOccurred(), TBApplication.TOUCH_DELAY * 3);
+//        Handler handler = new Handler();
+//        handler.postDelayed(() -> TBApplication.behaviour(v.getContext()).onLaunchOccurred(), TBApplication.TOUCH_DELAY * 3);
     }
 
     public boolean onLongClick(final int pos, View v) {

@@ -69,7 +69,7 @@
         </activity>
         <activity
             android:name=".SettingsActivity"
-            android:label="@string/activity_settings"
+            android:label="@string/launcher_settings"
             android:parentActivityName=".TBLauncherActivity"
             android:theme="@style/SettingTheme">
             <meta-data

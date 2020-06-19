@@ -32,10 +32,10 @@
     <string name="excluded_app_history_added">App excluded from history. Reset through the KISS settings</string>
     <string name="excluded_app_list_added">App excluded from KISS. Reset through the KISS settings</string>
     <string name="application_not_found">Whoops… unable to launch that app.</string>
-    <string name="menu_wallpaper">Change wallpaper</string>
+    <string name="change_wallpaper">Change wallpaper</string>
     <string name="menu_widget_add">Widget settings</string>
-    <string name="menu_settings">Device settings</string>
-    <string name="activity_settings">TBLauncher settings</string>
+    <string name="android_settings">Device settings</string>
+    <string name="launcher_settings">TBLauncher settings</string>
     <string name="rate_the_app">Rate the app</string>
     <string name="user_interface_summary">Themes, transparency and colors</string>
     <string name="title_ui">User interface</string>
