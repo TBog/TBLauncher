@@ -107,12 +107,33 @@ public final class ShortcutEntry extends EntryWithTags {
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public int getResultLayout() {
-        return R.layout.item_shortcut;
+    public int getResultLayout(int drawFlags) {
+        return Utilities.checkFlag(drawFlags, FLAG_DRAW_GRID) ? R.layout.item_grid_shortcut : R.layout.item_shortcut;
     }
 
     @Override
-    public void displayResult(@NonNull View view) {
+    public void displayResult(@NonNull View view, int drawFlags) {
+        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_GRID))
+            displayGridResult(view, drawFlags);
+        else
+            displayListResult(view, drawFlags);
+    }
+
+    private void displayGridResult(@NonNull View view, int drawFlags) {
+        TextView appName = view.findViewById(android.R.id.text1);
+        ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, appName);
+
+        ImageView appIcon = view.findViewById(android.R.id.icon);
+        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
+            appIcon.setVisibility(View.VISIBLE);
+            ResultViewHelper.setIconAsync(this, appIcon, AsyncSetEntryIcon.class);
+        } else {
+            appIcon.setImageDrawable(null);
+            appIcon.setVisibility(View.GONE);
+        }
+    }
+
+    private void displayListResult(@NonNull View view, int drawFlags) {
         Context context = view.getContext();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 
@@ -126,7 +147,7 @@ public final class ShortcutEntry extends EntryWithTags {
         if (getTags().isEmpty()) {
             tagsView.setVisibility(View.GONE);
         } else if (ResultViewHelper.displayHighlighted(relevanceSource, getTags(), relevance, tagsView, context)
-                || prefs.getBoolean("tags-enabled", true)) {
+                || Utilities.checkFlag(drawFlags, FLAG_DRAW_TAGS)) {
             tagsView.setVisibility(View.VISIBLE);
         } else {
             tagsView.setVisibility(View.GONE);
@@ -159,7 +180,7 @@ public final class ShortcutEntry extends EntryWithTags {
             Log.e("Shortcut", "get shortcut icon", e);
         }
 
-        if (prefs.getBoolean("icons-visible", true)) {
+        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
             Bitmap icon = getIcon(context);
             if (icon != null) {
                 BitmapDrawable drawable = new BitmapDrawable(context.getResources(), icon);
@@ -301,4 +322,20 @@ public final class ShortcutEntry extends EntryWithTags {
         // call after dialog got inflated (show call)
         ((TextView) dialog.findViewById(R.id.rename)).setText(getName());
     }
+
+    public static class AsyncSetEntryIcon extends ResultViewHelper.AsyncSetEntryDrawable {
+        public AsyncSetEntryIcon(ImageView image) {
+            super(image);
+        }
+
+        @Override
+        public Drawable getDrawable(EntryItem entry, Context context) {
+            ShortcutEntry shortcutEntry = (ShortcutEntry) entry;
+            Bitmap icon = shortcutEntry.getIcon(context);
+            if (icon == null)
+                return null;
+            return new BitmapDrawable(context.getResources(), icon);
+        }
+    }
+
 }

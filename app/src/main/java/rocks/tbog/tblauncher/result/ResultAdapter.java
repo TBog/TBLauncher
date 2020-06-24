@@ -1,7 +1,7 @@
 package rocks.tbog.tblauncher.result;
 
 import android.content.Context;
-import android.os.Handler;
+import android.content.SharedPreferences;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,16 +12,17 @@ import android.widget.SectionIndexer;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.preference.PreferenceManager;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
-import rocks.tbog.tblauncher.Behaviour;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.entry.ContactEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
+import rocks.tbog.tblauncher.entry.FilterEntry;
 import rocks.tbog.tblauncher.entry.ShortcutEntry;
 import rocks.tbog.tblauncher.ui.ListPopup;
 
@@ -47,24 +48,19 @@ public class ResultAdapter extends BaseAdapter implements SectionIndexer, Filter
 
     @Override
     public int getViewTypeCount() {
-        return 4;
+        return 5;
     }
 
     @Override
     public int getItemViewType(int position) {
-        //TODO: enable this
         if (results.get(position) instanceof AppEntry)
             return 1;
-//        else if (results.get(position) instanceof SearchResult)
-//            return 1;
-        else if (results.get(position) instanceof ContactEntry)
+        if (results.get(position) instanceof ContactEntry)
             return 2;
-//        else if (results.get(position) instanceof SettingsResult)
-//            return 3;
-//        else if (results.get(position) instanceof PhoneResult)
-//            return 4;
-        else if (results.get(position) instanceof ShortcutEntry)
+        if (results.get(position) instanceof FilterEntry)
             return 3;
+        if (results.get(position) instanceof ShortcutEntry)
+            return 4;
         return super.getItemViewType(position); // return 0;
     }
 
@@ -94,12 +90,20 @@ public class ResultAdapter extends BaseAdapter implements SectionIndexer, Filter
     public @NonNull
     View getView(int position, View convertView, @NonNull ViewGroup parent) {
         Context context = parent.getContext();
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        int drawFlags = EntryItem.FLAG_DRAW_NAME;
+        if ( prefs.getBoolean("tags-enabled", true) )
+            drawFlags |= EntryItem.FLAG_DRAW_TAGS;
+        if (prefs.getBoolean("icons-visible", true))
+            drawFlags |= EntryItem.FLAG_DRAW_ICON;
+
         EntryItem entryItem = results.get(position);
         if (convertView == null) {
             LayoutInflater inflater = LayoutInflater.from(context);
-            convertView = inflater.inflate(entryItem.getResultLayout(), parent, false);
+            convertView = inflater.inflate(entryItem.getResultLayout(drawFlags), parent, false);
         }
-        entryItem.displayResult(convertView);
+        entryItem.displayResult(convertView, drawFlags);
         return convertView;
     }
 

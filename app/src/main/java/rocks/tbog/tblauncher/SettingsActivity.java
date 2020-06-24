@@ -26,6 +26,7 @@ import androidx.preference.SwitchPreference;
 import rocks.tbog.tblauncher.preference.ConfirmDialog;
 import rocks.tbog.tblauncher.preference.CustomDialogPreference;
 import rocks.tbog.tblauncher.preference.PaletteDialog;
+import rocks.tbog.tblauncher.preference.QuickListDialog;
 import rocks.tbog.tblauncher.preference.SliderDialog;
 import rocks.tbog.tblauncher.utils.SystemUiVisibility;
 import rocks.tbog.tblauncher.utils.UIColors;
@@ -238,6 +239,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "reset-default-launcher":
                         dialogFragment = ConfirmDialog.newInstance(key);
                         break;
+                    case "quick-list-content":
+                        dialogFragment = QuickListDialog.newInstance(key);
+                        break;
                     default:
                         throw new RuntimeException("CustomDialogPreference \"" + key + "\" has no dialog defined");
                 }
@@ -304,6 +308,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     else
                         sharedPreferences.edit().putBoolean("fuzzy-search-tags", useTags).apply();
                 }
+                case "quick-list-text-visible":
+                case "quick-list-icons-visible":
+                    TBApplication.quickList(activity).onFavoritesChanged();
                 break;
             }
         }

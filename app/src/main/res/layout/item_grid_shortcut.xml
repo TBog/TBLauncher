@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical"
+    tools:layout_height="@dimen/large_bar_height"
+    tools:theme="@style/AppThemeTransparent">
+
+    <FrameLayout
+        android:layout_width="@dimen/icon_width"
+        android:layout_height="@dimen/icon_height"
+        android:layout_gravity="start|center_vertical"
+        android:layout_marginStart="@dimen/icon_margin_left"
+        android:layout_marginTop="@dimen/icon_margin_top"
+        android:layout_marginEnd="@dimen/icon_margin_right"
+        android:layout_marginBottom="@dimen/icon_margin_bottom">
+
+        <ImageView
+            android:id="@+id/item_shortcut_icon"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:contentDescription="@null"
+            tools:src="@drawable/ic_android" />
+
+        <ImageView
+            android:id="@+id/item_app_icon"
+            android:layout_width="@dimen/subicon_width"
+            android:layout_height="@dimen/subicon_height"
+            android:layout_gravity="end|bottom"
+            android:contentDescription="@null"
+            tools:src="@drawable/ic_android"
+            tools:tint="@color/YellowGreen" />
+    </FrameLayout>
+
+    <ImageView
+        android:id="@android:id/icon"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_gravity="top"
+        android:importantForAccessibility="no"
+        android:scaleType="fitCenter"
+        android:src="@drawable/ic_android" />
+
+    <TextView
+        android:id="@android:id/text1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:paddingHorizontal="2dp"
+        android:shadowColor="?attr/resultShadowColor"
+        android:shadowDx="1"
+        android:shadowDy="2"
+        android:shadowRadius="?attr/textShadowRadius"
+        android:textColor="?android:attr/textColorSecondary"
+        android:textSize="@dimen/result_small_size"
+        tools:ignore="RtlSymmetry"
+        tools:text="Apps" />
+
+</LinearLayout>

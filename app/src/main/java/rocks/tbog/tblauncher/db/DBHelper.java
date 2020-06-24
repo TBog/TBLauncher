@@ -508,7 +508,7 @@ public class DBHelper {
             statement.bindString(3, componentName);
             int count = statement.executeUpdateDelete();
             if (count != 1) {
-                Log.e(TAG, "Update name count = " + count);
+                Log.e(TAG, "Update name; count = " + count);
             }
             statement.close();
         } catch (Exception e) {
@@ -526,7 +526,7 @@ public class DBHelper {
             statement.bindString(3, componentName);
             int count = statement.executeUpdateDelete();
             if (count != 1) {
-                Log.e(TAG, "Update name count = " + count);
+                Log.e(TAG, "Reset name; count = " + count);
             }
             statement.close();
         } catch (Exception e) {
@@ -562,7 +562,7 @@ public class DBHelper {
             statement.bindString(2, componentName);
             int count = statement.executeUpdateDelete();
             if (count != 1) {
-                Log.e(TAG, "Update name count = " + count);
+                Log.e(TAG, "Update icon; count = " + count);
             }
             statement.close();
         } catch (Exception e) {
@@ -581,7 +581,7 @@ public class DBHelper {
             statement.bindString(2, componentName);
             int count = statement.executeUpdateDelete();
             if (count != 1) {
-                Log.e(TAG, "Update name count = " + count);
+                Log.e(TAG, "Reset icon; count = " + count);
             }
             statement.close();
         } catch (Exception e) {
@@ -631,5 +631,26 @@ public class DBHelper {
             }
         }
         return list;
+    }
+
+    public static boolean setQuickListPosition(@NonNull Context context, String record, String position) {
+        SQLiteDatabase db = getDatabase(context);
+        String sql = "UPDATE \"favorites\" SET \"custom_flags\"=(\"custom_flags\"|?), \"position\"=? WHERE \"record\"=?";
+        try {
+            SQLiteStatement statement = db.compileStatement(sql);
+            statement.bindLong(1, FavRecord.FLAG_SHOW_IN_QUICK_LIST);
+            statement.bindString(2, position);
+            statement.bindString(3, record);
+            int count = statement.executeUpdateDelete();
+            if (count != 1) {
+                Log.e(TAG, "Update position; count = " + count);
+                return false;
+            }
+            statement.close();
+        } catch (Exception e) {
+            Log.e(TAG, "set flag and position", e);
+            return false;
+        }
+        return true;
     }
 }

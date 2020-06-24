@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -710,6 +711,12 @@ public class DataHandler extends BroadcastReceiver
         return (entry != null) ? ((FavProvider) entry.provider) : null;
     }
 
+    @Nullable
+    public FilterProvider getFilterProvider() {
+        ProviderEntry entry = this.providers.get("filters");
+        return (entry != null) ? ((FilterProvider) entry.provider) : null;
+    }
+
 //    @Nullable
 //    public SearchProvider getSearchProvider() {
 //        ProviderEntry entry = this.providers.get("search");
@@ -876,6 +883,38 @@ public class DataHandler extends BroadcastReceiver
         for (ProviderEntry entry : this.providers.values()) {
             entry.provider.reload();
         }
+    }
+
+    public void setQuickList(Iterable<String> records) {
+        ArrayList<FavRecord> oldFav = getFavorites();
+        int pos = 0;
+        for (String record : records) {
+            for (Iterator<FavRecord> iterator = oldFav.iterator(); iterator.hasNext(); ) {
+                FavRecord favRecord = iterator.next();
+                if (favRecord.record.equals(record))
+                    iterator.remove();
+            }
+            String position = String.valueOf(pos);
+            if (!DBHelper.setQuickListPosition(context, record, position)) {
+                FavRecord favRecord = new FavRecord();
+                favRecord.record = record;
+                favRecord.flags = FavRecord.FLAG_SHOW_IN_QUICK_LIST;
+                favRecord.position = position;
+                DBHelper.setFavorite(context, favRecord);
+            }
+            pos += 1000;
+        }
+
+        for (FavRecord favRecord : oldFav) {
+            if (favRecord.isInQuickList()) {
+                favRecord.flags &= ~FavRecord.FLAG_SHOW_IN_QUICK_LIST;
+                DBHelper.setFavorite(context, favRecord);
+            }
+        }
+
+        FavProvider provider = getFavProvider();
+        if (provider != null)
+            provider.reload();
     }
 
     static final class ProviderEntry {

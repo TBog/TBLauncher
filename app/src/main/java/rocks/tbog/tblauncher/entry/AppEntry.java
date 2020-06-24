@@ -142,14 +142,34 @@ public final class AppEntry extends EntryWithTags {
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public int getResultLayout() {
-        return R.layout.item_app;
+    public int getResultLayout(int drawFlags) {
+        return Utilities.checkFlag(drawFlags, FLAG_DRAW_GRID) ? R.layout.item_grid : R.layout.item_app;
     }
 
     @Override
-    public void displayResult(@NonNull View view) {
+    public void displayResult(@NonNull View view, int drawFlags) {
+        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_GRID))
+            displayGridResult(view, drawFlags);
+        else
+            displayListResult(view, drawFlags);
+    }
+
+    private void displayGridResult(@NonNull View view, int drawFlags) {
+        TextView appName = view.findViewById(android.R.id.text1);
+        ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, appName);
+
+        ImageView appIcon = view.findViewById(android.R.id.icon);
+        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
+            appIcon.setVisibility(View.VISIBLE);
+            ResultViewHelper.setIconAsync(this, appIcon, AsyncSetEntryIcon.class);
+        } else {
+            appIcon.setImageDrawable(null);
+            appIcon.setVisibility(View.GONE);
+        }
+    }
+
+    private void displayListResult(@NonNull View view, int drawFlags) {
         Context context = view.getContext();
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 
         TextView appName = view.findViewById(R.id.item_app_name);
         ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, appName);
@@ -159,7 +179,7 @@ public final class AppEntry extends EntryWithTags {
         if (getTags().isEmpty()) {
             tagsView.setVisibility(View.GONE);
         } else if (ResultViewHelper.displayHighlighted(relevanceSource, getTags(), relevance, tagsView, context)
-                || prefs.getBoolean("tags-enabled", true)) {
+                || Utilities.checkFlag(drawFlags, FLAG_DRAW_TAGS)) {
             tagsView.setVisibility(View.VISIBLE);
         } else {
             tagsView.setVisibility(View.GONE);
@@ -167,7 +187,7 @@ public final class AppEntry extends EntryWithTags {
 
         View iconContainer = view.findViewById(R.id.item_icon_container);
         ImageView appIcon = view.findViewById(R.id.item_app_icon);
-        if (prefs.getBoolean("icons-visible", true)) {
+        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
             iconContainer.setVisibility(View.VISIBLE);
             ResultViewHelper.setIconAsync(this, appIcon, AsyncSetEntryIcon.class);
         } else {

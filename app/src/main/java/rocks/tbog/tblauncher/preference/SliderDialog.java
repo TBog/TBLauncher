@@ -40,8 +40,9 @@ public class SliderDialog extends PreferenceDialogFragmentCompat {
     }
 
     @Override
-    protected View onCreateDialogView(Context context) {
-        View root = super.onCreateDialogView(context);
+    protected void onBindDialogView(View root) {
+        super.onBindDialogView(root);
+
         CustomDialogPreference preference = (CustomDialogPreference) getPreference();
         final String key = preference.getKey();
 
@@ -96,7 +97,5 @@ public class SliderDialog extends PreferenceDialogFragmentCompat {
                 pref.setValue(progress);
             }
         });
-
-        return root;
     }
 }

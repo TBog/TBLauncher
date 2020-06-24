@@ -206,7 +206,10 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         });
 
         // clear button actions
-        mClearButton.setOnClickListener(v -> mSearchEditText.setText(""));
+        mClearButton.setOnClickListener(v -> {
+            mSearchEditText.setText("");
+            showKeyboard();
+        });
         mClearButton.setOnLongClickListener(v -> {
             mSearchEditText.setText("");
 
@@ -396,29 +399,32 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         mTBLauncherActivity.dismissPopup();
 
         mSearchEditText.requestFocus();
+
         InputMethodManager mgr = (InputMethodManager) mTBLauncherActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
         assert mgr != null;
-        mgr.showSoftInput(mSearchEditText, InputMethodManager.SHOW_FORCED);
-        mTBLauncherActivity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+        mgr.showSoftInput(mSearchEditText, InputMethodManager.SHOW_IMPLICIT);
+        //mTBLauncherActivity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
     }
 
     public void hideKeyboard() {
         Log.i(TAG, "Keyboard - HIDE");
+        mTBLauncherActivity.dismissPopup();
+
+        View focus = mTBLauncherActivity.getCurrentFocus();
+        mSearchEditText.clearFocus();
 
         // Check if no view has focus:
         InputMethodManager mgr = (InputMethodManager) mTBLauncherActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
         assert mgr != null;
 
-        View view = mTBLauncherActivity.getCurrentFocus();
-        if (view != null) {
-            mgr.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        if (focus != null) {
+            focus.clearFocus();
+            mgr.hideSoftInputFromWindow(focus.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+        } else {
+            mgr.hideSoftInputFromWindow(mSearchEditText.getWindowToken(), InputMethodManager.HIDE_IMPLICIT_ONLY);
         }
-        mgr.hideSoftInputFromWindow(mSearchEditText.getWindowToken(), InputMethodManager.HIDE_IMPLICIT_ONLY);
 
-        mTBLauncherActivity.dismissPopup();
-
-        mSearchEditText.clearFocus();
-        mTBLauncherActivity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
+        //mTBLauncherActivity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
     }
 
     @Override
@@ -669,11 +675,11 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 
     public void onResume() {
         Log.i(TAG, "onResume");
-        if (!bSearchBarHidden) {
-            showSearchBar();
-            showKeyboard();
-            mSearchEditText.postDelayed(this::showKeyboard, UI_ANIMATION_DELAY);
-        }
+//        if (!bSearchBarHidden) {
+//            showSearchBar();
+//            showKeyboard();
+//            mSearchEditText.postDelayed(this::showKeyboard, UI_ANIMATION_DELAY);
+//        }
     }
 
     public void onNewIntent() {
@@ -697,7 +703,16 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 
     public void onWindowFocusChanged(boolean hasFocus) {
         Log.i(TAG, "onWindowFocusChanged " + hasFocus);
-        if (!bSearchBarHidden && hasFocus)
-            showKeyboard();
+        if (hasFocus) {
+            if (bSearchBarHidden) {
+                hideKeyboard();
+            } else {
+                showKeyboard();
+                // UI_ANIMATION_DURATION should be the exact time the full-screen animation ends
+                mSearchEditText.postDelayed(this::showKeyboard, UI_ANIMATION_DURATION);
+            }
+        } else {
+            hideKeyboard();
+        }
     }
 }

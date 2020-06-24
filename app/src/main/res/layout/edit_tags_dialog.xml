@@ -61,26 +61,30 @@
         android:layout_height="2dp"
         android:background="?android:attr/listDivider" />
 
+    <!-- Alert dialog style buttons along the bottom. -->
     <LinearLayout
+        style="?android:attr/buttonBarStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center"
-        android:orientation="horizontal">
+        android:measureWithLargestChild="true">
 
         <Button
             android:id="@android:id/button2"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@android:string/cancel"
-            android:textAllCaps="false" />
+            android:layout_weight="1"
+            android:onClick="onClick"
+            android:text="@android:string/cancel" />
 
         <Button
             android:id="@android:id/button1"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="@android:string/ok"
-            android:textAllCaps="false" />
-
+            android:layout_weight="1"
+            android:onClick="onClick"
+            android:text="@android:string/ok" />
     </LinearLayout>
 
 </LinearLayout>

@@ -16,9 +16,14 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.LinearLayout;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.preference.PreferenceManager;
+
 import java.util.List;
 
 import rocks.tbog.tblauncher.dataprovider.FavProvider;
+import rocks.tbog.tblauncher.dataprovider.IProvider;
 import rocks.tbog.tblauncher.dataprovider.Provider;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.utils.UIColors;
@@ -65,21 +70,27 @@ public class QuickList {
         List<? extends EntryItem> list = provider != null ? provider.getQuickList() : null;
         if (list == null)
             return;
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mQuickList.getContext());
+        int drawFlags = EntryItem.FLAG_DRAW_GRID;
+        if (prefs.getBoolean("quick-list-text-visible", true))
+            drawFlags |= EntryItem.FLAG_DRAW_NAME;
+        if (prefs.getBoolean("quick-list-icons-visible", true))
+            drawFlags |= EntryItem.FLAG_DRAW_ICON;
         for (EntryItem entry : list) {
-            View view = LayoutInflater.from(getContext()).inflate(entry.getResultLayout(), mQuickList, false);
-            entry.displayResult(view);
+            View view = LayoutInflater.from(getContext()).inflate(entry.getResultLayout(drawFlags), mQuickList, false);
+            entry.displayResult(view, drawFlags);
             mQuickList.addView(view);
         }
         mQuickList.setVisibility(mQuickList.getChildCount() == 0 ? View.GONE : View.VISIBLE);
     }
 
-    public void toggleFilter(View v, Provider<? extends EntryItem> provider) {
+    public void toggleFilter(View v, IProvider provider, @NonNull String filterName) {
         Context ctx = v.getContext();
         TBApplication app = TBApplication.getApplication(ctx);
 
         // if there is no search we need to filter, just show all matching entries
         if (bAdapterEmpty) {
-            if (bFilterOn && provider != null && mLastFilter == provider.getScheme()) {
+            if (bFilterOn && provider != null && filterName.equals(mLastFilter)) {
                 app.behaviour().clearAdapter();
                 bFilterOn = false;
             } else {
@@ -87,7 +98,7 @@ public class QuickList {
                 list = provider != null ? provider.getPojos() : null;
                 if (list != null) {
                     app.behaviour().updateAdapter(list, false);
-                    mLastFilter = provider.getScheme();
+                    mLastFilter = filterName;
                     bFilterOn = true;
                 } else {
                     bFilterOn = false;
@@ -96,21 +107,26 @@ public class QuickList {
             // updateAdapter will change `bAdapterEmpty` and we change it back because we want
             // bAdapterEmpty to represent a search we need to filter
             bAdapterEmpty = true;
-        } else if (bFilterOn && (provider == null || mLastFilter == provider.getScheme())) {
+        } else if (bFilterOn && (provider == null || filterName.equals(mLastFilter))) {
             animToggleOff();
             bFilterOn = false;
             app.behaviour().filterResults(null);
         } else if (provider != null) {
             animToggleOff();
             bFilterOn = true;
-            mLastFilter = provider.getScheme();
-            app.behaviour().filterResults(provider.getScheme());
+            mLastFilter = filterName;
+            app.behaviour().filterResults(filterName);
         }
 
         // show what is currently toggled
         if (bFilterOn) {
             animToggleOn(v);
         }
+    }
+
+    public void toggleFilter(View v, @Nullable Provider<? extends EntryItem> provider) {
+        String filterName = provider != null ? provider.getScheme() : "";
+        toggleFilter(v, provider, filterName);
     }
 
     private void animToggleOn(View v) {
@@ -140,7 +156,7 @@ public class QuickList {
         int n = mQuickList.getChildCount();
         for (int i = 0; i < n; i += 1) {
             View view = mQuickList.getChildAt(i);
-            if (mLastFilter == null || mLastFilter == view.getTag(R.id.tag_filterScheme)) {
+            if (mLastFilter == null || mLastFilter == view.getTag(R.id.tag_filterName)) {
                 if (view.getTag(R.id.tag_anim) instanceof ValueAnimator) {
                     ValueAnimator colorAnim = (ValueAnimator) view.getTag(R.id.tag_anim);
                     colorAnim.reverse();
@@ -206,7 +222,7 @@ public class QuickList {
         // set layout height
         {
             int smallSize = resources.getDimensionPixelSize(R.dimen.bar_height);
-            int largeSize = resources.getDimensionPixelSize(R.dimen.large_bar_height);
+            int largeSize = resources.getDimensionPixelSize(R.dimen.large_quick_list_bar_height);
             ViewGroup.LayoutParams params = mQuickList.getLayoutParams();
             if (params instanceof LinearLayout.LayoutParams) {
                 params.height = smallSize + (largeSize - smallSize) * percent / 100;

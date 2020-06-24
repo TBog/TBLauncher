@@ -9,8 +9,10 @@ import androidx.annotation.Nullable;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import rocks.tbog.tblauncher.BuildConfig;
 import rocks.tbog.tblauncher.DataHandler;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.db.FavRecord;
@@ -67,6 +69,8 @@ public class FavProvider implements IProvider {
 
     @Override
     public List<? extends EntryItem> getPojos() {
+        if (BuildConfig.DEBUG)
+            return Collections.unmodifiableList(favList);
         return favList;
     }
 

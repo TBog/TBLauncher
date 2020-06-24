@@ -38,6 +38,7 @@
             android:layout_height="@dimen/bar_height"
             android:background="@null"
             android:gravity="center"
+            android:measureWithLargestChild="true"
             android:orientation="horizontal" />
 
         <include layout="@layout/search_bar" />

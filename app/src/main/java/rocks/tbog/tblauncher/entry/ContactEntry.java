@@ -26,6 +26,7 @@ import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.result.ResultHelper;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.utils.UIColors;
+import rocks.tbog.tblauncher.utils.Utilities;
 
 public final class ContactEntry extends EntryItem {
     public static final String SCHEME = "contact://";
@@ -93,12 +94,35 @@ public final class ContactEntry extends EntryItem {
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
     @Override
-    public int getResultLayout() {
-        return R.layout.item_contact;
+    public int getResultLayout(int drawFlags) {
+        return Utilities.checkFlag(drawFlags, FLAG_DRAW_GRID) ? R.layout.item_grid : R.layout.item_contact;
     }
 
     @Override
-    public void displayResult(@NonNull View view) {
+    public void displayResult(@NonNull View view, int drawFlags) {
+        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_GRID))
+            displayGridResult(view, drawFlags);
+        else
+            displayListResult(view, drawFlags);
+    }
+
+    private void displayGridResult(@NonNull View view, int drawFlags) {
+        // Contact name
+        TextView appName = view.findViewById(android.R.id.text1);
+        ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, appName);
+
+        // Contact photo
+        ImageView contactIcon = view.findViewById(android.R.id.icon);
+        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
+            contactIcon.setVisibility(View.VISIBLE);
+            ResultViewHelper.setIconAsync(this, contactIcon, AsyncSetEntryIcon.class);
+        } else {
+            contactIcon.setImageDrawable(null);
+            contactIcon.setVisibility(View.GONE);
+        }
+    }
+
+    private void displayListResult(@NonNull View view, int drawFlags) {
         Context context = view.getContext();
         // Contact name
         TextView contactName = view.findViewById(R.id.item_contact_name);
@@ -119,8 +143,7 @@ public final class ContactEntry extends EntryItem {
         // Contact photo
         ImageView contactIcon = view.findViewById(R.id.item_contact_icon);
 
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        if (prefs.getBoolean("icons-visible", true)) {
+        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
             contactIcon.setVisibility(View.VISIBLE);
             ResultViewHelper.setIconAsync(this, contactIcon, AsyncSetEntryIcon.class);
         } else {

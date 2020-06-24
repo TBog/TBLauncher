@@ -129,5 +129,13 @@
     <string name="filter_apps">Applications</string>
     <string name="filter_contacts">Contacts</string>
     <string name="filter_shortcuts">Shortcuts</string>
+    <string name="filter_favorites">Favorites</string>
+    <string name="quick_list_content">Customize content</string>
+    <string name="quick_list_content_summary">Change order and add entries</string>
+    <string name="label_preview">Preview</string>
+    <string name="filter_list">Possible filters</string>
+    <string name="favorites_list">From the favorites</string>
+    <string name="quick_list_icons_visible">Show Quick List icons</string>
+    <string name="quick_list_text_visible">Show names</string>
 
 </resources>

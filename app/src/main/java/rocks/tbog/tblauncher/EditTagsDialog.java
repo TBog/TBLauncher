@@ -47,7 +47,8 @@ public class EditTagsDialog extends DialogFragment<Set<String>> {
         String entryId = args.getString("entryId", "");
         EntryItem entry = TBApplication.getApplication(context).getDataHandler().getPojo(entryId);
         if (entry != null) {
-            View entryView = inflater.inflate(entry.getResultLayout(), root, false);
+            int drawFlags = EntryItem.FLAG_DRAW_NAME | EntryItem.FLAG_DRAW_ICON;
+            View entryView = inflater.inflate(entry.getResultLayout(drawFlags), root, false);
             entryView.setId(R.id.preview);
             root.addView(entryView, 0);
         }
@@ -76,7 +77,8 @@ public class EditTagsDialog extends DialogFragment<Set<String>> {
             dismiss();
             return;
         }
-        entry.displayResult(view.findViewById(R.id.preview));
+        int drawFlags = EntryItem.FLAG_DRAW_NAME | EntryItem.FLAG_DRAW_ICON;
+        entry.displayResult(view.findViewById(R.id.preview), drawFlags);
 
         // prepare the grid with all the tags
         mAdapter = new TagsAdapter(mTagList);
@@ -103,7 +105,13 @@ public class EditTagsDialog extends DialogFragment<Set<String>> {
         mNewTag.setOnEditorActionListener((v, actionId, event) -> {
             if (event == null) {
                 if (actionId != EditorInfo.IME_ACTION_NONE) {
-                    addTag(mNewTag.getText().toString());
+                    String tag = mNewTag.getText().toString();
+                    if (tag.isEmpty()) {
+                        onConfirm(mTagList);
+                        dismiss();
+                        return true;
+                    }
+                    addTag(tag);
                     return true;
                 }
             } else if (event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
@@ -115,6 +123,7 @@ public class EditTagsDialog extends DialogFragment<Set<String>> {
             }
             return false;
         });
+        mNewTag.requestFocus();
 
         // initialize add tag button
         ImageView addTag = view.findViewById(R.id.addTag);

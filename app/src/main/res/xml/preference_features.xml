@@ -20,12 +20,25 @@
             android:key="quick-list-always-visible"
             android:title="@string/quick_list_always_visible" />
 
+        <androidx.preference.SwitchPreference
+            android:defaultValue="false"
+            android:dependency="quick-list-enabled"
+            android:key="quick-list-text-visible"
+            android:title="@string/quick_list_text_visible" />
+
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
             android:defaultValue="@integer/default_bar_size"
             android:dependency="quick-list-enabled"
             android:dialogLayout="@layout/pref_alpha"
             android:key="quick-list-size"
             android:title="@string/quick_list_size" />
+
+        <rocks.tbog.tblauncher.preference.CustomDialogPreference
+            android:dependency="quick-list-enabled"
+            android:dialogLayout="@layout/pref_quick_list"
+            android:key="quick-list-content"
+            android:summary="@string/quick_list_content_summary"
+            android:title="@string/quick_list_content" />
 
     </androidx.preference.PreferenceCategory>
 
@@ -55,6 +68,12 @@
             android:defaultValue="true"
             android:key="icons-visible"
             android:title="@string/icons_visible" />
+
+        <androidx.preference.SwitchPreference
+            android:defaultValue="true"
+            android:dependency="quick-list-enabled"
+            android:key="quick-list-icons-visible"
+            android:title="@string/quick_list_icons_visible" />
 
     </androidx.preference.PreferenceCategory>
 

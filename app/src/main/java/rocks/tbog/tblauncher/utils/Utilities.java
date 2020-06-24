@@ -118,6 +118,10 @@ public class Utilities {
         return ON_SCREEN_RECT;
     }
 
+    public static boolean checkFlag(int flags, int flagToCheck) {
+        return (flags & flagToCheck) == flagToCheck;
+    }
+
     public interface GetDrawable {
         @Nullable
         Drawable getDrawable(@NonNull Context context);

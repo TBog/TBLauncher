@@ -27,6 +27,7 @@
 
     <dimen name="bar_height">25dp</dimen>
     <dimen name="large_bar_height">40dp</dimen>
+    <dimen name="large_quick_list_bar_height">100dp</dimen>
     <dimen name="bar_corner_radius">15dp</dimen> <!-- at most half of `large_bar_height` -->
     <dimen name="bar_text">12sp</dimen>
     <dimen name="large_bar_text">22sp</dimen>
@@ -41,6 +42,7 @@
 
     <dimen name="popup_title">12sp</dimen>
     <dimen name="custom_icon_column_width">68dp</dimen> <!-- icon_width + 2 * result_margin_horizontal -->
+    <dimen name="app_grid_column_width">80dp</dimen>
 
     <dimen name="edit_tag_size">12sp</dimen>
     <dimen name="edit_tag_padding">6sp</dimen>

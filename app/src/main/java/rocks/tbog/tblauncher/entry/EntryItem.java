@@ -21,6 +21,13 @@ import rocks.tbog.tblauncher.utils.FuzzyScore;
 public abstract class EntryItem {
 
     private static final String TAG = EntryItem.class.getSimpleName();
+
+    public static final int FLAG_DRAW_GRID = 1; // the layout will be used in a GridView
+    public static final int FLAG_DRAW_ICON = 1 << 1;
+    public static final int FLAG_DRAW_NAME = 1 << 2;
+    public static final int FLAG_DRAW_TAGS = 1 << 3;
+
+
     // Globally unique ID.
     // Usually starts with provider scheme, e.g. "app://" or "contact://" to
     // ensure unique constraint
@@ -104,9 +111,9 @@ public abstract class EntryItem {
     }
 
     @LayoutRes
-    public abstract int getResultLayout();
+    public abstract int getResultLayout(int drawFlags);
 
-    public abstract void displayResult(@NonNull View view);
+    public abstract void displayResult(@NonNull View view, int drawFlags);
 
     public static class RelevanceComparator implements java.util.Comparator<EntryItem> {
         @Override

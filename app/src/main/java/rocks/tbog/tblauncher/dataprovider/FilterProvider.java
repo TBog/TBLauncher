@@ -5,8 +5,10 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
+import rocks.tbog.tblauncher.BuildConfig;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.entry.AppEntry;
@@ -29,8 +31,6 @@ public class FilterProvider implements IProvider {
             filter.setOnClickListener(v -> {
                 Context ctx = v.getContext();
                 AppProvider provider = TBApplication.getApplication(ctx).getDataHandler().getAppProvider();
-                if (provider == null)
-                    return;
                 TBApplication.quickList(ctx).toggleFilter(v, provider);
             });
             filter.setName(context.getResources().getString(R.string.filter_apps));
@@ -42,9 +42,7 @@ public class FilterProvider implements IProvider {
             FilterEntry filter = new FilterEntry(id, R.drawable.ic_contact, ContactEntry.SCHEME);
             filter.setOnClickListener(v -> {
                 Context ctx = v.getContext();
-                ContactsProvider provider = TBApplication.getApplication(ctx).getDataHandler().getContactsProvider();
-                if (provider == null)
-                    return;
+                ContactsProvider provider = TBApplication.dataHandler(ctx).getContactsProvider();
                 TBApplication.quickList(ctx).toggleFilter(v, provider);
             });
             filter.setName(context.getResources().getString(R.string.filter_contacts));
@@ -56,12 +54,23 @@ public class FilterProvider implements IProvider {
             FilterEntry filter = new FilterEntry(id, R.drawable.ic_send, ShortcutEntry.SCHEME);
             filter.setOnClickListener(v -> {
                 Context ctx = v.getContext();
-                ShortcutsProvider provider = TBApplication.getApplication(ctx).getDataHandler().getShortcutsProvider();
-                if (provider == null)
-                    return;
+                ShortcutsProvider provider = TBApplication.dataHandler(ctx).getShortcutsProvider();
                 TBApplication.quickList(ctx).toggleFilter(v, provider);
             });
             filter.setName(context.getResources().getString(R.string.filter_shortcuts));
+            pojos.add(filter);
+        }
+        // favorites filter
+        {
+            String id = FilterEntry.SCHEME + "favorites";
+            String filterScheme = "(fav)";
+            FilterEntry filter = new FilterEntry(id, R.drawable.ic_favorite, filterScheme);
+            filter.setOnClickListener(v -> {
+                Context ctx = v.getContext();
+                FavProvider provider = TBApplication.dataHandler(ctx).getFavProvider();
+                TBApplication.quickList(ctx).toggleFilter(v, provider, filterScheme);
+            });
+            filter.setName(context.getResources().getString(R.string.filter_favorites));
             pojos.add(filter);
         }
     }
@@ -104,6 +113,8 @@ public class FilterProvider implements IProvider {
 
     @Override
     public List<? extends EntryItem> getPojos() {
+        if (BuildConfig.DEBUG)
+            return Collections.unmodifiableList(pojos);
         return pojos;
     }
 }

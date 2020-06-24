@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import rocks.tbog.tblauncher.BuildConfig;
 import rocks.tbog.tblauncher.TBLauncherActivity;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.loader.LoadEntryItem;
@@ -33,6 +34,7 @@ public abstract class Provider<T extends EntryItem> extends Service implements I
     /**
      * Scheme used to build ids for the pojos created by this provider
      */
+    @NonNull
     private String pojoScheme = "(none)://";
 
     private long start;
@@ -97,6 +99,7 @@ public abstract class Provider<T extends EntryItem> extends Service implements I
         this.sendBroadcast(i);
     }
 
+    @NonNull
     public String getScheme() {
         return pojoScheme;
     }
@@ -131,7 +134,9 @@ public abstract class Provider<T extends EntryItem> extends Service implements I
 
     @Override
     public List<? extends EntryItem> getPojos() {
-        return Collections.unmodifiableList(pojos);
+        if (BuildConfig.DEBUG)
+            return Collections.unmodifiableList(pojos);
+        return pojos;
     }
 
     @Override
