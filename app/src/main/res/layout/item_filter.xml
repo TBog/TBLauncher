@@ -1,20 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="wrap_content"
-    android:layout_height="match_parent"
-    android:layout_marginHorizontal="@dimen/result_margin_horizontal"
-    android:gravity="center"
-    android:orientation="vertical"
-    tools:background="@android:color/holo_green_light"
-    tools:layout_height="@dimen/bar_height"
-    tools:theme="@style/AppThemeTransparent">
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:orientation="horizontal"
+    android:paddingHorizontal="@dimen/result_margin_horizontal"
+    android:paddingVertical="@dimen/result_margin_vertical">
 
     <ImageView
         android:id="@android:id/icon"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="top"
+        android:layout_width="@dimen/icon_width"
+        android:layout_height="@dimen/icon_height"
+        android:layout_gravity="start|center_vertical"
+        android:layout_marginStart="@dimen/icon_margin_left"
+        android:layout_marginTop="@dimen/icon_margin_top"
+        android:layout_marginEnd="@dimen/icon_margin_right"
+        android:layout_marginBottom="@dimen/icon_margin_bottom"
         android:importantForAccessibility="no"
         android:scaleType="fitCenter"
         android:src="@drawable/ic_android" />
@@ -23,14 +25,17 @@
         android:id="@android:id/text1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom"
+        android:layout_gravity="center_vertical"
+        android:ellipsize="end"
+        android:maxLines="1"
         android:paddingEnd="2dp"
         android:shadowColor="?attr/resultShadowColor"
         android:shadowDx="1"
         android:shadowDy="2"
         android:shadowRadius="?attr/textShadowRadius"
         android:text="Apps"
-        android:textColor="?android:attr/textColorSecondary"
-        android:textSize="@dimen/result_small_size"
+        android:textColor="?attr/resultColor"
+        android:textSize="@dimen/result_title_size"
         tools:ignore="RtlSymmetry" />
-</FrameLayout>
+
+</LinearLayout>

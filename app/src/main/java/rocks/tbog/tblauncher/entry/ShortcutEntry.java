@@ -108,20 +108,27 @@ public final class ShortcutEntry extends EntryWithTags {
 
     @Override
     public int getResultLayout(int drawFlags) {
+//        return Utilities.checkFlag(drawFlags, FLAG_DRAW_LIST) ? R.layout.item_shortcut :
+//                (Utilities.checkFlag(drawFlags, FLAG_DRAW_GRID) ? R.layout.item_grid_shortcut :
+//                        R.layout.item_quick_list);
         return Utilities.checkFlag(drawFlags, FLAG_DRAW_GRID) ? R.layout.item_grid_shortcut : R.layout.item_shortcut;
     }
 
     @Override
     public void displayResult(@NonNull View view, int drawFlags) {
-        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_GRID))
-            displayGridResult(view, drawFlags);
-        else
+        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_LIST)) {
             displayListResult(view, drawFlags);
+        } else {
+            displayGridResult(view, drawFlags);
+        }
     }
 
     private void displayGridResult(@NonNull View view, int drawFlags) {
-        TextView appName = view.findViewById(android.R.id.text1);
-        ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, appName);
+        TextView nameView = view.findViewById(android.R.id.text1);
+        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_NAME))
+            ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, nameView);
+        else
+            nameView.setVisibility(View.GONE);
 
         ImageView appIcon = view.findViewById(android.R.id.icon);
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {

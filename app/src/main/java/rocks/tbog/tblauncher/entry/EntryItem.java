@@ -20,12 +20,35 @@ import rocks.tbog.tblauncher.utils.FuzzyScore;
 
 public abstract class EntryItem {
 
-    private static final String TAG = EntryItem.class.getSimpleName();
+    /**
+     * the layout will be used in a ListView
+     */
+    public static final int FLAG_DRAW_LIST = 1; // 1 << 0
 
-    public static final int FLAG_DRAW_GRID = 1; // the layout will be used in a GridView
-    public static final int FLAG_DRAW_ICON = 1 << 1;
-    public static final int FLAG_DRAW_NAME = 1 << 2;
-    public static final int FLAG_DRAW_TAGS = 1 << 3;
+    /**
+     * the layout will be used in a GridView
+     */
+    public static final int FLAG_DRAW_GRID = 2; // 1 << 1
+
+    /**
+     * the layout will be used in a horizontal LinearLayout
+     */
+    public static final int FLAG_DRAW_QUICK_LIST = 4; // 1 << 2
+
+    /**
+     * layout should display an icon
+     */
+    public static final int FLAG_DRAW_ICON = 8; // 1 << 3
+
+    /**
+     * layout should display a text/name
+     */
+    public static final int FLAG_DRAW_NAME = 16; // 1 << 4
+
+    /**
+     * layout should display tags
+     */
+    public static final int FLAG_DRAW_TAGS = 32; // 1 << 5
 
 
     // Globally unique ID.

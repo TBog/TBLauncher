@@ -35,7 +35,9 @@ public class FilterEntry extends EntryItem {
 
     @Override
     public int getResultLayout(int drawFlags) {
-        return Utilities.checkFlag(drawFlags, FLAG_DRAW_GRID) ? R.layout.item_grid : R.layout.item_filter;
+        return Utilities.checkFlag(drawFlags, FLAG_DRAW_LIST) ? R.layout.item_filter :
+                (Utilities.checkFlag(drawFlags, FLAG_DRAW_GRID) ? R.layout.item_grid :
+                        R.layout.item_quick_list);
     }
 
     @WorkerThread
@@ -50,7 +52,6 @@ public class FilterEntry extends EntryItem {
         else
             view.findViewById(android.R.id.text1).setVisibility(View.GONE);
 
-        view.setOnClickListener(listener);
         view.setTag(R.id.tag_filterName, filterScheme);
 
         ImageView appIcon = view.findViewById(android.R.id.icon);
@@ -61,6 +62,11 @@ public class FilterEntry extends EntryItem {
             appIcon.setImageDrawable(null);
             appIcon.setVisibility(View.GONE);
         }
+    }
+
+    @Override
+    public void doLaunch(@NonNull View view) {
+        listener.onClick(view);
     }
 
     public void setOnClickListener(@Nullable View.OnClickListener listener) {

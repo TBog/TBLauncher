@@ -143,20 +143,26 @@ public final class AppEntry extends EntryWithTags {
 
     @Override
     public int getResultLayout(int drawFlags) {
-        return Utilities.checkFlag(drawFlags, FLAG_DRAW_GRID) ? R.layout.item_grid : R.layout.item_app;
+        return Utilities.checkFlag(drawFlags, FLAG_DRAW_LIST) ? R.layout.item_app :
+                (Utilities.checkFlag(drawFlags, FLAG_DRAW_GRID) ? R.layout.item_grid :
+                        R.layout.item_quick_list);
     }
 
     @Override
     public void displayResult(@NonNull View view, int drawFlags) {
-        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_GRID))
-            displayGridResult(view, drawFlags);
-        else
+        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_LIST)) {
             displayListResult(view, drawFlags);
+        } else {
+            displayGridResult(view, drawFlags);
+        }
     }
 
     private void displayGridResult(@NonNull View view, int drawFlags) {
-        TextView appName = view.findViewById(android.R.id.text1);
-        ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, appName);
+        TextView nameView = view.findViewById(android.R.id.text1);
+        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_NAME))
+            ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, nameView);
+        else
+            nameView.setVisibility(View.GONE);
 
         ImageView appIcon = view.findViewById(android.R.id.icon);
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
@@ -171,8 +177,8 @@ public final class AppEntry extends EntryWithTags {
     private void displayListResult(@NonNull View view, int drawFlags) {
         Context context = view.getContext();
 
-        TextView appName = view.findViewById(R.id.item_app_name);
-        ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, appName);
+        TextView nameView = view.findViewById(R.id.item_app_name);
+        ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, nameView);
 
         TextView tagsView = view.findViewById(R.id.item_app_tag);
         // Hide tags view if tags are empty

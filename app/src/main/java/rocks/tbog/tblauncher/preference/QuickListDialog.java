@@ -1,6 +1,8 @@
 package rocks.tbog.tblauncher.preference;
 
 import android.content.Context;
+import android.content.SharedPreferences;
+import android.graphics.drawable.PaintDrawable;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -13,6 +15,7 @@ import android.widget.LinearLayout;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.preference.PreferenceDialogFragmentCompat;
+import androidx.preference.PreferenceManager;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -20,6 +23,7 @@ import java.util.Collections;
 import java.util.List;
 
 import rocks.tbog.tblauncher.DataHandler;
+import rocks.tbog.tblauncher.QuickList;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.dataprovider.FavProvider;
@@ -30,6 +34,7 @@ import rocks.tbog.tblauncher.entry.ContactEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.FilterEntry;
 import rocks.tbog.tblauncher.entry.ShortcutEntry;
+import rocks.tbog.tblauncher.utils.UIColors;
 
 public class QuickListDialog extends PreferenceDialogFragmentCompat {
 
@@ -37,6 +42,7 @@ public class QuickListDialog extends PreferenceDialogFragmentCompat {
     private LinearLayout mQuickListContainer;
     private GridView mFilterGrid;
     private GridView mFavoritesGrid;
+    private SharedPreferences mPref;
     private EntryAdapter.OnItemClickListener mAddToQuickList = (adapter, view, pos) -> {
         mQuickList.add(adapter.getItem(pos));
         populateList();
@@ -73,10 +79,19 @@ public class QuickListDialog extends PreferenceDialogFragmentCompat {
             if (list != null)
                 mQuickList.addAll(list);
         }
+        mPref = PreferenceManager.getDefaultSharedPreferences(view.getContext());
+        QuickList.applyUiPref(mPref, mQuickListContainer);
         populateList();
 
         mFilterGrid = view.findViewById(R.id.filterGrid);
         mFavoritesGrid = view.findViewById(R.id.favoritesGrid);
+
+        {
+            int color = QuickList.getBackgroundColor(mPref);
+            PaintDrawable drawable = new PaintDrawable();
+            drawable.getPaint().setColor(color);
+            mFilterGrid.setBackground(drawable);
+        }
 
         // filters
         {
@@ -122,14 +137,13 @@ public class QuickListDialog extends PreferenceDialogFragmentCompat {
         Context context = mQuickListContainer.getContext();
 
         mQuickListContainer.removeAllViews();
-
-        int drawFlags = EntryItem.FLAG_DRAW_GRID | EntryItem.FLAG_DRAW_NAME | EntryItem.FLAG_DRAW_ICON;
+        int drawFlags = QuickList.getDrawFlags(mPref);
         for (EntryItem entry : mQuickList) {
             View view = LayoutInflater.from(context).inflate(entry.getResultLayout(drawFlags), mQuickListContainer, false);
             entry.displayResult(view, drawFlags);
             mQuickListContainer.addView(view);
 
-            // remove on touch
+            // when user clicks, remove the view and the list item
             view.setOnClickListener((v) -> {
                 if (v.getParent() instanceof ViewGroup) {
                     int idx = ((ViewGroup) v.getParent()).indexOfChild(v);

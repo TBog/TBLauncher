@@ -92,7 +92,7 @@ public class ResultAdapter extends BaseAdapter implements SectionIndexer, Filter
         Context context = parent.getContext();
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        int drawFlags = EntryItem.FLAG_DRAW_NAME;
+        int drawFlags = EntryItem.FLAG_DRAW_NAME | EntryItem.FLAG_DRAW_LIST;
         if ( prefs.getBoolean("tags-enabled", true) )
             drawFlags |= EntryItem.FLAG_DRAW_TAGS;
         if (prefs.getBoolean("icons-visible", true))

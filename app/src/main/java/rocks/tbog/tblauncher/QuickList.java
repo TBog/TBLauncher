@@ -26,6 +26,7 @@ import rocks.tbog.tblauncher.dataprovider.FavProvider;
 import rocks.tbog.tblauncher.dataprovider.IProvider;
 import rocks.tbog.tblauncher.dataprovider.Provider;
 import rocks.tbog.tblauncher.entry.EntryItem;
+import rocks.tbog.tblauncher.result.ResultHelper;
 import rocks.tbog.tblauncher.utils.UIColors;
 
 public class QuickList {
@@ -60,6 +61,15 @@ public class QuickList {
         populateList();
     }
 
+    public static int getDrawFlags(SharedPreferences prefs) {
+        int drawFlags = EntryItem.FLAG_DRAW_QUICK_LIST;
+        if (prefs.getBoolean("quick-list-text-visible", true))
+            drawFlags |= EntryItem.FLAG_DRAW_NAME;
+        if (prefs.getBoolean("quick-list-icons-visible", true))
+            drawFlags |= EntryItem.FLAG_DRAW_ICON;
+        return drawFlags;
+    }
+
     private void populateList() {
         mQuickList.removeAllViews();
         if (!isQuickListEnabled()) {
@@ -71,15 +81,13 @@ public class QuickList {
         if (list == null)
             return;
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mQuickList.getContext());
-        int drawFlags = EntryItem.FLAG_DRAW_GRID;
-        if (prefs.getBoolean("quick-list-text-visible", true))
-            drawFlags |= EntryItem.FLAG_DRAW_NAME;
-        if (prefs.getBoolean("quick-list-icons-visible", true))
-            drawFlags |= EntryItem.FLAG_DRAW_ICON;
+        int drawFlags = getDrawFlags(prefs);
         for (EntryItem entry : list) {
             View view = LayoutInflater.from(getContext()).inflate(entry.getResultLayout(drawFlags), mQuickList, false);
             entry.displayResult(view, drawFlags);
             mQuickList.addView(view);
+
+            view.setOnClickListener((v) -> entry.doLaunch(v));
         }
         mQuickList.setVisibility(mQuickList.getChildCount() == 0 ? View.GONE : View.VISIBLE);
     }
@@ -212,37 +220,9 @@ public class QuickList {
     }
 
     public void onResume(SharedPreferences pref) {
-        Resources resources = mQuickList.getResources();
         mIsEnabled = pref.getBoolean("quick-list-enabled", true);
         mAlwaysVisible = pref.getBoolean("quick-list-always-visible", true);
-
-        // size
-        int percent = pref.getInt("quick-list-size", 0);
-
-        // set layout height
-        {
-            int smallSize = resources.getDimensionPixelSize(R.dimen.bar_height);
-            int largeSize = resources.getDimensionPixelSize(R.dimen.large_quick_list_bar_height);
-            ViewGroup.LayoutParams params = mQuickList.getLayoutParams();
-            if (params instanceof LinearLayout.LayoutParams) {
-                params.height = smallSize + (largeSize - smallSize) * percent / 100;
-                mQuickList.setLayoutParams(params);
-            } else {
-                throw new IllegalStateException("mSearchBarContainer has the wrong layout params");
-            }
-        }
-
-        int color = UIColors.getColor(pref, "quick-list-color");
-        int alpha = UIColors.getAlpha(pref, "quick-list-alpha");
-
-        // rounded drawable
-        PaintDrawable drawable = new PaintDrawable();
-        drawable.getPaint().setColor(UIColors.setAlpha(color, alpha));
-        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) mQuickList.getLayoutParams();
-        drawable.setCornerRadius(getContext().getResources().getDimension(R.dimen.bar_corner_radius));
-        mQuickList.setBackground(drawable);
-        int margin = (int) (params.height * .25f);
-        params.setMargins(margin, 0, margin, margin);
+        applyUiPref(pref, mQuickList);
     }
 
     public void adapterCleared() {
@@ -258,5 +238,41 @@ public class QuickList {
         animToggleOff();
         bFilterOn = false;
         bAdapterEmpty = false;
+    }
+
+    public static void applyUiPref(SharedPreferences pref, LinearLayout quickList) {
+        Resources resources = quickList.getResources();
+        // size
+        int percent = pref.getInt("quick-list-size", 0);
+
+        // set layout height
+        {
+            int smallSize = resources.getDimensionPixelSize(R.dimen.bar_height);
+            int largeSize = resources.getDimensionPixelSize(R.dimen.large_quick_list_bar_height);
+            ViewGroup.LayoutParams params = quickList.getLayoutParams();
+            if (params instanceof LinearLayout.LayoutParams) {
+                params.height = smallSize + (largeSize - smallSize) * percent / 100;
+                quickList.setLayoutParams(params);
+            } else {
+                throw new IllegalStateException("mSearchBarContainer has the wrong layout params");
+            }
+        }
+
+        int color = getBackgroundColor(pref);
+
+        // rounded drawable
+        PaintDrawable drawable = new PaintDrawable();
+        drawable.getPaint().setColor(color);
+        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) quickList.getLayoutParams();
+        drawable.setCornerRadius(resources.getDimension(R.dimen.bar_corner_radius));
+        quickList.setBackground(drawable);
+        int margin = (int) (params.height * .25f);
+        params.setMargins(margin, 0, margin, margin);
+    }
+
+    public static int getBackgroundColor(SharedPreferences pref) {
+        int color = UIColors.getColor(pref, "quick-list-color");
+        int alpha = UIColors.getAlpha(pref, "quick-list-alpha");
+        return UIColors.setAlpha(color, alpha);
     }
 }
