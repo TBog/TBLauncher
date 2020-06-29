@@ -16,7 +16,6 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -309,9 +308,9 @@ public final class ShortcutEntry extends EntryWithTags {
         builder.setTitle(context.getResources().getString(R.string.shortcut_rename_title));
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            builder.setView(R.layout.rename_dialog);
+            builder.setView(R.layout.dialog_rename);
         } else {
-            builder.setView(View.inflate(context, R.layout.rename_dialog, null));
+            builder.setView(View.inflate(context, R.layout.dialog_rename, null));
         }
 
         builder.setPositiveButton(R.string.custom_name_rename, (dialog, which) -> {

@@ -652,7 +652,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             updateSearchRecords();
         });
 
-        dialog.show(mTBLauncherActivity.getSupportFragmentManager(), "edit_tags_dialog");
+        dialog.show(mTBLauncherActivity.getSupportFragmentManager(), "dialog_edit_tags");
     }
 
     private boolean isCustomIconDialogVisible() {

@@ -4,8 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/dialog_background"
-    android:clipChildren="true"
-    android:clipToPadding="true"
     android:orientation="vertical"
     android:paddingHorizontal="@dimen/result_margin_horizontal"
     android:paddingVertical="@dimen/result_margin_vertical">

@@ -32,7 +32,7 @@ public class EditTagsDialog extends DialogFragment<Set<String>> {
 
     @Override
     protected int layoutRes() {
-        return R.layout.edit_tags_dialog;
+        return R.layout.dialog_edit_tags;
     }
 
     @Nullable
@@ -47,7 +47,7 @@ public class EditTagsDialog extends DialogFragment<Set<String>> {
         String entryId = args.getString("entryId", "");
         EntryItem entry = TBApplication.getApplication(context).getDataHandler().getPojo(entryId);
         if (entry != null) {
-            int drawFlags = EntryItem.FLAG_DRAW_NAME | EntryItem.FLAG_DRAW_ICON;
+            int drawFlags = EntryItem.FLAG_DRAW_LIST | EntryItem.FLAG_DRAW_NAME | EntryItem.FLAG_DRAW_ICON;
             View entryView = inflater.inflate(entry.getResultLayout(drawFlags), root, false);
             entryView.setId(R.id.preview);
             root.addView(entryView, 0);
@@ -77,7 +77,7 @@ public class EditTagsDialog extends DialogFragment<Set<String>> {
             dismiss();
             return;
         }
-        int drawFlags = EntryItem.FLAG_DRAW_NAME | EntryItem.FLAG_DRAW_ICON;
+        int drawFlags = EntryItem.FLAG_DRAW_LIST | EntryItem.FLAG_DRAW_NAME | EntryItem.FLAG_DRAW_ICON;
         entry.displayResult(view.findViewById(R.id.preview), drawFlags);
 
         // prepare the grid with all the tags

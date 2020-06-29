@@ -6,7 +6,6 @@ import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.LauncherActivityInfo;
 import android.content.pm.LauncherApps;
@@ -28,7 +27,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.WorkerThread;
 import androidx.appcompat.app.AlertDialog;
-import androidx.preference.PreferenceManager;
 
 import java.util.List;
 
@@ -399,9 +397,9 @@ public final class AppEntry extends EntryWithTags {
         builder.setTitle(context.getResources().getString(R.string.app_rename_title));
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            builder.setView(R.layout.rename_dialog);
+            builder.setView(R.layout.dialog_rename);
         } else {
-            builder.setView(View.inflate(context, R.layout.rename_dialog, null));
+            builder.setView(View.inflate(context, R.layout.dialog_rename, null));
         }
 
         builder.setPositiveButton(R.string.custom_name_rename, (dialog, which) -> {
