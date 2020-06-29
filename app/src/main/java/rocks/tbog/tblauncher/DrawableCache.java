@@ -1,15 +1,24 @@
 package rocks.tbog.tblauncher;
 
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.collection.LruCache;
 
-import java.util.HashMap;
+import java.util.List;
 
 public class DrawableCache {
+    private static final String TAG = "DrawCache";
     private boolean mEnabled = true;
-    private HashMap<String, DrawableInfo> mCache = new HashMap<>();
+    private LruCache<String, DrawableInfo> mCache = new LruCache<>(16);
+
+    public void setSize(int maxSize) {
+        mCache.resize(maxSize);
+    }
 
     private static class DrawableInfo {
 
@@ -36,14 +45,21 @@ public class DrawableCache {
         return null;
     }
 
-    public void setEnabled(boolean enabled) {
-        if (mEnabled == enabled)
-            return;
-        mEnabled = enabled;
-        clearCache();
+    public void clearCache() {
+        mCache.evictAll();
     }
 
-    public void clearCache() {
-        mCache.clear();
+    public void onPrefChanged(Context ctx, SharedPreferences pref) {
+        boolean enabled = pref.getBoolean("cache-drawable", true);
+        if (enabled != mEnabled) {
+            mEnabled = enabled;
+            clearCache();
+        }
+        boolean halfSize = pref.getBoolean("cache-half-apps", true);
+        List<?> apps = TBApplication.dataHandler(ctx).getApplications();
+        int size = apps == null ? 0 : apps.size();
+        size = size < 16 ? 16 : halfSize ? (size / 2) : (size * 115 / 100);
+        Log.i(TAG, "Cache size: " + size);
+        mCache.resize(size);
     }
 }

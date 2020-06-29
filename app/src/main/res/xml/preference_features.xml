@@ -88,6 +88,13 @@
             android:title="@string/cache_drawable" />
 
         <androidx.preference.SwitchPreference
+            android:defaultValue="true"
+            android:dependency="cache-drawable"
+            android:key="cache-half-apps"
+            android:title="@string/cache_half_apps"
+            android:summary="@string/cache_half_apps_summary"/>
+
+        <androidx.preference.SwitchPreference
             android:defaultValue="false"
             android:dependency="cache-drawable"
             android:key="screen-off-cache-clear"

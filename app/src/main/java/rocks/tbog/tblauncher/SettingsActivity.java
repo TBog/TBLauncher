@@ -23,6 +23,8 @@ import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceScreen;
 import androidx.preference.SwitchPreference;
 
+import java.util.List;
+
 import rocks.tbog.tblauncher.preference.ConfirmDialog;
 import rocks.tbog.tblauncher.preference.CustomDialogPreference;
 import rocks.tbog.tblauncher.preference.PaletteDialog;
@@ -307,13 +309,15 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         preference.setChecked(useTags);
                     else
                         sharedPreferences.edit().putBoolean("fuzzy-search-tags", useTags).apply();
+                    break;
                 }
                 case "quick-list-text-visible":
                 case "quick-list-icons-visible":
                     TBApplication.quickList(activity).onFavoritesChanged();
-                break;
+                    break;
                 case "cache-drawable":
-                    TBApplication.drawableCache(activity).setEnabled(sharedPreferences.getBoolean("cache-drawable", true));
+                case "cache-half-apps":
+                    TBApplication.drawableCache(activity).onPrefChanged(activity, sharedPreferences);
                     break;
             }
         }

@@ -53,7 +53,7 @@ public class TBApplication extends Application {
         super.onCreate();
         PreferenceManager.setDefaultValues(this, R.xml.preferences, true);
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        mDrawableCache.setEnabled(mSharedPreferences.getBoolean("cache-drawable", true));
+        mDrawableCache.onPrefChanged(this, mSharedPreferences);
     }
 
     public static TBApplication getApplication(Context context) {

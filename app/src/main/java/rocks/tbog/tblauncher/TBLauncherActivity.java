@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -116,6 +117,9 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
                     Log.v(TAG, "All providers are done loading.");
 
                     TBApplication.behaviour(TBLauncherActivity.this).displayLoader(false);
+
+                    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(TBLauncherActivity.this);
+                    TBApplication.drawableCache(TBLauncherActivity.this).onPrefChanged(TBLauncherActivity.this, prefs);
 
                     // Run GC once to free all the garbage accumulated during provider initialization
                     System.gc();
