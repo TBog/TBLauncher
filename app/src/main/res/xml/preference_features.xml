@@ -77,5 +77,24 @@
 
     </androidx.preference.PreferenceCategory>
 
+    <!-- Memory -->
+    <androidx.preference.PreferenceCategory
+        android:key="memory-section"
+        android:title="@string/memory_section">
+
+        <androidx.preference.SwitchPreference
+            android:defaultValue="true"
+            android:key="cache-drawable"
+            android:title="@string/cache_drawable" />
+
+        <androidx.preference.SwitchPreference
+            android:defaultValue="false"
+            android:dependency="cache-drawable"
+            android:key="screen-off-cache-clear"
+            android:title="@string/screen_off_cache_clear"
+            android:summary="@string/screen_off_cache_clear_summary"/>
+
+    </androidx.preference.PreferenceCategory>
+
 
 </androidx.preference.PreferenceScreen>

@@ -71,7 +71,7 @@ public class DataHandler extends BroadcastReceiver
     final private Context context;
     private String currentQuery;
     private final Map<String, ProviderEntry> providers = new HashMap<>();
-    public boolean allProvidersHaveLoaded = false;
+    private boolean mFullLoadOverSent = false;
     private long start;
 
     /**
@@ -303,44 +303,55 @@ public class DataHandler extends BroadcastReceiver
         this.providers.remove(name);
     }
 
+    private boolean allProvidersHaveLoaded() {
+        for (ProviderEntry entry : this.providers.values())
+            if (entry.provider == null || !entry.provider.isLoaded())
+                return false;
+        return true;
+    }
+
+    private boolean providersHaveLoaded(int step) {
+        for (ProviderEntry entry : this.providers.values()) {
+            if (entry.provider == null) {
+                return false;
+            }
+            if (step == entry.provider.getLoadStep() && !entry.provider.isLoaded()) {
+                return false;
+            }
+        }
+        return true;
+    }
+
     /**
      * Called when some event occurred that makes us believe that all data providers
      * might be ready now
      */
     private void handleProviderLoaded() {
-        if (this.allProvidersHaveLoaded) {
+        if (mFullLoadOverSent) {
             return;
         }
 
-        // Make sure that all providers are fully connected
-        for (ProviderEntry entry : this.providers.values()) {
-            if (entry.provider == null)
-                return;
-            // skip loadLast providers from this check
-            if (entry.provider.loadLast())
-                continue;
-            if (!entry.provider.isLoaded()) {
-                return;
+        for (int step : IProvider.LOAD_STEPS) {
+            boolean stepLoaded = true;
+            for (ProviderEntry entry : this.providers.values()) {
+                if (entry.provider == null)
+                    return;
+                if (step == entry.provider.getLoadStep() && !entry.provider.isLoaded()) {
+                    stepLoaded = false;
+                    entry.provider.reload(false);
+                }
             }
+            if (!stepLoaded)
+                return;
         }
-        // Now check loadLast providers
-        for (ProviderEntry entry : this.providers.values()) {
-            if (entry.provider == null)
-                return;
-            // reload providers that need to be loaded last
-            if (entry.provider.loadLast()) {
-                entry.provider.reload();
-                continue;
-            }
-            if (!entry.provider.isLoaded()) {
-                return;
-            }
-        }
+
+        if (!allProvidersHaveLoaded())
+            return;
 
         long time = System.currentTimeMillis() - start;
         Log.v(TAG, "Time to load all providers: " + time + "ms");
 
-        this.allProvidersHaveLoaded = true;
+        mFullLoadOverSent = true;
 
         // Broadcast the fact that the new providers list is ready
         try {
@@ -472,7 +483,7 @@ public class DataHandler extends BroadcastReceiver
         if (DBHelper.insertShortcut(this.context, record)) {
             ShortcutsProvider provider = getShortcutsProvider();
             if (provider != null)
-                provider.reload();
+                provider.reload(true);
             return true;
         }
         return false;
@@ -503,7 +514,7 @@ public class DataHandler extends BroadcastReceiver
         }
 
         if (!shortcuts.isEmpty() && this.getShortcutsProvider() != null) {
-            this.getShortcutsProvider().reload();
+            this.getShortcutsProvider().reload(true);
         }
     }
 
@@ -521,7 +532,7 @@ public class DataHandler extends BroadcastReceiver
         }
 
         if (this.getShortcutsProvider() != null) {
-            this.getShortcutsProvider().reload();
+            this.getShortcutsProvider().reload(true);
         }
     }
 
@@ -542,7 +553,7 @@ public class DataHandler extends BroadcastReceiver
         DBHelper.removeShortcuts(this.context, packageName);
 
         if (this.getShortcutsProvider() != null) {
-            this.getShortcutsProvider().reload();
+            this.getShortcutsProvider().reload(true);
         }
     }
 
@@ -869,8 +880,29 @@ public class DataHandler extends BroadcastReceiver
         DBHelper.renameShortcut(context, shortcutEntry, newName);
     }
 
+    public void onProviderRecreated( Provider<? extends EntryItem> provider )
+    {
+        mFullLoadOverSent = false;
+
+        IntentFilter intentFilter = new IntentFilter(TBLauncherActivity.LOAD_OVER);
+        this.context.registerReceiver(this, intentFilter);
+
+        Intent i = new Intent(TBLauncherActivity.START_LOAD);
+        this.context.sendBroadcast(i);
+
+        // reload providers for the next steps
+        for (int step : IProvider.LOAD_STEPS) {
+            if (step <= provider.getLoadStep())
+                continue;
+            for (ProviderEntry entry : this.providers.values()) {
+                if (entry.provider != null && step == entry.provider.getLoadStep())
+                    entry.provider.setDirty();
+            }
+        }
+    }
+
     public void reloadProviders() {
-        allProvidersHaveLoaded = false;
+        mFullLoadOverSent = false;
 
         start = System.currentTimeMillis();
 
@@ -880,8 +912,11 @@ public class DataHandler extends BroadcastReceiver
         Intent i = new Intent(TBLauncherActivity.START_LOAD);
         this.context.sendBroadcast(i);
 
-        for (ProviderEntry entry : this.providers.values()) {
-            entry.provider.reload();
+        for (int step : IProvider.LOAD_STEPS) {
+            for (ProviderEntry entry : this.providers.values()) {
+                if (entry.provider != null && step == entry.provider.getLoadStep())
+                    entry.provider.reload(true);
+            }
         }
     }
 
@@ -914,7 +949,11 @@ public class DataHandler extends BroadcastReceiver
 
         FavProvider provider = getFavProvider();
         if (provider != null)
-            provider.reload();
+            provider.reload(true);
+    }
+
+    public boolean fullLoadOverSent() {
+        return mFullLoadOverSent;
     }
 
     static final class ProviderEntry {

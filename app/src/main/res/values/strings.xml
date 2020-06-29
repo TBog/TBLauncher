@@ -137,5 +137,9 @@
     <string name="favorites_list">From the favorites</string>
     <string name="quick_list_icons_visible">Show Quick List icons</string>
     <string name="quick_list_text_visible">Show names</string>
+    <string name="cache_drawable">Cache icons</string>
+    <string name="screen_off_cache_clear">Release cache often</string>
+    <string name="screen_off_cache_clear_summary">Empty cache when screen turns off</string>
+    <string name="memory_section">Memory</string>
 
 </resources>

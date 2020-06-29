@@ -88,7 +88,7 @@ public abstract class Searcher extends AsyncTask<Void, EntryItem, Void> {
             return;
 
         // Loader should still be displayed until all the providers have finished loading
-        activity.displayLoader(!TBApplication.getApplication(activity.getContext()).getDataHandler().allProvidersHaveLoaded);
+        activity.displayLoader(!TBApplication.getApplication(activity.getContext()).getDataHandler().fullLoadOverSent());
 
         if (this.processedPojos.isEmpty()) {
             activity.clearAdapter();

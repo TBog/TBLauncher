@@ -92,7 +92,7 @@ public class SaveSingleOreoShortcutAsync extends AsyncTask<Void, Integer, Boolea
                 return;
             ShortcutsProvider shortcutsProvider = dataHandler.getShortcutsProvider();
             if (shortcutsProvider != null)
-                shortcutsProvider.reload();
+                shortcutsProvider.reload(true);
         }
     }
 

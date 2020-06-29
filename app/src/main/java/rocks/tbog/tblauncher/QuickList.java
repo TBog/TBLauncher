@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.PaintDrawable;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,7 +27,6 @@ import rocks.tbog.tblauncher.dataprovider.FavProvider;
 import rocks.tbog.tblauncher.dataprovider.IProvider;
 import rocks.tbog.tblauncher.dataprovider.Provider;
 import rocks.tbog.tblauncher.entry.EntryItem;
-import rocks.tbog.tblauncher.result.ResultHelper;
 import rocks.tbog.tblauncher.utils.UIColors;
 
 public class QuickList {
@@ -87,9 +87,10 @@ public class QuickList {
             entry.displayResult(view, drawFlags);
             mQuickList.addView(view);
 
-            view.setOnClickListener((v) -> entry.doLaunch(v));
+            view.setOnClickListener(entry::doLaunch);
         }
         mQuickList.setVisibility(mQuickList.getChildCount() == 0 ? View.GONE : View.VISIBLE);
+        mQuickList.requestLayout();
     }
 
     public void toggleFilter(View v, IProvider provider, @NonNull String filterName) {
@@ -268,6 +269,11 @@ public class QuickList {
         quickList.setBackground(drawable);
         int margin = (int) (params.height * .25f);
         params.setMargins(margin, 0, margin, margin);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            // clip list content to rounded corners
+            quickList.setClipToOutline(true);
+        }
+
     }
 
     public static int getBackgroundColor(SharedPreferences pref) {

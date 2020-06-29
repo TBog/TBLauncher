@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.List;
 
 import rocks.tbog.tblauncher.BuildConfig;
+import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.TBLauncherActivity;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.loader.LoadEntryItem;
@@ -47,9 +48,13 @@ public abstract class Provider<T extends EntryItem> extends Service implements I
     public void onCreate() {
         super.onCreate();
 
-        this.reload();
+        TBApplication.dataHandler(this).onProviderRecreated(this);
+        this.reload(true);
     }
 
+    protected boolean isLoading() {
+        return loader != null;
+    }
 
     void initialize(@NonNull LoadEntryItem<T> loader) {
         start = System.currentTimeMillis();
@@ -65,8 +70,9 @@ public abstract class Provider<T extends EntryItem> extends Service implements I
         loader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
-    @Override
-    public void reload() {
+    public void reload(boolean cancelCurrentLoadTask) {
+        if (!cancelCurrentLoadTask && loader != null)
+            return;
         loaded = false;
         // Handled at subclass level
         if (pojos.size() > 0) {
@@ -75,13 +81,18 @@ public abstract class Provider<T extends EntryItem> extends Service implements I
     }
 
     @Override
+    public void setDirty() {
+        // do nothing, we don't depend on any other provider
+    }
+
+    @Override
     public boolean isLoaded() {
         return this.loaded;
     }
 
     @Override
-    public boolean loadLast() {
-        return false;
+    public int getLoadStep() {
+        return LOAD_STEP_1;
     }
 
     public void loadOver(ArrayList<T> results) {

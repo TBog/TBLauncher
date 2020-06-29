@@ -190,21 +190,23 @@ public class ShortcutsProvider extends Provider<ShortcutEntry> {
     }
 
     @Override
-    public void reload() {
-        super.reload();
-        // If the user tries to add a new shortcut, but KISS isn't the default launcher
-        // AND the services are not running (low memory), then we won't be able to
-        // spawn a new service on Android 8.1+.
+    public void reload(boolean cancelCurrentLoadTask) {
+        super.reload(cancelCurrentLoadTask);
 
-        try {
-            this.initialize(new LoadShortcutsEntryItem(this));
-        } catch (IllegalStateException e) {
-            if (!notifiedKissNotDefaultLauncher) {
-                // Only display this message once per process
-                Toast.makeText(this, R.string.unable_to_initialize_shortcuts, Toast.LENGTH_LONG).show();
+        if (!isLoaded() && !isLoading()) {
+            try {
+                // If the user tries to add a new shortcut, but KISS isn't the default launcher
+                // AND the services are not running (low memory), then we won't be able to
+                // spawn a new service on Android 8.1+.
+                this.initialize(new LoadShortcutsEntryItem(this));
+            } catch (IllegalStateException e) {
+                if (!notifiedKissNotDefaultLauncher) {
+                    // Only display this message once per process
+                    Toast.makeText(this, R.string.unable_to_initialize_shortcuts, Toast.LENGTH_LONG).show();
+                }
+                notifiedKissNotDefaultLauncher = true;
+                e.printStackTrace();
             }
-            notifiedKissNotDefaultLauncher = true;
-            e.printStackTrace();
         }
     }
 

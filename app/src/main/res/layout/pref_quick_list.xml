@@ -17,7 +17,10 @@
         android:layout_height="@dimen/large_quick_list_bar_height"
         android:background="?attr/listBackgroundColor"
         android:gravity="center"
-        android:orientation="horizontal" />
+        android:measureWithLargestChild="true"
+        android:orientation="horizontal"
+        android:paddingHorizontal="@dimen/result_margin_horizontal"
+        android:paddingVertical="@dimen/result_margin_vertical" />
 
     <View
         android:layout_width="match_parent"
@@ -36,12 +39,11 @@
         android:layout_height="wrap_content"
         android:columnWidth="@dimen/app_grid_column_width"
         android:gravity="center"
-        android:horizontalSpacing="@dimen/result_margin_horizontal"
         android:numColumns="auto_fit"
         android:stretchMode="columnWidth"
-        android:verticalSpacing="@dimen/result_margin_vertical"
-        tools:itemCount="9"
-        tools:listitem="@layout/item_filter" />
+        android:verticalSpacing="@dimen/app_grid_vertical_spacing"
+        tools:layout_height="200dp"
+        tools:listitem="@layout/item_grid" />
 
     <View
         android:layout_width="match_parent"
@@ -60,11 +62,10 @@
         android:layout_height="wrap_content"
         android:columnWidth="@dimen/app_grid_column_width"
         android:gravity="center"
-        android:horizontalSpacing="@dimen/result_margin_horizontal"
         android:numColumns="auto_fit"
         android:stretchMode="columnWidth"
-        android:verticalSpacing="@dimen/result_margin_vertical"
-        tools:itemCount="9"
+        android:verticalSpacing="@dimen/app_grid_vertical_spacing"
+        tools:layout_height="200dp"
         tools:listitem="@layout/item_grid" />
 
 </LinearLayout>

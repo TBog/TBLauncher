@@ -129,7 +129,7 @@ public final class ResultViewHelper {
     }
 
     public static abstract class AsyncSetEntryDrawable extends AsyncTask<EntryItem, Void, Drawable> {
-        final WeakReference<ImageView> weakImage;
+        private final WeakReference<ImageView> weakImage;
         private String cacheId = null;
 
         public AsyncSetEntryDrawable(@NonNull ImageView image) {
@@ -141,9 +141,15 @@ public final class ResultViewHelper {
             this.weakImage = new WeakReference<>(image);
         }
 
+        @Nullable
+        public ImageView getImageView()
+        {
+            return weakImage.get();
+        }
+
         @Override
         protected Drawable doInBackground(EntryItem... entries) {
-            ImageView image = weakImage.get();
+            ImageView image = getImageView();
             if (isCancelled() || image == null || image.getTag() != this) {
                 weakImage.clear();
                 return null;
@@ -159,7 +165,7 @@ public final class ResultViewHelper {
 
         @Override
         protected void onPostExecute(Drawable drawable) {
-            ImageView image = weakImage.get();
+            ImageView image = getImageView();
             if (image == null || drawable == null) {
                 weakImage.clear();
                 return;

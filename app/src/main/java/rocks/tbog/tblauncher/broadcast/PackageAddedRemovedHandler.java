@@ -57,13 +57,13 @@ public class PackageAddedRemovedHandler extends BroadcastReceiver {
         {
             final AppProvider provider = dataHandler.getAppProvider();
             if (provider != null)
-                provider.reload();
+                provider.reload(true);
         }
         // Reload shortcuts list
         {
             final ShortcutsProvider provider = dataHandler.getShortcutsProvider();
             if (provider != null)
-                provider.reload();
+                provider.reload(true);
         }
     }
 

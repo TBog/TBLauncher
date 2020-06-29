@@ -5,6 +5,7 @@ import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.sqlite.SQLiteDatabase;
@@ -16,11 +17,11 @@ import rocks.tbog.tblauncher.searcher.Searcher;
 
 public class TBApplication extends Application {
 
-    public static final int TOUCH_DELAY = 120;
     private DataHandler dataHandler;
     private IconsHandler iconsPackHandler;
     private TagsHandler tagsHandler = null;
     private boolean bLayoutUpdateRequired = false;
+    private SharedPreferences mSharedPreferences = null;
 
     /**
      * Task launched on text change
@@ -51,6 +52,8 @@ public class TBApplication extends Application {
     public void onCreate() {
         super.onCreate();
         PreferenceManager.setDefaultValues(this, R.xml.preferences, true);
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        mDrawableCache.setEnabled(mSharedPreferences.getBoolean("cache-drawable", true));
     }
 
     public static TBApplication getApplication(Context context) {
@@ -125,7 +128,7 @@ public class TBApplication extends Application {
     public void initDataHandler() {
         if (dataHandler == null) {
             dataHandler = new DataHandler(this);
-        } else if (dataHandler.allProvidersHaveLoaded) {
+        } else if (dataHandler.fullLoadOverSent()) {
             // Already loaded! We still need to fire the FULL_LOAD event
             Intent i = new Intent(TBLauncherActivity.FULL_LOAD_OVER);
             sendBroadcast(i);
@@ -203,6 +206,8 @@ public class TBApplication extends Application {
         } else if (level >= ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) {
             // this is called every time the screen is off
             SQLiteDatabase.releaseMemory();
+            if (mSharedPreferences.getBoolean("screen-off-cache-clear", false))
+                mDrawableCache.clearCache();
         }
     }
 }

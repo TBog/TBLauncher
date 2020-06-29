@@ -113,7 +113,7 @@ public class SaveAllOreoShortcutsAsync extends AsyncTask<Void, Integer, Boolean>
                 return;
             ShortcutsProvider shortcutsProvider = dataHandler.getShortcutsProvider();
             if (shortcutsProvider != null)
-                shortcutsProvider.reload();
+                shortcutsProvider.reload(true);
         }
     }
 

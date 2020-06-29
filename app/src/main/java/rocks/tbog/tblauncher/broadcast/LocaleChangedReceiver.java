@@ -31,7 +31,7 @@ public class LocaleChangedReceiver extends BroadcastReceiver {
         // Reload application list
         final AppProvider provider = TBApplication.getApplication(ctx).getDataHandler().getAppProvider();
         if (provider != null) {
-            provider.reload();
+            provider.reload(true);
         }
     }
 }

@@ -12,6 +12,9 @@ import rocks.tbog.tblauncher.searcher.Searcher;
  * Public interface exposed by every KISS data provider
  */
 public interface IProvider {
+    int LOAD_STEP_1 = 0;
+    int LOAD_STEP_2 = 1;
+    int[] LOAD_STEPS = new int[] {LOAD_STEP_1, LOAD_STEP_2};
 
     /**
      * Post search results for the given query string to the searcher
@@ -27,8 +30,10 @@ public interface IProvider {
      * <p>
      * `"fr.neamar.summon.LOAD_OVER"` will be emitted once the reload is complete. The data provider
      * will stay usable (using it's old data) during the reload.
+     * @param cancelCurrentLoadTask pass true to stop current loading task and start another;
+     *                              pass false to do nothing if already loading
      */
-    void reload();
+    void reload(boolean cancelCurrentLoadTask);
 
     /**
      * Indicate whether this provider has already loaded it's data
@@ -41,10 +46,15 @@ public interface IProvider {
     boolean isLoaded();
 
     /**
-     * Return true to reload this after all other providers
-     * @return true if this should receive a reload after all other providers loaded
+     * Indicate that some providers have reloaded and this one may need to also reload
      */
-    boolean loadLast();
+    void setDirty();
+
+    /**
+     * Return the loading step for this provider
+     * @return one of the LOAD_STEPS
+     */
+    int getLoadStep();
 
     /**
      * Tells whether or not this provider may be able to find the pojo with

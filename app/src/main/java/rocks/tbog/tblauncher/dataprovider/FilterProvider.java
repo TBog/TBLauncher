@@ -80,9 +80,7 @@ public class FilterProvider implements IProvider {
 
     }
 
-    @Override
-    public void reload() {
-
+    public void reload(boolean cancelCurrentLoadTask) {
     }
 
     @Override
@@ -91,8 +89,13 @@ public class FilterProvider implements IProvider {
     }
 
     @Override
-    public boolean loadLast() {
-        return false;
+    public void setDirty() {
+        // do nothing, we already have the full list of items
+    }
+
+    @Override
+    public int getLoadStep() {
+        return LOAD_STEP_1;
     }
 
     @Override

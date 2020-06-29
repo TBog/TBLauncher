@@ -1,6 +1,7 @@
 package rocks.tbog.tblauncher.dataprovider;
 
 import android.content.Context;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -15,6 +16,7 @@ import java.util.List;
 import rocks.tbog.tblauncher.BuildConfig;
 import rocks.tbog.tblauncher.DataHandler;
 import rocks.tbog.tblauncher.TBApplication;
+import rocks.tbog.tblauncher.TBLauncherActivity;
 import rocks.tbog.tblauncher.db.FavRecord;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.searcher.Searcher;
@@ -26,8 +28,9 @@ public class FavProvider implements IProvider {
      */
     List<EntryItem> favList = new ArrayList<>();
     List<EntryItem> quickList = new ArrayList<>();
-    private boolean loaded = false;
-    private FavLoader loader = null;
+    private boolean mIsLoaded = false;
+    private FavLoader mLoadTask = null;
+    private long start;
 
     public FavProvider(Context context) {
         this.context = context;
@@ -39,22 +42,34 @@ public class FavProvider implements IProvider {
     }
 
     @Override
-    public void reload() {
-        if (loader != null)
-            loader.cancel(true);
+    public void reload(boolean cancelCurrentLoadTask) {
+        if (!cancelCurrentLoadTask && mLoadTask != null)
+            return;
+        if (mLoadTask != null)
+            mLoadTask.cancel(true);
         Log.i(Provider.TAG, "Starting provider: " + this.getClass().getSimpleName());
-        loader = new FavLoader(this);
-        loader.execute();
+        start = System.currentTimeMillis();
+        mLoadTask = new FavLoader(this);
+        mLoadTask.execute();
     }
 
     @Override
     public boolean isLoaded() {
-        return loaded;
+        return mIsLoaded;
     }
 
     @Override
-    public boolean loadLast() {
-        return !loaded && loader == null;
+    public void setDirty() {
+        // mark this as not loaded and wait for DataHandler to call reload
+        mIsLoaded = false;
+        if (mLoadTask != null)
+            mLoadTask.cancel(true);
+        mLoadTask = null;
+    }
+
+    @Override
+    public int getLoadStep() {
+        return LOAD_STEP_2;
     }
 
     @Override
@@ -122,7 +137,7 @@ public class FavProvider implements IProvider {
         @Override
         protected void onPostExecute(Object[] entryItems) {
             FavProvider provider = weakProvider.get();
-            if (entryItems == null || provider == null || provider.loader != this)
+            if (entryItems == null || provider == null || provider.mLoadTask != this)
                 return;
             @SuppressWarnings("unchecked")
             List<EntryItem> favList = (List<EntryItem>) entryItems[0];
@@ -134,8 +149,15 @@ public class FavProvider implements IProvider {
             provider.quickList = quickList;
 
             // mark the provider as loaded
-            provider.loaded = true;
-            provider.loader = null;
+            provider.mIsLoaded = true;
+            provider.mLoadTask = null;
+
+            {
+                long time = System.currentTimeMillis() - provider.start;
+                Log.i("Provider", "Time to load " + provider.getClass().getSimpleName() + ": " + time + "ms");
+                Intent i = new Intent(TBLauncherActivity.LOAD_OVER);
+                provider.context.sendBroadcast(i);
+            }
 
             TBApplication.quickList(provider.context).onFavoritesChanged();
         }

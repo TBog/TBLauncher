@@ -8,17 +8,22 @@ import androidx.annotation.Nullable;
 import java.util.HashMap;
 
 public class DrawableCache {
+    private boolean mEnabled = true;
     private HashMap<String, DrawableInfo> mCache = new HashMap<>();
 
     private static class DrawableInfo {
 
         final Drawable drawable;
+
         DrawableInfo(Drawable drawable) {
             this.drawable = drawable;
         }
 
     }
+
     public void cacheDrawable(@NonNull String name, Drawable drawable) {
+        if (!mEnabled)
+            return;
         DrawableInfo info = new DrawableInfo(drawable);
         mCache.put(name, info);
     }
@@ -29,6 +34,13 @@ public class DrawableCache {
         if (info != null)
             return info.drawable;
         return null;
+    }
+
+    public void setEnabled(boolean enabled) {
+        if (mEnabled == enabled)
+            return;
+        mEnabled = enabled;
+        clearCache();
     }
 
     public void clearCache() {

@@ -6,7 +6,6 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -45,7 +44,7 @@ public class AppCacheProvider implements IProvider {
         ArrayList<AppEntry> pojos = new ArrayList<>(apps.size());
 
         // convert from AppRecord to AppEntry
-        for ( AppRecord rec : apps.values() ) {
+        for (AppRecord rec : apps.values()) {
             UserHandleCompat user = UserHandleCompat.fromComponentName(context, rec.componentName);
             String id = AppEntry.SCHEME + rec.componentName;
             ComponentName cn = UserHandleCompat.unflattenComponentName(rec.componentName);
@@ -66,9 +65,7 @@ public class AppCacheProvider implements IProvider {
         AppProvider.checkAppResults(pojos, fuzzyScore, searcher);
     }
 
-    @Override
-    public void reload() {
-
+    public void reload(boolean cancelCurrentLoadTask) {
     }
 
     @Override
@@ -77,8 +74,13 @@ public class AppCacheProvider implements IProvider {
     }
 
     @Override
-    public boolean loadLast() {
-        return false;
+    public void setDirty() {
+        // do nothing, we already have the full list of items
+    }
+
+    @Override
+    public int getLoadStep() {
+        return LOAD_STEP_1;
     }
 
     @Override

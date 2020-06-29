@@ -36,7 +36,7 @@ public class AppProvider extends Provider<AppEntry> {
         @Override
         public void onReceive(Context context, Intent intent) {
             if (Objects.equals(intent.getAction(), Intent.ACTION_MANAGED_PROFILE_ADDED)) {
-                AppProvider.this.reload();
+                AppProvider.this.reload(true);
             } else if (Objects.equals(intent.getAction(), Intent.ACTION_MANAGED_PROFILE_REMOVED)) {
                 android.os.UserHandle profile = intent.getParcelableExtra(Intent.EXTRA_USER);
 
@@ -47,7 +47,7 @@ public class AppProvider extends Provider<AppEntry> {
                 DataHandler dataHandler = TBApplication.getApplication(context).getDataHandler();
                 dataHandler.removeFromExcluded(user);
                 dataHandler.removeFromFavorites(user);
-                AppProvider.this.reload();
+                AppProvider.this.reload(true);
             }
         }
     };
@@ -168,10 +168,10 @@ public class AppProvider extends Provider<AppEntry> {
     }
 
 
-    @Override
-    public void reload() {
-        super.reload();
-        this.initialize(new LoadAppEntry(this));
+    public void reload(boolean cancelCurrentLoadTask) {
+        super.reload(cancelCurrentLoadTask);
+        if (!isLoaded() && !isLoading())
+            this.initialize(new LoadAppEntry(this));
     }
 
     /**
@@ -194,8 +194,7 @@ public class AppProvider extends Provider<AppEntry> {
     }
 
     @WorkerThread
-    static void checkAppResults(Iterable<AppEntry> pojos, FuzzyScore fuzzyScore, Searcher searcher)
-    {
+    static void checkAppResults(Iterable<AppEntry> pojos, FuzzyScore fuzzyScore, Searcher searcher) {
         FuzzyScore.MatchInfo matchInfo;
         boolean match;
 

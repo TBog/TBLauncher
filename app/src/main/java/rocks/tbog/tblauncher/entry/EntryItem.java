@@ -9,8 +9,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 import androidx.preference.PreferenceManager;
 
+import java.util.ArrayList;
+
 import rocks.tbog.tblauncher.BuildConfig;
 import rocks.tbog.tblauncher.R;
+import rocks.tbog.tblauncher.TBApplication;
+import rocks.tbog.tblauncher.db.FavRecord;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.result.ResultAdapter;
 import rocks.tbog.tblauncher.result.ResultHelper;
@@ -174,9 +178,17 @@ public abstract class EntryItem {
 
         // If app already pinned, do not display the "add to favorite" option
         // otherwise don't show the "remove favorite button"
-        String favApps = PreferenceManager.getDefaultSharedPreferences(context).
-                getString("favorite-apps-list", "");
-        if (favApps.contains(id + ";")) {
+        boolean foundInFavorites = false;
+        ArrayList<FavRecord> favRecords = TBApplication.dataHandler(context).getFavorites();
+        for (FavRecord fav : favRecords)
+        {
+            if (id.equals(fav.record))
+            {
+                foundInFavorites = true;
+                break;
+            }
+        }
+        if (foundInFavorites) {
             for (int i = 0; i < adapter.getCount(); i += 1) {
                 LinearAdapter.MenuItem item = adapter.getItem(i);
                 if (item instanceof LinearAdapter.Item) {

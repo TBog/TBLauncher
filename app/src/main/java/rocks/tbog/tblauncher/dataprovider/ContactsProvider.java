@@ -20,14 +20,14 @@ public class ContactsProvider extends Provider<ContactEntry> {
         public void onChange(boolean selfChange) {
             //reload contacts
             Log.i(TAG, "Contacts changed, reloading provider.");
-            reload();
+            reload(true);
         }
     };
 
-    @Override
-    public void reload() {
-        super.reload();
-        this.initialize(new LoadContactsEntry(this));
+    public void reload(boolean cancelCurrentLoadTask) {
+        super.reload(cancelCurrentLoadTask);
+        if (!isLoaded() && !isLoading())
+            this.initialize(new LoadContactsEntry(this));
     }
 
     @Override
@@ -41,7 +41,7 @@ public class ContactsProvider extends Provider<ContactEntry> {
                 @Override
                 public void onGranted() {
                     // Great! Reload the contact provider. We're done :)
-                    reload();
+                    reload(true);
                 }
                 //TODO: try to remove contacts provider onDenied
             });

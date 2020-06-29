@@ -152,6 +152,7 @@ public class QuickListDialog extends PreferenceDialogFragmentCompat {
                 }
             });
         }
+        mQuickListContainer.requestLayout();
     }
 
     static class LoadDataForAdapter extends AsyncTask<Void, Void, ArrayList<EntryItem>> {

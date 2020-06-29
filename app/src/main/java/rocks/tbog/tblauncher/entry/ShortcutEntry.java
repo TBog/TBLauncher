@@ -16,6 +16,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -38,6 +39,7 @@ import rocks.tbog.tblauncher.result.ResultAdapter;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
+import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 
@@ -111,7 +113,7 @@ public final class ShortcutEntry extends EntryWithTags {
 //        return Utilities.checkFlag(drawFlags, FLAG_DRAW_LIST) ? R.layout.item_shortcut :
 //                (Utilities.checkFlag(drawFlags, FLAG_DRAW_GRID) ? R.layout.item_grid_shortcut :
 //                        R.layout.item_quick_list);
-        return Utilities.checkFlag(drawFlags, FLAG_DRAW_GRID) ? R.layout.item_grid_shortcut : R.layout.item_shortcut;
+        return Utilities.checkFlag(drawFlags, FLAG_DRAW_LIST) ? R.layout.item_shortcut : R.layout.item_grid_shortcut;
     }
 
     @Override
@@ -130,13 +132,17 @@ public final class ShortcutEntry extends EntryWithTags {
         else
             nameView.setVisibility(View.GONE);
 
-        ImageView appIcon = view.findViewById(android.R.id.icon);
+        ImageView icon1 = view.findViewById(android.R.id.icon1);
+        ImageView icon2 = view.findViewById(android.R.id.icon2);
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
-            appIcon.setVisibility(View.VISIBLE);
-            ResultViewHelper.setIconAsync(this, appIcon, AsyncSetEntryIcon.class);
+            icon1.setVisibility(View.VISIBLE);
+            icon2.setVisibility(View.VISIBLE);
+            ResultViewHelper.setIconAsync(this, icon1, AsyncSetEntryIcon.class);
         } else {
-            appIcon.setImageDrawable(null);
-            appIcon.setVisibility(View.GONE);
+            icon1.setImageDrawable(null);
+            icon2.setImageDrawable(null);
+            icon1.setVisibility(View.GONE);
+            icon2.setVisibility(View.GONE);
         }
     }
 
@@ -184,7 +190,7 @@ public final class ShortcutEntry extends EntryWithTags {
                 appDrawable = packageManager.getApplicationIcon(packageName);
             }
         } catch (PackageManager.NameNotFoundException | URISyntaxException e) {
-            Log.e("Shortcut", "get shortcut icon", e);
+            Log.e("Shortcut", "get app shortcut icon", e);
         }
 
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
@@ -265,7 +271,10 @@ public final class ShortcutEntry extends EntryWithTags {
 
     @Override
     ListPopup buildPopupMenu(Context context, LinearAdapter adapter, ResultAdapter parent, View parentView) {
+        adapter.add(new LinearAdapter.ItemTitle(context, R.string.popup_title_hist_fav));
         adapter.add(new LinearAdapter.Item(context, R.string.menu_remove_shortcut));
+        adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_add));
+        adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_remove));
         adapter.add(new LinearAdapter.ItemTitle(context, R.string.popup_title_customize));
         if (getTags().isEmpty())
             adapter.add(new LinearAdapter.Item(context, R.string.menu_tags_add));
@@ -331,6 +340,8 @@ public final class ShortcutEntry extends EntryWithTags {
     }
 
     public static class AsyncSetEntryIcon extends ResultViewHelper.AsyncSetEntryDrawable {
+        Drawable appDrawable = null;
+
         public AsyncSetEntryIcon(ImageView image) {
             super(image);
         }
@@ -338,10 +349,51 @@ public final class ShortcutEntry extends EntryWithTags {
         @Override
         public Drawable getDrawable(EntryItem entry, Context context) {
             ShortcutEntry shortcutEntry = (ShortcutEntry) entry;
+            // If no icon found for this shortcut, use app icon
+            final PackageManager packageManager = context.getPackageManager();
+            try {
+                List<ResolveInfo> packages = null;
+                if (!shortcutEntry.isOreoShortcut()) {
+                    Intent intent = Intent.parseUri(shortcutEntry.shortcutData, 0);
+                    packages = packageManager.queryIntentActivities(intent, 0);
+                }
+                if (packages != null && !packages.isEmpty()) {
+                    ResolveInfo mainPackage = packages.get(0);
+                    String packageName = mainPackage.activityInfo.applicationInfo.packageName;
+                    String activityName = mainPackage.activityInfo.name;
+                    UserHandleCompat user = new UserHandleCompat();
+                    ComponentName className = new ComponentName(packageName, activityName);
+                    String appId = AppEntry.SCHEME + user.getUserComponentName(className);
+                    appDrawable = TBApplication.drawableCache(context).getCachedDrawable(appId);
+                    if (appDrawable == null) {
+                        appDrawable = context.getPackageManager().getActivityIcon(className);
+                    }
+                } else {
+                    // Can't make sense of the intent URI (Oreo shortcut, or a shortcut from an activity that was removed from an installed app)
+                    // Retrieve app icon
+                    appDrawable = packageManager.getApplicationIcon(shortcutEntry.packageName);
+                }
+            } catch (PackageManager.NameNotFoundException | URISyntaxException e) {
+                Log.e("Shortcut", "get app shortcut icon", e);
+            }
             Bitmap icon = shortcutEntry.getIcon(context);
-            if (icon == null)
-                return null;
-            return new BitmapDrawable(context.getResources(), icon);
+            return icon != null ? new BitmapDrawable(context.getResources(), icon) : null;
+        }
+
+        @Override
+        protected void onPostExecute(Drawable drawable) {
+            // get ImageView before calling super
+            ImageView icon1 = getImageView();
+            super.onPostExecute(drawable);
+            if (icon1 != null && icon1.getParent() instanceof View) {
+                ImageView icon2 = ((View) icon1.getParent()).findViewById(android.R.id.icon2);
+                if (drawable != null) {
+                    icon2.setImageDrawable(appDrawable);
+                } else {
+                    icon1.setImageDrawable(appDrawable);
+                    icon2.setImageResource(R.drawable.ic_send);
+                }
+            }
         }
     }
 

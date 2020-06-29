@@ -312,6 +312,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 case "quick-list-icons-visible":
                     TBApplication.quickList(activity).onFavoritesChanged();
                 break;
+                case "cache-drawable":
+                    TBApplication.drawableCache(activity).setEnabled(sharedPreferences.getBoolean("cache-drawable", true));
+                    break;
             }
         }
     }
