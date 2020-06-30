@@ -40,6 +40,7 @@ import rocks.tbog.tblauncher.icons.SystemIconPack;
 import rocks.tbog.tblauncher.utils.DrawableUtils;
 import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
+import rocks.tbog.tblauncher.utils.Utilities;
 
 /**
  * Inspired from http://stackoverflow.com/questions/31490630/how-to-load-icon-from-icon-pack
@@ -52,6 +53,7 @@ public class IconsHandler {
     private final HashMap<String, String> mIconPackNames = new HashMap<>();
     private final Context ctx;
 
+    private int mAdaptiveShape = DrawableUtils.SHAPE_SYSTEM;
     private IconPackXML mIconPack = null;
     private SystemIconPack mSystemPack = new SystemIconPack();
 
@@ -67,11 +69,10 @@ public class IconsHandler {
      * Load configured icons pack
      */
     private void loadIconsPack() {
-
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+
         loadIconsPack(prefs.getString("icons-pack", "default"));
-        String shape = prefs.getString("adaptive-shape", String.valueOf(DrawableUtils.SHAPE_SYSTEM));
-        mSystemPack.setShape(Integer.parseInt(shape));
+        setAdaptiveShape(prefs.getString("adaptive-shape", null));
     }
 
     /**
@@ -94,6 +95,9 @@ public class IconsHandler {
         mIconPack.load(ctx.getPackageManager());
     }
 
+    public int getAdaptiveShape() {
+        return mAdaptiveShape;
+    }
 
     void setAdaptiveShape(@Nullable String shapePref) {
         int shape;
@@ -102,7 +106,7 @@ public class IconsHandler {
         } catch (Exception ignored) {
             shape = DrawableUtils.SHAPE_SYSTEM;
         }
-        mSystemPack.setShape(shape);
+        mAdaptiveShape = shape;
     }
 
     /**
@@ -293,30 +297,29 @@ public class IconsHandler {
     }
 
     public Drawable getCustomIcon(String componentName, long customIcon) {
-        File file = customIconFileName(componentName, customIcon);
-        try {
-            FileInputStream fis = new FileInputStream(file);
-            BitmapDrawable drawable =
-                    new BitmapDrawable(this.ctx.getResources(), BitmapFactory.decodeStream(fis));
-            fis.close();
-            return drawable;
-        } catch (Exception e) {
-            Log.e(TAG, "Unable to get custom icon " + file, e);
-        }
+        Bitmap bitmap = TBApplication.dataHandler(ctx).getCustomAppIcon(componentName);
+        if (bitmap != null)
+            return new BitmapDrawable(ctx.getResources(), bitmap);
 
+        Log.e(TAG, "Unable to get custom icon for " + componentName);
         return null;
     }
 
     public void changeAppIcon(AppEntry appEntry, Drawable drawable) {
-        AppRecord appRecord = TBApplication.getApplication(ctx).getDataHandler().setCustomAppIcon(appEntry.getUserComponentName());
+        Bitmap bitmap = Utilities.drawableToBitmap(drawable);
+        TBApplication app = TBApplication.getApplication(ctx);
+        AppRecord appRecord = app.getDataHandler().setCustomAppIcon(appEntry.getUserComponentName(), bitmap);
         //storeDrawable(customIconFileName(appRecord.componentName, appRecord.dbId), drawable);
         appEntry.setCustomIcon(appRecord.dbId);
+        app.getDrawableCache().cacheDrawable(appEntry.id, drawable);
     }
 
     public void restoreAppIcon(AppEntry appEntry) {
-        AppRecord appRecord = TBApplication.getApplication(ctx).getDataHandler().removeCustomAppIcon(appEntry.getUserComponentName());
+        TBApplication app = TBApplication.getApplication(ctx);
+        AppRecord appRecord = app.getDataHandler().removeCustomAppIcon(appEntry.getUserComponentName());
         removeStoredDrawable(customIconFileName(appRecord.componentName, appRecord.dbId));
         appEntry.clearCustomIcon();
+        app.getDrawableCache().cacheDrawable(appEntry.id, null);
     }
 
     public Drawable applyContactMask(@NonNull Context ctx, @NonNull Drawable drawable) {

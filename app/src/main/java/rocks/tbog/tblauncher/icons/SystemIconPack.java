@@ -21,11 +21,6 @@ import rocks.tbog.tblauncher.utils.UserHandleCompat;
 public class SystemIconPack implements IconPack<Void> {
 
     private static final String TAG = SystemIconPack.class.getSimpleName();
-    private int mShape = DrawableUtils.SHAPE_SYSTEM;
-
-    public void setShape(int shape) {
-        mShape = shape;
-    }
 
     @NonNull
     @Override
@@ -75,7 +70,7 @@ public class SystemIconPack implements IconPack<Void> {
     @Override
     public Drawable applyBackgroundAndMask(@NonNull Context ctx, @NonNull Drawable icon, boolean fitInside) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            icon = DrawableUtils.applyIconMaskShape(ctx, icon, mShape, fitInside);
+            icon = DrawableUtils.applyIconMaskShape(ctx, icon, fitInside);
         }
         return icon;
     }

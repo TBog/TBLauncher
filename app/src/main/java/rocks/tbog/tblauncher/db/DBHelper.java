@@ -28,7 +28,8 @@ import rocks.tbog.tblauncher.entry.ShortcutEntry;
 public class DBHelper {
     private static final String TAG = DBHelper.class.getSimpleName();
     private static SQLiteDatabase database = null;
-    private static final String[] TABLE_COLUMNS_APPS = new String[]{"_id", "display_name", "component_name", "custom_flags"};
+    private static final String[] TABLE_COLUMNS_APPS = new String[]{"_id", "display_name", "component_name", "custom_flags"};//, "custom_icon"};
+    private static final String[] TABLE_APPS_CUSTOM_ICON = new String[]{"custom_icon"};
     private static final String[] TABLE_COLUMNS_FAVORITES = new String[]{"record", "position", "custom_flags"};
 
     private DBHelper() {
@@ -553,13 +554,14 @@ public class DBHelper {
         return null;
     }
 
-    public static AppRecord setCustomAppIcon(Context context, String componentName) {
+    public static AppRecord setCustomAppIcon(Context context, String componentName, byte[] icon) {
         SQLiteDatabase db = getDatabase(context);
-        String sql = "UPDATE apps SET custom_flags=custom_flags|? WHERE component_name=?";
+        String sql = "UPDATE apps SET custom_flags=custom_flags|?, custom_icon=? WHERE component_name=?";
         try {
             SQLiteStatement statement = db.compileStatement(sql);
             statement.bindLong(1, AppRecord.FLAG_CUSTOM_ICON);
-            statement.bindString(2, componentName);
+            statement.bindBlob(2, icon);
+            statement.bindString(3, componentName);
             int count = statement.executeUpdateDelete();
             if (count != 1) {
                 Log.e(TAG, "Update icon; count = " + count);
@@ -574,7 +576,7 @@ public class DBHelper {
 
     public static AppRecord removeCustomAppIcon(Context context, String componentName) {
         SQLiteDatabase db = getDatabase(context);
-        String sql = "UPDATE apps SET custom_flags=custom_flags&~? WHERE component_name=?";
+        String sql = "UPDATE apps SET custom_flags=custom_flags&~?, custom_icon=NULL WHERE component_name=?";
         try {
             SQLiteStatement statement = db.compileStatement(sql);
             statement.bindLong(1, AppRecord.FLAG_CUSTOM_ICON);
@@ -589,6 +591,18 @@ public class DBHelper {
         }
 
         return getAppRecord(db, componentName);
+    }
+
+    public static byte[] getCustomAppIcon(Context context, String componentName) {
+        SQLiteDatabase db = getDatabase(context);
+        String[] selArgs = new String[]{componentName};
+        try (Cursor cursor = db.query("apps", TABLE_APPS_CUSTOM_ICON,
+                "component_name=?", selArgs, null, null, null)) {
+            if (cursor.moveToNext()) {
+                return cursor.getBlob(0);
+            }
+        }
+        return null;
     }
 
     public static void setFavorite(Context context, FavRecord fav) {

@@ -9,6 +9,8 @@ import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
 import android.content.pm.ShortcutInfo;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -19,6 +21,8 @@ import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import androidx.preference.PreferenceManager;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -868,8 +872,30 @@ public class DataHandler extends BroadcastReceiver
         DBHelper.removeCustomAppName(context, componentName, defaultName);
     }
 
-    public AppRecord setCustomAppIcon(String componentName) {
-        return DBHelper.setCustomAppIcon(context, componentName);
+    public AppRecord setCustomAppIcon(String componentName, Bitmap bitmap) {
+        ByteArrayOutputStream stream = null;
+        try {
+            stream = new ByteArrayOutputStream(1024);
+            if (!bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream))
+                stream = null;
+            else {
+                stream.flush();
+                stream.close();
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Unable to convert bitmap", e);
+        }
+        if (stream == null)
+            return null;
+        return DBHelper.setCustomAppIcon(context, componentName, stream.toByteArray());
+    }
+
+    public Bitmap getCustomAppIcon(String componentName)
+    {
+        byte[] bytes = DBHelper.getCustomAppIcon(context, componentName);
+        if (bytes == null)
+            return null;
+        return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
     }
 
     public AppRecord removeCustomAppIcon(String componentName) {
@@ -880,8 +906,7 @@ public class DataHandler extends BroadcastReceiver
         DBHelper.renameShortcut(context, shortcutEntry, newName);
     }
 
-    public void onProviderRecreated( Provider<? extends EntryItem> provider )
-    {
+    public void onProviderRecreated(Provider<? extends EntryItem> provider) {
         mFullLoadOverSent = false;
 
         IntentFilter intentFilter = new IntentFilter(TBLauncherActivity.LOAD_OVER);

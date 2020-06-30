@@ -8,7 +8,20 @@
     android:clipToPadding="true"
     android:orientation="vertical"
     android:paddingHorizontal="@dimen/result_margin_horizontal"
-    android:paddingVertical="@dimen/result_margin_vertical">
+    android:paddingVertical="@dimen/result_margin_vertical"
+    tools:theme="@style/AppThemeTransparent">
+
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        tools:layout_height="100dp">
+
+        <LinearLayout
+            android:id="@+id/iconPackList"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal" />
+    </HorizontalScrollView>
 
     <GridView
         android:id="@+id/iconGrid"
@@ -83,15 +96,15 @@
 
         <TextView
             android:layout_width="0dp"
-            android:layout_weight="1"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/icon_margin_left"
             android:layout_marginTop="@dimen/icon_margin_top"
             android:layout_marginEnd="@dimen/icon_margin_right"
             android:layout_marginBottom="@dimen/icon_margin_bottom"
-            android:textAlignment="textEnd"
+            android:layout_weight="1"
             android:gravity="center_vertical|end"
-            android:text="@string/custom_icon_preview" />
+            android:text="@string/custom_icon_preview"
+            android:textAlignment="textEnd" />
 
         <ImageView
             android:id="@+id/preview"
@@ -101,8 +114,8 @@
             android:layout_marginTop="@dimen/icon_margin_top"
             android:layout_marginEnd="@dimen/icon_margin_right"
             android:layout_marginBottom="@dimen/icon_margin_bottom"
-            android:src="@drawable/ic_android"
-            android:contentDescription="@string/cd_icon_preview" />
+            android:contentDescription="@string/cd_icon_preview"
+            android:src="@drawable/ic_android" />
 
         <Button
             android:id="@android:id/button1"

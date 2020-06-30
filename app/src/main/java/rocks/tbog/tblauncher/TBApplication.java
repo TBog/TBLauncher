@@ -76,10 +76,12 @@ public class TBApplication extends Application {
         return getApplication(context).mQuickList;
     }
 
+    @NonNull
     public static DrawableCache drawableCache(Context context) {
         return getApplication(context).mDrawableCache;
     }
 
+    @NonNull
     public static TagsHandler tagsHandler(Context context) {
         TBApplication app = getApplication(context);
         if (app.tagsHandler == null)
@@ -87,6 +89,7 @@ public class TBApplication extends Application {
         return app.tagsHandler;
     }
 
+    @NonNull
     public static DataHandler dataHandler(Context context) {
         return getApplication(context).getDataHandler();
     }
@@ -123,6 +126,11 @@ public class TBApplication extends Application {
             dataHandler = new DataHandler(this);
         }
         return dataHandler;
+    }
+
+    @NonNull
+    public DrawableCache getDrawableCache() {
+        return mDrawableCache;
     }
 
     public void initDataHandler() {

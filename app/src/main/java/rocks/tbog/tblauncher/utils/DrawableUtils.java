@@ -20,6 +20,7 @@ import androidx.annotation.RequiresApi;
 import androidx.preference.PreferenceManager;
 
 import rocks.tbog.tblauncher.R;
+import rocks.tbog.tblauncher.TBApplication;
 
 public class DrawableUtils {
 
@@ -67,9 +68,7 @@ public class DrawableUtils {
      */
     @RequiresApi(api = Build.VERSION_CODES.O)
     public static Drawable applyIconMaskShape(Context ctx, Drawable icon, boolean fitInside) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
-        String shapePref = prefs.getString("adaptive-shape", String.valueOf(SHAPE_SYSTEM));
-        int shape = Integer.parseInt(shapePref);
+        int shape = TBApplication.iconsHandler(ctx).getAdaptiveShape();
         return applyIconMaskShape(ctx, icon, shape, fitInside);
     }
 

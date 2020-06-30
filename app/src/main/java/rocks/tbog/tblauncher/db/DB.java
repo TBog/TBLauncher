@@ -11,7 +11,7 @@ import rocks.tbog.tblauncher.entry.FilterEntry;
 class DB extends SQLiteOpenHelper {
 
     private final static String DB_NAME = "kiss.s3db";
-    private final static int DB_VERSION = 8;
+    private final static int DB_VERSION = 9;
 
     DB(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -38,7 +38,7 @@ class DB extends SQLiteOpenHelper {
     }
 
     private void addAppsTable(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE \"apps\" ( _id INTEGER PRIMARY KEY AUTOINCREMENT, display_name TEXT NOT NULL DEFAULT '', component_name TEXT NOT NULL UNIQUE, custom_flags INTEGER DEFAULT 0 )");
+        db.execSQL("CREATE TABLE \"apps\" ( _id INTEGER PRIMARY KEY AUTOINCREMENT, display_name TEXT NOT NULL DEFAULT '', component_name TEXT NOT NULL UNIQUE, custom_flags INTEGER DEFAULT 0, custom_icon BLOB DEFAULT NULL )");
         db.execSQL("CREATE INDEX \"index_component\" ON \"apps\"(component_name);");
     }
 
@@ -101,6 +101,7 @@ class DB extends SQLiteOpenHelper {
                     createFavoritesTable(database);
                     // fall through
                 case 8:
+                    database.execSQL("ALTER TABLE \"apps\" ADD COLUMN \"custom_icon\" BLOB DEFAULT NULL");
                     // fall through
                 default:
                     break;

@@ -21,6 +21,7 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -33,6 +34,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 
 import rocks.tbog.tblauncher.icons.IconPack;
 import rocks.tbog.tblauncher.icons.IconPackXML;
@@ -49,6 +51,8 @@ public class CustomIconDialog extends DialogFragment<Drawable> {
     private GridView mIconGrid;
     private TextView mSearch;
     private ImageView mPreview;
+    private LinearLayout mIconPackList;
+    private IconPackXML mShownIconPack;
 
     @Override
     protected int layoutRes() {
@@ -65,6 +69,9 @@ public class CustomIconDialog extends DialogFragment<Drawable> {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             view.setClipToOutline(true);
         }
+
+        mIconPackList = view.findViewById(R.id.iconPackList);
+        populateIconPackList();
 
         mIconGrid = view.findViewById(R.id.iconGrid);
         IconAdapter iconAdapter = new IconAdapter(mIconData);
@@ -131,6 +138,44 @@ public class CustomIconDialog extends DialogFragment<Drawable> {
 
         //TODO: move this in an async task
         setQuickList(iconsHandler, view, cn, userHandle);
+    }
+
+    private void populateIconPackList() {
+        mIconPackList.removeAllViews();
+
+        LayoutInflater inflater = LayoutInflater.from(getContext());
+        Map<String, String> iconPacks = TBApplication.iconsHandler(getContext()).getIconPackNames();
+        for (Map.Entry<String, String> packInfo : iconPacks.entrySet()) {
+            String packageName = packInfo.getKey();
+            String packName = packInfo.getValue();
+            View packView = inflater.inflate(R.layout.item_quick_list, mIconPackList, false);
+            mIconPackList.addView(packView);
+
+            ImageView icon = packView.findViewById(android.R.id.icon);
+            TextView name = packView.findViewById(android.R.id.text1);
+
+            name.setText(packName);
+
+            Utilities.setIconAsync(icon, (ctx) -> {
+                Drawable drawable = null;
+                try {
+                    drawable = ctx.getPackageManager().getApplicationIcon(packageName);
+                } catch (PackageManager.NameNotFoundException ignored) {
+                }
+                return drawable;
+            });
+
+            packView.setTag(packageName);
+            packView.setOnClickListener((v) -> {
+                String tag = v.getTag().toString();
+                setShownIconPack(tag);
+            });
+        }
+
+        if (mIconPackList.getChildCount() == 0)
+            mIconPackList.setVisibility(View.GONE);
+        else
+            mIconPackList.requestLayout();
     }
 
     private void setQuickList(IconsHandler iconsHandler, View view, ComponentName cn, UserHandleCompat userHandle) {
@@ -252,29 +297,40 @@ public class CustomIconDialog extends DialogFragment<Drawable> {
         parent.addView(layout);
     }
 
+    private void setShownIconPack(String packageName)
+    {
+        IconPackXML pack = new IconPackXML(packageName);
+        pack.loadDrawables(getContext().getPackageManager());
+
+        mShownIconPack = pack;
+        refreshList();
+    }
+
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        refreshList();
+        IconsHandler iconsHandler = TBApplication.getApplication(getActivity()).getIconsHandler();
+        IconPack iconPack = iconsHandler.getCustomIconPack();
+        setShownIconPack(iconPack.getPackPackageName());
     }
 
     private void refreshList() {
         mIconData.clear();
-        IconsHandler iconsHandler = TBApplication.getApplication(getActivity()).getIconsHandler();
-        IconPack iconPack = iconsHandler.getCustomIconPack();
-        if (iconPack instanceof IconPackXML) {
-            Collection<IconPackXML.DrawableInfo> drawables = ((IconPackXML) iconPack).getDrawableList();
+        IconPackXML iconPack = mShownIconPack;
+        if (iconPack != null) {
+            Collection<IconPackXML.DrawableInfo> drawables = iconPack.getDrawableList();
             if (drawables != null) {
                 StringNormalizer.Result normalized = StringNormalizer.normalizeWithResult(mSearch.getText(), true);
                 FuzzyScore fuzzyScore = new FuzzyScore(normalized.codePoints);
                 for (IconPackXML.DrawableInfo info : drawables) {
                     if (fuzzyScore.match(info.getDrawableName()).match)
-                        mIconData.add(new IconData((IconPackXML) iconPack, info));
+                        mIconData.add(new IconData(iconPack, info));
                 }
             }
         }
-        mSearch.setVisibility(mIconData.isEmpty() ? View.GONE : View.VISIBLE);
-        mIconGrid.setVisibility(mIconData.isEmpty() ? View.GONE : View.VISIBLE);
+        boolean showGridAndSearch = !mIconData.isEmpty() || (mSearch.length() > 0);
+        mSearch.setVisibility(showGridAndSearch ? View.VISIBLE : View.GONE);
+        mIconGrid.setVisibility(showGridAndSearch ? View.VISIBLE : View.GONE);
         ((BaseAdapter) mIconGrid.getAdapter()).notifyDataSetChanged();
     }
 
