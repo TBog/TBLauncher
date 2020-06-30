@@ -97,6 +97,7 @@ public class CustomIconDialog extends DialogFragment<Drawable> {
                 mSearch.post(() -> refreshList());
             }
         });
+        mSearch.requestFocus();
 
         Bundle args = getArguments() != null ? getArguments() : new Bundle();
         String name = args.getString("componentName", "");
@@ -213,7 +214,6 @@ public class CustomIconDialog extends DialogFragment<Drawable> {
         }
 
         IconPack iconPack = mShownIconPack != null ? mShownIconPack : iconsHandler.getCustomIconPack();
-        //IIconPack systemIconPack = iconsHandler.getSystemIconPack();
 
         // add getActivityIcon(componentName)
         {
