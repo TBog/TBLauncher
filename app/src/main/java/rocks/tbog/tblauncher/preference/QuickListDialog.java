@@ -93,6 +93,10 @@ public class QuickListDialog extends PreferenceDialogFragmentCompat {
             mFilterGrid.setBackground(drawable);
         }
 
+        {
+            TBApplication.ui(getContext()).setResultListPref(mFavoritesGrid);
+        }
+
         // filters
         {
             ArrayList<EntryItem> list = new ArrayList<>();
@@ -137,7 +141,7 @@ public class QuickListDialog extends PreferenceDialogFragmentCompat {
         Context context = mQuickListContainer.getContext();
 
         mQuickListContainer.removeAllViews();
-        int drawFlags = QuickList.getDrawFlags(mPref);
+        int drawFlags = QuickList.getDrawFlags(mPref) | EntryItem.FLAG_DRAW_NO_CACHE;
         for (EntryItem entry : mQuickList) {
             View view = LayoutInflater.from(context).inflate(entry.getResultLayout(drawFlags), mQuickListContainer, false);
             entry.displayResult(view, drawFlags);
@@ -248,9 +252,7 @@ public class QuickListDialog extends PreferenceDialogFragmentCompat {
             } else {
                 view = convertView;
             }
-//            EntryAdapter.ViewHolder holder = view.getTag() instanceof EntryAdapter.ViewHolder ? (EntryAdapter.ViewHolder) view.getTag() : new EntryAdapter.ViewHolder(view);
 
-            //holder.setContent(content);
             content.displayResult(view, drawFlags);
 
             view.setOnClickListener(v -> {

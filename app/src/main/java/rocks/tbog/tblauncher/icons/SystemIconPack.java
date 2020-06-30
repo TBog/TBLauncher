@@ -13,6 +13,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 import rocks.tbog.tblauncher.utils.DrawableUtils;
@@ -75,10 +76,10 @@ public class SystemIconPack implements IconPack<Void> {
         return icon;
     }
 
-    @Nullable
+    @NonNull
     @Override
     public Collection<Void> getDrawableList() {
-        return null;
+        return Collections.emptyList();
     }
 
     @Nullable

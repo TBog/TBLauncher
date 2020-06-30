@@ -54,6 +54,11 @@ public abstract class EntryItem {
      */
     public static final int FLAG_DRAW_TAGS = 32; // 1 << 5
 
+    /**
+     * do not use cache, generate new drawable
+     */
+    public static final int FLAG_DRAW_NO_CACHE = 64; // 1 << 6
+
 
     // Globally unique ID.
     // Usually starts with provider scheme, e.g. "app://" or "contact://" to

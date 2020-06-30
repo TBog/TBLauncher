@@ -122,7 +122,7 @@ public final class ContactEntry extends EntryItem {
         ImageView contactIcon = view.findViewById(android.R.id.icon);
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
             contactIcon.setVisibility(View.VISIBLE);
-            ResultViewHelper.setIconAsync(this, contactIcon, AsyncSetEntryIcon.class);
+            ResultViewHelper.setIconAsync(drawFlags, this, contactIcon, AsyncSetEntryIcon.class);
         } else {
             contactIcon.setImageDrawable(null);
             contactIcon.setVisibility(View.GONE);
@@ -152,7 +152,7 @@ public final class ContactEntry extends EntryItem {
 
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
             contactIcon.setVisibility(View.VISIBLE);
-            ResultViewHelper.setIconAsync(this, contactIcon, AsyncSetEntryIcon.class);
+            ResultViewHelper.setIconAsync(drawFlags, this, contactIcon, AsyncSetEntryIcon.class);
         } else {
             contactIcon.setImageDrawable(null);
             contactIcon.setVisibility(View.GONE);
@@ -217,8 +217,8 @@ public final class ContactEntry extends EntryItem {
     }
 
     public static class AsyncSetEntryIcon extends ResultViewHelper.AsyncSetEntryDrawable {
-        public AsyncSetEntryIcon(ImageView image) {
-            super(image);
+        public AsyncSetEntryIcon(@NonNull ImageView image, int drawFlags) {
+            super(image, drawFlags);
         }
 
         protected Drawable getDrawable(EntryItem entry, Context ctx) {

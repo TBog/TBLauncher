@@ -28,7 +28,7 @@ public interface IconPack<DrawableInfo> {
     @NonNull
     Drawable applyBackgroundAndMask(@NonNull Context ctx, @NonNull Drawable defaultBitmap, boolean fitInside);
 
-    @Nullable
+    @NonNull
     Collection<DrawableInfo> getDrawableList();
 
     @Nullable

@@ -26,7 +26,7 @@ public class DrawableUtils {
 
     public static final int SHAPE_SYSTEM = 0;
     private static final int SHAPE_CIRCLE = 1;
-    private static final int SHAPE_SQUARE = 2;
+    public static final int SHAPE_SQUARE = 2;
     private static final int SHAPE_SQUIRCLE = 3;
     private static final int SHAPE_ROUND_RECT = 4;
     private static final int SHAPE_TEARDROP_BR = 5;

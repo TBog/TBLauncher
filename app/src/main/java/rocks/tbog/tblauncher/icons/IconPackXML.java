@@ -103,6 +103,7 @@ public class IconPackXML implements IconPack<IconPackXML.DrawableInfo> {
         return maskImage != null;
     }
 
+    @NonNull
     @Override
     public Collection<DrawableInfo> getDrawableList() {
         return Collections.unmodifiableCollection(drawableList);
@@ -157,7 +158,7 @@ public class IconPackXML implements IconPack<IconPackXML.DrawableInfo> {
     public Drawable applyBackgroundAndMask(@NonNull Context ctx, @NonNull Drawable systemIcon, boolean fitInside) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             if (systemIcon instanceof AdaptiveIconDrawable)
-                return DrawableUtils.applyIconMaskShape(ctx, systemIcon, fitInside);
+                systemIcon = DrawableUtils.applyIconMaskShape(ctx, systemIcon, DrawableUtils.SHAPE_SQUARE, fitInside);
         }
 
         if (systemIcon instanceof BitmapDrawable) {

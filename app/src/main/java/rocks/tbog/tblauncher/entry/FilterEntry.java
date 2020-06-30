@@ -57,7 +57,7 @@ public class FilterEntry extends EntryItem {
         ImageView appIcon = view.findViewById(android.R.id.icon);
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
             appIcon.setVisibility(View.VISIBLE);
-            ResultViewHelper.setIconAsync(this, appIcon, AsyncSetEntryIcon.class);
+            ResultViewHelper.setIconAsync(drawFlags, this, appIcon, AsyncSetEntryIcon.class);
         } else {
             appIcon.setImageDrawable(null);
             appIcon.setVisibility(View.GONE);
@@ -74,8 +74,8 @@ public class FilterEntry extends EntryItem {
     }
 
     public static class AsyncSetEntryIcon extends ResultViewHelper.AsyncSetEntryDrawable {
-        public AsyncSetEntryIcon(ImageView image) {
-            super(image);
+        public AsyncSetEntryIcon(@NonNull ImageView image, int drawFlags) {
+            super(image, drawFlags);
         }
 
         @Override

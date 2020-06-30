@@ -1,18 +1,14 @@
 package rocks.tbog.tblauncher.result;
 
 import android.content.Context;
-import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
-import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
-import android.text.style.StyleSpan;
 import android.util.Log;
 import android.util.Pair;
-import android.util.Printer;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -32,6 +28,7 @@ import rocks.tbog.tblauncher.entry.EntryWithTags;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
 import rocks.tbog.tblauncher.utils.UIColors;
+import rocks.tbog.tblauncher.utils.Utilities;
 
 public final class ResultViewHelper {
 
@@ -60,11 +57,11 @@ public final class ResultViewHelper {
     /**
      * Highlight text
      *
-     * @param relevance  the mapping and code points of the matched text
-     * @param normText   the mapping and code points of the provided text
-     * @param text       provided visible text that may need highlighting
-     * @param matchInfo  matched sequences
-     * @param view       TextView that gets the text
+     * @param relevance the mapping and code points of the matched text
+     * @param normText  the mapping and code points of the provided text
+     * @param text      provided visible text that may need highlighting
+     * @param matchInfo matched sequences
+     * @param view      TextView that gets the text
      * @return if the text got any matches
      */
     public static boolean displayHighlighted(@Nullable StringNormalizer.Result relevance, StringNormalizer.Result normText,
@@ -110,17 +107,19 @@ public final class ResultViewHelper {
         return matchFound;
     }
 
-    public static void setIconAsync(@NonNull EntryItem entry, @NonNull ImageView appIcon, @NonNull Class<? extends AsyncSetEntryDrawable> asyncSetEntryIconClass) {
-        Drawable cache = TBApplication.drawableCache(appIcon.getContext()).getCachedDrawable(entry.id);
-        if (cache != null) {
-            appIcon.setImageDrawable(cache);
-            return;
+    public static void setIconAsync(int drawFlags, @NonNull EntryItem entry, @NonNull ImageView appIcon, @NonNull Class<? extends AsyncSetEntryDrawable> asyncSetEntryIconClass) {
+        if (!Utilities.checkFlag(drawFlags, EntryItem.FLAG_DRAW_NO_CACHE)) {
+            Drawable cache = TBApplication.drawableCache(appIcon.getContext()).getCachedDrawable(entry.id);
+            if (cache != null) {
+                appIcon.setImageDrawable(cache);
+                return;
+            }
         }
 
         AsyncSetEntryDrawable task;
         try {
-            Constructor<? extends AsyncSetEntryDrawable> constructor = asyncSetEntryIconClass.getConstructor(ImageView.class);
-            task = constructor.newInstance(appIcon);
+            Constructor<? extends AsyncSetEntryDrawable> constructor = asyncSetEntryIconClass.getConstructor(ImageView.class, int.class);
+            task = constructor.newInstance(appIcon, drawFlags);
         } catch (IllegalAccessException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {
             Log.e(TAG, "new <? extends AsyncSetEntryDrawable>", e);
             return;
@@ -131,19 +130,20 @@ public final class ResultViewHelper {
     public static abstract class AsyncSetEntryDrawable extends AsyncTask<EntryItem, Void, Drawable> {
         private final WeakReference<ImageView> weakImage;
         private String cacheId = null;
+        protected int drawFlags;
 
-        public AsyncSetEntryDrawable(@NonNull ImageView image) {
+        public AsyncSetEntryDrawable(@NonNull ImageView image, int drawFlags) {
             super();
             if (image.getTag() instanceof AsyncSetEntryDrawable)
                 ((AsyncSetEntryDrawable) image.getTag()).cancel(true);
             image.setTag(this);
             image.setImageResource(android.R.color.transparent);
             this.weakImage = new WeakReference<>(image);
+            this.drawFlags = drawFlags;
         }
 
         @Nullable
-        public ImageView getImageView()
-        {
+        public ImageView getImageView() {
             return weakImage.get();
         }
 
@@ -155,7 +155,8 @@ public final class ResultViewHelper {
                 return null;
             }
             EntryItem entry = entries[0];
-            cacheId = entry.id;
+            if (!Utilities.checkFlag(drawFlags, EntryItem.FLAG_DRAW_NO_CACHE))
+                cacheId = entry.id;
             Context ctx = image.getContext();
             return getDrawable(entry, ctx);
         }

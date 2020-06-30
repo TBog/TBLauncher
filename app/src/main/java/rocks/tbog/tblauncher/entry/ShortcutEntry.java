@@ -38,7 +38,6 @@ import rocks.tbog.tblauncher.result.ResultAdapter;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
-import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 
@@ -136,7 +135,7 @@ public final class ShortcutEntry extends EntryWithTags {
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
             icon1.setVisibility(View.VISIBLE);
             icon2.setVisibility(View.VISIBLE);
-            ResultViewHelper.setIconAsync(this, icon1, AsyncSetEntryIcon.class);
+            ResultViewHelper.setIconAsync(drawFlags, this, icon1, AsyncSetEntryIcon.class);
         } else {
             icon1.setImageDrawable(null);
             icon2.setImageDrawable(null);
@@ -195,7 +194,7 @@ public final class ShortcutEntry extends EntryWithTags {
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
             shortcutIcon.setVisibility(View.VISIBLE);
             appIcon.setVisibility(View.VISIBLE);
-            ResultViewHelper.setIconAsync(this, shortcutIcon, AsyncSetEntryIcon.class);
+            ResultViewHelper.setIconAsync(drawFlags, this, shortcutIcon, AsyncSetEntryIcon.class);
         } else {
             shortcutIcon.setImageDrawable(null);
             appIcon.setImageDrawable(null);
@@ -355,8 +354,8 @@ public final class ShortcutEntry extends EntryWithTags {
     public static class AsyncSetEntryIcon extends ResultViewHelper.AsyncSetEntryDrawable {
         Drawable appDrawable = null;
 
-        public AsyncSetEntryIcon(ImageView image) {
-            super(image);
+        public AsyncSetEntryIcon(@NonNull ImageView image, int drawFlags) {
+            super(image, drawFlags);
         }
 
         @Override
@@ -374,13 +373,8 @@ public final class ShortcutEntry extends EntryWithTags {
                     ResolveInfo mainPackage = packages.get(0);
                     String packageName = mainPackage.activityInfo.applicationInfo.packageName;
                     String activityName = mainPackage.activityInfo.name;
-                    UserHandleCompat user = new UserHandleCompat();
                     ComponentName className = new ComponentName(packageName, activityName);
-                    String appId = AppEntry.SCHEME + user.getUserComponentName(className);
-                    appDrawable = TBApplication.drawableCache(context).getCachedDrawable(appId);
-                    if (appDrawable == null) {
-                        appDrawable = context.getPackageManager().getActivityIcon(className);
-                    }
+                    appDrawable = context.getPackageManager().getActivityIcon(className);
                 } else {
                     // Can't make sense of the intent URI (Oreo shortcut, or a shortcut from an activity that was removed from an installed app)
                     // Retrieve app icon

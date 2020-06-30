@@ -135,9 +135,6 @@ public class CustomIconDialog extends DialogFragment<Drawable> {
             View button = view.findViewById(android.R.id.button2);
             button.setOnClickListener(v -> dismiss());
         }
-
-        //TODO: move this in an async task
-        setQuickList(iconsHandler, view, cn, userHandle);
     }
 
     private void populateIconPackList() {
@@ -178,9 +175,25 @@ public class CustomIconDialog extends DialogFragment<Drawable> {
             mIconPackList.requestLayout();
     }
 
+    private void refreshQuickList() {
+        Context context = getContext();
+        View view = getView();
+
+        Bundle args = getArguments() != null ? getArguments() : new Bundle();
+        String name = args.getString("componentName", "");
+
+        IconsHandler iconsHandler = TBApplication.getApplication(context).getIconsHandler();
+        ComponentName cn = UserHandleCompat.unflattenComponentName(name);
+        UserHandleCompat userHandle = UserHandleCompat.fromComponentName(context, name);
+
+        //TODO: move this in an async task
+        setQuickList(iconsHandler, view, cn, userHandle);
+    }
+
     private void setQuickList(IconsHandler iconsHandler, View view, ComponentName cn, UserHandleCompat userHandle) {
         Context context = view.getContext();
         ViewGroup quickList = view.findViewById(R.id.quickList);
+        quickList.removeViews(1, quickList.getChildCount() - 1);
 
         ArraySet<Bitmap> dSet = new ArraySet<>(3);
 
@@ -199,7 +212,7 @@ public class CustomIconDialog extends DialogFragment<Drawable> {
             ((TextView) quickList.findViewById(android.R.id.text1)).setText(R.string.default_icon);
         }
 
-        IconPack iconPack = iconsHandler.getCustomIconPack();
+        IconPack iconPack = mShownIconPack != null ? mShownIconPack : iconsHandler.getCustomIconPack();
         //IIconPack systemIconPack = iconsHandler.getSystemIconPack();
 
         // add getActivityIcon(componentName)
@@ -297,13 +310,18 @@ public class CustomIconDialog extends DialogFragment<Drawable> {
         parent.addView(layout);
     }
 
-    private void setShownIconPack(String packageName)
-    {
-        IconPackXML pack = new IconPackXML(packageName);
-        pack.loadDrawables(getContext().getPackageManager());
-
-        mShownIconPack = pack;
+    private void setShownIconPack(String packageName) {
+        if (packageName == null) {
+            mShownIconPack = null;
+        } else {
+            if (mShownIconPack != null && packageName.equals(mShownIconPack.getPackPackageName()))
+                return;
+            IconPackXML pack = new IconPackXML(packageName);
+            pack.loadDrawables(getContext().getPackageManager());
+            mShownIconPack = pack;
+        }
         refreshList();
+        refreshQuickList();
     }
 
     @Override
@@ -311,7 +329,10 @@ public class CustomIconDialog extends DialogFragment<Drawable> {
         super.onActivityCreated(savedInstanceState);
         IconsHandler iconsHandler = TBApplication.getApplication(getActivity()).getIconsHandler();
         IconPack iconPack = iconsHandler.getCustomIconPack();
-        setShownIconPack(iconPack.getPackPackageName());
+        String packName = iconPack != null ? iconPack.getPackPackageName() : null;
+        if (packName == null && mIconPackList.getChildCount() > 0)
+            packName = mIconPackList.getChildAt(0).getTag().toString();
+        setShownIconPack(packName);
     }
 
     private void refreshList() {

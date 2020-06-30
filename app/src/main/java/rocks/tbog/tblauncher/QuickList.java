@@ -62,7 +62,7 @@ public class QuickList {
     }
 
     public static int getDrawFlags(SharedPreferences prefs) {
-        int drawFlags = EntryItem.FLAG_DRAW_QUICK_LIST;
+        int drawFlags = EntryItem.FLAG_DRAW_QUICK_LIST | EntryItem.FLAG_DRAW_NO_CACHE;
         if (prefs.getBoolean("quick-list-text-visible", true))
             drawFlags |= EntryItem.FLAG_DRAW_NAME;
         if (prefs.getBoolean("quick-list-icons-visible", true))

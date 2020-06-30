@@ -50,7 +50,7 @@ public class CustomizeUI {
     public void onResume() {
         setNotificationBarColor();
         setSearchBarPref();
-        setResultListPref();
+        setResultListPref(mResultLayout);
         TBApplication.quickList(getContext()).onResume(mPref);
     }
 
@@ -133,23 +133,23 @@ public class CustomizeUI {
         }
     }
 
-    private void setResultListPref() {
+    public void setResultListPref(View resultLayout) {
         int color = UIColors.getColor(mPref, "result-list-color");
         int alpha = UIColors.getAlpha(mPref, "result-list-alpha");
         Drawable drawable;
         if (mPref.getBoolean("result-list-rounded", true)) {
             drawable = new GradientDrawable();  // can't use PaintDrawable when alpha < 255, ugly big darker borders
             ((GradientDrawable) drawable).setColor(UIColors.setAlpha(color, alpha));
-            ((GradientDrawable) drawable).setCornerRadius(mResultLayout.getResources().getDimension(R.dimen.result_corner_radius));
+            ((GradientDrawable) drawable).setCornerRadius(resultLayout.getResources().getDimension(R.dimen.result_corner_radius));
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 // clip list content to rounded corners
-                mResultLayout.setClipToOutline(true);
+                resultLayout.setClipToOutline(true);
             }
         } else {
             drawable = new ColorDrawable(UIColors.setAlpha(color, alpha));
         }
         //drawable.setColorFilter(new PorterDuffColorFilter(UIColors.setAlpha(color, alpha), PorterDuff.Mode.MULTIPLY));
-        mResultLayout.setBackground(drawable);
+        resultLayout.setBackground(drawable);
     }
 
     public Context getContext() {

@@ -30,7 +30,11 @@ public class DrawableCache {
 
     }
 
-    public void cacheDrawable(@NonNull String name, Drawable drawable) {
+    public void cacheDrawable(@NonNull String name, @Nullable Drawable drawable) {
+        if (drawable == null) {
+            mCache.remove(name);
+            return;
+        }
         if (!mEnabled)
             return;
         DrawableInfo info = new DrawableInfo(drawable);
