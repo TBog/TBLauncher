@@ -1,78 +1,90 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/linearLayout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:gravity="center_vertical"
-    android:orientation="horizontal"
     android:paddingHorizontal="@dimen/result_margin_horizontal"
     android:paddingVertical="@dimen/result_margin_vertical">
 
-    <FrameLayout
+    <ImageView
+        android:id="@android:id/icon1"
         android:layout_width="@dimen/icon_width"
         android:layout_height="@dimen/icon_height"
-        android:layout_gravity="start|center_vertical"
         android:layout_marginStart="@dimen/icon_margin_left"
         android:layout_marginTop="@dimen/icon_margin_top"
         android:layout_marginEnd="@dimen/icon_margin_right"
-        android:layout_marginBottom="@dimen/icon_margin_bottom">
+        android:layout_marginBottom="@dimen/icon_margin_bottom"
+        android:importantForAccessibility="no"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:src="@drawable/ic_android" />
 
-        <ImageView
-            android:id="@+id/item_shortcut_icon"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:contentDescription="@null"
-            tools:src="@drawable/ic_android" />
+    <View
+        android:id="@+id/dummyGuide"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="@android:id/icon1"
+        app:layout_constraintHorizontal_weight="2"
+        app:layout_constraintLeft_toLeftOf="@android:id/icon1"
+        app:layout_constraintRight_toLeftOf="@android:id/icon2"
+        app:layout_constraintTop_toTopOf="@android:id/icon1" />
 
-        <ImageView
-            android:id="@+id/item_app_icon"
-            android:layout_width="@dimen/subicon_width"
-            android:layout_height="@dimen/subicon_height"
-            android:layout_gravity="end|bottom"
-            android:contentDescription="@null"
-            tools:src="@drawable/ic_android"
-            tools:tint="@color/YellowGreen" />
-    </FrameLayout>
+    <ImageView
+        android:id="@android:id/icon2"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:importantForAccessibility="no"
+        android:scaleType="fitXY"
+        app:layout_constraintBottom_toBottomOf="@android:id/icon1"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintLeft_toRightOf="@id/dummyGuide"
+        app:layout_constraintRight_toRightOf="@android:id/icon1"
+        tools:src="@drawable/ic_android"
+        tools:tint="@color/YellowGreen" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="start|center_vertical"
-        android:gravity="center_vertical"
-        android:orientation="vertical">
 
-        <TextView
-            android:id="@+id/item_app_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:paddingEnd="2dp"
-            android:paddingBottom="3dp"
-            android:shadowColor="?attr/resultShadowColor"
-            android:shadowDx="1"
-            android:shadowDy="2"
-            android:shadowRadius="?attr/textShadowRadius"
-            android:textColor="?attr/resultColor"
-            android:textSize="@dimen/result_title_size"
-            tools:ignore="RtlSymmetry"
-            tools:text="@string/stub_application" />
+    <TextView
+        android:id="@+id/item_app_name"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/icon_margin_right"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:paddingEnd="2dp"
+        android:paddingBottom="3dp"
+        android:shadowColor="?attr/resultShadowColor"
+        android:shadowDx="1"
+        android:shadowDy="2"
+        android:shadowRadius="?attr/textShadowRadius"
+        android:textColor="?attr/resultColor"
+        android:textSize="@dimen/result_title_size"
+        app:layout_constraintBottom_toTopOf="@id/item_app_tag"
+        app:layout_constraintStart_toEndOf="@android:id/icon1"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:ignore="RtlSymmetry"
+        tools:text="@string/stub_application" />
 
-        <TextView
-            android:id="@+id/item_app_tag"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="-6dp"
-            android:ellipsize="end"
-            android:paddingEnd="2dp"
-            android:shadowColor="?attr/resultShadowColor"
-            android:shadowDx="1"
-            android:shadowDy="2"
-            android:shadowRadius="?attr/textShadowRadius"
-            android:textColor="?android:attr/textColorSecondary"
-            android:textSize="@dimen/result_small_size"
-            tools:ignore="RtlSymmetry"
-            tools:text="@string/stub_app_tag" />
+    <TextView
+        android:id="@+id/item_app_tag"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:paddingEnd="2dp"
+        android:shadowColor="?attr/resultShadowColor"
+        android:shadowDx="1"
+        android:shadowDy="2"
+        android:shadowRadius="?attr/textShadowRadius"
+        android:textColor="?android:attr/textColorSecondary"
+        android:textSize="@dimen/result_small_size"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="@id/item_app_name"
+        app:layout_constraintTop_toBottomOf="@id/item_app_name"
+        tools:ignore="RtlSymmetry"
+        tools:text="@string/stub_app_tag" />
 
-    </LinearLayout>
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

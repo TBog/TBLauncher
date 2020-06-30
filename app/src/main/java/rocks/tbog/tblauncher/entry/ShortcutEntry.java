@@ -165,9 +165,6 @@ public final class ShortcutEntry extends EntryWithTags {
             tagsView.setVisibility(View.GONE);
         }
 
-        final ImageView shortcutIcon = view.findViewById(R.id.item_shortcut_icon);
-        final ImageView appIcon = view.findViewById(R.id.item_app_icon);
-
         // Retrieve package icon for this shortcut
         final PackageManager packageManager = context.getPackageManager();
         Drawable appDrawable = null;
@@ -192,24 +189,41 @@ public final class ShortcutEntry extends EntryWithTags {
             Log.e("Shortcut", "get app shortcut icon", e);
         }
 
+        final ImageView shortcutIcon = view.findViewById(android.R.id.icon1);
+        final ImageView appIcon = view.findViewById(android.R.id.icon2);
+
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
-            Bitmap icon = getIcon(context);
-            if (icon != null) {
-                BitmapDrawable drawable = new BitmapDrawable(context.getResources(), icon);
-                shortcutIcon.setImageDrawable(drawable);
-                appIcon.setImageDrawable(appDrawable);
-            } else {
-                // No icon for this shortcut, use app icon
-                shortcutIcon.setImageDrawable(appDrawable);
-                appIcon.setImageResource(R.drawable.ic_send);
-            }
-            if (!prefs.getBoolean("subicon-visible", true)) {
-                appIcon.setVisibility(View.GONE);
-            }
+            shortcutIcon.setVisibility(View.VISIBLE);
+            appIcon.setVisibility(View.VISIBLE);
+            ResultViewHelper.setIconAsync(this, shortcutIcon, AsyncSetEntryIcon.class);
         } else {
-            appIcon.setImageDrawable(null);
             shortcutIcon.setImageDrawable(null);
+            appIcon.setImageDrawable(null);
+            shortcutIcon.setVisibility(View.GONE);
+            appIcon.setVisibility(View.GONE);
         }
+
+
+//        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
+//            Bitmap icon = getIcon(context);
+//            shortcutIcon.setVisibility(View.VISIBLE);
+//            if (icon != null) {
+//                BitmapDrawable drawable = new BitmapDrawable(context.getResources(), icon);
+//                shortcutIcon.setImageDrawable(drawable);
+//                appIcon.setImageDrawable(appDrawable);
+//            } else {
+//                // No icon for this shortcut, use app icon
+//                shortcutIcon.setImageDrawable(appDrawable);
+//                appIcon.setImageResource(R.drawable.ic_send);
+//            }
+//            if (!prefs.getBoolean("subicon-visible", true)) {
+//                appIcon.setVisibility(View.GONE);
+//            }
+//        } else {
+//            appIcon.setImageDrawable(null);
+//            shortcutIcon.setImageDrawable(null);
+//            shortcutIcon.setVisibility(View.GONE);
+//        }
     }
 
     @Override

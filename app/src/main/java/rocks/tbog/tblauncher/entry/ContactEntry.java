@@ -148,7 +148,7 @@ public final class ContactEntry extends EntryItem {
         }
 
         // Contact photo
-        ImageView contactIcon = view.findViewById(R.id.item_contact_icon);
+        ImageView contactIcon = view.findViewById(android.R.id.icon);
 
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
             contactIcon.setVisibility(View.VISIBLE);

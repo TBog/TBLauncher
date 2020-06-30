@@ -75,13 +75,19 @@ public class IconPackXML implements IconPack<IconPackXML.DrawableInfo> {
 //        }
 //    }
 
+    @Override
     public void load(PackageManager packageManager) {
-        parseXML(packageManager);
+        try {
+            packResources = packageManager.getResourcesForApplication(iconPackPackageName);
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.e(TAG, "get icon pack resources" + iconPackPackageName, e);
+        }
+
+        parseAppFilterXML();
         loaded = true;
     }
 
-    public boolean hasMask()
-    {
+    public boolean hasMask() {
         return maskImage != null;
     }
 
@@ -90,11 +96,13 @@ public class IconPackXML implements IconPack<IconPackXML.DrawableInfo> {
         return Collections.unmodifiableCollection(drawableList);
     }
 
+    @Override
     @Nullable
     public Drawable getComponentDrawable(@NonNull Context ctx, @NonNull ComponentName componentName, @NonNull UserHandleCompat userHandle) {
         return getComponentDrawable(componentName.toString());
     }
 
+    @Override
     @Nullable
     public Drawable getComponentDrawable(String componentName) {
         ArraySet<DrawableInfo> drawables = drawablesByComponent.get(componentName);
@@ -136,7 +144,7 @@ public class IconPackXML implements IconPack<IconPackXML.DrawableInfo> {
     @Override
     public Drawable applyBackgroundAndMask(@NonNull Context ctx, @NonNull Drawable systemIcon, boolean fitInside) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            if(systemIcon instanceof AdaptiveIconDrawable)
+            if (systemIcon instanceof AdaptiveIconDrawable)
                 return DrawableUtils.applyIconMaskShape(ctx, systemIcon, fitInside);
         }
 
@@ -205,12 +213,17 @@ public class IconPackXML implements IconPack<IconPackXML.DrawableInfo> {
         return new BitmapDrawable(packResources, result);
     }
 
-    private void parseXML(PackageManager pm) {
+    private void parseDrawableXML() {
         XmlPullParser xpp = null;
+    }
+
+    private void parseAppFilterXML() {
+        XmlPullParser xpp = null;
+        if (packResources == null)
+            return;
 
         try {
             // search appfilter.xml into icons pack apk resource folder
-            packResources = pm.getResourcesForApplication(iconPackPackageName);
             int appfilterid = packResources.getIdentifier("appfilter", "xml", iconPackPackageName);
             if (appfilterid > 0) {
                 xpp = packResources.getXml(appfilterid);

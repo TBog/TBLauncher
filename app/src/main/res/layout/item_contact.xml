@@ -1,33 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/relativeLayout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:descendantFocusability="blocksDescendants"
-    android:gravity="center_vertical"
-    android:orientation="horizontal"
     android:paddingHorizontal="@dimen/result_margin_horizontal"
     android:paddingVertical="@dimen/result_margin_vertical">
 
     <ImageView
-        android:id="@+id/item_contact_icon"
+        android:id="@android:id/icon"
         android:layout_width="@dimen/icon_width"
         android:layout_height="@dimen/icon_height"
-        android:layout_alignParentStart="true"
-        android:layout_centerVertical="true"
+        android:layout_marginStart="@dimen/icon_margin_left"
+        android:layout_marginTop="@dimen/icon_margin_top"
         android:layout_marginEnd="@dimen/icon_margin_right"
+        android:layout_marginBottom="@dimen/icon_margin_bottom"
         android:importantForAccessibility="no"
         android:src="@drawable/ic_contact_placeholder"
-        tools:ignore="ContentDescription" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/item_contact_name"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignWithParentIfMissing="true"
-        android:layout_alignTop="@id/item_contact_icon"
-        android:layout_toStartOf="@+id/item_contact_action_message"
-        android:layout_toEndOf="@+id/item_contact_icon"
+        android:layout_marginStart="@dimen/icon_margin_right"
         android:ellipsize="end"
         android:paddingEnd="2dp"
         android:shadowColor="?attr/resultShadowColor"
@@ -37,6 +37,10 @@
         android:singleLine="true"
         android:textColor="?attr/resultColor"
         android:textSize="@dimen/result_title_size"
+        app:layout_constraintBottom_toTopOf="@id/item_contact_phone"
+        app:layout_constraintStart_toEndOf="@android:id/icon"
+        app:layout_constraintTop_toTopOf="@android:id/icon"
+        app:layout_constraintVertical_chainStyle="packed"
         tools:ignore="RtlSymmetry"
         tools:text="Contact name" />
 
@@ -44,9 +48,6 @@
         android:id="@+id/item_contact_phone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_below="@id/item_contact_name"
-        android:layout_alignStart="@id/item_contact_name"
-        android:layout_alignBottom="@id/item_contact_icon"
         android:gravity="center_vertical"
         android:importantForAccessibility="no"
         android:paddingEnd="2dp"
@@ -56,6 +57,9 @@
         android:shadowRadius="?attr/textShadowRadius"
         android:textColor="?android:attr/textColorSecondary"
         android:textSize="@dimen/result_small_size"
+        app:layout_constraintBottom_toBottomOf="@android:id/icon"
+        app:layout_constraintStart_toStartOf="@id/item_contact_name"
+        app:layout_constraintTop_toBottomOf="@id/item_contact_name"
         tools:ignore="RtlSymmetry"
         tools:text="+1 330 1234 5678" />
 
@@ -63,9 +67,7 @@
         android:id="@+id/item_contact_nickname"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignBaseline="@id/item_contact_phone"
         android:layout_marginStart="5dp"
-        android:layout_toEndOf="@+id/item_contact_phone"
         android:ellipsize="end"
         android:paddingEnd="2dp"
         android:shadowColor="?attr/resultShadowColor"
@@ -75,6 +77,8 @@
         android:singleLine="true"
         android:textColor="?android:attr/textColorSecondary"
         android:textSize="@dimen/result_title_size"
+        app:layout_constraintBaseline_toBaselineOf="@id/item_contact_phone"
+        app:layout_constraintStart_toEndOf="@+id/item_contact_phone"
         tools:ignore="RtlSymmetry"
         tools:text="Nickname" />
 
@@ -82,20 +86,22 @@
         android:id="@+id/item_contact_action_message"
         android:layout_width="@dimen/icon_width"
         android:layout_height="@dimen/icon_height"
-        android:layout_centerVertical="true"
-        android:layout_toStartOf="@+id/item_contact_action_phone"
         android:background="?attr/appSelectableItemBackground"
         android:contentDescription="@string/cd_item_contact_message"
-        android:src="@drawable/ic_message" />
+        android:src="@drawable/ic_message"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/item_contact_action_phone"
+        app:layout_constraintTop_toTopOf="parent" />
 
     <ImageButton
         android:id="@+id/item_contact_action_phone"
         android:layout_width="@dimen/icon_width"
         android:layout_height="@dimen/icon_height"
-        android:layout_alignParentEnd="true"
-        android:layout_centerVertical="true"
         android:background="?attr/appSelectableItemBackground"
         android:contentDescription="@string/cd_item_contact_call"
-        android:src="@drawable/ic_phone" />
+        android:src="@drawable/ic_phone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
 
-</RelativeLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

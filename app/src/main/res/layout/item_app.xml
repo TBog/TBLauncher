@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/linearLayout2"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:gravity="center_vertical"
@@ -8,79 +10,71 @@
     android:paddingHorizontal="@dimen/result_margin_horizontal"
     android:paddingVertical="@dimen/result_margin_vertical">
 
-    <FrameLayout
-        android:id="@+id/item_icon_container"
+
+    <ImageView
+        android:id="@android:id/icon"
         android:layout_width="@dimen/icon_width"
         android:layout_height="@dimen/icon_height"
-        android:layout_gravity="start|center_vertical"
         android:layout_marginStart="@dimen/icon_margin_left"
         android:layout_marginTop="@dimen/icon_margin_top"
         android:layout_marginEnd="@dimen/icon_margin_right"
-        android:layout_marginBottom="@dimen/icon_margin_bottom">
+        android:layout_marginBottom="@dimen/icon_margin_bottom"
+        android:importantForAccessibility="no"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:src="@drawable/ic_android" />
 
-        <ImageView
-            android:id="@+id/item_app_icon"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:contentDescription="@null"
-            tools:src="@drawable/ic_android" />
+    <ImageView
+        android:id="@+id/item_notification_dot"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:importantForAccessibility="no"
+        android:src="@drawable/notification_dot"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="@android:id/icon"
+        app:layout_constraintLeft_toLeftOf="@android:id/icon"
+        app:layout_constraintRight_toRightOf="@android:id/icon"
+        app:layout_constraintTop_toTopOf="@android:id/icon" />
 
-        <ImageView
-            android:id="@+id/item_notification_dot"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:contentDescription="@null"
-            android:src="@drawable/notification_dot"
-            android:visibility="gone"
-            tools:visibility="visible" />
-    </FrameLayout>
-
-    <LinearLayout
-        android:layout_width="match_parent"
+    <TextView
+        android:id="@+id/item_app_name"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="start|center_vertical"
-        android:gravity="center_vertical"
-        android:orientation="vertical">
+        android:layout_marginStart="@dimen/icon_margin_right"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:paddingEnd="2dp"
+        android:paddingBottom="3dp"
+        android:shadowColor="?attr/resultShadowColor"
+        android:shadowDx="1"
+        android:shadowDy="2"
+        android:shadowRadius="?attr/textShadowRadius"
+        android:textColor="?attr/resultColor"
+        android:textSize="@dimen/result_title_size"
+        app:layout_constraintBottom_toTopOf="@id/item_app_tag"
+        app:layout_constraintStart_toEndOf="@android:id/icon"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="packed"
+        tools:ignore="RtlSymmetry"
+        tools:text="@string/stub_application" />
 
-        <TextView
-            android:id="@+id/item_app_name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:ellipsize="end"
-            android:maxLines="1"
-            android:paddingEnd="2dp"
-            android:paddingBottom="3dp"
-            android:shadowColor="?attr/resultShadowColor"
-            android:shadowDx="1"
-            android:shadowDy="2"
-            android:shadowRadius="?attr/textShadowRadius"
-            android:textColor="?attr/resultColor"
-            android:textSize="@dimen/result_title_size"
-            tools:ignore="RtlSymmetry"
-            tools:text="@string/stub_application" />
+    <TextView
+        android:id="@+id/item_app_tag"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ellipsize="end"
+        android:paddingEnd="2dp"
+        android:shadowColor="?attr/resultShadowColor"
+        android:shadowDx="1"
+        android:shadowDy="2"
+        android:shadowRadius="?attr/textShadowRadius"
+        android:textColor="?android:attr/textColorSecondary"
+        android:textSize="@dimen/result_small_size"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="@id/item_app_name"
+        app:layout_constraintTop_toBottomOf="@id/item_app_name"
+        tools:ignore="RtlSymmetry"
+        tools:text="@string/stub_app_tag" />
 
-        <!--        <LinearLayout-->
-        <!--            android:id="@+id/item_app_tag_list"-->
-        <!--            android:layout_width="wrap_content"-->
-        <!--            android:layout_height="wrap_content"-->
-        <!--            android:orientation="horizontal">-->
-
-        <!--        </LinearLayout>-->
-        <TextView
-            android:id="@+id/item_app_tag"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="-6dp"
-            android:ellipsize="end"
-            android:paddingEnd="2dp"
-            android:shadowColor="?attr/resultShadowColor"
-            android:shadowDx="1"
-            android:shadowDy="2"
-            android:shadowRadius="?attr/textShadowRadius"
-            android:textColor="?android:attr/textColorSecondary"
-            android:textSize="@dimen/result_small_size"
-            tools:ignore="RtlSymmetry"
-            tools:text="@string/stub_app_tag" />
-
-    </LinearLayout>
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>

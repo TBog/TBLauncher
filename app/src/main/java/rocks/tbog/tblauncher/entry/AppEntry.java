@@ -189,14 +189,13 @@ public final class AppEntry extends EntryWithTags {
             tagsView.setVisibility(View.GONE);
         }
 
-        View iconContainer = view.findViewById(R.id.item_icon_container);
-        ImageView appIcon = view.findViewById(R.id.item_app_icon);
+        ImageView appIcon = view.findViewById(android.R.id.icon);
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
-            iconContainer.setVisibility(View.VISIBLE);
+            appIcon.setVisibility(View.VISIBLE);
             ResultViewHelper.setIconAsync(this, appIcon, AsyncSetEntryIcon.class);
         } else {
             appIcon.setImageDrawable(null);
-            iconContainer.setVisibility(View.GONE);
+            appIcon.setVisibility(View.GONE);
         }
 
         //TODO: enable notification badges
@@ -360,7 +359,7 @@ public final class AppEntry extends EntryWithTags {
 
                 // We're on a modern Android and can display activity animations
                 // If AppResult, find the icon
-                potentialIcon = v.findViewById(R.id.item_app_icon);
+                potentialIcon = v.findViewById(android.R.id.icon);
                 if (potentialIcon == null) {
                     // If favorite, find the icon
                     potentialIcon = v.findViewById(R.id.favorite);
