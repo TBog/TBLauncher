@@ -1,5 +1,6 @@
 package rocks.tbog.tblauncher.utils;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
@@ -68,6 +69,7 @@ public class DrawableUtils {
     /**
      * Handle adaptive icons for compatible devices
      */
+    @SuppressLint("NewApi")
     public static Drawable applyIconMaskShape(Context ctx, Drawable icon, int shape, boolean fitInside) {
         if (shape == SHAPE_SYSTEM)
             return icon;
