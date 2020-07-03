@@ -294,12 +294,16 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         }
                     }
                     break;
-                case "icons-pack":
-                    TBApplication.getApplication(activity).getIconsHandler().loadIconsPack(sharedPreferences.getString(key, "default"));
-                    TBApplication.drawableCache(activity).clearCache();
-                    break;
                 case "adaptive-shape":
-                    TBApplication.getApplication(activity).getIconsHandler().setAdaptiveShape(sharedPreferences.getString(key, null));
+                case "force-adaptive":
+                case "force-shape":
+                case "icons-pack":
+                case "contact-pack-mask":
+                case "contacts-shape":
+                case "shortcut-pack-mask":
+                case "shortcut-shape":
+                case "shortcut-pack-badge-mask":
+                    TBApplication.iconsHandler(activity).onPrefChanged(sharedPreferences);
                     TBApplication.drawableCache(activity).clearCache();
                     break;
                 case "tags-enabled": {

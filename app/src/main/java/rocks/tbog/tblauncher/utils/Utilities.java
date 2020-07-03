@@ -2,6 +2,7 @@ package rocks.tbog.tblauncher.utils;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -12,8 +13,12 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.util.DisplayMetrics;
+import android.view.Gravity;
 import android.view.View;
+import android.view.Window;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -21,6 +26,7 @@ import androidx.annotation.WorkerThread;
 
 import java.lang.ref.WeakReference;
 
+import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.ui.CutoutFactory;
 import rocks.tbog.tblauncher.ui.ICutout;
@@ -120,6 +126,48 @@ public class Utilities {
 
     public static boolean checkFlag(int flags, int flagToCheck) {
         return (flags & flagToCheck) == flagToCheck;
+    }
+
+    @Nullable
+    public static Activity getActivity(@Nullable Context ctx) {
+        while (ctx instanceof ContextWrapper) {
+            if (ctx instanceof Activity)
+                return (Activity) ctx;
+            ctx = ((ContextWrapper) ctx).getBaseContext();
+        }
+        return null;
+    }
+
+    public static void positionToast(Toast toast, View anchor, int offsetX, int offsetY) {
+        Activity activity = Utilities.getActivity(anchor.getContext());
+        if (activity != null)
+            positionToast(toast, anchor, activity.getWindow(), offsetX, offsetY);
+    }
+
+    public static void positionToast(Toast toast, View anchor, Window window, int offsetX, int offsetY) {
+        // toasts are positioned relatively to decor view, views relatively to their parents, we have to gather additional data to have a common coordinate system
+        Rect rect = new Rect();
+        window.getDecorView().getWindowVisibleDisplayFrame(rect);
+
+        // covert anchor view absolute position to a position which is relative to decor view
+        int[] viewLocation = new int[2];
+        anchor.getLocationOnScreen(viewLocation);
+        int viewLeft = viewLocation[0] - rect.left;
+        int viewTop = viewLocation[1] - rect.top;
+
+        // measure toast to center it relatively to the anchor view
+        DisplayMetrics metrics = new DisplayMetrics();
+        window.getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        int widthMeasureSpec = View.MeasureSpec.makeMeasureSpec(metrics.widthPixels, View.MeasureSpec.UNSPECIFIED);
+        int heightMeasureSpec = View.MeasureSpec.makeMeasureSpec(metrics.heightPixels, View.MeasureSpec.UNSPECIFIED);
+        toast.getView().measure(widthMeasureSpec, heightMeasureSpec);
+        int toastWidth = toast.getView().getMeasuredWidth();
+
+        // compute toast offsets
+        int toastX = viewLeft + (anchor.getWidth() - toastWidth) / 2 + offsetX;
+        int toastY = viewTop + anchor.getHeight() + offsetY;
+
+        toast.setGravity(Gravity.START | Gravity.TOP, toastX, toastY);
     }
 
     public interface GetDrawable {

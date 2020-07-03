@@ -1,13 +1,13 @@
 package rocks.tbog.tblauncher.utils;
 
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.RectF;
 import android.graphics.Shader.TileMode;
 import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.BitmapDrawable;
@@ -17,7 +17,6 @@ import android.util.TypedValue;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
-import androidx.preference.PreferenceManager;
 
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
@@ -34,9 +33,12 @@ public class DrawableUtils {
     private static final int SHAPE_TEARDROP_TL = 7;
     private static final int SHAPE_TEARDROP_TR = 8;
     private static final int SHAPE_TEARDROP_RND = 9;
+    private static final int SHAPE_HEXAGON = 10;
+    private static final int SHAPE_OCTAGON = 11;
 
     private static final Paint PAINT = new Paint();
-    private static final Path PATH = new Path();
+    private static final Path SHAPE_PATH = new Path();
+    private static final RectF RECT_F = new RectF();
 
     // https://stackoverflow.com/questions/3035692/how-to-convert-a-drawable-to-a-bitmap
 
@@ -66,13 +68,6 @@ public class DrawableUtils {
     /**
      * Handle adaptive icons for compatible devices
      */
-    @RequiresApi(api = Build.VERSION_CODES.O)
-    public static Drawable applyIconMaskShape(Context ctx, Drawable icon, boolean fitInside) {
-        int shape = TBApplication.iconsHandler(ctx).getAdaptiveShape();
-        return applyIconMaskShape(ctx, icon, shape, fitInside);
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.O)
     public static Drawable applyIconMaskShape(Context ctx, Drawable icon, int shape, boolean fitInside) {
         if (shape == SHAPE_SYSTEM)
             return icon;
@@ -84,8 +79,7 @@ public class DrawableUtils {
         final Paint outputPaint = PAINT;
         outputPaint.reset();
         outputPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
-
-        if (icon instanceof AdaptiveIconDrawable) {
+        if (isAdaptiveIconDrawable(icon)) {
             AdaptiveIconDrawable adaptiveIcon = (AdaptiveIconDrawable) icon;
             Drawable bgDrawable = adaptiveIcon.getBackground();
             Drawable fgDrawable = adaptiveIcon.getForeground();
@@ -123,7 +117,7 @@ public class DrawableUtils {
                 iconOffset = Math.round(marginPercent * icon.getIntrinsicHeight());
             } else {
                 // we don't have antialiasing when clipping so we make the icon bigger and let the View downscale
-                    iconSize = 2 * ctx.getResources().getDimensionPixelSize(R.dimen.icon_height);
+                iconSize = 2 * ctx.getResources().getDimensionPixelSize(R.dimen.icon_height);
             }
 
             outputBitmap = Bitmap.createBitmap(iconSize, iconSize, Bitmap.Config.ARGB_8888);
@@ -153,28 +147,27 @@ public class DrawableUtils {
      *
      * @param shape type of shape: DrawableUtils.SHAPE_*
      */
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private static void setIconShape(Canvas canvas, Paint paint, int shape) {
-        int iconSize = canvas.getHeight();
-        Path path = PATH;
+        float iconSize = canvas.getHeight();
+        Path path = SHAPE_PATH;
         path.rewind();
 
         switch (shape) {
             case SHAPE_CIRCLE: {
-                int radius = iconSize / 2;
+                int radius = (int)iconSize / 2;
                 canvas.drawCircle(radius, radius, radius, paint);
 
                 path.addCircle(radius, radius, radius, Path.Direction.CCW);
                 break;
             }
             case SHAPE_SQUIRCLE: {
-                int h = iconSize / 2;
+                int h = (int)iconSize / 2;
                 float c = iconSize / 2.333f;
                 path.moveTo(h, 0f);
                 path.cubicTo(h + c, 0, iconSize, h - c, iconSize, h);
                 path.cubicTo(iconSize, h + c, h + c, iconSize, h, iconSize);
                 path.cubicTo(h - c, iconSize, 0, h + c, 0, h);
-                path.cubicTo(0, h - c, h-c, 0, h, 0);
+                path.cubicTo(0, h - c, h - c, 0, h, 0);
                 path.close();
 
                 canvas.drawPath(path, paint);
@@ -186,39 +179,79 @@ public class DrawableUtils {
                 path.addRect(0f, 0f, iconSize, iconSize, Path.Direction.CCW);
                 break;
             case SHAPE_ROUND_RECT:
-                canvas.drawRoundRect(0f, 0f, iconSize, iconSize, iconSize / 8f, iconSize / 12f, paint);
+                RECT_F.set(0f, 0f, iconSize, iconSize);
+                canvas.drawRoundRect(RECT_F, iconSize / 8f, iconSize / 12f, paint);
 
-                path.addRoundRect(0f, 0f, iconSize, iconSize, iconSize / 8f, iconSize / 12f, Path.Direction.CCW);
+                path.addRoundRect(RECT_F, iconSize / 8f, iconSize / 12f, Path.Direction.CCW);
                 break;
             case SHAPE_TEARDROP_RND: // this is handled before we get here
             case SHAPE_TEARDROP_BR:
-                path.addArc(0, 0, iconSize, iconSize, 90, 270);
+                RECT_F.set(0f, 0f, iconSize, iconSize);
+                path.addArc(RECT_F, 90, 270);
                 path.lineTo(iconSize, iconSize * 0.70f);
-                path.arcTo(iconSize * 0.70f, iconSize * 0.70f, iconSize, iconSize, 0, 90, false);
+                RECT_F.set(iconSize * 0.70f, iconSize * 0.70f, iconSize, iconSize);
+                path.arcTo(RECT_F, 0, 90, false);
                 path.close();
 
                 canvas.drawPath(path, paint);
                 break;
             case SHAPE_TEARDROP_BL:
-                path.addArc(0, 0, iconSize, iconSize, 180, 270);
+                RECT_F.set(0f, 0f, iconSize, iconSize);
+                path.addArc(RECT_F, 180, 270);
                 path.lineTo(iconSize * .3f, iconSize);
-                path.arcTo(0, iconSize * .7f, iconSize * .3f, iconSize, 90, 90, false);
+                RECT_F.set(0f, iconSize * .7f, iconSize * .3f, iconSize);
+                path.arcTo(RECT_F, 90, 90, false);
                 path.close();
 
                 canvas.drawPath(path, paint);
                 break;
             case SHAPE_TEARDROP_TL:
-                path.addArc(0, 0, iconSize, iconSize, 270, 270);
+                RECT_F.set(0f, 0f, iconSize, iconSize);
+                path.addArc(RECT_F, 270, 270);
                 path.lineTo(0, iconSize * .3f);
-                path.arcTo(0, 0, iconSize * .3f, iconSize * .3f, 180, 90, false);
+                RECT_F.set(0f, 0f, iconSize * .3f, iconSize * .3f);
+                path.arcTo(RECT_F, 180, 90, false);
                 path.close();
 
                 canvas.drawPath(path, paint);
                 break;
             case SHAPE_TEARDROP_TR:
-                path.addArc(0, 0, iconSize, iconSize, 0, 270);
-                path.lineTo(iconSize * .7f, 0);
-                path.arcTo(iconSize * .7f, 0, iconSize, iconSize * .3f, 270, 90, false);
+                RECT_F.set(0f, 0f, iconSize, iconSize);
+                path.addArc(RECT_F, 0, 270);
+                path.lineTo(iconSize * .7f, 0f);
+                RECT_F.set(iconSize * .7f, 0f, iconSize, iconSize * .3f);
+                path.arcTo(RECT_F, 270, 90, false);
+                path.close();
+
+                canvas.drawPath(path, paint);
+                break;
+            case SHAPE_HEXAGON:
+                for (int deg = 0; deg < 360; deg += 60) {
+                    float x = ((float) Math.cos(Math.toRadians(deg)) * .5f + .5f) * iconSize;
+                    float y = ((float) Math.sin(Math.toRadians(deg)) * .5f + .5f) * iconSize;
+                    if (deg == 0)
+                        path.moveTo(x, y);
+                    else
+                        path.lineTo(x, y);
+                }
+                path.close();
+
+                canvas.drawPath(path, paint);
+                break;
+            case SHAPE_OCTAGON:
+                for (int deg = 22; deg < 360; deg += 45) {
+                    float x = ((float) Math.cos(Math.toRadians(deg + .5)) * .5f + .5f) * iconSize;
+                    float y = ((float) Math.sin(Math.toRadians(deg + .5)) * .5f + .5f) * iconSize;
+
+                    // scale it up to fill the rectangle
+                    x = x * 1.0824f - x * 0.0824f;
+                    y = y * 1.0824f - y * 0.0824f;
+
+                    if (deg == 22)
+                        path.moveTo(x, y);
+                    else
+                        path.lineTo(x, y);
+                }
                 path.close();
 
                 canvas.drawPath(path, paint);
@@ -226,5 +259,12 @@ public class DrawableUtils {
         }
         // make sure we don't draw outside the shape
         canvas.clipPath(path);
+    }
+
+    public static boolean isAdaptiveIconDrawable(Drawable drawable) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            return drawable instanceof AdaptiveIconDrawable;
+        }
+        return false;
     }
 }

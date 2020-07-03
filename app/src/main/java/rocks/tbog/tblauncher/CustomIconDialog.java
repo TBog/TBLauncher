@@ -1,5 +1,6 @@
 package rocks.tbog.tblauncher;
 
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.LauncherActivityInfo;
@@ -14,10 +15,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -38,6 +41,7 @@ import java.util.Map;
 
 import rocks.tbog.tblauncher.icons.IconPack;
 import rocks.tbog.tblauncher.icons.IconPackXML;
+import rocks.tbog.tblauncher.icons.SystemIconPack;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.ui.DialogFragment;
 import rocks.tbog.tblauncher.utils.DrawableUtils;
@@ -81,6 +85,10 @@ public class CustomIconDialog extends DialogFragment<Drawable> {
             mSelectedDrawable = adapter.getItem(position).getIcon();
             mPreview.setImageDrawable(mSelectedDrawable);
         });
+        iconAdapter.setOnItemLongClickListener(((adapter, v, position) -> {
+            String name = adapter.getItem(position).drawableInfo.getDrawableName();
+            displayToast(v, name);
+        }));
 
         mSearch = view.findViewById(R.id.search);
         mSearch.addTextChangedListener(new TextWatcher() {
@@ -136,6 +144,12 @@ public class CustomIconDialog extends DialogFragment<Drawable> {
             View button = view.findViewById(android.R.id.button2);
             button.setOnClickListener(v -> dismiss());
         }
+    }
+
+    private void displayToast(View v, CharSequence message) {
+        Toast toast = Toast.makeText(getDialog().getContext(), message, Toast.LENGTH_SHORT);
+        Utilities.positionToast(toast, v, getDialog().getWindow(), 0, 0);
+        toast.show();
     }
 
     private void populateIconPackList() {
@@ -202,7 +216,7 @@ public class CustomIconDialog extends DialogFragment<Drawable> {
         {
             Drawable drawable = iconsHandler.getDrawableIconForPackage(cn, userHandle);
 
-            checkDuplicateDrawable(dSet, drawable);
+            //checkDuplicateDrawable(dSet, drawable);
 
             ImageView icon = quickList.findViewById(android.R.id.icon);
             icon.setImageDrawable(drawable);
@@ -213,7 +227,8 @@ public class CustomIconDialog extends DialogFragment<Drawable> {
             ((TextView) quickList.findViewById(android.R.id.text1)).setText(R.string.default_icon);
         }
 
-        IconPack iconPack = mShownIconPack != null ? mShownIconPack : iconsHandler.getCustomIconPack();
+        IconPackXML iconPack = mShownIconPack;
+        SystemIconPack sysPack = iconsHandler.getSystemIconPack();
 
         // add getActivityIcon(componentName)
         {
@@ -225,12 +240,11 @@ public class CustomIconDialog extends DialogFragment<Drawable> {
             if (drawable != null) {
                 if (checkDuplicateDrawable(dSet, drawable)) {
                     addQuickOption(R.string.custom_icon_activity, drawable, quickList);
-                    if (iconPack != null)
+                    if (iconPack != null && iconPack.hasMask())
                         addQuickOption(R.string.custom_icon_activity_with_pack, iconPack.applyBackgroundAndMask(context, drawable, true), quickList);
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        addQuickOption(R.string.custom_icon_activity_adaptive, DrawableUtils.applyIconMaskShape(context, drawable, true), quickList);
-                        addQuickOption(R.string.custom_icon_activity_adaptive_fill, DrawableUtils.applyIconMaskShape(context, drawable, false), quickList);
-                    }
+                    addQuickOption(R.string.custom_icon_activity_adaptive, sysPack.applyBackgroundAndMask(context, drawable, true), quickList);
+                    if (!DrawableUtils.isAdaptiveIconDrawable(drawable))
+                        addQuickOption(R.string.custom_icon_activity_adaptive_fill, sysPack.applyBackgroundAndMask(context, drawable, false), quickList);
                 }
             }
         }
@@ -245,12 +259,11 @@ public class CustomIconDialog extends DialogFragment<Drawable> {
             if (drawable != null) {
                 if (checkDuplicateDrawable(dSet, drawable)) {
                     addQuickOption(R.string.custom_icon_application, drawable, quickList);
-                    if (iconPack != null)
+                    if (iconPack != null && iconPack.hasMask())
                         addQuickOption(R.string.custom_icon_application_with_pack, iconPack.applyBackgroundAndMask(context, drawable, true), quickList);
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                        addQuickOption(R.string.custom_icon_application_adaptive, DrawableUtils.applyIconMaskShape(context, drawable, true), quickList);
-                        addQuickOption(R.string.custom_icon_application_adaptive_fill, DrawableUtils.applyIconMaskShape(context, drawable, false), quickList);
-                    }
+                    addQuickOption(R.string.custom_icon_application_adaptive, sysPack.applyBackgroundAndMask(context, drawable, true), quickList);
+                    if (!DrawableUtils.isAdaptiveIconDrawable(drawable))
+                        addQuickOption(R.string.custom_icon_application_adaptive_fill, sysPack.applyBackgroundAndMask(context, drawable, false), quickList);
                 }
             }
         }
@@ -266,12 +279,11 @@ public class CustomIconDialog extends DialogFragment<Drawable> {
                 if (drawable != null) {
                     if (checkDuplicateDrawable(dSet, drawable)) {
                         addQuickOption(R.string.custom_icon_badged, drawable, quickList);
-                        if (iconPack != null)
+                        if (iconPack != null && iconPack.hasMask())
                             addQuickOption(R.string.custom_icon_badged_with_pack, iconPack.applyBackgroundAndMask(context, drawable, true), quickList);
-                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                            addQuickOption(R.string.custom_icon_badged_adaptive, DrawableUtils.applyIconMaskShape(context, drawable, true), quickList);
-                            addQuickOption(R.string.custom_icon_badged_adaptive_fill, DrawableUtils.applyIconMaskShape(context, drawable, false), quickList);
-                        }
+                        addQuickOption(R.string.custom_icon_badged_adaptive, sysPack.applyBackgroundAndMask(context, drawable, true), quickList);
+                        if (!DrawableUtils.isAdaptiveIconDrawable(drawable))
+                            addQuickOption(R.string.custom_icon_badged_adaptive_fill, sysPack.applyBackgroundAndMask(context, drawable, false), quickList);
                     }
                 }
             }
@@ -340,13 +352,11 @@ public class CustomIconDialog extends DialogFragment<Drawable> {
         IconPackXML iconPack = mShownIconPack;
         if (iconPack != null) {
             Collection<IconPackXML.DrawableInfo> drawables = iconPack.getDrawableList();
-            if (drawables != null) {
-                StringNormalizer.Result normalized = StringNormalizer.normalizeWithResult(mSearch.getText(), true);
-                FuzzyScore fuzzyScore = new FuzzyScore(normalized.codePoints);
-                for (IconPackXML.DrawableInfo info : drawables) {
-                    if (fuzzyScore.match(info.getDrawableName()).match)
-                        mIconData.add(new IconData(iconPack, info));
-                }
+            StringNormalizer.Result normalized = StringNormalizer.normalizeWithResult(mSearch.getText(), true);
+            FuzzyScore fuzzyScore = new FuzzyScore(normalized.codePoints);
+            for (IconPackXML.DrawableInfo info : drawables) {
+                if (fuzzyScore.match(info.getDrawableName()).match)
+                    mIconData.add(new IconData(iconPack, info));
             }
         }
         boolean showGridAndSearch = !mIconData.isEmpty() || (mSearch.length() > 0);
@@ -372,6 +382,7 @@ public class CustomIconDialog extends DialogFragment<Drawable> {
     static class IconAdapter extends BaseAdapter {
         private final List<IconData> mIcons;
         private OnItemClickListener mOnItemClickListener = null;
+        private OnItemClickListener mOnItemLongClickListener = null;
 
         public interface OnItemClickListener {
             void onItemClick(IconAdapter adapter, View view, int position);
@@ -383,6 +394,10 @@ public class CustomIconDialog extends DialogFragment<Drawable> {
 
         void setOnItemClickListener(OnItemClickListener listener) {
             mOnItemClickListener = listener;
+        }
+
+        void setOnItemLongClickListener(OnItemClickListener listener) {
+            mOnItemLongClickListener = listener;
         }
 
         @Override
@@ -419,54 +434,12 @@ public class CustomIconDialog extends DialogFragment<Drawable> {
                     mOnItemClickListener.onItemClick(IconAdapter.this, v, position);
             });
             holder.icon.setOnLongClickListener(v -> {
-                displayToast(v, content.drawableInfo.getDrawableName());
+                if (mOnItemLongClickListener != null)
+                    mOnItemLongClickListener.onItemClick(IconAdapter.this, v, position);
                 return true;
             });
 
             return view;
-        }
-
-        /**
-         * @param v       is the Button view that you want the Toast to appear above
-         * @param message is the string for the message
-         */
-
-        private void displayToast(View v, CharSequence message) {
-            int xOffset = 0;
-            int yOffset = 0;
-            Rect gvr = new Rect();
-
-            View parent = (View) v.getParent();
-            int parentHeight = parent.getHeight();
-
-            if (v.getGlobalVisibleRect(gvr)) {
-                View root = v.getRootView();
-
-                int halfWidth = root.getRight() / 2;
-                int halfHeight = root.getBottom() / 2;
-
-                int parentCenterX = (gvr.width() / 2) + gvr.left;
-
-                int parentCenterY = (gvr.height() / 2) + gvr.top;
-
-                if (parentCenterY <= halfHeight) {
-                    yOffset = -(halfHeight - parentCenterY);
-                } else {
-                    yOffset = (parentCenterY - halfHeight);
-                }
-
-                if (parentCenterX < halfWidth) {
-                    xOffset = -(halfWidth - parentCenterX);
-                }
-
-                if (parentCenterX >= halfWidth) {
-                    xOffset = parentCenterX - halfWidth;
-                }
-            }
-
-            Toast toast = Toast.makeText(v.getContext(), message, Toast.LENGTH_SHORT);
-            toast.setGravity(Gravity.CENTER, xOffset, yOffset + v.getHeight());
-            toast.show();
         }
 
         static class ViewHolder {

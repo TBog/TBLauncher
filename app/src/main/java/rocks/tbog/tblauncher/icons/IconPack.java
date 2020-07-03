@@ -20,9 +20,6 @@ public interface IconPack<DrawableInfo> {
     void load(PackageManager packageManager);
 
     @Nullable
-    Drawable getComponentDrawable(String componentName);
-
-    @Nullable
     Drawable getComponentDrawable(@NonNull Context ctx, @NonNull ComponentName componentName, @NonNull UserHandleCompat userHandle);
 
     @NonNull

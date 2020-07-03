@@ -69,7 +69,7 @@
     <string name="search_bar_section">Search bar</string>
     <string name="search_bar_size">Bar and text size</string>
     <string name="result_list_section">Result list</string>
-    <string name="icons_pack_name">Icon pack (ADW launcher)</string>
+    <string name="icons_pack">Choose pack</string>
     <string name="icons_pack_default_name">System icons</string>
     <string name="value">value %d</string>
     <string name="menu_app_rename">Rename app</string>
@@ -143,5 +143,8 @@
     <string name="memory_section">Memory</string>
     <string name="cache_half_apps">Small cache size</string>
     <string name="cache_half_apps_summary">Make LRU cache size half the number of apps installed</string>
+    <string name="contacts_shape_name">Contacts shape</string>
+    <string name="icon_pack_section">Icon pack</string>
+    <string name="shortcut_shape_name">Shortcut icon shape</string>
 
 </resources>

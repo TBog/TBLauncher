@@ -90,6 +90,8 @@ public class IconPackXML implements IconPack<IconPackXML.DrawableInfo> {
     }
 
     public void loadDrawables(PackageManager packageManager) {
+        if (!loaded)
+            load(packageManager);
         try {
             packResources = packageManager.getResourcesForApplication(iconPackPackageName);
         } catch (PackageManager.NameNotFoundException e) {
@@ -115,7 +117,6 @@ public class IconPackXML implements IconPack<IconPackXML.DrawableInfo> {
         return getComponentDrawable(componentName.toString());
     }
 
-    @Override
     @Nullable
     public Drawable getComponentDrawable(String componentName) {
         ArraySet<DrawableInfo> drawables = drawablesByComponent.get(componentName);

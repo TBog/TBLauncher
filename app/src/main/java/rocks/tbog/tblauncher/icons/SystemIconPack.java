@@ -16,12 +16,14 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.utils.DrawableUtils;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 
 public class SystemIconPack implements IconPack<Void> {
 
     private static final String TAG = SystemIconPack.class.getSimpleName();
+    private int mAdaptiveShape = DrawableUtils.SHAPE_SYSTEM;
 
     @NonNull
     @Override
@@ -33,10 +35,12 @@ public class SystemIconPack implements IconPack<Void> {
     public void load(PackageManager packageManager) {
     }
 
-    @Nullable
-    @Override
-    public Drawable getComponentDrawable(String componentName) {
-        return null;
+    public int getAdaptiveShape() {
+        return mAdaptiveShape;
+    }
+
+    public void setAdaptiveShape(int shape) {
+        mAdaptiveShape = shape;
     }
 
     @Nullable
@@ -70,10 +74,7 @@ public class SystemIconPack implements IconPack<Void> {
     @NonNull
     @Override
     public Drawable applyBackgroundAndMask(@NonNull Context ctx, @NonNull Drawable icon, boolean fitInside) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            icon = DrawableUtils.applyIconMaskShape(ctx, icon, fitInside);
-        }
-        return icon;
+        return DrawableUtils.applyIconMaskShape(ctx, icon, mAdaptiveShape, fitInside);
     }
 
     @NonNull

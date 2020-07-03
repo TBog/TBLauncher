@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:key="preferences-root"
-    android:title="@string/launcher_settings">
+    android:title="@string/launcher_settings"
+    tools:showIn="@layout/activity_settings">
 
     <androidx.preference.PreferenceScreen
         android:key="ui-holder"
@@ -14,92 +19,167 @@
         <!--            android:key="theme"-->
         <!--            android:title="@string/theme_name" />-->
         <androidx.preference.ListPreference
-            android:defaultValue="default"
-            android:key="icons-pack"
-            android:title="@string/icons_pack_name" />
-
-        <androidx.preference.ListPreference
             android:defaultValue="0"
             android:entries="@array/adaptiveEntries"
             android:entryValues="@array/adaptiveValues"
             android:key="adaptive-shape"
             android:title="@string/adaptive_shape_name" />
 
+        <androidx.preference.SwitchPreference
+            android:defaultValue="true"
+            android:disableDependentsState="true"
+            android:key="force-adaptive"
+            android:summary="For non-adaptive icons, reduce scale and place on a white background"
+            android:title="Force adaptive icons" />
+
+        <androidx.preference.SwitchPreference
+            android:defaultValue="false"
+            android:dependency="force-adaptive"
+            android:key="force-shape"
+            android:summary="Use adaptive mask on non-adaptive icons"
+            android:title="Force adaptive shape" />
+
+        <!-- Icon pack -->
+        <androidx.preference.PreferenceCategory
+            android:key="icon-pack-section"
+            android:title="@string/icon_pack_section"
+            app:initialExpandedChildrenCount="1">
+
+            <androidx.preference.ListPreference
+                android:defaultValue="default"
+                android:key="icons-pack"
+                android:title="@string/icons_pack" />
+
+            <androidx.preference.SwitchPreference
+                android:defaultValue="true"
+                android:disableDependentsState="true"
+                android:key="contact-pack-mask"
+                android:summary="Use icon pack mask for contacts"
+                android:title="Contacts" />
+
+            <androidx.preference.ListPreference
+                android:defaultValue="0"
+                android:dependency="contact-pack-mask"
+                android:entries="@array/adaptiveEntries"
+                android:entryValues="@array/adaptiveValues"
+                android:key="contacts-shape"
+                android:summary="Shape of contacts icon"
+                android:title="@string/contacts_shape_name" />
+
+            <androidx.preference.SwitchPreference
+                android:defaultValue="true"
+                android:disableDependentsState="true"
+                android:key="shortcut-pack-mask"
+                android:summary="Use icon pack mask for shortcut icon"
+                android:title="Shortcut icon" />
+
+            <androidx.preference.ListPreference
+                android:defaultValue="0"
+                android:dependency="shortcut-pack-mask"
+                android:entries="@array/adaptiveEntries"
+                android:entryValues="@array/adaptiveValues"
+                android:key="shortcut-shape"
+                android:summary="Shape of shortcut icon"
+                android:title="@string/shortcut_shape_name" />
+
+            <androidx.preference.SwitchPreference
+                android:defaultValue="true"
+                android:key="shortcut-pack-badge-mask"
+                android:summary="Use icon pack mask for shortcut badge"
+                android:title="Shortcut badge" />
+
+        </androidx.preference.PreferenceCategory>
+
         <!-- Notification bar -->
         <androidx.preference.PreferenceCategory
             android:key="notification-bar-section"
             android:title="@string/notification_bar_section">
+
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:dialogLayout="@layout/pref_color"
                 android:key="notification-bar-color"
                 android:title="@string/color"
                 android:widgetLayout="@layout/pref_color_preview" />
+
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="255"
                 android:dialogLayout="@layout/pref_alpha"
                 android:key="notification-bar-alpha"
                 android:title="@string/alpha"
                 android:widgetLayout="@layout/pref_alpha_preview" />
+
             <androidx.preference.SwitchPreference
                 android:defaultValue="true"
                 android:key="notification-bar-gradient"
                 android:title="@string/gradient" />
+
             <androidx.preference.SwitchPreference
                 android:key="black-notification-icons"
                 android:title="@string/black_notification_icons" />
+
         </androidx.preference.PreferenceCategory>
 
         <!-- Search bar -->
         <androidx.preference.PreferenceCategory
             android:key="search-bar-section"
             android:title="@string/search_bar_section">
+
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:dialogLayout="@layout/pref_color"
                 android:key="search-bar-color"
                 android:title="@string/color"
                 android:widgetLayout="@layout/pref_color_preview" />
+
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="127"
                 android:dialogLayout="@layout/pref_alpha"
                 android:key="search-bar-alpha"
                 android:title="@string/alpha"
                 android:widgetLayout="@layout/pref_alpha_preview" />
+
             <androidx.preference.SwitchPreference
                 android:defaultValue="true"
                 android:disableDependentsState="true"
                 android:key="search-bar-gradient"
                 android:title="@string/gradient" />
+
             <androidx.preference.SwitchPreference
                 android:defaultValue="true"
                 android:dependency="search-bar-gradient"
                 android:key="search-bar-rounded"
                 android:title="@string/round_corners" />
+
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@integer/default_bar_size"
                 android:dialogLayout="@layout/pref_alpha"
                 android:key="search-bar-size"
                 android:title="@string/search_bar_size" />
+
         </androidx.preference.PreferenceCategory>
 
         <!-- Result list -->
         <androidx.preference.PreferenceCategory
             android:key="result-list-section"
             android:title="@string/result_list_section">
+
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:dialogLayout="@layout/pref_color"
                 android:key="result-list-color"
                 android:title="@string/color"
                 android:widgetLayout="@layout/pref_color_preview" />
+
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="127"
                 android:dialogLayout="@layout/pref_alpha"
                 android:key="result-list-alpha"
                 android:title="@string/alpha"
                 android:widgetLayout="@layout/pref_alpha_preview" />
+
             <androidx.preference.SwitchPreference
                 android:defaultValue="true"
                 android:key="result-list-rounded"
                 android:title="@string/round_corners" />
+
         </androidx.preference.PreferenceCategory>
 
         <!-- Quick list -->
@@ -112,17 +192,20 @@
                 android:key="quick-list-color"
                 android:title="@string/color"
                 android:widgetLayout="@layout/pref_color_preview" />
+
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="127"
                 android:dialogLayout="@layout/pref_alpha"
                 android:key="quick-list-alpha"
                 android:title="@string/alpha"
                 android:widgetLayout="@layout/pref_alpha_preview" />
+
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@integer/default_bar_size"
                 android:dialogLayout="@layout/pref_alpha"
                 android:key="quick-list-size"
                 android:title="@string/quick_list_size" />
+
         </androidx.preference.PreferenceCategory>
 
         <!--        <androidx.preference.PreferenceCategory android:title="@string/misc">-->
@@ -165,14 +248,14 @@
 
 
     <rocks.tbog.tblauncher.preference.CustomDialogPreference
-        android:key="reset-default-launcher"
         android:dialogLayout="@layout/pref_confirm"
-        android:title="@string/reset_default_launcher"/>
+        android:key="reset-default-launcher"
+        android:title="@string/reset_default_launcher" />
 
     <rocks.tbog.tblauncher.preference.CustomDialogPreference
-        android:key="exit-app"
         android:dialogLayout="@layout/pref_confirm"
-        android:title="@string/exit_the_app"/>
+        android:key="exit-app"
+        android:title="@string/exit_the_app" />
 
     <androidx.preference.Preference
         android:key="rate-app"
