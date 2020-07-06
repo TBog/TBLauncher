@@ -229,7 +229,7 @@ public class TagsHandler {
                 removeTag(entry, tag);
         }
         else {
-            List<String> oldTags = getTags(entry.id);
+            List<String> oldTags = DBHelper.loadTags(getContext(), entry.id);
 
             // tags that need to be removed
             {

@@ -442,6 +442,26 @@ public class DBHelper {
         return records;
     }
 
+    /**
+     * @param context android context
+     * @param record the id of the app
+     * @return HashMap with EntryItem id as key and an ArrayList of tags for each
+     */
+    @NonNull
+    public static List<String> loadTags(Context context, String record) {
+        List<String> tagList;
+        SQLiteDatabase db = getDatabase(context);
+        try (Cursor cursor = db.query("tags", new String[]{"tag"},
+                "record=?", new String[]{record}, null, null, null)) {
+            tagList = new ArrayList<>(cursor.getCount());
+            while (cursor.moveToNext()) {
+                String tag = cursor.getString(0);
+                tagList.add(tag);
+            }
+        }
+        return tagList;
+    }
+
     @NonNull
     public static HashMap<String, AppRecord> getAppsData(Context context) {
         HashMap<String, AppRecord> records;

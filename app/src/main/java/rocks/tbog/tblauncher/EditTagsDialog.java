@@ -138,6 +138,8 @@ public class EditTagsDialog extends DialogFragment<Set<String>> {
         {
             View button = view.findViewById(android.R.id.button1);
             button.setOnClickListener(v -> {
+                String tag = mNewTag.getText().toString();
+                addTag(tag);
                 onConfirm(mTagList);
                 dismiss();
             });
@@ -151,6 +153,7 @@ public class EditTagsDialog extends DialogFragment<Set<String>> {
     }
 
     private void addTag(String tag) {
+        tag = tag.trim();
         if (tag.length() == 0)
             return;
         mTagList.add(tag);
