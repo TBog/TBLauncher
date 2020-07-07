@@ -355,13 +355,13 @@ public final class ShortcutEntry extends EntryWithTags {
     public static class AsyncSetEntryIcon extends ResultViewHelper.AsyncSetEntryDrawable {
         Drawable appDrawable = null;
 
-        public AsyncSetEntryIcon(@NonNull ImageView image, int drawFlags) {
-            super(image, drawFlags);
+        public AsyncSetEntryIcon(@NonNull ImageView image, int drawFlags, @NonNull EntryItem entryItem) {
+            super(image, drawFlags, entryItem);
         }
 
         @Override
-        public Drawable getDrawable(EntryItem entry, Context context) {
-            ShortcutEntry shortcutEntry = (ShortcutEntry) entry;
+        public Drawable getDrawable(Context context) {
+            ShortcutEntry shortcutEntry = (ShortcutEntry) entryItem;
             // If no icon found for this shortcut, use app icon
             final PackageManager packageManager = context.getPackageManager();
             try {

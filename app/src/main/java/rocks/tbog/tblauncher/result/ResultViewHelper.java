@@ -118,28 +118,42 @@ public final class ResultViewHelper {
 
         AsyncSetEntryDrawable task;
         try {
-            Constructor<? extends AsyncSetEntryDrawable> constructor = asyncSetEntryIconClass.getConstructor(ImageView.class, int.class);
-            task = constructor.newInstance(appIcon, drawFlags);
+            Constructor<? extends AsyncSetEntryDrawable> constructor = asyncSetEntryIconClass.getConstructor(ImageView.class, int.class, EntryItem.class);
+            task = constructor.newInstance(appIcon, drawFlags, entry);
         } catch (IllegalAccessException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {
             Log.e(TAG, "new <? extends AsyncSetEntryDrawable>", e);
             return;
         }
-        task.executeOnExecutor(iconAsyncExecutor, entry);
+        task.executeOnExecutor(iconAsyncExecutor);
     }
 
-    public static abstract class AsyncSetEntryDrawable extends AsyncTask<EntryItem, Void, Drawable> {
+    public static abstract class AsyncSetEntryDrawable extends AsyncTask<Void, Void, Drawable> {
         private final WeakReference<ImageView> weakImage;
-        private String cacheId = null;
+        protected final String cacheId;
         protected int drawFlags;
+        protected EntryItem entryItem;
 
-        public AsyncSetEntryDrawable(@NonNull ImageView image, int drawFlags) {
+        public AsyncSetEntryDrawable(@NonNull ImageView image, int drawFlags, @NonNull EntryItem entryItem) {
             super();
-            if (image.getTag() instanceof AsyncSetEntryDrawable)
-                ((AsyncSetEntryDrawable) image.getTag()).cancel(true);
+            cacheId = entryItem.id;
+
+            Object tag = image.getTag();
             image.setTag(this);
-            image.setImageResource(android.R.color.transparent);
+            boolean keepIcon = false;
+            if (tag instanceof AsyncSetEntryDrawable) {
+                AsyncSetEntryDrawable task = (AsyncSetEntryDrawable) tag;
+                task.cancel(false);
+                // if the old task was loading the same entry we can keep the icon while we refresh it
+                keepIcon = entryItem.equals(task.entryItem);
+            } else if (tag instanceof String) {
+                // if the tag equals cacheId then we can keep the icon while we refresh it
+                keepIcon = tag.equals(cacheId);
+            }
+            if (!keepIcon)
+                image.setImageResource(android.R.color.transparent);
             this.weakImage = new WeakReference<>(image);
             this.drawFlags = drawFlags;
+            this.entryItem = entryItem;
         }
 
         @Nullable
@@ -148,21 +162,18 @@ public final class ResultViewHelper {
         }
 
         @Override
-        protected Drawable doInBackground(EntryItem... entries) {
+        protected Drawable doInBackground(Void... voids) {
             ImageView image = getImageView();
             if (isCancelled() || image == null || image.getTag() != this) {
                 weakImage.clear();
                 return null;
             }
-            EntryItem entry = entries[0];
-            if (!Utilities.checkFlag(drawFlags, EntryItem.FLAG_DRAW_NO_CACHE))
-                cacheId = entry.id;
             Context ctx = image.getContext();
-            return getDrawable(entry, ctx);
+            return getDrawable(ctx);
         }
 
         @WorkerThread
-        protected abstract Drawable getDrawable(EntryItem entry, Context context);
+        protected abstract Drawable getDrawable(Context context);
 
         @Override
         protected void onPostExecute(Drawable drawable) {
@@ -172,8 +183,8 @@ public final class ResultViewHelper {
                 return;
             }
             image.setImageDrawable(drawable);
-            image.setTag(null);
-            if (cacheId != null)
+            image.setTag(cacheId);
+            if (cacheId != null && !Utilities.checkFlag(drawFlags, EntryItem.FLAG_DRAW_NO_CACHE))
                 TBApplication.drawableCache(image.getContext()).cacheDrawable(cacheId, drawable);
         }
     }

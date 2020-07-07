@@ -486,13 +486,13 @@ public final class AppEntry extends EntryWithTags {
     }
 
     public static class AsyncSetEntryIcon extends ResultViewHelper.AsyncSetEntryDrawable {
-        public AsyncSetEntryIcon(@NonNull ImageView image, int drawFlags) {
-            super(image, drawFlags);
+        public AsyncSetEntryIcon(@NonNull ImageView image, int drawFlags, @NonNull EntryItem entryItem) {
+            super(image, drawFlags, entryItem);
         }
 
         @Override
-        public Drawable getDrawable(EntryItem entry, Context context) {
-            AppEntry appEntry = (AppEntry) entry;
+        public Drawable getDrawable(Context context) {
+            AppEntry appEntry = (AppEntry) entryItem;
             //TODO: enable Google Calendar Icon
 //            if (GoogleCalendarIcon.GOOGLE_CALENDAR.equals(appEntry.packageName)) {
 //                // Google Calendar has a special treatment and displays a custom icon every day

@@ -217,12 +217,13 @@ public final class ContactEntry extends EntryItem {
     }
 
     public static class AsyncSetEntryIcon extends ResultViewHelper.AsyncSetEntryDrawable {
-        public AsyncSetEntryIcon(@NonNull ImageView image, int drawFlags) {
-            super(image, drawFlags);
+        public AsyncSetEntryIcon(@NonNull ImageView image, int drawFlags, @NonNull EntryItem entryItem) {
+            super(image, drawFlags, entryItem);
         }
 
-        protected Drawable getDrawable(EntryItem entry, Context ctx) {
-            Uri iconUri = ((ContactEntry) entry).iconUri;
+        @Override
+        protected Drawable getDrawable(Context ctx) {
+            Uri iconUri = ((ContactEntry) entryItem).iconUri;
             Drawable drawable = null;
             if (iconUri != null)
                 try {

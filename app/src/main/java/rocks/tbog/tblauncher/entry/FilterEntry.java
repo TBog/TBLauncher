@@ -74,14 +74,14 @@ public class FilterEntry extends EntryItem {
     }
 
     public static class AsyncSetEntryIcon extends ResultViewHelper.AsyncSetEntryDrawable {
-        public AsyncSetEntryIcon(@NonNull ImageView image, int drawFlags) {
-            super(image, drawFlags);
+        public AsyncSetEntryIcon(@NonNull ImageView image, int drawFlags, @NonNull EntryItem entryItem) {
+            super(image, drawFlags, entryItem);
         }
 
         @Override
-        public Drawable getDrawable(EntryItem entry, Context context) {
-            FilterEntry appEntry = (FilterEntry) entry;
-            return appEntry.getIconDrawable(context);
+        public Drawable getDrawable(Context context) {
+            FilterEntry filterEntry = (FilterEntry) entryItem;
+            return filterEntry.getIconDrawable(context);
         }
     }
 }
