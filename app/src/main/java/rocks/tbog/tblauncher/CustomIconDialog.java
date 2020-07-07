@@ -1,13 +1,11 @@
 package rocks.tbog.tblauncher;
 
-import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.LauncherActivityInfo;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
-import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -15,12 +13,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.util.DisplayMetrics;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -57,6 +52,7 @@ public class CustomIconDialog extends DialogFragment<Drawable> {
     private ImageView mPreview;
     private LinearLayout mIconPackList;
     private IconPackXML mShownIconPack;
+    private Utilities.AsyncRun mLoadIconPackTask = null;
 
     @Override
     protected int layoutRes() {
@@ -325,15 +321,24 @@ public class CustomIconDialog extends DialogFragment<Drawable> {
     private void setShownIconPack(String packageName) {
         if (packageName == null) {
             mShownIconPack = null;
+            refreshList();
+            refreshQuickList();
         } else {
             if (mShownIconPack != null && packageName.equals(mShownIconPack.getPackPackageName()))
                 return;
-            IconPackXML pack = new IconPackXML(packageName);
-            pack.loadDrawables(getContext().getPackageManager());
-            mShownIconPack = pack;
+            if (mLoadIconPackTask != null)
+                mLoadIconPackTask.cancel(true);
+            //TODO: inform the user we are loading data
+            mLoadIconPackTask = Utilities.runAsync(() -> {
+                IconPackXML pack = new IconPackXML(packageName);
+                pack.loadDrawables(getContext().getPackageManager());
+                mShownIconPack = pack;
+            }, () -> {
+                mLoadIconPackTask = null;
+                refreshList();
+                refreshQuickList();
+            });
         }
-        refreshList();
-        refreshQuickList();
     }
 
     @Override

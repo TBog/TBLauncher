@@ -26,7 +26,6 @@ import androidx.annotation.WorkerThread;
 
 import java.lang.ref.WeakReference;
 
-import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.ui.CutoutFactory;
 import rocks.tbog.tblauncher.ui.ICutout;
@@ -170,6 +169,10 @@ public class Utilities {
         toast.setGravity(Gravity.START | Gravity.TOP, toastX, toastY);
     }
 
+    public static Utilities.AsyncRun runAsync(Runnable background, Runnable after) {
+        return (Utilities.AsyncRun) new Utilities.AsyncRun(background, after).execute();
+    }
+
     public interface GetDrawable {
         @Nullable
         Drawable getDrawable(@NonNull Context context);
@@ -214,4 +217,26 @@ public class Utilities {
         }
     }
 
+    public static class AsyncRun extends AsyncTask<Void, Void, Void> {
+        private final Runnable mBackground;
+        private final Runnable mAfter;
+
+        public AsyncRun(@NonNull Runnable background, @Nullable Runnable after) {
+            super();
+            mBackground = background;
+            mAfter = after;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            mBackground.run();
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Void aVoid) {
+            if (mAfter != null)
+                mAfter.run();
+        }
+    }
 }
