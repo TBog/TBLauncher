@@ -21,7 +21,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import androidx.preference.PreferenceManager;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -548,7 +547,7 @@ public class DataHandler extends BroadcastReceiver
         // Remove all shortcuts from favorites for given package name
         List<ShortcutRecord> shortcutsList = DBHelper.getShortcuts(context, packageName);
         for (ShortcutRecord shortcut : shortcutsList) {
-            String id = ShortcutEntry.generateShortcutId(shortcut.displayName);
+            String id = ShortcutEntry.generateShortcutId(shortcut.dbId, shortcut.displayName);
             EntryItem entry = getPojo(id);
             if (entry != null)
                 removeFromFavorites(entry);

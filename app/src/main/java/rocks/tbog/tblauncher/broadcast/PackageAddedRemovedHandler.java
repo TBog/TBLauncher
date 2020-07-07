@@ -81,7 +81,7 @@ public class PackageAddedRemovedHandler extends BroadcastReceiver {
 
         handleEvent(ctx,
                 intent.getAction(),
-                packageName, new UserHandleCompat(),
+                packageName, UserHandleCompat.CURRENT_USER,
                 intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)
         );
 

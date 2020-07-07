@@ -6,6 +6,7 @@ import android.content.pm.LauncherApps.ShortcutQuery;
 import android.content.pm.ShortcutInfo;
 import android.os.Build;
 import android.os.Process;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -48,7 +49,7 @@ public class LoadShortcutsEntryItem extends LoadEntryItem<ShortcutEntry> {
             return new ArrayList<>();
         }
 
-        List<ShortcutRecord> records = DBHelper.getShortcuts(ctx);
+        List<ShortcutRecord> records = DBHelper.getShortcutsNoIcons(ctx);
         ArrayList<ShortcutEntry> pojos = new ArrayList<>(records.size());
 
         HashMap<String, ShortcutRecord> oreoMap = new HashMap<>();
@@ -58,7 +59,7 @@ public class LoadShortcutsEntryItem extends LoadEntryItem<ShortcutEntry> {
                 oreoMap.put(shortcutRecord.infoData, shortcutRecord);
                 continue;
             }
-            String id = ShortcutEntry.generateShortcutId(shortcutRecord.infoData);
+            String id = ShortcutEntry.generateShortcutId(shortcutRecord.dbId, shortcutRecord.infoData);
 
             ShortcutEntry pojo = new ShortcutEntry(id, shortcutRecord.dbId, shortcutRecord.packageName, shortcutRecord.infoData);
 
@@ -80,13 +81,15 @@ public class LoadShortcutsEntryItem extends LoadEntryItem<ShortcutEntry> {
                 shortcutInfos = Collections.emptyList();
 
             for (ShortcutInfo shortcutInfo : shortcutInfos) {
-                ShortcutEntry pojo = new ShortcutEntry(shortcutInfo);
-
                 ShortcutRecord record = oreoMap.get(shortcutInfo.getId());
-                if (record != null)
-                    pojo.setName(record.displayName);
-                else
-                    pojo.setName(shortcutInfo.getShortLabel().toString());
+                long dbId = 0;
+                String name = null;
+                if (record != null) {
+                    dbId = record.dbId;
+                    name = record.displayName;
+                }
+                ShortcutEntry pojo = new ShortcutEntry(dbId, shortcutInfo);
+                pojo.setName(name);
                 pojo.setTags(tagsHandler.getTags(pojo.id));
 
                 pojos.add(pojo);

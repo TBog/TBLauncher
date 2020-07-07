@@ -105,7 +105,7 @@ public class LoadAppEntry extends LoadEntryItem<AppEntry> {
             mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
 
             for (ResolveInfo info : manager.queryIntentActivities(mainIntent, 0)) {
-                UserHandleCompat user = new UserHandleCompat();
+                UserHandleCompat user = UserHandleCompat.CURRENT_USER;
                 ApplicationInfo appInfo = info.activityInfo.applicationInfo;
 
                 String displayName = info.loadLabel(manager).toString();

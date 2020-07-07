@@ -5,7 +5,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.os.Build;
 import android.os.Process;
-import android.os.UserHandle;
 import android.os.UserManager;
 
 import androidx.annotation.NonNull;
@@ -15,6 +14,7 @@ import androidx.annotation.NonNull;
  * Wrapper class for `android.os.UserHandle` that works with all Android versions
  */
 public class UserHandleCompat {
+    public static final UserHandleCompat CURRENT_USER = new UserHandleCompat();
     private final long serial;
     private final Object handle; // android.os.UserHandle on Android 4.2 and newer
 
@@ -40,15 +40,22 @@ public class UserHandleCompat {
         }
     }
 
+    public UserHandleCompat(Context context, android.os.UserHandle userHandle) {
+        final UserManager manager = (UserManager) context.getSystemService(Context.USER_SERVICE);
+        assert manager != null;
+        serial = manager.getSerialNumberForUser(userHandle);
+        handle = userHandle;
+    }
+
     public static UserHandleCompat fromComponentName(Context ctx, String componentName) {
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             UserManager manager = (UserManager) ctx.getSystemService(Context.USER_SERVICE);
             assert manager != null;
             long serial = getUserSerial(componentName);
-            UserHandle handle = manager.getUserForSerialNumber(serial);
+            android.os.UserHandle handle = manager.getUserForSerialNumber(serial);
             return new UserHandleCompat(serial, handle);
         }
-        return new UserHandleCompat();
+        return UserHandleCompat.CURRENT_USER;
     }
 
     @NonNull

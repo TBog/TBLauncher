@@ -172,7 +172,7 @@ public class TagsHandler {
             String packageName = list.get(0).activityInfo.applicationInfo.packageName;
             String className = list.get(0).activityInfo.name;
 
-            UserHandleCompat user = new UserHandleCompat();
+            UserHandleCompat user = UserHandleCompat.CURRENT_USER;
             return AppEntry.SCHEME + user.getUserComponentName(packageName, className);
         }
     }
@@ -203,7 +203,7 @@ public class TagsHandler {
                 {"com.asus.deskclock", "com.asus.deskclock.DeskClock"}
         };
 
-        UserHandleCompat user = new UserHandleCompat();
+        UserHandleCompat user = UserHandleCompat.CURRENT_USER;
         for (String[] clockImpl : clockImpls) {
             String packageName = clockImpl[0];
             String className = clockImpl[1];

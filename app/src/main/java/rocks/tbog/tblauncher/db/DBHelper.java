@@ -31,6 +31,7 @@ public class DBHelper {
     private static final String[] TABLE_COLUMNS_APPS = new String[]{"_id", "display_name", "component_name", "custom_flags"};//, "custom_icon"};
     private static final String[] TABLE_APPS_CUSTOM_ICON = new String[]{"custom_icon"};
     private static final String[] TABLE_COLUMNS_FAVORITES = new String[]{"record", "position", "custom_flags"};
+    private static final String[] TABLE_COLUMNS_SHORTCUTS = new String[]{"_id", "name", "package", "info_data", "icon_png", "custom_flags"};
 
     private DBHelper() {
     }
@@ -307,7 +308,7 @@ public class DBHelper {
 
         ArrayList<ShortcutRecord> records;
         try (Cursor cursor = db.query("shortcuts",
-                new String[]{"_id", "name", "package", "info_data", "custom_flags"},
+                TABLE_COLUMNS_SHORTCUTS,
                 "package = ?", new String[]{packageName},
                 null, null, null)) {
 
@@ -319,7 +320,8 @@ public class DBHelper {
                 entry.displayName = cursor.getString(1);
                 entry.packageName = cursor.getString(2);
                 entry.infoData = cursor.getString(3);
-                entry.flags = cursor.getInt(4);
+                entry.iconPng = cursor.getBlob(4);
+                entry.flags = cursor.getInt(5);
 
                 records.add(entry);
             }
@@ -332,7 +334,7 @@ public class DBHelper {
      * Retrieve a list of all shortcuts, without icons.
      */
     @NonNull
-    public static ArrayList<ShortcutRecord> getShortcuts(@NonNull Context context) {
+    public static ArrayList<ShortcutRecord> getShortcutsNoIcons(@NonNull Context context) {
         SQLiteDatabase db = getDatabase(context);
 
         ArrayList<ShortcutRecord> records;

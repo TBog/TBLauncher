@@ -38,6 +38,7 @@ import rocks.tbog.tblauncher.result.ResultAdapter;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
+import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 
@@ -63,10 +64,10 @@ public final class ShortcutEntry extends EntryWithTags {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.N_MR1)
-    public ShortcutEntry(@NonNull ShortcutInfo shortcutInfo) {
+    public ShortcutEntry(long dbId, @NonNull ShortcutInfo shortcutInfo) {
         super(ShortcutEntry.SCHEME + shortcutInfo.getId());
 
-        dbId = 0;
+        this.dbId = dbId;
         packageName = shortcutInfo.getPackage();
         shortcutData = shortcutInfo.getId();
         mShortcutInfo = shortcutInfo;
@@ -75,8 +76,8 @@ public final class ShortcutEntry extends EntryWithTags {
     /**
      * @return shortcut id generated from shortcut name
      */
-    public static String generateShortcutId(String shortcutName) {
-        return SCHEME + shortcutName.toLowerCase(Locale.ROOT);
+    public static String generateShortcutId(long dbId, String shortcutName) {
+        return SCHEME + dbId + "/" + shortcutName.toLowerCase(Locale.ROOT);
     }
 
     /**
@@ -374,11 +375,20 @@ public final class ShortcutEntry extends EntryWithTags {
                     String packageName = mainPackage.activityInfo.applicationInfo.packageName;
                     String activityName = mainPackage.activityInfo.name;
                     ComponentName className = new ComponentName(packageName, activityName);
-                    appDrawable = context.getPackageManager().getActivityIcon(className);
+                    appDrawable = TBApplication.iconsHandler(context).getDrawableIconForPackage(className, UserHandleCompat.CURRENT_USER);
+                    //appDrawable = context.getPackageManager().getActivityIcon(className);
                 } else {
                     // Can't make sense of the intent URI (Oreo shortcut, or a shortcut from an activity that was removed from an installed app)
                     // Retrieve app icon
-                    appDrawable = packageManager.getApplicationIcon(shortcutEntry.packageName);
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+                        if (shortcutEntry.mShortcutInfo != null) {
+                            UserHandleCompat user = new UserHandleCompat(context, shortcutEntry.mShortcutInfo.getUserHandle());
+                            ComponentName componentName = shortcutEntry.mShortcutInfo.getActivity();
+                            appDrawable = TBApplication.iconsHandler(context).getDrawableIconForPackage(componentName, user);
+                        }
+                    }
+                    if (appDrawable == null)
+                        appDrawable = packageManager.getApplicationIcon(shortcutEntry.packageName);
                 }
             } catch (PackageManager.NameNotFoundException | URISyntaxException e) {
                 Log.e("Shortcut", "get app shortcut icon", e);
