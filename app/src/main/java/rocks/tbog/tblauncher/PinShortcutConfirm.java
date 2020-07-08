@@ -26,6 +26,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.EditText;
@@ -36,7 +37,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 
 import rocks.tbog.tblauncher.db.ShortcutRecord;
+import rocks.tbog.tblauncher.entry.ShortcutEntry;
 import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
+import rocks.tbog.tblauncher.utils.Utilities;
 
 @RequiresApi(api = Build.VERSION_CODES.O)
 public class PinShortcutConfirm extends Activity implements OnClickListener {
@@ -68,7 +71,7 @@ public class PinShortcutConfirm extends Activity implements OnClickListener {
 
         // Label
         {
-            EditText edit = findViewById(android.R.id.text1);
+            EditText edit = findViewById(R.id.shortcutName);
             String packageName = packageNameHeuristic(this, shortcutInfo);
             String appName = ShortcutUtil.getAppNameFromPackageName(this, packageName);
             String prefix = !appName.isEmpty() ? (appName + ": ") : appName;
@@ -80,7 +83,7 @@ public class PinShortcutConfirm extends Activity implements OnClickListener {
 
         // Description
         {
-            TextView description = findViewById(R.id.shortcut_description);
+            TextView description = findViewById(R.id.shortcutDetails);
             ComponentName activity = shortcutInfo.getActivity();
             String htmlString = String.format(
                     "<h1>Shortcut details:</h1>" +
@@ -99,25 +102,40 @@ public class PinShortcutConfirm extends Activity implements OnClickListener {
             description.setText(Html.fromHtml(htmlString, Html.FROM_HTML_MODE_COMPACT));
         }
 
-        // Icon
         {
-            Drawable icon = mLauncherApps.getShortcutIconDrawable(shortcutInfo, 0);
-            ImageView iconView = findViewById(R.id.image);
-            if (icon != null)
-                iconView.setImageDrawable(icon);
-            else
-                iconView.setVisibility(View.GONE);
+            View view = findViewById(R.id.image);
+            TextView nameView = view.findViewById(android.R.id.text1);
+            nameView.setVisibility(View.GONE);
+            ImageView icon1 = view.findViewById(android.R.id.icon1);
+            setIconsAsync(icon1, shortcutInfo, (ctx) -> mLauncherApps.getShortcutIconDrawable(shortcutInfo, 0));
         }
 
-        // Icon with badge
         {
-            Drawable icon = mLauncherApps.getShortcutBadgedIconDrawable(shortcutInfo, 0);
-            ImageView iconView = findViewById(R.id.imageWithBadge);
-            if (icon != null)
-                iconView.setImageDrawable(icon);
-            else
-                iconView.setVisibility(View.GONE);
+            View view = findViewById(R.id.imageWithBadge);
+            TextView nameView = view.findViewById(android.R.id.text1);
+            nameView.setVisibility(View.GONE);
+            ImageView icon1 = view.findViewById(android.R.id.icon1);
+            setIconsAsync(icon1, shortcutInfo, (ctx) -> mLauncherApps.getShortcutBadgedIconDrawable(shortcutInfo, 0));
         }
+    }
+
+    private static void setIconsAsync(ImageView icon1, ShortcutInfo shortcutInfo, Utilities.GetDrawable getIcon) {
+        new Utilities.AsyncSetDrawable(icon1) {
+            Drawable appDrawable;
+
+            @Override
+            protected Drawable getDrawable(Context context) {
+                appDrawable = ShortcutEntry.getAppDrawable(context, shortcutInfo.getId(), shortcutInfo.getPackage(), shortcutInfo);
+                return getIcon.getDrawable(context);
+            }
+
+            @Override
+            protected void onPostExecute(Drawable drawable) {
+                ImageView icon1 = weakImage.get();
+                super.onPostExecute(drawable);
+                ShortcutEntry.setIcons(icon1, drawable, appDrawable);
+            }
+        }.execute();
     }
 
     @NonNull
@@ -165,6 +183,11 @@ public class PinShortcutConfirm extends Activity implements OnClickListener {
         }
     }
 
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        return super.onTouchEvent(event);
+    }
+
     private void acceptShortcut() {
         final ShortcutInfo shortcutInfo = mRequest.getShortcutInfo();
         if (shortcutInfo == null) {
@@ -176,7 +199,7 @@ public class PinShortcutConfirm extends Activity implements OnClickListener {
         ShortcutRecord record = ShortcutUtil.createShortcutRecord(this, shortcutInfo, false);
         if (record != null) {
             EditText edit = findViewById(android.R.id.text1);
-            if ( edit.getText().length() > 0 )
+            if (edit.getText().length() > 0)
                 record.displayName = edit.getText().toString();
             TBApplication.getApplication(this).getDataHandler().addShortcut(record);
         }

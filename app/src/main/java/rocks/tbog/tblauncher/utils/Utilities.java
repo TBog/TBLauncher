@@ -179,7 +179,7 @@ public class Utilities {
     }
 
     public static abstract class AsyncSetDrawable extends AsyncTask<Void, Void, Drawable> {
-        final WeakReference<ImageView> weakImage;
+        protected final WeakReference<ImageView> weakImage;
 
         protected AsyncSetDrawable(@NonNull ImageView image) {
             super();

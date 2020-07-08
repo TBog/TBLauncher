@@ -33,8 +33,8 @@ public class ConfirmDialog extends PreferenceDialogFragmentCompat {
 
         switch (key) {
             case "exit-app":
-                getActivity().finishAffinity();
-                //System.exit(0);
+                //getActivity().finishAffinity();
+                System.exit(0);
                 break;
             case "reset-default-launcher":
                 TBApplication.resetDefaultLauncherAndOpenChooser(getContext());

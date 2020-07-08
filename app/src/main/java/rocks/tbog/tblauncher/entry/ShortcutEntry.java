@@ -4,7 +4,6 @@ import android.annotation.TargetApi;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
@@ -24,8 +23,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+import androidx.annotation.WorkerThread;
 import androidx.appcompat.app.AlertDialog;
-import androidx.preference.PreferenceManager;
 
 import java.net.URISyntaxException;
 import java.util.List;
@@ -147,7 +146,6 @@ public final class ShortcutEntry extends EntryWithTags {
 
     private void displayListResult(@NonNull View view, int drawFlags) {
         Context context = view.getContext();
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
 
         TextView shortcutName = view.findViewById(R.id.item_app_name);
 
@@ -163,30 +161,6 @@ public final class ShortcutEntry extends EntryWithTags {
             tagsView.setVisibility(View.VISIBLE);
         } else {
             tagsView.setVisibility(View.GONE);
-        }
-
-        // Retrieve package icon for this shortcut
-        final PackageManager packageManager = context.getPackageManager();
-        Drawable appDrawable = null;
-        try {
-            List<ResolveInfo> packages = null;
-            if (!isOreoShortcut()) {
-                Intent intent = Intent.parseUri(shortcutData, 0);
-                packages = packageManager.queryIntentActivities(intent, 0);
-            }
-            if (packages != null && !packages.isEmpty()) {
-                ResolveInfo mainPackage = packages.get(0);
-                String packageName = mainPackage.activityInfo.applicationInfo.packageName;
-                String activityName = mainPackage.activityInfo.name;
-                ComponentName className = new ComponentName(packageName, activityName);
-                appDrawable = context.getPackageManager().getActivityIcon(className);
-            } else {
-                // Can't make sense of the intent URI (Oreo shortcut, or a shortcut from an activity that was removed from an installed app)
-                // Retrieve app icon
-                appDrawable = packageManager.getApplicationIcon(packageName);
-            }
-        } catch (PackageManager.NameNotFoundException | URISyntaxException e) {
-            Log.e("Shortcut", "get app shortcut icon", e);
         }
 
         final ImageView shortcutIcon = view.findViewById(android.R.id.icon1);
@@ -352,6 +326,54 @@ public final class ShortcutEntry extends EntryWithTags {
         ((TextView) dialog.findViewById(R.id.rename)).setText(getName());
     }
 
+    @WorkerThread
+    public static Drawable getAppDrawable(@NonNull Context context, @NonNull String shortcutData, @NonNull String packageName, @Nullable ShortcutInfo shortcutInfo) {
+        Drawable appDrawable = null;
+        final PackageManager packageManager = context.getPackageManager();
+        try {
+            List<ResolveInfo> packages = null;
+            if (shortcutInfo == null) {
+                Intent intent = Intent.parseUri(shortcutData, 0);
+                packages = packageManager.queryIntentActivities(intent, 0);
+            }
+            if (packages != null && !packages.isEmpty()) {
+                ResolveInfo mainPackage = packages.get(0);
+                String packName = mainPackage.activityInfo.applicationInfo.packageName;
+                String actName = mainPackage.activityInfo.name;
+                ComponentName className = new ComponentName(packName, actName);
+                appDrawable = TBApplication.iconsHandler(context).getDrawableIconForPackage(className, UserHandleCompat.CURRENT_USER);
+            } else {
+                // Can't make sense of the intent URI (Oreo shortcut, or a shortcut from an activity that was removed from an installed app)
+                // Retrieve app icon
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+                    if (shortcutInfo != null) {
+                        UserHandleCompat user = new UserHandleCompat(context, shortcutInfo.getUserHandle());
+                        ComponentName componentName = shortcutInfo.getActivity();
+                        appDrawable = TBApplication.iconsHandler(context).getDrawableIconForPackage(componentName, user);
+                    }
+                }
+            }
+            if (appDrawable == null)
+                appDrawable = packageManager.getApplicationIcon(packageName);
+        } catch (PackageManager.NameNotFoundException | URISyntaxException e) {
+            Log.e("Shortcut", "get app shortcut icon", e);
+        }
+        return appDrawable;
+    }
+
+    public static void setIcons(ImageView icon1, Drawable drawable, Drawable appDrawable) {
+        if (icon1 != null && icon1.getParent() instanceof View) {
+            ImageView icon2 = ((View) icon1.getParent()).findViewById(android.R.id.icon2);
+            if (drawable != null) {
+                icon2.setImageDrawable(appDrawable);
+            } else {
+                // If no icon found for this shortcut, use app icon
+                icon1.setImageDrawable(appDrawable);
+                icon2.setImageResource(R.drawable.ic_send);
+            }
+        }
+    }
+
     public static class AsyncSetEntryIcon extends ResultViewHelper.AsyncSetEntryDrawable {
         Drawable appDrawable = null;
 
@@ -362,37 +384,7 @@ public final class ShortcutEntry extends EntryWithTags {
         @Override
         public Drawable getDrawable(Context context) {
             ShortcutEntry shortcutEntry = (ShortcutEntry) entryItem;
-            // If no icon found for this shortcut, use app icon
-            final PackageManager packageManager = context.getPackageManager();
-            try {
-                List<ResolveInfo> packages = null;
-                if (!shortcutEntry.isOreoShortcut()) {
-                    Intent intent = Intent.parseUri(shortcutEntry.shortcutData, 0);
-                    packages = packageManager.queryIntentActivities(intent, 0);
-                }
-                if (packages != null && !packages.isEmpty()) {
-                    ResolveInfo mainPackage = packages.get(0);
-                    String packageName = mainPackage.activityInfo.applicationInfo.packageName;
-                    String activityName = mainPackage.activityInfo.name;
-                    ComponentName className = new ComponentName(packageName, activityName);
-                    appDrawable = TBApplication.iconsHandler(context).getDrawableIconForPackage(className, UserHandleCompat.CURRENT_USER);
-                    //appDrawable = context.getPackageManager().getActivityIcon(className);
-                } else {
-                    // Can't make sense of the intent URI (Oreo shortcut, or a shortcut from an activity that was removed from an installed app)
-                    // Retrieve app icon
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
-                        if (shortcutEntry.mShortcutInfo != null) {
-                            UserHandleCompat user = new UserHandleCompat(context, shortcutEntry.mShortcutInfo.getUserHandle());
-                            ComponentName componentName = shortcutEntry.mShortcutInfo.getActivity();
-                            appDrawable = TBApplication.iconsHandler(context).getDrawableIconForPackage(componentName, user);
-                        }
-                    }
-                    if (appDrawable == null)
-                        appDrawable = packageManager.getApplicationIcon(shortcutEntry.packageName);
-                }
-            } catch (PackageManager.NameNotFoundException | URISyntaxException e) {
-                Log.e("Shortcut", "get app shortcut icon", e);
-            }
+            appDrawable = getAppDrawable(context, shortcutEntry.shortcutData, shortcutEntry.packageName, shortcutEntry.mShortcutInfo);
             Bitmap icon = shortcutEntry.getIcon(context);
             return icon != null ? new BitmapDrawable(context.getResources(), icon) : null;
         }
@@ -402,15 +394,7 @@ public final class ShortcutEntry extends EntryWithTags {
             // get ImageView before calling super
             ImageView icon1 = getImageView();
             super.onPostExecute(drawable);
-            if (icon1 != null && icon1.getParent() instanceof View) {
-                ImageView icon2 = ((View) icon1.getParent()).findViewById(android.R.id.icon2);
-                if (drawable != null) {
-                    icon2.setImageDrawable(appDrawable);
-                } else {
-                    icon1.setImageDrawable(appDrawable);
-                    icon2.setImageResource(R.drawable.ic_send);
-                }
-            }
+            setIcons(icon1, drawable, appDrawable);
         }
     }
 

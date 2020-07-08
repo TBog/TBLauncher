@@ -91,31 +91,50 @@
         <item name="android:listPreferredItemHeightLarge">67dp</item> <!-- 80dp -->
     </style>
 
-<!--    <style name="AppThemeSemiTransparent" parent="AppThemeLight">-->
-<!--        <item name="android:textColorSecondary">@color/kiss_text_on_semi_light</item>-->
-<!--        <item name="resultShadowColor">@color/kiss_background_light_transparent</item>-->
-<!--        <item name="dividerDrawable">@null</item>-->
-<!--        <item name="listBackgroundColor">@color/kiss_background_light_transparent</item>-->
-<!--        <item name="textShadowRadius">3</item>-->
-<!--    </style>-->
+    <style name="DialogWindowTitle">
+        <item name="android:maxLines">1</item>
+        <item name="android:scrollHorizontally">true</item>
+        <item name="android:background">@drawable/window_title_background</item>
+        <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+    </style>
 
-<!--    <style name="AppThemeSemiTransparentDark" parent="AppThemeDark">-->
-<!--        <item name="resultColor">@color/kiss_text_on_semi_dark</item>-->
-<!--        <item name="android:textColorSecondary">@color/kiss_text_on_dark</item>-->
-<!--        <item name="dividerDrawable">@null</item>-->
-<!--        <item name="listBackgroundColor">@color/kiss_background_dark_transparent</item>-->
-<!--        <item name="textShadowRadius">3</item>-->
-<!--    </style>-->
+    <style name="GradientButtonBar" parent="@android:style/ButtonBar">
+        <item name="android:background">@drawable/button_bar_background</item>
+    </style>
 
-<!--    <style name="AppThemeTransparentDark" parent="AppThemeDark">-->
-<!--        <item name="listBackgroundColor">@android:color/transparent</item>-->
-<!--        <item name="dividerDrawable">@null</item>-->
-<!--        <item name="textShadowRadius">3</item>-->
-<!--    </style>-->
+    <style name="GradientBorderlessButton">
+        <item name="android:background">@null</item>
+        <item name="android:textColor">@color/colorAccent</item>
+    </style>
+
+    <style name="DialogTheme" parent="Theme.AppCompat.Dialog">
+        <item name="android:windowNoTitle">false</item>
+        <item name="android:colorBackground">?attr/colorBackgroundFloating</item>
+        <item name="android:windowFrame">@null</item>
+        <item name="android:windowTitleStyle">@style/DialogWindowTitle</item>
+        <item name="android:windowBackground">@drawable/dialog_background</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowContentOverlay">@null</item>
+        <item name="android:windowSoftInputMode">stateUnspecified|adjustPan</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowActionModeOverlay">true</item>
+
+        <item name="resultColor">@android:color/white</item>
+        <item name="searchColor">@android:color/white</item>
+        <item name="resultShadowColor">@android:color/black</item>
+        <item name="searchShadowColor">@android:color/black</item>
+        <item name="android:textColorSecondary">#7Fffffff</item>
+        <item name="searchBackgroundColor">@null</item>
+        <item name="listBackgroundColor">@color/black_overlay</item>
+        <item name="dividerDrawable">@null</item>
+        <item name="textShadowRadius">3</item>
+        <item name="colorControlHighlight">@color/colorAccent</item>
+
+        <item name="android:buttonBarStyle">@style/GradientButtonBar</item>
+        <item name="android:buttonBarButtonStyle">@style/GradientBorderlessButton</item>
+    </style>
 
     <style name="SettingTheme" parent="AppThemeLight">
-<!--        <item name="android:windowActionBar">true</item>-->
-<!--        <item name="android:windowNoTitle">false</item>-->
         <item name="windowActionBar">true</item>
         <item name="windowNoTitle">false</item>
         <item name="android:windowBackground">@color/kiss_background</item>
