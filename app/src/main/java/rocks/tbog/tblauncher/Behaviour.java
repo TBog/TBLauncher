@@ -247,14 +247,14 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             switch (stringId) {
                 case R.string.launcher_settings:
                     beforeLaunchOccurred();
-                    v.postDelayed(() -> {
+                    mClearButton.postDelayed(() -> {
                         c.startActivity(new Intent(c, SettingsActivity.class));
                         afterLaunchOccurred();
                     }, LAUNCH_DELAY);
                     break;
                 case R.string.change_wallpaper:
                     beforeLaunchOccurred();
-                    v.postDelayed(() -> {
+                    mClearButton.postDelayed(() -> {
                         Intent intent = new Intent(Intent.ACTION_SET_WALLPAPER);
                         c.startActivity(Intent.createChooser(intent, c.getString(R.string.change_wallpaper)));
                         afterLaunchOccurred();
@@ -264,7 +264,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                     break;
                 case R.string.android_settings:
                     beforeLaunchOccurred();
-                    v.postDelayed(() -> {
+                    mClearButton.postDelayed(() -> {
                         c.startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS));
                         afterLaunchOccurred();
                     }, LAUNCH_DELAY);
