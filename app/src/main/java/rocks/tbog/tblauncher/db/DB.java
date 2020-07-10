@@ -92,9 +92,9 @@ class DB extends SQLiteOpenHelper {
                     addAppsTable(database);
                     // fall through
                 case 6:
-                    database.execSQL("DROP TABLE 'shortcuts'");
+                    database.execSQL("DROP TABLE \"shortcuts\"");
                     createShortcutsTable(database);
-                    database.execSQL("DROP TABLE 'tags'");
+                    database.execSQL("DROP TABLE \"tags\"");
                     createTags(database);
                     // fall through
                 case 7:

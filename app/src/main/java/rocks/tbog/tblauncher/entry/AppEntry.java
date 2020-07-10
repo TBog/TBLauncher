@@ -25,6 +25,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.annotation.StringRes;
 import androidx.annotation.WorkerThread;
 import androidx.appcompat.app.AlertDialog;
 
@@ -285,10 +286,11 @@ public final class AppEntry extends EntryWithTags {
     }
 
     @Override
-    protected boolean popupMenuClickHandler(@NonNull final Context context, @NonNull LinearAdapter.MenuItem item, int stringId) {
+    protected boolean popupMenuClickHandler(@NonNull final View view, @NonNull LinearAdapter.MenuItem item, int stringId) {
+        Context ctx = view.getContext();
         if (item instanceof ShortcutItem) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                final LauncherApps launcherApps = (LauncherApps) context.getSystemService(Context.LAUNCHER_APPS_SERVICE);
+                final LauncherApps launcherApps = (LauncherApps) ctx.getSystemService(Context.LAUNCHER_APPS_SERVICE);
                 assert launcherApps != null;
                 launcherApps.startShortcut(((ShortcutItem) item).shortcutInfo, null, null);
             }
@@ -296,55 +298,57 @@ public final class AppEntry extends EntryWithTags {
         }
         switch (stringId) {
             case R.string.menu_app_details:
-                launchAppDetails(context);
+                launchAppDetails(ctx);
                 return true;
             case R.string.menu_app_store:
-                launchAppStore(context);
+                launchAppStore(ctx);
                 return true;
             case R.string.menu_app_uninstall:
-                launchUninstall(context);
+                launchUninstall(ctx);
                 return true;
 //            case R.string.menu_app_hibernate:
 //                hibernate(context, appPojo);
 //                return true;
-            case R.string.menu_exclude:
+            case R.string.menu_exclude: {
+                ListPopup menu = new ListPopup(ctx);
+                LinearAdapter adapter = new LinearAdapter();
+                menu.setAdapter(adapter);
 
-                //TODO: Change PopupMenu to ListPopup
-//                final int EXCLUDE_HISTORY_ID = 0;
-//                final int EXCLUDE_KISS_ID = 1;
-//                PopupMenu popupExcludeMenu = new PopupMenu(context, parentView);
-//                //Adding menu items
-//                popupExcludeMenu.getMenu().add(EXCLUDE_HISTORY_ID, Menu.NONE, Menu.NONE, R.string.menu_exclude_history);
-//                popupExcludeMenu.getMenu().add(EXCLUDE_KISS_ID, Menu.NONE, Menu.NONE, R.string.menu_exclude_kiss);
-//                //registering popup with OnMenuItemClickListener
-//                popupExcludeMenu.setOnMenuItemClickListener(item -> {
-//                    switch (item.getGroupId()) {
-//                        case EXCLUDE_HISTORY_ID:
-//                            excludeFromHistory(context, appPojo());
-//                            return true;
-//                        case EXCLUDE_KISS_ID:
-//                            excludeFromKiss(context, appPojo(), parent);
-//                            return true;
-//                    }
-//
-//                    return true;
-//                });
-//
-//                popupExcludeMenu.show();
+                adapter.add(new LinearAdapter.Item(ctx, R.string.menu_exclude_history));
+                adapter.add(new LinearAdapter.Item(ctx, R.string.menu_exclude_kiss));
+
+                menu.setOnItemClickListener((a, v, pos) -> {
+                    LinearAdapter.MenuItem menuItem = ((LinearAdapter) a).getItem(pos);
+                    @StringRes int id = 0;
+                    if (menuItem instanceof LinearAdapter.Item) {
+                        id = ((LinearAdapter.Item) a.getItem(pos)).stringId;
+                    }
+                    switch (id) {
+                        case R.string.menu_exclude_history:
+                            //excludeFromHistory(v.getContext(), appPojo());
+                            break;
+                        case R.string.menu_exclude_kiss:
+                            //excludeFromKiss(v.getContext(), appPojo(), parent);
+                            break;
+                    }
+                });
+                TBApplication.behaviour(ctx).registerPopup(menu);
+                menu.show(view);
                 return true;
+            }
             case R.string.menu_tags_add:
             case R.string.menu_tags_edit:
-                TBApplication.behaviour(context).launchEditTagsDialog(this);
+                TBApplication.behaviour(ctx).launchEditTagsDialog(this);
                 return true;
             case R.string.menu_app_rename:
-                launchRenameDialog(context);
+                launchRenameDialog(ctx);
                 return true;
             case R.string.menu_custom_icon:
-                TBApplication.behaviour(context).launchCustomIconDialog(this);
+                TBApplication.behaviour(ctx).launchCustomIconDialog(this);
                 return true;
         }
 
-        return super.popupMenuClickHandler(context, item, stringId);
+        return super.popupMenuClickHandler(view, item, stringId);
     }
 
     @Override

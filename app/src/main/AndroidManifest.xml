@@ -84,7 +84,7 @@
             android:exported="false"
             android:launchMode="singleInstance"
             android:noHistory="true"
-            android:theme="@style/DialogTheme"
+            android:theme="@style/TitleDialogTheme"
             tools:ignore="NewApi">
             <intent-filter>
                 <action android:name="android.content.pm.action.CONFIRM_PIN_SHORTCUT" />

@@ -7,7 +7,6 @@ import androidx.annotation.CallSuper;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
-import androidx.preference.PreferenceManager;
 
 import java.util.ArrayList;
 
@@ -235,7 +234,7 @@ public abstract class EntryItem {
             if (item instanceof LinearAdapter.Item) {
                 stringId = ((LinearAdapter.Item) adapter.getItem(position)).stringId;
             }
-            popupMenuClickHandler(view.getContext(), item, stringId);
+            popupMenuClickHandler(view, item, stringId);
         });
 
         return menu;
@@ -248,7 +247,8 @@ public abstract class EntryItem {
      * @return Works in the same way as onOptionsItemSelected, return true if the action has been handled, false otherwise
      */
     @CallSuper
-    boolean popupMenuClickHandler(@NonNull Context context, @NonNull LinearAdapter.MenuItem item, @StringRes int stringId) {
+    boolean popupMenuClickHandler(@NonNull View view, @NonNull LinearAdapter.MenuItem item, @StringRes int stringId) {
+        Context context = view.getContext();
         switch (stringId) {
             case R.string.menu_remove:
                 ResultHelper.removeFromResultsAndHistory(this, context);
