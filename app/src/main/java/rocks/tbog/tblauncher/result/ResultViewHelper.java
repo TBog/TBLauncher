@@ -111,11 +111,16 @@ public final class ResultViewHelper {
         if (!Utilities.checkFlag(drawFlags, EntryItem.FLAG_DRAW_NO_CACHE)) {
             Drawable cache = TBApplication.drawableCache(appIcon.getContext()).getCachedDrawable(entry.id);
             if (cache != null) {
+                // found the icon in cache
                 appIcon.setImageDrawable(cache);
-                return;
+                appIcon.setTag(entry.id);
+                // continue to run the async task only if FLAG_RELOAD set
+                if (!Utilities.checkFlag(drawFlags, EntryItem.FLAG_RELOAD))
+                    return;
             }
         }
 
+        // run the async task
         AsyncSetEntryDrawable task;
         try {
             Constructor<? extends AsyncSetEntryDrawable> constructor = asyncSetEntryIconClass.getConstructor(ImageView.class, int.class, EntryItem.class);

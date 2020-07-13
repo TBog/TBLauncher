@@ -125,7 +125,7 @@ public class PinShortcutConfirm extends Activity implements OnClickListener {
 
             @Override
             protected Drawable getDrawable(Context context) {
-                appDrawable = ShortcutEntry.getAppDrawable(context, shortcutInfo.getId(), shortcutInfo.getPackage(), shortcutInfo);
+                appDrawable = ShortcutEntry.getAppDrawable(context, shortcutInfo.getId(), shortcutInfo.getPackage(), shortcutInfo, true);
                 return getIcon.getDrawable(context);
             }
 

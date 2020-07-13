@@ -25,11 +25,13 @@ import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.WorkerThread;
 import androidx.appcompat.app.AlertDialog;
+import androidx.core.content.ContextCompat;
 
 import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Locale;
 
+import rocks.tbog.tblauncher.IconsHandler;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.db.DBHelper;
@@ -169,7 +171,7 @@ public final class ShortcutEntry extends EntryWithTags {
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
             shortcutIcon.setVisibility(View.VISIBLE);
             appIcon.setVisibility(View.VISIBLE);
-            ResultViewHelper.setIconAsync(drawFlags, this, shortcutIcon, AsyncSetEntryIcon.class);
+            ResultViewHelper.setIconAsync(drawFlags | FLAG_RELOAD, this, shortcutIcon, AsyncSetEntryIcon.class);
         } else {
             shortcutIcon.setImageDrawable(null);
             appIcon.setImageDrawable(null);
@@ -328,21 +330,24 @@ public final class ShortcutEntry extends EntryWithTags {
     }
 
     @WorkerThread
-    public static Drawable getAppDrawable(@NonNull Context context, @NonNull String shortcutData, @NonNull String packageName, @Nullable ShortcutInfo shortcutInfo) {
+    public static Drawable getAppDrawable(@NonNull Context context, @NonNull String shortcutData, @NonNull String packageName, @Nullable ShortcutInfo shortcutInfo, boolean isBadge) {
         Drawable appDrawable = null;
         final PackageManager packageManager = context.getPackageManager();
         try {
-            List<ResolveInfo> packages = null;
+            List<ResolveInfo> activities = null;
             if (shortcutInfo == null) {
                 Intent intent = Intent.parseUri(shortcutData, 0);
-                packages = packageManager.queryIntentActivities(intent, 0);
+                activities = packageManager.queryIntentActivities(intent, 0);
             }
-            if (packages != null && !packages.isEmpty()) {
-                ResolveInfo mainPackage = packages.get(0);
+            IconsHandler iconsHandler = TBApplication.iconsHandler(context);
+            if (activities != null && !activities.isEmpty()) {
+                ResolveInfo mainPackage = activities.get(0);
                 String packName = mainPackage.activityInfo.applicationInfo.packageName;
                 String actName = mainPackage.activityInfo.name;
                 ComponentName className = new ComponentName(packName, actName);
-                appDrawable = TBApplication.iconsHandler(context).getDrawableIconForPackage(className, UserHandleCompat.CURRENT_USER);
+                appDrawable = isBadge
+                        ? iconsHandler.getDrawableBadgeForPackage(className, UserHandleCompat.CURRENT_USER)
+                        : iconsHandler.getDrawableIconForPackage(className, UserHandleCompat.CURRENT_USER);
             } else {
                 // Can't make sense of the intent URI (Oreo shortcut, or a shortcut from an activity that was removed from an installed app)
                 // Retrieve app icon
@@ -350,12 +355,16 @@ public final class ShortcutEntry extends EntryWithTags {
                     if (shortcutInfo != null) {
                         UserHandleCompat user = new UserHandleCompat(context, shortcutInfo.getUserHandle());
                         ComponentName componentName = shortcutInfo.getActivity();
-                        appDrawable = TBApplication.iconsHandler(context).getDrawableIconForPackage(componentName, user);
+                        appDrawable = isBadge
+                                ? iconsHandler.getDrawableBadgeForPackage(componentName, user)
+                                : iconsHandler.getDrawableIconForPackage(componentName, user);
                     }
                 }
             }
-            if (appDrawable == null)
+            if (appDrawable == null) {
                 appDrawable = packageManager.getApplicationIcon(packageName);
+                iconsHandler.getIconPack().applyBackgroundAndMask(context, appDrawable, false);
+            }
         } catch (PackageManager.NameNotFoundException | URISyntaxException e) {
             Log.e("Shortcut", "get app shortcut icon", e);
         }
@@ -376,7 +385,7 @@ public final class ShortcutEntry extends EntryWithTags {
     }
 
     public static class AsyncSetEntryIcon extends ResultViewHelper.AsyncSetEntryDrawable {
-        Drawable appDrawable = null;
+        Drawable subIcon = null;
 
         public AsyncSetEntryIcon(@NonNull ImageView image, int drawFlags, @NonNull EntryItem entryItem) {
             super(image, drawFlags, entryItem);
@@ -385,9 +394,14 @@ public final class ShortcutEntry extends EntryWithTags {
         @Override
         public Drawable getDrawable(Context context) {
             ShortcutEntry shortcutEntry = (ShortcutEntry) entryItem;
-            appDrawable = getAppDrawable(context, shortcutEntry.shortcutData, shortcutEntry.packageName, shortcutEntry.mShortcutInfo);
             Bitmap icon = shortcutEntry.getIcon(context);
-            return icon != null ? new BitmapDrawable(context.getResources(), icon) : null;
+            if (icon == null) {
+                subIcon = ContextCompat.getDrawable(context, R.drawable.ic_send);
+                return getAppDrawable(context, shortcutEntry.shortcutData, shortcutEntry.packageName, shortcutEntry.mShortcutInfo, false);
+            } else {
+                subIcon = getAppDrawable(context, shortcutEntry.shortcutData, shortcutEntry.packageName, shortcutEntry.mShortcutInfo, true);
+            }
+            return new BitmapDrawable(context.getResources(), icon);
         }
 
         @Override
@@ -395,7 +409,7 @@ public final class ShortcutEntry extends EntryWithTags {
             // get ImageView before calling super
             ImageView icon1 = getImageView();
             super.onPostExecute(drawable);
-            setIcons(icon1, drawable, appDrawable);
+            setIcons(icon1, drawable, subIcon);
         }
     }
 

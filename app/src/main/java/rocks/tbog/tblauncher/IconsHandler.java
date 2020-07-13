@@ -150,6 +150,42 @@ public class IconsHandler {
     }
 
     /**
+     * Get or generate icon to use as a badge for an app
+     */
+    @WorkerThread
+    public Drawable getDrawableBadgeForPackage(ComponentName componentName, UserHandleCompat userHandle) {
+        // check the icon pack for a resource
+        if (mIconPack != null) {
+            String componentString = componentName.toString();
+            Drawable drawable = mIconPack.getComponentDrawable(componentString);
+            if (drawable != null) {
+                if (DrawableUtils.isAdaptiveIconDrawable(drawable) || mForceAdaptive) {
+                    int shape = mSystemPack.getAdaptiveShape();
+                    return DrawableUtils.applyIconMaskShape(ctx, drawable, shape, true);
+                } else
+                    return mIconPack.applyBackgroundAndMask(ctx, drawable, false);
+            }
+        }
+
+        // if icon pack doesn't have the drawable, use system drawable
+        Drawable systemIcon = mSystemPack.getComponentDrawable(ctx, componentName, userHandle);
+        if (systemIcon == null)
+            return null;
+
+        // if the icon pack has a mask, use that instead of the adaptive shape
+        if (mShortcutBadgePackMask && mIconPack != null && mIconPack.hasMask())
+            return mIconPack.applyBackgroundAndMask(ctx, systemIcon, false);
+
+        // use adaptive shape
+        if (DrawableUtils.isAdaptiveIconDrawable(systemIcon) || mForceAdaptive)
+            return mSystemPack.applyBackgroundAndMask(ctx, systemIcon, true);
+        else if (mForceShape)
+            return mSystemPack.applyBackgroundAndMask(ctx, systemIcon, false);
+        else
+            return systemIcon;
+    }
+
+    /**
      * Scan for installed icons packs
      */
     private void loadAvailableIconsPacks() {
@@ -324,25 +360,22 @@ public class IconsHandler {
     }
 
     public Drawable applyContactMask(@NonNull Context ctx, @NonNull Drawable drawable) {
+        if (!mContactPackMask)
+            return DrawableUtils.applyIconMaskShape(ctx, drawable, mContactsShape, false);
         if (mIconPack != null && mIconPack.hasMask()) {
             return mIconPack.applyBackgroundAndMask(ctx, drawable, false);
         }
-        Drawable output = mSystemPack.applyBackgroundAndMask(ctx, drawable, false);
-
-        // if nothing changed then make it a circle
-        if (output == drawable) {
-            int size = ctx.getResources().getDimensionPixelSize(R.dimen.icon_height);
-            Bitmap b = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
-            Canvas c = new Canvas(b);
-            Path path = new Path();
-            int h = size / 2;
-            path.addCircle(h, h, h, Path.Direction.CCW);
-            c.clipPath(path);
-            drawable.setBounds(0, 0, c.getWidth(), c.getHeight());
-            drawable.draw(c);
-            output = new BitmapDrawable(ctx.getResources(), b);
-        }
-        return output;
+        // if pack has no mask, make it a circle
+        int size = ctx.getResources().getDimensionPixelSize(R.dimen.icon_height);
+        Bitmap b = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
+        Canvas c = new Canvas(b);
+        Path path = new Path();
+        int h = size / 2;
+        path.addCircle(h, h, h, Path.Direction.CCW);
+        c.clipPath(path);
+        drawable.setBounds(0, 0, c.getWidth(), c.getHeight());
+        drawable.draw(c);
+        return new BitmapDrawable(ctx.getResources(), b);
     }
 
     @NonNull

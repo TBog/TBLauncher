@@ -58,6 +58,12 @@ public abstract class EntryItem {
      */
     public static final int FLAG_DRAW_NO_CACHE = 64; // 1 << 6
 
+    /**
+     * use cache but also run the load task
+     * Note: used for shortcuts as we don't have a way to cache multiple icons for the same entry id
+     */
+    public static final int FLAG_RELOAD = 128; // 1 << 7
+
 
     // Globally unique ID.
     // Usually starts with provider scheme, e.g. "app://" or "contact://" to
