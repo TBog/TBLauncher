@@ -198,7 +198,7 @@ public class PinShortcutConfirm extends Activity implements OnClickListener {
         Log.i(TAG, "Accept returned: " + result);
         ShortcutRecord record = ShortcutUtil.createShortcutRecord(this, shortcutInfo, false);
         if (record != null) {
-            EditText edit = findViewById(android.R.id.text1);
+            EditText edit = findViewById(R.id.shortcutName);
             if (edit.getText().length() > 0)
                 record.displayName = edit.getText().toString();
             TBApplication.getApplication(this).getDataHandler().addShortcut(record);
