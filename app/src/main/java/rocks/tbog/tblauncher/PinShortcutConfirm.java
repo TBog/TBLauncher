@@ -46,7 +46,7 @@ public class PinShortcutConfirm extends Activity implements OnClickListener {
     private static final String TAG = "ShortcutConfirm";
 
     protected LauncherApps mLauncherApps;
-
+    private EditText mShortcutName;
     private LauncherApps.PinItemRequest mRequest;
 
     @Override
@@ -71,14 +71,14 @@ public class PinShortcutConfirm extends Activity implements OnClickListener {
 
         // Label
         {
-            EditText edit = findViewById(R.id.shortcutName);
+            mShortcutName = findViewById(R.id.shortcutName);
             String packageName = packageNameHeuristic(this, shortcutInfo);
             String appName = ShortcutUtil.getAppNameFromPackageName(this, packageName);
             String prefix = !appName.isEmpty() ? (appName + ": ") : appName;
             if (shortcutInfo.getLongLabel() != null)
-                edit.setText(prefix + shortcutInfo.getLongLabel());
+                mShortcutName.setText(prefix + shortcutInfo.getLongLabel());
             else if (shortcutInfo.getShortLabel() != null)
-                edit.setText(prefix + shortcutInfo.getShortLabel());
+                mShortcutName.setText(prefix + shortcutInfo.getShortLabel());
         }
 
         // Description
@@ -198,9 +198,8 @@ public class PinShortcutConfirm extends Activity implements OnClickListener {
         Log.i(TAG, "Accept returned: " + result);
         ShortcutRecord record = ShortcutUtil.createShortcutRecord(this, shortcutInfo, false);
         if (record != null) {
-            EditText edit = findViewById(R.id.shortcutName);
-            if (edit.getText().length() > 0)
-                record.displayName = edit.getText().toString();
+            if (mShortcutName.getText().length() > 0)
+                record.displayName = mShortcutName.getText().toString();
             TBApplication.getApplication(this).getDataHandler().addShortcut(record);
         }
         mRequest = null;

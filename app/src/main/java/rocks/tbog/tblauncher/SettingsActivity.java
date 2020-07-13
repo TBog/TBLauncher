@@ -305,6 +305,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 case "shortcut-pack-badge-mask":
                     TBApplication.iconsHandler(activity).onPrefChanged(sharedPreferences);
                     TBApplication.drawableCache(activity).clearCache();
+                    TBApplication.quickList(activity).onFavoritesChanged();
                     break;
                 case "tags-enabled": {
                     boolean useTags = sharedPreferences.getBoolean("tags-enabled", true);

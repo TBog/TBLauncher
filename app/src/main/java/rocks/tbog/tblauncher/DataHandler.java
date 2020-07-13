@@ -889,8 +889,7 @@ public class DataHandler extends BroadcastReceiver
         return DBHelper.setCustomAppIcon(context, componentName, stream.toByteArray());
     }
 
-    public Bitmap getCustomAppIcon(String componentName)
-    {
+    public Bitmap getCustomAppIcon(String componentName) {
         byte[] bytes = DBHelper.getCustomAppIcon(context, componentName);
         if (bytes == null)
             return null;
@@ -936,7 +935,12 @@ public class DataHandler extends BroadcastReceiver
         Intent i = new Intent(TBLauncherActivity.START_LOAD);
         this.context.sendBroadcast(i);
 
-        checkServices();
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        for (String providerName : PROVIDER_NAMES) {
+            if (prefs.getBoolean("enable-" + providerName, true)) {
+                connectToProvider(providerName, 0);
+            }
+        }
 
         for (int step : IProvider.LOAD_STEPS) {
             for (ProviderEntry entry : this.providers.values()) {
@@ -949,8 +953,9 @@ public class DataHandler extends BroadcastReceiver
     public void checkServices() {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         for (String providerName : PROVIDER_NAMES) {
-            if (prefs.getBoolean("enable-" + providerName, true)) {
-                this.connectToProvider(providerName, 0);
+            if (!providers.containsKey(providerName) && prefs.getBoolean("enable-" + providerName, true)) {
+                reloadProviders();
+                break;
             }
         }
     }

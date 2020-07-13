@@ -94,14 +94,18 @@ public final class ShortcutEntry extends EntryWithTags {
         return shortcutData;
     }
 
-    public Bitmap getIcon(Context context) {
+    public Drawable getIcon(@NonNull Context context) {
         byte[] iconBlob = DBHelper.getShortcutIcon(context, this.dbId);
 
         if (iconBlob == null) {
             return null;
         }
 
-        return BitmapFactory.decodeByteArray(iconBlob, 0, iconBlob.length);
+        Bitmap bitmap = BitmapFactory.decodeByteArray(iconBlob, 0, iconBlob.length);
+        if (bitmap == null)
+            return null;
+
+        return TBApplication.iconsHandler(context).applyShortcutMask(context, bitmap);
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -394,14 +398,14 @@ public final class ShortcutEntry extends EntryWithTags {
         @Override
         public Drawable getDrawable(Context context) {
             ShortcutEntry shortcutEntry = (ShortcutEntry) entryItem;
-            Bitmap icon = shortcutEntry.getIcon(context);
+            Drawable icon = shortcutEntry.getIcon(context);
             if (icon == null) {
                 subIcon = ContextCompat.getDrawable(context, R.drawable.ic_send);
                 return getAppDrawable(context, shortcutEntry.shortcutData, shortcutEntry.packageName, shortcutEntry.mShortcutInfo, false);
             } else {
                 subIcon = getAppDrawable(context, shortcutEntry.shortcutData, shortcutEntry.packageName, shortcutEntry.mShortcutInfo, true);
             }
-            return new BitmapDrawable(context.getResources(), icon);
+            return icon;
         }
 
         @Override
