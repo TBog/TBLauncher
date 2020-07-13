@@ -936,10 +936,21 @@ public class DataHandler extends BroadcastReceiver
         Intent i = new Intent(TBLauncherActivity.START_LOAD);
         this.context.sendBroadcast(i);
 
+        checkServices();
+
         for (int step : IProvider.LOAD_STEPS) {
             for (ProviderEntry entry : this.providers.values()) {
                 if (entry.provider != null && step == entry.provider.getLoadStep())
                     entry.provider.reload(true);
+            }
+        }
+    }
+
+    public void checkServices() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        for (String providerName : PROVIDER_NAMES) {
+            if (prefs.getBoolean("enable-" + providerName, true)) {
+                this.connectToProvider(providerName, 0);
             }
         }
     }

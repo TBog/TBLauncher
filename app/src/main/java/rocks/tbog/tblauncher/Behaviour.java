@@ -121,7 +121,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         // while interacting with the UI.
         //mLauncherButton.setOnTouchListener(mDelayHideTouchListener);
 
-        mLauncherButton.setOnClickListener((v) -> TBApplication.getApplication(v.getContext()).getDataHandler().reloadProviders());
+        mLauncherButton.setOnClickListener((v) -> TBApplication.dataHandler(v.getContext()).reloadProviders());
     }
 
     private void initLauncherSearchEditText(EditText searchEditText) {
@@ -675,6 +675,8 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 
     public void onResume() {
         Log.i(TAG, "onResume");
+
+        TBApplication.dataHandler(getContext()).checkServices();
 //        if (!bSearchBarHidden) {
 //            showSearchBar();
 //            showKeyboard();
