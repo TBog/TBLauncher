@@ -114,10 +114,9 @@ public final class ShortcutEntry extends EntryWithTags {
 
     @Override
     public int getResultLayout(int drawFlags) {
-//        return Utilities.checkFlag(drawFlags, FLAG_DRAW_LIST) ? R.layout.item_shortcut :
-//                (Utilities.checkFlag(drawFlags, FLAG_DRAW_GRID) ? R.layout.item_grid_shortcut :
-//                        R.layout.item_quick_list);
-        return Utilities.checkFlag(drawFlags, FLAG_DRAW_LIST) ? R.layout.item_shortcut : R.layout.item_grid_shortcut;
+        return Utilities.checkFlag(drawFlags, FLAG_DRAW_LIST) ? R.layout.item_shortcut :
+                (Utilities.checkFlag(drawFlags, FLAG_DRAW_GRID) ? R.layout.item_grid_shortcut :
+                        R.layout.item_quick_list_shortcut);
     }
 
     @Override
@@ -130,6 +129,7 @@ public final class ShortcutEntry extends EntryWithTags {
     }
 
     private void displayGridResult(@NonNull View view, int drawFlags) {
+        drawFlags |= FLAG_RELOAD;
         TextView nameView = view.findViewById(android.R.id.text1);
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_NAME))
             ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, nameView);
@@ -151,6 +151,7 @@ public final class ShortcutEntry extends EntryWithTags {
     }
 
     private void displayListResult(@NonNull View view, int drawFlags) {
+        drawFlags |= FLAG_RELOAD;
         Context context = view.getContext();
 
         TextView shortcutName = view.findViewById(R.id.item_app_name);
@@ -175,7 +176,7 @@ public final class ShortcutEntry extends EntryWithTags {
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
             shortcutIcon.setVisibility(View.VISIBLE);
             appIcon.setVisibility(View.VISIBLE);
-            ResultViewHelper.setIconAsync(drawFlags | FLAG_RELOAD, this, shortcutIcon, AsyncSetEntryIcon.class);
+            ResultViewHelper.setIconAsync(drawFlags, this, shortcutIcon, AsyncSetEntryIcon.class);
         } else {
             shortcutIcon.setImageDrawable(null);
             appIcon.setImageDrawable(null);
