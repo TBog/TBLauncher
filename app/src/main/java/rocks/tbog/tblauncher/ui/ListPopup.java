@@ -127,15 +127,25 @@ public class ListPopup extends PopupWindow {
         }
     }
 
+    public void showCenter(View viewForWindowToken)
+    {
+        updateItems();
+
+        // don't steal the focus, this will prevent the keyboard from changing
+        setFocusable(false);
+        // draw over stuff if needed
+        setClippingEnabled(false);
+
+        setAnimationStyle(R.style.PopupAnimationBottom);
+        showAtLocation(viewForWindowToken, Gravity.CENTER, 0, 0);
+    }
+
     public void show(View anchor) {
         show(anchor, .5f);
     }
 
     public void show(View anchor, float anchorOverlap) {
         updateItems();
-
-//        if (mSystemUiVisibilityHelper != null)
-//            mSystemUiVisibilityHelper.copyVisibility(getContentView());
 
         // don't steal the focus, this will prevent the keyboard from changing
         setFocusable(false);

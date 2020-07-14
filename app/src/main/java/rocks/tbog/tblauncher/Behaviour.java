@@ -189,7 +189,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             Context ctx = v.getContext();
             ListPopup menu = getMenuPopup(ctx);
             TBApplication.behaviour(ctx).registerPopup(menu);
-            menu.show(v);
+            menu.showCenter(v);
         });
         mMenuButton.setOnLongClickListener(v -> {
             Context ctx = v.getContext();
@@ -238,7 +238,6 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         adapter.add(new LinearAdapter.Item(ctx, R.string.android_settings));
 
         menu.setOnItemClickListener((a, v, pos) -> {
-            Context c = v.getContext();
             LinearAdapter.MenuItem item = ((LinearAdapter) a).getItem(pos);
             @StringRes int stringId = 0;
             if (item instanceof LinearAdapter.Item) {
@@ -248,6 +247,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                 case R.string.launcher_settings:
                     beforeLaunchOccurred();
                     mClearButton.postDelayed(() -> {
+                        Context c = mClearButton.getContext();
                         c.startActivity(new Intent(c, SettingsActivity.class));
                         afterLaunchOccurred();
                     }, LAUNCH_DELAY);
@@ -255,6 +255,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                 case R.string.change_wallpaper:
                     beforeLaunchOccurred();
                     mClearButton.postDelayed(() -> {
+                        Context c = mClearButton.getContext();
                         Intent intent = new Intent(Intent.ACTION_SET_WALLPAPER);
                         c.startActivity(Intent.createChooser(intent, c.getString(R.string.change_wallpaper)));
                         afterLaunchOccurred();
@@ -265,6 +266,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                 case R.string.android_settings:
                     beforeLaunchOccurred();
                     mClearButton.postDelayed(() -> {
+                        Context c = mClearButton.getContext();
                         c.startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS));
                         afterLaunchOccurred();
                     }, LAUNCH_DELAY);
