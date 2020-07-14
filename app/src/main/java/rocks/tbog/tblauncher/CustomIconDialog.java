@@ -20,6 +20,7 @@ import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -47,6 +48,7 @@ import rocks.tbog.tblauncher.utils.Utilities;
 public class CustomIconDialog extends DialogFragment<Drawable> {
     private final List<IconData> mIconData = new ArrayList<>();
     private Drawable mSelectedDrawable = null;
+    private ProgressBar mIconLoadingBar;
     private GridView mIconGrid;
     private TextView mSearch;
     private ImageView mPreview;
@@ -69,6 +71,8 @@ public class CustomIconDialog extends DialogFragment<Drawable> {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             view.setClipToOutline(true);
         }
+
+        mIconLoadingBar = view.findViewById(R.id.iconLoadingBar);
 
         mIconPackList = view.findViewById(R.id.iconPackList);
         populateIconPackList();
@@ -321,22 +325,30 @@ public class CustomIconDialog extends DialogFragment<Drawable> {
     private void setShownIconPack(String packageName) {
         if (packageName == null) {
             mShownIconPack = null;
-            refreshList();
             refreshQuickList();
+            refreshList();
         } else {
             if (mShownIconPack != null && packageName.equals(mShownIconPack.getPackPackageName()))
                 return;
             if (mLoadIconPackTask != null)
                 mLoadIconPackTask.cancel(true);
-            //TODO: inform the user we are loading data
+
+            // inform the user we are loading data
+            {
+                mShownIconPack = null;
+                refreshList();
+                mIconLoadingBar.setVisibility(View.VISIBLE);
+            }
+
+            // load the new pack
             mLoadIconPackTask = Utilities.runAsync(() -> {
                 IconPackXML pack = new IconPackXML(packageName);
                 pack.loadDrawables(getContext().getPackageManager());
                 mShownIconPack = pack;
             }, () -> {
                 mLoadIconPackTask = null;
-                refreshList();
                 refreshQuickList();
+                refreshList();
             });
         }
     }
@@ -364,6 +376,7 @@ public class CustomIconDialog extends DialogFragment<Drawable> {
                     mIconData.add(new IconData(iconPack, info));
             }
         }
+        mIconLoadingBar.setVisibility(View.GONE);
         boolean showGridAndSearch = !mIconData.isEmpty() || (mSearch.length() > 0);
         mSearch.setVisibility(showGridAndSearch ? View.VISIBLE : View.GONE);
         mIconGrid.setVisibility(showGridAndSearch ? View.VISIBLE : View.GONE);

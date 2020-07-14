@@ -21,16 +21,29 @@ import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.EntryWithTags;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
+import rocks.tbog.tblauncher.utils.Utilities;
 
 public class TagsHandler {
     private final TBApplication mApplication;
     // HashMap with EntryItem id as key and an ArrayList of tags for each
-    private final Map<String, List<String>> mTagsCache;
+    private final HashMap<String, List<String>> mTagsCache = new HashMap<>();
 
     TagsHandler(TBApplication application) {
         mApplication = application;
-        mTagsCache = DBHelper.loadTags(application);
-        addDefaultAliases();
+        loadFromDB();
+    }
+
+    public void loadFromDB() {
+        final HashMap<String, List<String>> tags = new HashMap<>();
+        Utilities.runAsync(() -> {
+            Map<String, List<String>> dbTags = DBHelper.loadTags(getContext());
+            tags.clear();
+            tags.putAll(dbTags);
+        }, () -> {
+            mTagsCache.clear();
+            mTagsCache.putAll(tags);
+            addDefaultAliases();
+        });
     }
 
     private Context getContext() {
@@ -227,8 +240,7 @@ public class TagsHandler {
             ArrayList<String> tagsToRemove = new ArrayList<>(getTags(entry.id));
             for (String tag : tagsToRemove)
                 removeTag(entry, tag);
-        }
-        else {
+        } else {
             List<String> oldTags = DBHelper.loadTags(getContext(), entry.id);
 
             // tags that need to be removed

@@ -30,6 +30,14 @@
         android:layout_height="2dp"
         android:background="?android:attr/listDivider" />
 
+    <ProgressBar
+        android:id="@+id/iconLoadingBar"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:visibility="gone"
+        android:indeterminate="true" />
+
     <GridView
         android:id="@+id/iconGrid"
         android:layout_width="match_parent"
