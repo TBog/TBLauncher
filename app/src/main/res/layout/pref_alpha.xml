@@ -4,7 +4,8 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:padding="@dimen/launcher_button_padding"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:theme="@style/SettingsDialogTheme">
 
     <TextView
         android:id="@android:id/text1"

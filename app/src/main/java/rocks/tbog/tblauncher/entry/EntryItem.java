@@ -179,12 +179,11 @@ public abstract class EntryItem {
         adapter.add(new LinearAdapter.Item(context, R.string.menu_remove));
         adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_add));
         adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_remove));
-        return inflatePopupMenu(adapter, context);
+        return inflatePopupMenu(context, adapter);
     }
 
-    ListPopup inflatePopupMenu(@NonNull LinearAdapter adapter, @NonNull Context context) {
-        ListPopup menu = new ListPopup(context);
-        menu.setAdapter(adapter);
+    ListPopup inflatePopupMenu(@NonNull Context context, @NonNull LinearAdapter adapter) {
+        ListPopup menu = ListPopup.create(context, adapter);
 
         // If app already pinned, do not display the "add to favorite" option
         // otherwise don't show the "remove favorite button"

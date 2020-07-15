@@ -29,6 +29,8 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
+import android.view.Window;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -54,6 +56,11 @@ public class PinShortcutConfirm extends Activity implements OnClickListener {
         super.onCreate(savedInstanceState);
 
         //requestWindowFeature(Window.FEATURE_NO_TITLE);
+        Window window = getWindow();
+        if (window != null) {
+            window.setDimAmount(0.7f);
+            window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+        }
         setContentView(R.layout.pin_shortcut_confirm);
 
         mLauncherApps = getSystemService(LauncherApps.class);

@@ -252,8 +252,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             // If it was one of our custom Preferences, show its dialog
             if (dialogFragment != null) {
                 dialogFragment.setTargetFragment(this, 0);
-                final FragmentManager fm = this.getFragmentManager();
-                assert fm != null;
+                final FragmentManager fm = this.getParentFragmentManager();
                 dialogFragment.show(fm, DIALOG_FRAGMENT_TAG);
             }
             // Could not be handled here. Try with the super method.

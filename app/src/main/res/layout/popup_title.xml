@@ -2,7 +2,8 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    tools:theme="@style/ListPopupTitle">
 
     <TextView
         android:id="@android:id/text1"
@@ -12,13 +13,13 @@
         android:layout_marginStart="?android:attr/listPreferredItemPaddingLeft"
         android:layout_marginEnd="?android:attr/listPreferredItemPaddingRight"
         android:gravity="center_horizontal"
-        android:textSize="@dimen/popup_title"
+        android:textAppearance="@style/ListPopupTitle"
         tools:text="@string/popup_title_hist_fav" />
 
     <include
         layout="@layout/popup_divider"
         android:layout_width="match_parent"
-        android:layout_height="2dp"
+        android:layout_height="@dimen/separator_thickness"
         android:layout_gravity="bottom|center_horizontal"
         android:gravity="center_horizontal" />
 

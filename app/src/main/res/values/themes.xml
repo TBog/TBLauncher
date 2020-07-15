@@ -3,83 +3,20 @@
 
     <style name="BaseThemeLight" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="appSelectableItemBackground">?android:attr/selectableItemBackground</item>
-        <item name="android:actionMenuTextColor">@android:color/white</item>
+        <item name="android:actionMenuTextColor">@color/Crimson</item>
         <item name="android:windowTranslucentStatus">true</item>
         <item name="android:windowTranslucentNavigation">true</item>
+        <item name="colorPrimary">@color/colorPrimary</item>
+        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
+        <item name="colorAccent">@color/colorAccent</item>
+        <item name="android:windowBackground">@null</item>
     </style>
 
-    <style name="BaseThemeDark" parent="Theme.AppCompat.NoActionBar">
-        <item name="appSelectableItemBackground">?android:attr/selectableItemBackground</item>
-        <item name="android:windowTranslucentStatus">true</item>
-        <item name="android:windowTranslucentNavigation">true</item>
-    </style>
-
-    <style name="AppThemeLight" parent="BaseThemeLight">
-        <item name="android:windowShowWallpaper">true</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:textColor">@color/primary_text_color_selector</item>
-        <item name="android:textColorSecondary">@color/secondary_text_color_selector</item>
-        <item name="android:textColorTertiary">@color/tertiary_text_color_selector</item>
-
-        <item name="searchColor">@android:color/black</item>
-        <item name="resultColor">@android:color/black</item>
-        <item name="resultShadowColor">#3f000000</item>
-        <item name="listBackgroundColor">@android:color/white</item>
-        <item name="searchBackgroundColor">@android:color/white</item>
-        <item name="searchBackgroundOutline">@android:color/transparent</item>
-        <item name="dividerDrawable">@drawable/list_separator_light</item>
-        <item name="textShadowRadius">0</item>
-    </style>
-
-    <style name="AppThemeDark" parent="BaseThemeDark">
-        <item name="android:windowShowWallpaper">true</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:textColor">@color/kiss_text_on_dark</item>
-        <item name="android:textColorSecondary">#7f7f7f</item>
-
-        <item name="searchColor">@color/kiss_text_on_dark</item>
-        <item name="resultColor">@color/kiss_text_on_dark</item>
-        <item name="resultShadowColor">@android:color/black</item>
-        <item name="listBackgroundColor">@color/kiss_list_background_inverse</item>
-
-        <item name="searchBackgroundColor">@color/kiss_list_background_inverse</item>
-        <item name="searchBackgroundOutline">@android:color/transparent</item>
-        <item name="dividerDrawable">@drawable/list_separator_dark</item>
-        <item name="textShadowRadius">0</item>
-    </style>
-
-
-    <style name="AppThemeAmoledDark" parent="BaseThemeDark">
-        <item name="android:windowShowWallpaper">false</item>
-        <item name="android:windowBackground">@android:color/black</item>
-        <item name="android:textColor">@color/kiss_text_on_dark</item>
-        <item name="android:textColorSecondary">#7f7f7f</item>
-
-        <item name="searchColor">@android:color/white</item>
-        <item name="resultColor">@android:color/white</item>
-        <item name="resultShadowColor">@android:color/black</item>
-        <item name="listBackgroundColor">@android:color/black</item>
-        <item name="searchBackgroundOutline">@android:color/white</item>
-        <item name="searchBackgroundColor">@android:color/black</item>
-
-        <item name="dividerDrawable">@android:color/transparent</item>
-        <item name="textShadowRadius">0</item>
-    </style>
-
-    <style name="SettingThemeAmoledDark" parent="SettingThemeDark">
-        <item name="android:windowShowWallpaper">false</item>
-        <item name="android:windowBackground">@android:color/black</item>
-        <item name="android:textColor">@color/kiss_text_on_dark</item>
-        <item name="android:textColorSecondary">#7f7f7f</item>
-    </style>
-
-
-    <style name="AppThemeTransparent" parent="AppThemeLight">
+    <style name="AppThemeTransparent" parent="BaseThemeLight">
         <item name="resultColor">@android:color/white</item>
         <item name="searchColor">@android:color/white</item>
         <item name="resultShadowColor">@android:color/black</item>
         <item name="searchShadowColor">@android:color/black</item>
-        <item name="android:textColorSecondary">#7Fffffff</item>
         <item name="searchBackgroundColor">@null</item>
         <item name="listBackgroundColor">@color/black_overlay</item>
         <item name="dividerDrawable">@null</item>
@@ -89,11 +26,23 @@
         <item name="android:listPreferredItemHeight">54dp</item> <!-- 64dp -->
         <item name="android:listPreferredItemHeightSmall">40dp</item> <!-- 48dp -->
         <item name="android:listPreferredItemHeightLarge">67dp</item> <!-- 80dp -->
+
+        <item name="android:windowShowWallpaper">true</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:textColor">@color/primary_text_color_selector</item>
+        <item name="android:textColorSecondary">@color/secondary_text_color_selector</item>
+        <item name="android:textColorTertiary">@color/tertiary_text_color_selector</item>
+
+        <item name="searchBackgroundOutline">@android:color/transparent</item>
     </style>
 
     <style name="GradientWindowTitle">
-        <item name="android:maxLines">1</item>
         <item name="android:scrollHorizontally">true</item>
+        <item name="android:layout_marginTop">0dp</item>
+        <item name="android:layout_marginStart">0dp</item>
+        <item name="android:layout_marginEnd">0dp</item>
+        <item name="android:paddingStart">@dimen/result_margin_horizontal</item>
+        <item name="android:paddingEnd">@dimen/result_margin_horizontal</item>
         <item name="android:background">@drawable/window_title_background</item>
         <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
     </style>
@@ -109,7 +58,7 @@
 
     <style name="TitleDialogTheme" parent="Theme.AppCompat.Dialog">
         <item name="android:windowNoTitle">false</item>
-        <item name="android:colorBackground">?attr/colorBackgroundFloating</item>
+        <item name="android:colorBackground">@color/Black</item>
         <item name="android:windowFrame">@null</item>
         <item name="android:windowTitleStyle">@style/GradientWindowTitle</item>
         <item name="android:windowBackground">@drawable/dialog_background</item>
@@ -119,11 +68,15 @@
         <item name="windowActionBar">false</item>
         <item name="windowActionModeOverlay">true</item>
 
+        <item name="android:textColor">@color/primary_text_color_selector</item>
+        <item name="android:textColorSecondary">@color/secondary_text_color_selector</item>
+        <item name="android:textColorTertiary">@color/tertiary_text_color_selector</item>
+        <item name="android:listDivider">@drawable/list_separator_light</item>
+
         <item name="resultColor">@android:color/white</item>
         <item name="searchColor">@android:color/white</item>
         <item name="resultShadowColor">@android:color/black</item>
         <item name="searchShadowColor">@android:color/black</item>
-        <item name="android:textColorSecondary">#7Fffffff</item>
         <item name="searchBackgroundColor">@null</item>
         <item name="listBackgroundColor">@color/black_overlay</item>
         <item name="dividerDrawable">@null</item>
@@ -134,15 +87,47 @@
         <item name="android:buttonBarButtonStyle">@style/GradientBorderlessButton</item>
     </style>
 
-    <style name="SettingTheme" parent="AppThemeLight">
-        <item name="windowActionBar">true</item>
-        <item name="windowNoTitle">false</item>
-        <item name="android:windowBackground">@color/kiss_background</item>
+    <style name="NoTitleDialogTheme" parent="TitleDialogTheme">
+        <item name="android:windowNoTitle">true</item>
     </style>
 
-    <style name="SettingThemeDark" parent="AppThemeDark">
-        <item name="android:windowActionBar">true</item>
-        <item name="android:windowNoTitle">false</item>
-        <item name="android:windowBackground">@color/kiss_list_background_inverse</item>
+    <style name="ListPopupTitle">
+        <item name="android:textSize">@dimen/popup_title</item>
+        <item name="android:textColor">@color/primary_text_color_selector</item>
+    </style>
+
+    <style name="ListPopupItem">
+        <item name="android:textSize">@dimen/result_small_size</item>
+        <item name="android:textColor">@color/secondary_text_color_selector</item>
+    </style>
+
+    <style name="ListPopupTheme" parent="Widget.AppCompat.ListPopupWindow">
+        <item name="android:colorBackground">@android:color/transparent</item>
+        <item name="android:listDivider">@drawable/list_separator_light</item>
+        <item name="android:listPreferredItemPaddingLeft">@dimen/popup_padding_horizontal</item>
+        <item name="android:listPreferredItemPaddingRight">@dimen/popup_padding_horizontal</item>
+    </style>
+
+    <style name="SettingsDialogTheme" parent="NoTitleDialogTheme">
+        <item name="android:textColor">@color/primary_text_color_selector</item>
+        <item name="android:textColorSecondary">@color/secondary_text_color_selector</item>
+        <item name="android:textColorTertiary">@color/tertiary_text_color_selector</item>
+        <item name="android:listDivider">@drawable/list_separator_light</item>
+    </style>
+
+    <!--
+        Because I can't find a way to theme the PreferenceCategory divider,
+        (it should be `android:listSeparatorTextViewStyle`)
+        I'll use a light background for the SettingsActivity for now
+    -->
+    <style name="SettingTheme" parent="AppThemeTransparent">
+        <item name="windowActionBar">true</item>
+        <item name="windowNoTitle">false</item>
+        <item name="android:windowBackground">@color/Honeydew</item>
+        <item name="alertDialogTheme">@style/SettingsDialogTheme</item>
+        <item name="android:textColor">@color/primary_text_color_selector_black</item>
+        <item name="android:textColorSecondary">@color/secondary_text_color_selector_black</item>
+        <item name="android:textColorTertiary">@color/tertiary_text_color_selector_black</item>
+        <item name="colorAccent">@color/DarkGreen</item>
     </style>
 </resources>

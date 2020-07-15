@@ -6,7 +6,9 @@
     android:background="@drawable/dialog_background"
     android:orientation="vertical"
     android:paddingHorizontal="@dimen/result_margin_horizontal"
-    android:paddingVertical="@dimen/result_margin_vertical">
+    android:paddingVertical="@dimen/result_margin_vertical"
+    android:layout_margin="0dp"
+    android:theme="@style/TitleDialogTheme">
 
     <!-- Code will inflate a preview of the entry here -->
     <!--    <include-->
@@ -54,16 +56,15 @@
 
     </LinearLayout>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:background="?android:attr/listDivider" />
+    <View style="@style/SeparatorHorizontal" />
 
     <!-- Alert dialog style buttons along the bottom. -->
     <LinearLayout
         style="?android:attr/buttonBarStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:baselineAligned="false"
         android:measureWithLargestChild="true">
 
         <Button

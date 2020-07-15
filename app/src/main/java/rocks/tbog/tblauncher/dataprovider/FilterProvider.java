@@ -68,6 +68,7 @@ public class FilterProvider implements IProvider {
             filter.setOnClickListener(v -> {
                 Context ctx = v.getContext();
                 FavProvider provider = TBApplication.dataHandler(ctx).getFavProvider();
+                // TODO: somehow enable filtering for the favorites, right now we can only show them
                 TBApplication.quickList(ctx).toggleFilter(v, provider, filterScheme);
             });
             filter.setName(context.getResources().getString(R.string.filter_favorites));

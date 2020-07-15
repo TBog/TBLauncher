@@ -26,11 +26,17 @@
         android:layout_height="wrap_content"
         android:breakStrategy="simple"
         android:hyphenationFrequency="none"
-        android:minWidth="@dimen/icon_width"
         android:maxLines="2"
+        android:minWidth="@dimen/icon_width"
         android:minLines="1"
+        android:shadowColor="?attr/resultShadowColor"
+        android:shadowDx="1"
+        android:shadowDy="2"
+        android:shadowRadius="?attr/textShadowRadius"
         android:text="@string/app_name"
         android:textAlignment="center"
+        android:textColor="?android:attr/textColorSecondary"
+        android:textSize="@dimen/result_small_size"
         tools:ignore="UnusedAttribute" />
 
 </LinearLayout>

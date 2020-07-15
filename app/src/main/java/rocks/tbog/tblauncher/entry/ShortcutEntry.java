@@ -10,7 +10,6 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.Log;
@@ -276,7 +275,7 @@ public final class ShortcutEntry extends EntryWithTags {
             adapter.add(new LinearAdapter.Item(context, R.string.menu_tags_edit));
         adapter.add(new LinearAdapter.Item(context, R.string.menu_shortcut_rename));
         //adapter.add(new LinearAdapter.Item(context, R.string.menu_custom_icon));
-        return inflatePopupMenu(adapter, context);
+        return inflatePopupMenu(context, adapter);
     }
 
     @Override

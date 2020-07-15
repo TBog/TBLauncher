@@ -4,7 +4,8 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical"
-    android:padding="@dimen/launcher_button_padding">
+    android:padding="@dimen/launcher_button_padding"
+    android:theme="@style/SettingsDialogTheme">
 
     <TextView
         android:layout_width="match_parent"
@@ -23,10 +24,8 @@
         android:paddingVertical="@dimen/result_margin_vertical" />
 
     <View
-        android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:layout_marginVertical="@dimen/result_margin_vertical"
-        android:background="?android:attr/listDivider" />
+        style="@style/SeparatorHorizontal"
+        android:layout_marginVertical="@dimen/result_margin_vertical" />
 
     <TextView
         android:layout_width="match_parent"
@@ -46,10 +45,8 @@
         tools:listitem="@layout/item_grid" />
 
     <View
-        android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:layout_marginVertical="@dimen/result_margin_vertical"
-        android:background="?android:attr/listDivider" />
+        style="@style/SeparatorHorizontal"
+        android:layout_marginVertical="@dimen/result_margin_vertical" />
 
     <TextView
         android:layout_width="match_parent"

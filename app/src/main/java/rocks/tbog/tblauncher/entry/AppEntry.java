@@ -17,6 +17,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
+import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -282,7 +283,7 @@ public final class AppEntry extends EntryWithTags {
 //            adapter.add(new ListPopup.Item(context, R.string.menu_app_hibernate));
 //        }
 
-        return inflatePopupMenu(adapter, context);
+        return inflatePopupMenu(context, adapter);
     }
 
     @Override
@@ -310,9 +311,8 @@ public final class AppEntry extends EntryWithTags {
 //                hibernate(context, appPojo);
 //                return true;
             case R.string.menu_exclude: {
-                ListPopup menu = new ListPopup(ctx);
                 LinearAdapter adapter = new LinearAdapter();
-                menu.setAdapter(adapter);
+                ListPopup menu = ListPopup.create(ctx, adapter);
 
                 adapter.add(new LinearAdapter.Item(ctx, R.string.menu_exclude_history));
                 adapter.add(new LinearAdapter.Item(ctx, R.string.menu_exclude_kiss));
@@ -395,7 +395,8 @@ public final class AppEntry extends EntryWithTags {
         }
     }
 
-    private void launchRenameDialog(@NonNull Context context) {
+    private void launchRenameDialog(@NonNull Context ctx) {
+        ContextThemeWrapper context = new ContextThemeWrapper(ctx, R.style.NoTitleDialogTheme);
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(context.getResources().getString(R.string.app_rename_title));
 

@@ -228,9 +228,8 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     private ListPopup getMenuPopup(Context ctx) {
-        ListPopup menu = new ListPopup(ctx);
         LinearAdapter adapter = new LinearAdapter();
-        menu.setAdapter(adapter);
+        ListPopup menu = ListPopup.create(ctx, adapter);
 
         adapter.add(new LinearAdapter.Item(ctx, R.string.launcher_settings));
         adapter.add(new LinearAdapter.Item(ctx, R.string.change_wallpaper));

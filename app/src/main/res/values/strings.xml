@@ -146,5 +146,8 @@
     <string name="contacts_shape_name">Contacts shape</string>
     <string name="icon_pack_section">Icon pack</string>
     <string name="shortcut_shape_name">Shortcut icon shape</string>
+    <string name="icon_pack_list">Installed icon packs</string>
+    <string name="icon_pack_content_list">Icons from the selected icon pack</string>
+    <string name="icon_pack_quick_list">System icon variations</string>
 
 </resources>

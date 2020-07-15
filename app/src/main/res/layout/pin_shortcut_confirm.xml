@@ -6,8 +6,8 @@
     android:layout_height="match_parent"
     android:gravity="center_horizontal"
     android:orientation="vertical"
-    tools:context=".PinShortcutConfirm"
-    tools:theme="@style/TitleDialogTheme">
+    android:theme="@style/TitleDialogTheme"
+    tools:context=".PinShortcutConfirm">
 
     <!-- Message to show to use. -->
     <LinearLayout

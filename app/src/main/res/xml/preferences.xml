@@ -8,31 +8,31 @@
     android:title="@string/launcher_settings"
     tools:showIn="@layout/activity_settings">
 
-    <androidx.preference.PreferenceScreen
+    <PreferenceScreen
         android:key="ui-holder"
         android:summary="@string/user_interface_summary"
         android:title="@string/title_ui">
-        <!--        <androidx.preference.ListPreference-->
+        <!--        <ListPreference-->
         <!--            android:defaultValue="transparent"-->
         <!--            android:entries="@array/themesEntries"-->
         <!--            android:entryValues="@array/themesValues"-->
         <!--            android:key="theme"-->
         <!--            android:title="@string/theme_name" />-->
-        <androidx.preference.ListPreference
+        <ListPreference
             android:defaultValue="0"
             android:entries="@array/adaptiveEntries"
             android:entryValues="@array/adaptiveValues"
             android:key="adaptive-shape"
             android:title="@string/adaptive_shape_name" />
 
-        <androidx.preference.SwitchPreference
+        <SwitchPreference
             android:defaultValue="true"
             android:disableDependentsState="true"
             android:key="force-adaptive"
             android:summary="For non-adaptive icons, reduce scale and place on a white background"
             android:title="Force adaptive icons" />
 
-        <androidx.preference.SwitchPreference
+        <SwitchPreference
             android:defaultValue="false"
             android:dependency="force-adaptive"
             android:key="force-shape"
@@ -40,24 +40,24 @@
             android:title="Force adaptive shape" />
 
         <!-- Icon pack -->
-        <androidx.preference.PreferenceCategory
+        <PreferenceCategory
             android:key="icon-pack-section"
             android:title="@string/icon_pack_section"
             app:initialExpandedChildrenCount="1">
 
-            <androidx.preference.ListPreference
+            <ListPreference
                 android:defaultValue="default"
                 android:key="icons-pack"
                 android:title="@string/icons_pack" />
 
-            <androidx.preference.SwitchPreference
+            <SwitchPreference
                 android:defaultValue="true"
                 android:disableDependentsState="true"
                 android:key="contact-pack-mask"
                 android:summary="Use icon pack mask for contacts"
                 android:title="Contacts" />
 
-            <androidx.preference.ListPreference
+            <ListPreference
                 android:defaultValue="0"
                 android:dependency="contact-pack-mask"
                 android:entries="@array/adaptiveEntries"
@@ -66,14 +66,14 @@
                 android:summary="Shape of contacts icon"
                 android:title="@string/contacts_shape_name" />
 
-            <androidx.preference.SwitchPreference
+            <SwitchPreference
                 android:defaultValue="true"
                 android:disableDependentsState="true"
                 android:key="shortcut-pack-mask"
                 android:summary="Use icon pack mask for shortcut icon"
                 android:title="Shortcut icon" />
 
-            <androidx.preference.ListPreference
+            <ListPreference
                 android:defaultValue="0"
                 android:dependency="shortcut-pack-mask"
                 android:entries="@array/adaptiveEntries"
@@ -82,16 +82,16 @@
                 android:summary="Shape of shortcut icon"
                 android:title="@string/shortcut_shape_name" />
 
-            <androidx.preference.SwitchPreference
+            <SwitchPreference
                 android:defaultValue="true"
                 android:key="shortcut-pack-badge-mask"
                 android:summary="Use icon pack mask for shortcut badge"
                 android:title="Shortcut badge" />
 
-        </androidx.preference.PreferenceCategory>
+        </PreferenceCategory>
 
         <!-- Notification bar -->
-        <androidx.preference.PreferenceCategory
+        <PreferenceCategory
             android:key="notification-bar-section"
             android:title="@string/notification_bar_section">
 
@@ -108,19 +108,19 @@
                 android:title="@string/alpha"
                 android:widgetLayout="@layout/pref_alpha_preview" />
 
-            <androidx.preference.SwitchPreference
+            <SwitchPreference
                 android:defaultValue="true"
                 android:key="notification-bar-gradient"
                 android:title="@string/gradient" />
 
-            <androidx.preference.SwitchPreference
+            <SwitchPreference
                 android:key="black-notification-icons"
                 android:title="@string/black_notification_icons" />
 
-        </androidx.preference.PreferenceCategory>
+        </PreferenceCategory>
 
         <!-- Search bar -->
-        <androidx.preference.PreferenceCategory
+        <PreferenceCategory
             android:key="search-bar-section"
             android:title="@string/search_bar_section">
 
@@ -137,13 +137,13 @@
                 android:title="@string/alpha"
                 android:widgetLayout="@layout/pref_alpha_preview" />
 
-            <androidx.preference.SwitchPreference
+            <SwitchPreference
                 android:defaultValue="true"
                 android:disableDependentsState="true"
                 android:key="search-bar-gradient"
                 android:title="@string/gradient" />
 
-            <androidx.preference.SwitchPreference
+            <SwitchPreference
                 android:defaultValue="true"
                 android:dependency="search-bar-gradient"
                 android:key="search-bar-rounded"
@@ -155,10 +155,10 @@
                 android:key="search-bar-size"
                 android:title="@string/search_bar_size" />
 
-        </androidx.preference.PreferenceCategory>
+        </PreferenceCategory>
 
         <!-- Result list -->
-        <androidx.preference.PreferenceCategory
+        <PreferenceCategory
             android:key="result-list-section"
             android:title="@string/result_list_section">
 
@@ -175,15 +175,15 @@
                 android:title="@string/alpha"
                 android:widgetLayout="@layout/pref_alpha_preview" />
 
-            <androidx.preference.SwitchPreference
+            <SwitchPreference
                 android:defaultValue="true"
                 android:key="result-list-rounded"
                 android:title="@string/round_corners" />
 
-        </androidx.preference.PreferenceCategory>
+        </PreferenceCategory>
 
         <!-- Quick list -->
-        <androidx.preference.PreferenceCategory
+        <PreferenceCategory
             android:key="quick-list-section"
             android:title="@string/quick_list_section">
 
@@ -206,45 +206,45 @@
                 android:key="quick-list-size"
                 android:title="@string/quick_list_size" />
 
-        </androidx.preference.PreferenceCategory>
+        </PreferenceCategory>
 
-        <!--        <androidx.preference.PreferenceCategory android:title="@string/misc">-->
-        <!--            <androidx.preference.SwitchPreference-->
+        <!--        <PreferenceCategory android:title="@string/misc">-->
+        <!--            <SwitchPreference-->
         <!--                android:defaultValue="false"-->
         <!--                android:key="pref-swap-kiss-button-with-menu"-->
         <!--                android:title="@string/swap_kiss_button_with_menu" />-->
-        <!--        </androidx.preference.PreferenceCategory>-->
-    </androidx.preference.PreferenceScreen>
+        <!--        </PreferenceCategory>-->
+    </PreferenceScreen>
 
-    <androidx.preference.PreferenceScreen
+    <PreferenceScreen
         android:key="feature-holder"
         android:summary="@string/features_summary"
         android:title="@string/title_features">
         <!-- include preference_features.xml -->
-        <androidx.preference.Preference />
+        <Preference />
 
-    </androidx.preference.PreferenceScreen>
+    </PreferenceScreen>
 
-    <!--    <androidx.preference.PreferenceScreen-->
+    <!--    <PreferenceScreen-->
     <!--        android:key="ui-custom-apps"-->
     <!--        android:summary="Custom app icons and names"-->
     <!--        android:title="Customized apps">-->
 
     <!--        &lt;!&ndash; Custom Icons &ndash;&gt;-->
-    <!--        <androidx.preference.PreferenceCategory-->
+    <!--        <PreferenceCategory-->
     <!--            android:key="custom-icons-section"-->
     <!--            android:title="Icons">-->
-    <!--            <androidx.preference.MultiSelectListPreference-->
+    <!--            <MultiSelectListPreference-->
     <!--                android:key="custom-icons-list"/>-->
-    <!--        </androidx.preference.PreferenceCategory>-->
+    <!--        </PreferenceCategory>-->
 
     <!--        &lt;!&ndash; Custom app name &ndash;&gt;-->
-    <!--        <androidx.preference.PreferenceCategory-->
+    <!--        <PreferenceCategory-->
     <!--            android:key="custom-names-section"-->
     <!--            android:title="Names">-->
-    <!--        </androidx.preference.PreferenceCategory>-->
+    <!--        </PreferenceCategory>-->
 
-    <!--    </androidx.preference.PreferenceScreen>-->
+    <!--    </PreferenceScreen>-->
 
 
     <rocks.tbog.tblauncher.preference.CustomDialogPreference
@@ -257,12 +257,12 @@
         android:key="exit-app"
         android:title="@string/exit_the_app" />
 
-    <androidx.preference.Preference
+    <Preference
         android:key="rate-app"
         android:title="@string/rate_the_app">
         <intent
             android:action="android.intent.action.VIEW"
             android:data="market://details?id=rocks.tbog.tblauncher" />
-    </androidx.preference.Preference>
+    </Preference>
 
 </androidx.preference.PreferenceScreen>

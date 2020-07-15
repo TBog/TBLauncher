@@ -6,12 +6,17 @@
     android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:background="@drawable/dialog_background"
-    android:clipChildren="true"
-    android:clipToPadding="true"
     android:orientation="vertical"
     android:paddingHorizontal="@dimen/result_margin_horizontal"
     android:paddingVertical="@dimen/result_margin_vertical"
-    tools:theme="@style/AppThemeTransparent">
+    android:theme="@style/TitleDialogTheme">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="@dimen/result_corner_radius"
+        android:text="@string/icon_pack_list"
+        android:textColor="?android:attr/textColorPrimary" />
 
     <HorizontalScrollView
         android:layout_width="match_parent"
@@ -25,18 +30,24 @@
             android:orientation="horizontal" />
     </HorizontalScrollView>
 
-    <View
+    <View style="@style/SeparatorHorizontal" />
+
+    <TextView
         android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:background="?android:attr/listDivider" />
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="@dimen/result_corner_radius"
+        android:text="@string/icon_pack_content_list"
+        android:textColor="?android:attr/textColorPrimary" />
 
     <ProgressBar
         android:id="@+id/iconLoadingBar"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:indeterminate="true"
+        android:indeterminateOnly="true"
         android:visibility="gone"
-        android:indeterminate="true" />
+        tools:visibility="visible" />
 
     <GridView
         android:id="@+id/iconGrid"
@@ -52,26 +63,22 @@
         tools:itemCount="20"
         tools:listitem="@layout/custom_icon_item" />
 
-    <LinearLayout
+    <EditText
+        android:id="@+id/search"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center">
+        android:autofillHints="application,text"
+        android:hint="@string/hint_custom_icon"
+        android:inputType="textAutoCorrect" />
 
-        <EditText
-            android:id="@+id/search"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:autofillHints="application,text"
-            android:hint="@string/hint_custom_icon"
-            android:inputType="textAutoCorrect" />
+    <View style="@style/SeparatorHorizontal" />
 
-    </LinearLayout>
-
-    <View
+    <TextView
         android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:background="?android:attr/listDivider" />
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="@dimen/result_corner_radius"
+        android:text="@string/icon_pack_quick_list"
+        android:textColor="?android:attr/textColorPrimary" />
 
     <HorizontalScrollView
         android:layout_width="match_parent"
@@ -91,19 +98,19 @@
 
     </HorizontalScrollView>
 
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:background="?android:attr/listDivider" />
+    <View style="@style/SeparatorHorizontal" />
 
     <LinearLayout
+        style="?android:attr/buttonBarStyle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
         android:gravity="center"
         android:orientation="horizontal">
 
         <Button
             android:id="@android:id/button2"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@android:string/cancel"
@@ -118,8 +125,14 @@
             android:layout_marginBottom="@dimen/icon_margin_bottom"
             android:layout_weight="1"
             android:gravity="center_vertical|end"
+            android:shadowColor="?attr/resultShadowColor"
+            android:shadowDx="1"
+            android:shadowDy="2"
+            android:shadowRadius="?attr/textShadowRadius"
             android:text="@string/custom_icon_preview"
-            android:textAlignment="textEnd" />
+            android:textAlignment="textEnd"
+            android:textColor="?android:attr/textColorSecondary"
+            android:textSize="@dimen/result_small_size" />
 
         <ImageView
             android:id="@+id/preview"
@@ -134,6 +147,7 @@
 
         <Button
             android:id="@android:id/button1"
+            style="?android:attr/buttonBarButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="@android:string/ok"
