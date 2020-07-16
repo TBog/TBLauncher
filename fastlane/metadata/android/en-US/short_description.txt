@@ -1,0 +1,1 @@
+Small memory footprint, icon pack support, color and behaviour customizable

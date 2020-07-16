@@ -1,0 +1,23 @@
+𝙏𝙝𝙞𝙨 𝙞𝙨 𝙩𝙝𝙚 𝙡𝙖𝙪𝙣𝙘𝙝𝙚𝙧 𝙪𝙨𝙚𝙙 𝙖𝙣𝙙 𝙙𝙚𝙫𝙚𝙡𝙤𝙥𝙚𝙙 𝙗𝙮
+██████████████████████▀█
+█─▄─▄─█▄─▄─▀█─▄▄─█─▄▄▄▄█
+███─████─▄─▀█─██─█─██▄─█
+▀▀▄▄▄▀▀▄▄▄▄▀▀▄▄▄▄▀▄▄▄▄▄▀
+
+Motives for developing my own launcher:
+🔹Clean main screen to enjoy the wallpaper
+🔸Fast access to apps by searching
+🔹Icon Pack compatible
+🔸Ability to customize colors and behaviors
+
+New Features:
+⦾ Update app list when changes detected
+⦿ Adaptive icon shapes
+⦾ Cache icons for fast result display
+⦿ Tags to better organize apps
+⦾ Quick list items to filter results
+⦿ Preference color preview
+⦾ Shortcuts for apps, contacts, etc.
+
+Source code https://github.com/TBog/TBLauncher
+The initial idea and code came from https://play.google.com/store/apps/details?id=fr.neamar.kiss

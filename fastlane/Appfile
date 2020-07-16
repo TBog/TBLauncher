@@ -1,0 +1,2 @@
+json_key_file("~/Git/api-6639387416894723381-146876-dc4a54b09905.json") # Path to the json secret file - Follow https://docs.fastlane.tools/actions/supply/#setup to get one
+package_name("rocks.tbog.tblauncher") # e.g. com.krausefx.app
