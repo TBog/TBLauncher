@@ -146,6 +146,7 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
         TBApplication.behaviour(this).onCreateActivity(this);
         TBApplication.ui(this).onCreateActivity(this);
         TBApplication.quickList(this).onCreateActivity(this);
+        TBApplication.liveWallpaper(this).onCreateActivity(this);
     }
 
     @Override

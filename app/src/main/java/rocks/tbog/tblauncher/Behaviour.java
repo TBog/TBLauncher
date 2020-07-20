@@ -178,7 +178,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         mHideHandler = new Handler(Looper.getMainLooper());
 
         // Set up the user interaction to manually show or hide the system UI.
-        findViewById(R.id.root_layout).setOnClickListener(view -> toggleSearchBar());
+        //findViewById(R.id.root_layout).setOnClickListener(view -> toggleSearchBar());
 
         initResultLayout(findViewById(R.id.resultLayout));
         initLauncherButton(findViewById(R.id.launcherButton));
@@ -300,7 +300,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         }
     }
 
-    private void toggleSearchBar() {
+    public void toggleSearchBar() {
         if (bSearchBarHidden) {
             showKeyboard();
             showSearchBar();

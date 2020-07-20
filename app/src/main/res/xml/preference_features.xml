@@ -77,6 +77,38 @@
 
     </androidx.preference.PreferenceCategory>
 
+    <!-- Wallpaper / LWP - LiveWallpaper -->
+    <PreferenceCategory
+        android:key="wallpaper-holder"
+        android:title="@string/title_wallpaper">
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="lwp-touch"
+            android:title="@string/lwp_touch" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="lwp-drag"
+            android:summary="@string/lwp_drag_desc"
+            android:title="@string/lwp_drag" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:key="wp-drag-animate"
+            android:summary="@string/wp_drag_animate_desc"
+            android:title="@string/wp_drag_animate" />
+        <SwitchPreference
+            android:defaultValue="true"
+            android:dependency="wp-drag-animate"
+            android:key="wp-animate-center"
+            android:summary="@string/wp_animate_center_desc"
+            android:title="@string/wp_animate_center" />
+        <SwitchPreference
+            android:defaultValue="false"
+            android:dependency="wp-drag-animate"
+            android:key="wp-animate-sides"
+            android:summary="@string/wp_animate_sides_desc"
+            android:title="@string/wp_animate_sides" />
+    </PreferenceCategory>
+
     <!-- Memory -->
     <androidx.preference.PreferenceCategory
         android:key="memory-section"
@@ -91,15 +123,15 @@
             android:defaultValue="true"
             android:dependency="cache-drawable"
             android:key="cache-half-apps"
-            android:title="@string/cache_half_apps"
-            android:summary="@string/cache_half_apps_summary"/>
+            android:summary="@string/cache_half_apps_summary"
+            android:title="@string/cache_half_apps" />
 
         <androidx.preference.SwitchPreference
             android:defaultValue="false"
             android:dependency="cache-drawable"
             android:key="screen-off-cache-clear"
-            android:title="@string/screen_off_cache_clear"
-            android:summary="@string/screen_off_cache_clear_summary"/>
+            android:summary="@string/screen_off_cache_clear_summary"
+            android:title="@string/screen_off_cache_clear" />
 
     </androidx.preference.PreferenceCategory>
 

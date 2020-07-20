@@ -150,4 +150,15 @@
     <string name="icon_pack_content_list">Icons from the selected icon pack</string>
     <string name="icon_pack_quick_list">System icon variations</string>
 
+    <string name="title_wallpaper">Wallpaper interactions</string>
+    <string name="lwp_touch">Send touch events to wallpaper</string>
+    <string name="lwp_drag">Emulate drag event for wallpaper</string>
+    <string name="lwp_drag_desc">Send multiple touch events</string>
+    <string name="wp_drag_animate">Scroll wallpaper</string>
+    <string name="wp_drag_animate_desc">Drag ← → to scroll wallpaper</string>
+    <string name="wp_animate_center">Center wallpaper</string>
+    <string name="wp_animate_center_desc">The wallpaper will return to center after scrolling</string>
+    <string name="wp_animate_sides">Side stick wallpaper</string>
+    <string name="wp_animate_sides_desc">The wallpaper will stick to the left or right after scrolling</string>
+
 </resources>

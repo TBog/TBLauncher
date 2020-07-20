@@ -273,6 +273,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             // rebind and relayout all visible views because I can't find how to rebind only the current view
             getListView().getAdapter().notifyDataSetChanged();
 
+            TBApplication.liveWallpaper(activity).onPrefChanged(sharedPreferences, key);
+
             switch (key) {
                 case "notification-bar-color":
                 case "notification-bar-alpha": {

@@ -48,6 +48,11 @@ public class TBApplication extends Application {
      */
     private DrawableCache mDrawableCache = new DrawableCache();
 
+    /**
+     * Manage live wallpaper interaction
+     */
+    private LiveWallpaper mLiveWallpaper = new LiveWallpaper();
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -82,6 +87,11 @@ public class TBApplication extends Application {
     }
 
     @NonNull
+    public static LiveWallpaper liveWallpaper(Context context) {
+        return getApplication(context).mLiveWallpaper;
+    }
+
+    @NonNull
     public static TagsHandler tagsHandler(Context context) {
         TBApplication app = getApplication(context);
         if (app.tagsHandler == null)
@@ -104,6 +114,8 @@ public class TBApplication extends Application {
             tbApplication.mCustomizeUI = new CustomizeUI();
         if (tbApplication.mQuickList.getContext() == activity)
             tbApplication.mQuickList = new QuickList();
+        if (tbApplication.mLiveWallpaper.getContext() == activity)
+            tbApplication.mLiveWallpaper = new LiveWallpaper();
     }
 
     public static void runTask(Context context, Searcher task) {
