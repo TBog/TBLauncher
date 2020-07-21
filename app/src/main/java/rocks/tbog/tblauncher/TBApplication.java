@@ -53,12 +53,24 @@ public class TBApplication extends Application {
      */
     private LiveWallpaper mLiveWallpaper = new LiveWallpaper();
 
+    /**
+     * Manage widgets
+     */
+    private WidgetManager mWidgetManager = new WidgetManager();
+
     @Override
     public void onCreate() {
         super.onCreate();
         PreferenceManager.setDefaultValues(this, R.xml.preferences, true);
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         mDrawableCache.onPrefChanged(this, mSharedPreferences);
+        mWidgetManager.start(this);
+    }
+
+    @Override
+    public void onTerminate() {
+        mWidgetManager.stop();
+        super.onTerminate();
     }
 
     public static TBApplication getApplication(Context context) {
@@ -92,6 +104,11 @@ public class TBApplication extends Application {
     }
 
     @NonNull
+    public static WidgetManager widgetManager(Context context) {
+        return getApplication(context).mWidgetManager;
+    }
+
+    @NonNull
     public static TagsHandler tagsHandler(Context context) {
         TBApplication app = getApplication(context);
         if (app.tagsHandler == null)
@@ -116,6 +133,8 @@ public class TBApplication extends Application {
             tbApplication.mQuickList = new QuickList();
         if (tbApplication.mLiveWallpaper.getContext() == activity)
             tbApplication.mLiveWallpaper = new LiveWallpaper();
+        if (tbApplication.mWidgetManager.usingActivity(activity))
+            tbApplication.mWidgetManager = new WidgetManager();
     }
 
     public static void runTask(Context context, Searcher task) {

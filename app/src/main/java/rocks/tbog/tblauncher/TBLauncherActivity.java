@@ -15,6 +15,7 @@ import android.view.WindowManager;
 import android.widget.PopupWindow;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.preference.PreferenceManager;
@@ -147,6 +148,7 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
         TBApplication.ui(this).onCreateActivity(this);
         TBApplication.quickList(this).onCreateActivity(this);
         TBApplication.liveWallpaper(this).onCreateActivity(this);
+        TBApplication.widgetManager(this).onCreateActivity(this);
     }
 
     @Override
@@ -273,5 +275,12 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
             else
                 c = null;
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (TBApplication.widgetManager(this).onActivityResult(this, requestCode, resultCode, data))
+            return;
+        super.onActivityResult(requestCode, resultCode, data);
     }
 }

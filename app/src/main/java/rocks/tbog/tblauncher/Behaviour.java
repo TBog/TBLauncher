@@ -74,6 +74,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     private ResultAdapter mResultAdapter;
     private EditText mSearchEditText;
     private View mSearchBarContainer;
+    private View mWidgetContainer;
     private View mClearButton;
     private View mMenuButton;
     private ImageView mLauncherButton;
@@ -170,6 +171,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 
         bSearchBarHidden = true;
         mSearchBarContainer = findViewById(R.id.searchBarContainer);
+        mWidgetContainer = findViewById(R.id.widgetContainer);
         mClearButton = findViewById(R.id.clearButton);
         mMenuButton = findViewById(R.id.menuButton);
         mNotificationBackground = findViewById(R.id.notificationBackground);
@@ -233,7 +235,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 
         adapter.add(new LinearAdapter.Item(ctx, R.string.launcher_settings));
         adapter.add(new LinearAdapter.Item(ctx, R.string.change_wallpaper));
-        //adapter.add(new LinearAdapter.Item(ctx, R.string.menu_widget_add));
+        adapter.add(new LinearAdapter.Item(ctx, R.string.menu_widget_add));
         adapter.add(new LinearAdapter.Item(ctx, R.string.android_settings));
 
         menu.setOnItemClickListener((a, v, pos) -> {
@@ -246,7 +248,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                 case R.string.launcher_settings:
                     beforeLaunchOccurred();
                     mClearButton.postDelayed(() -> {
-                        Context c = mClearButton.getContext();
+                        Context c = mTBLauncherActivity;
                         c.startActivity(new Intent(c, SettingsActivity.class));
                         afterLaunchOccurred();
                     }, LAUNCH_DELAY);
@@ -254,19 +256,19 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                 case R.string.change_wallpaper:
                     beforeLaunchOccurred();
                     mClearButton.postDelayed(() -> {
-                        Context c = mClearButton.getContext();
+                        Context c = mTBLauncherActivity;
                         Intent intent = new Intent(Intent.ACTION_SET_WALLPAPER);
                         c.startActivity(Intent.createChooser(intent, c.getString(R.string.change_wallpaper)));
                         afterLaunchOccurred();
                     }, LAUNCH_DELAY);
                     break;
                 case R.string.menu_widget_add:
+                    TBApplication.widgetManager(mTBLauncherActivity).selectWidget(mTBLauncherActivity);
                     break;
                 case R.string.android_settings:
                     beforeLaunchOccurred();
                     mClearButton.postDelayed(() -> {
-                        Context c = mClearButton.getContext();
-                        c.startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS));
+                        mTBLauncherActivity.startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS));
                         afterLaunchOccurred();
                     }, LAUNCH_DELAY);
                     break;
@@ -322,6 +324,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                 .start();
 
         mSearchBarContainer.setVisibility(View.VISIBLE);
+        mWidgetContainer.setVisibility(View.GONE);
         mSearchBarContainer.animate()
                 .setListener(null)
                 .setStartDelay(0)
@@ -364,6 +367,9 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         else {
             mNotificationBackground.setTranslationY(-mNotificationBackground.getLayoutParams().height);
         }
+
+        mWidgetContainer.setVisibility(View.VISIBLE);
+
         //TODO: animate mResultLayout to fill the space freed by mSearchBarContainer
         if (animate)
             mSearchBarContainer.animate()
