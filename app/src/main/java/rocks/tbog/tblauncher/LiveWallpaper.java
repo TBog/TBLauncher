@@ -22,6 +22,7 @@ class LiveWallpaper {
     private Point mWindowSize;
     private android.os.IBinder mWindowToken;
     private View mContentView;
+    private float mFirstTouchOffset;
     private float mFirstTouchPos;
     private float mLastTouchPos;
     private float mWallpaperOffset;
@@ -80,6 +81,7 @@ class LiveWallpaper {
         switch (actionMasked) {
             case MotionEvent.ACTION_DOWN:
                 mFirstTouchPos = event.getRawX();
+                mFirstTouchOffset = mWallpaperOffset;
                 if (isPreferenceWPDragAnimate()) {
                     mContentView.clearAnimation();
 
@@ -106,7 +108,7 @@ class LiveWallpaper {
 //                    mLastTouchPos = fTouchPos;
                     mLastTouchPos = event.getRawX();
                     float fOffset = (mFirstTouchPos - mLastTouchPos) * 1.01f / mWindowSize.x;
-                    updateWallpaperOffset(mWallpaperOffset + fOffset);
+                    updateWallpaperOffset(mFirstTouchOffset + fOffset);
                 }
 
                 //send move/drag event to the LWP
