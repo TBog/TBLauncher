@@ -32,13 +32,16 @@
 
         <include layout="@layout/result_list" />
 
-        <FrameLayout
+        <LinearLayout
             android:id="@+id/widgetContainer"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:background="@null"
-            android:gravity="center" />
+            android:background="@drawable/dialog_background"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:visibility="gone"
+            tools:visibility="visible"/>
 
         <LinearLayout
             android:id="@+id/quickList"

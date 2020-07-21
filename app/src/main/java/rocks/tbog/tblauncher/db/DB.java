@@ -11,7 +11,7 @@ import rocks.tbog.tblauncher.entry.FilterEntry;
 class DB extends SQLiteOpenHelper {
 
     private final static String DB_NAME = "kiss.s3db";
-    private final static int DB_VERSION = 9;
+    private final static int DB_VERSION = 10;
 
     DB(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -26,6 +26,7 @@ class DB extends SQLiteOpenHelper {
         //createQuickList(database);
         createShortcutsTable(database);
         createFavoritesTable(database);
+        createWidgetsTable(database);
     }
 
     private void createTags(SQLiteDatabase database) {
@@ -71,6 +72,11 @@ class DB extends SQLiteOpenHelper {
         }
     }
 
+    private void createWidgetsTable(SQLiteDatabase db)
+    {
+        db.execSQL("CREATE TABLE \"widgets\" (_id INTEGER PRIMARY KEY AUTOINCREMENT, \"appWidgetId\" INTEGER NOT NULL UNIQUE, \"properties\" TEXT)");
+    }
+
     @Override
     public void onUpgrade(SQLiteDatabase database, int oldVersion, int newVersion) {
         Log.d("onUpgrade", "Updating database from version " + oldVersion + " to version " + newVersion);
@@ -102,6 +108,9 @@ class DB extends SQLiteOpenHelper {
                     // fall through
                 case 8:
                     database.execSQL("ALTER TABLE \"apps\" ADD COLUMN \"custom_icon\" BLOB DEFAULT NULL");
+                    // fall through
+                case 9:
+                    createWidgetsTable(database);
                     // fall through
                 default:
                     break;

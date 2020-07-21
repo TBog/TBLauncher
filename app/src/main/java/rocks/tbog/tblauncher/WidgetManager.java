@@ -5,21 +5,34 @@ import android.appwidget.AppWidgetHost;
 import android.appwidget.AppWidgetHostView;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
+import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.LinearLayout;
+import android.widget.ListAdapter;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
+import java.util.Iterator;
+
+import rocks.tbog.tblauncher.db.DBHelper;
+import rocks.tbog.tblauncher.db.WidgetRecord;
+import rocks.tbog.tblauncher.ui.LinearAdapter;
+import rocks.tbog.tblauncher.ui.ListPopup;
 
 public class WidgetManager {
     private static final String TAG = "Wdg";
     private AppWidgetManager mAppWidgetManager;
     private WidgetHost mAppWidgetHost;
     private ViewGroup mLayout;
+    private final ArrayList<WidgetRecord> mWidgets = new ArrayList<>(0);
     private static final int APPWIDGET_HOST_ID = 1337;
     private static final int REQUEST_PICK_APPWIDGET = 101;
     private static final int REQUEST_CREATE_APPWIDGET = 102;
@@ -68,19 +81,59 @@ public class WidgetManager {
             }
         }
 
+        int[] appWidgetIds;
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
-            int[] appWidgetIds = mAppWidgetHost.getAppWidgetIds();
-            for (int appWidgetId : appWidgetIds) {
-                restoreWidget(appWidgetId);
+            appWidgetIds = mAppWidgetHost.getAppWidgetIds();
+        } else {
+            appWidgetIds = new int[0];
+        }
+
+        {
+            ArrayList<WidgetRecord> widgets = DBHelper.getWidgets(mLayout.getContext());
+            mWidgets.clear();
+            mWidgets.addAll(widgets);
+        }
+
+        // sync DB with AppWidgetHost
+        for (int appWidgetId : appWidgetIds) {
+            boolean foundInDB = false;
+            for (WidgetRecord rec : mWidgets) {
+                if (rec.appWidgetId == appWidgetId) {
+                    foundInDB = true;
+                    break;
+                }
             }
+            if (!foundInDB) {
+                // remove zombie widget
+                removeWidget(appWidgetId);
+            }
+        }
+
+        // restore widgets
+        for (WidgetRecord rec : mWidgets) {
+            restoreWidget(rec);
         }
     }
 
-    private void restoreWidget(int appWidgetId) {
+    private void restoreWidget(WidgetRecord rec) {
+        final int appWidgetId = rec.appWidgetId;
         Context ctx = mLayout.getContext().getApplicationContext();
         AppWidgetProviderInfo appWidgetInfo = mAppWidgetManager.getAppWidgetInfo(appWidgetId);
+        if (appWidgetInfo == null)
+            return;
         AppWidgetHostView hostView = mAppWidgetHost.createView(ctx, appWidgetId, appWidgetInfo);
-        hostView.setAppWidget(appWidgetId, appWidgetInfo);
+
+        addWidgetToLayout(hostView, appWidgetInfo, rec);
+    }
+
+    private void addWidgetToLayout(AppWidgetHostView hostView, AppWidgetProviderInfo appWidgetInfo, WidgetRecord rec) {
+        ViewGroup.LayoutParams params = new LinearLayout.LayoutParams(rec.width, rec.height);
+        hostView.setLayoutParams(params);
+        hostView.setMinimumWidth(rec.width);
+        hostView.setMinimumHeight(rec.height);
+
+        hostView.setAppWidget(rec.appWidgetId, appWidgetInfo);
+        hostView.updateAppWidgetSize(null, rec.width, rec.height, rec.width, rec.height);
 
         mLayout.addView(hostView);
     }
@@ -156,16 +209,53 @@ public class WidgetManager {
         int appWidgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID, -1);
         AppWidgetProviderInfo appWidgetInfo = mAppWidgetManager.getAppWidgetInfo(appWidgetId);
         AppWidgetHostView hostView = mAppWidgetHost.createView(activity.getApplicationContext(), appWidgetId, appWidgetInfo);
-        hostView.setAppWidget(appWidgetId, appWidgetInfo);
-        mLayout.addView(hostView);
+
+        WidgetRecord rec = new WidgetRecord();
+        rec.appWidgetId = appWidgetId;
+        rec.width = appWidgetInfo.minWidth;
+        rec.height = appWidgetInfo.minHeight;
+
+        DBHelper.addWidget(activity, rec);
+        mWidgets.add(rec);
+
+        addWidgetToLayout(hostView, appWidgetInfo, rec);
     }
 
     /**
      * Removes the widget displayed by this AppWidgetHostView.
      */
     public void removeWidget(AppWidgetHostView hostView) {
-        mAppWidgetHost.deleteAppWidgetId(hostView.getAppWidgetId());
+        final int appWidgetId = hostView.getAppWidgetId();
+        mAppWidgetHost.deleteAppWidgetId(appWidgetId);
         mLayout.removeView(hostView);
+        DBHelper.removeWidget(mLayout.getContext(), appWidgetId);
+        for (Iterator<WidgetRecord> iterator = mWidgets.iterator(); iterator.hasNext(); ) {
+            WidgetRecord rec = iterator.next();
+            if (rec.appWidgetId == appWidgetId)
+                iterator.remove();
+        }
+    }
+
+    public void removeWidget(int appWidgetId) {
+        int childCount = mLayout.getChildCount();
+        for (int child = 0; child < childCount; child += 1) {
+            View view = mLayout.getChildAt(child);
+            if (view instanceof AppWidgetHostView) {
+                int viewAppWidgetId = ((AppWidgetHostView) view).getAppWidgetId();
+                if (viewAppWidgetId == appWidgetId) {
+                    removeWidget((AppWidgetHostView) view);
+                    return;
+                }
+            }
+        }
+        // if we reach this point then the layout does not have the widget
+        mAppWidgetHost.deleteAppWidgetId(appWidgetId);
+        DBHelper.removeWidget(mLayout.getContext(), appWidgetId);
+        for (Iterator<WidgetRecord> iterator = mWidgets.iterator(); iterator.hasNext(); ) {
+            WidgetRecord rec = iterator.next();
+            if (rec.appWidgetId == appWidgetId)
+                iterator.remove();
+        }
     }
 
     /**
@@ -194,11 +284,53 @@ public class WidgetManager {
         } else if (resultCode == Activity.RESULT_CANCELED && data != null) {
             int appWidgetId = data.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1);
             if (appWidgetId != -1) {
-                mAppWidgetHost.deleteAppWidgetId(appWidgetId);
+                removeWidget(appWidgetId);
                 return true;
             }
         }
         return false;
+    }
+
+    public int widgetCount() {
+        return mWidgets.size();
+    }
+
+    public ListPopup getRemoveWidgetPopup() {
+        Context ctx = mLayout.getContext();
+        LinearAdapter adapter = new LinearAdapter();
+
+        adapter.add(new LinearAdapter.ItemTitle(ctx, R.string.menu_widget_remove));
+
+        for (WidgetRecord rec : mWidgets) {
+            AppWidgetProviderInfo info = mAppWidgetManager.getAppWidgetInfo(rec.appWidgetId);
+            if (info == null)
+                continue;
+            String name;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                name = info.loadLabel(ctx.getPackageManager());
+            } else {
+                name = info.label;
+            }
+            adapter.add(new WidgetPopupItem(name, rec.appWidgetId));
+        }
+
+        ListPopup menu = ListPopup.create(ctx, adapter);
+        menu.setOnItemClickListener((a, v, pos) -> {
+            Object item = a.getItem(pos);
+            if (item instanceof WidgetPopupItem) {
+                removeWidget(((WidgetPopupItem) item).appWidgetId);
+            }
+        });
+        return menu;
+    }
+
+    static class WidgetPopupItem extends LinearAdapter.ItemString {
+        int appWidgetId;
+
+        public WidgetPopupItem(@NonNull String string, int appWidgetId) {
+            super(string);
+            this.appWidgetId = appWidgetId;
+        }
     }
 
     static class WidgetHost extends AppWidgetHost {

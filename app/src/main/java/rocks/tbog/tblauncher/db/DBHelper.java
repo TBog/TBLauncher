@@ -446,7 +446,7 @@ public class DBHelper {
 
     /**
      * @param context android context
-     * @param record the id of the app
+     * @param record  the id of the app
      * @return HashMap with EntryItem id as key and an ArrayList of tags for each
      */
     @NonNull
@@ -688,5 +688,33 @@ public class DBHelper {
             return false;
         }
         return true;
+    }
+
+    public static ArrayList<WidgetRecord> getWidgets(@NonNull Context context) {
+        SQLiteDatabase db = getDatabase(context);
+        ArrayList<WidgetRecord> list;
+        try (Cursor c = db.query("widgets", new String[]{"appWidgetId", "properties"}, null, null, null, null, null)) {
+            list = new ArrayList<>(c.getCount());
+            while (c.moveToNext()) {
+                WidgetRecord rec = new WidgetRecord();
+                rec.appWidgetId = c.getInt(0);
+                rec.loadProperties(c.getString(1));
+                list.add(rec);
+            }
+        }
+        return list;
+    }
+
+    public static void addWidget(@NonNull Context context, WidgetRecord rec) {
+        SQLiteDatabase db = getDatabase(context);
+        ContentValues values = new ContentValues();
+        values.put("appWidgetId", rec.appWidgetId);
+        values.put("properties", rec.packedProperties());
+        db.insert("widgets", null, values);
+    }
+
+    public static void removeWidget(@NonNull Context context, int appWidgetId) {
+        SQLiteDatabase db = getDatabase(context);
+        db.delete("widgets", "appWidgetId=?", new String[]{String.valueOf(appWidgetId)});
     }
 }

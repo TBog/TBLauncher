@@ -18,7 +18,6 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
@@ -236,6 +235,8 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         adapter.add(new LinearAdapter.Item(ctx, R.string.launcher_settings));
         adapter.add(new LinearAdapter.Item(ctx, R.string.change_wallpaper));
         adapter.add(new LinearAdapter.Item(ctx, R.string.menu_widget_add));
+        if (TBApplication.widgetManager(ctx).widgetCount() > 0)
+            adapter.add(new LinearAdapter.Item(ctx, R.string.menu_widget_remove));
         adapter.add(new LinearAdapter.Item(ctx, R.string.android_settings));
 
         menu.setOnItemClickListener((a, v, pos) -> {
@@ -265,6 +266,13 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                 case R.string.menu_widget_add:
                     TBApplication.widgetManager(mTBLauncherActivity).selectWidget(mTBLauncherActivity);
                     break;
+                case R.string.menu_widget_remove: {
+                    Context c = mTBLauncherActivity;
+                    ListPopup removeWidgetPopup = TBApplication.widgetManager(c).getRemoveWidgetPopup();
+                    TBApplication.behaviour(c).registerPopup(removeWidgetPopup);
+                    removeWidgetPopup.showCenter(mTBLauncherActivity.getWindow().getDecorView());
+                    break;
+                }
                 case R.string.android_settings:
                     beforeLaunchOccurred();
                     mClearButton.postDelayed(() -> {
@@ -315,6 +323,8 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     private void showSearchBar() {
         SystemUiVisibility.clearFullscreen(mDecorView);
 
+        hideWidgets();
+
         mNotificationBackground.setTranslationY(-mNotificationBackground.getLayoutParams().height);
         mNotificationBackground.animate()
                 .translationY(0f)
@@ -340,6 +350,11 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         // Schedule a runnable to display UI elements after a delay
         mHideHandler.removeCallbacks(mHidePart2Runnable);
         mHideHandler.postDelayed(mShowPart2Runnable, UI_ANIMATION_DELAY);
+    }
+
+    private void hideWidgets() {
+        mWidgetContainer.setVisibility(View.GONE);
+        mResultLayout.setVisibility(View.INVISIBLE);
     }
 
     private void hideSearchBar() {
@@ -368,8 +383,6 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             mNotificationBackground.setTranslationY(-mNotificationBackground.getLayoutParams().height);
         }
 
-        mWidgetContainer.setVisibility(View.VISIBLE);
-
         //TODO: animate mResultLayout to fill the space freed by mSearchBarContainer
         if (animate)
             mSearchBarContainer.animate()
@@ -393,12 +406,19 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         clearAdapter();
         bSearchBarHidden = true;
 
+        showWidgets();
+
         TBApplication.quickList(getContext()).hideQuickList(animate);
 
         // Schedule a runnable to remove the status and navigation bar after a delay
         mHideHandler.removeCallbacks(mShowPart2Runnable);
         //mHideHandler.post(mHidePart2Runnable);
         mHideHandler.postDelayed(mHidePart2Runnable, startDelay);
+    }
+
+    private void showWidgets() {
+        mWidgetContainer.setVisibility(View.VISIBLE);
+        mResultLayout.setVisibility(View.GONE);
     }
 
     public void showKeyboard() {
@@ -462,6 +482,8 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     @Override
     public void clearAdapter() {
         mResultAdapter.clear();
+        if (bSearchBarHidden)
+            return;
         mResultLayout.setVisibility(View.INVISIBLE);
         TBApplication.quickList(getContext()).adapterCleared();
         displayClearOnInput();

@@ -33,7 +33,8 @@
     <string name="excluded_app_list_added">App excluded from KISS. Reset through the KISS settings</string>
     <string name="application_not_found">Whoops… unable to launch that app.</string>
     <string name="change_wallpaper">Change wallpaper</string>
-    <string name="menu_widget_add">Widget settings</string>
+    <string name="menu_widget_add">Add Widget</string>
+    <string name="menu_widget_remove">Remove Widget</string>
     <string name="android_settings">Device settings</string>
     <string name="launcher_settings">TBLauncher settings</string>
     <string name="rate_the_app">Rate the app</string>

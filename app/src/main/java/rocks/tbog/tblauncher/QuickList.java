@@ -89,7 +89,7 @@ public class QuickList {
 
             view.setOnClickListener(entry::doLaunch);
         }
-        mQuickList.setVisibility(mQuickList.getChildCount() == 0 ? View.GONE : View.VISIBLE);
+        //mQuickList.setVisibility(mQuickList.getChildCount() == 0 ? View.GONE : View.VISIBLE);
         mQuickList.requestLayout();
     }
 
