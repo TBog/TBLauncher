@@ -4,6 +4,7 @@ import android.app.WallpaperManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Point;
+import android.graphics.PointF;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
@@ -22,12 +23,15 @@ class LiveWallpaper {
     private Point mWindowSize;
     private android.os.IBinder mWindowToken;
     private View mContentView;
-    private float mFirstTouchOffset;
-    private float mFirstTouchPos;
-    private float mLastTouchPos;
-    private float mWallpaperOffset;
+    private final PointF mFirstTouchOffset = new PointF();
+    private final PointF mFirstTouchPos = new PointF();
+    private final PointF mLastTouchPos = new PointF();
+    private final PointF mWallpaperOffset = new PointF(.5f, .5f);
     private Anim mAnimation;
     private VelocityTracker mVelocityTracker;
+
+    private final int SCREEN_COUNT_HORIZONTAL = Integer.parseInt("3");
+    private final int SCREEN_COUNT_VERTICAL = Integer.parseInt("1");
 
     private boolean lwpTouch = true;
     private boolean lwpDrag = false;
@@ -59,9 +63,17 @@ class LiveWallpaper {
         mWallpaperManager = (WallpaperManager) mainActivity.getSystemService(Context.WALLPAPER_SERVICE);
         assert mWallpaperManager != null;
 
+        // set mContentView before we call updateWallpaperOffset
         mContentView = mainActivity.findViewById(android.R.id.content);
-        mWallpaperManager.setWallpaperOffsetSteps(.5f, 0.f);
-        mWallpaperOffset = 0.5f; // this is the center
+        {
+            float xStep = (SCREEN_COUNT_HORIZONTAL > 1) ? (1.f / (SCREEN_COUNT_HORIZONTAL - 1)) : 0.f;
+            float yStep = (SCREEN_COUNT_VERTICAL > 1) ? (1.f / (SCREEN_COUNT_VERTICAL - 1)) : 0.f;
+            mWallpaperManager.setWallpaperOffsetSteps(xStep, yStep);
+
+            int centerScreenX = SCREEN_COUNT_HORIZONTAL / 2;
+            int centerScreenY = SCREEN_COUNT_VERTICAL / 2;
+            updateWallpaperOffset(centerScreenX * xStep, centerScreenY * yStep);
+        }
         mAnimation = new Anim();
         mVelocityTracker = null;
         mWindowSize = new Point(1, 1);
@@ -80,15 +92,15 @@ class LiveWallpaper {
         int actionMasked = event.getActionMasked();
         switch (actionMasked) {
             case MotionEvent.ACTION_DOWN:
-                mFirstTouchPos = event.getRawX();
-                mFirstTouchOffset = mWallpaperOffset;
+                mFirstTouchPos.set(event.getRawX(), event.getRawY());
+                mFirstTouchOffset.set(mWallpaperOffset);
                 if (isPreferenceWPDragAnimate()) {
                     mContentView.clearAnimation();
 
                     mVelocityTracker = VelocityTracker.obtain();
                     mVelocityTracker.addMovement(event);
 
-                    mLastTouchPos = event.getRawX();
+                    mLastTouchPos.set(mFirstTouchPos);
                     mTBLauncherActivity.getWindowManager()
                             .getDefaultDisplay()
                             .getSize(mWindowSize);
@@ -106,9 +118,10 @@ class LiveWallpaper {
 //                    fOffset += mWallpaperOffset;
 //                    updateWallpaperOffset(fOffset);
 //                    mLastTouchPos = fTouchPos;
-                    mLastTouchPos = event.getRawX();
-                    float fOffset = (mFirstTouchPos - mLastTouchPos) * 1.01f / mWindowSize.x;
-                    updateWallpaperOffset(mFirstTouchOffset + fOffset);
+                    mLastTouchPos.set(event.getRawX(), event.getRawY());
+                    float offsetX = (mFirstTouchPos.x - mLastTouchPos.x) * 1.01f / mWindowSize.x;
+                    float offsetY = (mFirstTouchPos.y - mLastTouchPos.y) * 1.01f / mWindowSize.y;
+                    updateWallpaperOffset(mFirstTouchOffset.x + offsetX, mFirstTouchOffset.y + offsetY);
                 }
 
                 //send move/drag event to the LWP
@@ -133,13 +146,15 @@ class LiveWallpaper {
 
                     // was this a click?
                     if (actionMasked == MotionEvent.ACTION_UP) {
-                        float xMove = (mFirstTouchPos - mLastTouchPos) / mWindowSize.x;
+                        float xMove = (mFirstTouchPos.x - mLastTouchPos.x) / mWindowSize.x;
+                        float yMove = (mFirstTouchPos.y - mLastTouchPos.y) / mWindowSize.y;
                         float xVel = mVelocityTracker.getXVelocity() / mWindowSize.x;
                         float yVel = mVelocityTracker.getYVelocity() / mWindowSize.y;
-                        Log.d("LWP", String.format(Locale.US, "Velocity=(%.3f, %.3f) Move=(%.3f, 0)", xVel, yVel, xMove));
+                        Log.d("LWP", String.format(Locale.US, "Velocity=(%.3f, %.3f) Move=(%.3f, %.3f)", xVel, yVel, xMove, yMove));
                         if (Math.abs(xVel) < .01f
                                 && Math.abs(yVel) < .01f
-                                && Math.abs(xMove) < .01f)
+                                && Math.abs(xMove) < .01f
+                                && Math.abs(yMove) < .01f)
                             onClick(view);
                     }
 
@@ -204,12 +219,13 @@ class LiveWallpaper {
         return mWindowToken != null ? mWindowToken : (mWindowToken = mContentView.getWindowToken());
     }
 
-    private void updateWallpaperOffset(float offset) {
+    private void updateWallpaperOffset(float offsetX, float offsetY) {
         android.os.IBinder iBinder = getWindowToken();
         if (iBinder != null) {
-            offset = Math.max(0.f, Math.min(1.f, offset));
-            mWallpaperOffset = offset;
-            mWallpaperManager.setWallpaperOffsets(iBinder, mWallpaperOffset, 0.f);
+            offsetX = Math.max(0.f, Math.min(1.f, offsetX));
+            offsetY = Math.max(0.f, Math.min(1.f, offsetY));
+            mWallpaperManager.setWallpaperOffsets(iBinder, offsetX, offsetY);
+            mWallpaperOffset.set(offsetX, offsetY);
         }
     }
 
@@ -241,9 +257,9 @@ class LiveWallpaper {
     }
 
     class Anim extends Animation {
-        float mStartOffset;
-        float mDeltaOffset;
-        float mVelocity;
+        final PointF mStartOffset = new PointF();
+        final PointF mDeltaOffset = new PointF();
+        final PointF mVelocity = new PointF();
 
         Anim() {
             super();
@@ -252,16 +268,20 @@ class LiveWallpaper {
 
         boolean init() {
             mVelocityTracker.computeCurrentVelocity(1000 / 30);
-            mVelocity = mVelocityTracker.getXVelocity();
+            mVelocity.set(mVelocityTracker.getXVelocity(), mVelocityTracker.getYVelocity());
             //Log.d("LWP", "mVelocity=" + String.format(Locale.US, "%.2f", mVelocity));
 
-            mStartOffset = mWallpaperOffset;
+            mStartOffset.set(mWallpaperOffset);
             //Log.d("LWP", "mStartOffset=" + String.format(Locale.US, "%.2f", mStartOffset));
 
             boolean stickToSides = isPreferenceWPStickToSides();
             boolean stickToCenter = isPreferenceWPReturnCenter();
-            float expectedPos = -Math.min(Math.max(mVelocity / mWindowSize.x, -.5f), .5f) + mStartOffset;
-            //Log.d("LWP", "expectedPos=" + String.format(Locale.US, "%.2f", expectedPos));
+            float expectedPosX = -Math.min(Math.max(mVelocity.x / mWindowSize.x, -.5f), .5f) + mStartOffset.x;
+            //float expectedPosY = -Math.min(Math.max(mVelocity.y / mWindowSize.y, -.5f), .5f) + mStartOffset.y;
+            //Log.d("LWP", "expectedPos=" + String.format(Locale.US, "%.2f %.2f", expectedPosX, expectedPosY));
+
+            // stick to center
+            mDeltaOffset.y = .5f - mStartOffset.y;
 
             // if we stick only to the center
             float leftStickPercent = -1.f;
@@ -277,12 +297,12 @@ class LiveWallpaper {
                 rightStickPercent = .5f;
             }
 
-            if (expectedPos <= leftStickPercent)
-                mDeltaOffset = 0.f - mStartOffset;
-            else if (expectedPos >= rightStickPercent)
-                mDeltaOffset = 1.f - mStartOffset;
+            if (expectedPosX <= leftStickPercent)
+                mDeltaOffset.x = 0.f - mStartOffset.x;
+            else if (expectedPosX >= rightStickPercent)
+                mDeltaOffset.x = 1.f - mStartOffset.x;
             else if (stickToCenter)
-                mDeltaOffset = .5f - mStartOffset;
+                mDeltaOffset.x = .5f - mStartOffset.x;
             else
                 return false;
             return true;
@@ -290,13 +310,18 @@ class LiveWallpaper {
 
         @Override
         protected void applyTransformation(float interpolatedTime, Transformation t) {
-            float fOffset = mStartOffset + mDeltaOffset * interpolatedTime;
+            float offsetX = mStartOffset.x + mDeltaOffset.x * interpolatedTime;
+            float offsetY = mStartOffset.y + mDeltaOffset.y * interpolatedTime;
             float velocityInterpolator = (float) Math.sqrt(interpolatedTime) * 3.f;
-            if (velocityInterpolator < 1.f)
-                fOffset -= mVelocity / mWindowSize.x * velocityInterpolator;
-            else
-                fOffset -= mVelocity / mWindowSize.x * (1.f - 0.5f * (velocityInterpolator - 1.f));
-            updateWallpaperOffset(fOffset);
+            if (velocityInterpolator < 1.f) {
+                offsetX -= mVelocity.x / mWindowSize.x * velocityInterpolator;
+                offsetY -= mVelocity.y / mWindowSize.y * velocityInterpolator;
+            }
+            else {
+                offsetX -= mVelocity.x / mWindowSize.x * (1.f - 0.5f * (velocityInterpolator - 1.f));
+                offsetY -= mVelocity.y / mWindowSize.y * (1.f - 0.5f * (velocityInterpolator - 1.f));
+            }
+            updateWallpaperOffset(offsetX, offsetY);
         }
     }
 }
