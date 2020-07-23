@@ -8,7 +8,6 @@ import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.Window;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
@@ -135,16 +134,20 @@ public class ListPopup extends PopupWindow {
         layout.forceLayout();
     }
 
-    public void showCenter(View viewForWindowToken) {
+    private void beforeShow()
+    {
         updateItems();
 
         // don't steal the focus, this will prevent the keyboard from changing
         setFocusable(false);
         // draw over stuff if needed
         setClippingEnabled(false);
+    }
 
+    public void showCenter(View viewForWindowToken) {
+        beforeShow();
         setAnimationStyle(R.style.PopupAnimationBottom);
-        showAtLocation(viewForWindowToken, Gravity.CENTER, 0, 0);
+        super.showAtLocation(viewForWindowToken, Gravity.CENTER, 0, 0);
         applyDim();
     }
 
@@ -153,12 +156,7 @@ public class ListPopup extends PopupWindow {
     }
 
     public void show(View anchor, float anchorOverlap) {
-        updateItems();
-
-        // don't steal the focus, this will prevent the keyboard from changing
-        setFocusable(false);
-        // draw over stuff if needed
-        setClippingEnabled(false);
+        beforeShow();
 
         final Rect displayFrame = new Rect();
         anchor.getWindowVisibleDisplayFrame(displayFrame);
@@ -175,6 +173,7 @@ public class ListPopup extends PopupWindow {
                 View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
 
         setWidth(rootView.getMeasuredWidth());
+        setHeight(LinearLayout.LayoutParams.WRAP_CONTENT);
 
         int xOffset = anchorPos[0] + anchor.getPaddingLeft();
         if (xOffset + rootView.getMeasuredWidth() > displayFrame.right)
@@ -202,7 +201,15 @@ public class ListPopup extends PopupWindow {
             setHeight(distanceToBottom + overlapAmount);
         }
 
-        showAtLocation(anchor, Gravity.START | Gravity.TOP, xOffset, yOffset);
+        super.showAtLocation(anchor, Gravity.START | Gravity.TOP, xOffset, yOffset);
+        applyDim();
+    }
+
+    @Override
+    public void showAtLocation(View parent, int gravity, int x, int y) {
+        beforeShow();
+        setAnimationStyle(R.style.PopupAnimationTop);
+        super.showAtLocation(parent, gravity, x, y);
         applyDim();
     }
 

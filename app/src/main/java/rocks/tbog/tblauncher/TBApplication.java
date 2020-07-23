@@ -58,6 +58,11 @@ public class TBApplication extends Application {
      */
     private WidgetManager mWidgetManager = new WidgetManager();
 
+    /**
+     * The state of certain launcher features
+     */
+    private static LauncherState mState = new LauncherState();
+
     @Override
     public void onCreate() {
         super.onCreate();
@@ -119,6 +124,10 @@ public class TBApplication extends Application {
     @NonNull
     public static DataHandler dataHandler(Context context) {
         return getApplication(context).getDataHandler();
+    }
+
+    public static LauncherState state() {
+        return mState;
     }
 
     public static void onDestroyActivity(TBLauncherActivity activity) {

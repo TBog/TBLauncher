@@ -33,6 +33,7 @@ public class QuickList {
     private TBLauncherActivity mTBLauncherActivity;
     private boolean mIsEnabled = true;
     private boolean mAlwaysVisible = true;
+    private boolean mListDirty = true;
     private LinearLayout mQuickList;
 
     // bAdapterEmpty is true when no search results are displayed
@@ -52,13 +53,15 @@ public class QuickList {
         mTBLauncherActivity = tbLauncherActivity;
 
         mQuickList = mTBLauncherActivity.findViewById(R.id.quickList);
-        populateList();
+        mListDirty = true;
     }
 
     public void onFavoritesChanged() {
         if (mQuickList == null)
             return;
-        populateList();
+        mListDirty = true;
+        if (TBApplication.state().isQuickListVisible())
+            populateList();
     }
 
     public static int getDrawFlags(SharedPreferences prefs) {
@@ -71,6 +74,7 @@ public class QuickList {
     }
 
     private void populateList() {
+        mListDirty = false;
         mQuickList.removeAllViews();
         if (!isQuickListEnabled()) {
             mQuickList.setVisibility(View.GONE);
@@ -186,11 +190,23 @@ public class QuickList {
     }
 
     private void show() {
+        if (mListDirty)
+            populateList();
         if (isQuickListEnabled()) {
             mQuickList.animate()
                     .scaleY(1f)
-                    .setListener(null)
                     .setInterpolator(new AccelerateDecelerateInterpolator())
+                    .setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationStart(Animator animation) {
+                            TBApplication.state().setQuickList(LauncherState.AnimatedVisibility.ANIM_TO_VISIBLE);
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            TBApplication.state().setQuickList(LauncherState.AnimatedVisibility.VISIBLE);
+                        }
+                    })
                     .start();
             mQuickList.setVisibility(View.VISIBLE);
         }
@@ -202,20 +218,28 @@ public class QuickList {
             if (animate) {
                 mQuickList.animate()
                         .scaleY(0f)
+                        .setInterpolator(new DecelerateInterpolator())
                         .setListener(new AnimatorListenerAdapter() {
                             @Override
+                            public void onAnimationStart(Animator animation) {
+                                TBApplication.state().setQuickList(LauncherState.AnimatedVisibility.ANIM_TO_HIDDEN);
+                            }
+
+                            @Override
                             public void onAnimationEnd(Animator animation) {
+                                TBApplication.state().setQuickList(LauncherState.AnimatedVisibility.HIDDEN);
                                 mQuickList.setVisibility(View.GONE);
                             }
                         })
-                        .setInterpolator(new DecelerateInterpolator())
                         .start();
                 mQuickList.setVisibility(View.VISIBLE);
             } else {
+                TBApplication.state().setQuickList(LauncherState.AnimatedVisibility.HIDDEN);
                 mQuickList.setScaleY(0f);
                 mQuickList.setVisibility(View.GONE);
             }
         } else {
+            TBApplication.state().setQuickList(LauncherState.AnimatedVisibility.HIDDEN);
             mQuickList.setVisibility(View.GONE);
         }
     }

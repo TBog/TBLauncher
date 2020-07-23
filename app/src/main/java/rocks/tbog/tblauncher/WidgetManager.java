@@ -5,19 +5,21 @@ import android.appwidget.AppWidgetHost;
 import android.appwidget.AppWidgetHostView;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.HapticFeedbackConstants;
+import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
-import android.widget.ListAdapter;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -134,6 +136,9 @@ public class WidgetManager {
 
         hostView.setAppWidget(rec.appWidgetId, appWidgetInfo);
         hostView.updateAppWidgetSize(null, rec.width, rec.height, rec.width, rec.height);
+
+//        hostView.setOnClickListener();
+//        hostView.setOnLongClickListener();
 
         mLayout.addView(hostView);
     }
@@ -324,6 +329,35 @@ public class WidgetManager {
         return menu;
     }
 
+    public ListPopup getConfigPopup(Activity activity) {
+        LinearAdapter adapter = new LinearAdapter();
+
+        adapter.add(new LinearAdapter.Item(activity, R.string.menu_widget_add));
+        if (widgetCount() > 0)
+            adapter.add(new LinearAdapter.Item(activity, R.string.menu_widget_remove));
+
+        ListPopup menu = ListPopup.create(activity, adapter);
+        menu.setOnItemClickListener((a, v, pos) -> {
+            LinearAdapter.MenuItem item = ((LinearAdapter) a).getItem(pos);
+            @StringRes int stringId = 0;
+            if (item instanceof LinearAdapter.Item) {
+                stringId = ((LinearAdapter.Item) a.getItem(pos)).stringId;
+            }
+            switch (stringId) {
+                case R.string.menu_widget_add:
+                    TBApplication.widgetManager(activity).selectWidget(activity);
+                    break;
+                case R.string.menu_widget_remove: {
+                    ListPopup removeWidgetPopup = TBApplication.widgetManager(activity).getRemoveWidgetPopup();
+                    TBApplication.behaviour(activity).registerPopup(removeWidgetPopup);
+                    removeWidgetPopup.showCenter(activity.getWindow().getDecorView());
+                    break;
+                }
+            }
+        });
+        return menu;
+    }
+
     static class WidgetPopupItem extends LinearAdapter.ItemString {
         int appWidgetId;
 
@@ -336,6 +370,55 @@ public class WidgetManager {
     static class WidgetHost extends AppWidgetHost {
         public WidgetHost(Context context) {
             super(context, APPWIDGET_HOST_ID);
+        }
+
+        @Override
+        protected AppWidgetHostView onCreateView(Context context, int appWidgetId, AppWidgetProviderInfo appWidget) {
+            return new WidgetView(context);
+        }
+    }
+
+    static class WidgetView extends AppWidgetHostView {
+        private OnClickListener mOnClickListener = null;
+        private OnLongClickListener mOnLongClickListener = null;
+        private static final int longPressTimeout = ViewConfiguration.getLongPressTimeout();
+
+        public WidgetView(Context context) {
+            super(context);
+        }
+
+        @Override
+        public void setOnLongClickListener(@Nullable OnLongClickListener listener) {
+            setLongClickable(true);
+            mOnLongClickListener = listener;
+        }
+
+        @Override
+        public void setOnClickListener(@Nullable OnClickListener listener) {
+            setClickable(true);
+            mOnClickListener = listener;
+        }
+
+        @Override
+        public boolean onInterceptTouchEvent(MotionEvent event) {
+            View view = this;
+            int act = event.getActionMasked();
+            if (view.isPressed() && act == MotionEvent.ACTION_UP || act == MotionEvent.ACTION_MOVE) {
+                long eventDuration = event.getEventTime() - event.getDownTime();
+                if (eventDuration > longPressTimeout) {
+                    if (mOnLongClickListener != null && mOnLongClickListener.onLongClick(view))
+                    {
+                        view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+                        return true;
+                    }
+                } else {
+                    if (mOnClickListener != null) {
+                        mOnClickListener.onClick(view);
+                        return true;
+                    }
+                }
+            }
+            return super.onInterceptTouchEvent(event);
         }
     }
 }

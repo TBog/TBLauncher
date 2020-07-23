@@ -66,8 +66,6 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     private TBLauncherActivity mTBLauncherActivity = null;
     private DialogFragment<?> mFragmentDialog = null;
 
-    private boolean bSearchBarHidden;
-
     private View mResultLayout;
     private AnimatedListView mResultList;
     private ResultAdapter mResultAdapter;
@@ -78,7 +76,6 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     private View mMenuButton;
     private ImageView mLauncherButton;
     private View mDecorView;
-    private Handler mHideHandler;
     private View mNotificationBackground;
 
     private final Runnable mHidePart2Runnable = new Runnable() {
@@ -168,7 +165,6 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         mTBLauncherActivity = tbLauncherActivity;
         mPref = PreferenceManager.getDefaultSharedPreferences(tbLauncherActivity);
 
-        bSearchBarHidden = true;
         mSearchBarContainer = findViewById(R.id.searchBarContainer);
         mWidgetContainer = findViewById(R.id.widgetContainer);
         mClearButton = findViewById(R.id.clearButton);
@@ -176,7 +172,6 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         mNotificationBackground = findViewById(R.id.notificationBackground);
 
         mDecorView = mTBLauncherActivity.getWindow().getDecorView();
-        mHideHandler = new Handler(Looper.getMainLooper());
 
         // Set up the user interaction to manually show or hide the system UI.
         //findViewById(R.id.root_layout).setOnClickListener(view -> toggleSearchBar());
@@ -311,12 +306,12 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     public void toggleSearchBar() {
-        if (bSearchBarHidden) {
-            showKeyboard();
-            showSearchBar();
-        } else {
+        if (TBApplication.state().isSearchBarVisible()) {
             hideKeyboard();
             hideSearchBar();
+        } else {
+            showKeyboard();
+            showSearchBar();
         }
     }
 
@@ -331,10 +326,20 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                 .setStartDelay(0)
                 .setDuration(UI_ANIMATION_DURATION)
                 .setInterpolator(new LinearInterpolator())
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+                        TBApplication.state().setNotificationBar(LauncherState.AnimatedVisibility.ANIM_TO_VISIBLE);
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        TBApplication.state().setNotificationBar(LauncherState.AnimatedVisibility.VISIBLE);
+                    }
+                })
                 .start();
 
         mSearchBarContainer.setVisibility(View.VISIBLE);
-        mWidgetContainer.setVisibility(View.GONE);
         mSearchBarContainer.animate()
                 .setListener(null)
                 .setStartDelay(0)
@@ -342,17 +347,28 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                 .translationY(0f)
                 .setDuration(UI_ANIMATION_DURATION)
                 .setInterpolator(new DecelerateInterpolator())
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+                        TBApplication.state().setSearchBar(LauncherState.AnimatedVisibility.ANIM_TO_VISIBLE);
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        TBApplication.state().setSearchBar(LauncherState.AnimatedVisibility.VISIBLE);
+                    }
+                })
                 .start();
-        bSearchBarHidden = false;
 
         TBApplication.quickList(getContext()).showQuickList();
 
         // Schedule a runnable to display UI elements after a delay
-        mHideHandler.removeCallbacks(mHidePart2Runnable);
-        mHideHandler.postDelayed(mShowPart2Runnable, UI_ANIMATION_DELAY);
+        mSearchBarContainer.removeCallbacks(mHidePart2Runnable);
+        mSearchBarContainer.postDelayed(mShowPart2Runnable, UI_ANIMATION_DELAY);
     }
 
     private void hideWidgets() {
+        TBApplication.state().setWidgets(LauncherState.AnimatedVisibility.HIDDEN);
         mWidgetContainer.setVisibility(View.GONE);
         mResultLayout.setVisibility(View.INVISIBLE);
     }
@@ -378,8 +394,20 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                     .setStartDelay(startDelay)
                     .setDuration(UI_ANIMATION_DURATION)
                     .setInterpolator(new AccelerateInterpolator())
+                    .setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationStart(Animator animation) {
+                            TBApplication.state().setNotificationBar(LauncherState.AnimatedVisibility.ANIM_TO_HIDDEN);
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            TBApplication.state().setNotificationBar(LauncherState.AnimatedVisibility.HIDDEN);
+                        }
+                    })
                     .start();
         else {
+            TBApplication.state().setNotificationBar(LauncherState.AnimatedVisibility.HIDDEN);
             mNotificationBackground.setTranslationY(-mNotificationBackground.getLayoutParams().height);
         }
 
@@ -397,32 +425,45 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                     .translationY(mSearchBarContainer.getHeight() * 2f)
                     .setDuration(UI_ANIMATION_DURATION)
                     .setInterpolator(new AccelerateInterpolator())
+                    .setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationStart(Animator animation) {
+                            TBApplication.state().setSearchBar(LauncherState.AnimatedVisibility.ANIM_TO_HIDDEN);
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            TBApplication.state().setSearchBar(LauncherState.AnimatedVisibility.HIDDEN);
+                        }
+                    })
                     .start();
         else {
+            TBApplication.state().setSearchBar(LauncherState.AnimatedVisibility.HIDDEN);
             mSearchBarContainer.setAlpha(0f);
             mSearchBarContainer.setTranslationY(mSearchBarContainer.getHeight() * 2f);
             mSearchBarContainer.setVisibility(View.INVISIBLE);
         }
         clearAdapter();
-        bSearchBarHidden = true;
 
         showWidgets();
 
         TBApplication.quickList(getContext()).hideQuickList(animate);
 
         // Schedule a runnable to remove the status and navigation bar after a delay
-        mHideHandler.removeCallbacks(mShowPart2Runnable);
+        mSearchBarContainer.removeCallbacks(mShowPart2Runnable);
         //mHideHandler.post(mHidePart2Runnable);
-        mHideHandler.postDelayed(mHidePart2Runnable, startDelay);
+        mSearchBarContainer.postDelayed(mHidePart2Runnable, startDelay);
     }
 
     private void showWidgets() {
+        TBApplication.state().setWidgets(LauncherState.AnimatedVisibility.VISIBLE);
         mWidgetContainer.setVisibility(View.VISIBLE);
         mResultLayout.setVisibility(View.GONE);
     }
 
     public void showKeyboard() {
         Log.i(TAG, "Keyboard - SHOW");
+        TBApplication.state().setKeyboard(LauncherState.AnimatedVisibility.VISIBLE);
         mTBLauncherActivity.dismissPopup();
 
         mSearchEditText.requestFocus();
@@ -435,6 +476,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 
     public void hideKeyboard() {
         Log.i(TAG, "Keyboard - HIDE");
+        TBApplication.state().setKeyboard(LauncherState.AnimatedVisibility.HIDDEN);
         mTBLauncherActivity.dismissPopup();
 
         View focus = mTBLauncherActivity.getCurrentFocus();
@@ -482,8 +524,9 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     @Override
     public void clearAdapter() {
         mResultAdapter.clear();
-        if (bSearchBarHidden)
+        if (!TBApplication.state().isSearchBarVisible())
             return;
+        TBApplication.state().setResultList(LauncherState.AnimatedVisibility.HIDDEN);
         mResultLayout.setVisibility(View.INVISIBLE);
         TBApplication.quickList(getContext()).adapterCleared();
         displayClearOnInput();
@@ -498,6 +541,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         if (isCustomIconDialogVisible()) {
             mResultAdapter.updateResults(results);
         } else {
+            TBApplication.state().setResultList(LauncherState.AnimatedVisibility.VISIBLE);
             mResultLayout.setVisibility(View.VISIBLE);
             mResultList.prepareChangeAnim();
             mResultAdapter.updateResults(results);
@@ -706,11 +750,6 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         Log.i(TAG, "onResume");
 
         TBApplication.dataHandler(getContext()).checkServices();
-//        if (!bSearchBarHidden) {
-//            showSearchBar();
-//            showKeyboard();
-//            mSearchEditText.postDelayed(this::showKeyboard, UI_ANIMATION_DELAY);
-//        }
     }
 
     public void onNewIntent() {
@@ -735,12 +774,12 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     public void onWindowFocusChanged(boolean hasFocus) {
         Log.i(TAG, "onWindowFocusChanged " + hasFocus);
         if (hasFocus) {
-            if (bSearchBarHidden) {
-                hideKeyboard();
-            } else {
+            if (TBApplication.state().isKeyboardVisible()) {
                 showKeyboard();
                 // UI_ANIMATION_DURATION should be the exact time the full-screen animation ends
                 mSearchEditText.postDelayed(this::showKeyboard, UI_ANIMATION_DURATION);
+            } else {
+                hideKeyboard();
             }
         } else {
             hideKeyboard();

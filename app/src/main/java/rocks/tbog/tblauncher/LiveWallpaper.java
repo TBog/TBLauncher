@@ -6,9 +6,12 @@ import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.util.Log;
+import android.view.Gravity;
+import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.animation.Animation;
 import android.view.animation.Transformation;
 
@@ -16,7 +19,10 @@ import androidx.preference.PreferenceManager;
 
 import java.util.Locale;
 
+import rocks.tbog.tblauncher.ui.ListPopup;
+
 class LiveWallpaper {
+    private static final int longPressTimeout = ViewConfiguration.getLongPressTimeout();
     private final boolean wallpaperIsVisible = true;
     private TBLauncherActivity mTBLauncherActivity = null;
     private WallpaperManager mWallpaperManager;
@@ -38,6 +44,13 @@ class LiveWallpaper {
     private boolean wpDragAnimate = true;
     private boolean wpReturnCenter = true;
     private boolean wpStickToSides = false;
+
+    private Runnable mLongClickRunnable = () -> {
+        if (!TBApplication.state().isWidgetVisible())
+            return;
+        View view = mTBLauncherActivity.findViewById(R.id.root_layout);
+        onLongClick(view);
+    };
 
     LiveWallpaper() {
 //        TypedValue typedValue = new TypedValue();
@@ -77,26 +90,43 @@ class LiveWallpaper {
         mAnimation = new Anim();
         mVelocityTracker = null;
         mWindowSize = new Point(1, 1);
-        mainActivity.findViewById(R.id.root_layout).setOnTouchListener(this::onTouch);
+        View root = mainActivity.findViewById(R.id.root_layout);
+//        root.setClickable(true);
+//        root.setLongClickable(true);
+        root.setOnTouchListener(this::onRootTouch);
     }
 
     static void onClick(View view) {
         TBApplication.behaviour(view.getContext()).toggleSearchBar();
     }
 
-    boolean onTouch(View view, MotionEvent event) {
+    void onLongClick(View view) {
+        view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
+        Context ctx = view.getContext();
+        ListPopup menu = TBApplication.widgetManager(ctx).getConfigPopup(mTBLauncherActivity);
+        TBApplication.behaviour(ctx).registerPopup(menu);
+        int x = (int) (mLastTouchPos.x + .5f);
+        int y = (int) (mLastTouchPos.y + .5f);
+        menu.showAtLocation(view, Gravity.START | Gravity.TOP, x, y);
+    }
+
+    boolean onRootTouch(View view, MotionEvent event) {
         if (!wallpaperIsVisible) {
             return false;
         }
 
         int actionMasked = event.getActionMasked();
+
         switch (actionMasked) {
             case MotionEvent.ACTION_DOWN:
+                view.postDelayed(mLongClickRunnable, longPressTimeout);
                 mFirstTouchPos.set(event.getRawX(), event.getRawY());
                 mFirstTouchOffset.set(mWallpaperOffset);
                 if (isPreferenceWPDragAnimate()) {
                     mContentView.clearAnimation();
 
+                    if (mVelocityTracker != null)
+                        mVelocityTracker.recycle();
                     mVelocityTracker = VelocityTracker.obtain();
                     mVelocityTracker.addMovement(event);
 
@@ -113,15 +143,14 @@ class LiveWallpaper {
                 if (mVelocityTracker != null) {
                     mVelocityTracker.addMovement(event);
 
-//                    float fTouchPos = event.getRawX();
-//                    float fOffset = (mLastTouchPos - fTouchPos) * 1.01f / mWindowSize.x;
-//                    fOffset += mWallpaperOffset;
-//                    updateWallpaperOffset(fOffset);
-//                    mLastTouchPos = fTouchPos;
                     mLastTouchPos.set(event.getRawX(), event.getRawY());
-                    float offsetX = (mFirstTouchPos.x - mLastTouchPos.x) * 1.01f / mWindowSize.x;
-                    float offsetY = (mFirstTouchPos.y - mLastTouchPos.y) * 1.01f / mWindowSize.y;
-                    updateWallpaperOffset(mFirstTouchOffset.x + offsetX, mFirstTouchOffset.y + offsetY);
+                    float xMove = (mFirstTouchPos.x - mLastTouchPos.x) / mWindowSize.x;
+                    float yMove = (mFirstTouchPos.y - mLastTouchPos.y) / mWindowSize.y;
+                    if (Math.abs(xMove) > .01f || Math.abs(yMove) > .01f)
+                        view.removeCallbacks(mLongClickRunnable);
+                    float offsetX = mFirstTouchOffset.x + xMove * 1.01f;
+                    float offsetY = mFirstTouchOffset.y + yMove * 1.01f;
+                    updateWallpaperOffset(offsetX, offsetY);
                 }
 
                 //send move/drag event to the LWP
@@ -134,29 +163,34 @@ class LiveWallpaper {
             case MotionEvent.ACTION_UP:
                 // was this a click?
                 if (mVelocityTracker == null) {
-                    onClick(view);
+                    view.removeCallbacks(mLongClickRunnable);
+                    if (event.getEventTime() - event.getDownTime() < longPressTimeout)
+                        onClick(view);
+                    return true;
+                } else {
+                    float xMove = (mFirstTouchPos.x - mLastTouchPos.x) / mWindowSize.x;
+                    float yMove = (mFirstTouchPos.y - mLastTouchPos.y) / mWindowSize.y;
+                    float xVel = mVelocityTracker.getXVelocity() / mWindowSize.x;
+                    float yVel = mVelocityTracker.getYVelocity() / mWindowSize.y;
+                    Log.d("LWP", String.format(Locale.US, "Velocity=(%.3f, %.3f) Move=(%.3f, %.3f)", xVel, yVel, xMove, yMove));
+                    if (Math.abs(xVel) < .01f
+                            && Math.abs(yVel) < .01f
+                            && Math.abs(xMove) < .01f
+                            && Math.abs(yMove) < .01f) {
+                        view.removeCallbacks(mLongClickRunnable);
+                        if (event.getEventTime() - event.getDownTime() < longPressTimeout)
+                            onClick(view);
+                        return true;
+                    }
                 }
                 //fallthrough
             case MotionEvent.ACTION_CANCEL:
+                view.removeCallbacks(mLongClickRunnable);
                 if (mVelocityTracker != null) {
                     mVelocityTracker.addMovement(event);
 
                     if (mAnimation.init())
                         mContentView.startAnimation(mAnimation);
-
-                    // was this a click?
-                    if (actionMasked == MotionEvent.ACTION_UP) {
-                        float xMove = (mFirstTouchPos.x - mLastTouchPos.x) / mWindowSize.x;
-                        float yMove = (mFirstTouchPos.y - mLastTouchPos.y) / mWindowSize.y;
-                        float xVel = mVelocityTracker.getXVelocity() / mWindowSize.x;
-                        float yVel = mVelocityTracker.getYVelocity() / mWindowSize.y;
-                        Log.d("LWP", String.format(Locale.US, "Velocity=(%.3f, %.3f) Move=(%.3f, %.3f)", xVel, yVel, xMove, yMove));
-                        if (Math.abs(xVel) < .01f
-                                && Math.abs(yVel) < .01f
-                                && Math.abs(xMove) < .01f
-                                && Math.abs(yMove) < .01f)
-                            onClick(view);
-                    }
 
                     mVelocityTracker.recycle();
                     mVelocityTracker = null;
@@ -316,8 +350,7 @@ class LiveWallpaper {
             if (velocityInterpolator < 1.f) {
                 offsetX -= mVelocity.x / mWindowSize.x * velocityInterpolator;
                 offsetY -= mVelocity.y / mWindowSize.y * velocityInterpolator;
-            }
-            else {
+            } else {
                 offsetX -= mVelocity.x / mWindowSize.x * (1.f - 0.5f * (velocityInterpolator - 1.f));
                 offsetY -= mVelocity.y / mWindowSize.y * (1.f - 0.5f * (velocityInterpolator - 1.f));
             }
