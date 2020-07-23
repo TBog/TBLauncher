@@ -3,6 +3,7 @@ package rocks.tbog.tblauncher.ui;
 import android.content.Context;
 import android.database.DataSetObserver;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Build;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
@@ -21,6 +22,8 @@ import rocks.tbog.tblauncher.R;
 public class ListPopup extends PopupWindow {
     private final View.OnClickListener mClickListener;
     private final View.OnLongClickListener mLongClickListener;
+    private final Rect mTempRect = new Rect();
+    private final int[] mTempLocation = new int[2];
     private OnItemLongClickListener mItemLongClickListener;
     private OnItemClickListener mItemClickListener;
     private DataSetObserver mObserver;
@@ -84,6 +87,17 @@ public class ListPopup extends PopupWindow {
         this.dismissOnClick = dismissOnClick;
     }
 
+    public boolean isInsideViewBounds(int x, int y) {
+        final int[] pos = mTempLocation;
+        final Rect rect = mTempRect;
+
+        View rootView = getContentView().getRootView();
+        rootView.getDrawingRect(rect);
+        rootView.getLocationOnScreen(pos);
+        rect.offset(pos[0], pos[1]);
+        return rect.contains(x, y);
+    }
+
     /**
      * Set background dim amount (0=no dim, 1=full dim)
      *
@@ -134,8 +148,7 @@ public class ListPopup extends PopupWindow {
         layout.forceLayout();
     }
 
-    private void beforeShow()
-    {
+    private void beforeShow() {
         updateItems();
 
         // don't steal the focus, this will prevent the keyboard from changing
@@ -158,10 +171,10 @@ public class ListPopup extends PopupWindow {
     public void show(View anchor, float anchorOverlap) {
         beforeShow();
 
-        final Rect displayFrame = new Rect();
+        final Rect displayFrame = mTempRect;
         anchor.getWindowVisibleDisplayFrame(displayFrame);
 
-        final int[] anchorPos = new int[2];
+        final int[] anchorPos = mTempLocation;
         anchor.getLocationOnScreen(anchorPos);
 
         final int distanceToBottom = displayFrame.bottom - (anchorPos[1] + anchor.getHeight());

@@ -23,11 +23,10 @@ import rocks.tbog.tblauncher.ui.ListPopup;
 
 class LiveWallpaper {
     private static final int longPressTimeout = ViewConfiguration.getLongPressTimeout();
-    private final boolean wallpaperIsVisible = true;
+    private boolean isAttached = false;
     private TBLauncherActivity mTBLauncherActivity = null;
     private WallpaperManager mWallpaperManager;
     private Point mWindowSize;
-    private android.os.IBinder mWindowToken;
     private View mContentView;
     private final PointF mFirstTouchOffset = new PointF();
     private final PointF mFirstTouchPos = new PointF();
@@ -111,7 +110,7 @@ class LiveWallpaper {
     }
 
     boolean onRootTouch(View view, MotionEvent event) {
-        if (!wallpaperIsVisible) {
+        if (!isAttached) {
             return false;
         }
 
@@ -250,7 +249,7 @@ class LiveWallpaper {
     }
 
     private android.os.IBinder getWindowToken() {
-        return mWindowToken != null ? mWindowToken : (mWindowToken = mContentView.getWindowToken());
+        return mContentView.getWindowToken();
     }
 
     private void updateWallpaperOffset(float offsetX, float offsetY) {
@@ -288,6 +287,14 @@ class LiveWallpaper {
         if (pointerIndex >= 0 && pointerIndex < pointerCount) {
             sendTouchEvent((int) event.getX(pointerIndex) + viewOffset[0], (int) event.getY(pointerIndex) + viewOffset[1], pointerIndex);
         }
+    }
+
+    public void onAttachedToWindow() {
+        isAttached = true;
+    }
+
+    public void onDetachedFromWindow() {
+        isAttached = false;
     }
 
     class Anim extends Animation {

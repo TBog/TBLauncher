@@ -10,7 +10,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.WindowManager;
 import android.widget.PopupWindow;
 
@@ -62,22 +62,17 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
 
     private Permission permissionManager;
 
-//    @Override
-//    public void onAttachedToWindow() {
-//        super.onAttachedToWindow();
-//
-//        final Rect padding = new Rect(0, 0, 0, 0);
-//        ICutout cutout = Utilities.getNotchCutout(this);
-//        if (cutout.hasCutout()) {
-//            padding.set(cutout.getSafeZone());
-//        }
-//
-//        // add padding for the status bar
-//        cutout = CutoutFactory.getStatusBar(this);
-//        padding.top = Math.max(cutout.getSafeZone().top, padding.top);
-//
-//        findViewById(R.id.root_layout).setPadding(padding.left, padding.top, padding.right, padding.bottom);
-//    }
+    @Override
+    public void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        TBApplication.liveWallpaper(this).onAttachedToWindow();
+    }
+
+    @Override
+    public void onDetachedFromWindow() {
+        super.onDetachedFromWindow();
+        TBApplication.liveWallpaper(this).onDetachedFromWindow();
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -254,6 +249,29 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
             return true;
         }
         return false;
+    }
+
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent event) {
+        boolean shouldDismissPopup = false;
+        if (mPopup != null) {
+            int action = event.getActionMasked();
+            if (action == MotionEvent.ACTION_DOWN) {
+                if (mPopup instanceof ListPopup) {
+                    // this check is not needed
+                    // we'll not receive the event if it happened inside the popup
+                    int x = (int) (event.getRawX() + .5f);
+                    int y = (int) (event.getRawY() + .5f);
+                    if (!((ListPopup) mPopup).isInsideViewBounds(x, y))
+                        shouldDismissPopup = true;
+                } else {
+                    shouldDismissPopup = true;
+                }
+            }
+        }
+        if (shouldDismissPopup && dismissPopup())
+            return true;
+        return super.dispatchTouchEvent(event);
     }
 
     @Override
