@@ -2,6 +2,7 @@ package rocks.tbog.tblauncher.ui;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -9,14 +10,15 @@ import android.widget.BaseAdapter;
 import android.widget.TextView;
 
 import androidx.annotation.LayoutRes;
-import androidx.annotation.StringRes;
 import androidx.annotation.NonNull;
+import androidx.annotation.StringRes;
 
 import java.util.ArrayList;
 
 import rocks.tbog.tblauncher.R;
 
 /**
+ * Adapter used to inflate views in a LinearLayout
  * WARNING: don't use this adapter for long lists, it does not recycle views
  */
 public class LinearAdapter extends BaseAdapter {
@@ -129,16 +131,20 @@ public class LinearAdapter extends BaseAdapter {
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
         MenuItem item = getItem(position);
-        String text = item.toString();
         convertView = LayoutInflater.from(parent.getContext()).inflate(item.getLayoutResource(), parent, false);
         if (item instanceof ItemDivider) {
             return convertView;
         }
 
-        TextView textView = convertView.findViewById(android.R.id.text1);
-        textView.setText(text);
+        bindView(convertView, item);
 
         return convertView;
+    }
+
+    protected void bindView(View convertView, MenuItem item) {
+        String text = item.toString();
+        TextView textView = convertView.findViewById(android.R.id.text1);
+        textView.setText(text);
     }
 
     public void add(MenuItem item) {

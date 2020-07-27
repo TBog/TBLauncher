@@ -23,10 +23,9 @@ import rocks.tbog.tblauncher.ui.ListPopup;
 
 class LiveWallpaper {
     private static final int longPressTimeout = ViewConfiguration.getLongPressTimeout();
-    private boolean isAttached = false;
     private TBLauncherActivity mTBLauncherActivity = null;
     private WallpaperManager mWallpaperManager;
-    private Point mWindowSize;
+    private final Point mWindowSize = new Point(1, 1);
     private View mContentView;
     private final PointF mFirstTouchOffset = new PointF();
     private final PointF mFirstTouchPos = new PointF();
@@ -88,10 +87,7 @@ class LiveWallpaper {
         }
         mAnimation = new Anim();
         mVelocityTracker = null;
-        mWindowSize = new Point(1, 1);
         View root = mainActivity.findViewById(R.id.root_layout);
-//        root.setClickable(true);
-//        root.setLongClickable(true);
         root.setOnTouchListener(this::onRootTouch);
     }
 
@@ -110,7 +106,7 @@ class LiveWallpaper {
     }
 
     boolean onRootTouch(View view, MotionEvent event) {
-        if (!isAttached) {
+        if (!view.isAttachedToWindow()) {
             return false;
         }
 
@@ -120,6 +116,7 @@ class LiveWallpaper {
             case MotionEvent.ACTION_DOWN:
                 view.postDelayed(mLongClickRunnable, longPressTimeout);
                 mFirstTouchPos.set(event.getRawX(), event.getRawY());
+                mLastTouchPos.set(mFirstTouchPos);
                 mFirstTouchOffset.set(mWallpaperOffset);
                 if (isPreferenceWPDragAnimate()) {
                     mContentView.clearAnimation();
@@ -129,7 +126,6 @@ class LiveWallpaper {
                     mVelocityTracker = VelocityTracker.obtain();
                     mVelocityTracker.addMovement(event);
 
-                    mLastTouchPos.set(mFirstTouchPos);
                     mTBLauncherActivity.getWindowManager()
                             .getDefaultDisplay()
                             .getSize(mWindowSize);
@@ -139,10 +135,10 @@ class LiveWallpaper {
                     sendTouchEvent(view, event);
                 return true;
             case MotionEvent.ACTION_MOVE:
+                mLastTouchPos.set(event.getRawX(), event.getRawY());
                 if (mVelocityTracker != null) {
                     mVelocityTracker.addMovement(event);
 
-                    mLastTouchPos.set(event.getRawX(), event.getRawY());
                     float xMove = (mFirstTouchPos.x - mLastTouchPos.x) / mWindowSize.x;
                     float yMove = (mFirstTouchPos.y - mLastTouchPos.y) / mWindowSize.y;
                     if (Math.abs(xMove) > .01f || Math.abs(yMove) > .01f)
@@ -249,16 +245,17 @@ class LiveWallpaper {
     }
 
     private android.os.IBinder getWindowToken() {
-        return mContentView.getWindowToken();
+        return mContentView != null && mContentView.isAttachedToWindow() ? mContentView.getWindowToken() : null;
     }
 
     private void updateWallpaperOffset(float offsetX, float offsetY) {
+        offsetX = Math.max(0.f, Math.min(1.f, offsetX));
+        offsetY = Math.max(0.f, Math.min(1.f, offsetY));
+        mWallpaperOffset.set(offsetX, offsetY);
+
         android.os.IBinder iBinder = getWindowToken();
         if (iBinder != null) {
-            offsetX = Math.max(0.f, Math.min(1.f, offsetX));
-            offsetY = Math.max(0.f, Math.min(1.f, offsetY));
             mWallpaperManager.setWallpaperOffsets(iBinder, offsetX, offsetY);
-            mWallpaperOffset.set(offsetX, offsetY);
         }
     }
 
@@ -287,14 +284,6 @@ class LiveWallpaper {
         if (pointerIndex >= 0 && pointerIndex < pointerCount) {
             sendTouchEvent((int) event.getX(pointerIndex) + viewOffset[0], (int) event.getY(pointerIndex) + viewOffset[1], pointerIndex);
         }
-    }
-
-    public void onAttachedToWindow() {
-        isAttached = true;
-    }
-
-    public void onDetachedFromWindow() {
-        isAttached = false;
     }
 
     class Anim extends Animation {

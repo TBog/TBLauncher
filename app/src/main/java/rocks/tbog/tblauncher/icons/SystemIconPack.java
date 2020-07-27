@@ -66,7 +66,7 @@ public class SystemIconPack implements IconPack<Void> {
                 drawable = ctx.getPackageManager().getActivityIcon(componentName);
             }
         } catch (PackageManager.NameNotFoundException | IndexOutOfBoundsException e) {
-            Log.e(TAG, "Unable to find component " + componentName.toString() + e);
+            Log.e(TAG, "Unable to find component " + componentName.toString(), e);
         }
         return drawable;
     }

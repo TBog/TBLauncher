@@ -7,26 +7,29 @@ import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.ArrayMap;
 import android.util.Log;
-import android.view.HapticFeedbackConstants;
+import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
+import androidx.core.view.GestureDetectorCompat;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 import rocks.tbog.tblauncher.db.DBHelper;
 import rocks.tbog.tblauncher.db.WidgetRecord;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
+import rocks.tbog.tblauncher.ui.LinearAdapterPlus;
 import rocks.tbog.tblauncher.ui.ListPopup;
 
 public class WidgetManager {
@@ -34,7 +37,7 @@ public class WidgetManager {
     private AppWidgetManager mAppWidgetManager;
     private WidgetHost mAppWidgetHost;
     private ViewGroup mLayout;
-    private final ArrayList<WidgetRecord> mWidgets = new ArrayList<>(0);
+    private final ArrayMap<Integer, WidgetRecord> mWidgets = new ArrayMap<>(0);
     private static final int APPWIDGET_HOST_ID = 1337;
     private static final int REQUEST_PICK_APPWIDGET = 101;
     private static final int REQUEST_CREATE_APPWIDGET = 102;
@@ -93,26 +96,38 @@ public class WidgetManager {
         {
             ArrayList<WidgetRecord> widgets = DBHelper.getWidgets(mLayout.getContext());
             mWidgets.clear();
-            mWidgets.addAll(widgets);
+            mWidgets.ensureCapacity(widgets.size());
+            for (WidgetRecord record : widgets)
+                mWidgets.put(record.appWidgetId, record);
         }
 
         // sync DB with AppWidgetHost
         for (int appWidgetId : appWidgetIds) {
-            boolean foundInDB = false;
-            for (WidgetRecord rec : mWidgets) {
-                if (rec.appWidgetId == appWidgetId) {
-                    foundInDB = true;
-                    break;
-                }
-            }
-            if (!foundInDB) {
-                // remove zombie widget
+            if (!mWidgets.containsKey(appWidgetId)) {
+                // remove widget that has no info in DB
                 removeWidget(appWidgetId);
             }
         }
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+            ArrayList<Integer> toDelete = new ArrayList<>(0);
+            for (WidgetRecord rec : mWidgets.values()) {
+                boolean found = false;
+                for (int appWidgetId : appWidgetIds)
+                    if (appWidgetId == rec.appWidgetId) {
+                        found = true;
+                        break;
+                    }
+                if (!found) {
+                    // remove widget from DB
+                    toDelete.add(rec.appWidgetId);
+                }
+            }
+            for (int appWidgetId : toDelete)
+                removeWidget(appWidgetId);
+        }
 
         // restore widgets
-        for (WidgetRecord rec : mWidgets) {
+        for (WidgetRecord rec : mWidgets.values()) {
             restoreWidget(rec);
         }
     }
@@ -137,8 +152,15 @@ public class WidgetManager {
         hostView.setAppWidget(rec.appWidgetId, appWidgetInfo);
         hostView.updateAppWidgetSize(null, rec.width, rec.height, rec.width, rec.height);
 
-//        hostView.setOnClickListener();
-//        hostView.setOnLongClickListener();
+        hostView.setOnLongClickListener(v -> {
+            if (v instanceof WidgetView) {
+                ListPopup menu = getConfigPopup((WidgetView) v);
+                TBApplication.behaviour(v.getContext()).registerPopup(menu);
+                menu.show(v, 0.f);
+                return true;
+            }
+            return false;
+        });
 
         mLayout.addView(hostView);
     }
@@ -178,7 +200,9 @@ public class WidgetManager {
      * configuration activity.
      */
     private void configureWidget(Activity activity, Intent data) {
-        Bundle extras = data.getExtras();
+        Bundle extras = data != null ? data.getExtras() : null;
+        if (extras == null)
+            return;
         int appWidgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID, -1);
         AppWidgetProviderInfo appWidgetInfo = mAppWidgetManager.getAppWidgetInfo(appWidgetId);
 
@@ -210,9 +234,13 @@ public class WidgetManager {
      * Creates the widget and adds it to our view layout.
      */
     public void createWidget(Activity activity, Intent data) {
-        Bundle extras = data.getExtras();
+        Bundle extras = data != null ? data.getExtras() : null;
+        if (extras == null)
+            return;
         int appWidgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID, -1);
         AppWidgetProviderInfo appWidgetInfo = mAppWidgetManager.getAppWidgetInfo(appWidgetId);
+        if (appWidgetInfo == null)
+            return;
         AppWidgetHostView hostView = mAppWidgetHost.createView(activity.getApplicationContext(), appWidgetId, appWidgetInfo);
 
         WidgetRecord rec = new WidgetRecord();
@@ -221,7 +249,7 @@ public class WidgetManager {
         rec.height = appWidgetInfo.minHeight;
 
         DBHelper.addWidget(activity, rec);
-        mWidgets.add(rec);
+        mWidgets.put(rec.appWidgetId, rec);
 
         addWidgetToLayout(hostView, appWidgetInfo, rec);
     }
@@ -234,11 +262,7 @@ public class WidgetManager {
         mAppWidgetHost.deleteAppWidgetId(appWidgetId);
         mLayout.removeView(hostView);
         DBHelper.removeWidget(mLayout.getContext(), appWidgetId);
-        for (Iterator<WidgetRecord> iterator = mWidgets.iterator(); iterator.hasNext(); ) {
-            WidgetRecord rec = iterator.next();
-            if (rec.appWidgetId == appWidgetId)
-                iterator.remove();
-        }
+        mWidgets.remove(appWidgetId);
     }
 
     public void removeWidget(int appWidgetId) {
@@ -256,11 +280,7 @@ public class WidgetManager {
         // if we reach this point then the layout does not have the widget
         mAppWidgetHost.deleteAppWidgetId(appWidgetId);
         DBHelper.removeWidget(mLayout.getContext(), appWidgetId);
-        for (Iterator<WidgetRecord> iterator = mWidgets.iterator(); iterator.hasNext(); ) {
-            WidgetRecord rec = iterator.next();
-            if (rec.appWidgetId == appWidgetId)
-                iterator.remove();
-        }
+        mWidgets.remove(appWidgetId);
     }
 
     /**
@@ -300,23 +320,19 @@ public class WidgetManager {
         return mWidgets.size();
     }
 
+    /**
+     * A popup with all active widgets to choose one to remove
+     *
+     * @return
+     */
     public ListPopup getRemoveWidgetPopup() {
         Context ctx = mLayout.getContext();
-        LinearAdapter adapter = new LinearAdapter();
+        LinearAdapter adapter = new LinearAdapterPlus();
 
         adapter.add(new LinearAdapter.ItemTitle(ctx, R.string.menu_widget_remove));
 
-        for (WidgetRecord rec : mWidgets) {
-            AppWidgetProviderInfo info = mAppWidgetManager.getAppWidgetInfo(rec.appWidgetId);
-            if (info == null)
-                continue;
-            String name;
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                name = info.loadLabel(ctx.getPackageManager());
-            } else {
-                name = info.label;
-            }
-            adapter.add(new WidgetPopupItem(name, rec.appWidgetId));
+        for (WidgetRecord rec : mWidgets.values()) {
+            adapter.add(WidgetPopupItem.create(ctx, mAppWidgetManager, rec.appWidgetId));
         }
 
         ListPopup menu = ListPopup.create(ctx, adapter);
@@ -329,6 +345,12 @@ public class WidgetManager {
         return menu;
     }
 
+    /**
+     * Popup with options for all widgets
+     *
+     * @param activity used to start the widget select popup
+     * @return the popup menu
+     */
     public ListPopup getConfigPopup(Activity activity) {
         LinearAdapter adapter = new LinearAdapter();
 
@@ -358,12 +380,80 @@ public class WidgetManager {
         return menu;
     }
 
-    static class WidgetPopupItem extends LinearAdapter.ItemString {
+    /**
+     * Popup with options for the widget in the view
+     *
+     * @param view of the widget
+     * @return the popup menu
+     */
+    protected ListPopup getConfigPopup(WidgetView view) {
+        int appWidgetId = view.getAppWidgetId();
+        Context ctx = view.getContext();
+        LinearAdapter adapter = new LinearAdapter();
+
+        WidgetRecord widget = mWidgets.get(appWidgetId);
+        if (widget != null) {
+            adapter.add(new LinearAdapter.ItemString("ID: " + widget.appWidgetId));
+            adapter.add(new LinearAdapter.ItemString("Width: " + widget.width));
+            adapter.add(new LinearAdapter.ItemString("Height: " + widget.height));
+        } else {
+            adapter.add(new LinearAdapter.ItemString("ERROR: Not found"));
+        }
+
+        ListPopup menu = ListPopup.create(ctx, adapter);
+
+        menu.setOnItemClickListener((a, v, pos) -> {
+        });
+        return menu;
+    }
+
+    static class WidgetPopupItem extends LinearAdapterPlus.ItemStringIcon {
         int appWidgetId;
 
-        public WidgetPopupItem(@NonNull String string, int appWidgetId) {
-            super(string);
+        @NonNull
+        static WidgetPopupItem create(Context ctx, AppWidgetManager appWidgetManager, int appWidgetId) {
+            AppWidgetProviderInfo info = appWidgetManager.getAppWidgetInfo(appWidgetId);
+            String name = null;
+            Drawable icon = null;
+            if (info != null) {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    name = info.loadLabel(ctx.getPackageManager());
+                    icon = info.loadPreviewImage(ctx, 0);
+                } else {
+                    name = info.label;
+                    icon = ctx.getPackageManager().getDrawable(info.provider.getPackageName(), info.previewImage, null);
+                }
+                if (icon == null) {
+                    try {
+                        icon = ctx.getPackageManager().getApplicationLogo(info.provider.getPackageName());
+                    } catch (PackageManager.NameNotFoundException ignored) {
+                    }
+                }
+            }
+            if (name == null)
+                name = "[null]";
+            if (icon == null) {
+                if (info == null) {
+                    icon = ctx.getResources().getDrawable(R.drawable.ic_android);
+                } else {
+                    try {
+                        icon = ctx.getPackageManager().getApplicationIcon(info.provider.getPackageName());
+                    } catch (PackageManager.NameNotFoundException ignored) {
+                        icon = ctx.getResources().getDrawable(R.drawable.ic_android);
+                    }
+                }
+            }
+            return new WidgetPopupItem(name, appWidgetId, icon);
+        }
+
+        private WidgetPopupItem(@NonNull String string, int appWidgetId, @NonNull Drawable icon) {
+            super(string, icon);
             this.appWidgetId = appWidgetId;
+        }
+
+        @Override
+        public int getLayoutResource() {
+            return R.layout.popup_list_item_icon;
         }
     }
 
@@ -379,43 +469,56 @@ public class WidgetManager {
     }
 
     static class WidgetView extends AppWidgetHostView {
+        private final GestureDetectorCompat gestureDetector;
+        private boolean mLongClickCalled = false;
         private OnClickListener mOnClickListener = null;
         private OnLongClickListener mOnLongClickListener = null;
-        private static final int longPressTimeout = ViewConfiguration.getLongPressTimeout();
 
         public WidgetView(Context context) {
             super(context);
+            GestureDetector.SimpleOnGestureListener onGestureListener = new GestureDetector.SimpleOnGestureListener() {
+                @Override
+                public boolean onSingleTapUp(MotionEvent e) {
+                    if (mOnClickListener != null) {
+                        mOnClickListener.onClick(WidgetView.this);
+                        return true;
+                    }
+                    return false;
+                }
+
+                @Override
+                public void onLongPress(MotionEvent e) {
+                    if (mOnLongClickListener != null) {
+                        mLongClickCalled = true;
+                        mOnLongClickListener.onLongClick(WidgetView.this);
+                    }
+                }
+            };
+            gestureDetector = new GestureDetectorCompat(context, onGestureListener);
         }
 
         @Override
         public void setOnLongClickListener(@Nullable OnLongClickListener listener) {
-            setLongClickable(true);
+            gestureDetector.setIsLongpressEnabled(listener != null);
+            setLongClickable(listener != null);
             mOnLongClickListener = listener;
         }
 
         @Override
         public void setOnClickListener(@Nullable OnClickListener listener) {
-            setClickable(true);
+            setClickable(listener != null);
             mOnClickListener = listener;
         }
 
         @Override
         public boolean onInterceptTouchEvent(MotionEvent event) {
-            View view = this;
+            if (gestureDetector.onTouchEvent(event))
+                return true;
             int act = event.getActionMasked();
-            if (view.isPressed() && act == MotionEvent.ACTION_UP || act == MotionEvent.ACTION_MOVE) {
-                long eventDuration = event.getEventTime() - event.getDownTime();
-                if (eventDuration > longPressTimeout) {
-                    if (mOnLongClickListener != null && mOnLongClickListener.onLongClick(view))
-                    {
-                        view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-                        return true;
-                    }
-                } else {
-                    if (mOnClickListener != null) {
-                        mOnClickListener.onClick(view);
-                        return true;
-                    }
+            if (act == MotionEvent.ACTION_UP) {
+                if (mLongClickCalled) {
+                    mLongClickCalled = false;
+                    return true;
                 }
             }
             return super.onInterceptTouchEvent(event);

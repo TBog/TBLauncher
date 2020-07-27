@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingVertical="@dimen/widget_preview_padding_vertical"
+    android:paddingStart="?android:attr/listPreferredItemPaddingStart"
+    android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
+    android:theme="@style/ListPopupItem">
+
+    <ImageView
+        android:id="@android:id/icon"
+        android:layout_width="@dimen/widget_preview_width"
+        android:layout_height="@dimen/widget_preview_height"
+        android:importantForAccessibility="no"
+        tools:src="@drawable/bg_tag_item" />
+
+    <TextView
+        android:id="@android:id/text1"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:paddingStart="?android:attr/listPreferredItemPaddingStart"
+        tools:ignore="RtlSymmetry"
+        tools:text="Placeholder Widget name" />
+</LinearLayout>
+

@@ -63,18 +63,6 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
     private Permission permissionManager;
 
     @Override
-    public void onAttachedToWindow() {
-        super.onAttachedToWindow();
-        TBApplication.liveWallpaper(this).onAttachedToWindow();
-    }
-
-    @Override
-    public void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        TBApplication.liveWallpaper(this).onDetachedFromWindow();
-    }
-
-    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
