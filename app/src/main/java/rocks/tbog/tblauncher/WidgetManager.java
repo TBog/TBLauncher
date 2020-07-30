@@ -8,6 +8,7 @@ import android.appwidget.AppWidgetProviderInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.PointF;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -71,10 +72,23 @@ public class WidgetManager {
      */
     public void onCreateActivity(Activity activity) {
         mLayout = activity.findViewById(R.id.widgetContainer);
-        mLayout.setPageCount(3, 1);
+        mLayout.setPageCount(LiveWallpaper.SCREEN_COUNT_HORIZONTAL, LiveWallpaper.SCREEN_COUNT_VERTICAL);
         restoreWidgets();
         // post the scroll event to happen after the measure and layout phase
-        mLayout.post(() -> scroll(.5f, 0.f));
+        final LiveWallpaper lw = TBApplication.liveWallpaper(activity);
+        mLayout.post(new Runnable() {
+            @Override
+            public void run() {
+                if (mLayout.getMeasuredWidth() == 0) {
+                    // layout did not happen yet, wait some more
+                    mLayout.removeCallbacks(this);
+                    mLayout.post(this);
+                    return;
+                }
+                PointF offset = lw.getWallpaperOffset();
+                WidgetManager.this.scroll(offset.x, offset.y);
+            }
+        });
     }
 
     private void restoreWidgets() {
@@ -159,7 +173,7 @@ public class WidgetManager {
             if (v instanceof WidgetView) {
                 v.setOnClickListener(v1 -> {
                     v1.setOnClickListener(null);
-                    mLayout.enableHandle(v1, WidgetLayout.Handle.DISABLE_ALL);
+                    mLayout.enableHandle(v1, WidgetLayout.Handle.DISABLED);
                 });
                 ListPopup menu = getConfigPopup((WidgetView) v);
                 TBApplication.behaviour(v.getContext()).registerPopup(menu);
@@ -400,11 +414,19 @@ public class WidgetManager {
 
         WidgetRecord widget = mWidgets.get(appWidgetId);
         if (widget != null) {
-            adapter.add(new WidgetOptionItem("Move", WidgetOptionItem.Action.MOVE));
-            adapter.add(new WidgetOptionItem("Resize", WidgetOptionItem.Action.RESIZE));
-            adapter.add(new WidgetOptionItem("Reset position", WidgetOptionItem.Action.RESET_POSITION));
-            adapter.add(new WidgetOptionItem("Reset size", WidgetOptionItem.Action.RESET_SIZE));
+            final WidgetLayout.Handle handleType = mLayout.getHandleType(view);
+            if (handleType != WidgetLayout.Handle.MOVE)
+                adapter.add(new WidgetOptionItem("Move", WidgetOptionItem.Action.MOVE));
+            else
+                adapter.add(new WidgetOptionItem("Exit move", WidgetOptionItem.Action.RESET));
+
+            if (handleType != WidgetLayout.Handle.RESIZE)
+                adapter.add(new WidgetOptionItem("Resize", WidgetOptionItem.Action.RESIZE));
+            else
+                adapter.add(new WidgetOptionItem("Exit resize", WidgetOptionItem.Action.RESET));
+
             adapter.add(new WidgetOptionItem("Remove", WidgetOptionItem.Action.REMOVE));
+
             if (BuildConfig.DEBUG) {
                 adapter.add(new LinearAdapter.ItemTitle("Debug info"));
                 adapter.add(new LinearAdapter.ItemString("ID: " + widget.appWidgetId));
@@ -425,16 +447,14 @@ public class WidgetManager {
                         //TBApplication.state().setWidgetMove(LauncherState.AnimatedVisibility.VISIBLE);
                         mLayout.enableHandle(view, WidgetLayout.Handle.MOVE);
                         break;
-                    case RESET_POSITION:
-                        mLayout.enableHandle(view, WidgetLayout.Handle.DISABLE_ALL);
-                        break;
                     case RESIZE:
                         mLayout.enableHandle(view, WidgetLayout.Handle.RESIZE);
                         break;
-                    case RESET_SIZE:
-                        mLayout.enableHandle(view, WidgetLayout.Handle.DISABLE_ALL);
+                    case RESET:
+                        mLayout.disableHandle(view);
                         break;
                     case REMOVE:
+                        mLayout.disableHandle(view);
                         removeWidget(view);
                         break;
                 }
@@ -466,9 +486,8 @@ public class WidgetManager {
         enum Action {
             UNDEFINED,
             MOVE,
-            RESET_POSITION,
             RESIZE,
-            RESET_SIZE,
+            RESET,
             REMOVE,
         }
 

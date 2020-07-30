@@ -34,8 +34,8 @@ public class LiveWallpaper {
     private Anim mAnimation;
     private VelocityTracker mVelocityTracker;
 
-    private final int SCREEN_COUNT_HORIZONTAL = Integer.parseInt("3");
-    private final int SCREEN_COUNT_VERTICAL = Integer.parseInt("1");
+    public static final int SCREEN_COUNT_HORIZONTAL = Integer.parseInt("1");
+    public static final int SCREEN_COUNT_VERTICAL = Integer.parseInt("1");
 
     private boolean lwpTouch = true;
     private boolean lwpDrag = false;
@@ -56,6 +56,10 @@ public class LiveWallpaper {
 //        TypedArray a = mainActivity.obtainStyledAttributes(typedValue.resourceId, new int[]{android.R.attr.windowShowWallpaper});
 //        wallpaperIsVisible = a.getBoolean(0, true);
 //        a.recycle();
+    }
+
+    public PointF getWallpaperOffset() {
+        return mWallpaperOffset;
     }
 
     public void onCreateActivity(TBLauncherActivity mainActivity) {

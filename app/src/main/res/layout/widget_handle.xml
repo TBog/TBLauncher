@@ -3,8 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    tools:layout_width="100dp"
-    tools:layout_height="200dp">
+    tools:layout_height="200dp"
+    tools:layout_width="100dp">
 
     <ImageView
         android:id="@+id/handle_top_left"
@@ -12,7 +12,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="top|left"
         android:importantForAccessibility="no"
-        android:src="@drawable/ic_handle_top_left"
+        android:rotation="90"
+        android:src="@drawable/ic_handle_resize_bl"
         tools:ignore="RtlHardcoded" />
 
     <ImageView
@@ -21,7 +22,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="top|right"
         android:importantForAccessibility="no"
-        android:src="@drawable/ic_handle_top_right"
+        android:rotation="180"
+        android:src="@drawable/ic_handle_resize_bl"
         tools:ignore="RtlHardcoded" />
 
     <ImageView
@@ -30,7 +32,8 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|right"
         android:importantForAccessibility="no"
-        android:src="@drawable/ic_handle_bottom_right"
+        android:rotation="-90"
+        android:src="@drawable/ic_handle_resize_bl"
         tools:ignore="RtlHardcoded" />
 
     <ImageView
@@ -39,7 +42,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|left"
         android:importantForAccessibility="no"
-        android:src="@drawable/ic_handle_bottom_left"
+        android:src="@drawable/ic_handle_resize_bl"
         tools:ignore="RtlHardcoded" />
 
 </FrameLayout>
