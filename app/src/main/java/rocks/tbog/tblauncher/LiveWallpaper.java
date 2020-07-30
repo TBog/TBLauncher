@@ -21,7 +21,7 @@ import java.util.Locale;
 
 import rocks.tbog.tblauncher.ui.ListPopup;
 
-class LiveWallpaper {
+public class LiveWallpaper {
     private static final int longPressTimeout = ViewConfiguration.getLongPressTimeout();
     private TBLauncherActivity mTBLauncherActivity = null;
     private WallpaperManager mWallpaperManager;
@@ -232,7 +232,7 @@ class LiveWallpaper {
         return lwpDrag;
     }
 
-    private boolean isPreferenceWPDragAnimate() {
+    public boolean isPreferenceWPDragAnimate() {
         return wpDragAnimate;
     }
 
@@ -252,7 +252,7 @@ class LiveWallpaper {
         offsetX = Math.max(0.f, Math.min(1.f, offsetX));
         offsetY = Math.max(0.f, Math.min(1.f, offsetY));
         mWallpaperOffset.set(offsetX, offsetY);
-
+        TBApplication.widgetManager(mTBLauncherActivity).scroll(offsetX, offsetY);
         android.os.IBinder iBinder = getWindowToken();
         if (iBinder != null) {
             mWallpaperManager.setWallpaperOffsets(iBinder, offsetX, offsetY);

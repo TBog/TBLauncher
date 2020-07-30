@@ -31,12 +31,13 @@ import rocks.tbog.tblauncher.db.WidgetRecord;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.LinearAdapterPlus;
 import rocks.tbog.tblauncher.ui.ListPopup;
+import rocks.tbog.tblauncher.ui.WidgetLayout;
 
 public class WidgetManager {
     private static final String TAG = "Wdg";
     private AppWidgetManager mAppWidgetManager;
     private WidgetHost mAppWidgetHost;
-    private ViewGroup mLayout;
+    private WidgetLayout mLayout;
     private final ArrayMap<Integer, WidgetRecord> mWidgets = new ArrayMap<>(0);
     private static final int APPWIDGET_HOST_ID = 1337;
     private static final int REQUEST_PICK_APPWIDGET = 101;
@@ -70,8 +71,10 @@ public class WidgetManager {
      */
     public void onCreateActivity(Activity activity) {
         mLayout = activity.findViewById(R.id.widgetContainer);
-
+        mLayout.setPageCount(3, 1);
         restoreWidgets();
+        // post the scroll event to happen after the measure and layout phase
+        mLayout.post(() -> scroll(.5f, 0.f));
     }
 
     private void restoreWidgets() {
@@ -154,6 +157,10 @@ public class WidgetManager {
 
         hostView.setOnLongClickListener(v -> {
             if (v instanceof WidgetView) {
+                v.setOnClickListener(v1 -> {
+                    v1.setOnClickListener(null);
+                    mLayout.enableHandle(v1, WidgetLayout.Handle.DISABLE_ALL);
+                });
                 ListPopup menu = getConfigPopup((WidgetView) v);
                 TBApplication.behaviour(v.getContext()).registerPopup(menu);
                 menu.show(v, 0.f);
@@ -387,15 +394,23 @@ public class WidgetManager {
      * @return the popup menu
      */
     protected ListPopup getConfigPopup(WidgetView view) {
-        int appWidgetId = view.getAppWidgetId();
+        final int appWidgetId = view.getAppWidgetId();
         Context ctx = view.getContext();
         LinearAdapter adapter = new LinearAdapter();
 
         WidgetRecord widget = mWidgets.get(appWidgetId);
         if (widget != null) {
-            adapter.add(new LinearAdapter.ItemString("ID: " + widget.appWidgetId));
-            adapter.add(new LinearAdapter.ItemString("Width: " + widget.width));
-            adapter.add(new LinearAdapter.ItemString("Height: " + widget.height));
+            adapter.add(new WidgetOptionItem("Move", WidgetOptionItem.Action.MOVE));
+            adapter.add(new WidgetOptionItem("Resize", WidgetOptionItem.Action.RESIZE));
+            adapter.add(new WidgetOptionItem("Reset position", WidgetOptionItem.Action.RESET_POSITION));
+            adapter.add(new WidgetOptionItem("Reset size", WidgetOptionItem.Action.RESET_SIZE));
+            adapter.add(new WidgetOptionItem("Remove", WidgetOptionItem.Action.REMOVE));
+            if (BuildConfig.DEBUG) {
+                adapter.add(new LinearAdapter.ItemTitle("Debug info"));
+                adapter.add(new LinearAdapter.ItemString("ID: " + widget.appWidgetId));
+                adapter.add(new LinearAdapter.ItemString("Width: " + widget.width));
+                adapter.add(new LinearAdapter.ItemString("Height: " + widget.height));
+            }
         } else {
             adapter.add(new LinearAdapter.ItemString("ERROR: Not found"));
         }
@@ -403,8 +418,66 @@ public class WidgetManager {
         ListPopup menu = ListPopup.create(ctx, adapter);
 
         menu.setOnItemClickListener((a, v, pos) -> {
+            Object item = a.getItem(pos);
+            if (item instanceof WidgetOptionItem) {
+                switch (((WidgetOptionItem) item).mAction) {
+                    case MOVE:
+                        //TBApplication.state().setWidgetMove(LauncherState.AnimatedVisibility.VISIBLE);
+                        mLayout.enableHandle(view, WidgetLayout.Handle.MOVE);
+                        break;
+                    case RESET_POSITION:
+                        mLayout.enableHandle(view, WidgetLayout.Handle.DISABLE_ALL);
+                        break;
+                    case RESIZE:
+                        mLayout.enableHandle(view, WidgetLayout.Handle.RESIZE);
+                        break;
+                    case RESET_SIZE:
+                        mLayout.enableHandle(view, WidgetLayout.Handle.DISABLE_ALL);
+                        break;
+                    case REMOVE:
+                        removeWidget(view);
+                        break;
+                }
+            }
         });
         return menu;
+    }
+
+    /**
+     * Scroll to page, just like the wallpaper
+     *
+     * @param scrollX horizontal scroll position 0.f .. 1.f
+     * @param scrollY vertical scroll position 0.f .. 1.f
+     */
+    public void scroll(float scrollX, float scrollY) {
+        if (mLayout == null)
+            return;
+
+        final int pageCountX = mLayout.getHorizontalPageCount();
+        final float pageX = pageCountX * scrollX;
+
+        final int pageCountY = mLayout.getVerticalPageCount();
+        final float pageY = pageCountY * scrollY;
+
+        mLayout.scrollToPage(pageX, pageY);
+    }
+
+    static class WidgetOptionItem extends LinearAdapter.ItemString {
+        enum Action {
+            UNDEFINED,
+            MOVE,
+            RESET_POSITION,
+            RESIZE,
+            RESET_SIZE,
+            REMOVE,
+        }
+
+        Action mAction = Action.UNDEFINED;
+
+        public WidgetOptionItem(@NonNull String string, Action action) {
+            super(string);
+            mAction = action;
+        }
     }
 
     static class WidgetPopupItem extends LinearAdapterPlus.ItemStringIcon {
@@ -522,6 +595,15 @@ public class WidgetManager {
                 }
             }
             return super.onInterceptTouchEvent(event);
+        }
+
+        @Override
+        protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+            super.onLayout(changed, left, top, right, bottom);
+            if (!changed)
+                return;
+            //mWidget.onWidgetLayout(child, changed, mTmpChildRect);
+            Log.d(TAG, "Widget #" + getAppWidgetId() + " layout: " + left + " " + top + " " + right + " " + bottom);
         }
     }
 }

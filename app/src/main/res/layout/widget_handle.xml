@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    tools:layout_width="100dp"
+    tools:layout_height="200dp">
+
+    <ImageView
+        android:id="@+id/handle_top_left"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|left"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_handle_top_left"
+        tools:ignore="RtlHardcoded" />
+
+    <ImageView
+        android:id="@+id/handle_top_right"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|right"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_handle_top_right"
+        tools:ignore="RtlHardcoded" />
+
+    <ImageView
+        android:id="@+id/handle_bottom_right"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|right"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_handle_bottom_right"
+        tools:ignore="RtlHardcoded" />
+
+    <ImageView
+        android:id="@+id/handle_bottom_left"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|left"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_handle_bottom_left"
+        tools:ignore="RtlHardcoded" />
+
+</FrameLayout>
