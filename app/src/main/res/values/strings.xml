@@ -162,5 +162,13 @@
     <string name="wp_animate_center_desc">The wallpaper will return to center after scrolling</string>
     <string name="wp_animate_sides">Side stick wallpaper</string>
     <string name="wp_animate_sides_desc">The wallpaper will stick to the left or right after scrolling</string>
+    <string name="cfg_widget_move">Move</string>
+    <string name="cfg_widget_move_switch">Switch move</string>
+    <string name="cfg_widget_move_exit">Exit move</string>
+    <string name="cfg_widget_resize">Resize</string>
+    <string name="cfg_widget_resize_switch">Switch resize</string>
+    <string name="cfg_widget_resize_exit">Exit resize</string>
+    <string name="cfg_widget_remove">Remove</string>
 
+    <string name="shortcut_with_appName">%s: %s</string>
 </resources>

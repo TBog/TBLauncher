@@ -81,15 +81,19 @@ public class PinShortcutConfirm extends Activity implements OnClickListener {
             mShortcutName = findViewById(R.id.shortcutName);
             String packageName = packageNameHeuristic(this, shortcutInfo);
             String appName = ShortcutUtil.getAppNameFromPackageName(this, packageName);
-            String prefix = !appName.isEmpty() ? (appName + ": ") : appName;
-            if (shortcutInfo.getLongLabel() != null)
-                mShortcutName.setText(prefix + shortcutInfo.getLongLabel());
-            else if (shortcutInfo.getShortLabel() != null)
-                mShortcutName.setText(prefix + shortcutInfo.getShortLabel());
+            CharSequence label = shortcutInfo.getLongLabel();
+            if (label == null)
+                label = shortcutInfo.getShortLabel();
+            if (label == null)
+                label = shortcutInfo.getPackage();
+            if (!appName.isEmpty())
+                mShortcutName.setText(getString(R.string.shortcut_with_appName, appName, label));
+            else
+                mShortcutName.setText(label);
         }
 
         // Description
-        {
+        if (BuildConfig.DEBUG) {
             TextView description = findViewById(R.id.shortcutDetails);
             ComponentName activity = shortcutInfo.getActivity();
             String htmlString = String.format(

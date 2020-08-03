@@ -422,19 +422,20 @@ public class WidgetManager {
         if (widget != null) {
             final WidgetLayout.Handle handleType = mLayout.getHandleType(view);
             if (handleType.isMove()) {
-                adapter.add(new WidgetOptionItem("Exit move", WidgetOptionItem.Action.RESET));
+                adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_move_switch, WidgetOptionItem.Action.MOVE_SWITCH));
+                adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_move_exit, WidgetOptionItem.Action.RESET));
             } else {
-                adapter.add(new WidgetOptionItem("Move", WidgetOptionItem.Action.MOVE));
+                adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_move, WidgetOptionItem.Action.MOVE));
             }
 
             if (handleType.isResize()) {
-                //adapter.add(new WidgetOptionItem("Switch resize", WidgetOptionItem.Action.RESIZE));
-                adapter.add(new WidgetOptionItem("Exit resize", WidgetOptionItem.Action.RESET));
+                adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_resize_switch, WidgetOptionItem.Action.RESIZE_SWITCH));
+                adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_resize_exit, WidgetOptionItem.Action.RESET));
             } else {
-                adapter.add(new WidgetOptionItem("Resize", WidgetOptionItem.Action.RESIZE));
+                adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_resize, WidgetOptionItem.Action.RESIZE));
             }
 
-            adapter.add(new WidgetOptionItem("Remove", WidgetOptionItem.Action.REMOVE));
+            adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_remove, WidgetOptionItem.Action.REMOVE));
 
             if (BuildConfig.DEBUG) {
                 adapter.add(new LinearAdapter.ItemTitle("Debug info"));
@@ -469,6 +470,14 @@ public class WidgetManager {
                         });
                         mLayout.enableHandle(view, mLastMoveType);
                         break;
+                    case MOVE_SWITCH:
+                        if (mLayout.getHandleType(view) == WidgetLayout.Handle.MOVE_FREE) {
+                            mLastMoveType = WidgetLayout.Handle.MOVE_AXIAL;
+                        } else {
+                            mLastMoveType = WidgetLayout.Handle.MOVE_FREE;
+                        }
+                        mLayout.enableHandle(view, mLastMoveType);
+                        break;
                     case RESIZE:
                         view.setOnClickListener(v1 -> {
                             view.setOnClickListener(null);
@@ -483,6 +492,14 @@ public class WidgetManager {
                             }
                             mLayout.enableHandle(view, mLastResizeType);
                         });
+                        mLayout.enableHandle(view, mLastResizeType);
+                        break;
+                    case RESIZE_SWITCH:
+                        if (mLayout.getHandleType(view) == WidgetLayout.Handle.RESIZE_DIAGONAL) {
+                            mLastResizeType = WidgetLayout.Handle.RESIZE_AXIAL;
+                        } else {
+                            mLastResizeType = WidgetLayout.Handle.RESIZE_DIAGONAL;
+                        }
                         mLayout.enableHandle(view, mLastResizeType);
                         break;
                     case RESET:
@@ -561,18 +578,20 @@ public class WidgetManager {
         return icon;
     }
 
-    static class WidgetOptionItem extends LinearAdapter.ItemString {
+    static class WidgetOptionItem extends LinearAdapter.Item {
         enum Action {
             MOVE,
+            MOVE_SWITCH,
             RESIZE,
+            RESIZE_SWITCH,
             RESET,
             REMOVE,
         }
 
         final Action mAction;
 
-        public WidgetOptionItem(@NonNull String string, Action action) {
-            super(string);
+        public WidgetOptionItem(Context ctx, @StringRes int stringId, Action action) {
+            super(ctx, stringId);
             mAction = action;
         }
     }

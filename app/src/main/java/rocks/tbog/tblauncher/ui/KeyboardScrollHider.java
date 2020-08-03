@@ -2,6 +2,7 @@ package rocks.tbog.tblauncher.ui;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
+import android.annotation.SuppressLint;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -42,6 +43,7 @@ public class KeyboardScrollHider implements View.OnTouchListener {
      * Start monitoring and intercepting touch events of the target list view and providing our
      * transformations
      */
+    @SuppressLint("ClickableViewAccessibility")
     public void start() {
         this.list.setOnTouchListener(this);
     }
@@ -49,6 +51,7 @@ public class KeyboardScrollHider implements View.OnTouchListener {
     /**
      *
      */
+    @SuppressLint("ClickableViewAccessibility")
     @SuppressWarnings("unused")
     public void stop() {
         this.list.setOnTouchListener(null);

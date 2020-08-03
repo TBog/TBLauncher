@@ -190,7 +190,7 @@ public class WidgetLayout extends ViewGroup {
                 final OnTouchListener moveListener = new OnTouchListener() {
                     final PointF mDownPos = new PointF();
 
-                    @SuppressLint("RtlHardcoded")
+                    @SuppressLint({"RtlHardcoded", "ClickableViewAccessibility"})
                     @Override
                     public boolean onTouch(View v, MotionEvent event) {
                         final int action = event.getActionMasked();
@@ -247,7 +247,7 @@ public class WidgetLayout extends ViewGroup {
                     final Point mDownMargin = new Point();
                     final PointF mDownPos = new PointF();
 
-                    @SuppressLint("RtlHardcoded")
+                    @SuppressLint({"RtlHardcoded", "ClickableViewAccessibility"})
                     @Override
                     public boolean onTouch(View v, MotionEvent event) {
                         final int action = event.getActionMasked();

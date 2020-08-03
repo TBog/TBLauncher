@@ -33,9 +33,9 @@
         android:shadowDx="1"
         android:shadowDy="2"
         android:shadowRadius="?attr/textShadowRadius"
-        android:text="Apps"
         android:textColor="?attr/resultColor"
         android:textSize="@dimen/result_title_size"
-        tools:ignore="RtlSymmetry" />
+        tools:ignore="RtlSymmetry"
+        tools:text="Apps" />
 
 </LinearLayout>

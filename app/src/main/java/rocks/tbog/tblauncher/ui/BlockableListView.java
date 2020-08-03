@@ -1,5 +1,6 @@
 package rocks.tbog.tblauncher.ui;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -39,6 +40,7 @@ public class BlockableListView extends ListView {
         this.touchEventsBlocked = false;
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent ev) {
         return this.touchEventsBlocked || super.onTouchEvent(ev);
