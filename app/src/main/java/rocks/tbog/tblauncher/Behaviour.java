@@ -230,8 +230,8 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         adapter.add(new LinearAdapter.Item(ctx, R.string.launcher_settings));
         adapter.add(new LinearAdapter.Item(ctx, R.string.change_wallpaper));
         adapter.add(new LinearAdapter.Item(ctx, R.string.menu_widget_add));
-        if (TBApplication.widgetManager(ctx).widgetCount() > 0)
-            adapter.add(new LinearAdapter.Item(ctx, R.string.menu_widget_remove));
+//        if (TBApplication.widgetManager(ctx).widgetCount() > 0)
+//            adapter.add(new LinearAdapter.Item(ctx, R.string.menu_widget_remove));
         adapter.add(new LinearAdapter.Item(ctx, R.string.android_settings));
 
         menu.setOnItemClickListener((a, v, pos) -> {
@@ -261,13 +261,13 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                 case R.string.menu_widget_add:
                     TBApplication.widgetManager(mTBLauncherActivity).selectWidget(mTBLauncherActivity);
                     break;
-                case R.string.menu_widget_remove: {
-                    Context c = mTBLauncherActivity;
-                    ListPopup removeWidgetPopup = TBApplication.widgetManager(c).getRemoveWidgetPopup();
-                    TBApplication.behaviour(c).registerPopup(removeWidgetPopup);
-                    removeWidgetPopup.showCenter(mTBLauncherActivity.getWindow().getDecorView());
-                    break;
-                }
+//                case R.string.menu_widget_remove: {
+//                    Context c = mTBLauncherActivity;
+//                    ListPopup removeWidgetPopup = TBApplication.widgetManager(c).getRemoveWidgetPopup();
+//                    TBApplication.behaviour(c).registerPopup(removeWidgetPopup);
+//                    removeWidgetPopup.showCenter(mTBLauncherActivity.getWindow().getDecorView());
+//                    break;
+//                }
                 case R.string.android_settings:
                     beforeLaunchOccurred();
                     mClearButton.postDelayed(() -> {

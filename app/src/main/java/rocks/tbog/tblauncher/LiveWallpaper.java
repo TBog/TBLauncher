@@ -34,8 +34,8 @@ public class LiveWallpaper {
     private Anim mAnimation;
     private VelocityTracker mVelocityTracker;
 
-    public static final int SCREEN_COUNT_HORIZONTAL = Integer.parseInt("1");
-    public static final int SCREEN_COUNT_VERTICAL = Integer.parseInt("1");
+    public static final int SCREEN_COUNT_HORIZONTAL = Integer.parseInt("3");
+    public static final int SCREEN_COUNT_VERTICAL = Integer.parseInt("1"); // not tested with values != 1
 
     private boolean lwpTouch = true;
     private boolean lwpDrag = false;

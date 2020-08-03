@@ -1,6 +1,7 @@
 package rocks.tbog.tblauncher.ui;
 
 import android.annotation.SuppressLint;
+import android.appwidget.AppWidgetHostView;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.PointF;
@@ -16,6 +17,9 @@ import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
+import androidx.annotation.DrawableRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
 import rocks.tbog.tblauncher.R;
@@ -34,10 +38,21 @@ public class WidgetLayout extends ViewGroup {
     private final Point mPageCount = new Point(1, 1);
 
     public enum Handle {
-        MOVE,
-        RESIZE,
-        DISABLED,
+        MOVE_FREE,
+        MOVE_AXIAL,
+        RESIZE_DIAGONAL,
+        RESIZE_AXIAL,
+        DISABLED;
+
+        public boolean isMove() {
+            return this == MOVE_FREE || this == MOVE_AXIAL;
+        }
+
+        public boolean isResize() {
+            return this == RESIZE_DIAGONAL || this == RESIZE_AXIAL;
+        }
     }
+
 
     public WidgetLayout(Context context) {
         super(context);
@@ -88,6 +103,7 @@ public class WidgetLayout extends ViewGroup {
 //        return indexOfChild(widgetView) == -1;
 //    }
 
+    @NonNull
     public Handle getHandleType(View widgetView) {
         int viewIndex = indexOfChild(widgetView);
         if (viewIndex == -1) {
@@ -97,7 +113,10 @@ public class WidgetLayout extends ViewGroup {
                     viewIndex = ((ViewGroup) child).indexOfChild(widgetView);
                     if (viewIndex != -1) {
                         // we keep the handle type in the tag
-                        return (Handle) child.getTag();
+                        Object tag = child.getTag();
+                        if (tag instanceof Handle)
+                            return (Handle) child.getTag();
+                        throw new IllegalStateException("widget view tag should hold the Handle");
                     }
                 }
             }
@@ -109,7 +128,6 @@ public class WidgetLayout extends ViewGroup {
         enableHandle(widgetView, Handle.DISABLED);
     }
 
-    @SuppressLint("ClickableViewAccessibility")
     public void enableHandle(View widgetView, Handle handle) {
         convertAutoPositionTo(LayoutParams.Placement.MARGIN_TL_AS_POSITION);
 
@@ -158,8 +176,8 @@ public class WidgetLayout extends ViewGroup {
         switch (handle) {
             case DISABLED:
                 LayoutParams lp = (LayoutParams) widgetHandle.getLayoutParams();
-                lp.width = widgetHandle.getWidth();
-                lp.height = widgetHandle.getHeight();
+                lp.width = widgetView.getWidth();
+                lp.height = widgetView.getHeight();
 
                 int idx = indexOfChild(widgetHandle);
                 widgetHandle.removeViewAt(0);
@@ -167,10 +185,12 @@ public class WidgetLayout extends ViewGroup {
                 addView(widgetView, idx);
                 widgetView.setLayoutParams(lp);
                 break;
-            case MOVE: {
+            case MOVE_FREE:
+            case MOVE_AXIAL: {
                 final OnTouchListener moveListener = new OnTouchListener() {
                     final PointF mDownPos = new PointF();
 
+                    @SuppressLint("RtlHardcoded")
                     @Override
                     public boolean onTouch(View v, MotionEvent event) {
                         final int action = event.getActionMasked();
@@ -182,8 +202,14 @@ public class WidgetLayout extends ViewGroup {
                             case MotionEvent.ACTION_MOVE: {
                                 final float xMove = event.getRawX() - mDownPos.x;
                                 final float yMove = event.getRawY() - mDownPos.y;
-                                parent.setTranslationX(xMove);
-                                parent.setTranslationY(yMove);
+
+                                int gravity = ((FrameLayout.LayoutParams) v.getLayoutParams()).gravity;
+                                boolean horizontal = ((gravity & Gravity.LEFT) == Gravity.LEFT) || ((gravity & Gravity.RIGHT) == Gravity.RIGHT);
+                                boolean vertical = ((gravity & Gravity.TOP) == Gravity.TOP) || ((gravity & Gravity.BOTTOM) == Gravity.BOTTOM);
+                                if (horizontal)
+                                    parent.setTranslationX(xMove);
+                                if (vertical)
+                                    parent.setTranslationY(yMove);
                                 return true;
                             }
                             case MotionEvent.ACTION_UP: {
@@ -208,29 +234,14 @@ public class WidgetLayout extends ViewGroup {
                     }
                 };
 
-                {
-                    ImageView image = widgetHandle.findViewById(R.id.handle_top_left);
-                    image.setImageResource(R.drawable.ic_handle_move);
-                    image.setOnTouchListener(moveListener);
-                }
-                {
-                    ImageView image = widgetHandle.findViewById(R.id.handle_top_right);
-                    image.setImageResource(R.drawable.ic_handle_move);
-                    image.setOnTouchListener(moveListener);
-                }
-                {
-                    ImageView image = widgetHandle.findViewById(R.id.handle_bottom_right);
-                    image.setImageResource(R.drawable.ic_handle_move);
-                    image.setOnTouchListener(moveListener);
-                }
-                {
-                    ImageView image = widgetHandle.findViewById(R.id.handle_bottom_left);
-                    image.setImageResource(R.drawable.ic_handle_move);
-                    image.setOnTouchListener(moveListener);
-                }
+                if (handle == Handle.MOVE_FREE)
+                    setupCornerHandles(widgetHandle, R.drawable.ic_handle_move, moveListener);
+                else
+                    setupLineHandles(widgetHandle, R.drawable.ic_handle_move, moveListener);
                 break;
             }
-            case RESIZE: {
+            case RESIZE_DIAGONAL:
+            case RESIZE_AXIAL: {
                 final OnTouchListener resizeListener = new OnTouchListener() {
                     final Point mDownSize = new Point();
                     final Point mDownMargin = new Point();
@@ -257,26 +268,35 @@ public class WidgetLayout extends ViewGroup {
                             case MotionEvent.ACTION_MOVE: {
                                 int xMove = (int) (event.getRawX() - mDownPos.x + .5f);
                                 int yMove = (int) (event.getRawY() - mDownPos.y + .5f);
+
+                                int gravity = ((FrameLayout.LayoutParams) v.getLayoutParams()).gravity;
                                 // move widget handler
                                 {
                                     final View parent = (View) v.getParent();
                                     final LayoutParams lp = (LayoutParams) parent.getLayoutParams();
-                                    int gravity = ((FrameLayout.LayoutParams) v.getLayoutParams()).gravity;
+                                    boolean changed = false;
                                     if ((gravity & Gravity.LEFT) == Gravity.LEFT) {
                                         lp.leftMargin = mDownMargin.x + xMove;
                                         xMove = -xMove;
+                                        changed = true;
                                     }
                                     if ((gravity & Gravity.TOP) == Gravity.TOP) {
                                         lp.topMargin = mDownMargin.y + yMove;
                                         yMove = -yMove;
+                                        changed = true;
                                     }
-                                    parent.setLayoutParams(lp);
+                                    if (changed)
+                                        parent.setLayoutParams(lp);
                                 }
                                 // resize widget
                                 {
                                     final ViewGroup.LayoutParams lp = widgetView.getLayoutParams();
-                                    lp.width = mDownSize.x + xMove;
-                                    lp.height = mDownSize.y + yMove;
+                                    boolean horizontal = ((gravity & Gravity.LEFT) == Gravity.LEFT) || ((gravity & Gravity.RIGHT) == Gravity.RIGHT);
+                                    boolean vertical = ((gravity & Gravity.TOP) == Gravity.TOP) || ((gravity & Gravity.BOTTOM) == Gravity.BOTTOM);
+                                    if (horizontal)
+                                        lp.width = mDownSize.x + xMove;
+                                    if (vertical)
+                                        lp.height = mDownSize.y + yMove;
                                     widgetView.setLayoutParams(lp);
                                 }
                                 requestLayout();
@@ -292,28 +312,76 @@ public class WidgetLayout extends ViewGroup {
                     }
                 };
 
-                {
-                    ImageView image = widgetHandle.findViewById(R.id.handle_top_left);
-                    image.setImageResource(R.drawable.ic_handle_resize_bl);
-                    image.setOnTouchListener(resizeListener);
-                }
-                {
-                    ImageView image = widgetHandle.findViewById(R.id.handle_top_right);
-                    image.setImageResource(R.drawable.ic_handle_resize_bl);
-                    image.setOnTouchListener(resizeListener);
-                }
-                {
-                    ImageView image = widgetHandle.findViewById(R.id.handle_bottom_right);
-                    image.setImageResource(R.drawable.ic_handle_resize_bl);
-                    image.setOnTouchListener(resizeListener);
-                }
-                {
-                    ImageView image = widgetHandle.findViewById(R.id.handle_bottom_left);
-                    image.setImageResource(R.drawable.ic_handle_resize_bl);
-                    image.setOnTouchListener(resizeListener);
-                }
+                if (handle == Handle.RESIZE_DIAGONAL)
+                    setupCornerHandles(widgetHandle, R.drawable.ic_handle_resize_bl, resizeListener);
+                else
+                    setupLineHandles(widgetHandle, R.drawable.ic_handle_resize_l, resizeListener);
                 break;
             }
+        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private static void setupCornerHandles(ViewGroup widgetHandle, @DrawableRes int ic_handle_corner, OnTouchListener touchListener) {
+        widgetHandle.findViewById(R.id.handle_left).setVisibility(GONE);
+        widgetHandle.findViewById(R.id.handle_top).setVisibility(GONE);
+        widgetHandle.findViewById(R.id.handle_right).setVisibility(GONE);
+        widgetHandle.findViewById(R.id.handle_bottom).setVisibility(GONE);
+        {
+            ImageView image = widgetHandle.findViewById(R.id.handle_top_left);
+            image.setVisibility(VISIBLE);
+            image.setImageResource(ic_handle_corner);
+            image.setOnTouchListener(touchListener);
+        }
+        {
+            ImageView image = widgetHandle.findViewById(R.id.handle_top_right);
+            image.setVisibility(VISIBLE);
+            image.setImageResource(ic_handle_corner);
+            image.setOnTouchListener(touchListener);
+        }
+        {
+            ImageView image = widgetHandle.findViewById(R.id.handle_bottom_right);
+            image.setVisibility(VISIBLE);
+            image.setImageResource(ic_handle_corner);
+            image.setOnTouchListener(touchListener);
+        }
+        {
+            ImageView image = widgetHandle.findViewById(R.id.handle_bottom_left);
+            image.setVisibility(VISIBLE);
+            image.setImageResource(ic_handle_corner);
+            image.setOnTouchListener(touchListener);
+        }
+    }
+
+    @SuppressLint("ClickableViewAccessibility")
+    private static void setupLineHandles(ViewGroup widgetHandle, @DrawableRes int ic_handle, OnTouchListener touchListener) {
+        widgetHandle.findViewById(R.id.handle_top_left).setVisibility(GONE);
+        widgetHandle.findViewById(R.id.handle_top_right).setVisibility(GONE);
+        widgetHandle.findViewById(R.id.handle_bottom_right).setVisibility(GONE);
+        widgetHandle.findViewById(R.id.handle_bottom_left).setVisibility(GONE);
+        {
+            ImageView image = widgetHandle.findViewById(R.id.handle_left);
+            image.setVisibility(VISIBLE);
+            image.setImageResource(ic_handle);
+            image.setOnTouchListener(touchListener);
+        }
+        {
+            ImageView image = widgetHandle.findViewById(R.id.handle_top);
+            image.setVisibility(VISIBLE);
+            image.setImageResource(ic_handle);
+            image.setOnTouchListener(touchListener);
+        }
+        {
+            ImageView image = widgetHandle.findViewById(R.id.handle_right);
+            image.setVisibility(VISIBLE);
+            image.setImageResource(ic_handle);
+            image.setOnTouchListener(touchListener);
+        }
+        {
+            ImageView image = widgetHandle.findViewById(R.id.handle_bottom);
+            image.setVisibility(VISIBLE);
+            image.setImageResource(ic_handle);
+            image.setOnTouchListener(touchListener);
         }
     }
 
@@ -367,8 +435,6 @@ public class WidgetLayout extends ViewGroup {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int maxTotalWidth = 0;
-        int maxTotalHeight = 0;
         int count = getChildCount();
         // Iterate through all children and measure them.
         for (int i = 0; i < count; i++) {
@@ -377,14 +443,11 @@ public class WidgetLayout extends ViewGroup {
                 continue;
             // Measure the child.
             measureChildWithMargins(child, widthMeasureSpec, 0, heightMeasureSpec, 0);
-
-            maxTotalWidth += child.getMeasuredWidth();
-            maxTotalHeight += child.getMeasuredHeight();
         }
         int width = Math.max(getSuggestedMinimumWidth(), MeasureSpec.getSize(widthMeasureSpec));
         int height = Math.max(getSuggestedMinimumHeight(), MeasureSpec.getSize(heightMeasureSpec));
-        for (int screenIdx = 0; screenIdx < SCREEN_POSITIONS.length; screenIdx += 1) {
-            screenLayout(SCREEN_POSITIONS[screenIdx], 0, 0, width, height, false);
+        for (int screenPosition : SCREEN_POSITIONS) {
+            screenLayout(screenPosition, 0, 0, width, height, false);
             width = Math.max(width, mTmpContainerRect.width());
             height = Math.max(height, mTmpContainerRect.height());
         }
@@ -405,6 +468,46 @@ public class WidgetLayout extends ViewGroup {
         int screenBottom = bottom - getPaddingBottom();
 
         screenLayout(SCREEN_MIDDLE, screenLeft, screenTop, screenRight, screenBottom, true);
+    }
+
+    @Nullable
+    public AppWidgetHostView getWidget(int appWidgetId) {
+        for (int idx = 0; idx < getChildCount(); idx += 1) {
+            View child = getChildAt(idx);
+            if (child instanceof AppWidgetHostView && ((AppWidgetHostView) child).getAppWidgetId() == appWidgetId) {
+                return (AppWidgetHostView) child;
+            }
+            if (child instanceof ViewGroup) {
+                View view = ((ViewGroup) child).getChildAt(0);
+                if (view instanceof AppWidgetHostView && ((AppWidgetHostView) view).getAppWidgetId() == appWidgetId) {
+                    return (AppWidgetHostView) view;
+                }
+            }
+        }
+        return null;
+    }
+
+    public void removeWidget(AppWidgetHostView view) {
+        disableHandle(view);
+        removeView(view);
+    }
+
+    public boolean removeWidget(int appWidgetId) {
+        for (int idx = 0; idx < getChildCount(); idx += 1) {
+            View child = getChildAt(idx);
+            if (child instanceof AppWidgetHostView && ((AppWidgetHostView) child).getAppWidgetId() == appWidgetId) {
+                removeView(child);
+                return true;
+            }
+            if (child instanceof ViewGroup) {
+                View view = ((ViewGroup) child).getChildAt(0);
+                if (view instanceof AppWidgetHostView && ((AppWidgetHostView) view).getAppWidgetId() == appWidgetId) {
+                    removeWidget((AppWidgetHostView) view);
+                    return true;
+                }
+            }
+        }
+        return false;
     }
 
     private void horizontalLayout(boolean changed, int left, int top, int right, int bottom) {

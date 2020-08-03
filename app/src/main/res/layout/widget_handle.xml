@@ -45,4 +45,43 @@
         android:src="@drawable/ic_handle_resize_bl"
         tools:ignore="RtlHardcoded" />
 
+    <ImageView
+        android:id="@+id/handle_left"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="left|center_vertical"
+        android:importantForAccessibility="no"
+        android:src="@drawable/ic_handle_resize_l"
+        tools:ignore="RtlHardcoded" />
+
+    <ImageView
+        android:id="@+id/handle_top"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="top|center_horizontal"
+        android:importantForAccessibility="no"
+        android:rotation="90"
+        android:src="@drawable/ic_handle_resize_l"
+        tools:ignore="RtlHardcoded" />
+
+    <ImageView
+        android:id="@+id/handle_right"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="right|center_vertical"
+        android:importantForAccessibility="no"
+        android:rotation="180"
+        android:src="@drawable/ic_handle_resize_l"
+        tools:ignore="RtlHardcoded" />
+
+    <ImageView
+        android:id="@+id/handle_bottom"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|center_horizontal"
+        android:importantForAccessibility="no"
+        android:rotation="-90"
+        android:src="@drawable/ic_handle_resize_l"
+        tools:ignore="RtlHardcoded" />
+
 </FrameLayout>

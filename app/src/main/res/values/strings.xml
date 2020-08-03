@@ -35,6 +35,7 @@
     <string name="change_wallpaper">Change wallpaper</string>
     <string name="menu_widget_add">Add Widget</string>
     <string name="menu_widget_remove">Remove Widget</string>
+    <string name="menu_widget_configure">Configure Widget</string>
     <string name="android_settings">Device settings</string>
     <string name="launcher_settings">TBLauncher settings</string>
     <string name="rate_the_app">Rate the app</string>

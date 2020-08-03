@@ -14,16 +14,12 @@ import android.os.Build;
 import android.os.Bundle;
 import android.util.ArrayMap;
 import android.util.Log;
-import android.view.GestureDetector;
-import android.view.MotionEvent;
-import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
-import androidx.core.view.GestureDetectorCompat;
 
 import java.util.ArrayList;
 
@@ -33,12 +29,15 @@ import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.LinearAdapterPlus;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.ui.WidgetLayout;
+import rocks.tbog.tblauncher.ui.WidgetView;
 
 public class WidgetManager {
     private static final String TAG = "Wdg";
     private AppWidgetManager mAppWidgetManager;
     private WidgetHost mAppWidgetHost;
     private WidgetLayout mLayout;
+    private WidgetLayout.Handle mLastMoveType = WidgetLayout.Handle.MOVE_FREE;
+    private WidgetLayout.Handle mLastResizeType = WidgetLayout.Handle.RESIZE_DIAGONAL;
     private final ArrayMap<Integer, WidgetRecord> mWidgets = new ArrayMap<>(0);
     private static final int APPWIDGET_HOST_ID = 1337;
     private static final int REQUEST_PICK_APPWIDGET = 101;
@@ -171,10 +170,6 @@ public class WidgetManager {
 
         hostView.setOnLongClickListener(v -> {
             if (v instanceof WidgetView) {
-                v.setOnClickListener(v1 -> {
-                    v1.setOnClickListener(null);
-                    mLayout.enableHandle(v1, WidgetLayout.Handle.DISABLED);
-                });
                 ListPopup menu = getConfigPopup((WidgetView) v);
                 TBApplication.behaviour(v.getContext()).registerPopup(menu);
                 menu.show(v, 0.f);
@@ -280,25 +275,16 @@ public class WidgetManager {
      */
     public void removeWidget(AppWidgetHostView hostView) {
         final int appWidgetId = hostView.getAppWidgetId();
+        mLayout.removeWidget(hostView);
+
         mAppWidgetHost.deleteAppWidgetId(appWidgetId);
-        mLayout.removeView(hostView);
         DBHelper.removeWidget(mLayout.getContext(), appWidgetId);
         mWidgets.remove(appWidgetId);
     }
 
     public void removeWidget(int appWidgetId) {
-        int childCount = mLayout.getChildCount();
-        for (int child = 0; child < childCount; child += 1) {
-            View view = mLayout.getChildAt(child);
-            if (view instanceof AppWidgetHostView) {
-                int viewAppWidgetId = ((AppWidgetHostView) view).getAppWidgetId();
-                if (viewAppWidgetId == appWidgetId) {
-                    removeWidget((AppWidgetHostView) view);
-                    return;
-                }
-            }
-        }
-        // if we reach this point then the layout does not have the widget
+        mLayout.removeWidget(appWidgetId);
+
         mAppWidgetHost.deleteAppWidgetId(appWidgetId);
         DBHelper.removeWidget(mLayout.getContext(), appWidgetId);
         mWidgets.remove(appWidgetId);
@@ -342,28 +328,21 @@ public class WidgetManager {
     }
 
     /**
-     * A popup with all active widgets to choose one to remove
+     * A popup with all active widgets to choose one
      *
-     * @return
+     * @return the menu
      */
-    public ListPopup getRemoveWidgetPopup() {
+    public ListPopup getWidgetListPopup(@StringRes int title) {
         Context ctx = mLayout.getContext();
         LinearAdapter adapter = new LinearAdapterPlus();
 
-        adapter.add(new LinearAdapter.ItemTitle(ctx, R.string.menu_widget_remove));
+        adapter.add(new LinearAdapter.ItemTitle(ctx, title));
 
         for (WidgetRecord rec : mWidgets.values()) {
             adapter.add(WidgetPopupItem.create(ctx, mAppWidgetManager, rec.appWidgetId));
         }
 
-        ListPopup menu = ListPopup.create(ctx, adapter);
-        menu.setOnItemClickListener((a, v, pos) -> {
-            Object item = a.getItem(pos);
-            if (item instanceof WidgetPopupItem) {
-                removeWidget(((WidgetPopupItem) item).appWidgetId);
-            }
-        });
-        return menu;
+        return ListPopup.create(ctx, adapter);
     }
 
     /**
@@ -376,8 +355,10 @@ public class WidgetManager {
         LinearAdapter adapter = new LinearAdapter();
 
         adapter.add(new LinearAdapter.Item(activity, R.string.menu_widget_add));
-        if (widgetCount() > 0)
+        if (widgetCount() > 0) {
+            adapter.add(new LinearAdapter.Item(activity, R.string.menu_widget_configure));
             adapter.add(new LinearAdapter.Item(activity, R.string.menu_widget_remove));
+        }
 
         ListPopup menu = ListPopup.create(activity, adapter);
         menu.setOnItemClickListener((a, v, pos) -> {
@@ -390,8 +371,33 @@ public class WidgetManager {
                 case R.string.menu_widget_add:
                     TBApplication.widgetManager(activity).selectWidget(activity);
                     break;
+                case R.string.menu_widget_configure: {
+                    ListPopup configWidgetPopup = TBApplication.widgetManager(activity).getWidgetListPopup(R.string.menu_widget_configure);
+                    configWidgetPopup.setOnItemClickListener((a1, v1, pos1) -> {
+                        Object item1 = a1.getItem(pos1);
+                        if (item1 instanceof WidgetPopupItem) {
+                            AppWidgetHostView widgetView = mLayout.getWidget(((WidgetPopupItem) item1).appWidgetId);
+                            if (widgetView == null)
+                                return;
+                            ListPopup popup = getConfigPopup((WidgetView) widgetView);
+                            TBApplication.behaviour(mLayout.getContext()).registerPopup(popup);
+                            popup.show(widgetView, 0.f);
+                        }
+                    });
+
+                    TBApplication.behaviour(activity).registerPopup(configWidgetPopup);
+                    configWidgetPopup.showCenter(activity.getWindow().getDecorView());
+                    break;
+                }
                 case R.string.menu_widget_remove: {
-                    ListPopup removeWidgetPopup = TBApplication.widgetManager(activity).getRemoveWidgetPopup();
+                    ListPopup removeWidgetPopup = TBApplication.widgetManager(activity).getWidgetListPopup(R.string.menu_widget_remove);
+                    removeWidgetPopup.setOnItemClickListener((a1, v1, pos1) -> {
+                        Object item1 = a1.getItem(pos1);
+                        if (item1 instanceof WidgetPopupItem) {
+                            removeWidget(((WidgetPopupItem) item1).appWidgetId);
+                        }
+                    });
+
                     TBApplication.behaviour(activity).registerPopup(removeWidgetPopup);
                     removeWidgetPopup.showCenter(activity.getWindow().getDecorView());
                     break;
@@ -415,21 +421,25 @@ public class WidgetManager {
         WidgetRecord widget = mWidgets.get(appWidgetId);
         if (widget != null) {
             final WidgetLayout.Handle handleType = mLayout.getHandleType(view);
-            if (handleType != WidgetLayout.Handle.MOVE)
-                adapter.add(new WidgetOptionItem("Move", WidgetOptionItem.Action.MOVE));
-            else
+            if (handleType.isMove()) {
                 adapter.add(new WidgetOptionItem("Exit move", WidgetOptionItem.Action.RESET));
+            } else {
+                adapter.add(new WidgetOptionItem("Move", WidgetOptionItem.Action.MOVE));
+            }
 
-            if (handleType != WidgetLayout.Handle.RESIZE)
-                adapter.add(new WidgetOptionItem("Resize", WidgetOptionItem.Action.RESIZE));
-            else
+            if (handleType.isResize()) {
+                //adapter.add(new WidgetOptionItem("Switch resize", WidgetOptionItem.Action.RESIZE));
                 adapter.add(new WidgetOptionItem("Exit resize", WidgetOptionItem.Action.RESET));
+            } else {
+                adapter.add(new WidgetOptionItem("Resize", WidgetOptionItem.Action.RESIZE));
+            }
 
             adapter.add(new WidgetOptionItem("Remove", WidgetOptionItem.Action.REMOVE));
 
             if (BuildConfig.DEBUG) {
                 adapter.add(new LinearAdapter.ItemTitle("Debug info"));
                 adapter.add(new LinearAdapter.ItemString("ID: " + widget.appWidgetId));
+                adapter.add(new LinearAdapter.ItemString("Name: " + getWidgetName(ctx, view.getAppWidgetInfo())));
                 adapter.add(new LinearAdapter.ItemString("Width: " + widget.width));
                 adapter.add(new LinearAdapter.ItemString("Height: " + widget.height));
             }
@@ -444,17 +454,43 @@ public class WidgetManager {
             if (item instanceof WidgetOptionItem) {
                 switch (((WidgetOptionItem) item).mAction) {
                     case MOVE:
-                        //TBApplication.state().setWidgetMove(LauncherState.AnimatedVisibility.VISIBLE);
-                        mLayout.enableHandle(view, WidgetLayout.Handle.MOVE);
+                        view.setOnClickListener(v1 -> {
+                            view.setOnClickListener(null);
+                            view.setOnDoubleClickListener(null);
+                            mLayout.disableHandle(view);
+                        });
+                        view.setOnDoubleClickListener(v1 -> {
+                            if (mLayout.getHandleType(view) == WidgetLayout.Handle.MOVE_FREE) {
+                                mLastMoveType = WidgetLayout.Handle.MOVE_AXIAL;
+                            } else {
+                                mLastMoveType = WidgetLayout.Handle.MOVE_FREE;
+                            }
+                            mLayout.enableHandle(view, mLastMoveType);
+                        });
+                        mLayout.enableHandle(view, mLastMoveType);
                         break;
                     case RESIZE:
-                        mLayout.enableHandle(view, WidgetLayout.Handle.RESIZE);
+                        view.setOnClickListener(v1 -> {
+                            view.setOnClickListener(null);
+                            view.setOnDoubleClickListener(null);
+                            mLayout.disableHandle(view);
+                        });
+                        view.setOnDoubleClickListener(v1 -> {
+                            if (mLayout.getHandleType(view) == WidgetLayout.Handle.RESIZE_DIAGONAL) {
+                                mLastResizeType = WidgetLayout.Handle.RESIZE_AXIAL;
+                            } else {
+                                mLastResizeType = WidgetLayout.Handle.RESIZE_DIAGONAL;
+                            }
+                            mLayout.enableHandle(view, mLastResizeType);
+                        });
+                        mLayout.enableHandle(view, mLastResizeType);
                         break;
                     case RESET:
+                        view.setOnClickListener(null);
+                        view.setOnDoubleClickListener(null);
                         mLayout.disableHandle(view);
                         break;
                     case REMOVE:
-                        mLayout.disableHandle(view);
                         removeWidget(view);
                         break;
                 }
@@ -482,16 +518,58 @@ public class WidgetManager {
         mLayout.scrollToPage(pageX, pageY);
     }
 
+    @NonNull
+    public static String getWidgetName(Context ctx, AppWidgetProviderInfo info) {
+        String name = null;
+        if (info != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                name = info.loadLabel(ctx.getPackageManager());
+            } else {
+                name = info.label;
+            }
+        }
+        return name == null ? "[null]" : name;
+    }
+
+    @NonNull
+    public static Drawable getWidgetPreview(Context ctx, @Nullable AppWidgetProviderInfo info) {
+        Drawable icon = null;
+        if (info != null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                icon = info.loadPreviewImage(ctx, 0);
+            } else {
+                icon = ctx.getPackageManager().getDrawable(info.provider.getPackageName(), info.previewImage, null);
+            }
+            if (icon == null) {
+                try {
+                    icon = ctx.getPackageManager().getApplicationLogo(info.provider.getPackageName());
+                } catch (PackageManager.NameNotFoundException ignored) {
+                }
+            }
+        }
+        if (icon == null) {
+            if (info == null) {
+                icon = ctx.getResources().getDrawable(R.drawable.ic_android);
+            } else {
+                try {
+                    icon = ctx.getPackageManager().getApplicationIcon(info.provider.getPackageName());
+                } catch (PackageManager.NameNotFoundException ignored) {
+                    icon = ctx.getResources().getDrawable(R.drawable.ic_android);
+                }
+            }
+        }
+        return icon;
+    }
+
     static class WidgetOptionItem extends LinearAdapter.ItemString {
         enum Action {
-            UNDEFINED,
             MOVE,
             RESIZE,
             RESET,
             REMOVE,
         }
 
-        Action mAction = Action.UNDEFINED;
+        final Action mAction;
 
         public WidgetOptionItem(@NonNull String string, Action action) {
             super(string);
@@ -505,36 +583,8 @@ public class WidgetManager {
         @NonNull
         static WidgetPopupItem create(Context ctx, AppWidgetManager appWidgetManager, int appWidgetId) {
             AppWidgetProviderInfo info = appWidgetManager.getAppWidgetInfo(appWidgetId);
-            String name = null;
-            Drawable icon = null;
-            if (info != null) {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    name = info.loadLabel(ctx.getPackageManager());
-                    icon = info.loadPreviewImage(ctx, 0);
-                } else {
-                    name = info.label;
-                    icon = ctx.getPackageManager().getDrawable(info.provider.getPackageName(), info.previewImage, null);
-                }
-                if (icon == null) {
-                    try {
-                        icon = ctx.getPackageManager().getApplicationLogo(info.provider.getPackageName());
-                    } catch (PackageManager.NameNotFoundException ignored) {
-                    }
-                }
-            }
-            if (name == null)
-                name = "[null]";
-            if (icon == null) {
-                if (info == null) {
-                    icon = ctx.getResources().getDrawable(R.drawable.ic_android);
-                } else {
-                    try {
-                        icon = ctx.getPackageManager().getApplicationIcon(info.provider.getPackageName());
-                    } catch (PackageManager.NameNotFoundException ignored) {
-                        icon = ctx.getResources().getDrawable(R.drawable.ic_android);
-                    }
-                }
-            }
+            String name = getWidgetName(ctx, info);
+            Drawable icon = getWidgetPreview(ctx, info);
             return new WidgetPopupItem(name, appWidgetId, icon);
         }
 
@@ -560,69 +610,4 @@ public class WidgetManager {
         }
     }
 
-    static class WidgetView extends AppWidgetHostView {
-        private final GestureDetectorCompat gestureDetector;
-        private boolean mLongClickCalled = false;
-        private OnClickListener mOnClickListener = null;
-        private OnLongClickListener mOnLongClickListener = null;
-
-        public WidgetView(Context context) {
-            super(context);
-            GestureDetector.SimpleOnGestureListener onGestureListener = new GestureDetector.SimpleOnGestureListener() {
-                @Override
-                public boolean onSingleTapUp(MotionEvent e) {
-                    if (mOnClickListener != null) {
-                        mOnClickListener.onClick(WidgetView.this);
-                        return true;
-                    }
-                    return false;
-                }
-
-                @Override
-                public void onLongPress(MotionEvent e) {
-                    if (mOnLongClickListener != null) {
-                        mLongClickCalled = true;
-                        mOnLongClickListener.onLongClick(WidgetView.this);
-                    }
-                }
-            };
-            gestureDetector = new GestureDetectorCompat(context, onGestureListener);
-        }
-
-        @Override
-        public void setOnLongClickListener(@Nullable OnLongClickListener listener) {
-            gestureDetector.setIsLongpressEnabled(listener != null);
-            setLongClickable(listener != null);
-            mOnLongClickListener = listener;
-        }
-
-        @Override
-        public void setOnClickListener(@Nullable OnClickListener listener) {
-            setClickable(listener != null);
-            mOnClickListener = listener;
-        }
-
-        @Override
-        public boolean onInterceptTouchEvent(MotionEvent event) {
-            if (gestureDetector.onTouchEvent(event))
-                return true;
-            int act = event.getActionMasked();
-            if (act == MotionEvent.ACTION_UP) {
-                if (mLongClickCalled) {
-                    mLongClickCalled = false;
-                    return true;
-                }
-            }
-            return super.onInterceptTouchEvent(event);
-        }
-
-        @Override
-        protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-            super.onLayout(changed, left, top, right, bottom);
-            if (!changed)
-                return;
-            //mWidget.onWidgetLayout(child, changed, mTmpChildRect);
-            Log.d(TAG, "Widget #" + getAppWidgetId() + " layout: " + left + " " + top + " " + right + " " + bottom);
-        }
-    }
 }
