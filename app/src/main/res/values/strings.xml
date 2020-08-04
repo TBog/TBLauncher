@@ -169,6 +169,9 @@
     <string name="cfg_widget_resize_switch">Switch resize</string>
     <string name="cfg_widget_resize_exit">Exit resize</string>
     <string name="cfg_widget_remove">Remove</string>
+    <string name="cfg_widget_screen_left">Move to <br /><b>left</b> screen</string>
+    <string name="cfg_widget_screen_middle">Move to <br /><b>middle</b> screen</string>
+    <string name="cfg_widget_screen_right">Move to <br /><b>right</b> screen</string>
 
     <string name="shortcut_with_appName">%s: %s</string>
 </resources>

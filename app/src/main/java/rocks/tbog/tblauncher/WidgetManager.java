@@ -30,6 +30,7 @@ import rocks.tbog.tblauncher.ui.LinearAdapterPlus;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.ui.WidgetLayout;
 import rocks.tbog.tblauncher.ui.WidgetView;
+import rocks.tbog.tblauncher.utils.Utilities;
 
 public class WidgetManager {
     private static final String TAG = "Wdg";
@@ -75,19 +76,23 @@ public class WidgetManager {
         restoreWidgets();
         // post the scroll event to happen after the measure and layout phase
         final LiveWallpaper lw = TBApplication.liveWallpaper(activity);
-        mLayout.post(new Runnable() {
-            @Override
-            public void run() {
-                if (mLayout.getMeasuredWidth() == 0) {
-                    // layout did not happen yet, wait some more
-                    mLayout.removeCallbacks(this);
-                    mLayout.post(this);
-                    return;
-                }
-                PointF offset = lw.getWallpaperOffset();
-                WidgetManager.this.scroll(offset.x, offset.y);
-            }
+        mLayout.addOnAfterLayoutTask(() -> {
+            PointF offset = lw.getWallpaperOffset();
+            WidgetManager.this.scroll(offset.x, offset.y);
         });
+//        mLayout.post(new Runnable() {
+//            @Override
+//            public void run() {
+//                if (mLayout.getMeasuredWidth() == 0) {
+//                    // layout did not happen yet, wait some more
+//                    mLayout.removeCallbacks(this);
+//                    mLayout.post(this);
+//                    return;
+//                }
+//                PointF offset = lw.getWallpaperOffset();
+//                WidgetManager.this.scroll(offset.x, offset.y);
+//            }
+//        });
     }
 
     private void restoreWidgets() {
@@ -160,10 +165,14 @@ public class WidgetManager {
     }
 
     private void addWidgetToLayout(AppWidgetHostView hostView, AppWidgetProviderInfo appWidgetInfo, WidgetRecord rec) {
-        ViewGroup.LayoutParams params = new LinearLayout.LayoutParams(rec.width, rec.height);
+        WidgetLayout.LayoutParams params = new WidgetLayout.LayoutParams(rec.width, rec.height);
+        params.leftMargin = rec.left;
+        params.topMargin = rec.top;
+        params.screen = rec.screen;
+        params.placement = WidgetLayout.LayoutParams.Placement.MARGIN_TL_AS_POSITION;
         hostView.setLayoutParams(params);
-        hostView.setMinimumWidth(rec.width);
-        hostView.setMinimumHeight(rec.height);
+        hostView.setMinimumWidth(appWidgetInfo.minWidth);
+        hostView.setMinimumHeight(appWidgetInfo.minHeight);
 
         hostView.setAppWidget(rec.appWidgetId, appWidgetInfo);
         hostView.updateAppWidgetSize(null, rec.width, rec.height, rec.width, rec.height);
@@ -435,6 +444,16 @@ public class WidgetManager {
                 adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_resize, WidgetOptionItem.Action.RESIZE));
             }
 
+            final ViewGroup.LayoutParams lp = view.getLayoutParams();
+            if (lp instanceof WidgetLayout.LayoutParams) {
+                if (((WidgetLayout.LayoutParams) lp).screen != WidgetLayout.LayoutParams.SCREEN_LEFT)
+                    adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_screen_left, WidgetOptionItem.Action.MOVE2SCREEN_LEFT));
+                if (((WidgetLayout.LayoutParams) lp).screen != WidgetLayout.LayoutParams.SCREEN_MIDDLE)
+                    adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_screen_middle, WidgetOptionItem.Action.MOVE2SCREEN_MIDDLE));
+                if (((WidgetLayout.LayoutParams) lp).screen != WidgetLayout.LayoutParams.SCREEN_RIGHT)
+                    adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_screen_right, WidgetOptionItem.Action.MOVE2SCREEN_RIGHT));
+            }
+
             adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_remove, WidgetOptionItem.Action.REMOVE));
 
             if (BuildConfig.DEBUG) {
@@ -459,6 +478,7 @@ public class WidgetManager {
                             view.setOnClickListener(null);
                             view.setOnDoubleClickListener(null);
                             mLayout.disableHandle(view);
+                            saveWidgetProperties(view);
                         });
                         view.setOnDoubleClickListener(v1 -> {
                             if (mLayout.getHandleType(view) == WidgetLayout.Handle.MOVE_FREE) {
@@ -483,6 +503,7 @@ public class WidgetManager {
                             view.setOnClickListener(null);
                             view.setOnDoubleClickListener(null);
                             mLayout.disableHandle(view);
+                            saveWidgetProperties(view);
                         });
                         view.setOnDoubleClickListener(v1 -> {
                             if (mLayout.getHandleType(view) == WidgetLayout.Handle.RESIZE_DIAGONAL) {
@@ -506,14 +527,49 @@ public class WidgetManager {
                         view.setOnClickListener(null);
                         view.setOnDoubleClickListener(null);
                         mLayout.disableHandle(view);
+                        saveWidgetProperties(view);
                         break;
                     case REMOVE:
                         removeWidget(view);
                         break;
+                    case MOVE2SCREEN_LEFT: {
+                        final WidgetLayout.LayoutParams lp = (WidgetLayout.LayoutParams) view.getLayoutParams();
+                        lp.screen = WidgetLayout.LayoutParams.SCREEN_LEFT;
+                        view.setLayoutParams(lp);
+                        break;
+                    }
+                    case MOVE2SCREEN_RIGHT: {
+                        final WidgetLayout.LayoutParams lp = (WidgetLayout.LayoutParams) view.getLayoutParams();
+                        lp.screen = WidgetLayout.LayoutParams.SCREEN_RIGHT;
+                        view.setLayoutParams(lp);
+                        break;
+                    }
+                    case MOVE2SCREEN_MIDDLE: {
+                        final WidgetLayout.LayoutParams lp = (WidgetLayout.LayoutParams) view.getLayoutParams();
+                        lp.screen = WidgetLayout.LayoutParams.SCREEN_MIDDLE;
+                        view.setLayoutParams(lp);
+                        break;
+                    }
                 }
             }
         });
         return menu;
+    }
+
+    private void saveWidgetProperties(WidgetView view) {
+        final int appWidgetId = view.getAppWidgetId();
+//        WidgetRecord rec = mWidgets.get(appWidgetId);
+//        if (rec == null)
+//            return;
+        mLayout.addOnAfterLayoutTask(() -> {
+            WidgetRecord rec = mWidgets.get(appWidgetId);
+            AppWidgetHostView widgetHostView = mLayout.getWidget(appWidgetId);
+            if (rec != null && widgetHostView != null) {
+                rec.saveProperties(widgetHostView);
+                Utilities.runAsync(() -> DBHelper.setWidgetProperties(mLayout.getContext(), rec), null);
+            }
+        });
+        mLayout.requestLayout();
     }
 
     /**
@@ -580,12 +636,11 @@ public class WidgetManager {
 
     static class WidgetOptionItem extends LinearAdapter.Item {
         enum Action {
-            MOVE,
-            MOVE_SWITCH,
-            RESIZE,
-            RESIZE_SWITCH,
+            MOVE, MOVE_SWITCH,
+            RESIZE, RESIZE_SWITCH,
             RESET,
             REMOVE,
+            MOVE2SCREEN_LEFT, MOVE2SCREEN_MIDDLE, MOVE2SCREEN_RIGHT,
         }
 
         final Action mAction;

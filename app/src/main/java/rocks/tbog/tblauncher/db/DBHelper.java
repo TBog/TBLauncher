@@ -717,4 +717,14 @@ public class DBHelper {
         SQLiteDatabase db = getDatabase(context);
         db.delete("widgets", "appWidgetId=?", new String[]{String.valueOf(appWidgetId)});
     }
+
+    public static void setWidgetProperties(@NonNull Context context, WidgetRecord rec)
+    {
+        SQLiteDatabase db = getDatabase(context);
+
+        ContentValues values = new ContentValues();
+        values.put("properties", rec.packedProperties());
+
+        db.update("widgets", values, "appWidgetId=?", new String[]{String.valueOf(rec.appWidgetId)});
+    }
 }

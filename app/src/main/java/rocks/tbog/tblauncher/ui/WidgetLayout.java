@@ -16,11 +16,14 @@ import android.view.ViewGroup;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.ScrollView;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
+
+import java.util.ArrayList;
 
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
@@ -28,6 +31,7 @@ import rocks.tbog.tblauncher.TBApplication;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static rocks.tbog.tblauncher.ui.WidgetLayout.LayoutParams.SCREEN_MIDDLE;
 import static rocks.tbog.tblauncher.ui.WidgetLayout.LayoutParams.SCREEN_POSITIONS;
+import static rocks.tbog.tblauncher.ui.WidgetLayout.LayoutParams.SCREEN_RIGHT;
 
 public class WidgetLayout extends ViewGroup {
     /**
@@ -36,6 +40,11 @@ public class WidgetLayout extends ViewGroup {
     private final Rect mTmpContainerRect = new Rect();
     private final Rect mTmpChildRect = new Rect();
     private final Point mPageCount = new Point(1, 1);
+    private final ArrayList<OnAfterLayoutTask> mAfterLayoutTaskList = new ArrayList<>(1);
+
+    public interface OnAfterLayoutTask {
+        void onAfterLayout();
+    }
 
     public enum Handle {
         MOVE_FREE,
@@ -55,20 +64,27 @@ public class WidgetLayout extends ViewGroup {
 
 
     public WidgetLayout(Context context) {
-        super(context);
+        this(context, null);
     }
 
     public WidgetLayout(Context context, AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, 0);
     }
 
     public WidgetLayout(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        init();
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public WidgetLayout(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+        init();
+    }
+
+    private void init() {
+        setClipChildren(true);
+        setClipToPadding(true);
     }
 
     public void setPageCount(int horizontal, int vertical) {
@@ -83,6 +99,15 @@ public class WidgetLayout extends ViewGroup {
 
     public int getVerticalPageCount() {
         return mPageCount.y;
+    }
+
+    /**
+     * Add a one time run task
+     *
+     * @param task what to run
+     */
+    public void addOnAfterLayoutTask(OnAfterLayoutTask task) {
+        mAfterLayoutTaskList.add(task);
     }
 
     /**
@@ -436,18 +461,26 @@ public class WidgetLayout extends ViewGroup {
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         int count = getChildCount();
+
+        int width = Math.max(getSuggestedMinimumWidth(), MeasureSpec.getSize(widthMeasureSpec));
+        int height = Math.max(getSuggestedMinimumHeight(), MeasureSpec.getSize(heightMeasureSpec));
+
         // Iterate through all children and measure them.
         for (int i = 0; i < count; i++) {
             final View child = getChildAt(i);
             if (child.getVisibility() == GONE)
                 continue;
+            ViewGroup.LayoutParams lp = child.getLayoutParams();
+
             // Measure the child.
-            measureChildWithMargins(child, widthMeasureSpec, 0, heightMeasureSpec, 0);
+            //measureChildWithMargins(child, widthMeasureSpec, 0, heightMeasureSpec, 0);
+            int childWidthMeasureSpec = ViewGroup.getChildMeasureSpec(widthMeasureSpec, 0, lp.width);
+            int childHeightMeasureSpec = ViewGroup.getChildMeasureSpec(heightMeasureSpec, 0, lp.height);
+            child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
         }
-        int width = Math.max(getSuggestedMinimumWidth(), MeasureSpec.getSize(widthMeasureSpec));
-        int height = Math.max(getSuggestedMinimumHeight(), MeasureSpec.getSize(heightMeasureSpec));
+
         for (int screenPosition : SCREEN_POSITIONS) {
-            screenLayout(screenPosition, 0, 0, width, height, false);
+            screenLayout(screenPosition, width, height, false);
             width = Math.max(width, mTmpContainerRect.width());
             height = Math.max(height, mTmpContainerRect.height());
         }
@@ -460,6 +493,7 @@ public class WidgetLayout extends ViewGroup {
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         if (mPageCount.x > 1 && mPageCount.y == 1) {
             horizontalLayout(changed, left, top, right, bottom);
+            callAfterLayout();
             return;
         }
         int screenLeft = left + getPaddingLeft();
@@ -467,7 +501,14 @@ public class WidgetLayout extends ViewGroup {
         int screenRight = right - getPaddingRight();
         int screenBottom = bottom - getPaddingBottom();
 
-        screenLayout(SCREEN_MIDDLE, screenLeft, screenTop, screenRight, screenBottom, true);
+        screenLayout(SCREEN_MIDDLE, screenRight - screenLeft, screenBottom - screenTop, true);
+        callAfterLayout();
+    }
+
+    protected void callAfterLayout() {
+        for (OnAfterLayoutTask afterLayout : mAfterLayoutTaskList)
+            afterLayout.onAfterLayout();
+        mAfterLayoutTaskList.clear();
     }
 
     @Nullable
@@ -512,13 +553,6 @@ public class WidgetLayout extends ViewGroup {
 
     private void horizontalLayout(boolean changed, int left, int top, int right, int bottom) {
         final int screenWidth = right - left;
-//        Rect screen = new Rect(left, top, right, bottom);
-//        {
-//            final int wholeWidth = screenWidth * mPageCount.x;
-//            final int centerX = screen.centerX();
-//            screen.left = centerX - wholeWidth / 2;
-//            screen.right = screen.left + wholeWidth;
-//        }
 
         for (int screenPos : SCREEN_POSITIONS) {
             // add padding
@@ -527,18 +561,25 @@ public class WidgetLayout extends ViewGroup {
             int screenRight = right - getPaddingRight();
             int screenBottom = bottom - getPaddingBottom();
 
-            screenLayout(screenPos, screenLeft, screenTop, screenRight, screenBottom, true);
+            screenLayout(screenPos, screenRight - screenLeft, screenBottom - screenTop, true);
             left += screenWidth;
+            right += screenWidth;
         }
     }
 
-    private void screenLayout(int position, int left, int top, int right, int bottom, boolean childLayout) {
+    private void screenLayout(int position, int width, int height, boolean childLayout) {
         mTmpContainerRect.setEmpty();
+        final int screenTop = 0;
+        final int screenLeft;
+        if (position == SCREEN_MIDDLE)
+            screenLeft = width;
+        else if (position == SCREEN_RIGHT)
+            screenLeft = 2 * width;
+        else
+            screenLeft = 0;
         int autoX = 0;
         int autoY = 0;
-        final int width = right - left;
-        final int height = bottom - top;
-        int maxChildY = top;
+        int maxChildY = 0;
         final int childCount = getChildCount();
         for (int childIdx = 0; childIdx < childCount; childIdx++) {
             final View child = getChildAt(childIdx);
@@ -575,6 +616,8 @@ public class WidgetLayout extends ViewGroup {
                 case MARGIN_TL_AS_POSITION:
                     mTmpChildRect.offset(lp.leftMargin, lp.topMargin);
             }
+
+            mTmpChildRect.offset(screenLeft, screenTop);
 
             // Place the child.
             if (childLayout)
