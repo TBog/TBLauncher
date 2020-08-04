@@ -37,18 +37,18 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:background="@drawable/popup_background"
             android:gravity="center"
             android:orientation="vertical"
             android:visibility="gone"
-            tools:visibility="visible"/>
-<!--            <ImageView-->
-<!--                android:importantForAccessibility="no"-->
-<!--                android:layout_width="50dp"-->
-<!--                android:layout_height="50dp"-->
-<!--                android:src="@drawable/ic_android"-->
-<!--                />-->
-<!--        </rocks.tbog.tblauncher.ui.WidgetLayout>-->
+            tools:background="@drawable/popup_background"
+            tools:visibility="visible" />
+        <!--            <ImageView-->
+        <!--                android:importantForAccessibility="no"-->
+        <!--                android:layout_width="50dp"-->
+        <!--                android:layout_height="50dp"-->
+        <!--                android:src="@drawable/ic_android"-->
+        <!--                />-->
+        <!--        </rocks.tbog.tblauncher.ui.WidgetLayout>-->
 
         <LinearLayout
             android:id="@+id/quickList"
