@@ -23,6 +23,7 @@ import rocks.tbog.tblauncher.ui.ListPopup;
 
 public class LiveWallpaper {
     private static final int longPressTimeout = ViewConfiguration.getLongPressTimeout();
+    private static final String TAG = "LWP";
     private TBLauncherActivity mTBLauncherActivity = null;
     private WallpaperManager mWallpaperManager;
     private final Point mWindowSize = new Point(1, 1);
@@ -114,6 +115,7 @@ public class LiveWallpaper {
             return false;
         }
 
+        Log.d(TAG, "onRootTouch\r\n" + event);
         int actionMasked = event.getActionMasked();
 
         switch (actionMasked) {
@@ -171,7 +173,7 @@ public class LiveWallpaper {
                     float yMove = (mFirstTouchPos.y - mLastTouchPos.y) / mWindowSize.y;
                     float xVel = mVelocityTracker.getXVelocity() / mWindowSize.x;
                     float yVel = mVelocityTracker.getYVelocity() / mWindowSize.y;
-                    Log.d("LWP", String.format(Locale.US, "Velocity=(%.3f, %.3f) Move=(%.3f, %.3f)", xVel, yVel, xMove, yMove));
+                    Log.d(TAG, String.format(Locale.US, "Velocity=(%.3f, %.3f) Move=(%.3f, %.3f)", xVel, yVel, xMove, yMove));
                     if (Math.abs(xVel) < .01f
                             && Math.abs(yVel) < .01f
                             && Math.abs(xMove) < .01f
@@ -200,6 +202,7 @@ public class LiveWallpaper {
                     break;
         }
 
+        Log.d(TAG, "onRootTouch event NOT consumed");
         // do not consume the event
         return false;
     }
@@ -303,16 +306,16 @@ public class LiveWallpaper {
         boolean init() {
             mVelocityTracker.computeCurrentVelocity(1000 / 30);
             mVelocity.set(mVelocityTracker.getXVelocity(), mVelocityTracker.getYVelocity());
-            //Log.d("LWP", "mVelocity=" + String.format(Locale.US, "%.2f", mVelocity));
+            //Log.d(TAG, "mVelocity=" + String.format(Locale.US, "%.2f", mVelocity));
 
             mStartOffset.set(mWallpaperOffset);
-            //Log.d("LWP", "mStartOffset=" + String.format(Locale.US, "%.2f", mStartOffset));
+            //Log.d(TAG, "mStartOffset=" + String.format(Locale.US, "%.2f", mStartOffset));
 
             boolean stickToSides = isPreferenceWPStickToSides();
             boolean stickToCenter = isPreferenceWPReturnCenter();
             float expectedPosX = -Math.min(Math.max(mVelocity.x / mWindowSize.x, -.5f), .5f) + mStartOffset.x;
             //float expectedPosY = -Math.min(Math.max(mVelocity.y / mWindowSize.y, -.5f), .5f) + mStartOffset.y;
-            //Log.d("LWP", "expectedPos=" + String.format(Locale.US, "%.2f %.2f", expectedPosX, expectedPosY));
+            //Log.d(TAG, "expectedPos=" + String.format(Locale.US, "%.2f %.2f", expectedPosX, expectedPosY));
 
             // stick to center
             mDeltaOffset.y = .5f - mStartOffset.y;

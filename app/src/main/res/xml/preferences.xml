@@ -102,7 +102,7 @@
                 android:widgetLayout="@layout/pref_color_preview" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:defaultValue="255"
+                android:defaultValue="@integer/default_notification_bar_opacity"
                 android:dialogLayout="@layout/pref_alpha"
                 android:key="notification-bar-alpha"
                 android:title="@string/alpha"
@@ -131,7 +131,7 @@
                 android:widgetLayout="@layout/pref_color_preview" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:defaultValue="127"
+                android:defaultValue="@integer/default_search_bar_opacity"
                 android:dialogLayout="@layout/pref_alpha"
                 android:key="search-bar-alpha"
                 android:title="@string/alpha"
@@ -169,7 +169,7 @@
                 android:widgetLayout="@layout/pref_color_preview" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:defaultValue="127"
+                android:defaultValue="@integer/default_result_list_opacity"
                 android:dialogLayout="@layout/pref_alpha"
                 android:key="result-list-alpha"
                 android:title="@string/alpha"
@@ -194,7 +194,7 @@
                 android:widgetLayout="@layout/pref_color_preview" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:defaultValue="127"
+                android:defaultValue="@integer/default_quick_list_opacity"
                 android:dialogLayout="@layout/pref_alpha"
                 android:key="quick-list-alpha"
                 android:title="@string/alpha"

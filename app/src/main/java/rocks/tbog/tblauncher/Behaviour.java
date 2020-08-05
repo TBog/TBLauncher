@@ -194,7 +194,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             // check if menu contains elements and if yes show it
             if (!menu.getAdapter().isEmpty()) {
                 TBApplication.behaviour(ctx).registerPopup(menu);
-                menu.show(v);
+                menu.show(v, 0f);
                 return true;
             }
 

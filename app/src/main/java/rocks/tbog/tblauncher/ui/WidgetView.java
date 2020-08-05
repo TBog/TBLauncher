@@ -13,6 +13,7 @@ import androidx.core.view.GestureDetectorCompat;
 import rocks.tbog.tblauncher.WidgetManager;
 
 public class WidgetView extends AppWidgetHostView {
+    private static final String TAG = "WdgView";
     private final GestureDetectorCompat gestureDetector;
     private boolean mIntercepted = false;
     private boolean mLongClickCalled = false;
@@ -56,7 +57,7 @@ public class WidgetView extends AppWidgetHostView {
 
             @Override
             public boolean onDoubleTapEvent(MotionEvent e) {
-                //Log.d(WidgetManager.TAG, "onDoubleTapEvent " + e);
+                //Log.d(TAG, "onDoubleTapEvent " + e);
                 if (mOnDoubleClickListener != null) {
                     final int act = e.getActionMasked();
                     if (act == MotionEvent.ACTION_UP)
@@ -86,7 +87,7 @@ public class WidgetView extends AppWidgetHostView {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        //Log.d(WidgetManager.TAG, "onInterceptTouchEvent\r\n" + event);
+        Log.d(TAG, "onInterceptTouchEvent\r\n" + event);
         if (event.getPointerCount() != 1)
             return false;
         final int act = event.getActionMasked();
@@ -107,30 +108,38 @@ public class WidgetView extends AppWidgetHostView {
         }
 
         if (gestureDetector.onTouchEvent(event)) {
-            //Log.d(WidgetManager.TAG, "mIntercepted " + true);
+            Log.d(TAG, "mIntercepted " + true);
             return mIntercepted = true;
         }
 
-        //Log.d(WidgetManager.TAG, "super.onInterceptTouchEvent");
+        Log.d(TAG, "super.onInterceptTouchEvent");
         return super.onInterceptTouchEvent(event);
     }
 
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        //Log.d(WidgetManager.TAG, "onTouchEvent\t\n" + event + "\r\nmIntercepted " + mIntercepted);
+        Log.d(TAG, "onTouchEvent\t\n" + event + "\r\nmIntercepted " + mIntercepted);
         // first call after the intercept can be ignored
         if (mIntercepted) {
             mIntercepted = false;
-            //Log.d(WidgetManager.TAG, "mIntercepted " + false);
+            Log.d(TAG, "mIntercepted " + false);
             return true;
         }
         if (event.getPointerCount() != 1)
             return false;
         if (gestureDetector.onTouchEvent(event))
             return true;
-        //Log.d(WidgetManager.TAG, "super.onTouchEvent");
-        return super.onTouchEvent(event);
+
+        Log.d(TAG, "super.onTouchEvent");
+        if (super.onTouchEvent(event))
+            return true;
+        // if no child view handled this event, send cancel to gestureDetector
+        MotionEvent cancel = MotionEvent.obtainNoHistory(event);
+        cancel.setAction(MotionEvent.ACTION_CANCEL);
+        Log.d(TAG, "gestureDetector CANCEL");
+        gestureDetector.onTouchEvent(cancel);
+        return false;
     }
 
     @Override

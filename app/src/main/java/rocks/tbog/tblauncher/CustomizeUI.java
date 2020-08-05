@@ -107,7 +107,7 @@ public class CustomizeUI {
 
         // set text size
         {
-            float smallSize = resources.getDimension(R.dimen.bar_text);
+            float smallSize = resources.getDimension(R.dimen.small_bar_text);
             float largeSize = resources.getDimension(R.dimen.large_bar_text);
             mSearchBar.setTextSize(TypedValue.COMPLEX_UNIT_PX, smallSize + (largeSize - smallSize) * percent / 100);
         }

@@ -368,6 +368,7 @@ public class WidgetManager {
             adapter.add(new LinearAdapter.Item(activity, R.string.menu_widget_configure));
             adapter.add(new LinearAdapter.Item(activity, R.string.menu_widget_remove));
         }
+        adapter.add(new LinearAdapter.Item(activity, R.string.launcher_settings));
 
         ListPopup menu = ListPopup.create(activity, adapter);
         menu.setOnItemClickListener((a, v, pos) -> {
@@ -411,6 +412,14 @@ public class WidgetManager {
                     removeWidgetPopup.showCenter(activity.getWindow().getDecorView());
                     break;
                 }
+                case R.string.launcher_settings:
+                    //TBApplication.behaviour(v.getContext()).beforeLaunchOccurred();
+                    mLayout.postDelayed(() -> {
+                        Context c = mLayout.getContext();
+                        c.startActivity(new Intent(c, SettingsActivity.class));
+                        //TBApplication.behaviour(c).afterLaunchOccurred();
+                    }, Behaviour.LAUNCH_DELAY);
+                    break;
             }
         });
         return menu;

@@ -33,9 +33,9 @@
     <string name="excluded_app_list_added">App excluded from KISS. Reset through the KISS settings</string>
     <string name="application_not_found">Whoops… unable to launch that app.</string>
     <string name="change_wallpaper">Change wallpaper</string>
-    <string name="menu_widget_add">Add Widget</string>
-    <string name="menu_widget_remove">Remove Widget</string>
-    <string name="menu_widget_configure">Configure Widget</string>
+    <string name="menu_widget_add">Add Widget…</string>
+    <string name="menu_widget_remove">Remove Widget…</string>
+    <string name="menu_widget_configure">Configure Widget…</string>
     <string name="android_settings">Device settings</string>
     <string name="launcher_settings">TBLauncher settings</string>
     <string name="rate_the_app">Rate the app</string>
@@ -169,9 +169,9 @@
     <string name="cfg_widget_resize_switch">Switch resize</string>
     <string name="cfg_widget_resize_exit">Exit resize</string>
     <string name="cfg_widget_remove">Remove</string>
-    <string name="cfg_widget_screen_left">Move to <br /><b>left</b> screen</string>
-    <string name="cfg_widget_screen_middle">Move to <br /><b>middle</b> screen</string>
-    <string name="cfg_widget_screen_right">Move to <br /><b>right</b> screen</string>
+    <string name="cfg_widget_screen_left">Move to <br />\n<b>left</b> screen</string>
+    <string name="cfg_widget_screen_middle">Move to <br />\n<b>middle</b> screen</string>
+    <string name="cfg_widget_screen_right">Move to <br />\n<b>right</b> screen</string>
 
     <string name="shortcut_with_appName">%s: %s</string>
 </resources>
