@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 
-import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 import static rocks.tbog.tblauncher.ui.WidgetLayout.LayoutParams.SCREEN_MIDDLE;
 import static rocks.tbog.tblauncher.ui.WidgetLayout.LayoutParams.SCREEN_POSITIONS;
 import static rocks.tbog.tblauncher.ui.WidgetLayout.LayoutParams.SCREEN_RIGHT;
@@ -179,8 +178,8 @@ public class WidgetLayout extends ViewGroup {
             widgetHandle = (ViewGroup) LayoutInflater.from(getContext()).inflate(R.layout.widget_handle, this, false);
             {
                 LayoutParams lp = new LayoutParams((LayoutParams) widgetView.getLayoutParams());
-                lp.width = WRAP_CONTENT;
-                lp.height = WRAP_CONTENT;
+                lp.width = ViewGroup.LayoutParams.WRAP_CONTENT;
+                lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
                 widgetHandle.setLayoutParams(lp);
             }
             {
@@ -472,10 +471,19 @@ public class WidgetLayout extends ViewGroup {
             ViewGroup.LayoutParams lp = child.getLayoutParams();
 
             // Measure the child.
-            //measureChildWithMargins(child, widthMeasureSpec, 0, heightMeasureSpec, 0);
-            int childWidthMeasureSpec = ViewGroup.getChildMeasureSpec(widthMeasureSpec, 0, lp.width);
-            int childHeightMeasureSpec = ViewGroup.getChildMeasureSpec(heightMeasureSpec, 0, lp.height);
+            final int childWidthMeasureSpec;
+            if (lp.width == ViewGroup.LayoutParams.WRAP_CONTENT)
+                childWidthMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+            else
+                childWidthMeasureSpec = ViewGroup.getChildMeasureSpec(widthMeasureSpec, 0, lp.width);
+
+            final int childHeightMeasureSpec;
+            if (lp.height == ViewGroup.LayoutParams.WRAP_CONTENT)
+                childHeightMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
+            else
+                childHeightMeasureSpec = ViewGroup.getChildMeasureSpec(heightMeasureSpec, 0, lp.height);
             child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
+            //TODO: check that child is not out of bounds
         }
 
         for (int screenPosition : SCREEN_POSITIONS) {
