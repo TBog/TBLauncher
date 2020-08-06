@@ -3,7 +3,6 @@ package rocks.tbog.tblauncher.ui;
 import android.content.Context;
 import android.database.DataSetObserver;
 import android.graphics.Rect;
-import android.graphics.RectF;
 import android.os.Build;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
@@ -155,6 +154,11 @@ public class ListPopup extends PopupWindow {
         setFocusable(false);
         // draw over stuff if needed
         setClippingEnabled(false);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            // we already take this into account
+            setOverlapAnchor(false);
+        }
     }
 
     public void showCenter(View viewForWindowToken) {
@@ -185,9 +189,6 @@ public class ListPopup extends PopupWindow {
         rootView.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
                 View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
 
-        setWidth(rootView.getMeasuredWidth());
-        setHeight(LinearLayout.LayoutParams.WRAP_CONTENT);
-
         int xOffset = anchorPos[0] + anchor.getPaddingLeft();
         if (xOffset + rootView.getMeasuredWidth() > displayFrame.right)
             xOffset = displayFrame.right - rootView.getMeasuredWidth();
@@ -203,27 +204,88 @@ public class ListPopup extends PopupWindow {
             yOffset = anchorPos[1] + overlapAmount - rootView.getMeasuredHeight();
             setAnimationStyle(R.style.PopupAnimationBottom);
             if (distanceToTop < rootView.getMeasuredHeight()) {
-                // enable scroll
-                setHeight(distanceToTop + overlapAmount);
                 yOffset += rootView.getMeasuredHeight() - distanceToTop - overlapAmount;
             }
         } else {
             // show below anchor with scroll
             yOffset = anchorPos[1] + overlapAmount;
             setAnimationStyle(R.style.PopupAnimationTop);
-            setHeight(distanceToBottom + overlapAmount);
         }
 
-        super.showAtLocation(anchor, Gravity.START | Gravity.TOP, xOffset, yOffset);
+        final int width = rootView.getMeasuredWidth();
+        final int height = rootView.getMeasuredHeight();
+        int[] offset = setSizeAndPosition(displayFrame, xOffset, yOffset, width, height);
+        super.showAtLocation(anchor, Gravity.START | Gravity.TOP, offset[0], offset[1]);
         applyDim();
+    }
+
+    @Override
+    public void showAsDropDown(View anchor, int xoff, int yoff, int gravity) {
+        //TODO: this is just a placeholder, implement if used
+        show(anchor);
     }
 
     @Override
     public void showAtLocation(View parent, int gravity, int x, int y) {
         beforeShow();
-        setAnimationStyle(R.style.PopupAnimationTop);
-        super.showAtLocation(parent, gravity, x, y);
+        final Rect displayFrame = mTempRect;
+        parent.getWindowVisibleDisplayFrame(displayFrame);
+
+        int[] offset = setSizeAndPosition(displayFrame, x, y);
+        if (y - offset[1] > getHeight() / 2)
+            setAnimationStyle(R.style.PopupAnimationBottom);
+        else
+            setAnimationStyle(R.style.PopupAnimationTop);
+        super.showAtLocation(parent, gravity, offset[0], offset[1]);
         applyDim();
+    }
+
+    private int[] setSizeAndPosition(Rect displayFrame, int xOffset, int yOffset) {
+        View rootView = getContentView().getRootView();
+        rootView.forceLayout();
+        rootView.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
+                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+
+        int width = rootView.getMeasuredWidth();
+        int height = rootView.getMeasuredHeight();
+        return setSizeAndPosition(displayFrame, xOffset, yOffset, width, height);
+    }
+
+    /**
+     * set size and recompute offset
+     *
+     * @param displayFrame display bounds
+     * @param xOffset      x offset
+     * @param yOffset      y offset
+     * @param width        measured width of root view
+     * @param height       measured height of root view
+     * @return new offset returned using mTempLocation
+     */
+    private int[] setSizeAndPosition(Rect displayFrame, int xOffset, int yOffset, int width, int height) {
+        if (xOffset + width > displayFrame.right)
+            xOffset = displayFrame.right - width;
+
+        if (yOffset + height > displayFrame.bottom)
+            yOffset = displayFrame.bottom - height;
+
+        if (xOffset < displayFrame.left) {
+            xOffset = displayFrame.left;
+            // may enable scroll
+            width = Math.min(width, displayFrame.width());
+        }
+
+        if (yOffset < displayFrame.top) {
+            yOffset = displayFrame.top;
+            // may enable scroll
+            height = Math.min(height, displayFrame.height());
+        }
+
+        setWidth(width);
+        setHeight(height);
+
+        mTempLocation[0] = xOffset;
+        mTempLocation[1] = yOffset;
+        return mTempLocation;
     }
 
     /**
