@@ -10,12 +10,12 @@ import android.view.MotionEvent;
 import androidx.annotation.Nullable;
 import androidx.core.view.GestureDetectorCompat;
 
-import rocks.tbog.tblauncher.WidgetManager;
-
 public class WidgetView extends AppWidgetHostView {
     private static final String TAG = "WdgView";
     private final GestureDetectorCompat gestureDetector;
     private boolean mIntercepted = false;
+    private boolean mJustIntercepted = false;
+    private boolean mSendCancel = false;
     private boolean mLongClickCalled = false;
     private OnClickListener mOnClickListener = null;
     private OnClickListener mOnDoubleClickListener = null;
@@ -66,6 +66,20 @@ public class WidgetView extends AppWidgetHostView {
                 }
                 return false;
             }
+
+            @Override
+            public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
+                Log.d(TAG, "onScroll mSendCancel = true");
+                mSendCancel = true;
+                return true;
+            }
+
+            @Override
+            public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+                Log.d(TAG, "onFling mSendCancel = true");
+                mSendCancel = true;
+                return true;
+            }
         };
         gestureDetector = new GestureDetectorCompat(context, onGestureListener);
     }
@@ -87,7 +101,7 @@ public class WidgetView extends AppWidgetHostView {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent event) {
-        Log.d(TAG, "onInterceptTouchEvent\r\n" + event);
+        Log.d(TAG, "onInterceptTouchEvent\r\n" + event + "\r\nmIntercepted = " + mIntercepted);
         if (event.getPointerCount() != 1)
             return false;
         final int act = event.getActionMasked();
@@ -97,19 +111,23 @@ public class WidgetView extends AppWidgetHostView {
                 // The framework may have dropped the up or cancel event for the previous gesture
                 // due to an app switch, ANR, or some other state change.
                 mIntercepted = false;
+                mJustIntercepted = false;
+                mSendCancel = false;
                 mLongClickCalled = false;
                 break;
             case MotionEvent.ACTION_UP:
                 if (mLongClickCalled) {
                     mLongClickCalled = false;
-                    return mIntercepted = true;
+                    return mJustIntercepted = true;
                 }
                 break;
         }
 
+        if (mIntercepted)
+            return true;
         if (gestureDetector.onTouchEvent(event)) {
-            Log.d(TAG, "mIntercepted " + true);
-            return mIntercepted = true;
+            Log.d(TAG, "mJustIntercepted = " + true);
+            return mJustIntercepted = true;
         }
 
         Log.d(TAG, "super.onInterceptTouchEvent");
@@ -119,11 +137,14 @@ public class WidgetView extends AppWidgetHostView {
     @SuppressLint("ClickableViewAccessibility")
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        Log.d(TAG, "onTouchEvent\t\n" + event + "\r\nmIntercepted " + mIntercepted);
+        Log.d(TAG, "onTouchEvent\t\n" + event +
+                "\r\nmJustIntercepted " + mJustIntercepted +
+                " mIntercepted " + mIntercepted);
         // first call after the intercept can be ignored
-        if (mIntercepted) {
-            mIntercepted = false;
-            Log.d(TAG, "mIntercepted " + false);
+        if (mJustIntercepted) {
+            mJustIntercepted = false;
+            mIntercepted = true;
+            Log.d(TAG, "mJustIntercepted = " + false);
             return true;
         }
         if (event.getPointerCount() != 1)
@@ -131,15 +152,28 @@ public class WidgetView extends AppWidgetHostView {
         if (gestureDetector.onTouchEvent(event))
             return true;
 
+        // if we intercepted this gesture, handle all touch events
+        boolean handled = mIntercepted;
+
+        if (mSendCancel) {
+            handled = true;
+            event.setAction(MotionEvent.ACTION_CANCEL);
+        }
+
         Log.d(TAG, "super.onTouchEvent");
-        if (super.onTouchEvent(event))
-            return true;
-        // if no child view handled this event, send cancel to gestureDetector
-        MotionEvent cancel = MotionEvent.obtainNoHistory(event);
-        cancel.setAction(MotionEvent.ACTION_CANCEL);
-        Log.d(TAG, "gestureDetector CANCEL");
-        gestureDetector.onTouchEvent(cancel);
-        return false;
+        if (super.onTouchEvent(event)) {
+            Log.d(TAG, "mIntercepted = " + false);
+            mIntercepted = false;
+            handled = true;
+        }
+        else {
+            // if no child view handled this event, send cancel to gestureDetector
+            MotionEvent cancel = MotionEvent.obtainNoHistory(event);
+            cancel.setAction(MotionEvent.ACTION_CANCEL);
+            Log.d(TAG, "gestureDetector CANCEL");
+            gestureDetector.onTouchEvent(cancel);
+        }
+        return handled;
     }
 
     @Override

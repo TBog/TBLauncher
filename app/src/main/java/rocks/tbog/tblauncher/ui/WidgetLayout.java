@@ -197,8 +197,8 @@ public class WidgetLayout extends ViewGroup {
         widgetHandle.setTag(handle);
 
         switch (handle) {
-            case DISABLED:
-                LayoutParams lp = (LayoutParams) widgetHandle.getLayoutParams();
+            case DISABLED: {
+                final LayoutParams lp = (LayoutParams) widgetHandle.getLayoutParams();
                 lp.width = widgetView.getWidth();
                 lp.height = widgetView.getHeight();
 
@@ -208,139 +208,19 @@ public class WidgetLayout extends ViewGroup {
                 addView(widgetView, idx);
                 widgetView.setLayoutParams(lp);
                 break;
+            }
             case MOVE_FREE:
-            case MOVE_AXIAL: {
-                final OnTouchListener moveListener = new OnTouchListener() {
-                    final PointF mDownPos = new PointF();
-
-                    @SuppressLint({"RtlHardcoded", "ClickableViewAccessibility"})
-                    @Override
-                    public boolean onTouch(View v, MotionEvent event) {
-                        final int action = event.getActionMasked();
-                        final View parent = (View) v.getParent();
-                        switch (action) {
-                            case MotionEvent.ACTION_DOWN:
-                                mDownPos.set(event.getRawX(), event.getRawY());
-                                return true;
-                            case MotionEvent.ACTION_MOVE: {
-                                final float xMove = event.getRawX() - mDownPos.x;
-                                final float yMove = event.getRawY() - mDownPos.y;
-
-                                int gravity = ((FrameLayout.LayoutParams) v.getLayoutParams()).gravity;
-                                boolean horizontal = ((gravity & Gravity.LEFT) == Gravity.LEFT) || ((gravity & Gravity.RIGHT) == Gravity.RIGHT);
-                                boolean vertical = ((gravity & Gravity.TOP) == Gravity.TOP) || ((gravity & Gravity.BOTTOM) == Gravity.BOTTOM);
-                                if (horizontal)
-                                    parent.setTranslationX(xMove);
-                                if (vertical)
-                                    parent.setTranslationY(yMove);
-                                return true;
-                            }
-                            case MotionEvent.ACTION_UP: {
-                                final LayoutParams lp = (LayoutParams) parent.getLayoutParams();
-
-                                lp.leftMargin += (int) parent.getTranslationX();
-                                lp.topMargin += (int) parent.getTranslationY();
-                                parent.setTranslationX(0f);
-                                parent.setTranslationY(0f);
-
-                                parent.setLayoutParams(lp);
-                                requestLayout();
-                                return true;
-                            }
-                            case MotionEvent.ACTION_CANCEL: {
-                                parent.setTranslationX(0f);
-                                parent.setTranslationY(0f);
-                                return true;
-                            }
-                        }
-                        return false;
-                    }
-                };
-
-                if (handle == Handle.MOVE_FREE)
-                    setupCornerHandles(widgetHandle, R.drawable.ic_handle_move, moveListener);
-                else
-                    setupLineHandles(widgetHandle, R.drawable.ic_handle_move, moveListener);
+                setupCornerHandles(widgetHandle, R.drawable.ic_handle_move, sMoveListener);
                 break;
-            }
+            case MOVE_AXIAL:
+                setupLineHandles(widgetHandle, R.drawable.ic_handle_move, sMoveListener);
+                break;
             case RESIZE_DIAGONAL:
-            case RESIZE_AXIAL: {
-                final OnTouchListener resizeListener = new OnTouchListener() {
-                    final Point mDownSize = new Point();
-                    final Point mDownMargin = new Point();
-                    final PointF mDownPos = new PointF();
-
-                    @SuppressLint({"RtlHardcoded", "ClickableViewAccessibility"})
-                    @Override
-                    public boolean onTouch(View v, MotionEvent event) {
-                        final int action = event.getActionMasked();
-                        switch (action) {
-                            case MotionEvent.ACTION_DOWN: {
-                                {
-                                    final ViewGroup.LayoutParams lp = widgetView.getLayoutParams();
-                                    mDownSize.set(lp.width, lp.height);
-                                }
-                                {
-                                    final View parent = (View) v.getParent();
-                                    final LayoutParams lp = (LayoutParams) parent.getLayoutParams();
-                                    mDownMargin.set(lp.leftMargin, lp.topMargin);
-                                }
-                                mDownPos.set(event.getRawX(), event.getRawY());
-                                return true;
-                            }
-                            case MotionEvent.ACTION_MOVE: {
-                                int xMove = (int) (event.getRawX() - mDownPos.x + .5f);
-                                int yMove = (int) (event.getRawY() - mDownPos.y + .5f);
-
-                                int gravity = ((FrameLayout.LayoutParams) v.getLayoutParams()).gravity;
-                                // move widget handler
-                                {
-                                    final View parent = (View) v.getParent();
-                                    final LayoutParams lp = (LayoutParams) parent.getLayoutParams();
-                                    boolean changed = false;
-                                    if ((gravity & Gravity.LEFT) == Gravity.LEFT) {
-                                        lp.leftMargin = mDownMargin.x + xMove;
-                                        xMove = -xMove;
-                                        changed = true;
-                                    }
-                                    if ((gravity & Gravity.TOP) == Gravity.TOP) {
-                                        lp.topMargin = mDownMargin.y + yMove;
-                                        yMove = -yMove;
-                                        changed = true;
-                                    }
-                                    if (changed)
-                                        parent.setLayoutParams(lp);
-                                }
-                                // resize widget
-                                {
-                                    final ViewGroup.LayoutParams lp = widgetView.getLayoutParams();
-                                    boolean horizontal = ((gravity & Gravity.LEFT) == Gravity.LEFT) || ((gravity & Gravity.RIGHT) == Gravity.RIGHT);
-                                    boolean vertical = ((gravity & Gravity.TOP) == Gravity.TOP) || ((gravity & Gravity.BOTTOM) == Gravity.BOTTOM);
-                                    if (horizontal)
-                                        lp.width = mDownSize.x + xMove;
-                                    if (vertical)
-                                        lp.height = mDownSize.y + yMove;
-                                    widgetView.setLayoutParams(lp);
-                                }
-                                requestLayout();
-                                return true;
-                            }
-                            case MotionEvent.ACTION_UP: {
-                                return true;
-                            }
-                            case MotionEvent.ACTION_CANCEL:
-                                return true;
-                        }
-                        return false;
-                    }
-                };
-
-                if (handle == Handle.RESIZE_DIAGONAL)
-                    setupCornerHandles(widgetHandle, R.drawable.ic_handle_resize_bl, resizeListener);
-                else
-                    setupLineHandles(widgetHandle, R.drawable.ic_handle_resize_l, resizeListener);
+                setupCornerHandles(widgetHandle, R.drawable.ic_handle_resize_bl, sResizeListener);
                 break;
-            }
+            case RESIZE_AXIAL:
+                setupLineHandles(widgetHandle, R.drawable.ic_handle_resize_l, sResizeListener);
+                break;
         }
     }
 
@@ -632,6 +512,135 @@ public class WidgetLayout extends ViewGroup {
             mTmpContainerRect.union(mTmpChildRect);
         }
     }
+
+    private static final OnTouchListener sMoveListener = new OnTouchListener() {
+        final PointF mDownPos = new PointF();
+
+        @SuppressLint({"RtlHardcoded", "ClickableViewAccessibility"})
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            final int action = event.getActionMasked();
+            final View parent = (View) v.getParent();
+            switch (action) {
+                case MotionEvent.ACTION_DOWN:
+                    mDownPos.set(event.getRawX(), event.getRawY());
+                    return true;
+                case MotionEvent.ACTION_MOVE: {
+                    final float xMove = event.getRawX() - mDownPos.x;
+                    final float yMove = event.getRawY() - mDownPos.y;
+
+                    int gravity = ((FrameLayout.LayoutParams) v.getLayoutParams()).gravity;
+                    boolean horizontal = ((gravity & Gravity.LEFT) == Gravity.LEFT) || ((gravity & Gravity.RIGHT) == Gravity.RIGHT);
+                    boolean vertical = ((gravity & Gravity.TOP) == Gravity.TOP) || ((gravity & Gravity.BOTTOM) == Gravity.BOTTOM);
+                    if (horizontal)
+                        parent.setTranslationX(xMove);
+                    if (vertical)
+                        parent.setTranslationY(yMove);
+                    return true;
+                }
+                case MotionEvent.ACTION_UP: {
+                    final LayoutParams lp = (LayoutParams) parent.getLayoutParams();
+
+                    lp.leftMargin += (int) parent.getTranslationX();
+                    lp.topMargin += (int) parent.getTranslationY();
+                    parent.setTranslationX(0f);
+                    parent.setTranslationY(0f);
+
+                    parent.setLayoutParams(lp);
+                    return true;
+                }
+                case MotionEvent.ACTION_CANCEL: {
+                    parent.setTranslationX(0f);
+                    parent.setTranslationY(0f);
+                    return true;
+                }
+            }
+            return false;
+        }
+    };
+
+    private static final OnTouchListener sResizeListener = new OnTouchListener() {
+        final Point mDownSize = new Point();
+        final Point mDownMargin = new Point();
+        final PointF mDownPos = new PointF();
+
+        @SuppressLint({"RtlHardcoded", "ClickableViewAccessibility"})
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            final ViewGroup parent = (ViewGroup) v.getParent();
+            final View widgetView = parent.getChildAt(0);
+            final int action = event.getActionMasked();
+            switch (action) {
+                case MotionEvent.ACTION_DOWN: {
+                    {
+                        final ViewGroup.LayoutParams lp = widgetView.getLayoutParams();
+                        mDownSize.set(lp.width, lp.height);
+                    }
+                    {
+                        final LayoutParams lp = (LayoutParams) parent.getLayoutParams();
+                        mDownMargin.set(lp.leftMargin, lp.topMargin);
+                    }
+                    mDownPos.set(event.getRawX(), event.getRawY());
+                    return true;
+                }
+                case MotionEvent.ACTION_MOVE: {
+                    int xMove = (int) (event.getRawX() - mDownPos.x + .5f);
+                    int yMove = (int) (event.getRawY() - mDownPos.y + .5f);
+
+                    int gravity = ((FrameLayout.LayoutParams) v.getLayoutParams()).gravity;
+                    // move widget handler
+                    {
+                        final LayoutParams lp = (LayoutParams) parent.getLayoutParams();
+                        boolean changed = false;
+                        if ((gravity & Gravity.LEFT) == Gravity.LEFT) {
+                            lp.leftMargin = mDownMargin.x + xMove;
+                            xMove = -xMove;
+                            changed = true;
+                        }
+                        if ((gravity & Gravity.TOP) == Gravity.TOP) {
+                            lp.topMargin = mDownMargin.y + yMove;
+                            yMove = -yMove;
+                            changed = true;
+                        }
+                        if (changed)
+                            parent.setLayoutParams(lp);
+                    }
+                    // resize widget
+                    {
+                        final ViewGroup.LayoutParams lp = widgetView.getLayoutParams();
+                        boolean horizontal = ((gravity & Gravity.LEFT) == Gravity.LEFT) || ((gravity & Gravity.RIGHT) == Gravity.RIGHT);
+                        boolean vertical = ((gravity & Gravity.TOP) == Gravity.TOP) || ((gravity & Gravity.BOTTOM) == Gravity.BOTTOM);
+                        if (horizontal)
+                            lp.width = mDownSize.x + xMove;
+                        if (vertical)
+                            lp.height = mDownSize.y + yMove;
+                        widgetView.setLayoutParams(lp);
+                    }
+                    //requestLayout();
+                    return true;
+                }
+                case MotionEvent.ACTION_UP: {
+                    return true;
+                }
+                case MotionEvent.ACTION_CANCEL: {
+                    {
+                        final ViewGroup.LayoutParams lp = widgetView.getLayoutParams();
+                        lp.width = mDownSize.x;
+                        lp.height = mDownSize.y;
+                        widgetView.setLayoutParams(lp);
+                    }
+                    {
+                        final LayoutParams lp = (LayoutParams) parent.getLayoutParams();
+                        lp.leftMargin = mDownMargin.x;
+                        lp.topMargin = mDownMargin.y;
+                        parent.setLayoutParams(lp);
+                    }
+                    return true;
+                }
+            }
+            return false;
+        }
+    };
 
     public static class LayoutParams extends ViewGroup.MarginLayoutParams {
 
