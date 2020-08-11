@@ -15,7 +15,6 @@ import android.os.Bundle;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.ViewGroup;
-import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -39,6 +38,7 @@ public class WidgetManager {
     private WidgetLayout mLayout;
     private WidgetLayout.Handle mLastMoveType = WidgetLayout.Handle.MOVE_FREE;
     private WidgetLayout.Handle mLastResizeType = WidgetLayout.Handle.RESIZE_DIAGONAL;
+    private WidgetLayout.Handle mLastMoveResizeType = WidgetLayout.Handle.MOVE_FREE_RESIZE_AXIAL;
     private final ArrayMap<Integer, WidgetRecord> mWidgets = new ArrayMap<>(0);
     private static final int APPWIDGET_HOST_ID = 1337;
     private static final int REQUEST_PICK_APPWIDGET = 101;
@@ -453,6 +453,13 @@ public class WidgetManager {
                 adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_resize, WidgetOptionItem.Action.RESIZE));
             }
 
+            if (handleType.isMoveResize()) {
+                adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_move_resize, WidgetOptionItem.Action.MOVE_RESIZE_SWITCH));
+                adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_move_resize_exit, WidgetOptionItem.Action.RESET));
+            } else {
+                adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_move_resize, WidgetOptionItem.Action.MOVE_RESIZE));
+            }
+
             final ViewGroup.LayoutParams lp = view.getLayoutParams();
             if (lp instanceof WidgetLayout.LayoutParams) {
                 if (((WidgetLayout.LayoutParams) lp).screen != WidgetLayout.LayoutParams.SCREEN_LEFT)
@@ -531,6 +538,30 @@ public class WidgetManager {
                             mLastResizeType = WidgetLayout.Handle.RESIZE_DIAGONAL;
                         }
                         mLayout.enableHandle(view, mLastResizeType);
+                        break;
+                    case MOVE_RESIZE:
+                        view.setOnClickListener(v1 -> {
+                            view.setOnClickListener(null);
+                            view.setOnDoubleClickListener(null);
+                            mLayout.disableHandle(view);
+                            saveWidgetProperties(view);
+                        });
+                        view.setOnDoubleClickListener(v1 -> {
+                            if (mLayout.getHandleType(view) == WidgetLayout.Handle.MOVE_FREE_RESIZE_AXIAL) {
+                                mLastMoveResizeType = WidgetLayout.Handle.RESIZE_DIAGONAL_MOVE_AXIAL;
+                            } else {
+                                mLastMoveResizeType = WidgetLayout.Handle.MOVE_FREE_RESIZE_AXIAL;
+                            }
+                            mLayout.enableHandle(view, mLastMoveResizeType);
+                        });
+                        mLayout.enableHandle(view, mLastMoveResizeType);
+                    case MOVE_RESIZE_SWITCH:
+                        if (mLayout.getHandleType(view) == WidgetLayout.Handle.MOVE_FREE_RESIZE_AXIAL) {
+                            mLastMoveResizeType = WidgetLayout.Handle.RESIZE_DIAGONAL_MOVE_AXIAL;
+                        } else {
+                            mLastMoveResizeType = WidgetLayout.Handle.MOVE_FREE_RESIZE_AXIAL;
+                        }
+                        mLayout.enableHandle(view, mLastMoveResizeType);
                         break;
                     case RESET:
                         view.setOnClickListener(null);
@@ -647,6 +678,7 @@ public class WidgetManager {
         enum Action {
             MOVE, MOVE_SWITCH,
             RESIZE, RESIZE_SWITCH,
+            MOVE_RESIZE, MOVE_RESIZE_SWITCH,
             RESET,
             REMOVE,
             MOVE2SCREEN_LEFT, MOVE2SCREEN_MIDDLE, MOVE2SCREEN_RIGHT,

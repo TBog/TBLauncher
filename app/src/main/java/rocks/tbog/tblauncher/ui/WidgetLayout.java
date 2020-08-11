@@ -49,6 +49,8 @@ public class WidgetLayout extends ViewGroup {
         MOVE_AXIAL,
         RESIZE_DIAGONAL,
         RESIZE_AXIAL,
+        MOVE_FREE_RESIZE_AXIAL,
+        RESIZE_DIAGONAL_MOVE_AXIAL,
         DISABLED;
 
         public boolean isMove() {
@@ -57,6 +59,10 @@ public class WidgetLayout extends ViewGroup {
 
         public boolean isResize() {
             return this == RESIZE_DIAGONAL || this == RESIZE_AXIAL;
+        }
+
+        public boolean isMoveResize() {
+            return this == MOVE_FREE_RESIZE_AXIAL || this == RESIZE_DIAGONAL_MOVE_AXIAL;
         }
     }
 
@@ -210,26 +216,36 @@ public class WidgetLayout extends ViewGroup {
                 break;
             }
             case MOVE_FREE:
-                setupCornerHandles(widgetHandle, R.drawable.ic_handle_move, sMoveListener);
+                setupCornerHandles(widgetHandle, R.drawable.ic_handle_move, sMoveListener, true);
                 break;
             case MOVE_AXIAL:
-                setupLineHandles(widgetHandle, R.drawable.ic_handle_move, sMoveListener);
+                setupLineHandles(widgetHandle, R.drawable.ic_handle_move, sMoveListener, true);
                 break;
             case RESIZE_DIAGONAL:
-                setupCornerHandles(widgetHandle, R.drawable.ic_handle_resize_bl, sResizeListener);
+                setupCornerHandles(widgetHandle, R.drawable.ic_handle_resize_bl, sResizeListener, true);
                 break;
             case RESIZE_AXIAL:
-                setupLineHandles(widgetHandle, R.drawable.ic_handle_resize_l, sResizeListener);
+                setupLineHandles(widgetHandle, R.drawable.ic_handle_resize_l, sResizeListener, true);
+                break;
+            case MOVE_FREE_RESIZE_AXIAL:
+                setupCornerHandles(widgetHandle, R.drawable.ic_handle_move, sMoveListener, false);
+                setupLineHandles(widgetHandle, R.drawable.ic_handle_resize_l, sResizeListener, false);
+                break;
+            case RESIZE_DIAGONAL_MOVE_AXIAL:
+                setupCornerHandles(widgetHandle, R.drawable.ic_handle_resize_bl, sResizeListener, false);
+                setupLineHandles(widgetHandle, R.drawable.ic_handle_move, sMoveListener, false);
                 break;
         }
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private static void setupCornerHandles(ViewGroup widgetHandle, @DrawableRes int ic_handle_corner, OnTouchListener touchListener) {
-        widgetHandle.findViewById(R.id.handle_left).setVisibility(GONE);
-        widgetHandle.findViewById(R.id.handle_top).setVisibility(GONE);
-        widgetHandle.findViewById(R.id.handle_right).setVisibility(GONE);
-        widgetHandle.findViewById(R.id.handle_bottom).setVisibility(GONE);
+    private static void setupCornerHandles(ViewGroup widgetHandle, @DrawableRes int ic_handle_corner, OnTouchListener touchListener, boolean hideOthers) {
+        if (hideOthers) {
+            widgetHandle.findViewById(R.id.handle_left).setVisibility(GONE);
+            widgetHandle.findViewById(R.id.handle_top).setVisibility(GONE);
+            widgetHandle.findViewById(R.id.handle_right).setVisibility(GONE);
+            widgetHandle.findViewById(R.id.handle_bottom).setVisibility(GONE);
+        }
         {
             ImageView image = widgetHandle.findViewById(R.id.handle_top_left);
             image.setVisibility(VISIBLE);
@@ -257,11 +273,13 @@ public class WidgetLayout extends ViewGroup {
     }
 
     @SuppressLint("ClickableViewAccessibility")
-    private static void setupLineHandles(ViewGroup widgetHandle, @DrawableRes int ic_handle, OnTouchListener touchListener) {
-        widgetHandle.findViewById(R.id.handle_top_left).setVisibility(GONE);
-        widgetHandle.findViewById(R.id.handle_top_right).setVisibility(GONE);
-        widgetHandle.findViewById(R.id.handle_bottom_right).setVisibility(GONE);
-        widgetHandle.findViewById(R.id.handle_bottom_left).setVisibility(GONE);
+    private static void setupLineHandles(ViewGroup widgetHandle, @DrawableRes int ic_handle, OnTouchListener touchListener, boolean hideOthers) {
+        if (hideOthers) {
+            widgetHandle.findViewById(R.id.handle_top_left).setVisibility(GONE);
+            widgetHandle.findViewById(R.id.handle_top_right).setVisibility(GONE);
+            widgetHandle.findViewById(R.id.handle_bottom_right).setVisibility(GONE);
+            widgetHandle.findViewById(R.id.handle_bottom_left).setVisibility(GONE);
+        }
         {
             ImageView image = widgetHandle.findViewById(R.id.handle_left);
             image.setVisibility(VISIBLE);

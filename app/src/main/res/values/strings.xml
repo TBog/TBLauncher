@@ -168,6 +168,9 @@
     <string name="cfg_widget_resize">Resize</string>
     <string name="cfg_widget_resize_switch">Switch resize</string>
     <string name="cfg_widget_resize_exit">Exit resize</string>
+    <string name="cfg_widget_move_resize">Move &amp; Resize</string>
+    <string name="cfg_widget_move_resize_switch">Switch Move &amp; Resize</string>
+    <string name="cfg_widget_move_resize_exit">Exit Move &amp; Resize</string>
     <string name="cfg_widget_remove">Remove</string>
     <string name="cfg_widget_screen_left">Move to <br />\n<b>left</b> screen</string>
     <string name="cfg_widget_screen_middle">Move to <br />\n<b>middle</b> screen</string>
