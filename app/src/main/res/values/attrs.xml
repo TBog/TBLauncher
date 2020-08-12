@@ -19,4 +19,15 @@
     <attr name="dividerDrawable" format="reference" />
     <attr name="appSelectableItemBackground" format="reference" />
     <attr name="textShadowRadius" format="reference|float" />
+    
+    <declare-styleable name="SwipeDisabledViewPager">
+        <attr name="maxHeight" format="dimension"/>
+    </declare-styleable>
+
+    <declare-styleable name="ColorSliderView">
+        <attr name="maxColor" format="color"/>
+        <attr name="baseColor" format="color"/>
+        <attr name="alphaMode" format="boolean"/>
+    </declare-styleable>
+    
 </resources>

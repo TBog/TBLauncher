@@ -7,8 +7,10 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.util.Log;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -23,11 +25,9 @@ import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceScreen;
 import androidx.preference.SwitchPreference;
 
-import java.util.List;
-
+import rocks.tbog.tblauncher.preference.ChooseColorDialog;
 import rocks.tbog.tblauncher.preference.ConfirmDialog;
 import rocks.tbog.tblauncher.preference.CustomDialogPreference;
-import rocks.tbog.tblauncher.preference.PaletteDialog;
 import rocks.tbog.tblauncher.preference.QuickListDialog;
 import rocks.tbog.tblauncher.preference.SliderDialog;
 import rocks.tbog.tblauncher.utils.SystemUiVisibility;
@@ -109,6 +109,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     public static class SettingsFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
         static final String FRAGMENT_TAG = SettingsFragment.class.getName();
         private static final String DIALOG_FRAGMENT_TAG = "androidx.preference.PreferenceFragment.DIALOG";
+        private static final String TAG = "Settings";
 
         public SettingsFragment() {
             super();
@@ -222,12 +223,13 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             if (preference instanceof CustomDialogPreference) {
                 // Create a new instance of CustomDialog with the key of the related Preference
                 String key = preference.getKey();
+                Log.d(TAG, "onDisplayPreferenceDialog " + key);
                 switch (key) {
                     case "notification-bar-color":
                     case "search-bar-color":
                     case "result-list-color":
                     case "quick-list-color":
-                        dialogFragment = PaletteDialog.newInstance(key);
+                        dialogFragment = ChooseColorDialog.newInstance(key);
                         break;
                     case "notification-bar-alpha":
                     case "search-bar-alpha":

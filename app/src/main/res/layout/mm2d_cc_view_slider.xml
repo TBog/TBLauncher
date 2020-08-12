@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:orientation="vertical"
+    tools:parentTag="android.widget.LinearLayout"
+    >
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        >
+
+        <net.mm2d.color.chooser.element.ColorSliderView
+            android:id="@+id/seek_red"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingTop="@dimen/mm2d_cc_seek_padding"
+            android:paddingBottom="@dimen/mm2d_cc_seek_padding"
+            app:maxColor="#ff0000"
+            app:alphaMode="false"
+            app:baseColor="#000000"
+            tools:progress="128"
+            />
+
+        <TextView
+            android:id="@+id/text_red"
+            android:layout_width="@dimen/mm2d_cc_rgb_size"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:fontFamily="monospace"
+            android:gravity="end"
+            android:text="0"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="@dimen/mm2d_cc_color_text"
+            tools:ignore="HardcodedText,SpUsage"
+            />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        >
+
+        <net.mm2d.color.chooser.element.ColorSliderView
+            android:id="@+id/seek_green"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingTop="@dimen/mm2d_cc_seek_padding"
+            android:paddingBottom="@dimen/mm2d_cc_seek_padding"
+            app:maxColor="#00ff00"
+            app:alphaMode="false"
+            app:baseColor="#000000"
+            tools:progress="128"
+            />
+
+        <TextView
+            android:id="@+id/text_green"
+            android:layout_width="@dimen/mm2d_cc_rgb_size"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:fontFamily="monospace"
+            android:gravity="end"
+            android:text="0"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="@dimen/mm2d_cc_color_text"
+            tools:ignore="HardcodedText,SpUsage"
+            />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        >
+
+        <net.mm2d.color.chooser.element.ColorSliderView
+            android:id="@+id/seek_blue"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingTop="@dimen/mm2d_cc_seek_padding"
+            android:paddingBottom="@dimen/mm2d_cc_seek_padding"
+            app:maxColor="#0000ff"
+            app:alphaMode="false"
+            app:baseColor="#000000"
+            tools:progress="128"
+            />
+
+        <TextView
+            android:id="@+id/text_blue"
+            android:layout_width="@dimen/mm2d_cc_rgb_size"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:fontFamily="monospace"
+            android:gravity="end"
+            android:text="0"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="@dimen/mm2d_cc_color_text"
+            tools:ignore="HardcodedText,SpUsage"
+            />
+    </LinearLayout>
+
+</merge>

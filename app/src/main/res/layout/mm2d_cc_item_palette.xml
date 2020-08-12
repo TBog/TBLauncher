@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="horizontal"
+    >
+
+    <net.mm2d.color.chooser.element.PaletteCell
+        android:id="@+id/sample_00"
+        style="@style/palette_cell"
+        />
+
+    <net.mm2d.color.chooser.element.PaletteCell
+        android:id="@+id/sample_01"
+        style="@style/palette_cell"
+        />
+
+    <net.mm2d.color.chooser.element.PaletteCell
+        android:id="@+id/sample_02"
+        style="@style/palette_cell"
+        />
+
+    <net.mm2d.color.chooser.element.PaletteCell
+        android:id="@+id/sample_03"
+        style="@style/palette_cell"
+        />
+
+    <net.mm2d.color.chooser.element.PaletteCell
+        android:id="@+id/sample_04"
+        style="@style/palette_cell"
+        />
+
+    <net.mm2d.color.chooser.element.PaletteCell
+        android:id="@+id/sample_05"
+        style="@style/palette_cell"
+        />
+
+    <net.mm2d.color.chooser.element.PaletteCell
+        android:id="@+id/sample_06"
+        style="@style/palette_cell"
+        />
+
+    <net.mm2d.color.chooser.element.PaletteCell
+        android:id="@+id/sample_07"
+        style="@style/palette_cell"
+        />
+
+    <net.mm2d.color.chooser.element.PaletteCell
+        android:id="@+id/sample_08"
+        style="@style/palette_cell"
+        />
+
+    <net.mm2d.color.chooser.element.PaletteCell
+        android:id="@+id/sample_09"
+        style="@style/palette_cell"
+        />
+
+    <net.mm2d.color.chooser.element.PaletteCell
+        android:id="@+id/sample_10"
+        style="@style/palette_cell"
+        />
+
+    <net.mm2d.color.chooser.element.PaletteCell
+        android:id="@+id/sample_11"
+        style="@style/palette_cell"
+        />
+
+    <net.mm2d.color.chooser.element.PaletteCell
+        android:id="@+id/sample_12"
+        style="@style/palette_cell"
+        />
+
+    <net.mm2d.color.chooser.element.PaletteCell
+        android:id="@+id/sample_13"
+        style="@style/palette_cell"
+        />
+</LinearLayout>

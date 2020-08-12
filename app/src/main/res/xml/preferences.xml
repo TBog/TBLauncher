@@ -96,7 +96,6 @@
             android:title="@string/notification_bar_section">
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:dialogLayout="@layout/pref_color"
                 android:key="notification-bar-color"
                 android:title="@string/color"
                 android:widgetLayout="@layout/pref_color_preview" />
@@ -125,7 +124,6 @@
             android:title="@string/search_bar_section">
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:dialogLayout="@layout/pref_color"
                 android:key="search-bar-color"
                 android:title="@string/color"
                 android:widgetLayout="@layout/pref_color_preview" />
@@ -163,7 +161,6 @@
             android:title="@string/result_list_section">
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:dialogLayout="@layout/pref_color"
                 android:key="result-list-color"
                 android:title="@string/color"
                 android:widgetLayout="@layout/pref_color_preview" />
@@ -188,7 +185,6 @@
             android:title="@string/quick_list_section">
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:dialogLayout="@layout/pref_color"
                 android:key="quick-list-color"
                 android:title="@string/color"
                 android:widgetLayout="@layout/pref_color_preview" />

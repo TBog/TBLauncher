@@ -69,6 +69,7 @@
         <item name="windowActionModeOverlay">true</item>
 
         <item name="android:textColor">@color/primary_text_color_selector</item>
+        <item name="android:textColorPrimary">@color/primary_text_color_selector</item>
         <item name="android:textColorSecondary">@color/secondary_text_color_selector</item>
         <item name="android:textColorTertiary">@color/tertiary_text_color_selector</item>
         <item name="android:listDivider">@drawable/list_separator_light</item>
@@ -110,6 +111,7 @@
 
     <style name="SettingsDialogTheme" parent="NoTitleDialogTheme">
         <item name="android:textColor">@color/primary_text_color_selector</item>
+        <item name="android:textColorPrimary">@color/primary_text_color_selector</item>
         <item name="android:textColorSecondary">@color/secondary_text_color_selector</item>
         <item name="android:textColorTertiary">@color/tertiary_text_color_selector</item>
         <item name="android:listDivider">@drawable/list_separator_light</item>
@@ -126,6 +128,7 @@
         <item name="android:windowBackground">@color/Honeydew</item>
         <item name="alertDialogTheme">@style/SettingsDialogTheme</item>
         <item name="android:textColor">@color/primary_text_color_selector_black</item>
+        <item name="android:textColorPrimary">@color/primary_text_color_selector_black</item>
         <item name="android:textColorSecondary">@color/secondary_text_color_selector_black</item>
         <item name="android:textColorTertiary">@color/tertiary_text_color_selector_black</item>
         <item name="colorAccent">@color/DarkGreen</item>
