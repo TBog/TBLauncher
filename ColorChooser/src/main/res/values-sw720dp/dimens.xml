@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <dimen name="mm2d_cc_panel_height">600dp</dimen>
+    <dimen name="mm2d_cc_dialog_width">680dp</dimen>
+    <dimen name="mm2d_cc_hsv_margin">32dp</dimen>
+</resources>

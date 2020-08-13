@@ -1,2 +1,3 @@
+include ':ColorChooser'
 rootProject.name='TBLauncher'
 include ':app'

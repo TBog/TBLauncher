@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="SwipeDisabledViewPager">
+        <attr name="maxHeight" format="dimension"/>
+    </declare-styleable>
+
+    <declare-styleable name="ColorSliderView">
+        <attr name="maxColor" format="color"/>
+        <attr name="baseColor" format="color"/>
+        <attr name="alphaMode" format="boolean"/>
+    </declare-styleable>
+</resources>

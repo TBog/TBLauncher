@@ -227,7 +227,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "search-bar-color":
                     case "result-list-color":
                     case "quick-list-color":
-                        dialogFragment = PaletteDialog.newInstance(key);
+                        //dialogFragment = PaletteDialog.newInstance(key);
+                        dialogFragment = Color
                         break;
                     case "notification-bar-alpha":
                     case "search-bar-alpha":

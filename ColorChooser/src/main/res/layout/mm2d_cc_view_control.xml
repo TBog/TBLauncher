@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+<merge
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:orientation="vertical"
+    tools:parentTag="android.widget.LinearLayout"
+    >
+
+    <LinearLayout
+        android:id="@+id/section_alpha"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginRight="@dimen/mm2d_cc_page_margin"
+        android:layout_marginLeft="@dimen/mm2d_cc_page_margin"
+        android:layout_marginBottom="@dimen/mm2d_cc_page_margin"
+        android:orientation="horizontal"
+        >
+
+        <net.mm2d.color.chooser.element.ColorSliderView
+            android:id="@+id/seek_alpha"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:paddingTop="@dimen/mm2d_cc_seek_padding"
+            android:paddingBottom="@dimen/mm2d_cc_seek_padding"
+            app:maxColor="#000000"
+            app:alphaMode="true"
+            app:baseColor="#ffffff"
+            tools:progress="128"
+            />
+
+        <TextView
+            android:id="@+id/text_alpha"
+            android:layout_width="@dimen/mm2d_cc_rgb_size"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_vertical"
+            android:fontFamily="monospace"
+            android:gravity="end"
+            android:text="0"
+            android:textColor="?android:attr/textColorPrimary"
+            android:textSize="@dimen/mm2d_cc_color_text"
+            tools:ignore="HardcodedText,SpUsage"
+            />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_marginRight="@dimen/mm2d_cc_page_margin"
+        android:layout_marginLeft="@dimen/mm2d_cc_page_margin"
+        android:layout_gravity="end"
+        tools:orientation="horizontal"
+        >
+
+        <net.mm2d.color.chooser.element.PreviewView
+            android:id="@+id/color_preview"
+            android:layout_width="@dimen/mm2d_cc_preview_width"
+            android:layout_height="@dimen/mm2d_cc_preview_height"
+            android:layout_marginEnd="@dimen/mm2d_cc_sample_horizontal_margin"
+            android:layout_marginRight="@dimen/mm2d_cc_sample_horizontal_margin"
+            />
+
+        <EditText
+            android:id="@+id/edit_hex"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ems="5"
+            android:fontFamily="monospace"
+            android:inputType="textNoSuggestions"
+            android:textSize="@dimen/mm2d_cc_color_text"
+            tools:ignore="Autofill,LabelFor,SpUsage"
+            />
+    </LinearLayout>
+</merge>

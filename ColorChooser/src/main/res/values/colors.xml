@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="mm2d_cc_sample_frame">#FFFFFF</color>
+    <color name="mm2d_cc_sample_shadow">#1a000000</color>
+    <color name="mm2d_cc_checker_light">#FFFFFF</color>
+    <color name="mm2d_cc_checker_dark">#808080</color>
+</resources>
