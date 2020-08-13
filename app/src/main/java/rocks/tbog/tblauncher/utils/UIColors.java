@@ -13,31 +13,6 @@ import androidx.appcompat.app.AppCompatActivity;
 
 public class UIColors {
     public static final int COLOR_DEFAULT = 0xFF4caf50;
-    // Source: https://material.io/guidelines/style/color.html#color-color-palette
-    public static final int[] COLOR_LIST = new int[]{
-            0xFFf44336, //red
-            0xFFe91e63, //pink
-            0xFF9c27b0, //purple
-            0xFF673ab7, //deep purple
-            0xFF3f51b5, //indigo
-            0xFF2196f3, //blue
-            0xFF03a9f4, //light blue
-            0xFF00bcd4, //cyan
-            0xFF009688, //teal
-            0xFF4caf50, //green
-            0xFF8bc34a, //light green
-            0xFFcddc39, //lime
-            0xFFffeb3b, //yellow
-            0xFFffc107, //amber
-            0xFFff9800, //orange
-            0xFFff5722, //deep orange
-            0xFF795548, //brown
-            0xFF9e9e9e, //grey
-            0xFF607d8b, //blue gray
-            0xFF000080, //navy
-            0xFF000000, //black
-            0xFFffffff  //white
-    };
 
     public static int getPrimaryColor(Context context) {
         return COLOR_DEFAULT;

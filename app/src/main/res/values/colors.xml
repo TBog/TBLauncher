@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">@color/MediumSeaGreen</color>
-    <color name="colorPrimaryDark">@color/DarkGreen</color>
-    <color name="colorAccent">@color/GreenYellow</color>
+    <color name="colorPrimary">#3CB371</color>
+    <color name="colorPrimaryDark">#006400</color>
+    <color name="colorAccent">#ADFF2F</color>
 
+    <color name="undefined">#DC143C</color>
     <color name="black_overlay">#66000000</color>
 
     <color name="kiss_divider_light">#e0e0e0</color>

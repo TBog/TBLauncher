@@ -3,7 +3,7 @@
 
     <style name="BaseThemeLight" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="appSelectableItemBackground">?android:attr/selectableItemBackground</item>
-        <item name="android:actionMenuTextColor">@color/Crimson</item>
+        <item name="android:actionMenuTextColor">@color/undefined</item>
         <item name="android:windowTranslucentStatus">true</item>
         <item name="android:windowTranslucentNavigation">true</item>
         <item name="colorPrimary">@color/colorPrimary</item>
@@ -58,7 +58,7 @@
 
     <style name="TitleDialogTheme" parent="Theme.AppCompat.Dialog">
         <item name="android:windowNoTitle">false</item>
-        <item name="android:colorBackground">@color/Black</item>
+        <item name="android:colorBackground">#000</item>
         <item name="android:windowFrame">@null</item>
         <item name="android:windowTitleStyle">@style/GradientWindowTitle</item>
         <item name="android:windowBackground">@drawable/dialog_background</item>
@@ -125,12 +125,14 @@
     <style name="SettingTheme" parent="AppThemeTransparent">
         <item name="windowActionBar">true</item>
         <item name="windowNoTitle">false</item>
-        <item name="android:windowBackground">@color/Honeydew</item>
+        <item name="android:windowBackground">#f0fff0</item>
         <item name="alertDialogTheme">@style/SettingsDialogTheme</item>
         <item name="android:textColor">@color/primary_text_color_selector_black</item>
         <item name="android:textColorPrimary">@color/primary_text_color_selector_black</item>
         <item name="android:textColorSecondary">@color/secondary_text_color_selector_black</item>
         <item name="android:textColorTertiary">@color/tertiary_text_color_selector_black</item>
-        <item name="colorAccent">@color/DarkGreen</item>
+        <item name="colorPrimary">#ffd700</item>
+        <item name="colorPrimaryDark">#000</item>
+        <item name="colorAccent">@color/colorPrimaryDark</item>
     </style>
 </resources>
