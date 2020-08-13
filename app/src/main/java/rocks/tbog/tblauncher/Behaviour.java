@@ -10,8 +10,6 @@ import android.content.pm.LauncherApps;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -750,6 +748,18 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         Log.i(TAG, "onResume");
 
         TBApplication.dataHandler(getContext()).checkServices();
+        LauncherState state = TBApplication.state();
+        if (state.isWidgetVisible())
+        {
+            if (state.isSearchBarVisible())
+                hideSearchBar(0, false);
+        }
+        else
+        {
+            //showKeyboard();
+            mSearchEditText.postDelayed(this::showKeyboard, UI_ANIMATION_DURATION);
+            showSearchBar();
+        }
     }
 
     public void onNewIntent() {
@@ -758,6 +768,10 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             mSearchEditText.setText("");
             hideKeyboard();
             hideSearchBar(false);
+        }
+        else
+        {
+            toggleSearchBar();
         }
 
         Intent intent = mTBLauncherActivity.getIntent();
@@ -773,13 +787,12 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 
     public void onWindowFocusChanged(boolean hasFocus) {
         Log.i(TAG, "onWindowFocusChanged " + hasFocus);
-        if (hasFocus) {
-            if (TBApplication.state().isKeyboardVisible()) {
-                showKeyboard();
+        LauncherState state = TBApplication.state();
+        if (hasFocus && state.isSearchBarVisible()) {
+            if (!state.isKeyboardVisible()) {
+                //showKeyboard();
                 // UI_ANIMATION_DURATION should be the exact time the full-screen animation ends
                 mSearchEditText.postDelayed(this::showKeyboard, UI_ANIMATION_DURATION);
-            } else {
-                hideKeyboard();
             }
         } else {
             hideKeyboard();
