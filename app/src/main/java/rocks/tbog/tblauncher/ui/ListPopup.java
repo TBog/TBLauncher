@@ -162,10 +162,7 @@ public class ListPopup extends PopupWindow {
     }
 
     public void showCenter(View viewForWindowToken) {
-        beforeShow();
-        setAnimationStyle(R.style.PopupAnimationBottom);
-        super.showAtLocation(viewForWindowToken, Gravity.CENTER, 0, 0);
-        applyDim();
+        showAtLocation(viewForWindowToken, Gravity.CENTER, 0, 0);
     }
 
     public void show(View anchor) {

@@ -225,12 +225,14 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         LinearAdapter adapter = new LinearAdapter();
         ListPopup menu = ListPopup.create(ctx, adapter);
 
-        adapter.add(new LinearAdapter.Item(ctx, R.string.launcher_settings));
+        adapter.add(new LinearAdapter.ItemTitle(ctx, R.string.menu_popup_title));
         adapter.add(new LinearAdapter.Item(ctx, R.string.change_wallpaper));
         adapter.add(new LinearAdapter.Item(ctx, R.string.menu_widget_add));
-//        if (TBApplication.widgetManager(ctx).widgetCount() > 0)
-//            adapter.add(new LinearAdapter.Item(ctx, R.string.menu_widget_remove));
-        adapter.add(new LinearAdapter.Item(ctx, R.string.android_settings));
+        if (TBApplication.widgetManager(ctx).widgetCount() > 0)
+            adapter.add(new LinearAdapter.Item(ctx, R.string.menu_widget_remove));
+        adapter.add(new LinearAdapter.ItemTitle(ctx, R.string.menu_popup_title_settings));
+        adapter.add(new LinearAdapter.Item(ctx, R.string.menu_popup_launcher_settings));
+        adapter.add(new LinearAdapter.Item(ctx, R.string.menu_popup_android_settings));
 
         menu.setOnItemClickListener((a, v, pos) -> {
             LinearAdapter.MenuItem item = ((LinearAdapter) a).getItem(pos);
@@ -239,7 +241,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                 stringId = ((LinearAdapter.Item) a.getItem(pos)).stringId;
             }
             switch (stringId) {
-                case R.string.launcher_settings:
+                case R.string.menu_popup_launcher_settings:
                     beforeLaunchOccurred();
                     mClearButton.postDelayed(() -> {
                         Context c = mTBLauncherActivity;
@@ -257,16 +259,12 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                     }, LAUNCH_DELAY);
                     break;
                 case R.string.menu_widget_add:
-                    TBApplication.widgetManager(mTBLauncherActivity).selectWidget(mTBLauncherActivity);
+                    TBApplication.widgetManager(mTBLauncherActivity).showSelectWidget(mTBLauncherActivity);
                     break;
-//                case R.string.menu_widget_remove: {
-//                    Context c = mTBLauncherActivity;
-//                    ListPopup removeWidgetPopup = TBApplication.widgetManager(c).getRemoveWidgetPopup();
-//                    TBApplication.behaviour(c).registerPopup(removeWidgetPopup);
-//                    removeWidgetPopup.showCenter(mTBLauncherActivity.getWindow().getDecorView());
-//                    break;
-//                }
-                case R.string.android_settings:
+                case R.string.menu_widget_remove:
+                    TBApplication.widgetManager(mTBLauncherActivity).showRemoveWidgetPopup();
+                    break;
+                case R.string.menu_popup_android_settings:
                     beforeLaunchOccurred();
                     mClearButton.postDelayed(() -> {
                         mTBLauncherActivity.startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS));
@@ -749,13 +747,10 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 
         TBApplication.dataHandler(getContext()).checkServices();
         LauncherState state = TBApplication.state();
-        if (state.isWidgetVisible())
-        {
+        if (state.isWidgetVisible()) {
             if (state.isSearchBarVisible())
                 hideSearchBar(0, false);
-        }
-        else
-        {
+        } else {
             //showKeyboard();
             mSearchEditText.postDelayed(this::showKeyboard, UI_ANIMATION_DURATION);
             showSearchBar();
@@ -768,9 +763,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             mSearchEditText.setText("");
             hideKeyboard();
             hideSearchBar(false);
-        }
-        else
-        {
+        } else {
             toggleSearchBar();
         }
 
@@ -795,7 +788,10 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                 mSearchEditText.postDelayed(this::showKeyboard, UI_ANIMATION_DURATION);
             }
         } else {
-            hideKeyboard();
+            if (state.isWidgetVisible()) {
+                hideKeyboard();
+                hideSearchBar(0, false);
+            }
         }
     }
 }

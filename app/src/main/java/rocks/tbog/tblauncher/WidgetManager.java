@@ -198,7 +198,7 @@ public class WidgetManager {
      * Launches the menu to select the widget. The selected widget will be on
      * the result of the activity.
      */
-    public void selectWidget(Activity activity) {
+    public void showSelectWidget(Activity activity) {
         int appWidgetId = this.mAppWidgetHost.allocateAppWidgetId();
         Intent pickIntent = new Intent(AppWidgetManager.ACTION_APPWIDGET_PICK);
         pickIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
@@ -363,12 +363,13 @@ public class WidgetManager {
     public ListPopup getConfigPopup(Activity activity) {
         LinearAdapter adapter = new LinearAdapter();
 
+        adapter.add(new LinearAdapter.ItemTitle(activity, R.string.menu_widget_title));
         adapter.add(new LinearAdapter.Item(activity, R.string.menu_widget_add));
         if (widgetCount() > 0) {
             adapter.add(new LinearAdapter.Item(activity, R.string.menu_widget_configure));
             adapter.add(new LinearAdapter.Item(activity, R.string.menu_widget_remove));
         }
-        adapter.add(new LinearAdapter.Item(activity, R.string.launcher_settings));
+        adapter.add(new LinearAdapter.Item(activity, R.string.menu_popup_launcher_settings));
 
         ListPopup menu = ListPopup.create(activity, adapter);
         menu.setOnItemClickListener((a, v, pos) -> {
@@ -379,7 +380,7 @@ public class WidgetManager {
             }
             switch (stringId) {
                 case R.string.menu_widget_add:
-                    TBApplication.widgetManager(activity).selectWidget(activity);
+                    TBApplication.widgetManager(activity).showSelectWidget(activity);
                     break;
                 case R.string.menu_widget_configure: {
                     ListPopup configWidgetPopup = TBApplication.widgetManager(activity).getWidgetListPopup(R.string.menu_widget_configure);
@@ -399,20 +400,10 @@ public class WidgetManager {
                     configWidgetPopup.showCenter(activity.getWindow().getDecorView());
                     break;
                 }
-                case R.string.menu_widget_remove: {
-                    ListPopup removeWidgetPopup = TBApplication.widgetManager(activity).getWidgetListPopup(R.string.menu_widget_remove);
-                    removeWidgetPopup.setOnItemClickListener((a1, v1, pos1) -> {
-                        Object item1 = a1.getItem(pos1);
-                        if (item1 instanceof WidgetPopupItem) {
-                            removeWidget(((WidgetPopupItem) item1).appWidgetId);
-                        }
-                    });
-
-                    TBApplication.behaviour(activity).registerPopup(removeWidgetPopup);
-                    removeWidgetPopup.showCenter(activity.getWindow().getDecorView());
+                case R.string.menu_widget_remove:
+                    showRemoveWidgetPopup();
                     break;
-                }
-                case R.string.launcher_settings:
+                case R.string.menu_popup_launcher_settings:
                     //TBApplication.behaviour(v.getContext()).beforeLaunchOccurred();
                     mLayout.postDelayed(() -> {
                         Context c = mLayout.getContext();
@@ -423,6 +414,21 @@ public class WidgetManager {
             }
         });
         return menu;
+    }
+
+    public void showRemoveWidgetPopup()
+    {
+        Context context = mLayout.getContext();
+        ListPopup removeWidgetPopup = TBApplication.widgetManager(context).getWidgetListPopup(R.string.menu_widget_remove);
+        removeWidgetPopup.setOnItemClickListener((a1, v1, pos1) -> {
+            Object item1 = a1.getItem(pos1);
+            if (item1 instanceof WidgetPopupItem) {
+                removeWidget(((WidgetPopupItem) item1).appWidgetId);
+            }
+        });
+
+        TBApplication.behaviour(context).registerPopup(removeWidgetPopup);
+        removeWidgetPopup.showCenter(mLayout);
     }
 
     /**

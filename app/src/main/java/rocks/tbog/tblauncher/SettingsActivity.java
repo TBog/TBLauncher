@@ -10,7 +10,6 @@ import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -57,7 +56,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
         getSupportFragmentManager().addOnBackStackChangedListener(() -> {
             if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
-                setTitle(R.string.launcher_settings);
+                setTitle(R.string.menu_popup_launcher_settings);
             }
         });
 

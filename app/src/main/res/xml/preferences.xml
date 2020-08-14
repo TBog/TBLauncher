@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:key="preferences-root"
-    android:title="@string/launcher_settings"
+    android:title="@string/menu_popup_launcher_settings"
     tools:showIn="@layout/activity_settings">
 
     <PreferenceScreen
