@@ -45,6 +45,8 @@
         <item name="android:paddingEnd">@dimen/result_margin_horizontal</item>
         <item name="android:background">@drawable/window_title_background</item>
         <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
+        <item name="android:textColor">@color/colorAccent</item>
+        <item name="android:textStyle">bold</item>
     </style>
 
     <style name="GradientButtonBar" parent="@android:style/ButtonBar">

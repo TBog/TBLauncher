@@ -1,5 +1,5 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
-    <string name="app_name">TBLauncher</string>
+    <string name="app_name">TinyBit launcher</string>
     <string name="hint_ui_search">Search apps, contacts, …</string>
 
     <string name="dummy_button">Dummy Button</string>
@@ -7,9 +7,9 @@
 
     <string name="removed_item">Removed</string>
 
-    <string name="unable_to_initialize_shortcuts">Unable to initialize shortcuts. Is KISS your default launcher?</string>
-    <string name="cant_pin_shortcut">Could not add shortcut. Is KISS your default launcher\?</string>
-    <string name="cant_save_shortcuts">Could not add shortcuts. Is KISS your default launcher\?</string>
+    <string name="unable_to_initialize_shortcuts">Unable to initialize shortcuts. Is TBLauncher your default launcher?</string>
+    <string name="cant_pin_shortcut">Could not add shortcut. Is TBLauncher your default launcher\?</string>
+    <string name="cant_save_shortcuts">Could not add shortcuts. Is TBLauncher your default launcher\?</string>
     <string name="toast_favorites_added">%s was added to favorites</string>
     <string name="toast_favorites_removed">%s was removed from favorites</string>
     <string name="menu_favorites_add">Add to favorites</string>
@@ -28,9 +28,9 @@
     <string name="menu_app_store">View in store</string>
     <string name="menu_app_uninstall">Uninstall</string>
     <string name="menu_exclude_history">from history</string>
-    <string name="menu_exclude_kiss">from KISS</string>
-    <string name="excluded_app_history_added">App excluded from history. Reset through the KISS settings</string>
-    <string name="excluded_app_list_added">App excluded from KISS. Reset through the KISS settings</string>
+    <string name="menu_exclude_kiss">from TBLauncher</string>
+    <string name="excluded_app_history_added">App excluded from history. Reset through the TBLauncher settings</string>
+    <string name="excluded_app_list_added">App excluded from TBLauncher. Reset through the TBLauncher settings</string>
     <string name="application_not_found">Whoops… unable to launch that app.</string>
     <string name="change_wallpaper">Change wallpaper</string>
     <string name="menu_widget_title">Widget menu</string>
@@ -55,7 +55,7 @@
     <string name="transparent_favorites_bar">Transparent favorites bar</string>
     <string name="large_search_bar">Bigger search bar</string>
     <string name="round_corners">Rounded corners</string>
-    <string name="swap_kiss_button_with_menu">KISS button on the right</string>
+    <string name="swap_kiss_button_with_menu">TBLauncher button on the right</string>
 
     <!-- Default title for color picker dialog [CHAR LIMIT=30] -->
     <string name="color_picker_default_title">Select a Color</string>
@@ -124,6 +124,7 @@
     <string name="shortcuts_no_host_permission">This is not your main launcher anymore and can\'t access your shortcuts.</string>
     <string name="pin_shortcut_message">Do you want to add this shortcut?</string>
     <string name="pin_shortcut_label">Choose shortcut label</string>
+    <string name="pin_shortcut_icon">Shortcut icon</string>
     <string name="quick_list_always_visible">Always visible</string>
     <string name="exit_the_app">Close launcher</string>
     <string name="exit_the_app_confirm">Are you sure you want to close the launcher?</string>

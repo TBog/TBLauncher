@@ -15,18 +15,20 @@
                 <corners android:radius="@dimen/result_corner_radius" />
             </shape>
         </item>
-        <item>
-            <!-- move the 1dp stoke outside -->
-            <inset
-                android:insetLeft="1dp"
-                android:insetTop="1dp"
-                android:insetRight="1dp"
-                android:insetBottom="1dp">
-                <shape>
-                    <solid android:color="@color/black_overlay" />
-                    <corners android:radius="@dimen/result_corner_radius" />
-                </shape>
-            </inset>
+        <item
+            android:bottom="1dp"
+            android:left="1dp"
+            android:right="1dp"
+            android:top="1dp">
+            <shape>
+                <solid android:color="@color/black_overlay" />
+                <corners android:radius="@dimen/result_corner_radius" />
+                <padding
+                    android:bottom="1dp"
+                    android:left="1dp"
+                    android:right="1dp"
+                    android:top="1dp" />
+            </shape>
         </item>
     </layer-list>
 

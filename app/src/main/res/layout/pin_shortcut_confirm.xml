@@ -1,19 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:gravity="center_horizontal"
     android:orientation="vertical"
     android:theme="@style/TitleDialogTheme"
-    tools:context=".PinShortcutConfirm">
+    tools:background="@drawable/dialog_background"
+    tools:layout_height="wrap_content">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="16dp"
+        android:labelFor="@+id/shortcutName"
+        android:text="@string/pin_shortcut_icon"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="@dimen/icon_height"
         android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="16dp"
+        android:layout_marginBottom="16dp"
         android:baselineAligned="false"
         android:gravity="center"
         android:measureWithLargestChild="true"
@@ -40,14 +49,8 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:text="@string/pin_shortcut_message"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="16dp"
         android:labelFor="@+id/shortcutName"
         android:text="@string/pin_shortcut_label"
         android:textAppearance="?android:attr/textAppearanceSmall" />
@@ -57,15 +60,23 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
+        android:layout_marginBottom="16dp"
         android:importantForAutofill="no"
         android:inputType="text"
+        android:textAppearance="?android:attr/textAppearanceMedium" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        android:text="@string/pin_shortcut_message"
         android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <TextView
         android:id="@+id/shortcutDetails"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
+        android:layout_margin="16dp"
         android:minLines="6"
         android:textAppearance="?android:attr/textAppearance"
         tools:layout_weight="1"
