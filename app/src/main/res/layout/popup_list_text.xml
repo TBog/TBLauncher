@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@android:id/text1"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="?android:attr/listChoiceBackgroundIndicator"
+    android:gravity="center_vertical"
+    android:lineSpacingMultiplier="0.75"
+    android:minLines="1"
+    android:paddingStart="?android:attr/listPreferredItemPaddingLeft"
+    android:paddingEnd="?android:attr/listPreferredItemPaddingRight"
+    android:theme="@style/ListPopupItem"
+    tools:text="&lt;text&gt;\n\t&lt;second line of text &#x2F;&gt;\n\t&lt;some more text &#x2F;&gt;\n&lt;&#x2F;text&gt;" />

@@ -41,7 +41,7 @@
         app:layout_constraintLeft_toRightOf="@id/dummyGuide"
         app:layout_constraintRight_toRightOf="@android:id/icon1"
         tools:src="@drawable/ic_android"
-        tools:tint="@color/YellowGreen" />
+        tools:tint="#9acd32" />
 
     <TextView
         android:id="@android:id/text1"

@@ -41,6 +41,7 @@ import androidx.annotation.RequiresApi;
 import rocks.tbog.tblauncher.db.ShortcutRecord;
 import rocks.tbog.tblauncher.entry.ShortcutEntry;
 import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
+import rocks.tbog.tblauncher.utils.DebugInfo;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 @RequiresApi(api = Build.VERSION_CODES.O)
@@ -93,7 +94,7 @@ public class PinShortcutConfirm extends Activity implements OnClickListener {
         }
 
         // Description
-        if (BuildConfig.DEBUG) {
+        if (DebugInfo.widgetAdd(this)) {
             TextView description = findViewById(R.id.shortcutDetails);
             ComponentName activity = shortcutInfo.getActivity();
             String htmlString = String.format(
@@ -111,6 +112,11 @@ public class PinShortcutConfirm extends Activity implements OnClickListener {
                     shortcutInfo.getId()
             );
             description.setText(Html.fromHtml(htmlString, Html.FROM_HTML_MODE_COMPACT));
+            description.setVisibility(View.VISIBLE);
+        }
+        else
+        {
+            findViewById(R.id.shortcutDetails).setVisibility(View.GONE);
         }
 
         {

@@ -9,7 +9,6 @@
     android:theme="@style/TitleDialogTheme"
     tools:context=".PinShortcutConfirm">
 
-    <!-- Message to show to use. -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="@dimen/icon_height"
@@ -20,12 +19,14 @@
         android:measureWithLargestChild="true"
         android:orientation="horizontal">
 
+        <!-- TODO: let user choose if he wants badge or not -->
         <include
             android:id="@+id/image"
             layout="@layout/item_grid_shortcut"
             android:layout_width="0dp"
             android:layout_height="match_parent"
-            android:layout_weight="1" />
+            android:layout_weight="1"
+            android:visibility="gone" />
 
         <include
             android:id="@+id/imageWithBadge"
@@ -66,7 +67,9 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
         android:minLines="6"
-        android:textAppearance="?android:attr/textAppearance" />
+        android:textAppearance="?android:attr/textAppearance"
+        tools:layout_weight="1"
+        tools:text="&lt;text&gt;\n\t&lt;second line of text &#x2F;&gt;\n\t&lt;some more text &#x2F;&gt;\n&lt;&#x2F;text&gt;" />
 
     <!-- Alert dialog style buttons along the bottom. -->
     <LinearLayout

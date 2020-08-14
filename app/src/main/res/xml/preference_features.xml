@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:key="feature-holder"
     android:summary="@string/features_summary"
     android:title="@string/title_features">
@@ -135,5 +136,32 @@
 
     </androidx.preference.PreferenceCategory>
 
+    <!-- Debug -->
+    <androidx.preference.PreferenceCategory
+        android:key="debug-section"
+        android:title="@string/debug_section"
+        app:initialExpandedChildrenCount="0">
+
+        <androidx.preference.SwitchPreference
+            android:defaultValue="false"
+            android:key="debug-menu-state"
+            android:title="@string/debug_menu_state" />
+
+        <androidx.preference.SwitchPreference
+            android:defaultValue="false"
+            android:key="debug-widget-add-info"
+            android:title="@string/debug_widget_add_info" />
+
+        <androidx.preference.SwitchPreference
+            android:defaultValue="false"
+            android:key="debug-widget-info"
+            android:title="@string/debug_widget_info" />
+
+        <androidx.preference.SwitchPreference
+            android:defaultValue="false"
+            android:key="debug-item-relevance"
+            android:title="@string/debug_item_relevance" />
+
+    </androidx.preference.PreferenceCategory>
 
 </androidx.preference.PreferenceScreen>

@@ -180,4 +180,10 @@
     <string name="cfg_widget_screen_right">Move to <br />\n<b>right</b> screen</string>
 
     <string name="shortcut_with_appName">%s: %s</string>
+
+    <string name="debug_section">Debug</string>
+    <string name="debug_menu_state">Visibility state info</string>
+    <string name="debug_widget_add_info">Add widget extra info</string>
+    <string name="debug_widget_info">Long press widget extra info</string>
+    <string name="debug_item_relevance">Search relevance</string>
 </resources>

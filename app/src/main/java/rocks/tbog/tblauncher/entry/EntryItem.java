@@ -19,6 +19,7 @@ import rocks.tbog.tblauncher.result.ResultAdapter;
 import rocks.tbog.tblauncher.result.ResultHelper;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
+import rocks.tbog.tblauncher.utils.DebugInfo;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
 
 public abstract class EntryItem {
@@ -215,7 +216,7 @@ public abstract class EntryItem {
             }
         }
 
-        if (BuildConfig.DEBUG) {
+        if (DebugInfo.itemRelevance(context)) {
             adapter.add(new LinearAdapter.ItemTitle("Debug info"));
             adapter.add(new LinearAdapter.ItemString("Relevance: " + getRelevance()));
         }

@@ -29,6 +29,7 @@ import rocks.tbog.tblauncher.ui.LinearAdapterPlus;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.ui.WidgetLayout;
 import rocks.tbog.tblauncher.ui.WidgetView;
+import rocks.tbog.tblauncher.utils.DebugInfo;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public class WidgetManager {
@@ -478,12 +479,11 @@ public class WidgetManager {
 
             adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_remove, WidgetOptionItem.Action.REMOVE));
 
-            if (BuildConfig.DEBUG) {
+            if (DebugInfo.widgetInfo(view.getContext())) {
                 adapter.add(new LinearAdapter.ItemTitle("Debug info"));
-                adapter.add(new LinearAdapter.ItemString("ID: " + widget.appWidgetId));
                 adapter.add(new LinearAdapter.ItemString("Name: " + getWidgetName(ctx, view.getAppWidgetInfo())));
-                adapter.add(new LinearAdapter.ItemString("Width: " + widget.width));
-                adapter.add(new LinearAdapter.ItemString("Height: " + widget.height));
+                adapter.add(new LinearAdapter.ItemText(widget.packedProperties()));
+                adapter.add(new LinearAdapter.ItemString("ID: " + widget.appWidgetId));
             }
         } else {
             adapter.add(new LinearAdapter.ItemString("ERROR: Not found"));

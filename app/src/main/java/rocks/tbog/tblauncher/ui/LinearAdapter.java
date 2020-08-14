@@ -2,7 +2,6 @@ package rocks.tbog.tblauncher.ui;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
-import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -94,6 +93,22 @@ public class LinearAdapter extends BaseAdapter {
         @Override
         public boolean isEnabled() {
             return true;
+        }
+    }
+
+    public static class ItemText extends ItemString {
+        public ItemText(@NonNull String string) {
+            super(string);
+        }
+
+        @Override
+        public int getLayoutResource() {
+            return R.layout.popup_list_text;
+        }
+
+        @Override
+        public boolean isEnabled() {
+            return false;
         }
     }
 
