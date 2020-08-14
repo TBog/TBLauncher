@@ -1,99 +1,144 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/linearLayout3"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:gravity="center_horizontal"
-    android:orientation="vertical"
+    tools:layout_height="wrap_content"
     android:theme="@style/TitleDialogTheme"
+    tools:background="@drawable/dialog_background"
     tools:context=".PinShortcutConfirm">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/icon_height"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="16dp"
-        android:baselineAligned="false"
-        android:gravity="center"
-        android:measureWithLargestChild="true"
-        android:orientation="horizontal">
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideBegin"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_begin="16dp" />
 
-        <!-- TODO: let user choose if he wants badge or not -->
-        <include
-            android:id="@+id/image"
-            layout="@layout/item_grid_shortcut"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:visibility="gone" />
-
-        <include
-            android:id="@+id/imageWithBadge"
-            layout="@layout/item_grid_shortcut"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1" />
-
-    </LinearLayout>
+    <androidx.constraintlayout.widget.Guideline
+        android:id="@+id/guideEnd"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_end="16dp" />
 
     <TextView
-        android:layout_width="match_parent"
+        android:id="@+id/iconsLabel"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:text="@string/pin_shortcut_message"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:labelFor="@+id/image"
+        android:text="@string/pin_shortcut_icon"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        app:layout_constraintBottom_toTopOf="@+id/imageWithBadge"
+        app:layout_constraintStart_toStartOf="@id/guideBegin"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="spread_inside" />
+
+    <!-- TODO: let user choose if he wants badge or not -->
+    <include
+        android:id="@+id/image"
+        layout="@layout/item_grid_shortcut"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:visibility="gone"
+        app:layout_constraintEnd_toStartOf="@+id/imageWithBadge"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="@id/guideBegin"
+        app:layout_constraintTop_toTopOf="@id/imageWithBadge"
+        tools:visibility="gone" />
+
+    <include
+        android:id="@+id/imageWithBadge"
+        layout="@layout/item_grid_shortcut"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toTopOf="@+id/shortcutLabel"
+        app:layout_constraintEnd_toEndOf="@id/guideEnd"
+        app:layout_constraintStart_toEndOf="@id/image"
+        app:layout_constraintTop_toBottomOf="@+id/iconsLabel" />
+
 
     <TextView
-        android:layout_width="match_parent"
+        android:id="@+id/shortcutLabel"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
         android:labelFor="@+id/shortcutName"
         android:text="@string/pin_shortcut_label"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        app:layout_constraintBottom_toTopOf="@+id/shortcutName"
+        app:layout_constraintStart_toStartOf="@id/guideBegin"
+        app:layout_constraintTop_toBottomOf="@+id/imageWithBadge" />
 
     <EditText
         android:id="@+id/shortcutName"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
         android:importantForAutofill="no"
         android:inputType="text"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        app:layout_constraintBottom_toTopOf="@id/question"
+        app:layout_constraintEnd_toEndOf="@id/guideEnd"
+        app:layout_constraintStart_toStartOf="@id/guideBegin"
+        app:layout_constraintTop_toBottomOf="@+id/shortcutLabel" />
+
+    <TextView
+        android:id="@+id/question"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="@string/pin_shortcut_message"
+        android:textAppearance="?android:attr/textAppearanceMedium"
+        app:layout_constraintBottom_toTopOf="@id/shortcutDetails"
+        app:layout_constraintStart_toStartOf="@id/guideBegin"
+        app:layout_constraintTop_toBottomOf="@+id/shortcutName" />
 
     <TextView
         android:id="@+id/shortcutDetails"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
         android:minLines="6"
         android:textAppearance="?android:attr/textAppearance"
-        tools:layout_weight="1"
+        app:layout_constraintBottom_toTopOf="@+id/ok"
+        app:layout_constraintEnd_toEndOf="@id/guideEnd"
+        app:layout_constraintStart_toStartOf="@id/guideBegin"
+        app:layout_constraintTop_toBottomOf="@+id/question"
         tools:text="&lt;text&gt;\n\t&lt;second line of text &#x2F;&gt;\n\t&lt;some more text &#x2F;&gt;\n&lt;&#x2F;text&gt;" />
 
     <!-- Alert dialog style buttons along the bottom. -->
-    <LinearLayout
+    <View
+        android:id="@+id/buttonBarBackground"
         style="?android:attr/buttonBarStyle"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/ok"
+        tools:backgroundTint="@android:color/holo_red_dark" />
+
+    <Button
+        android:id="@+id/cancel"
+        style="?android:attr/buttonBarButtonStyle"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:measureWithLargestChild="true">
+        android:onClick="onClick"
+        android:text="@android:string/cancel"
+        app:layout_constraintBottom_toBottomOf="@+id/ok"
+        app:layout_constraintEnd_toStartOf="@+id/ok"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/ok" />
 
-        <Button
-            android:id="@+id/cancel"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:onClick="onClick"
-            android:text="@android:string/cancel" />
+    <Button
+        android:id="@+id/ok"
+        style="?android:attr/buttonBarButtonStyle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="onClick"
+        android:text="@android:string/ok"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/cancel"
+        app:layout_constraintTop_toBottomOf="@id/shortcutDetails" />
 
-        <Button
-            android:id="@+id/ok"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:onClick="onClick"
-            android:text="@android:string/ok" />
-    </LinearLayout>
-</LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
