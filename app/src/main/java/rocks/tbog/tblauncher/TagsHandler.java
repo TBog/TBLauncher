@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -83,14 +84,14 @@ public class TagsHandler {
 //        return tags.toArray(new String[0]);
 //    }
 
-//    public Set<String> getAllTagsAsSet() {
-//        Set<String> tags = new HashSet<>();
-//        for (Map.Entry<String, String> entry : mTagsCache.entrySet()) {
-//            tags.addAll(Arrays.asList(entry.getValue().split("\\s+")));
-//        }
-//        tags.remove("");
-//        return tags;
-//    }
+    public Set<String> getAllTagsAsSet() {
+        Set<String> tags = new HashSet<>();
+        for (Map.Entry<String, List<String>> entry : mTagsCache.entrySet()) {
+            tags.addAll(entry.getValue());
+        }
+        tags.remove("");
+        return tags;
+    }
 
     private void addDefaultAliases() {
         Context context = getContext();

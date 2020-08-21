@@ -10,6 +10,8 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -19,6 +21,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.collection.ArraySet;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import rocks.tbog.tblauncher.entry.EntryItem;
@@ -28,7 +33,7 @@ public class EditTagsDialog extends DialogFragment<Set<String>> {
 
     private final ArraySet<String> mTagList = new ArraySet<>();
     private TagsAdapter mAdapter;
-    private TextView mNewTag;
+    private AutoCompleteTextView mNewTag;
 
     @Override
     protected int layoutRes() {
@@ -123,12 +128,17 @@ public class EditTagsDialog extends DialogFragment<Set<String>> {
             }
             return false;
         });
+        // set the auto complete list
+        {
+            List<String> allTags = new ArrayList<>(TBApplication.tagsHandler(context).getAllTagsAsSet());
+            Collections.sort(allTags);
+            mNewTag.setAdapter(new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, allTags));
+        }
         mNewTag.requestFocus();
 
         // initialize add tag button
         ImageView addTag = view.findViewById(R.id.addTag);
         addTag.setOnClickListener(v ->
-
         {
             String tag = mNewTag.getText().toString();
             addTag(tag);

@@ -3,11 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:layout_margin="0dp"
     android:background="@drawable/dialog_background"
     android:orientation="vertical"
     android:paddingHorizontal="@dimen/result_margin_horizontal"
     android:paddingVertical="@dimen/result_margin_vertical"
-    android:layout_margin="0dp"
     android:theme="@style/TitleDialogTheme">
 
     <!-- Code will inflate a preview of the entry here -->
@@ -36,12 +36,15 @@
         android:layout_height="wrap_content"
         android:gravity="center">
 
-        <EditText
+        <AutoCompleteTextView
             android:id="@+id/newTag"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:autofillHints="application,text"
+            android:completionThreshold="1"
+            android:dropDownWidth="wrap_content"
+            android:dropDownHeight="wrap_content"
             android:hint="@string/hint_new_tag"
             android:imeOptions="actionSend"
             android:inputType="textAutoCorrect"

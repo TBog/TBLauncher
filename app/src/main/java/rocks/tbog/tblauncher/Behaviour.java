@@ -751,7 +751,8 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             if (state.isSearchBarVisible())
                 hideSearchBar(0, false);
         } else {
-            //showKeyboard();
+            // can't show keyboard if we don't have focus, wait for onWindowFocusChanged
+            mSearchEditText.requestFocus();
             mSearchEditText.postDelayed(this::showKeyboard, UI_ANIMATION_DURATION);
             showSearchBar();
         }
@@ -783,7 +784,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         LauncherState state = TBApplication.state();
         if (hasFocus && state.isSearchBarVisible()) {
             if (!state.isKeyboardVisible()) {
-                //showKeyboard();
+                mSearchEditText.requestFocus();
                 // UI_ANIMATION_DURATION should be the exact time the full-screen animation ends
                 mSearchEditText.postDelayed(this::showKeyboard, UI_ANIMATION_DURATION);
             }
