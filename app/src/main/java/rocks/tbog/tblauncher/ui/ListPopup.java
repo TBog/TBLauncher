@@ -53,13 +53,13 @@ public class ListPopup extends PopupWindow {
         setHeight(LinearLayout.LayoutParams.WRAP_CONTENT);
         mItemClickListener = null;
         mClickListener = v -> {
-            if (dismissOnClick)
-                dismiss();
             if (mItemClickListener != null) {
                 LinearLayout layout1 = getLinearLayout();
                 int position = layout1.indexOfChild(v);
                 mItemClickListener.onItemClick(mAdapter, v, position);
             }
+            if (dismissOnClick)
+                dismiss();
         };
         mLongClickListener = v -> {
             if (mItemLongClickListener == null)

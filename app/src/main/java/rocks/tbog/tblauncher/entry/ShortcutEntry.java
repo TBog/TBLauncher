@@ -279,7 +279,7 @@ public final class ShortcutEntry extends EntryWithTags {
     }
 
     @Override
-    boolean popupMenuClickHandler(@NonNull View view, @NonNull LinearAdapter.MenuItem item, int stringId) {
+    boolean popupMenuClickHandler(@NonNull View view, @NonNull LinearAdapter.MenuItem item, int stringId, View parentView) {
         Context ctx = view.getContext();
         switch (stringId) {
             case R.string.menu_remove_shortcut:
@@ -295,7 +295,7 @@ public final class ShortcutEntry extends EntryWithTags {
                 launchRenameDialog(ctx);
                 return true;
         }
-        return super.popupMenuClickHandler(view, item, stringId);
+        return super.popupMenuClickHandler(view, item, stringId, parentView);
     }
 
     private void launchRenameDialog(@NonNull Context context) {

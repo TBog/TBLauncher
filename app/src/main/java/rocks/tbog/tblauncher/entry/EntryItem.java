@@ -10,7 +10,6 @@ import androidx.annotation.StringRes;
 
 import java.util.ArrayList;
 
-import rocks.tbog.tblauncher.BuildConfig;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.db.FavRecord;
@@ -240,7 +239,7 @@ public abstract class EntryItem {
             if (item instanceof LinearAdapter.Item) {
                 stringId = ((LinearAdapter.Item) adapter.getItem(position)).stringId;
             }
-            popupMenuClickHandler(view, item, stringId);
+            popupMenuClickHandler(view, item, stringId, parentView);
         });
 
         return menu;
@@ -253,7 +252,7 @@ public abstract class EntryItem {
      * @return Works in the same way as onOptionsItemSelected, return true if the action has been handled, false otherwise
      */
     @CallSuper
-    boolean popupMenuClickHandler(@NonNull View view, @NonNull LinearAdapter.MenuItem item, @StringRes int stringId) {
+    boolean popupMenuClickHandler(@NonNull View view, @NonNull LinearAdapter.MenuItem item, @StringRes int stringId, View parentView) {
         Context context = view.getContext();
         switch (stringId) {
             case R.string.menu_remove:

@@ -287,7 +287,7 @@ public final class AppEntry extends EntryWithTags {
     }
 
     @Override
-    protected boolean popupMenuClickHandler(@NonNull final View view, @NonNull LinearAdapter.MenuItem item, int stringId) {
+    protected boolean popupMenuClickHandler(@NonNull final View view, @NonNull LinearAdapter.MenuItem item, int stringId, View parentView) {
         Context ctx = view.getContext();
         if (item instanceof ShortcutItem) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -332,8 +332,8 @@ public final class AppEntry extends EntryWithTags {
                             break;
                     }
                 });
+                menu.show(parentView);
                 TBApplication.behaviour(ctx).registerPopup(menu);
-                menu.show(view);
                 return true;
             }
             case R.string.menu_tags_add:
@@ -348,7 +348,7 @@ public final class AppEntry extends EntryWithTags {
                 return true;
         }
 
-        return super.popupMenuClickHandler(view, item, stringId);
+        return super.popupMenuClickHandler(view, item, stringId, parentView);
     }
 
     @Override
