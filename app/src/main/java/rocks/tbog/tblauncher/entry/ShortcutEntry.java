@@ -375,15 +375,22 @@ public final class ShortcutEntry extends EntryWithTags {
         return appDrawable;
     }
 
-    public static void setIcons(ImageView icon1, Drawable drawable, Drawable appDrawable) {
-        if (icon1 != null && icon1.getParent() instanceof View) {
-            ImageView icon2 = ((View) icon1.getParent()).findViewById(android.R.id.icon2);
-            if (drawable != null) {
-                icon2.setImageDrawable(appDrawable);
-            } else {
+    public static void setIcons(int drawFlags, ImageView icon1, Drawable shortcutDrawable, Drawable appDrawable) {
+        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON_BADGE)) {
+            if (icon1 != null && icon1.getParent() instanceof View) {
+                ImageView icon2 = ((View) icon1.getParent()).findViewById(android.R.id.icon2);
+                if (shortcutDrawable != null) {
+                    icon2.setImageDrawable(appDrawable);
+                } else {
+                    // If no icon found for this shortcut, use app icon
+                    icon1.setImageDrawable(appDrawable);
+                    icon2.setImageResource(R.drawable.ic_send);
+                }
+            }
+        } else {
+            if (shortcutDrawable == null) {
                 // If no icon found for this shortcut, use app icon
                 icon1.setImageDrawable(appDrawable);
-                icon2.setImageResource(R.drawable.ic_send);
             }
         }
     }
@@ -413,7 +420,7 @@ public final class ShortcutEntry extends EntryWithTags {
             // get ImageView before calling super
             ImageView icon1 = getImageView();
             super.onPostExecute(drawable);
-            setIcons(icon1, drawable, subIcon);
+            setIcons(drawFlags, icon1, drawable, subIcon);
         }
     }
 

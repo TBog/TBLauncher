@@ -26,43 +26,48 @@ public abstract class EntryItem {
     /**
      * the layout will be used in a ListView
      */
-    public static final int FLAG_DRAW_LIST = 1; // 1 << 0
+    public static final int FLAG_DRAW_LIST = 0x0001; // 1 << 0
 
     /**
      * the layout will be used in a GridView
      */
-    public static final int FLAG_DRAW_GRID = 2; // 1 << 1
+    public static final int FLAG_DRAW_GRID = 0x0002; // 1 << 1
 
     /**
      * the layout will be used in a horizontal LinearLayout
      */
-    public static final int FLAG_DRAW_QUICK_LIST = 4; // 1 << 2
+    public static final int FLAG_DRAW_QUICK_LIST = 0x0004; // 1 << 2
 
     /**
      * layout should display an icon
      */
-    public static final int FLAG_DRAW_ICON = 8; // 1 << 3
+    public static final int FLAG_DRAW_ICON = 0x0008; // 1 << 3
+
+    /**
+     * layout may display a badge (shortcut sub-icon) if appropriate
+     */
+    public static final int FLAG_DRAW_ICON_BADGE = 0x0010; // 1 << 4
 
     /**
      * layout should display a text/name
      */
-    public static final int FLAG_DRAW_NAME = 16; // 1 << 4
+    public static final int FLAG_DRAW_NAME = 0x0020; // 1 << 5
 
     /**
      * layout should display tags
      */
-    public static final int FLAG_DRAW_TAGS = 32; // 1 << 5
+    public static final int FLAG_DRAW_TAGS = 0x0040; // 1 << 6
 
     /**
      * do not use cache, generate new drawable
      */
-    public static final int FLAG_DRAW_NO_CACHE = 64; // 1 << 6
+    public static final int FLAG_DRAW_NO_CACHE = 0x0080; // 1 << 7
 
     /**
      * use cache but also run the load task
      * Note: used for shortcuts as we don't have a way to cache multiple icons for the same entry id
      */
-    public static final int FLAG_RELOAD = 128; // 1 << 7
+    public static final int FLAG_RELOAD = 0x0100; // 1 << 8
 
 
     // Globally unique ID.

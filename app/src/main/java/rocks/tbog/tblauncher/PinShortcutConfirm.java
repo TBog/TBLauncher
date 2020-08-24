@@ -19,6 +19,7 @@ import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.LauncherApps;
 import android.content.pm.ShortcutInfo;
 import android.graphics.drawable.Drawable;
@@ -37,8 +38,10 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.preference.PreferenceManager;
 
 import rocks.tbog.tblauncher.db.ShortcutRecord;
+import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.ShortcutEntry;
 import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
 import rocks.tbog.tblauncher.utils.DebugInfo;
@@ -55,6 +58,13 @@ public class PinShortcutConfirm extends Activity implements OnClickListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        if (prefs.getBoolean("pin-auto-confirm", false)) {
+            acceptShortcut();
+            finish();
+            return;
+        }
 
         //requestWindowFeature(Window.FEATURE_NO_TITLE);
         Window window = getWindow();
@@ -113,9 +123,7 @@ public class PinShortcutConfirm extends Activity implements OnClickListener {
             );
             description.setText(Html.fromHtml(htmlString, Html.FROM_HTML_MODE_COMPACT));
             description.setVisibility(View.VISIBLE);
-        }
-        else
-        {
+        } else {
             findViewById(R.id.shortcutDetails).setVisibility(View.GONE);
         }
 
@@ -150,7 +158,8 @@ public class PinShortcutConfirm extends Activity implements OnClickListener {
             protected void onPostExecute(Drawable drawable) {
                 ImageView icon1 = weakImage.get();
                 super.onPostExecute(drawable);
-                ShortcutEntry.setIcons(icon1, drawable, appDrawable);
+                int drawFlags = EntryItem.FLAG_DRAW_ICON | EntryItem.FLAG_DRAW_ICON_BADGE;
+                ShortcutEntry.setIcons(drawFlags, icon1, drawable, appDrawable);
             }
         }.execute();
     }

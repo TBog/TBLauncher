@@ -189,4 +189,9 @@
     <string name="debug_widget_add_info">Add widget extra info</string>
     <string name="debug_widget_info">Long press widget extra info</string>
     <string name="debug_item_relevance">Search relevance</string>
+    <string name="shortcut_section">Shortcut</string>
+    <string name="shortcut_pin_auto_confirm">Auto confirm shortcut</string>
+    <string name="shortcut_show_badge">Show app badge</string>
+    <string name="shortcut_show_badge_summary">Display app icon that created the shortcut</string>
+    <string name="quick_list_show_badge">Show Quick List shortcut badge</string>
 </resources>

@@ -43,23 +43,6 @@
 
     </androidx.preference.PreferenceCategory>
 
-    <!-- Tags -->
-    <androidx.preference.PreferenceCategory
-        android:key="tags-section"
-        android:title="@string/tags_section">
-
-        <androidx.preference.SwitchPreference
-            android:defaultValue="true"
-            android:key="tags-enabled"
-            android:title="@string/tags_enabled" />
-        <androidx.preference.SwitchPreference
-            android:defaultValue="true"
-            android:dependency="tags-enabled"
-            android:key="fuzzy-search-tags"
-            android:title="@string/fuzzy_search_tags" />
-
-    </androidx.preference.PreferenceCategory>
-
     <!-- Icons -->
     <androidx.preference.PreferenceCategory
         android:key="icons-section"
@@ -75,6 +58,47 @@
             android:dependency="quick-list-enabled"
             android:key="quick-list-icons-visible"
             android:title="@string/quick_list_icons_visible" />
+
+        <androidx.preference.SwitchPreference
+            android:defaultValue="true"
+            android:dependency="quick-list-icons-visible"
+            android:key="quick-list-show-badge"
+            android:title="@string/quick_list_show_badge" />
+
+    </androidx.preference.PreferenceCategory>
+
+    <!-- Shortcut -->
+    <androidx.preference.PreferenceCategory
+        android:key="shortcut-section"
+        android:title="@string/shortcut_section">
+
+        <androidx.preference.SwitchPreference
+            android:defaultValue="false"
+            android:key="pin-auto-confirm"
+            android:title="@string/shortcut_pin_auto_confirm" />
+
+        <androidx.preference.SwitchPreference
+            android:defaultValue="true"
+            android:key="shortcut-show-badge"
+            android:summary="@string/shortcut_show_badge_summary"
+            android:title="@string/shortcut_show_badge" />
+
+    </androidx.preference.PreferenceCategory>
+
+    <!-- Tags -->
+    <androidx.preference.PreferenceCategory
+        android:key="tags-section"
+        android:title="@string/tags_section">
+
+        <androidx.preference.SwitchPreference
+            android:defaultValue="true"
+            android:key="tags-enabled"
+            android:title="@string/tags_enabled" />
+        <androidx.preference.SwitchPreference
+            android:defaultValue="true"
+            android:dependency="tags-enabled"
+            android:key="fuzzy-search-tags"
+            android:title="@string/fuzzy_search_tags" />
 
     </androidx.preference.PreferenceCategory>
 

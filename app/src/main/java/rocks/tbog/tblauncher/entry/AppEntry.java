@@ -326,9 +326,11 @@ public final class AppEntry extends EntryWithTags {
                     switch (id) {
                         case R.string.menu_exclude_history:
                             //excludeFromHistory(v.getContext(), appPojo());
+                            Toast.makeText(ctx, "Not Implemented", Toast.LENGTH_LONG).show();
                             break;
                         case R.string.menu_exclude_kiss:
                             //excludeFromKiss(v.getContext(), appPojo(), parent);
+                            Toast.makeText(ctx, "Work in progress", Toast.LENGTH_LONG).show();
                             break;
                     }
                 });

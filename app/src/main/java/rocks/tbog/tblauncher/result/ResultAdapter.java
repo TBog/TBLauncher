@@ -97,6 +97,8 @@ public class ResultAdapter extends BaseAdapter implements SectionIndexer, Filter
             drawFlags |= EntryItem.FLAG_DRAW_TAGS;
         if (prefs.getBoolean("icons-visible", true))
             drawFlags |= EntryItem.FLAG_DRAW_ICON;
+        if (prefs.getBoolean("shortcut-show-badge", true))
+            drawFlags |= EntryItem.FLAG_DRAW_ICON_BADGE;
 
         EntryItem entryItem = results.get(position);
         if (convertView == null) {

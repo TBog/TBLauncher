@@ -70,6 +70,8 @@ public class QuickList {
             drawFlags |= EntryItem.FLAG_DRAW_NAME;
         if (prefs.getBoolean("quick-list-icons-visible", true))
             drawFlags |= EntryItem.FLAG_DRAW_ICON;
+        if (prefs.getBoolean("quick-list-show-badge", true))
+            drawFlags |= EntryItem.FLAG_DRAW_ICON_BADGE;
         return drawFlags;
     }
 

@@ -1,18 +1,26 @@
 package rocks.tbog.tblauncher;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.ColorFilter;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.text.Spannable;
+import android.text.SpannableString;
+import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
@@ -202,10 +210,17 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 if (view != null) {
                     if (sharedPreferences.getBoolean("black-notification-icons", false)) {
                         SystemUiVisibility.setLightStatusBar(view);
+                        setActionBarTextColor(0xFF000000);
                     } else {
                         SystemUiVisibility.clearLightStatusBar(view);
+                        setActionBarTextColor(0xFFffffff);
                     }
                 }
+            } else {
+                if (UIColors.luminance(color) > .5)
+                    setActionBarTextColor(0xFF000000);
+                else
+                    setActionBarTextColor(0xFFffffff);
             }
         }
 
@@ -282,6 +297,12 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     int color = UIColors.getColor(sharedPreferences, "notification-bar-color");
                     int alpha = UIColors.getAlpha(sharedPreferences, "notification-bar-alpha");
                     UIColors.setStatusBarColor(activity, UIColors.setAlpha(color, alpha));
+                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+                        if (UIColors.luminance(color) > .5)
+                            setActionBarTextColor(0xFF000000);
+                        else
+                            setActionBarTextColor(0xFFffffff);
+                    }
                     break;
                 }
                 case "black-notification-icons":
@@ -291,8 +312,10 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                             break;
                         if (sharedPreferences.getBoolean("black-notification-icons", false)) {
                             SystemUiVisibility.setLightStatusBar(view);
+                            setActionBarTextColor(0xFF000000);
                         } else {
                             SystemUiVisibility.clearLightStatusBar(view);
+                            setActionBarTextColor(0xFFffffff);
                         }
                     }
                     break;
@@ -320,6 +343,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 }
                 case "quick-list-text-visible":
                 case "quick-list-icons-visible":
+                case "quick-list-show-badge":
                     TBApplication.quickList(activity).onFavoritesChanged();
                     break;
                 case "cache-drawable":
@@ -327,6 +351,31 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     TBApplication.drawableCache(activity).onPrefChanged(activity, sharedPreferences);
                     break;
             }
+        }
+
+        private void setActionBarTextColor(int color) {
+            Activity activity = getActivity();
+            ActionBar actionBar = activity instanceof AppCompatActivity
+                    ? ((AppCompatActivity) activity).getSupportActionBar()
+                    : null;
+            CharSequence title = actionBar != null ? actionBar.getTitle() : null;
+            if (title == null)
+                return;
+
+            Drawable arrow = ContextCompat.getDrawable(activity, R.drawable.ic_arrow_back);
+            if (arrow != null) {
+                Drawable wrappedArrow = DrawableCompat.wrap(arrow);
+                DrawableCompat.setTint(wrappedArrow, color);
+                actionBar.setHomeAsUpIndicator(wrappedArrow);
+            }
+
+            SpannableString text = new SpannableString(title);
+            ForegroundColorSpan[] spansToRemove = text.getSpans(0, text.length(), ForegroundColorSpan.class);
+            for (ForegroundColorSpan span : spansToRemove) {
+                text.removeSpan(span);
+            }
+            text.setSpan(new ForegroundColorSpan(color), 0, text.length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+            actionBar.setTitle(text);
         }
     }
 }
