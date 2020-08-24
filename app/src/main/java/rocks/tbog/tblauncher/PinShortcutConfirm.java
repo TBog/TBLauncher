@@ -60,11 +60,6 @@ public class PinShortcutConfirm extends Activity implements OnClickListener {
         super.onCreate(savedInstanceState);
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
-        if (prefs.getBoolean("pin-auto-confirm", false)) {
-            acceptShortcut();
-            finish();
-            return;
-        }
 
         //requestWindowFeature(Window.FEATURE_NO_TITLE);
         Window window = getWindow();
@@ -101,6 +96,12 @@ public class PinShortcutConfirm extends Activity implements OnClickListener {
                 mShortcutName.setText(getString(R.string.shortcut_with_appName, appName, label));
             else
                 mShortcutName.setText(label);
+        }
+
+        if (prefs.getBoolean("pin-auto-confirm", false)) {
+            acceptShortcut();
+            finish();
+            return;
         }
 
         // Description
