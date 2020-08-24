@@ -23,6 +23,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
+import androidx.core.content.res.ResourcesCompat;
 
 import java.lang.ref.WeakReference;
 
@@ -72,7 +73,7 @@ public class Utilities {
         try {
             Resources resources = packageManager.getResourcesForApplication(iconRes.packageName);
             final int id = resources.getIdentifier(iconRes.resourceName, null, null);
-            return resources.getDrawableForDensity(id, 0);
+            return ResourcesCompat.getDrawableForDensity(resources, id, 0, null);
         } catch (Exception e) {
             // Icon not found.
         }

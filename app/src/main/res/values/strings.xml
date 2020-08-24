@@ -180,7 +180,7 @@
     <string name="cfg_widget_screen_middle">Move to <br />\n<b>middle</b> screen</string>
     <string name="cfg_widget_screen_right">Move to <br />\n<b>right</b> screen</string>
 
-    <string name="shortcut_with_appName">%s: %s</string>
+    <string name="shortcut_with_appName">%1$s: %2$s</string>
 
     <string name="debug_section">Debug</string>
     <string name="debug_menu_state">Visibility state info</string>

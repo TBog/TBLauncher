@@ -20,6 +20,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.collection.ArraySet;
+import androidx.core.content.res.ResourcesCompat;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -142,7 +143,7 @@ public class IconPackXML implements IconPack<IconPackXML.DrawableInfo> {
     @Override
     public Drawable getDrawable(@NonNull DrawableInfo drawableInfo) {
         try {
-            return packResources.getDrawable(drawableInfo.drawableId);
+            return ResourcesCompat.getDrawable(packResources, drawableInfo.drawableId, null);
         } catch (Resources.NotFoundException ignored) {
         }
         return null;

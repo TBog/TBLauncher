@@ -19,6 +19,7 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
+import androidx.core.content.res.ResourcesCompat;
 
 import java.util.ArrayList;
 
@@ -668,15 +669,16 @@ public class WidgetManager {
         }
         if (icon == null) {
             if (info == null) {
-                icon = ctx.getResources().getDrawable(R.drawable.ic_android);
+                icon = ResourcesCompat.getDrawable(ctx.getResources(), R.drawable.ic_android, null);
             } else {
                 try {
                     icon = ctx.getPackageManager().getApplicationIcon(info.provider.getPackageName());
                 } catch (PackageManager.NameNotFoundException ignored) {
-                    icon = ctx.getResources().getDrawable(R.drawable.ic_android);
+                    icon = ResourcesCompat.getDrawable(ctx.getResources(), R.drawable.ic_android, null);
                 }
             }
         }
+        assert icon != null;
         return icon;
     }
 
