@@ -3,9 +3,11 @@ package rocks.tbog.tblauncher;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.content.pm.LauncherApps;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
@@ -744,6 +746,22 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 
     public void onResume() {
         Log.i(TAG, "onResume");
+
+        // set activity orientation
+        {
+            final Activity act = mTBLauncherActivity;
+            if (mPref.getBoolean("lock-portrait", true)) {
+                if (mPref.getBoolean("sensor-orientation", true))
+                    act.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
+                else
+                    act.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT);
+            } else {
+                if (mPref.getBoolean("sensor-orientation", true))
+                    act.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
+                else
+                    act.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_USER);
+            }
+        }
 
         TBApplication.dataHandler(getContext()).checkServices();
         LauncherState state = TBApplication.state();

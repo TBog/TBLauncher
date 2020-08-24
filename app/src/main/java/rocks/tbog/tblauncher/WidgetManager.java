@@ -583,18 +583,21 @@ public class WidgetManager {
                         final WidgetLayout.LayoutParams lp = (WidgetLayout.LayoutParams) view.getLayoutParams();
                         lp.screen = WidgetLayout.LayoutParams.SCREEN_LEFT;
                         view.setLayoutParams(lp);
+                        saveWidgetProperties(view);
                         break;
                     }
                     case MOVE2SCREEN_RIGHT: {
                         final WidgetLayout.LayoutParams lp = (WidgetLayout.LayoutParams) view.getLayoutParams();
                         lp.screen = WidgetLayout.LayoutParams.SCREEN_RIGHT;
                         view.setLayoutParams(lp);
+                        saveWidgetProperties(view);
                         break;
                     }
                     case MOVE2SCREEN_MIDDLE: {
                         final WidgetLayout.LayoutParams lp = (WidgetLayout.LayoutParams) view.getLayoutParams();
                         lp.screen = WidgetLayout.LayoutParams.SCREEN_MIDDLE;
                         view.setLayoutParams(lp);
+                        saveWidgetProperties(view);
                         break;
                     }
                 }

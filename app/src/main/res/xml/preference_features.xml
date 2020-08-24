@@ -108,6 +108,14 @@
             android:key="wp-animate-sides"
             android:summary="@string/wp_animate_sides_desc"
             android:title="@string/wp_animate_sides" />
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="lock-portrait"
+            android:title="@string/lock_portrait" />
+        <SwitchPreference
+            android:defaultValue="true"
+            android:key="sensor-orientation"
+            android:title="@string/sensor_orientation" />
     </PreferenceCategory>
 
     <!-- Memory -->

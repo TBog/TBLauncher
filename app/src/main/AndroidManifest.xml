@@ -71,6 +71,7 @@
             android:name=".SettingsActivity"
             android:label="@string/menu_popup_launcher_settings"
             android:parentActivityName=".TBLauncherActivity"
+            android:screenOrientation="user"
             android:theme="@style/SettingTheme">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -84,6 +85,7 @@
             android:exported="false"
             android:launchMode="singleInstance"
             android:noHistory="true"
+            android:screenOrientation="user"
             android:theme="@style/TitleDialogTheme"
             tools:ignore="NewApi">
             <intent-filter>

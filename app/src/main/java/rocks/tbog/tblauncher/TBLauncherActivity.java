@@ -6,6 +6,8 @@ import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
+import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
@@ -135,11 +137,28 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
     }
 
     @Override
+    protected void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+
+        TBApplication.behaviour(this).onPostCreate();
+    }
+
+    @Override
     protected void onDestroy() {
         Log.d(TAG, "onDestroy()");
         TBApplication.onDestroyActivity(this);
         unregisterReceiver(mReceiver);
         super.onDestroy();
+    }
+
+    @Override
+    public void onConfigurationChanged(@NonNull Configuration newConfig) {
+        //TBApplication.behaviour(this).onConfigurationChanged(this, newConfig);
+        Log.d(TAG, "onConfigurationChanged" +
+                " orientation=" + newConfig.orientation +
+                " keyboard=" + newConfig.keyboard +
+                " keyboardHidden=" + newConfig.keyboardHidden);
+        super.onConfigurationChanged(newConfig);
     }
 
     @Override
@@ -186,13 +205,6 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
     private void initKeyboardScrollHider(BottomPullEffectView listEdgeEffect, BlockableListView resultList) {
         mHider = new KeyboardScrollHider(TBApplication.behaviour(this), resultList, listEdgeEffect);
         mHider.start();
-    }
-
-    @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-
-        TBApplication.behaviour(this).onPostCreate();
     }
 
     @Override

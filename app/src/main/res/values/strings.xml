@@ -160,6 +160,8 @@
     <string name="lwp_touch">Send touch events to wallpaper</string>
     <string name="lwp_drag">Emulate drag event for wallpaper</string>
     <string name="lwp_drag_desc">Send multiple touch events</string>
+    <string name="lock_portrait">Lock portrait</string>
+    <string name="sensor_orientation">Sensor Orientation</string>
     <string name="wp_drag_animate">Scroll wallpaper</string>
     <string name="wp_drag_animate_desc">Drag ← → to scroll wallpaper</string>
     <string name="wp_animate_center">Center wallpaper</string>
