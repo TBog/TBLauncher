@@ -103,7 +103,13 @@ public class ShortcutUtil {
             }
 
             for (android.os.UserHandle profile : manager.getUserProfiles()) {
-                List<ShortcutInfo> list = launcherApps.getShortcuts(shortcutQuery, profile);
+                List<ShortcutInfo> list;
+                try {
+                    list = launcherApps.getShortcuts(shortcutQuery, profile);
+                } catch (IllegalStateException e) {
+                    // profile is locked or user not running
+                    list = null;
+                }
                 if (list != null)
                     shortcutInfoList.addAll(list);
             }
