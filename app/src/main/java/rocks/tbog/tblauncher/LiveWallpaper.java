@@ -270,7 +270,11 @@ public class LiveWallpaper {
         android.os.IBinder iBinder = getWindowToken();
         if (iBinder != null) {
             String command = index == 0 ? WallpaperManager.COMMAND_TAP : WallpaperManager.COMMAND_SECONDARY_TAP;
-            mWallpaperManager.sendWallpaperCommand(iBinder, command, x, y, 0, null);
+            try {
+                mWallpaperManager.sendWallpaperCommand(iBinder, command, x, y, 0, null);
+            } catch (Exception e) {
+                Log.e(TAG, "sendTouchEvent (" + x + "," + y + ") idx=" + index, e);
+            }
         }
     }
 
