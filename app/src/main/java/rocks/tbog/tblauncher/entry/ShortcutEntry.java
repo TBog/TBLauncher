@@ -13,6 +13,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -298,7 +299,8 @@ public final class ShortcutEntry extends EntryWithTags {
         return super.popupMenuClickHandler(view, item, stringId, parentView);
     }
 
-    private void launchRenameDialog(@NonNull Context context) {
+    private void launchRenameDialog(@NonNull Context ctx) {
+        ContextThemeWrapper context = new ContextThemeWrapper(ctx, R.style.NoTitleDialogTheme);
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
         builder.setTitle(context.getResources().getString(R.string.shortcut_rename_title));
 
