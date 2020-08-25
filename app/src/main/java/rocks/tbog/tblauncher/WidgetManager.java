@@ -233,19 +233,17 @@ public class WidgetManager {
         int appWidgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID, -1);
         AppWidgetProviderInfo appWidgetInfo = mAppWidgetManager.getAppWidgetInfo(appWidgetId);
 
-//        Bundle opts = new Bundle();
-//        opts.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, maxWidth);
-//        opts.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, minHeight);
-//        opts.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, maxWidth);
-//        opts.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, maxHeight);
-
-        boolean hasPermission = mAppWidgetManager.bindAppWidgetIdIfAllowed(appWidgetId, appWidgetInfo.provider);
-        if (!hasPermission) {
-            Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_BIND);
-            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
-            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, appWidgetInfo.provider);
-            activity.startActivityForResult(intent, REQUEST_PICK_APPWIDGET/*REQUEST_BIND*/);
-        }
+        /* See https://stackoverflow.com/a/40269593
+         * If you use the AppWidgetManager.ACTION_APPWIDGET_PICK inten to pick the intent from the chooser displayed by the Android OS, there is no need to bind as the framework automatically binds the widget.
+         * If you implement a custom chooser (for example, something which shows the preview images of widgets which is implemented in lots of custom launchers), then binding is necessary.
+         */
+//        boolean hasPermission = mAppWidgetManager.bindAppWidgetIdIfAllowed(appWidgetId, appWidgetInfo.provider);
+//        if (!hasPermission) {
+//            Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_BIND);
+//            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
+//            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, appWidgetInfo.provider);
+//            activity.startActivityForResult(intent, REQUEST_PICK_APPWIDGET/*REQUEST_BIND*/);
+//        }
 
         if (appWidgetInfo.configure != null) {
             Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_CONFIGURE);
