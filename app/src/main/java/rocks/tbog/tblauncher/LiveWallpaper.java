@@ -13,6 +13,7 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.animation.Animation;
+import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Transformation;
 
 import androidx.preference.PreferenceManager;
@@ -167,6 +168,8 @@ public class LiveWallpaper {
                     view.removeCallbacks(mLongClickRunnable);
                     if (event.getEventTime() - event.getDownTime() < longPressTimeout)
                         onClick(view);
+                    if (mAnimation.init())
+                        mContentView.startAnimation(mAnimation);
                     return true;
                 } else {
                     float xMove = (mFirstTouchPos.x - mLastTouchPos.x) / mWindowSize.x;
@@ -181,6 +184,10 @@ public class LiveWallpaper {
                         view.removeCallbacks(mLongClickRunnable);
                         if (event.getEventTime() - event.getDownTime() < longPressTimeout)
                             onClick(view);
+                        // snap position if needed
+                        mVelocityTracker.addMovement(event);
+                        if (mAnimation.init())
+                            mContentView.startAnimation(mAnimation);
                         return true;
                     }
                 }
@@ -195,6 +202,9 @@ public class LiveWallpaper {
 
                     mVelocityTracker.recycle();
                     mVelocityTracker = null;
+                } else {
+                    if (mAnimation.init())
+                        mContentView.startAnimation(mAnimation);
                 }
                 if (isPreferenceWPDragAnimate())
                     return true;
@@ -304,12 +314,17 @@ public class LiveWallpaper {
 
         Anim() {
             super();
-            setDuration(1000);
+            setDuration(500);
+            setInterpolator(new DecelerateInterpolator());
         }
 
         boolean init() {
-            mVelocityTracker.computeCurrentVelocity(1000 / 30);
-            mVelocity.set(mVelocityTracker.getXVelocity(), mVelocityTracker.getYVelocity());
+            if (mVelocityTracker == null) {
+                mVelocity.set(0.f, 0.f);
+            } else {
+                mVelocityTracker.computeCurrentVelocity(1000 / 30);
+                mVelocity.set(mVelocityTracker.getXVelocity(), mVelocityTracker.getYVelocity());
+            }
             //Log.d(TAG, "mVelocity=" + String.format(Locale.US, "%.2f", mVelocity));
 
             mStartOffset.set(mWallpaperOffset);

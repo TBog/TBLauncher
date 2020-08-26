@@ -149,7 +149,7 @@ public class QuickList {
             ValueAnimator colorAnim = (ValueAnimator) v.getTag(R.id.tag_anim);
             colorAnim.start();
         } else {
-            int colorTo = UIColors.getPrimaryColor(v.getContext());
+            int colorTo = UIColors.getQuickListToggleColor(v.getContext());
             int colorFrom = v.getBackground() instanceof ColorDrawable ? ((ColorDrawable) v.getBackground()).getColor() : (colorTo & 0x00FFFFFF);
             ValueAnimator colorAnim = ValueAnimator.ofObject(new ArgbEvaluator(), colorFrom, colorTo);
             colorAnim.addUpdateListener(animator -> v.setBackgroundColor((int) animator.getAnimatedValue()));
@@ -176,7 +176,7 @@ public class QuickList {
                     ValueAnimator colorAnim = (ValueAnimator) view.getTag(R.id.tag_anim);
                     colorAnim.reverse();
                 } else {
-                    view.setBackgroundColor(UIColors.getPrimaryColor(mQuickList.getContext()) & 0x00FFFFFF);
+                    view.setBackgroundColor(UIColors.getQuickListToggleColor(mQuickList.getContext()) & 0x00FFFFFF);
                 }
             }
         }

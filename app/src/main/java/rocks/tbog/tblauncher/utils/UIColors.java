@@ -11,11 +11,27 @@ import android.view.WindowManager;
 import androidx.annotation.ColorInt;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.PreferenceManager;
 
 public class UIColors {
-    public static final int COLOR_DEFAULT = 0xFF4caf50;
+    public static final int COLOR_DEFAULT = 0xFF3cb371;
+    private static int CACHED_COLOR_HIGHLIGHT = 0;
+    private static int CACHED_COLOR_RESULT_TEXT = 0;
+    private static int CACHED_COLOR_RESULT_TEXT2 = 0;
+    private static int CACHED_COLOR_QL_TOGGLE = 0;
+    private static int CACHED_COLOR_CONTACT_ACTION = 0;
+    private static int CACHED_COLOR_SEARCH_TEXT = 0;
 
-    public static int getPrimaryColor(Context context) {
+    public static void resetCache() {
+        CACHED_COLOR_HIGHLIGHT = 0;
+        CACHED_COLOR_RESULT_TEXT = 0;
+        CACHED_COLOR_RESULT_TEXT2 = 0;
+        CACHED_COLOR_QL_TOGGLE = 0;
+        CACHED_COLOR_CONTACT_ACTION = 0;
+        CACHED_COLOR_SEARCH_TEXT = 0;
+    }
+
+    public static int getDefaultColor(Context context) {
         return COLOR_DEFAULT;
     }
 
@@ -34,8 +50,7 @@ public class UIColors {
 
     /**
      * Returns the relative luminance of a color.
-     * <p>
-     * code adapted from calculateLuminance(@ColorInt int color) at
+     * Code adapted from <i>calculateLuminance(@ColorInt int color)</i>
      * https://android.googlesource.com/platform/frameworks/base/+/master/core/java/com/android/internal/graphics/ColorUtils.java
      *
      * @return a value between 0 (darkest black) and 1 (lightest white)
@@ -70,5 +85,59 @@ public class UIColors {
         if (actionBar != null) {
             actionBar.setBackgroundDrawable(new ColorDrawable(notificationBarColor));
         }
+    }
+
+    public static int getResultHighlightColor(Context context) {
+        if (CACHED_COLOR_HIGHLIGHT == 0) {
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+            int highlightColor = getColor(pref, "result-highlight-color");
+            CACHED_COLOR_HIGHLIGHT = setAlpha(highlightColor, 0xFF);
+        }
+        return CACHED_COLOR_HIGHLIGHT;
+    }
+
+    public static int getResultTextColor(Context context) {
+        if (CACHED_COLOR_RESULT_TEXT == 0) {
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+            int highlightColor = pref.getInt("result-text-color", 0xffffff);
+            CACHED_COLOR_RESULT_TEXT = setAlpha(highlightColor, 0xFF);
+        }
+        return CACHED_COLOR_RESULT_TEXT;
+    }
+
+    public static int getResultText2Color(Context context) {
+        if (CACHED_COLOR_RESULT_TEXT2 == 0) {
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+            int highlightColor = pref.getInt("result-text2-color", 0xbbffbb);
+            CACHED_COLOR_RESULT_TEXT2 = setAlpha(highlightColor, 0xFF);
+        }
+        return CACHED_COLOR_RESULT_TEXT2;
+    }
+
+    public static int getQuickListToggleColor(Context context) {
+        if (CACHED_COLOR_QL_TOGGLE == 0) {
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+            int highlightColor = getColor(pref, "quick-list-toggle-color");
+            CACHED_COLOR_QL_TOGGLE = setAlpha(highlightColor, 0xFF);
+        }
+        return CACHED_COLOR_QL_TOGGLE;
+    }
+
+    public static int getContactActionColor(Context context) {
+        if (CACHED_COLOR_CONTACT_ACTION == 0) {
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+            int highlightColor = getColor(pref, "contact-action-color");
+            CACHED_COLOR_CONTACT_ACTION = setAlpha(highlightColor, 0xFF);
+        }
+        return CACHED_COLOR_CONTACT_ACTION;
+    }
+
+    public static int getSearchTextColor(Context context) {
+        if (CACHED_COLOR_SEARCH_TEXT == 0) {
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+            int highlightColor = getColor(pref, "search-bar-text-color");
+            CACHED_COLOR_SEARCH_TEXT = setAlpha(highlightColor, 0xFF);
+        }
+        return CACHED_COLOR_SEARCH_TEXT;
     }
 }

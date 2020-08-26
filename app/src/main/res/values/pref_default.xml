@@ -5,4 +5,8 @@
     <integer name="default_search_bar_opacity" translatable="false">193</integer>       <!-- 75% -->
     <integer name="default_result_list_opacity" translatable="false">193</integer>      <!-- 75% -->
     <integer name="default_quick_list_opacity" translatable="false">193</integer>       <!-- 75% -->
+    <integer name="default_color" translatable="false">0x3caf50</integer>
+    <integer name="default_color_highlight" translatable="false">0x3cb371</integer>
+    <integer name="default_color_text" translatable="false">0xffffff</integer>
+    <integer name="default_color_text2" translatable="false">0xbbffbb</integer>
 </resources>

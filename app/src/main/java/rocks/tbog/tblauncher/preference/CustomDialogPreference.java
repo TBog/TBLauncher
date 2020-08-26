@@ -92,7 +92,7 @@ public class CustomDialogPreference extends androidx.preference.DialogPreference
             if (view instanceof ImageView) {
                 ColorDrawable color = null;
                 if (value instanceof Integer)
-                    color = new ColorDrawable((Integer) value);
+                    color = new ColorDrawable((int)value | 0xFF000000);
                 ((ImageView) view).setImageDrawable(color);
             }
         }

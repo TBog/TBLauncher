@@ -41,6 +41,7 @@ import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
+import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
 
@@ -159,6 +160,7 @@ public final class AppEntry extends EntryWithTags {
 
     private void displayGridResult(@NonNull View view, int drawFlags) {
         TextView nameView = view.findViewById(android.R.id.text1);
+        nameView.setTextColor(UIColors.getResultTextColor(view.getContext()));
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_NAME))
             ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, nameView);
         else
@@ -178,9 +180,11 @@ public final class AppEntry extends EntryWithTags {
         Context context = view.getContext();
 
         TextView nameView = view.findViewById(R.id.item_app_name);
+        nameView.setTextColor(UIColors.getResultTextColor(context));
         ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, nameView);
 
         TextView tagsView = view.findViewById(R.id.item_app_tag);
+        tagsView.setTextColor(UIColors.getResultText2Color(context));
         // Hide tags view if tags are empty
         if (getTags().isEmpty()) {
             tagsView.setVisibility(View.GONE);

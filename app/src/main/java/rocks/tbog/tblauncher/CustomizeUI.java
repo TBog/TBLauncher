@@ -112,6 +112,14 @@ public class CustomizeUI {
             mSearchBar.setTextSize(TypedValue.COMPLEX_UNIT_PX, smallSize + (largeSize - smallSize) * percent / 100);
         }
 
+        // set text color
+        {
+            int searchTextColor = UIColors.getSearchTextColor(mSearchBar.getContext());
+            int searchHintColor = UIColors.setAlpha(searchTextColor, 0xAA);
+            mSearchBar.setTextColor(searchTextColor);
+            mSearchBar.setHintTextColor(searchHintColor);
+        }
+
         // color
         int color = UIColors.getColor(mPref, "search-bar-color");
         int alpha = UIColors.getAlpha(mPref, "search-bar-alpha");

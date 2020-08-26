@@ -24,7 +24,6 @@ import androidx.annotation.WorkerThread;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.preference.PreferenceManager;
 
-import java.io.File;
 import java.util.HashMap;
 import java.util.List;
 
@@ -291,6 +290,6 @@ public class IconsHandler {
         } catch (Resources.NotFoundException ignored) {
         }
 
-        return (d == null) ? new ColorDrawable(UIColors.getPrimaryColor(context)) : d;
+        return (d == null) ? new ColorDrawable(UIColors.getDefaultColor(context)) : d;
     }
 }

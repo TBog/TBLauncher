@@ -39,6 +39,7 @@ import rocks.tbog.tblauncher.result.ResultAdapter;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
+import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
 
@@ -131,6 +132,7 @@ public final class ShortcutEntry extends EntryWithTags {
     private void displayGridResult(@NonNull View view, int drawFlags) {
         drawFlags |= FLAG_RELOAD;
         TextView nameView = view.findViewById(android.R.id.text1);
+        nameView.setTextColor(UIColors.getResultTextColor(view.getContext()));
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_NAME))
             ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, nameView);
         else
@@ -155,10 +157,12 @@ public final class ShortcutEntry extends EntryWithTags {
         Context context = view.getContext();
 
         TextView shortcutName = view.findViewById(R.id.item_app_name);
+        shortcutName.setTextColor(UIColors.getResultTextColor(view.getContext()));
 
         ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, shortcutName);
 
         TextView tagsView = view.findViewById(R.id.item_app_tag);
+        tagsView.setTextColor(UIColors.getResultText2Color(view.getContext()));
 
         // Hide tags view if tags are empty
         if (getTags().isEmpty()) {

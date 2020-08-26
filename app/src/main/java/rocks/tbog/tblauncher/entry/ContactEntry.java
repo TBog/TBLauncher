@@ -112,6 +112,7 @@ public final class ContactEntry extends EntryItem {
     private void displayGridResult(@NonNull View view, int drawFlags) {
         // Contact name
         TextView nameView = view.findViewById(android.R.id.text1);
+        nameView.setTextColor(UIColors.getResultTextColor(view.getContext()));
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_NAME))
             ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, nameView);
         else
@@ -133,14 +134,17 @@ public final class ContactEntry extends EntryItem {
         Context context = view.getContext();
         // Contact name
         TextView contactName = view.findViewById(R.id.item_contact_name);
+        contactName.setTextColor(UIColors.getResultTextColor(context));
         ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, contactName);
 
         // Contact phone
         TextView contactPhone = view.findViewById(R.id.item_contact_phone);
+        contactPhone.setTextColor(UIColors.getResultText2Color(context));
         ResultViewHelper.displayHighlighted(relevanceSource, normalizedPhone, phone, relevance, contactPhone);
 
         // Contact nickname
         TextView contactNickname = view.findViewById(R.id.item_contact_nickname);
+        contactNickname.setTextColor(UIColors.getResultTextColor(context));
         if (getNickname().isEmpty()) {
             contactNickname.setVisibility(View.GONE);
         } else {
@@ -169,13 +173,13 @@ public final class ContactEntry extends EntryItem {
 //            }
 //        });
 
-        int primaryColor = UIColors.getPrimaryColor(context);
+        int contactActionColor = UIColors.getContactActionColor(context);
         // Phone action
         ImageButton phoneButton = view.findViewById(R.id.item_contact_action_phone);
-        phoneButton.setColorFilter(primaryColor, PorterDuff.Mode.MULTIPLY);
+        phoneButton.setColorFilter(contactActionColor, PorterDuff.Mode.MULTIPLY);
         // Message action
         ImageButton messageButton = view.findViewById(R.id.item_contact_action_message);
-        messageButton.setColorFilter(primaryColor, PorterDuff.Mode.MULTIPLY);
+        messageButton.setColorFilter(contactActionColor, PorterDuff.Mode.MULTIPLY);
 
         PackageManager pm = context.getPackageManager();
 
@@ -234,7 +238,7 @@ public final class ContactEntry extends EntryItem {
             if (drawable == null) {
                 drawable = ContextCompat.getDrawable(ctx, R.drawable.ic_contact_placeholder);
                 if (drawable == null)
-                    drawable = new ColorDrawable(UIColors.getPrimaryColor(ctx));
+                    drawable = new ColorDrawable(UIColors.getDefaultColor(ctx));
             }
             return TBApplication.iconsHandler(ctx).applyContactMask(ctx, drawable);
         }

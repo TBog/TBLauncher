@@ -72,7 +72,7 @@ public final class ResultViewHelper {
             return false;
         }
 
-        int color = UIColors.getPrimaryColor(view.getContext());
+        int color = UIColors.getResultHighlightColor(view.getContext());
         view.setText(highlightText(normText, text, matchInfo, color));
 
         return true;
@@ -84,7 +84,7 @@ public final class ResultViewHelper {
 //        Printer debugPrint = x -> debug.append(x).append("\n");
         boolean matchFound = false;
 
-        int color = UIColors.getPrimaryColor(context);
+        int color = UIColors.getResultHighlightColor(context);
         SpannableStringBuilder builder = new SpannableStringBuilder();
         boolean first = true;
         for (EntryWithTags.TagDetails tag : tags) {

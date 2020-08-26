@@ -15,6 +15,7 @@ import androidx.core.content.ContextCompat;
 import rocks.tbog.tblauncher.BuildConfig;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
+import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public class FilterEntry extends EntryItem {
@@ -47,10 +48,12 @@ public class FilterEntry extends EntryItem {
 
     @Override
     public void displayResult(@NonNull View view, int drawFlags) {
+        TextView nameView = view.findViewById(android.R.id.text1);
+        nameView.setTextColor(UIColors.getResultTextColor(view.getContext()));
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_NAME))
-            ((TextView) view.findViewById(android.R.id.text1)).setText(getName());
+            nameView.setText(getName());
         else
-            view.findViewById(android.R.id.text1).setVisibility(View.GONE);
+            nameView.setVisibility(View.GONE);
 
         view.setTag(R.id.tag_filterName, filterScheme);
 

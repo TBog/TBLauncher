@@ -242,6 +242,12 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "notification-bar-color":
                     case "search-bar-color":
                     case "result-list-color":
+                    case "result-highlight-color":
+                    case "result-text-color":
+                    case "result-text2-color":
+                    case "contact-action-color":
+                    case "search-bar-text-color":
+                    case "quick-list-toggle-color":
                     case "quick-list-color":
                         dialogFragment = ChooseColorDialog.newInstance(key);
                         break;
@@ -318,6 +324,17 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                             setActionBarTextColor(0xFFffffff);
                         }
                     }
+                    break;
+                case "quick-list-toggle-color":
+                    // toggle animation is also caching the color
+                    TBApplication.quickList(activity).onFavoritesChanged();
+                    // fallthrough
+                case "result-highlight-color":
+                case "result-text-color":
+                case "result-text2-color":
+                case "contact-action-color":
+                case "search-bar-text-color":
+                    UIColors.resetCache();
                     break;
                 case "adaptive-shape":
                 case "force-adaptive":

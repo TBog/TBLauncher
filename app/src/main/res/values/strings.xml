@@ -194,4 +194,14 @@
     <string name="shortcut_show_badge">Show app badge</string>
     <string name="shortcut_show_badge_summary">Display app icon that created the shortcut</string>
     <string name="quick_list_show_badge">Show Quick List shortcut badge</string>
+    <string name="result_list_color">Background color</string>
+    <string name="result_list_alpha">Background opacity</string>
+    <string name="result_highlight_color">Highlight color</string>
+    <string name="quick_list_color">Background color</string>
+    <string name="quick_list_alpha">Background Opacity</string>
+    <string name="quick_list_toggle_color">Toggle background color</string>
+    <string name="contact_action_color">Contact action color</string>
+    <string name="result_text_color">Text color</string>
+    <string name="result_text2_color">Secondary text color</string>
+    <string name="search_bar_text_color">Text color</string>
 </resources>
