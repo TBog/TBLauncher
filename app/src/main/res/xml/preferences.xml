@@ -211,7 +211,7 @@
                 android:widgetLayout="@layout/pref_color_preview" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:defaultValue="@integer/default_color_highlight"
+                android:defaultValue="@integer/default_color_text"
                 android:key="contact-action-color"
                 android:title="@string/contact_action_color"
                 android:widgetLayout="@layout/pref_color_preview" />
