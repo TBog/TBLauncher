@@ -156,6 +156,12 @@
                 android:widgetLayout="@layout/pref_color_preview" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@integer/default_color_text"
+                android:key="search-bar-icon-color"
+                android:title="@string/search_bar_icon_color"
+                android:widgetLayout="@layout/pref_color_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@integer/default_bar_size"
                 android:dialogLayout="@layout/pref_alpha"
                 android:key="search-bar-size"

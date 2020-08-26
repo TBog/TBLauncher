@@ -247,6 +247,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "result-text2-color":
                     case "contact-action-color":
                     case "search-bar-text-color":
+                    case "search-bar-icon-color":
                     case "quick-list-toggle-color":
                     case "quick-list-color":
                         dialogFragment = ChooseColorDialog.newInstance(key);
@@ -334,6 +335,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 case "result-text2-color":
                 case "contact-action-color":
                 case "search-bar-text-color":
+                case "search-bar-icon-color":
                     UIColors.resetCache();
                     break;
                 case "adaptive-shape":

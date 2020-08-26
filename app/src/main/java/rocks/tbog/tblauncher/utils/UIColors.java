@@ -21,6 +21,7 @@ public class UIColors {
     private static int CACHED_COLOR_QL_TOGGLE = 0;
     private static int CACHED_COLOR_CONTACT_ACTION = 0;
     private static int CACHED_COLOR_SEARCH_TEXT = 0;
+    private static int CACHED_COLOR_SEARCH_ICON = 0;
 
     public static void resetCache() {
         CACHED_COLOR_HIGHLIGHT = 0;
@@ -29,6 +30,7 @@ public class UIColors {
         CACHED_COLOR_QL_TOGGLE = 0;
         CACHED_COLOR_CONTACT_ACTION = 0;
         CACHED_COLOR_SEARCH_TEXT = 0;
+        CACHED_COLOR_SEARCH_ICON = 0;
     }
 
     public static int getDefaultColor(Context context) {
@@ -139,5 +141,14 @@ public class UIColors {
             CACHED_COLOR_SEARCH_TEXT = setAlpha(highlightColor, 0xFF);
         }
         return CACHED_COLOR_SEARCH_TEXT;
+    }
+
+    public static int getSearchIconColor(Context context) {
+        if (CACHED_COLOR_SEARCH_ICON == 0) {
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+            int highlightColor = getColor(pref, "search-bar-icon-color");
+            CACHED_COLOR_SEARCH_ICON = setAlpha(highlightColor, 0xFF);
+        }
+        return CACHED_COLOR_SEARCH_ICON;
     }
 }

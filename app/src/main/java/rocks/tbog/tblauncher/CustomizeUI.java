@@ -30,6 +30,9 @@ public class CustomizeUI {
     private ImageView mNotificationBackground;
     private ViewGroup mSearchBarContainer;
     private SearchEditText mSearchBar;
+    private ImageView mLauncherButton;
+    private ImageView mMenuButton;
+    private ImageView mClearButton;
     private View mResultLayout;
 
     @SuppressWarnings("TypeParameterUnusedInFormals")
@@ -44,6 +47,9 @@ public class CustomizeUI {
         mNotificationBackground = findViewById(R.id.notificationBackground);
         mSearchBarContainer = findViewById(R.id.searchBarContainer);
         mSearchBar = mSearchBarContainer.findViewById(R.id.launcherSearch);
+        mLauncherButton = mSearchBarContainer.findViewById(R.id.launcherButton);
+        mMenuButton = mSearchBarContainer.findViewById(R.id.menuButton);
+        mClearButton = mSearchBarContainer.findViewById(R.id.clearButton);
         mResultLayout = findViewById(R.id.resultLayout);
     }
 
@@ -92,7 +98,7 @@ public class CustomizeUI {
         // size
         int percent = mPref.getInt("search-bar-size", 0);
 
-        // set layout height
+        // layout height
         {
             int smallSize = resources.getDimensionPixelSize(R.dimen.bar_height);
             int largeSize = resources.getDimensionPixelSize(R.dimen.large_bar_height);
@@ -105,22 +111,30 @@ public class CustomizeUI {
             }
         }
 
-        // set text size
+        // text size
         {
             float smallSize = resources.getDimension(R.dimen.small_bar_text);
             float largeSize = resources.getDimension(R.dimen.large_bar_text);
             mSearchBar.setTextSize(TypedValue.COMPLEX_UNIT_PX, smallSize + (largeSize - smallSize) * percent / 100);
         }
 
-        // set text color
+        // text color
         {
             int searchTextColor = UIColors.getSearchTextColor(mSearchBar.getContext());
-            int searchHintColor = UIColors.setAlpha(searchTextColor, 0xAA);
+            int searchHintColor = UIColors.setAlpha(searchTextColor, 0xBB);
             mSearchBar.setTextColor(searchTextColor);
             mSearchBar.setHintTextColor(searchHintColor);
         }
 
-        // color
+        // icon color
+        {
+            int searchIconColor = UIColors.getSearchIconColor(mLauncherButton.getContext());
+            mLauncherButton.getDrawable().setColorFilter(new PorterDuffColorFilter(searchIconColor, PorterDuff.Mode.MULTIPLY));
+            mMenuButton.getDrawable().setColorFilter(new PorterDuffColorFilter(searchIconColor, PorterDuff.Mode.MULTIPLY));
+            mClearButton.getDrawable().setColorFilter(new PorterDuffColorFilter(searchIconColor, PorterDuff.Mode.MULTIPLY));
+        }
+
+        // background color
         int color = UIColors.getColor(mPref, "search-bar-color");
         int alpha = UIColors.getAlpha(mPref, "search-bar-alpha");
         boolean gradient = mPref.getBoolean("search-bar-gradient", true);

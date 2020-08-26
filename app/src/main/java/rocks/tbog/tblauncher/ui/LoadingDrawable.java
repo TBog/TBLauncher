@@ -19,9 +19,9 @@ import java.util.ArrayList;
 
 /**
  * This drawable is best used when the view is set to have
- *      adjustViewBounds="true"
- *      scaleType="fitCenter"
- *      either width or height have a size or match_parent
+ * adjustViewBounds="true"
+ * scaleType="fitCenter"
+ * either width or height have a size or match_parent
  * Set Intrinsic size to 1x1 if you want to use scaleType="fitXY" in the view
  */
 
@@ -56,12 +56,12 @@ public class LoadingDrawable extends Drawable implements Animatable, ValueAnimat
 
     @Override
     public void setAlpha(int alpha) {
-
+        mPaint.setAlpha(alpha);
     }
 
     @Override
     public void setColorFilter(@Nullable ColorFilter colorFilter) {
-
+        mPaint.setColorFilter(colorFilter);
     }
 
     @Override
@@ -104,7 +104,7 @@ public class LoadingDrawable extends Drawable implements Animatable, ValueAnimat
         {
             int size = rect.width();
 
-            int shapeSize = (int)(size * SHAPE_SIZE_PERCENT);
+            int shapeSize = (int) (size * SHAPE_SIZE_PERCENT);
             int padding = (size - 3 * shapeSize) / 6;
 
             mShapeList.ensureCapacity(3 * 3);
