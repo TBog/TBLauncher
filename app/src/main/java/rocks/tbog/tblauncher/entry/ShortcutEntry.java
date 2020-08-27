@@ -1,6 +1,7 @@
 package rocks.tbog.tblauncher.entry;
 
 import android.annotation.TargetApi;
+import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -47,6 +48,7 @@ import rocks.tbog.tblauncher.utils.Utilities;
 public final class ShortcutEntry extends EntryWithTags {
 
     public static final String SCHEME = "shortcut://";
+    private static final String TAG = "shortcut";
 
     private final long dbId;
     @NonNull
@@ -243,8 +245,12 @@ public final class ShortcutEntry extends EntryWithTags {
         }
 
         if (mShortcutInfo != null) {
-            launcherApps.startShortcut(mShortcutInfo, Utilities.getOnScreenRect(v), null);
-            return;
+            try {
+                launcherApps.startShortcut(mShortcutInfo, Utilities.getOnScreenRect(v), null);
+                return;
+            } catch (ActivityNotFoundException e) {
+                Log.e(TAG, "startShortcut", e);
+            }
         }
 
 //        LauncherApps.ShortcutQuery query = new LauncherApps.ShortcutQuery();
