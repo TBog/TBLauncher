@@ -381,9 +381,9 @@ public final class ShortcutEntry extends EntryWithTags {
         return appDrawable;
     }
 
-    public static void setIcons(int drawFlags, ImageView icon1, Drawable shortcutDrawable, Drawable appDrawable) {
+    public static void setIcons(int drawFlags, @NonNull ImageView icon1, Drawable shortcutDrawable, Drawable appDrawable) {
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON_BADGE)) {
-            if (icon1 != null && icon1.getParent() instanceof View) {
+            if (icon1.getParent() instanceof View) {
                 ImageView icon2 = ((View) icon1.getParent()).findViewById(android.R.id.icon2);
                 if (shortcutDrawable != null) {
                     icon2.setImageDrawable(appDrawable);
@@ -426,7 +426,8 @@ public final class ShortcutEntry extends EntryWithTags {
             // get ImageView before calling super
             ImageView icon1 = getImageView();
             super.onPostExecute(drawable);
-            setIcons(drawFlags, icon1, drawable, subIcon);
+            if (icon1 != null)
+                setIcons(drawFlags, icon1, drawable, subIcon);
         }
     }
 
