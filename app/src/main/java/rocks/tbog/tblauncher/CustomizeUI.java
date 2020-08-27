@@ -3,8 +3,6 @@ package rocks.tbog.tblauncher;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
-import android.graphics.PorterDuff;
-import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
@@ -23,6 +21,7 @@ import rocks.tbog.tblauncher.ui.CutoutFactory;
 import rocks.tbog.tblauncher.ui.SearchEditText;
 import rocks.tbog.tblauncher.utils.SystemUiVisibility;
 import rocks.tbog.tblauncher.utils.UIColors;
+import rocks.tbog.tblauncher.utils.Utilities;
 
 public class CustomizeUI {
     private TBLauncherActivity mTBLauncherActivity;
@@ -72,8 +71,7 @@ public class CustomizeUI {
                 params.height = size;
                 mNotificationBackground.setLayoutParams(params);
             }
-            mNotificationBackground.setImageAlpha(alpha);
-            mNotificationBackground.setColorFilter(color);
+            Utilities.setColorFilterMultiply(mNotificationBackground, UIColors.setAlpha(color, alpha));
             UIColors.setStatusBarColor(mTBLauncherActivity, 0x00000000);
         } else {
             mNotificationBackground.setVisibility(View.GONE);
@@ -129,30 +127,27 @@ public class CustomizeUI {
         // icon color
         {
             int searchIconColor = UIColors.getSearchIconColor(mLauncherButton.getContext());
-            mLauncherButton.getDrawable().setColorFilter(new PorterDuffColorFilter(searchIconColor, PorterDuff.Mode.MULTIPLY));
-            mMenuButton.getDrawable().setColorFilter(new PorterDuffColorFilter(searchIconColor, PorterDuff.Mode.MULTIPLY));
-            mClearButton.getDrawable().setColorFilter(new PorterDuffColorFilter(searchIconColor, PorterDuff.Mode.MULTIPLY));
+            Utilities.setColorFilterMultiply(mLauncherButton, searchIconColor);
+            Utilities.setColorFilterMultiply(mMenuButton, searchIconColor);
+            Utilities.setColorFilterMultiply(mClearButton, searchIconColor);
         }
 
         // background color
         int color = UIColors.getColor(mPref, "search-bar-color");
         int alpha = UIColors.getAlpha(mPref, "search-bar-alpha");
-        boolean gradient = mPref.getBoolean("search-bar-gradient", true);
-        if (gradient) {
+        if (mPref.getBoolean("search-bar-gradient", true)) {
             mSearchBarContainer.setBackgroundResource(R.drawable.search_bar_background);
-            mSearchBarContainer.getBackground().setColorFilter(new PorterDuffColorFilter(UIColors.setAlpha(color, alpha), PorterDuff.Mode.MULTIPLY));
-        } else {
-            if (mPref.getBoolean("search-bar-rounded", true)) {
-                PaintDrawable drawable = new PaintDrawable();
-                drawable.getPaint().setColor(UIColors.setAlpha(color, alpha));
-                LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) mSearchBarContainer.getLayoutParams();
-                drawable.setCornerRadius(resources.getDimension(R.dimen.bar_corner_radius));
-                mSearchBarContainer.setBackground(drawable);
-                int margin = (int) (params.height * .25f);
-                params.setMargins(margin, 0, margin, margin);
-            } else
-                mSearchBarContainer.setBackground(new ColorDrawable(UIColors.setAlpha(color, alpha)));
-        }
+            Utilities.setColorFilterMultiply(mSearchBarContainer.getBackground(), UIColors.setAlpha(color, alpha));
+        } else if (mPref.getBoolean("search-bar-rounded", true)) {
+            PaintDrawable drawable = new PaintDrawable();
+            drawable.getPaint().setColor(UIColors.setAlpha(color, alpha));
+            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) mSearchBarContainer.getLayoutParams();
+            drawable.setCornerRadius(resources.getDimension(R.dimen.bar_corner_radius));
+            mSearchBarContainer.setBackground(drawable);
+            int margin = (int) (params.height * .25f);
+            params.setMargins(margin, 0, margin, margin);
+        } else
+            mSearchBarContainer.setBackground(new ColorDrawable(UIColors.setAlpha(color, alpha)));
     }
 
     public void setResultListPref(View resultLayout) {
@@ -170,7 +165,6 @@ public class CustomizeUI {
         } else {
             drawable = new ColorDrawable(UIColors.setAlpha(color, alpha));
         }
-        //drawable.setColorFilter(new PorterDuffColorFilter(UIColors.setAlpha(color, alpha), PorterDuff.Mode.MULTIPLY));
         resultLayout.setBackground(drawable);
     }
 

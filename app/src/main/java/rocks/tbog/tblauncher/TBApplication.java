@@ -67,6 +67,7 @@ public class TBApplication extends Application {
     public void onCreate() {
         super.onCreate();
         PreferenceManager.setDefaultValues(this, R.xml.preferences, true);
+        PreferenceManager.setDefaultValues(this, R.xml.preference_features, true);
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         mDrawableCache.onPrefChanged(this, mSharedPreferences);
         mWidgetManager.start(this);

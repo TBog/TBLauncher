@@ -134,7 +134,7 @@
     <style name="SettingTheme" parent="AppThemeTransparent">
         <item name="windowActionBar">true</item>
         <item name="windowNoTitle">false</item>
-        <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:windowBackground">@color/settingsBackground</item>
         <item name="alertDialogTheme">@style/SettingsDialogTheme</item>
         <item name="android:textColor">@color/primary_text_color_selector_black</item>
         <item name="android:textColorPrimary">@color/primary_text_color_selector_black</item>

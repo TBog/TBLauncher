@@ -8,6 +8,9 @@ import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.ColorFilter;
+import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
@@ -172,6 +175,17 @@ public class Utilities {
 
     public static Utilities.AsyncRun runAsync(Runnable background, Runnable after) {
         return (Utilities.AsyncRun) new Utilities.AsyncRun(background, after).execute();
+    }
+
+    public static void setColorFilterMultiply(@NonNull ImageView imageView, int color) {
+        setColorFilterMultiply(imageView.getDrawable(), color);
+    }
+
+    public static void setColorFilterMultiply(@Nullable Drawable drawable, int color) {
+        if (drawable == null)
+            return;
+        ColorFilter cf = new PorterDuffColorFilter(color, PorterDuff.Mode.MULTIPLY);
+        drawable.setColorFilter(cf);
     }
 
     public interface GetDrawable {
