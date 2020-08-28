@@ -163,7 +163,10 @@ public final class ResultViewHelper {
 
         @Nullable
         public ImageView getImageView() {
-            return weakImage.get();
+            ImageView imageView = weakImage.get();
+            if (imageView != null && !imageView.isAttachedToWindow())
+                return null;
+            return imageView;
         }
 
         @Override
