@@ -138,9 +138,9 @@
     <string name="filter_favorites">Favorites</string>
     <string name="quick_list_content">Customize content</string>
     <string name="quick_list_content_summary">Change order and add entries</string>
-    <string name="label_preview">Preview</string>
-    <string name="filter_list">Possible filters</string>
-    <string name="favorites_list">From the favorites</string>
+    <string name="edit_quick_list_preview">Preview <em>(touch to remove from quick list)</em></string>
+    <string name="edit_quick_list_filters">Possible filters</string>
+    <string name="edit_quick_list_favorites">From the favorites</string>
     <string name="quick_list_icons_visible">Show Quick List icons</string>
     <string name="quick_list_text_visible">Show names</string>
     <string name="cache_drawable">Cache icons</string>

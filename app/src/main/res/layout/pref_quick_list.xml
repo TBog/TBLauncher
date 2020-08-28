@@ -10,7 +10,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/label_preview" />
+        android:text="@string/edit_quick_list_preview" />
 
     <LinearLayout
         android:id="@+id/preview"
@@ -30,7 +30,7 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/filter_list" />
+        android:text="@string/edit_quick_list_filters" />
 
     <GridView
         android:id="@+id/filterGrid"
@@ -51,12 +51,13 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/favorites_list" />
+        android:text="@string/edit_quick_list_favorites" />
 
     <GridView
         android:id="@+id/favoritesGrid"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:columnWidth="@dimen/app_grid_column_width"
         android:gravity="center"
         android:numColumns="auto_fit"
