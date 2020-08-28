@@ -1,5 +1,6 @@
 package rocks.tbog.tblauncher.result;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -164,7 +165,8 @@ public final class ResultViewHelper {
         @Nullable
         public ImageView getImageView() {
             ImageView imageView = weakImage.get();
-            if (imageView != null && !imageView.isAttachedToWindow())
+            Activity act = Utilities.getActivity(imageView.getContext());
+            if (act == null || act.isFinishing() || act.isDestroyed())
                 return null;
             return imageView;
         }
