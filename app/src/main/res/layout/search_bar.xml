@@ -68,7 +68,7 @@
                 android:focusable="true"
                 android:paddingLeft="@dimen/launcher_button_padding"
                 android:paddingRight="@dimen/launcher_button_padding"
-                android:scaleType="fitCenter"
+                android:scaleType="centerCrop"
                 android:src="@drawable/ic_dots"
                 android:textAlignment="center" />
 
@@ -82,7 +82,7 @@
                 android:focusable="true"
                 android:paddingLeft="@dimen/launcher_button_padding"
                 android:paddingRight="@dimen/launcher_button_padding"
-                android:scaleType="fitCenter"
+                android:scaleType="centerCrop"
                 android:src="@drawable/ic_clear"
                 android:textAlignment="center"
                 android:visibility="invisible" />

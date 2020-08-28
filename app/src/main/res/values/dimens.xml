@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <dimen name="icon_width">48dp</dimen>
-    <dimen name="icon_height">48dp</dimen>
-    <dimen name="subicon_width">22dp</dimen>
-    <dimen name="subicon_height">22dp</dimen>
+    <dimen name="icon_width">32dp</dimen>
+    <dimen name="icon_height">32dp</dimen>
+    <dimen name="subicon_width">12dp</dimen>
+    <dimen name="subicon_height">12dp</dimen>
 
     <dimen name="pref_preview_width">32dp</dimen>
     <dimen name="pref_preview_height">32dp</dimen>
@@ -13,28 +13,27 @@
     <dimen name="icon_margin_top">5dp</dimen>
     <dimen name="icon_margin_bottom">5dp</dimen>
 
-    <dimen name="result_margin_horizontal">10dp</dimen>
-    <dimen name="result_margin_vertical">5dp</dimen>
-    <dimen name="result_corner_radius">24dp</dimen>
+    <dimen name="result_margin_horizontal">5dp</dimen>
+    <dimen name="result_margin_vertical">2dp</dimen>
+    <dimen name="result_corner_radius">12dp</dimen>
 
     <dimen name="quick_list_margin_horizontal">2dp</dimen>
     <dimen name="quick_list_margin_vertical">2dp</dimen>
 
-    <dimen name="result_title_size">18sp</dimen>
-    <dimen name="result_small_size">14sp</dimen>
+    <dimen name="result_title_size">14sp</dimen>
+    <dimen name="result_small_size">12sp</dimen>
 
     <dimen name="color_swatch_large">64dip</dimen>
     <dimen name="color_swatch_small">48dip</dimen>
     <dimen name="color_swatch_margins_large">8dip</dimen>
     <dimen name="color_swatch_margins_small">4dip</dimen>
 
-    <dimen name="bar_height">25dp</dimen>
-    <dimen name="large_bar_height">40dp</dimen>
-    <dimen name="large_quick_list_bar_height">150dp</dimen>
-    <dimen name="bar_corner_radius">15dp</dimen> <!-- at most half of `large_bar_height` -->
-    <dimen name="small_bar_text">12sp</dimen>
-    <dimen name="large_bar_text">22sp</dimen>
-
+    <dimen name="bar_height">13dp</dimen>
+    <dimen name="large_bar_height">22dp</dimen>
+    <dimen name="large_quick_list_bar_height">75dp</dimen>
+    <dimen name="bar_corner_radius">11dp</dimen> <!-- at most half of `large_bar_height` -->
+    <dimen name="small_bar_text">10sp</dimen>
+    <dimen name="large_bar_text">20sp</dimen>
 
     <dimen name="launcher_button_width">45dp</dimen>
     <dimen name="launcher_button_padding">10dp</dimen>
@@ -71,7 +70,7 @@
     <dimen name="mm2d_cc_slider_height">32dp</dimen>
     <dimen name="mm2d_cc_slider_width">256dp</dimen>
     <dimen name="mm2d_cc_panel_margin">8dp</dimen>
-    <dimen name="mm2d_cc_panel_height">360dp</dimen>
+    <dimen name="mm2d_cc_panel_height">200dp</dimen>
     <dimen name="mm2d_cc_dialog_width">-1px</dimen>
     <dimen name="mm2d_cc_rgb_size">24dp</dimen>
     <dimen name="mm2d_cc_color_text">12dp</dimen>
