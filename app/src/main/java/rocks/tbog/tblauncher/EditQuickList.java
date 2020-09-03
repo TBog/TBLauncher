@@ -1,10 +1,9 @@
-package rocks.tbog.tblauncher.preference;
+package rocks.tbog.tblauncher;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.drawable.PaintDrawable;
 import android.os.AsyncTask;
-import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -14,7 +13,6 @@ import android.widget.LinearLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.preference.PreferenceDialogFragmentCompat;
 import androidx.preference.PreferenceManager;
 
 import java.util.ArrayList;
@@ -22,10 +20,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import rocks.tbog.tblauncher.DataHandler;
-import rocks.tbog.tblauncher.QuickList;
-import rocks.tbog.tblauncher.R;
-import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.dataprovider.FavProvider;
 import rocks.tbog.tblauncher.dataprovider.FilterProvider;
 import rocks.tbog.tblauncher.db.FavRecord;
@@ -34,9 +28,8 @@ import rocks.tbog.tblauncher.entry.ContactEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.FilterEntry;
 import rocks.tbog.tblauncher.entry.ShortcutEntry;
-import rocks.tbog.tblauncher.utils.UIColors;
 
-public class QuickListDialog extends PreferenceDialogFragmentCompat {
+public class EditQuickList {
 
     private final List<EntryItem> mQuickList = new ArrayList<>();
     private LinearLayout mQuickListContainer;
@@ -48,29 +41,14 @@ public class QuickListDialog extends PreferenceDialogFragmentCompat {
         populateList();
     };
 
-    public static QuickListDialog newInstance(String key) {
-        QuickListDialog fragment = new QuickListDialog();
-        final Bundle b = new Bundle(1);
-        b.putString(ARG_KEY, key);
-        fragment.setArguments(b);
-
-        return fragment;
-    }
-
-    @Override
-    public void onDialogClosed(boolean positiveResult) {
-        if (!positiveResult)
-            return;
+    public void applyChanges(@NonNull Context context) {
         List<String> idList = new ArrayList<>(mQuickList.size());
         for (EntryItem entry : mQuickList)
             idList.add(entry.id);
-        TBApplication.dataHandler(getContext()).setQuickList(idList);
+        TBApplication.dataHandler(context).setQuickList(idList);
     }
 
-    @Override
-    protected void onBindDialogView(View view) {
-        super.onBindDialogView(view);
-
+    public void bindView(View view){
         // keep the preview the same as the actual thing
         mQuickListContainer = view.findViewById(R.id.preview);
         {
@@ -94,7 +72,7 @@ public class QuickListDialog extends PreferenceDialogFragmentCompat {
         }
 
         {
-            TBApplication.ui(getContext()).setResultListPref(mFavoritesGrid);
+            TBApplication.ui(view.getContext()).setResultListPref(mFavoritesGrid);
         }
 
         // filters
@@ -135,6 +113,7 @@ public class QuickListDialog extends PreferenceDialogFragmentCompat {
 
         ((EntryAdapter) mFilterGrid.getAdapter()).setOnItemClickListener(mAddToQuickList);
         ((EntryAdapter) mFavoritesGrid.getAdapter()).setOnItemClickListener(mAddToQuickList);
+
     }
 
     private void populateList() {
@@ -263,5 +242,4 @@ public class QuickListDialog extends PreferenceDialogFragmentCompat {
             return view;
         }
     }
-
 }

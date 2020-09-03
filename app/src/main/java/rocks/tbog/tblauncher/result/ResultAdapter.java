@@ -130,7 +130,7 @@ public class ResultAdapter extends BaseAdapter implements SectionIndexer, Filter
     public boolean onLongClick(final int pos, View v) {
         ListPopup menu;
         try {
-            menu = results.get(pos).getPopupMenu(v.getContext(), this, v);
+            menu = results.get(pos).getPopupMenu(v);
         } catch (ArrayIndexOutOfBoundsException ignored) {
             return false;
         }

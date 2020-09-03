@@ -165,8 +165,9 @@ public final class ResultViewHelper {
         @Nullable
         public ImageView getImageView() {
             ImageView imageView = weakImage.get();
-            Activity act = Utilities.getActivity(imageView.getContext());
-            if (act == null || act.isFinishing() || act.isDestroyed())
+            // make sure we have a valid activity
+            Activity act = Utilities.getActivity(imageView);
+            if (act == null)
                 return null;
             return imageView;
         }

@@ -36,7 +36,6 @@ import rocks.tbog.tblauncher.IconsHandler;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.db.DBHelper;
-import rocks.tbog.tblauncher.result.ResultAdapter;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
@@ -274,7 +273,7 @@ public final class ShortcutEntry extends EntryWithTags {
     }
 
     @Override
-    ListPopup buildPopupMenu(Context context, LinearAdapter adapter, ResultAdapter parent, View parentView) {
+    ListPopup buildPopupMenu(Context context, LinearAdapter adapter, View parentView, int flags) {
         adapter.add(new LinearAdapter.ItemTitle(context, R.string.popup_title_hist_fav));
         adapter.add(new LinearAdapter.Item(context, R.string.menu_remove_shortcut));
         adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_add));

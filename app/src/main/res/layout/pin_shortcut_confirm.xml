@@ -83,28 +83,5 @@
         tools:text="&lt;text&gt;\n\t&lt;second line of text &#x2F;&gt;\n\t&lt;some more text &#x2F;&gt;\n&lt;&#x2F;text&gt;" />
 
     <!-- Alert dialog style buttons along the bottom. -->
-    <LinearLayout
-        style="?android:attr/buttonBarStyle"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:measureWithLargestChild="true">
-
-        <Button
-            android:id="@+id/cancel"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:onClick="onClick"
-            android:text="@android:string/cancel" />
-
-        <Button
-            android:id="@+id/ok"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:onClick="onClick"
-            android:text="@android:string/ok" />
-    </LinearLayout>
+    <include layout="@layout/ok_cancel_button_bar" />
 </LinearLayout>

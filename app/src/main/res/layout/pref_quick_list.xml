@@ -4,18 +4,21 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical"
-    android:padding="@dimen/launcher_button_padding"
+    android:measureWithLargestChild="true"
     android:theme="@style/SettingsDialogTheme">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/dialog_padding_horizontal"
+        android:layout_marginTop="@dimen/dialog_padding_vertical"
         android:text="@string/edit_quick_list_preview" />
 
     <LinearLayout
         android:id="@+id/preview"
         android:layout_width="match_parent"
         android:layout_height="@dimen/large_quick_list_bar_height"
+        android:layout_marginHorizontal="@dimen/dialog_padding_horizontal"
         android:background="?attr/listBackgroundColor"
         android:gravity="center"
         android:measureWithLargestChild="true"
@@ -30,15 +33,20 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/dialog_padding_horizontal"
         android:text="@string/edit_quick_list_filters" />
 
     <GridView
         android:id="@+id/filterGrid"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:layout_marginHorizontal="@dimen/dialog_padding_horizontal"
         android:columnWidth="@dimen/app_grid_column_width"
         android:gravity="center"
         android:numColumns="auto_fit"
+        android:paddingHorizontal="@dimen/app_grid_horizontal_padding"
+        android:paddingVertical="@dimen/app_grid_vertical_padding"
         android:stretchMode="columnWidth"
         android:verticalSpacing="@dimen/app_grid_vertical_spacing"
         tools:layout_height="200dp"
@@ -51,16 +59,20 @@
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/dialog_padding_horizontal"
         android:text="@string/edit_quick_list_favorites" />
 
     <GridView
         android:id="@+id/favoritesGrid"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_marginHorizontal="@dimen/dialog_padding_horizontal"
         android:layout_weight="1"
         android:columnWidth="@dimen/app_grid_column_width"
         android:gravity="center"
         android:numColumns="auto_fit"
+        android:paddingHorizontal="@dimen/app_grid_horizontal_padding"
+        android:paddingVertical="@dimen/app_grid_vertical_padding"
         android:stretchMode="columnWidth"
         android:verticalSpacing="@dimen/app_grid_vertical_spacing"
         tools:layout_height="200dp"

@@ -787,12 +787,18 @@ public class DataHandler extends BroadcastReceiver
         record.record = entry.id;
         record.position = "0";
         DBHelper.setFavorite(context, record);
+        FavProvider favProvider = getFavProvider();
+        if (favProvider != null)
+            favProvider.reload(true);
     }
 
     public void removeFromFavorites(EntryItem entry) {
         FavRecord record = new FavRecord();
         record.record = entry.id;
         DBHelper.removeFavorite(context, record);
+        FavProvider favProvider = getFavProvider();
+        if (favProvider != null)
+            favProvider.reload(true);
     }
 
     @SuppressWarnings("StringSplitter")

@@ -3,7 +3,6 @@ package rocks.tbog.tblauncher;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.ColorFilter;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -35,7 +34,7 @@ import androidx.preference.SwitchPreference;
 import rocks.tbog.tblauncher.preference.ChooseColorDialog;
 import rocks.tbog.tblauncher.preference.ConfirmDialog;
 import rocks.tbog.tblauncher.preference.CustomDialogPreference;
-import rocks.tbog.tblauncher.preference.QuickListDialog;
+import rocks.tbog.tblauncher.preference.QuickListPreferenceDialog;
 import rocks.tbog.tblauncher.preference.SliderDialog;
 import rocks.tbog.tblauncher.utils.SystemUiVisibility;
 import rocks.tbog.tblauncher.utils.UIColors;
@@ -265,7 +264,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         dialogFragment = ConfirmDialog.newInstance(key);
                         break;
                     case "quick-list-content":
-                        dialogFragment = QuickListDialog.newInstance(key);
+                        dialogFragment = QuickListPreferenceDialog.newInstance(key);
                         break;
                     default:
                         throw new RuntimeException("CustomDialogPreference \"" + key + "\" has no dialog defined");

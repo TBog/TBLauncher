@@ -71,8 +71,8 @@ public class PinShortcutConfirm extends Activity implements OnClickListener {
 
         mLauncherApps = getSystemService(LauncherApps.class);
 
-        findViewById(R.id.ok).setOnClickListener(this);
-        findViewById(R.id.cancel).setOnClickListener(this);
+        findViewById(android.R.id.button1).setOnClickListener(this);
+        findViewById(android.R.id.button2).setOnClickListener(this);
 
         mRequest = mLauncherApps.getPinItemRequest(getIntent());
         final ShortcutInfo shortcutInfo = mRequest.getShortcutInfo();
@@ -199,12 +199,12 @@ public class PinShortcutConfirm extends Activity implements OnClickListener {
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
-            case R.id.ok:
+            case android.R.id.button1:
                 acceptShortcut();
                 finish();
                 break;
 
-            case R.id.cancel:
+            case android.R.id.button2:
                 finish();
                 break;
         }

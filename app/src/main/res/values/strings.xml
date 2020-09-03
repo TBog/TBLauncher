@@ -205,4 +205,5 @@
     <string name="result_text2_color">Secondary text color</string>
     <string name="search_bar_text_color">Text color</string>
     <string name="search_bar_icon_color">Icons color</string>
+    <string name="menu_popup_quick_list_customize">Customize quick list</string>
 </resources>

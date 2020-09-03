@@ -16,6 +16,7 @@ import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.LinearLayout;
+import android.widget.ListAdapter;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -27,6 +28,8 @@ import rocks.tbog.tblauncher.dataprovider.FavProvider;
 import rocks.tbog.tblauncher.dataprovider.IProvider;
 import rocks.tbog.tblauncher.dataprovider.Provider;
 import rocks.tbog.tblauncher.entry.EntryItem;
+import rocks.tbog.tblauncher.ui.LinearAdapter;
+import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.UIColors;
 
 public class QuickList {
@@ -94,6 +97,27 @@ public class QuickList {
             mQuickList.addView(view);
 
             view.setOnClickListener(entry::doLaunch);
+            view.setOnLongClickListener(v -> {
+                ListPopup menu = entry.getPopupMenu(v, EntryItem.FLAG_POPUP_MENU_QUICK_LIST);
+
+//                LinearAdapter adapter = menu.getAdapter() instanceof LinearAdapter ? (LinearAdapter) menu.getAdapter() : null;
+//                if (adapter != null) {
+//                    Context ctx = v.getContext();
+//                    adapter.add(new LinearAdapter.ItemTitle(ctx, R.string.menu_popup_title_settings));
+//                    adapter.add(new LinearAdapter.Item(ctx, R.string.menu_popup_quick_list_customize));
+//
+//                    //menu.setOnItemClickListener(entry::);
+//                }
+
+                // check if menu contains elements and if yes show it
+                if (!menu.getAdapter().isEmpty()) {
+                    TBApplication.behaviour(v.getContext()).registerPopup(menu);
+                    menu.show(v);
+                    return true;
+                }
+
+                return false;
+            });
         }
         //mQuickList.setVisibility(mQuickList.getChildCount() == 0 ? View.GONE : View.VISIBLE);
         mQuickList.requestLayout();

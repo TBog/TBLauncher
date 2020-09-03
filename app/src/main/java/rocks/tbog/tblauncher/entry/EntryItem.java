@@ -14,12 +14,12 @@ import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.db.FavRecord;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
-import rocks.tbog.tblauncher.result.ResultAdapter;
 import rocks.tbog.tblauncher.result.ResultHelper;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.DebugInfo;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
+import rocks.tbog.tblauncher.utils.Utilities;
 
 public abstract class EntryItem {
 
@@ -69,6 +69,9 @@ public abstract class EntryItem {
      */
     public static final int FLAG_RELOAD = 0x0100; // 1 << 8
 
+    // Popup menu flags
+    public static final int FLAG_POPUP_MENU_RESULT_LIST = 0x01;
+    public static final int FLAG_POPUP_MENU_QUICK_LIST = 0x02;
 
     // Globally unique ID.
     // Usually starts with provider scheme, e.g. "app://" or "contact://" to
@@ -180,11 +183,15 @@ public abstract class EntryItem {
      *
      * @return an inflated, listener-free PopupMenu
      */
-    ListPopup buildPopupMenu(Context context, LinearAdapter adapter, final ResultAdapter parent, View parentView) {
+    ListPopup buildPopupMenu(Context context, LinearAdapter adapter, View parentView, int flags) {
         adapter.add(new LinearAdapter.ItemTitle(context, R.string.popup_title_hist_fav));
         adapter.add(new LinearAdapter.Item(context, R.string.menu_remove));
         adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_add));
         adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_remove));
+        if (Utilities.checkFlag(flags, FLAG_POPUP_MENU_QUICK_LIST)) {
+            adapter.add(new LinearAdapter.ItemTitle(context, R.string.menu_popup_title_settings));
+            adapter.add(new LinearAdapter.Item(context, R.string.menu_popup_quick_list_customize));
+        }
         return inflatePopupMenu(context, adapter);
     }
 
@@ -195,10 +202,8 @@ public abstract class EntryItem {
         // otherwise don't show the "remove favorite button"
         boolean foundInFavorites = false;
         ArrayList<FavRecord> favRecords = TBApplication.dataHandler(context).getFavorites();
-        for (FavRecord fav : favRecords)
-        {
-            if (id.equals(fav.record))
-            {
+        for (FavRecord fav : favRecords) {
+            if (id.equals(fav.record)) {
                 foundInFavorites = true;
                 break;
             }
@@ -235,9 +240,10 @@ public abstract class EntryItem {
      * @return a PopupMenu object
      */
     @NonNull
-    public ListPopup getPopupMenu(final Context context, final ResultAdapter resultAdapter, final View parentView) {
+    public ListPopup getPopupMenu(final View parentView, int flags) {
+        final Context context = parentView.getContext();
         LinearAdapter menuAdapter = new LinearAdapter();
-        ListPopup menu = buildPopupMenu(context, menuAdapter, resultAdapter, parentView);
+        ListPopup menu = buildPopupMenu(context, menuAdapter, parentView, flags);
 
         menu.setOnItemClickListener((adapter, view, position) -> {
             LinearAdapter.MenuItem item = ((LinearAdapter) adapter).getItem(position);
@@ -249,6 +255,11 @@ public abstract class EntryItem {
         });
 
         return menu;
+    }
+
+    @NonNull
+    public ListPopup getPopupMenu(final View parentView) {
+        return getPopupMenu(parentView, FLAG_POPUP_MENU_RESULT_LIST);
     }
 
     /**
@@ -266,10 +277,14 @@ public abstract class EntryItem {
                 return true;
             case R.string.menu_favorites_add:
                 ResultHelper.launchAddToFavorites(context, this);
-                break;
+                return true;
             case R.string.menu_favorites_remove:
                 ResultHelper.launchRemoveFromFavorites(context, this);
-                break;
+                TBApplication.quickList(context).onFavoritesChanged();
+                return true;
+            case R.string.menu_popup_quick_list_customize:
+                TBApplication.behaviour(context).launchEditQuickListDialog();
+                return true;
         }
 
 //        FullscreenActivity mainActivity = (FullscreenActivity) context;

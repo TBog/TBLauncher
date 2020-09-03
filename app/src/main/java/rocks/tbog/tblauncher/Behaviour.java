@@ -45,6 +45,7 @@ import rocks.tbog.tblauncher.searcher.QuerySearcher;
 import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
 import rocks.tbog.tblauncher.ui.AnimatedListView;
 import rocks.tbog.tblauncher.ui.DialogFragment;
+import rocks.tbog.tblauncher.ui.EditQuickListDialog;
 import rocks.tbog.tblauncher.ui.KeyboardScrollHider;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
@@ -724,6 +725,12 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         });
 
         dialog.show(mTBLauncherActivity.getSupportFragmentManager(), "dialog_edit_tags");
+    }
+
+    public void launchEditQuickListDialog() {
+        EditQuickListDialog dialog = new EditQuickListDialog();
+        openFragmentDialog(dialog);
+        dialog.show(mTBLauncherActivity.getSupportFragmentManager(), "dialog_edit_quick_list");
     }
 
     private boolean isCustomIconDialogVisible() {

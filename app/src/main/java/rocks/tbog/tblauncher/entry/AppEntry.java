@@ -36,7 +36,6 @@ import rocks.tbog.tblauncher.BuildConfig;
 import rocks.tbog.tblauncher.IconsHandler;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
-import rocks.tbog.tblauncher.result.ResultAdapter;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
@@ -227,7 +226,7 @@ public final class AppEntry extends EntryWithTags {
     }
 
     @Override
-    protected ListPopup buildPopupMenu(Context context, LinearAdapter adapter, final ResultAdapter resultAdapter, View parentView) {
+    protected ListPopup buildPopupMenu(Context context, LinearAdapter adapter, View parentView, int flags) {
 //        if (!(context instanceof TBLauncherActivity) || ((TBLauncherActivity) context).isViewingSearchResults()) {
 //            adapter.add(new ListPopup.Item(context, R.string.menu_remove));
 //        }

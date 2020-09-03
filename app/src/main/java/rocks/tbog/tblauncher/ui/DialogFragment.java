@@ -14,6 +14,8 @@ import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import rocks.tbog.tblauncher.R;
+
 public abstract class DialogFragment<Output> extends androidx.fragment.app.DialogFragment {
     private OnDismissListener mOnDismissListener = null;
     private OnConfirmListener<Output> mOnConfirmListener = null;
@@ -52,7 +54,7 @@ public abstract class DialogFragment<Output> extends androidx.fragment.app.Dialo
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setStyle(DialogFragment.STYLE_NO_FRAME, 0);
+        setStyle(DialogFragment.STYLE_NO_FRAME, R.style.NoTitleDialogTheme);
     }
 
     @NonNull

@@ -65,8 +65,7 @@ public class EditTagsDialog extends DialogFragment<Set<String>> {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        Context context = getContext();
-        assert context != null;
+        Context context = requireContext();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             view.setClipToOutline(true);
