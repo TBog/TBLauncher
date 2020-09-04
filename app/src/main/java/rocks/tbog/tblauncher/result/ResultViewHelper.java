@@ -10,6 +10,8 @@ import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.util.Pair;
+import android.util.TypedValue;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -29,6 +31,7 @@ import rocks.tbog.tblauncher.entry.EntryWithTags;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
 import rocks.tbog.tblauncher.utils.UIColors;
+import rocks.tbog.tblauncher.utils.UISizes;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public final class ResultViewHelper {
@@ -131,6 +134,32 @@ public final class ResultViewHelper {
             return;
         }
         task.executeOnExecutor(iconAsyncExecutor);
+    }
+
+    public static void applyPreferences(int drawFlags, TextView nameView, ImageView iconView) {
+        Context ctx = nameView.getContext();
+
+        nameView.setTextColor(UIColors.getResultTextColor(ctx));
+        nameView.setTextSize(TypedValue.COMPLEX_UNIT_PX, UISizes.getResultTextSize(ctx));
+
+        ViewGroup.LayoutParams params = iconView.getLayoutParams();
+        if (params.width > 0 && params.height > 0) {
+            int size = UISizes.getResultIconSize(ctx);
+            if (params.width != size || params.height != size) {
+                params.width = size;
+                params.height = size;
+                iconView.setLayoutParams(params);
+            }
+        }
+    }
+
+    public static void applyPreferences(int drawFlags, TextView nameView, TextView tagsView, ImageView iconView) {
+        applyPreferences(drawFlags, nameView, iconView);
+
+        Context ctx = tagsView.getContext();
+
+        tagsView.setTextColor(UIColors.getResultText2Color(ctx));
+        tagsView.setTextSize(TypedValue.COMPLEX_UNIT_PX, UISizes.getResultText2Size(ctx));
     }
 
     public static abstract class AsyncSetEntryDrawable extends AsyncTask<Void, Void, Drawable> {

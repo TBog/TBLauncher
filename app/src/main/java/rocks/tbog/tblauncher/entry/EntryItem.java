@@ -270,7 +270,7 @@ public abstract class EntryItem {
      */
     @CallSuper
     boolean popupMenuClickHandler(@NonNull View view, @NonNull LinearAdapter.MenuItem item, @StringRes int stringId, View parentView) {
-        Context context = view.getContext();
+        Context context = parentView.getContext();
         switch (stringId) {
             case R.string.menu_remove:
                 ResultHelper.removeFromResultsAndHistory(this, context);

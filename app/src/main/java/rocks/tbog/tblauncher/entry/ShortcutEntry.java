@@ -151,6 +151,8 @@ public final class ShortcutEntry extends EntryWithTags {
             icon1.setVisibility(View.GONE);
             icon2.setVisibility(View.GONE);
         }
+
+        ResultViewHelper.applyPreferences(drawFlags, nameView, icon1);
     }
 
     private void displayListResult(@NonNull View view, int drawFlags) {
@@ -210,6 +212,8 @@ public final class ShortcutEntry extends EntryWithTags {
 //            shortcutIcon.setImageDrawable(null);
 //            shortcutIcon.setVisibility(View.GONE);
 //        }
+
+        ResultViewHelper.applyPreferences(drawFlags, shortcutName, tagsView, shortcutIcon);
     }
 
     @Override

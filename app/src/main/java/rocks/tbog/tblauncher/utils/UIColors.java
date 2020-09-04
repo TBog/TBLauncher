@@ -13,7 +13,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceManager;
 
-public class UIColors {
+public final class UIColors {
     public static final int COLOR_DEFAULT = 0xFF3cb371;
     private static int CACHED_COLOR_HIGHLIGHT = 0;
     private static int CACHED_COLOR_RESULT_TEXT = 0;
@@ -22,6 +22,9 @@ public class UIColors {
     private static int CACHED_COLOR_CONTACT_ACTION = 0;
     private static int CACHED_COLOR_SEARCH_TEXT = 0;
     private static int CACHED_COLOR_SEARCH_ICON = 0;
+
+    private UIColors() {
+    }
 
     public static void resetCache() {
         CACHED_COLOR_HIGHLIGHT = 0;

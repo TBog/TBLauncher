@@ -33,6 +33,7 @@ import androidx.appcompat.app.AlertDialog;
 import java.util.List;
 
 import rocks.tbog.tblauncher.BuildConfig;
+import rocks.tbog.tblauncher.CustomizeUI;
 import rocks.tbog.tblauncher.IconsHandler;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
@@ -159,7 +160,6 @@ public final class AppEntry extends EntryWithTags {
 
     private void displayGridResult(@NonNull View view, int drawFlags) {
         TextView nameView = view.findViewById(android.R.id.text1);
-        nameView.setTextColor(UIColors.getResultTextColor(view.getContext()));
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_NAME))
             ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, nameView);
         else
@@ -173,17 +173,17 @@ public final class AppEntry extends EntryWithTags {
             appIcon.setImageDrawable(null);
             appIcon.setVisibility(View.GONE);
         }
+
+        ResultViewHelper.applyPreferences(drawFlags, nameView, appIcon);
     }
 
     private void displayListResult(@NonNull View view, int drawFlags) {
-        Context context = view.getContext();
+        final Context context = view.getContext();
 
         TextView nameView = view.findViewById(R.id.item_app_name);
-        nameView.setTextColor(UIColors.getResultTextColor(context));
         ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, nameView);
 
         TextView tagsView = view.findViewById(R.id.item_app_tag);
-        tagsView.setTextColor(UIColors.getResultText2Color(context));
         // Hide tags view if tags are empty
         if (getTags().isEmpty()) {
             tagsView.setVisibility(View.GONE);
@@ -213,6 +213,8 @@ public final class AppEntry extends EntryWithTags {
 //            int primaryColor = UIColors.getPrimaryColor(context);
 //            notificationView.setColorFilter(primaryColor);
 //        }
+
+        ResultViewHelper.applyPreferences(drawFlags, nameView, tagsView, appIcon);
     }
 
     static class ShortcutItem extends LinearAdapter.ItemString {

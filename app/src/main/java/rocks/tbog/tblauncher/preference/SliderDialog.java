@@ -17,6 +17,7 @@ import rocks.tbog.tblauncher.R;
 public class SliderDialog extends PreferenceDialogFragmentCompat {
 
     protected TextView mTextView2;
+    protected int mSliderOffset = 0;
 
     public static SliderDialog newInstance(String key) {
         SliderDialog fragment = new SliderDialog();
@@ -65,7 +66,6 @@ public class SliderDialog extends PreferenceDialogFragmentCompat {
         SeekBar seekBar = root.findViewById(R.id.seekBar); // seekBar default minimum is set to 0
         if (key.endsWith("-alpha"))
             seekBar.setMax(255);
-        seekBar.setProgress((Integer) preference.getValue());
 
         switch (key) {
             case "search-bar-size":
@@ -76,12 +76,29 @@ public class SliderDialog extends PreferenceDialogFragmentCompat {
                 break;
         }
 
+        // because we can't set minimum below API 26 we make our own
+        switch (key) {
+            case "result-text-size":
+            case "result-text2-size":
+            case "result-icon-size":
+                mSliderOffset = 2;
+                seekBar.setMax(seekBar.getMax() - mSliderOffset);
+                break;
+        }
+        seekBar.setProgress((Integer) preference.getValue() - mSliderOffset);
+
+        // update display value
         mTextView2 = root.findViewById(android.R.id.text2);
-        mTextView2.setText(mTextView2.getResources().getString(R.string.value, seekBar.getProgress()));
+        {
+            int progress = seekBar.getProgress();
+            progress += mSliderOffset;
+            mTextView2.setText(mTextView2.getResources().getString(R.string.value, progress));
+        }
 
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                progress += mSliderOffset;
                 mTextView2.setText(mTextView2.getResources().getString(R.string.value, progress));
             }
 
@@ -93,6 +110,7 @@ public class SliderDialog extends PreferenceDialogFragmentCompat {
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 int progress = seekBar.getProgress();
+                progress += mSliderOffset;
                 CustomDialogPreference pref = ((CustomDialogPreference) SliderDialog.this.getPreference());
                 pref.setValue(progress);
             }

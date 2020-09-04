@@ -128,6 +128,8 @@ public final class ContactEntry extends EntryItem {
             contactIcon.setImageDrawable(null);
             contactIcon.setVisibility(View.GONE);
         }
+
+        ResultViewHelper.applyPreferences(drawFlags, nameView, contactIcon);
     }
 
     private void displayListResult(@NonNull View view, int drawFlags) {
@@ -205,6 +207,8 @@ public final class ContactEntry extends EntryItem {
             phoneButton.setVisibility(View.INVISIBLE);
             messageButton.setVisibility(View.INVISIBLE);
         }
+
+        ResultViewHelper.applyPreferences(drawFlags, contactName, contactPhone, contactIcon);
     }
 
     @Override

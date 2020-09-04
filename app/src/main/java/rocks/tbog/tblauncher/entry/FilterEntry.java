@@ -65,6 +65,8 @@ public class FilterEntry extends EntryItem {
             appIcon.setImageDrawable(null);
             appIcon.setVisibility(View.GONE);
         }
+
+        ResultViewHelper.applyPreferences(drawFlags, nameView, appIcon);
     }
 
     @Override

@@ -70,13 +70,15 @@
 
     <!-- Content Description -->
     <string name="cd_show_all_apps">Show all applications</string>
-    <string name="select_alpha">Drag the slider to select the desired opacity</string>
+    <string name="title_select_alpha">Drag the slider to select the desired opacity</string>
+    <string name="title_select_size">Drag the slider to select the desired size</string>
     <string name="search_bar_section">Search bar</string>
     <string name="search_bar_size">Bar and text size</string>
     <string name="result_list_section">Result list</string>
     <string name="icons_pack">Choose pack</string>
     <string name="icons_pack_default_name">System icons</string>
     <string name="value">value %d</string>
+    <string name="size">&lt;%d&gt;</string>
     <string name="menu_app_rename">Rename app</string>
     <string name="menu_shortcut_rename">Rename shortcut</string>
     <string name="menu_custom_icon">Change icon</string>
@@ -201,9 +203,12 @@
     <string name="quick_list_alpha">Background Opacity</string>
     <string name="quick_list_toggle_color">Toggle background color</string>
     <string name="contact_action_color">Contact action color</string>
+    <string name="result_icon_size">Icon size</string>
     <string name="result_text_color">Text color</string>
     <string name="result_text2_color">Secondary text color</string>
     <string name="search_bar_text_color">Text color</string>
     <string name="search_bar_icon_color">Icons color</string>
     <string name="menu_popup_quick_list_customize">Customize quick list</string>
+    <string name="result_text_size">Text size</string>
+    <string name="result_text2_size">Secondary text size</string>
 </resources>

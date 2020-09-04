@@ -38,6 +38,7 @@ import rocks.tbog.tblauncher.preference.QuickListPreferenceDialog;
 import rocks.tbog.tblauncher.preference.SliderDialog;
 import rocks.tbog.tblauncher.utils.SystemUiVisibility;
 import rocks.tbog.tblauncher.utils.UIColors;
+import rocks.tbog.tblauncher.utils.UISizes;
 
 public class SettingsActivity extends AppCompatActivity implements PreferenceFragmentCompat.OnPreferenceStartScreenCallback/*, PreferenceFragmentCompat.OnPreferenceStartFragmentCallback*/ {
 
@@ -257,6 +258,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "search-bar-size":
                     case "quick-list-alpha":
                     case "quick-list-size":
+                    case "result-text-size":
+                    case "result-text2-size":
+                    case "result-icon-size":
                         dialogFragment = SliderDialog.newInstance(key);
                         break;
                     case "exit-app":
@@ -336,6 +340,11 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 case "search-bar-text-color":
                 case "search-bar-icon-color":
                     UIColors.resetCache();
+                    break;
+                case "result-text-size":
+                case "result-text2-size":
+                case "result-icon-size":
+                    UISizes.resetCache();
                     break;
                 case "adaptive-shape":
                 case "force-adaptive":

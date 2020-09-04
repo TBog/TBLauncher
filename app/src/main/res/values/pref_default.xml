@@ -9,4 +9,7 @@
     <integer name="default_color_highlight" translatable="false">0x3cb371</integer>
     <integer name="default_color_text" translatable="false">0xffffff</integer>
     <integer name="default_color_text2" translatable="false">0xbbffbb</integer>
+    <integer name="default_size_text" translatable="false">14</integer>                 <!-- sp -->
+    <integer name="default_size_text2" translatable="false">12</integer>                <!-- sp -->
+    <integer name="default_size_icon" translatable="false">48</integer>                 <!-- dp -->
 </resources>
