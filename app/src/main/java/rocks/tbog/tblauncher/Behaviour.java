@@ -204,8 +204,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 
         // clear button actions
         mClearButton.setOnClickListener(v -> {
-            mSearchEditText.setText("");
-            showKeyboard();
+            clearSearch();
         });
         mClearButton.setOnLongClickListener(v -> {
             mSearchEditText.setText("");
@@ -593,6 +592,13 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         mResultList.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_DISABLED);
         // Add a message to be processed after all current messages, to reset transcript mode to default
         mResultList.post(() -> mResultList.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL));
+    }
+
+    public void clearSearch() {
+        if (mSearchEditText == null)
+            return;
+        mSearchEditText.setText("");
+        showKeyboard();
     }
 
     public void updateSearchRecords() {

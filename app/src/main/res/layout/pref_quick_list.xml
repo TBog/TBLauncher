@@ -3,8 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:orientation="vertical"
     android:measureWithLargestChild="true"
+    android:orientation="vertical"
     android:theme="@style/SettingsDialogTheme">
 
     <TextView
@@ -34,14 +34,14 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/dialog_padding_horizontal"
-        android:text="@string/edit_quick_list_filters" />
+        android:text="@string/edit_quick_list_filters_and_actions" />
 
     <GridView
         android:id="@+id/filterGrid"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"
         android:layout_marginHorizontal="@dimen/dialog_padding_horizontal"
+        android:layout_weight="1"
         android:columnWidth="@dimen/app_grid_column_width"
         android:gravity="center"
         android:numColumns="auto_fit"

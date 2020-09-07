@@ -16,19 +16,19 @@ import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.LinearLayout;
-import android.widget.ListAdapter;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.preference.PreferenceManager;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import rocks.tbog.tblauncher.dataprovider.FavProvider;
 import rocks.tbog.tblauncher.dataprovider.IProvider;
 import rocks.tbog.tblauncher.dataprovider.Provider;
 import rocks.tbog.tblauncher.entry.EntryItem;
-import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.UIColors;
 
@@ -44,9 +44,11 @@ public class QuickList {
 
     // is any filter activated?
     private boolean bFilterOn = false;
+    // is any action activated?
+    private boolean bActionOn = false;
 
     // last filter scheme, used for better toggle behaviour
-    private String mLastFilter = null;
+    private String mLastSelection = null;
 
     public Context getContext() {
         return mTBLauncherActivity;
@@ -123,13 +125,52 @@ public class QuickList {
         mQuickList.requestLayout();
     }
 
+    public void toggleProvider(View v, IProvider provider, @NonNull java.util.Comparator<? super EntryItem> comparator) {
+        Context ctx = v.getContext();
+        TBApplication app = TBApplication.getApplication(ctx);
+        Object tag_actionId = v.getTag(R.id.tag_actionId);
+        String actionId = tag_actionId instanceof String ? (String)tag_actionId : "";
+
+        // toggle off any filter
+        if (bFilterOn)
+        {
+            animToggleOff();
+            bFilterOn = false;
+            app.behaviour().filterResults(null);
+        }
+
+        // show action provider content
+        {
+            // if the last action is not the current action, toggle on this action
+            if (!bActionOn || !actionId.equals(mLastSelection)) {
+                List<? extends EntryItem> list;
+                list = provider != null ? provider.getPojos() : null;
+                if (list != null) {
+                    // copy list in order to sort it
+                    list = new ArrayList<>(list);
+                    //TODO: do we need this on another thread?
+                    Collections.sort(list, comparator);
+                    app.behaviour().clearSearch();
+                    app.behaviour().updateAdapter(list, false);
+                    mLastSelection = actionId;
+                    bActionOn = true;
+                }
+            }
+            else
+            {
+                // to toggle off the action, set bActionOn to false
+                app.behaviour().clearSearch();
+            }
+        }
+    }
+
     public void toggleFilter(View v, IProvider provider, @NonNull String filterName) {
         Context ctx = v.getContext();
         TBApplication app = TBApplication.getApplication(ctx);
 
         // if there is no search we need to filter, just show all matching entries
         if (bAdapterEmpty) {
-            if (bFilterOn && provider != null && filterName.equals(mLastFilter)) {
+            if (bFilterOn && provider != null && filterName.equals(mLastSelection)) {
                 app.behaviour().clearAdapter();
                 bFilterOn = false;
             } else {
@@ -137,7 +178,7 @@ public class QuickList {
                 list = provider != null ? provider.getPojos() : null;
                 if (list != null) {
                     app.behaviour().updateAdapter(list, false);
-                    mLastFilter = filterName;
+                    mLastSelection = filterName;
                     bFilterOn = true;
                 } else {
                     bFilterOn = false;
@@ -146,14 +187,14 @@ public class QuickList {
             // updateAdapter will change `bAdapterEmpty` and we change it back because we want
             // bAdapterEmpty to represent a search we need to filter
             bAdapterEmpty = true;
-        } else if (bFilterOn && (provider == null || filterName.equals(mLastFilter))) {
+        } else if (bFilterOn && (provider == null || filterName.equals(mLastSelection))) {
             animToggleOff();
             bFilterOn = false;
             app.behaviour().filterResults(null);
         } else if (provider != null) {
             animToggleOff();
             bFilterOn = true;
-            mLastFilter = filterName;
+            mLastSelection = filterName;
             app.behaviour().filterResults(filterName);
         }
 
@@ -195,7 +236,7 @@ public class QuickList {
         int n = mQuickList.getChildCount();
         for (int i = 0; i < n; i += 1) {
             View view = mQuickList.getChildAt(i);
-            if (mLastFilter == null || mLastFilter == view.getTag(R.id.tag_filterName)) {
+            if (mLastSelection == null || mLastSelection == view.getTag(R.id.tag_filterName)) {
                 if (view.getTag(R.id.tag_anim) instanceof ValueAnimator) {
                     ValueAnimator colorAnim = (ValueAnimator) view.getTag(R.id.tag_anim);
                     colorAnim.reverse();
@@ -279,6 +320,7 @@ public class QuickList {
     public void adapterCleared() {
         animToggleOff();
         bFilterOn = false;
+        bActionOn = false;
         bAdapterEmpty = true;
         if (!mAlwaysVisible)
             hideQuickList(true);
@@ -288,6 +330,7 @@ public class QuickList {
         show();
         animToggleOff();
         bFilterOn = false;
+        bActionOn = false;
         bAdapterEmpty = false;
     }
 

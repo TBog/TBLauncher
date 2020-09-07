@@ -20,9 +20,11 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import rocks.tbog.tblauncher.dataprovider.ActionProvider;
 import rocks.tbog.tblauncher.dataprovider.FavProvider;
 import rocks.tbog.tblauncher.dataprovider.FilterProvider;
 import rocks.tbog.tblauncher.db.FavRecord;
+import rocks.tbog.tblauncher.entry.ActionEntry;
 import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.entry.ContactEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
@@ -33,7 +35,7 @@ public class EditQuickList {
 
     private final List<EntryItem> mQuickList = new ArrayList<>();
     private LinearLayout mQuickListContainer;
-    private GridView mFilterGrid;
+    private GridView mFilterAndActionGrid;
     private GridView mFavoritesGrid;
     private SharedPreferences mPref;
     private EntryAdapter.OnItemClickListener mAddToQuickList = (adapter, view, pos) -> {
@@ -48,7 +50,7 @@ public class EditQuickList {
         TBApplication.dataHandler(context).setQuickList(idList);
     }
 
-    public void bindView(View view){
+    public void bindView(View view) {
         // keep the preview the same as the actual thing
         mQuickListContainer = view.findViewById(R.id.preview);
         {
@@ -61,32 +63,39 @@ public class EditQuickList {
         QuickList.applyUiPref(mPref, mQuickListContainer);
         populateList();
 
-        mFilterGrid = view.findViewById(R.id.filterGrid);
+        mFilterAndActionGrid = view.findViewById(R.id.filterGrid);
         mFavoritesGrid = view.findViewById(R.id.favoritesGrid);
 
         {
             int color = QuickList.getBackgroundColor(mPref);
             PaintDrawable drawable = new PaintDrawable();
             drawable.getPaint().setColor(color);
-            mFilterGrid.setBackground(drawable);
+            mFilterAndActionGrid.setBackground(drawable);
         }
 
         {
             TBApplication.ui(view.getContext()).setResultListPref(mFavoritesGrid);
         }
 
-        // filters
+        // filters and actions
         {
             ArrayList<EntryItem> list = new ArrayList<>();
             EntryAdapter adapter = new EntryAdapter(list);
-            mFilterGrid.setAdapter(adapter);
+            mFilterAndActionGrid.setAdapter(adapter);
             new LoadDataForAdapter(adapter, () -> {
                 Context ctx = mQuickListContainer.getContext();
                 DataHandler dataHandler = TBApplication.dataHandler(ctx);
-                FilterProvider provider = dataHandler.getFilterProvider();
-                List<? extends EntryItem> filterEntries = provider != null ? provider.getPojos() : Collections.emptyList();
-                ArrayList<EntryItem> data = new ArrayList<>(filterEntries.size());
-                data.addAll(filterEntries);
+                ArrayList<EntryItem> data = new ArrayList<>();
+                {
+                    FilterProvider provider = dataHandler.getFilterProvider();
+                    List<? extends EntryItem> entryItems = provider != null ? provider.getPojos() : Collections.emptyList();
+                    data.addAll(entryItems);
+                }
+                {
+                    ActionProvider provider = dataHandler.getActionProvider();
+                    List<? extends EntryItem> entryItems = provider != null ? provider.getPojos() : Collections.emptyList();
+                    data.addAll(entryItems);
+                }
                 return data;
             }).execute();
         }
@@ -103,15 +112,15 @@ public class EditQuickList {
                 ArrayList<EntryItem> data = new ArrayList<>(favRecords.size());
                 for (FavRecord fav : favRecords) {
                     EntryItem entry = dataHandler.getPojo(fav.record);
-                    // we have a separate section for filters, don't duplicate
-                    if (entry != null && !(entry instanceof FilterEntry))
+                    // we have a separate section for filters and actions, don't duplicate
+                    if (entry != null && !(entry instanceof FilterEntry) && !(entry instanceof ActionEntry))
                         data.add(entry);
                 }
                 return data;
             }).execute();
         }
 
-        ((EntryAdapter) mFilterGrid.getAdapter()).setOnItemClickListener(mAddToQuickList);
+        ((EntryAdapter) mFilterAndActionGrid.getAdapter()).setOnItemClickListener(mAddToQuickList);
         ((EntryAdapter) mFavoritesGrid.getAdapter()).setOnItemClickListener(mAddToQuickList);
 
     }

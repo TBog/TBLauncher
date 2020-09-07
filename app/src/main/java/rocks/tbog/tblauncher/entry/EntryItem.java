@@ -23,6 +23,9 @@ import rocks.tbog.tblauncher.utils.Utilities;
 
 public abstract class EntryItem {
 
+    public static final RelevanceComparator RELEVANCE_COMPARATOR = new RelevanceComparator();
+    public static final NameComparator NAME_COMPARATOR = new NameComparator();
+
     /**
      * the layout will be used in a ListView
      */
@@ -174,6 +177,16 @@ public abstract class EntryItem {
                     return lhs.name.compareTo(rhs.name);
             }
             return lhs.getRelevance() - rhs.getRelevance();
+        }
+
+    }
+
+    public static class NameComparator implements java.util.Comparator<EntryItem> {
+        @Override
+        public int compare(EntryItem lhs, EntryItem rhs) {
+            if (lhs.normalizedName != null && rhs.normalizedName != null)
+                return lhs.normalizedName.compareTo(rhs.normalizedName);
+            return lhs.name.compareTo(rhs.name);
         }
 
     }

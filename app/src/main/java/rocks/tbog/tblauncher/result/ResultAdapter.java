@@ -14,9 +14,11 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.preference.PreferenceManager;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.entry.AppEntry;
@@ -32,9 +34,9 @@ public class ResultAdapter extends BaseAdapter implements SectionIndexer, Filter
      * Array list containing all the results currently displayed
      */
     @NonNull
-    private final List<EntryItem> results;
+    private final ArrayList<EntryItem> results;
     @Nullable
-    private List<EntryItem> resultsOriginal = null;
+    private ArrayList<EntryItem> resultsOriginal = null;
 
     // Mapping from letter to a position (only used for fast scroll, when viewing app list)
     private HashMap<String, Integer> alphaIndexer = new HashMap<>();
@@ -42,7 +44,7 @@ public class ResultAdapter extends BaseAdapter implements SectionIndexer, Filter
     private String[] sections = new String[0];
     private Filter mFilter = new FilterById();
 
-    public ResultAdapter(ArrayList<EntryItem> results) {
+    public ResultAdapter(@NotNull ArrayList<EntryItem> results) {
         this.results = results;
     }
 
@@ -93,7 +95,7 @@ public class ResultAdapter extends BaseAdapter implements SectionIndexer, Filter
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         int drawFlags = EntryItem.FLAG_DRAW_NAME | EntryItem.FLAG_DRAW_LIST;
-        if ( prefs.getBoolean("tags-enabled", true) )
+        if (prefs.getBoolean("tags-enabled", true))
             drawFlags |= EntryItem.FLAG_DRAW_TAGS;
         if (prefs.getBoolean("icons-visible", true))
             drawFlags |= EntryItem.FLAG_DRAW_ICON;
@@ -162,7 +164,7 @@ public class ResultAdapter extends BaseAdapter implements SectionIndexer, Filter
      *
      * @param results new list of results
      */
-    public void updateResults(List<? extends EntryItem> results) {
+    public void updateResults(Collection<? extends EntryItem> results) {
         resultsOriginal = null;
         this.results.clear();
         this.results.addAll(results);
@@ -281,7 +283,7 @@ public class ResultAdapter extends BaseAdapter implements SectionIndexer, Filter
         protected void publishResults(CharSequence constraint, FilterResults filterResults) {
             if (filterResults != null) {
                 results.clear();
-                results.addAll((List<EntryItem>) filterResults.values);
+                results.addAll((ArrayList<EntryItem>) filterResults.values);
                 notifyDataSetChanged();
             } else if (resultsOriginal != null) {
                 results.clear();

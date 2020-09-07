@@ -32,6 +32,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import rocks.tbog.tblauncher.dataprovider.ActionProvider;
 import rocks.tbog.tblauncher.dataprovider.AppCacheProvider;
 import rocks.tbog.tblauncher.dataprovider.AppProvider;
 import rocks.tbog.tblauncher.dataprovider.ContactsProvider;
@@ -124,6 +125,11 @@ public class DataHandler extends BroadcastReceiver
             ProviderEntry providerEntry = new ProviderEntry();
             providerEntry.provider = new FavProvider(context);
             providers.put("favorites", providerEntry);
+        }
+        {
+            ProviderEntry providerEntry = new ProviderEntry();
+            providerEntry.provider = new ActionProvider(context);
+            providers.put("actions", providerEntry);
         }
 
 //        ProviderEntry calculatorEntry = new ProviderEntry();
@@ -729,6 +735,12 @@ public class DataHandler extends BroadcastReceiver
     public FilterProvider getFilterProvider() {
         ProviderEntry entry = this.providers.get("filters");
         return (entry != null) ? ((FilterProvider) entry.provider) : null;
+    }
+
+    @Nullable
+    public ActionProvider getActionProvider() {
+        ProviderEntry entry = this.providers.get("actions");
+        return (entry != null) ? ((ActionProvider) entry.provider) : null;
     }
 
 //    @Nullable
