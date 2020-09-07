@@ -11,8 +11,16 @@ import android.content.pm.LauncherActivityInfo;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
+import android.graphics.ComposeShader;
+import android.graphics.LinearGradient;
+import android.graphics.Paint;
+import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.graphics.Shader;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.PaintDrawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.RectShape;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -201,6 +209,28 @@ public final class AppEntry extends EntryWithTags {
         } else {
             appIcon.setImageDrawable(null);
             appIcon.setVisibility(View.GONE);
+        }
+
+        ImageView gutterView = view.findViewById(R.id.gutter);
+        //if (Utilities.checkFlag(drawFlags, FLAG_DRAW_GUTTER))
+        {
+            PaintDrawable gutter = new PaintDrawable();
+            gutter.setShape(new RectShape());
+            gutter.setShaderFactory(new ShapeDrawable.ShaderFactory() {
+                @Override
+                public Shader resize(int w, int h) {
+                    return new LinearGradient(0, 0, w, 0, 0xFFffffff, 0x00ffffff, Shader.TileMode.CLAMP);
+//                    LinearGradient gradient1 = new LinearGradient(0, 0, w, 0, 0xFFffffff, 0x00ffffff, Shader.TileMode.CLAMP);
+//                    LinearGradient gradient2 = new LinearGradient(w, 0, w*.5f, h*.5f, 0x00ffffff, 0xFFffffff, Shader.TileMode.CLAMP);
+//                    LinearGradient gradient3 = new LinearGradient(w, h, w*.5f, h*.5f, 0x00ffffff, 0xFFffffff, Shader.TileMode.CLAMP);
+//
+//                    ComposeShader compose = new ComposeShader(gradient1, gradient2, PorterDuff.Mode.MULTIPLY);
+//                    return new ComposeShader(compose, gradient3, PorterDuff.Mode.MULTIPLY);
+                }
+            });
+            gutterView.setImageDrawable(gutter);
+            Paint paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+            gutterView.setLayerType(View.LAYER_TYPE_SOFTWARE, paint);
         }
 
         //TODO: enable notification badges
