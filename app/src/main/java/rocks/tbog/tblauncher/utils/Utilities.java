@@ -131,6 +131,10 @@ public class Utilities {
         return (flags & flagToCheck) == flagToCheck;
     }
 
+    public static boolean checkAnyFlag(int flags, int anyFlag) {
+        return (flags & anyFlag) != 0;
+    }
+
     /**
      * Return a valid activity or null given a view
      * @param view any view of an activity

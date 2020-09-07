@@ -142,8 +142,8 @@ public final class ResultViewHelper {
         nameView.setTextColor(UIColors.getResultTextColor(ctx));
         nameView.setTextSize(TypedValue.COMPLEX_UNIT_PX, UISizes.getResultTextSize(ctx));
 
-        ViewGroup.LayoutParams params = iconView.getLayoutParams();
-        if (params.width > 0 && params.height > 0) {
+        if (Utilities.checkAnyFlag(drawFlags, EntryItem.FLAG_DRAW_LIST | EntryItem.FLAG_DRAW_GRID)) {
+            ViewGroup.LayoutParams params = iconView.getLayoutParams();
             int size = UISizes.getResultIconSize(ctx);
             if (params.width != size || params.height != size) {
                 params.width = size;
@@ -151,6 +151,13 @@ public final class ResultViewHelper {
                 iconView.setLayoutParams(params);
             }
         }
+
+//        if (Utilities.checkFlag(drawFlags, EntryItem.FLAG_DRAW_LIST))
+//        {
+//            int[] colors = new int[] {0xFF000000, 0xFF00ff00, 0xFF000000};
+//            GradientDrawable bkg = new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, colors);
+//            iconView.setBackground(bkg);
+//        }
     }
 
     public static void applyPreferences(int drawFlags, TextView nameView, TextView tagsView, ImageView iconView) {
