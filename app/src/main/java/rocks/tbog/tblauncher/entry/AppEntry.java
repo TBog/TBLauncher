@@ -33,7 +33,6 @@ import androidx.appcompat.app.AlertDialog;
 import java.util.List;
 
 import rocks.tbog.tblauncher.BuildConfig;
-import rocks.tbog.tblauncher.CustomizeUI;
 import rocks.tbog.tblauncher.IconsHandler;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
@@ -41,13 +40,11 @@ import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
-import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_DYNAMIC;
 import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_MANIFEST;
-import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_PINNED;
 
 public final class AppEntry extends EntryWithTags {
 
@@ -234,7 +231,7 @@ public final class AppEntry extends EntryWithTags {
 //        }
 
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            List<ShortcutInfo> list = ShortcutUtil.getShortcut(context, getPackageName(), FLAG_MATCH_MANIFEST | FLAG_MATCH_PINNED | FLAG_MATCH_DYNAMIC);
+            List<ShortcutInfo> list = ShortcutUtil.getShortcut(context, getPackageName(), FLAG_MATCH_MANIFEST | FLAG_MATCH_DYNAMIC);
             for (ShortcutInfo info : list) {
                 CharSequence label = info.getLongLabel();
                 if (label == null)
