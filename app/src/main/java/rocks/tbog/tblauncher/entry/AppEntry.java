@@ -246,7 +246,7 @@ public final class AppEntry extends EntryWithTags {
         }
 
         adapter.add(new LinearAdapter.ItemTitle(context, R.string.popup_title_hist_fav));
-        adapter.add(new LinearAdapter.Item(context, R.string.menu_exclude));
+        //adapter.add(new LinearAdapter.Item(context, R.string.menu_exclude));
         adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_add));
         adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_remove));
 
