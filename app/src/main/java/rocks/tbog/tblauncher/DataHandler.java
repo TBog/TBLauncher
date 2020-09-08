@@ -980,14 +980,15 @@ public class DataHandler extends BroadcastReceiver
 
     public void setQuickList(Iterable<String> records) {
         ArrayList<FavRecord> oldFav = getFavorites();
-        int pos = 0;
+        int pos = 1;
         for (String record : records) {
+            // remove from oldFav the current record
             for (Iterator<FavRecord> iterator = oldFav.iterator(); iterator.hasNext(); ) {
                 FavRecord favRecord = iterator.next();
                 if (favRecord.record.equals(record))
                     iterator.remove();
             }
-            String position = String.valueOf(pos);
+            String position = String.format("%08x", pos);
             if (!DBHelper.setQuickListPosition(context, record, position)) {
                 FavRecord favRecord = new FavRecord();
                 favRecord.record = record;
@@ -995,7 +996,7 @@ public class DataHandler extends BroadcastReceiver
                 favRecord.position = position;
                 DBHelper.setFavorite(context, favRecord);
             }
-            pos += 1000;
+            pos += 11;
         }
 
         for (FavRecord favRecord : oldFav) {
