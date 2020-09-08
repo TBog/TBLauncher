@@ -33,7 +33,7 @@ import rocks.tbog.tblauncher.entry.ShortcutEntry;
 
 public class EditQuickList {
 
-    private final List<EntryItem> mQuickList = new ArrayList<>();
+    private final ArrayList<EntryItem> mQuickList = new ArrayList<>();
     private LinearLayout mQuickListContainer;
     private GridView mFilterAndActionGrid;
     private GridView mFavoritesGrid;
@@ -44,7 +44,7 @@ public class EditQuickList {
     };
 
     public void applyChanges(@NonNull Context context) {
-        List<String> idList = new ArrayList<>(mQuickList.size());
+        ArrayList<String> idList = new ArrayList<>(mQuickList.size());
         for (EntryItem entry : mQuickList)
             idList.add(entry.id);
         TBApplication.dataHandler(context).setQuickList(idList);

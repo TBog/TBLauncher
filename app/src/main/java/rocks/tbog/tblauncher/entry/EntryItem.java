@@ -198,7 +198,7 @@ public abstract class EntryItem {
      */
     ListPopup buildPopupMenu(Context context, LinearAdapter adapter, View parentView, int flags) {
         adapter.add(new LinearAdapter.ItemTitle(context, R.string.popup_title_hist_fav));
-        adapter.add(new LinearAdapter.Item(context, R.string.menu_remove));
+        //adapter.add(new LinearAdapter.Item(context, R.string.menu_remove_history));
         adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_add));
         adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_remove));
         if (Utilities.checkFlag(flags, FLAG_POPUP_MENU_QUICK_LIST)) {
@@ -285,7 +285,7 @@ public abstract class EntryItem {
     boolean popupMenuClickHandler(@NonNull View view, @NonNull LinearAdapter.MenuItem item, @StringRes int stringId, View parentView) {
         Context context = parentView.getContext();
         switch (stringId) {
-            case R.string.menu_remove:
+            case R.string.menu_remove_history:
                 ResultHelper.removeFromResultsAndHistory(this, context);
                 return true;
             case R.string.menu_favorites_add:

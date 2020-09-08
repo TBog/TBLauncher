@@ -19,7 +19,7 @@ public class ActionProvider extends StaticProvider<ActionEntry> {
         // show apps sorted by name
         {
             String id = ActionEntry.SCHEME + "show/apps/byName";
-            ActionEntry actionEntry = new ActionEntry(id, R.drawable.ic_android);
+            ActionEntry actionEntry = new ActionEntry(id, R.drawable.ic_apps_az);
             actionEntry.setAction(v -> {
                 Context ctx = v.getContext();
                 Provider<? extends EntryItem> provider = TBApplication.dataHandler(ctx).getAppProvider();
@@ -31,7 +31,7 @@ public class ActionProvider extends StaticProvider<ActionEntry> {
         // show apps sorted by name in reverse order
         {
             String id = ActionEntry.SCHEME + "show/apps/byNameReversed";
-            ActionEntry actionEntry = new ActionEntry(id, R.drawable.ic_android);
+            ActionEntry actionEntry = new ActionEntry(id, R.drawable.ic_apps_za);
             actionEntry.setAction(v -> {
                 Context ctx = v.getContext();
                 Provider<? extends EntryItem> provider = TBApplication.dataHandler(ctx).getAppProvider();
@@ -43,7 +43,7 @@ public class ActionProvider extends StaticProvider<ActionEntry> {
         // show contacts sorted by name
         {
             String id = ActionEntry.SCHEME + "show/contacts/byName";
-            ActionEntry actionEntry = new ActionEntry(id, R.drawable.ic_contact);
+            ActionEntry actionEntry = new ActionEntry(id, R.drawable.ic_contacts_az);
             actionEntry.setAction(v -> {
                 Context ctx = v.getContext();
                 Provider<? extends EntryItem> provider = TBApplication.dataHandler(ctx).getContactsProvider();
@@ -55,7 +55,7 @@ public class ActionProvider extends StaticProvider<ActionEntry> {
         // show contacts sorted by name in reverse order
         {
             String id = ActionEntry.SCHEME + "show/contacts/byNameReversed";
-            ActionEntry actionEntry = new ActionEntry(id, R.drawable.ic_contact);
+            ActionEntry actionEntry = new ActionEntry(id, R.drawable.ic_contacts_za);
             actionEntry.setAction(v -> {
                 Context ctx = v.getContext();
                 Provider<? extends EntryItem> provider = TBApplication.dataHandler(ctx).getContactsProvider();
@@ -67,11 +67,23 @@ public class ActionProvider extends StaticProvider<ActionEntry> {
         // show shortcuts sorted by name
         {
             String id = ActionEntry.SCHEME + "show/shortcuts/byName";
-            ActionEntry actionEntry = new ActionEntry(id, R.drawable.ic_send);
+            ActionEntry actionEntry = new ActionEntry(id, R.drawable.ic_shortcuts_az);
             actionEntry.setAction(v -> {
                 Context ctx = v.getContext();
                 Provider<? extends EntryItem> provider = TBApplication.dataHandler(ctx).getShortcutsProvider();
                 TBApplication.quickList(ctx).toggleProvider(v, provider, EntryItem.NAME_COMPARATOR);
+            });
+            actionEntry.setName(context.getResources().getString(R.string.action_show_shortcuts));
+            pojos.add(actionEntry);
+        }
+        // show shortcuts sorted by name in reverse order
+        {
+            String id = ActionEntry.SCHEME + "show/shortcuts/byNameReversed";
+            ActionEntry actionEntry = new ActionEntry(id, R.drawable.ic_shortcuts_za);
+            actionEntry.setAction(v -> {
+                Context ctx = v.getContext();
+                Provider<? extends EntryItem> provider = TBApplication.dataHandler(ctx).getShortcutsProvider();
+                TBApplication.quickList(ctx).toggleProvider(v, provider, Collections.reverseOrder(EntryItem.NAME_COMPARATOR));
             });
             actionEntry.setName(context.getResources().getString(R.string.action_show_shortcuts));
             pojos.add(actionEntry);
