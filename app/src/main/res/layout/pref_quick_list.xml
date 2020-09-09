@@ -14,6 +14,7 @@
         android:layout_marginTop="@dimen/dialog_padding_vertical"
         android:text="@string/edit_quick_list_preview" />
 
+    <!-- The preview will get the same margin as the real thing (25% of the height) -->
     <LinearLayout
         android:id="@+id/preview"
         android:layout_width="match_parent"
@@ -25,10 +26,6 @@
         android:orientation="horizontal"
         android:paddingHorizontal="@dimen/result_margin_horizontal"
         android:paddingVertical="@dimen/result_margin_vertical" />
-
-    <View
-        style="@style/SeparatorHorizontal"
-        android:layout_marginVertical="@dimen/result_margin_vertical" />
 
     <TextView
         android:layout_width="match_parent"
@@ -42,6 +39,7 @@
         android:layout_height="0dp"
         android:layout_marginHorizontal="@dimen/dialog_padding_horizontal"
         android:layout_weight="1"
+        android:clipToPadding="false"
         android:columnWidth="@dimen/app_grid_column_width"
         android:gravity="center"
         android:numColumns="auto_fit"
@@ -52,14 +50,11 @@
         tools:layout_height="200dp"
         tools:listitem="@layout/item_grid" />
 
-    <View
-        style="@style/SeparatorHorizontal"
-        android:layout_marginVertical="@dimen/result_margin_vertical" />
-
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="@dimen/dialog_padding_horizontal"
+        android:layout_marginTop="@dimen/dialog_padding_vertical"
         android:text="@string/edit_quick_list_favorites" />
 
     <GridView
@@ -68,6 +63,7 @@
         android:layout_height="0dp"
         android:layout_marginHorizontal="@dimen/dialog_padding_horizontal"
         android:layout_weight="1"
+        android:clipToPadding="false"
         android:columnWidth="@dimen/app_grid_column_width"
         android:gravity="center"
         android:numColumns="auto_fit"

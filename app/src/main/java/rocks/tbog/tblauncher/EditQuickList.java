@@ -38,7 +38,7 @@ public class EditQuickList {
     private GridView mFilterAndActionGrid;
     private GridView mFavoritesGrid;
     private SharedPreferences mPref;
-    private EntryAdapter.OnItemClickListener mAddToQuickList = (adapter, view, pos) -> {
+    private final EntryAdapter.OnItemClickListener mAddToQuickList = (adapter, view, pos) -> {
         mQuickList.add(adapter.getItem(pos));
         populateList();
     };
@@ -51,15 +51,16 @@ public class EditQuickList {
     }
 
     public void bindView(View view) {
+        final Context context = view.getContext();
         // keep the preview the same as the actual thing
         mQuickListContainer = view.findViewById(R.id.preview);
         {
-            FavProvider provider = TBApplication.getApplication(view.getContext()).getDataHandler().getFavProvider();
+            FavProvider provider = TBApplication.getApplication(context).getDataHandler().getFavProvider();
             List<? extends EntryItem> list = provider != null ? provider.getQuickList() : null;
             if (list != null)
                 mQuickList.addAll(list);
         }
-        mPref = PreferenceManager.getDefaultSharedPreferences(view.getContext());
+        mPref = PreferenceManager.getDefaultSharedPreferences(context);
         QuickList.applyUiPref(mPref, mQuickListContainer);
         populateList();
 
@@ -67,14 +68,9 @@ public class EditQuickList {
         mFavoritesGrid = view.findViewById(R.id.favoritesGrid);
 
         {
-            int color = QuickList.getBackgroundColor(mPref);
-            PaintDrawable drawable = new PaintDrawable();
-            drawable.getPaint().setColor(color);
-            mFilterAndActionGrid.setBackground(drawable);
-        }
-
-        {
-            TBApplication.ui(view.getContext()).setResultListPref(mFavoritesGrid);
+            CustomizeUI customizeUI = TBApplication.ui(context);
+            customizeUI.setResultListPref(mFilterAndActionGrid);
+            customizeUI.setResultListPref(mFavoritesGrid);
         }
 
         // filters and actions
@@ -83,7 +79,7 @@ public class EditQuickList {
             EntryAdapter adapter = new EntryAdapter(list);
             mFilterAndActionGrid.setAdapter(adapter);
             new LoadDataForAdapter(adapter, () -> {
-                Context ctx = mQuickListContainer.getContext();
+                Context ctx = mFilterAndActionGrid.getContext();
                 DataHandler dataHandler = TBApplication.dataHandler(ctx);
                 ArrayList<EntryItem> data = new ArrayList<>();
                 {
@@ -106,7 +102,7 @@ public class EditQuickList {
             EntryAdapter adapter = new EntryAdapter(list);
             mFavoritesGrid.setAdapter(adapter);
             new LoadDataForAdapter(adapter, () -> {
-                Context ctx = mQuickListContainer.getContext();
+                Context ctx = mFavoritesGrid.getContext();
                 DataHandler dataHandler = TBApplication.dataHandler(ctx);
                 ArrayList<FavRecord> favRecords = dataHandler.getFavorites();
                 ArrayList<EntryItem> data = new ArrayList<>(favRecords.size());

@@ -129,11 +129,10 @@ public class QuickList {
         Context ctx = v.getContext();
         TBApplication app = TBApplication.getApplication(ctx);
         Object tag_actionId = v.getTag(R.id.tag_actionId);
-        String actionId = tag_actionId instanceof String ? (String)tag_actionId : "";
+        String actionId = tag_actionId instanceof String ? (String) tag_actionId : "";
 
         // toggle off any filter
-        if (bFilterOn)
-        {
+        if (bFilterOn) {
             animToggleOff();
             bFilterOn = false;
             app.behaviour().filterResults(null);
@@ -155,9 +154,7 @@ public class QuickList {
                     mLastSelection = actionId;
                     bActionOn = true;
                 }
-            }
-            else
-            {
+            } else {
                 // to toggle off the action, set bActionOn to false
                 app.behaviour().clearSearch();
             }
@@ -339,17 +336,16 @@ public class QuickList {
         // size
         int percent = pref.getInt("quick-list-size", 0);
 
+        if (!(quickList.getLayoutParams() instanceof LinearLayout.LayoutParams))
+            throw new IllegalStateException("mSearchBarContainer has the wrong layout params");
+
+        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) quickList.getLayoutParams();
         // set layout height
         {
             int smallSize = resources.getDimensionPixelSize(R.dimen.bar_height);
             int largeSize = resources.getDimensionPixelSize(R.dimen.large_quick_list_bar_height);
-            ViewGroup.LayoutParams params = quickList.getLayoutParams();
-            if (params instanceof LinearLayout.LayoutParams) {
-                params.height = smallSize + (largeSize - smallSize) * percent / 100;
-                quickList.setLayoutParams(params);
-            } else {
-                throw new IllegalStateException("mSearchBarContainer has the wrong layout params");
-            }
+            params.height = smallSize + (largeSize - smallSize) * percent / 100;
+            quickList.setLayoutParams(params);
         }
 
         int color = getBackgroundColor(pref);
@@ -357,7 +353,6 @@ public class QuickList {
         // rounded drawable
         PaintDrawable drawable = new PaintDrawable();
         drawable.getPaint().setColor(color);
-        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) quickList.getLayoutParams();
         drawable.setCornerRadius(resources.getDimension(R.dimen.bar_corner_radius));
         quickList.setBackground(drawable);
         int margin = (int) (params.height * .25f);
