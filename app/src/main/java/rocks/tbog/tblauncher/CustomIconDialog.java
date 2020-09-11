@@ -1,5 +1,6 @@
 package rocks.tbog.tblauncher;
 
+import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.LauncherActivityInfo;
@@ -16,6 +17,7 @@ import android.text.TextWatcher;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -35,6 +37,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
+import rocks.tbog.tblauncher.dataprovider.FavProvider;
+import rocks.tbog.tblauncher.entry.EntryItem;
+import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.icons.IconPack;
 import rocks.tbog.tblauncher.icons.IconPackXML;
 import rocks.tbog.tblauncher.icons.SystemIconPack;
@@ -64,9 +69,6 @@ public class CustomIconDialog extends DialogFragment<Drawable> {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        Context context = getContext();
-        assert context != null;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             view.setClipToOutline(true);
@@ -107,28 +109,13 @@ public class CustomIconDialog extends DialogFragment<Drawable> {
         });
         mSearch.requestFocus();
 
+        mPreview = view.findViewById(R.id.preview);
+
         Bundle args = getArguments() != null ? getArguments() : new Bundle();
-        String name = args.getString("componentName", "");
-        long customIcon = args.getLong("customIcon", 0);
-
-        IconsHandler iconsHandler = TBApplication.getApplication(context).getIconsHandler();
-        ComponentName cn = UserHandleCompat.unflattenComponentName(name);
-        UserHandleCompat userHandle = UserHandleCompat.fromComponentName(context, name);
-
-        // Preview
-        {
-            mPreview = view.findViewById(R.id.preview);
-//            Drawable drawable = customIcon != 0 ? iconsHandler.getCustomIcon(name, customIcon) : null;
-//            if (drawable == null)
-//                drawable = iconsHandler.getDrawableIconForPackage(cn, userHandle);
-//            mPreview.setImageDrawable(drawable);
-            Utilities.setIconAsync(mPreview, ctx -> {
-                Drawable drawable = customIcon != 0 ? iconsHandler.getCustomIcon(name, customIcon) : null;
-                if (drawable == null)
-                    drawable = iconsHandler.getDrawableIconForPackage(cn, userHandle);
-                return drawable;
-            });
-        }
+        if (args.containsKey("componentName"))
+            customIconApp(args);
+        else if (args.containsKey("entryId"))
+            customIconStaticEntry(args);
 
         // OK button
         {
@@ -146,9 +133,50 @@ public class CustomIconDialog extends DialogFragment<Drawable> {
         }
     }
 
+    private void customIconApp(Bundle args) {
+        Context context = requireContext();
+
+        String name = args.getString("componentName", "");
+        long customIcon = args.getLong("customIcon", 0);
+        if (name.isEmpty()) {
+            dismiss();
+            return;
+        }
+
+        IconsHandler iconsHandler = TBApplication.getApplication(context).getIconsHandler();
+        ComponentName cn = UserHandleCompat.unflattenComponentName(name);
+        UserHandleCompat userHandle = UserHandleCompat.fromComponentName(context, name);
+
+        // Preview
+        Utilities.setIconAsync(mPreview, ctx -> {
+            Drawable drawable = customIcon != 0 ? iconsHandler.getCustomIcon(name, customIcon) : null;
+            if (drawable == null)
+                drawable = iconsHandler.getDrawableIconForPackage(cn, userHandle);
+            return drawable;
+        });
+    }
+
+    private void customIconStaticEntry(Bundle args) {
+        Context context = requireContext();
+
+        String entryId = args.getString("entryId", "");
+        EntryItem entryItem = TBApplication.dataHandler(context).getPojo(entryId);
+        if (!(entryItem instanceof StaticEntry)) {
+            dismiss();
+            return;
+        }
+        StaticEntry staticEntry = (StaticEntry) entryItem;
+
+        // Preview
+        Utilities.setIconAsync(mPreview, staticEntry::getIconDrawable);
+    }
+
     private void displayToast(View v, CharSequence message) {
-        Toast toast = Toast.makeText(getDialog().getContext(), message, Toast.LENGTH_SHORT);
-        Utilities.positionToast(toast, v, getDialog().getWindow(), 0, 0);
+        Window window = requireDialog().getWindow();
+        if (window == null || v == null)
+            return;
+        Toast toast = Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT);
+        Utilities.positionToast(toast, v, window, 0, 0);
         toast.show();
     }
 
@@ -191,18 +219,50 @@ public class CustomIconDialog extends DialogFragment<Drawable> {
     }
 
     private void refreshQuickList() {
-        Context context = getContext();
+        Context context = requireContext();
         View view = getView();
+        if (view == null)
+            return;
 
         Bundle args = getArguments() != null ? getArguments() : new Bundle();
-        String name = args.getString("componentName", "");
+        if (args.containsKey("componentName")) {
+            String name = args.getString("componentName", "");
 
-        IconsHandler iconsHandler = TBApplication.getApplication(context).getIconsHandler();
-        ComponentName cn = UserHandleCompat.unflattenComponentName(name);
-        UserHandleCompat userHandle = UserHandleCompat.fromComponentName(context, name);
+            IconsHandler iconsHandler = TBApplication.getApplication(context).getIconsHandler();
+            ComponentName cn = UserHandleCompat.unflattenComponentName(name);
+            UserHandleCompat userHandle = UserHandleCompat.fromComponentName(context, name);
 
-        //TODO: move this in an async task
-        setQuickList(iconsHandler, view, cn, userHandle);
+            //TODO: move this in an async task
+            setQuickList(iconsHandler, view, cn, userHandle);
+        } else if (args.containsKey("entryId")) {
+            String entryId = args.getString("entryId", "");
+            EntryItem entryItem = TBApplication.dataHandler(context).getPojo(entryId);
+            if (!(entryItem instanceof StaticEntry)) {
+                dismiss();
+                return;
+            }
+            StaticEntry staticEntry = (StaticEntry) entryItem;
+            setQuickList(view, staticEntry);
+        }
+    }
+
+    private void setQuickList(View view, StaticEntry staticEntry) {
+        Context context = view.getContext();
+        ViewGroup quickList = view.findViewById(R.id.quickList);
+        quickList.removeViews(1, quickList.getChildCount() - 1);
+
+        // add default icon
+        {
+            Drawable drawable = staticEntry.getDefaultDrawable(context);
+
+            ImageView icon = quickList.findViewById(android.R.id.icon);
+            icon.setImageDrawable(drawable);
+            icon.setOnClickListener(v -> {
+                mSelectedDrawable = null;
+                mPreview.setImageDrawable(((ImageView) v).getDrawable());
+            });
+            ((TextView) quickList.findViewById(android.R.id.text1)).setText(R.string.default_icon);
+        }
     }
 
     private void setQuickList(IconsHandler iconsHandler, View view, ComponentName cn, UserHandleCompat userHandle) {
@@ -343,7 +403,7 @@ public class CustomIconDialog extends DialogFragment<Drawable> {
             // load the new pack
             mLoadIconPackTask = Utilities.runAsync(() -> {
                 IconPackXML pack = new IconPackXML(packageName);
-                pack.loadDrawables(getContext().getPackageManager());
+                pack.loadDrawables(requireContext().getPackageManager());
                 mShownIconPack = pack;
             }, () -> {
                 mLoadIconPackTask = null;
@@ -356,8 +416,8 @@ public class CustomIconDialog extends DialogFragment<Drawable> {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        IconsHandler iconsHandler = TBApplication.getApplication(getActivity()).getIconsHandler();
-        IconPack iconPack = iconsHandler.getCustomIconPack();
+        IconsHandler iconsHandler = TBApplication.getApplication(requireContext()).getIconsHandler();
+        IconPackXML iconPack = iconsHandler.getCustomIconPack();
         String packName = iconPack != null ? iconPack.getPackPackageName() : null;
         if (packName == null && mIconPackList.getChildCount() > 0)
             packName = mIconPackList.getChildAt(0).getTag().toString();

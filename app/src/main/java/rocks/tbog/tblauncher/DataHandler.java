@@ -49,6 +49,7 @@ import rocks.tbog.tblauncher.db.ValuedHistoryRecord;
 import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.ShortcutEntry;
+import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.searcher.Searcher;
 import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
@@ -885,6 +886,10 @@ public class DataHandler extends BroadcastReceiver
         DBHelper.setCustomAppName(context, componentName, newName);
     }
 
+    public void renameStaticEntry(String entryId, String newName) {
+        DBHelper.setCustomStaticEntryName(context, entryId, newName);
+    }
+
     public void removeRenameApp(String componentName, String defaultName) {
         DBHelper.removeCustomAppName(context, componentName, defaultName);
     }
@@ -907,6 +912,23 @@ public class DataHandler extends BroadcastReceiver
         return DBHelper.setCustomAppIcon(context, componentName, stream.toByteArray());
     }
 
+    public void setCustomStaticEntryIcon(String entryId, Bitmap bitmap) {
+        ByteArrayOutputStream stream = null;
+        try {
+            stream = new ByteArrayOutputStream(1024);
+            if (!bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream))
+                stream = null;
+            else {
+                stream.flush();
+                stream.close();
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Unable to convert bitmap", e);
+        }
+        if (stream != null)
+            DBHelper.setCustomStaticEntryIcon(context, entryId, stream.toByteArray());
+    }
+
     public Bitmap getCustomAppIcon(String componentName) {
         byte[] bytes = DBHelper.getCustomAppIcon(context, componentName);
         if (bytes == null)
@@ -916,6 +938,17 @@ public class DataHandler extends BroadcastReceiver
 
     public AppRecord removeCustomAppIcon(String componentName) {
         return DBHelper.removeCustomAppIcon(context, componentName);
+    }
+
+    public void removeCustomStaticEntryIcon(String entryId) {
+        DBHelper.removeCustomStaticEntryIcon(context, entryId);
+    }
+
+    public Bitmap getCustomStaticEntryIcon(StaticEntry staticEntry) {
+        byte[] bytes = DBHelper.getCustomFavIcon(context, staticEntry.id);
+        if (bytes == null)
+            return null;
+        return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
     }
 
     public void renameShortcut(ShortcutEntry shortcutEntry, String newName) {
@@ -992,7 +1025,7 @@ public class DataHandler extends BroadcastReceiver
             if (!DBHelper.setQuickListPosition(context, record, position)) {
                 FavRecord favRecord = new FavRecord();
                 favRecord.record = record;
-                favRecord.flags = FavRecord.FLAG_SHOW_IN_QUICK_LIST;
+                favRecord.flags |= FavRecord.FLAG_SHOW_IN_QUICK_LIST;
                 favRecord.position = position;
                 DBHelper.setFavorite(context, favRecord);
             }

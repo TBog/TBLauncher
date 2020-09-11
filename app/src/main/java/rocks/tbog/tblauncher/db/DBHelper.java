@@ -30,7 +30,8 @@ public class DBHelper {
     private static SQLiteDatabase database = null;
     private static final String[] TABLE_COLUMNS_APPS = new String[]{"_id", "display_name", "component_name", "custom_flags"};//, "custom_icon"};
     private static final String[] TABLE_APPS_CUSTOM_ICON = new String[]{"custom_icon"};
-    private static final String[] TABLE_COLUMNS_FAVORITES = new String[]{"record", "position", "custom_flags"};
+    private static final String[] TABLE_FAVORITES_CUSTOM_ICON = new String[]{"custom_icon"};
+    private static final String[] TABLE_COLUMNS_FAVORITES = new String[]{"record", "position", "custom_flags", "name"};//, "custom_icon"};
     private static final String[] TABLE_COLUMNS_SHORTCUTS = new String[]{"_id", "name", "package", "info_data", "icon_png", "custom_flags"};
 
     private DBHelper() {
@@ -539,6 +540,24 @@ public class DBHelper {
         }
     }
 
+    public static void setCustomStaticEntryName(Context context, String entryId, String newName) {
+        SQLiteDatabase db = getDatabase(context);
+        String sql = "UPDATE favorites SET name=?,custom_flags=custom_flags|? WHERE record=?";
+        try {
+            SQLiteStatement statement = db.compileStatement(sql);
+            statement.bindString(1, newName);
+            statement.bindLong(2, FavRecord.FLAG_CUSTOM_NAME);
+            statement.bindString(3, entryId);
+            int count = statement.executeUpdateDelete();
+            if (count != 1) {
+                Log.e(TAG, "Update name; count = " + count);
+            }
+            statement.close();
+        } catch (Exception e) {
+            Log.e(TAG, "Insert or Update custom fav name", e);
+        }
+    }
+
     public static void removeCustomAppName(Context context, String componentName, String defaultName) {
         SQLiteDatabase db = getDatabase(context);
         String sql = "UPDATE apps SET display_name=?,custom_flags=custom_flags&~? WHERE component_name=?";
@@ -596,6 +615,26 @@ public class DBHelper {
         return getAppRecord(db, componentName);
     }
 
+    public static void setCustomStaticEntryIcon(Context context, String entryId, byte[] icon) {
+        SQLiteDatabase db = getDatabase(context);
+        String sql = "UPDATE favorites SET custom_flags=custom_flags|?, custom_icon=? WHERE record=?";
+        try {
+            SQLiteStatement statement = db.compileStatement(sql);
+            statement.bindLong(1, FavRecord.FLAG_CUSTOM_ICON);
+            statement.bindBlob(2, icon);
+            statement.bindString(3, entryId);
+            int count = statement.executeUpdateDelete();
+            if (count != 1) {
+                Log.e(TAG, "Update icon; count = " + count);
+            }
+            statement.close();
+        } catch (Exception e) {
+            Log.e(TAG, "Insert or Update custom fav name", e);
+        }
+
+        //return getAppRecord(db, componentName);
+    }
+
     public static AppRecord removeCustomAppIcon(Context context, String componentName) {
         SQLiteDatabase db = getDatabase(context);
         String sql = "UPDATE apps SET custom_flags=custom_flags&~?, custom_icon=NULL WHERE component_name=?";
@@ -615,11 +654,42 @@ public class DBHelper {
         return getAppRecord(db, componentName);
     }
 
+    public static void removeCustomStaticEntryIcon(Context context, String entryId) {
+        SQLiteDatabase db = getDatabase(context);
+        String sql = "UPDATE favorites SET custom_flags=custom_flags&~?, custom_icon=NULL WHERE component_name=?";
+        try {
+            SQLiteStatement statement = db.compileStatement(sql);
+            statement.bindLong(1, FavRecord.FLAG_CUSTOM_ICON);
+            statement.bindString(2, entryId);
+            int count = statement.executeUpdateDelete();
+            if (count != 1) {
+                Log.e(TAG, "Reset icon; count = " + count);
+            }
+            statement.close();
+        } catch (Exception e) {
+            Log.e(TAG, "Insert or Update custom app name", e);
+        }
+
+        //return getFavRecord(db, entryId);
+    }
+
     public static byte[] getCustomAppIcon(Context context, String componentName) {
         SQLiteDatabase db = getDatabase(context);
         String[] selArgs = new String[]{componentName};
         try (Cursor cursor = db.query("apps", TABLE_APPS_CUSTOM_ICON,
                 "component_name=?", selArgs, null, null, null)) {
+            if (cursor.moveToNext()) {
+                return cursor.getBlob(0);
+            }
+        }
+        return null;
+    }
+
+    public static byte[] getCustomFavIcon(Context context, String record) {
+        SQLiteDatabase db = getDatabase(context);
+        String[] selArgs = new String[]{record};
+        try (Cursor cursor = db.query("favorites", TABLE_FAVORITES_CUSTOM_ICON,
+                "record=?", selArgs, null, null, null)) {
             if (cursor.moveToNext()) {
                 return cursor.getBlob(0);
             }

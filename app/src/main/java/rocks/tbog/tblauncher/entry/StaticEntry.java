@@ -1,28 +1,123 @@
 package rocks.tbog.tblauncher.entry;
 
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
+import android.view.ContextThemeWrapper;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 
+import rocks.tbog.tblauncher.IconsHandler;
 import rocks.tbog.tblauncher.R;
+import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
+import rocks.tbog.tblauncher.ui.LinearAdapter;
+import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public abstract class StaticEntry extends EntryItem {
     @DrawableRes
     protected int iconResource;
+    protected boolean customIcon;
 
     public StaticEntry(@NonNull String id, @DrawableRes int icon) {
         super(id);
         iconResource = icon;
+    }
+
+    @Override
+    ListPopup buildPopupMenu(Context context, LinearAdapter adapter, View parentView, int flags) {
+
+        adapter.add(new LinearAdapter.ItemTitle(context, R.string.popup_title_customize));
+        adapter.add(new LinearAdapter.Item(context, R.string.menu_action_rename));
+        adapter.add(new LinearAdapter.Item(context, R.string.menu_custom_icon));
+
+        if (Utilities.checkFlag(flags, FLAG_POPUP_MENU_QUICK_LIST)) {
+            adapter.add(new LinearAdapter.ItemTitle(context, R.string.menu_popup_title_settings));
+            adapter.add(new LinearAdapter.Item(context, R.string.menu_popup_quick_list_customize));
+        }
+
+        return inflatePopupMenu(context, adapter);
+    }
+
+    @Override
+    boolean popupMenuClickHandler(@NonNull View view, @NonNull LinearAdapter.MenuItem item, int stringId, View parentView) {
+        Context ctx = view.getContext();
+        switch (stringId) {
+            case R.string.menu_action_rename:
+                launchRenameDialog(ctx);
+                return true;
+            case R.string.menu_custom_icon:
+                TBApplication.behaviour(ctx).launchCustomIconDialog(this);
+                return true;
+        }
+        return super.popupMenuClickHandler(view, item, stringId, parentView);
+    }
+
+    private void launchRenameDialog(@NonNull Context ctx) {
+        ContextThemeWrapper context = new ContextThemeWrapper(ctx, R.style.NoTitleDialogTheme);
+        AlertDialog.Builder builder = new AlertDialog.Builder(context);
+        builder.setTitle(context.getResources().getString(R.string.app_rename_title));
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            builder.setView(R.layout.dialog_rename);
+        } else {
+            builder.setView(View.inflate(context, R.layout.dialog_rename, null));
+        }
+
+        builder.setPositiveButton(R.string.custom_name_rename, (dialog, which) -> {
+            EditText input = ((AlertDialog) dialog).findViewById(R.id.rename);
+
+            // Set new name
+            String newName = input.getText().toString().trim();
+            setName(newName);
+            TBApplication.getApplication(context).getDataHandler().renameStaticEntry(id, newName);
+
+            // Show toast message
+            String msg = context.getResources().getString(R.string.app_rename_confirmation, getName());
+            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
+
+            dialog.dismiss();
+        });
+//        builder.setNeutralButton(R.string.custom_name_set_default, (dialog, which) -> {
+//            String name = null;
+//            PackageManager pm = context.getPackageManager();
+//            try {
+//                ApplicationInfo applicationInfo = pm.getApplicationInfo(getPackageName(), 0);
+//                name = applicationInfo.loadLabel(pm).toString();
+//            } catch (PackageManager.NameNotFoundException ignored) {
+//            }
+//            if (name != null) {
+//                setName(name);
+//                TBApplication.getApplication(context).getDataHandler().removeRenameApp(getUserComponentName(), name);
+//
+//                // Show toast message
+//                String msg = context.getResources().getString(R.string.app_rename_confirmation, getName());
+//                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
+//            }
+//
+//            dialog.dismiss();
+//        });
+        builder.setNegativeButton(android.R.string.cancel, (dialog, which) -> {
+            dialog.cancel();
+        });
+
+        AlertDialog dialog = builder.create();
+        dialog.show();
+        // call after dialog got inflated (show call)
+        ((TextView) dialog.findViewById(R.id.rename)).setText(getName());
     }
 
     @Override
@@ -53,8 +148,28 @@ public abstract class StaticEntry extends EntryItem {
         ResultViewHelper.applyPreferences(drawFlags, nameView, appIcon);
     }
 
+    public void setCustomIcon() {
+        customIcon = true;
+    }
+
+    public void clearCustomIcon() {
+        customIcon = false;
+    }
+
     @WorkerThread
-    private Drawable getIconDrawable(Context context) {
+    public Drawable getIconDrawable(Context context) {
+        if (customIcon) {
+            IconsHandler iconsHandler = TBApplication.getApplication(context).getIconsHandler();
+            Drawable drawable = iconsHandler.getCustomIcon(this);
+            if (drawable != null)
+                return drawable;
+            else
+                iconsHandler.restoreDefaultIcon(this);
+        }
+        return getDefaultDrawable(context);
+    }
+
+    public Drawable getDefaultDrawable(Context context) {
         return ContextCompat.getDrawable(context, iconResource);
     }
 
@@ -65,8 +180,8 @@ public abstract class StaticEntry extends EntryItem {
 
         @Override
         public Drawable getDrawable(Context context) {
-            StaticEntry filterEntry = (StaticEntry) entryItem;
-            return filterEntry.getIconDrawable(context);
+            StaticEntry entry = (StaticEntry) entryItem;
+            return entry.getIconDrawable(context);
         }
     }
 }

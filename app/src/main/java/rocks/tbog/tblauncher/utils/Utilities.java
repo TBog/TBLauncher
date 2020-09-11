@@ -137,6 +137,7 @@ public class Utilities {
 
     /**
      * Return a valid activity or null given a view
+     *
      * @param view any view of an activity
      * @return an activity or null
      */
@@ -147,6 +148,7 @@ public class Utilities {
 
     /**
      * Return a valid activity or null given a context
+     *
      * @param ctx context
      * @return an activity or null
      */
@@ -164,13 +166,13 @@ public class Utilities {
         return null;
     }
 
-    public static void positionToast(Toast toast, View anchor, int offsetX, int offsetY) {
-        Activity activity = Utilities.getActivity(anchor.getContext());
+    public static void positionToast(@NonNull Toast toast, @Nullable View anchor, int offsetX, int offsetY) {
+        Activity activity = Utilities.getActivity(anchor);
         if (activity != null)
             positionToast(toast, anchor, activity.getWindow(), offsetX, offsetY);
     }
 
-    public static void positionToast(Toast toast, View anchor, Window window, int offsetX, int offsetY) {
+    public static void positionToast(@NonNull Toast toast, @NonNull View anchor, @NonNull Window window, int offsetX, int offsetY) {
         // toasts are positioned relatively to decor view, views relatively to their parents, we have to gather additional data to have a common coordinate system
         Rect rect = new Rect();
         window.getDecorView().getWindowVisibleDisplayFrame(rect);
@@ -231,7 +233,8 @@ public class Utilities {
         @Override
         protected Drawable doInBackground(Void... voids) {
             ImageView image = weakImage.get();
-            if (isCancelled() || image == null || image.getTag() != this) {
+            Activity act = Utilities.getActivity(image);
+            if (isCancelled() || act == null || image.getTag() != this) {
                 weakImage.clear();
                 return null;
             }
@@ -246,7 +249,8 @@ public class Utilities {
         @Override
         protected void onPostExecute(Drawable drawable) {
             ImageView image = weakImage.get();
-            if (image == null || drawable == null) {
+            Activity act = Utilities.getActivity(image);
+            if (act == null || drawable == null) {
                 weakImage.clear();
                 return;
             }

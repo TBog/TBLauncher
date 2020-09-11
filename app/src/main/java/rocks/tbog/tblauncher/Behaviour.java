@@ -39,6 +39,7 @@ import java.util.List;
 import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.EntryWithTags;
+import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.result.ResultAdapter;
 import rocks.tbog.tblauncher.searcher.ISearchActivity;
 import rocks.tbog.tblauncher.searcher.QuerySearcher;
@@ -687,8 +688,10 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         CustomIconDialog dialog = new CustomIconDialog();
         openFragmentDialog(dialog);
 
-        // We assume the mResultLayout is visible
-        mResultLayout.setVisibility(View.INVISIBLE);
+        // If mResultLayout is visible
+        boolean bResultListVisible = TBApplication.state().isResultListVisible();
+        if (bResultListVisible)
+            mResultLayout.setVisibility(View.INVISIBLE);
 
         // set args
         {
@@ -697,17 +700,51 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             args.putLong("customIcon", appEntry.getCustomIcon());
             dialog.setArguments(args);
         }
-        // OnDismiss: We assume the mResultLayout was visible
-        dialog.setOnDismissListener(dlg -> mResultLayout.setVisibility(View.VISIBLE));
+        // OnDismiss: We restore mResultLayout visibility
+        if (bResultListVisible)
+            dialog.setOnDismissListener(dlg -> mResultLayout.setVisibility(View.VISIBLE));
 
         dialog.setOnConfirmListener(drawable -> {
             if (drawable == null)
-                TBApplication.getApplication(mTBLauncherActivity).getIconsHandler().restoreAppIcon(appEntry);
+                TBApplication.getApplication(mTBLauncherActivity).getIconsHandler().restoreDefaultIcon(appEntry);
             else
-                TBApplication.getApplication(mTBLauncherActivity).getIconsHandler().changeAppIcon(appEntry, drawable);
+                TBApplication.getApplication(mTBLauncherActivity).getIconsHandler().changeIcon(appEntry, drawable);
             // force a result refresh to update the icon in the view
             //TODO: find a better way to update the result icon
             updateSearchRecords();
+            TBApplication.quickList(mTBLauncherActivity).onFavoritesChanged();
+        });
+        dialog.show(mTBLauncherActivity.getSupportFragmentManager(), "custom_icon_dialog");
+    }
+
+    public void launchCustomIconDialog(StaticEntry staticEntry) {
+        CustomIconDialog dialog = new CustomIconDialog();
+        openFragmentDialog(dialog);
+
+        // If mResultLayout is visible
+        boolean bResultListVisible = TBApplication.state().isResultListVisible();
+        if (bResultListVisible)
+            mResultLayout.setVisibility(View.INVISIBLE);
+
+        // set args
+        {
+            Bundle args = new Bundle();
+            args.putString("entryId", staticEntry.id);
+            dialog.setArguments(args);
+        }
+        // OnDismiss: We restore mResultLayout visibility
+        if (bResultListVisible)
+            dialog.setOnDismissListener(dlg -> mResultLayout.setVisibility(View.VISIBLE));
+
+        dialog.setOnConfirmListener(drawable -> {
+            if (drawable == null)
+                TBApplication.getApplication(mTBLauncherActivity).getIconsHandler().restoreDefaultIcon(staticEntry);
+            else
+                TBApplication.getApplication(mTBLauncherActivity).getIconsHandler().changeIcon(staticEntry, drawable);
+            // force a result refresh to update the icon in the view
+            //TODO: find a better way to update the result icon
+            updateSearchRecords();
+            TBApplication.quickList(mTBLauncherActivity).onFavoritesChanged();
         });
         dialog.show(mTBLauncherActivity.getSupportFragmentManager(), "custom_icon_dialog");
     }

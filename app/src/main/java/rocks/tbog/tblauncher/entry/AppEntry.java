@@ -113,7 +113,7 @@ public final class AppEntry extends EntryWithTags {
             if (drawable != null)
                 return drawable;
             else
-                iconsHandler.restoreAppIcon(this);
+                iconsHandler.restoreDefaultIcon(this);
         }
         return iconsHandler.getDrawableIconForPackage(componentName, userHandle);
     }
@@ -284,6 +284,11 @@ public final class AppEntry extends EntryWithTags {
 //        if (TBApplication.getApplication(context).getRootHandler().isRootActivated() && TBApplication.getApplication(context).getRootHandler().isRootAvailable()) {
 //            adapter.add(new ListPopup.Item(context, R.string.menu_app_hibernate));
 //        }
+
+        if (Utilities.checkFlag(flags, FLAG_POPUP_MENU_QUICK_LIST)) {
+            adapter.add(new LinearAdapter.ItemTitle(context, R.string.menu_popup_title_settings));
+            adapter.add(new LinearAdapter.Item(context, R.string.menu_popup_quick_list_customize));
+        }
 
         return inflatePopupMenu(context, adapter);
     }
@@ -459,7 +464,9 @@ public final class AppEntry extends EntryWithTags {
         AlertDialog dialog = builder.create();
         dialog.show();
         // call after dialog got inflated (show call)
-        ((TextView) dialog.findViewById(R.id.rename)).setText(getName());
+        TextView nameView = dialog.findViewById(R.id.rename);
+        nameView.setText(getName());
+        nameView.requestFocus();
     }
 
     /**

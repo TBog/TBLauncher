@@ -80,6 +80,7 @@
     <string name="value">value %d</string>
     <string name="size">&lt;%d&gt;</string>
     <string name="menu_app_rename">Rename app</string>
+    <string name="menu_action_rename">Rename</string>
     <string name="menu_shortcut_rename">Rename shortcut</string>
     <string name="menu_custom_icon">Change icon</string>
     <string name="app_rename_title">Choose a custom name for this application</string>
