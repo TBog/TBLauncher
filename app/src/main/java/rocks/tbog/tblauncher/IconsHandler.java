@@ -255,6 +255,7 @@ public class IconsHandler {
         Bitmap bitmap = Utilities.drawableToBitmap(drawable);
         TBApplication app = TBApplication.getApplication(ctx);
         app.getDataHandler().setCustomStaticEntryIcon(staticEntry.id, bitmap);
+        staticEntry.setCustomIcon();
         app.getDrawableCache().cacheDrawable(staticEntry.id, drawable);
     }
 

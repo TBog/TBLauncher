@@ -656,7 +656,26 @@ public class DBHelper {
 
     public static void removeCustomStaticEntryIcon(Context context, String entryId) {
         SQLiteDatabase db = getDatabase(context);
-        String sql = "UPDATE favorites SET custom_flags=custom_flags&~?, custom_icon=NULL WHERE component_name=?";
+        String sql = "UPDATE favorites SET custom_flags=custom_flags&~?, custom_icon=NULL WHERE record=?";
+        try {
+            SQLiteStatement statement = db.compileStatement(sql);
+            statement.bindLong(1, FavRecord.FLAG_CUSTOM_ICON);
+            statement.bindString(2, entryId);
+            int count = statement.executeUpdateDelete();
+            if (count != 1) {
+                Log.e(TAG, "Reset icon; count = " + count);
+            }
+            statement.close();
+        } catch (Exception e) {
+            Log.e(TAG, "Insert or Update custom app name", e);
+        }
+
+        //return getFavRecord(db, entryId);
+    }
+
+    public static void removeCustomStaticEntryName(Context context, String entryId) {
+        SQLiteDatabase db = getDatabase(context);
+        String sql = "UPDATE favorites SET custom_flags=custom_flags&~?, name=NULL WHERE record=?";
         try {
             SQLiteStatement statement = db.compileStatement(sql);
             statement.bindLong(1, FavRecord.FLAG_CUSTOM_ICON);
@@ -733,6 +752,7 @@ public class DBHelper {
                 fav.record = c.getString(0);
                 fav.position = c.getString(1);
                 fav.flags = c.getInt(2);
+                fav.displayName = c.getString(3);
                 list.add(fav);
             }
         }

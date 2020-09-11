@@ -80,16 +80,13 @@ public class EditQuickList {
             mFilterAndActionGrid.setAdapter(adapter);
             new LoadDataForAdapter(adapter, () -> {
                 Context ctx = mFilterAndActionGrid.getContext();
-                DataHandler dataHandler = TBApplication.dataHandler(ctx);
                 ArrayList<EntryItem> data = new ArrayList<>();
                 {
-                    FilterProvider provider = dataHandler.getFilterProvider();
-                    List<? extends EntryItem> entryItems = provider != null ? provider.getPojos() : Collections.emptyList();
+                    List<? extends EntryItem> entryItems = new FilterProvider(ctx).getPojos();
                     data.addAll(entryItems);
                 }
                 {
-                    ActionProvider provider = dataHandler.getActionProvider();
-                    List<? extends EntryItem> entryItems = provider != null ? provider.getPojos() : Collections.emptyList();
+                    List<? extends EntryItem> entryItems = new ActionProvider(ctx).getPojos();
                     data.addAll(entryItems);
                 }
                 return data;
@@ -118,7 +115,6 @@ public class EditQuickList {
 
         ((EntryAdapter) mFilterAndActionGrid.getAdapter()).setOnItemClickListener(mAddToQuickList);
         ((EntryAdapter) mFavoritesGrid.getAdapter()).setOnItemClickListener(mAddToQuickList);
-
     }
 
     private void populateList() {

@@ -18,9 +18,12 @@ import androidx.annotation.WorkerThread;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 
+import rocks.tbog.tblauncher.DataHandler;
 import rocks.tbog.tblauncher.IconsHandler;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
+import rocks.tbog.tblauncher.dataprovider.ActionProvider;
+import rocks.tbog.tblauncher.dataprovider.FilterProvider;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
@@ -39,6 +42,10 @@ public abstract class StaticEntry extends EntryItem {
 
     @Override
     ListPopup buildPopupMenu(Context context, LinearAdapter adapter, View parentView, int flags) {
+
+        adapter.add(new LinearAdapter.ItemTitle(context, R.string.popup_title_hist_fav));
+        adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_add));
+        adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_remove));
 
         adapter.add(new LinearAdapter.ItemTitle(context, R.string.popup_title_customize));
         adapter.add(new LinearAdapter.Item(context, R.string.menu_action_rename));
@@ -83,33 +90,46 @@ public abstract class StaticEntry extends EntryItem {
             // Set new name
             String newName = input.getText().toString().trim();
             setName(newName);
-            TBApplication.getApplication(context).getDataHandler().renameStaticEntry(id, newName);
+            TBApplication.getApplication(ctx).getDataHandler().renameStaticEntry(id, newName);
 
             // Show toast message
-            String msg = context.getResources().getString(R.string.app_rename_confirmation, getName());
-            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
+            String msg = ctx.getResources().getString(R.string.app_rename_confirmation, getName());
+            Toast.makeText(ctx, msg, Toast.LENGTH_SHORT).show();
 
             dialog.dismiss();
         });
-//        builder.setNeutralButton(R.string.custom_name_set_default, (dialog, which) -> {
-//            String name = null;
-//            PackageManager pm = context.getPackageManager();
-//            try {
-//                ApplicationInfo applicationInfo = pm.getApplicationInfo(getPackageName(), 0);
-//                name = applicationInfo.loadLabel(pm).toString();
-//            } catch (PackageManager.NameNotFoundException ignored) {
-//            }
-//            if (name != null) {
-//                setName(name);
-//                TBApplication.getApplication(context).getDataHandler().removeRenameApp(getUserComponentName(), name);
-//
-//                // Show toast message
-//                String msg = context.getResources().getString(R.string.app_rename_confirmation, getName());
-//                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
-//            }
-//
-//            dialog.dismiss();
-//        });
+        builder.setNeutralButton(R.string.custom_name_set_default, (dialog, which) -> {
+            DataHandler dataHandler = TBApplication.dataHandler(ctx);
+            dataHandler.renameStaticEntry(id, null);
+
+            String name = null;
+
+            //TODO: get the original name by recreating the StaticProvider
+            {
+                ActionProvider actionProvider = dataHandler.getActionProvider();
+                if (actionProvider != null && actionProvider.mayFindById(id))
+                    name = new ActionProvider(ctx).findById(id).getName();
+            }
+            {
+                FilterProvider filterProvider = dataHandler.getFilterProvider();
+                if (filterProvider != null && filterProvider.mayFindById(id))
+                    name = new FilterProvider(ctx).findById(id).getName();
+            }
+            if (name != null) {
+                setName(name);
+
+                // Show toast message
+                String msg = ctx.getResources().getString(R.string.app_rename_confirmation, getName());
+                Toast.makeText(ctx, msg, Toast.LENGTH_SHORT).show();
+            }
+            else
+            {
+                // can't find the default name. Reload providers and hope to get the name
+                dataHandler.reloadProviders();
+            }
+
+            dialog.dismiss();
+        });
         builder.setNegativeButton(android.R.string.cancel, (dialog, which) -> {
             dialog.cancel();
         });

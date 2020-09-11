@@ -15,7 +15,7 @@ import rocks.tbog.tblauncher.entry.EntryItem;
 public class ActionProvider extends StaticProvider<ActionEntry> {
 
     public ActionProvider(@NonNull Context context) {
-        super(new ArrayList<>(5));
+        super(new ArrayList<>(7));
         // show apps sorted by name
         {
             String id = ActionEntry.SCHEME + "show/apps/byName";
@@ -91,7 +91,7 @@ public class ActionProvider extends StaticProvider<ActionEntry> {
         // show favorites sorted by name
         {
             String id = ActionEntry.SCHEME + "show/favorites/byName";
-            ActionEntry actionEntry = new ActionEntry(id, R.drawable.ic_favorite);
+            ActionEntry actionEntry = new ActionEntry(id, R.drawable.ic_favorites);
             actionEntry.setAction(v -> {
                 Context ctx = v.getContext();
                 FavProvider provider = TBApplication.dataHandler(ctx).getFavProvider();

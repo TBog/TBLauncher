@@ -886,8 +886,11 @@ public class DataHandler extends BroadcastReceiver
         DBHelper.setCustomAppName(context, componentName, newName);
     }
 
-    public void renameStaticEntry(String entryId, String newName) {
-        DBHelper.setCustomStaticEntryName(context, entryId, newName);
+    public void renameStaticEntry(@NonNull String entryId, @Nullable String newName) {
+        if (newName == null)
+            DBHelper.removeCustomStaticEntryName(context, entryId);
+        else
+            DBHelper.setCustomStaticEntryName(context, entryId, newName);
     }
 
     public void removeRenameApp(String componentName, String defaultName) {
