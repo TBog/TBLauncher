@@ -67,10 +67,15 @@ public abstract class EntryItem {
     public static final int FLAG_DRAW_NO_CACHE = 0x0080; // 1 << 7
 
     /**
+     * the item will be drawn on a while background
+     */
+    public static final int FLAG_DRAW_WHITE_BG = 0x0100; // 1 << 8
+
+    /**
      * use cache but also run the load task
      * Note: used for shortcuts as we don't have a way to cache multiple icons for the same entry id
      */
-    public static final int FLAG_RELOAD = 0x0100; // 1 << 8
+    public static final int FLAG_RELOAD = 0x0200; // 1 << 9
 
     // Popup menu flags
     public static final int FLAG_POPUP_MENU_RESULT_LIST = 0x01;

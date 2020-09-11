@@ -1,8 +1,7 @@
 package rocks.tbog.tblauncher.entry;
 
 import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.view.ContextThemeWrapper;
@@ -17,6 +16,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
+import androidx.core.graphics.drawable.DrawableCompat;
 
 import rocks.tbog.tblauncher.DataHandler;
 import rocks.tbog.tblauncher.IconsHandler;
@@ -121,9 +121,7 @@ public abstract class StaticEntry extends EntryItem {
                 // Show toast message
                 String msg = ctx.getResources().getString(R.string.app_rename_confirmation, getName());
                 Toast.makeText(ctx, msg, Toast.LENGTH_SHORT).show();
-            }
-            else
-            {
+            } else {
                 // can't find the default name. Reload providers and hope to get the name
                 dataHandler.reloadProviders();
             }
@@ -201,7 +199,13 @@ public abstract class StaticEntry extends EntryItem {
         @Override
         public Drawable getDrawable(Context context) {
             StaticEntry entry = (StaticEntry) entryItem;
-            return entry.getIconDrawable(context);
+            Drawable drawable = entry.getIconDrawable(context);
+            if (!entry.customIcon) {
+                drawable = DrawableCompat.wrap(drawable);
+                int color = Utilities.checkFlag(drawFlags, FLAG_DRAW_WHITE_BG) ? Color.BLACK : Color.WHITE;
+                DrawableCompat.setTint(drawable, color);
+            }
+            return drawable;
         }
     }
 }

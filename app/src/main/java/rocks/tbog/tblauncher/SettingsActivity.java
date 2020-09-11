@@ -329,6 +329,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         }
                     }
                     break;
+                case "quick-list-color":
+                    // static entities will change color based on luminance
+                    // fallthrough
                 case "quick-list-toggle-color":
                     // toggle animation is also caching the color
                     TBApplication.quickList(activity).onFavoritesChanged();
@@ -391,9 +394,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
             Drawable arrow = ContextCompat.getDrawable(activity, R.drawable.ic_arrow_back);
             if (arrow != null) {
-                Drawable wrappedArrow = DrawableCompat.wrap(arrow);
-                DrawableCompat.setTint(wrappedArrow, color);
-                actionBar.setHomeAsUpIndicator(wrappedArrow);
+                arrow = DrawableCompat.wrap(arrow);
+                DrawableCompat.setTint(arrow, color);
+                actionBar.setHomeAsUpIndicator(arrow);
             }
 
             SpannableString text = new SpannableString(title);
