@@ -27,6 +27,30 @@
         app:layout_constraintWidth_max="@dimen/icon_width"
         tools:src="@drawable/ic_android" />
 
+    <View
+        android:id="@+id/dummyGuide"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="@android:id/icon"
+        app:layout_constraintHorizontal_weight="2"
+        app:layout_constraintLeft_toLeftOf="@android:id/icon"
+        app:layout_constraintRight_toLeftOf="@android:id/icon2"
+        app:layout_constraintTop_toTopOf="@android:id/icon" />
+
+    <ImageView
+        android:id="@android:id/icon2"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:importantForAccessibility="no"
+        android:scaleType="fitXY"
+        app:layout_constraintBottom_toBottomOf="@android:id/icon"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintHorizontal_weight="1"
+        app:layout_constraintLeft_toRightOf="@id/dummyGuide"
+        app:layout_constraintRight_toRightOf="@android:id/icon"
+        tools:src="@drawable/ic_android"
+        tools:tint="#9acd32" />
+
     <TextView
         android:id="@android:id/text1"
         android:layout_width="wrap_content"

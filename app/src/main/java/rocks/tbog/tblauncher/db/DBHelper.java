@@ -540,6 +540,48 @@ public class DBHelper {
         }
     }
 
+    public static boolean setAppHidden(Context context, String componentName) {
+        boolean ret = false;
+        SQLiteDatabase db = getDatabase(context);
+        String sql = "UPDATE \"apps\" SET \"custom_flags\"=\"custom_flags\"|? WHERE \"component_name\"=?";
+        try {
+            SQLiteStatement statement = db.compileStatement(sql);
+            statement.bindLong(1, AppRecord.FLAG_APP_HIDDEN);
+            statement.bindString(2, componentName);
+            int count = statement.executeUpdateDelete();
+            if (count == 1) {
+                ret = true;
+            } else {
+                Log.e(TAG, "Update name; count = " + count);
+            }
+            statement.close();
+        } catch (Exception e) {
+            Log.e(TAG, "Insert or Update custom app name", e);
+        }
+        return ret;
+    }
+
+    public static boolean removeAppHidden(Context context, String componentName) {
+        boolean ret = false;
+        SQLiteDatabase db = getDatabase(context);
+        String sql = "UPDATE \"apps\" SET \"custom_flags\"=\"custom_flags\"&~? WHERE \"component_name\"=?";
+        try {
+            SQLiteStatement statement = db.compileStatement(sql);
+            statement.bindLong(1, AppRecord.FLAG_APP_HIDDEN);
+            statement.bindString(2, componentName);
+            int count = statement.executeUpdateDelete();
+            if (count == 1) {
+                ret = true;
+            } else {
+                Log.e(TAG, "Update name; count = " + count);
+            }
+            statement.close();
+        } catch (Exception e) {
+            Log.e(TAG, "Insert or Update custom app name", e);
+        }
+        return ret;
+    }
+
     public static void setCustomStaticEntryName(Context context, String entryId, String newName) {
         SQLiteDatabase db = getDatabase(context);
         String sql = "UPDATE favorites SET name=?,custom_flags=custom_flags|? WHERE record=?";
@@ -734,11 +776,14 @@ public class DBHelper {
         }
     }
 
-    public static void removeFavorite(Context context, FavRecord fav) {
+    public static boolean removeFavorite(Context context, FavRecord fav) {
         SQLiteDatabase db = getDatabase(context);
 
-        if (0 == db.delete("favorites", "record=?", new String[]{fav.record}))
+        if (0 == db.delete("favorites", "record=?", new String[]{fav.record})) {
             Log.e(TAG, "removeFavorite " + fav.record);
+            return false;
+        }
+        return true;
     }
 
     @NonNull
@@ -808,8 +853,7 @@ public class DBHelper {
         db.delete("widgets", "appWidgetId=?", new String[]{String.valueOf(appWidgetId)});
     }
 
-    public static void setWidgetProperties(@NonNull Context context, WidgetRecord rec)
-    {
+    public static void setWidgetProperties(@NonNull Context context, WidgetRecord rec) {
         SQLiteDatabase db = getDatabase(context);
 
         ContentValues values = new ContentValues();

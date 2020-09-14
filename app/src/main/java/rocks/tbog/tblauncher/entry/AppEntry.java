@@ -55,7 +55,7 @@ public final class AppEntry extends EntryWithTags {
     private final UserHandleCompat userHandle;
 
     private long customIcon = 0;
-    private boolean excluded = false;
+    private boolean hiddenByUser = false;
     private boolean excludedFromHistory = false;
 
     public AppEntry(@NonNull String id, @NonNull String packageName, @NonNull String className, @NonNull UserHandleCompat userHandle) {
@@ -75,12 +75,12 @@ public final class AppEntry extends EntryWithTags {
         return componentName.getPackageName();
     }
 
-    public boolean isExcluded() {
-        return excluded;
+    public boolean isHiddenByUser() {
+        return hiddenByUser;
     }
 
-    public void setExcluded(boolean excluded) {
-        this.excluded = excluded;
+    public void setHiddenByUser(boolean hiddenByUser) {
+        this.hiddenByUser = hiddenByUser;
     }
 
     public boolean isExcludedFromHistory() {
@@ -163,12 +163,23 @@ public final class AppEntry extends EntryWithTags {
             nameView.setVisibility(View.GONE);
 
         ImageView appIcon = view.findViewById(android.R.id.icon);
+        ImageView bottomRightIcon = view.findViewById(android.R.id.icon2);
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
             appIcon.setVisibility(View.VISIBLE);
             ResultViewHelper.setIconAsync(drawFlags, this, appIcon, AsyncSetEntryIcon.class);
+            if (bottomRightIcon != null) {
+                if (isHiddenByUser()) {
+                    bottomRightIcon.setVisibility(View.VISIBLE);
+                    bottomRightIcon.setImageResource(R.drawable.ic_eye_crossed);
+                } else {
+                    bottomRightIcon.setVisibility(View.GONE);
+                }
+            }
         } else {
             appIcon.setImageDrawable(null);
             appIcon.setVisibility(View.GONE);
+            if (bottomRightIcon != null)
+                bottomRightIcon.setVisibility(View.GONE);
         }
 
         ResultViewHelper.applyPreferences(drawFlags, nameView, appIcon);
@@ -192,12 +203,20 @@ public final class AppEntry extends EntryWithTags {
         }
 
         ImageView appIcon = view.findViewById(android.R.id.icon);
+        ImageView bottomRightIcon = view.findViewById(android.R.id.icon2);
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
             appIcon.setVisibility(View.VISIBLE);
             ResultViewHelper.setIconAsync(drawFlags, this, appIcon, AsyncSetEntryIcon.class);
+            if (isHiddenByUser()) {
+                bottomRightIcon.setVisibility(View.VISIBLE);
+                bottomRightIcon.setImageResource(R.drawable.ic_eye_crossed);
+            } else {
+                bottomRightIcon.setVisibility(View.GONE);
+            }
         } else {
             appIcon.setImageDrawable(null);
             appIcon.setVisibility(View.GONE);
+            bottomRightIcon.setVisibility(View.GONE);
         }
 
         //TODO: enable notification badges
@@ -246,6 +265,10 @@ public final class AppEntry extends EntryWithTags {
         //adapter.add(new LinearAdapter.Item(context, R.string.menu_exclude));
         adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_add));
         adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_remove));
+        if (isHiddenByUser())
+            adapter.add(new LinearAdapter.Item(context, R.string.menu_show));
+        else
+            adapter.add(new LinearAdapter.Item(context, R.string.menu_hide));
 
         adapter.add(new LinearAdapter.ItemTitle(context, R.string.popup_title_customize));
         if (getTags().isEmpty())
@@ -345,6 +368,20 @@ public final class AppEntry extends EntryWithTags {
                 TBApplication.behaviour(ctx).registerPopup(menu);
                 return true;
             }
+            case R.string.menu_hide:
+                if (TBApplication.dataHandler(ctx).addToHidden(this)) {
+                    setHiddenByUser(true);
+                    TBApplication.behaviour(ctx).refreshSearchRecords();
+                    //Toast.makeText(ctx, "App "+getName()+" hidden from search", Toast.LENGTH_LONG).show();
+                }
+                break;
+            case R.string.menu_show:
+                if (TBApplication.dataHandler(ctx).removeFromHidden(this)) {
+                    setHiddenByUser(false);
+                    TBApplication.behaviour(ctx).refreshSearchRecords();
+                    //Toast.makeText(ctx, "App "+getName()+" shown in searches", Toast.LENGTH_LONG).show();
+                }
+                break;
             case R.string.menu_tags_add:
             case R.string.menu_tags_edit:
                 TBApplication.behaviour(ctx).launchEditTagsDialog(this);

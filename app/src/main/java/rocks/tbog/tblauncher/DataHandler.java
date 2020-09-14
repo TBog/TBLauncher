@@ -24,6 +24,7 @@ import androidx.preference.PreferenceManager;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -587,75 +588,15 @@ public class DataHandler extends BroadcastReceiver
         return excluded;
     }
 
-//    public void addToExcludedFromHistory(AppEntry app) {
-//        // The set needs to be cloned and then edited,
-//        // modifying in place is not supported by putStringSet()
-//        Set<String> excluded = new HashSet<>(getExcludedFromHistory());
-//        excluded.add(app.id);
-//
-//        if (ShortcutUtil.areShortcutsEnabled(context)) {
-//            // Add all shortcuts for given package name to being excluded from history
-//            List<ShortcutRecord> shortcutsList = DBHelper.getShortcuts(context, app.getPackageName());
-//            for (ShortcutRecord shortcut : shortcutsList) {
-//                String id = ShortcutEntry.generateShortcutId(shortcut.displayName);
-//                excluded.add(id);
-//            }
-//            // Refresh shortcuts
-//            if (!shortcutsList.isEmpty() && this.getShortcutsProvider() != null) {
-//                this.getShortcutsProvider().reload();
-//            }
-//        }
-//
-//        PreferenceManager.getDefaultSharedPreferences(context).edit().putStringSet("excluded-apps-from-history", excluded).apply();
-//        app.setExcludedFromHistory(true);
-//    }
+    public boolean addToHidden(AppEntry entry) {
+        // if it's hidden it shouldn't be a favorite, right?
+        removeFromFavorites(entry);
+        return DBHelper.setAppHidden(context, entry.getUserComponentName());
+    }
 
-//    public void removeFromExcludedFromHistory(AppEntry app) {
-//        // The set needs to be cloned and then edited,
-//        // modifying in place is not supported by putStringSet()
-//        Set<String> excluded = new HashSet<>(getExcludedFromHistory());
-//        excluded.remove(app.id);
-//
-//        if (ShortcutUtil.areShortcutsEnabled(context)) {
-//            // Add all shortcuts for given package name to being included in history
-//            List<ShortcutRecord> shortcutsList = DBHelper.getShortcuts(context, app.getPackageName());
-//            for (ShortcutRecord shortcut : shortcutsList) {
-//                String id = ShortcutEntry.generateShortcutId(shortcut.displayName);
-//                excluded.remove(id);
-//            }
-//        }
-//
-//        PreferenceManager.getDefaultSharedPreferences(context).edit().putStringSet("excluded-apps-from-history", excluded).apply();
-//        app.setExcludedFromHistory(false);
-//    }
-
-//    public void addToExcluded(AppEntry app) {
-//        // The set needs to be cloned and then edited,
-//        // modifying in place is not supported by putStringSet()
-//        Set<String> excluded = new HashSet<>(getExcluded());
-//        excluded.add(app.getUserComponentName());
-//        PreferenceManager.getDefaultSharedPreferences(context).edit().putStringSet("excluded-apps", excluded).apply();
-//        app.setExcluded(true);
-//
-//        // Ensure it's removed from favorites too
-//        DataHandler dataHandler = TBApplication.getApplication(context).getDataHandler();
-//        dataHandler.removeFromFavorites(app.id);
-//
-//        // Exclude shortcuts for this app
-//        removeShortcuts(app.getPackageName());
-//    }
-
-//    public void removeFromExcluded(AppEntry app) {
-//        // The set needs to be cloned and then edited,
-//        // modifying in place is not supported by putStringSet()
-//        Set<String> excluded = new HashSet<>(getExcluded());
-//        excluded.remove(app.getUserComponentName());
-//        PreferenceManager.getDefaultSharedPreferences(context).edit().putStringSet("excluded-apps", excluded).apply();
-//        app.setExcluded(false);
-//
-//        // Add shortcuts for this app
-//        addShortcut(app.getPackageName());
-//    }
+    public boolean removeFromHidden(AppEntry entry) {
+        return DBHelper.removeAppHidden(context, entry.getUserComponentName());
+    }
 
     public void removeFromExcluded(String packageName) {
         Set<String> excluded = getExcluded();
@@ -703,9 +644,9 @@ public class DataHandler extends BroadcastReceiver
      * @return pojos for all applications
      */
     @Nullable
-    public List<AppEntry> getApplicationsWithoutExcluded() {
+    public List<AppEntry> getApplicationsWithoutHidden() {
         AppProvider appProvider = getAppProvider();
-        return appProvider != null ? appProvider.getAllAppsWithoutExcluded() : null;
+        return appProvider != null ? appProvider.getAllAppsWithoutHidden() : null;
     }
 
     @Nullable
@@ -808,10 +749,11 @@ public class DataHandler extends BroadcastReceiver
     public void removeFromFavorites(EntryItem entry) {
         FavRecord record = new FavRecord();
         record.record = entry.id;
-        DBHelper.removeFavorite(context, record);
-        FavProvider favProvider = getFavProvider();
-        if (favProvider != null)
-            favProvider.reload(true);
+        if (DBHelper.removeFavorite(context, record)) {
+            FavProvider favProvider = getFavProvider();
+            if (favProvider != null)
+                favProvider.reload(true);
+        }
     }
 
     @SuppressWarnings("StringSplitter")

@@ -21,6 +21,8 @@
     <string name="cd_main_clear">Clear search bar</string>
     <string name="permission_denied">Permission has been denied</string>
     <string name="menu_exclude">Exclude…</string>
+    <string name="menu_hide">Hide</string>
+    <string name="menu_show">Reveal</string>
     <string name="menu_remove_shortcut">Unpin</string>
     <string name="menu_tags_add">Add tags</string>
     <string name="menu_tags_edit">Edit tags</string>

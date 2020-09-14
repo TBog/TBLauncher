@@ -602,6 +602,10 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         showKeyboard();
     }
 
+    public void refreshSearchRecords() {
+        mResultList.setAdapter(mResultAdapter);
+    }
+
     public void updateSearchRecords() {
         if (mSearchEditText != null)
             updateSearchRecords(true, mSearchEditText.getText().toString());
@@ -710,8 +714,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             else
                 TBApplication.getApplication(mTBLauncherActivity).getIconsHandler().changeIcon(appEntry, drawable);
             // force a result refresh to update the icon in the view
-            //TODO: find a better way to update the result icon
-            updateSearchRecords();
+            refreshSearchRecords();
             TBApplication.quickList(mTBLauncherActivity).onFavoritesChanged();
         });
         dialog.show(mTBLauncherActivity.getSupportFragmentManager(), "custom_icon_dialog");
@@ -742,8 +745,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             else
                 TBApplication.getApplication(mTBLauncherActivity).getIconsHandler().changeIcon(staticEntry, drawable);
             // force a result refresh to update the icon in the view
-            //TODO: find a better way to update the result icon
-            updateSearchRecords();
+            refreshSearchRecords();
             TBApplication.quickList(mTBLauncherActivity).onFavoritesChanged();
         });
         dialog.show(mTBLauncherActivity.getSupportFragmentManager(), "custom_icon_dialog");
@@ -763,8 +765,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 
         dialog.setOnConfirmListener(newTags -> {
             TBApplication.tagsHandler(mTBLauncherActivity).setTags(entry, newTags);
-            //TODO: find a better way to update the views
-            updateSearchRecords();
+            refreshSearchRecords();
         });
 
         dialog.show(mTBLauncherActivity.getSupportFragmentManager(), "dialog_edit_tags");
