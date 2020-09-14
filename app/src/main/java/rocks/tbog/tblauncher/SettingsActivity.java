@@ -3,7 +3,6 @@ package rocks.tbog.tblauncher;
 import android.app.Activity;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.ColorFilter;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.os.Build;
@@ -35,10 +34,11 @@ import androidx.preference.SwitchPreference;
 import rocks.tbog.tblauncher.preference.ChooseColorDialog;
 import rocks.tbog.tblauncher.preference.ConfirmDialog;
 import rocks.tbog.tblauncher.preference.CustomDialogPreference;
-import rocks.tbog.tblauncher.preference.QuickListDialog;
+import rocks.tbog.tblauncher.preference.QuickListPreferenceDialog;
 import rocks.tbog.tblauncher.preference.SliderDialog;
 import rocks.tbog.tblauncher.utils.SystemUiVisibility;
 import rocks.tbog.tblauncher.utils.UIColors;
+import rocks.tbog.tblauncher.utils.UISizes;
 
 public class SettingsActivity extends AppCompatActivity implements PreferenceFragmentCompat.OnPreferenceStartScreenCallback/*, PreferenceFragmentCompat.OnPreferenceStartFragmentCallback*/ {
 
@@ -258,6 +258,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "search-bar-size":
                     case "quick-list-alpha":
                     case "quick-list-size":
+                    case "result-text-size":
+                    case "result-text2-size":
+                    case "result-icon-size":
                         dialogFragment = SliderDialog.newInstance(key);
                         break;
                     case "exit-app":
@@ -265,7 +268,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         dialogFragment = ConfirmDialog.newInstance(key);
                         break;
                     case "quick-list-content":
-                        dialogFragment = QuickListDialog.newInstance(key);
+                        dialogFragment = QuickListPreferenceDialog.newInstance(key);
                         break;
                     default:
                         throw new RuntimeException("CustomDialogPreference \"" + key + "\" has no dialog defined");
@@ -326,6 +329,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         }
                     }
                     break;
+                case "quick-list-color":
+                    // static entities will change color based on luminance
+                    // fallthrough
                 case "quick-list-toggle-color":
                     // toggle animation is also caching the color
                     TBApplication.quickList(activity).onFavoritesChanged();
@@ -337,6 +343,11 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 case "search-bar-text-color":
                 case "search-bar-icon-color":
                     UIColors.resetCache();
+                    break;
+                case "result-text-size":
+                case "result-text2-size":
+                case "result-icon-size":
+                    UISizes.resetCache();
                     break;
                 case "adaptive-shape":
                 case "force-adaptive":
@@ -383,9 +394,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
             Drawable arrow = ContextCompat.getDrawable(activity, R.drawable.ic_arrow_back);
             if (arrow != null) {
-                Drawable wrappedArrow = DrawableCompat.wrap(arrow);
-                DrawableCompat.setTint(wrappedArrow, color);
-                actionBar.setHomeAsUpIndicator(wrappedArrow);
+                arrow = DrawableCompat.wrap(arrow);
+                DrawableCompat.setTint(arrow, color);
+                actionBar.setHomeAsUpIndicator(arrow);
             }
 
             SpannableString text = new SpannableString(title);

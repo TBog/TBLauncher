@@ -36,18 +36,15 @@ import rocks.tbog.tblauncher.BuildConfig;
 import rocks.tbog.tblauncher.IconsHandler;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
-import rocks.tbog.tblauncher.result.ResultAdapter;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
-import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_DYNAMIC;
 import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_MANIFEST;
-import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_PINNED;
 
 public final class AppEntry extends EntryWithTags {
 
@@ -58,7 +55,7 @@ public final class AppEntry extends EntryWithTags {
     private final UserHandleCompat userHandle;
 
     private long customIcon = 0;
-    private boolean excluded = false;
+    private boolean hiddenByUser = false;
     private boolean excludedFromHistory = false;
 
     public AppEntry(@NonNull String id, @NonNull String packageName, @NonNull String className, @NonNull UserHandleCompat userHandle) {
@@ -78,12 +75,12 @@ public final class AppEntry extends EntryWithTags {
         return componentName.getPackageName();
     }
 
-    public boolean isExcluded() {
-        return excluded;
+    public boolean isHiddenByUser() {
+        return hiddenByUser;
     }
 
-    public void setExcluded(boolean excluded) {
-        this.excluded = excluded;
+    public void setHiddenByUser(boolean hiddenByUser) {
+        this.hiddenByUser = hiddenByUser;
     }
 
     public boolean isExcludedFromHistory() {
@@ -116,7 +113,7 @@ public final class AppEntry extends EntryWithTags {
             if (drawable != null)
                 return drawable;
             else
-                iconsHandler.restoreAppIcon(this);
+                iconsHandler.restoreDefaultIcon(this);
         }
         return iconsHandler.getDrawableIconForPackage(componentName, userHandle);
     }
@@ -160,31 +157,41 @@ public final class AppEntry extends EntryWithTags {
 
     private void displayGridResult(@NonNull View view, int drawFlags) {
         TextView nameView = view.findViewById(android.R.id.text1);
-        nameView.setTextColor(UIColors.getResultTextColor(view.getContext()));
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_NAME))
             ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, nameView);
         else
             nameView.setVisibility(View.GONE);
 
         ImageView appIcon = view.findViewById(android.R.id.icon);
+        ImageView bottomRightIcon = view.findViewById(android.R.id.icon2);
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
             appIcon.setVisibility(View.VISIBLE);
             ResultViewHelper.setIconAsync(drawFlags, this, appIcon, AsyncSetEntryIcon.class);
+            if (bottomRightIcon != null) {
+                if (isHiddenByUser()) {
+                    bottomRightIcon.setVisibility(View.VISIBLE);
+                    bottomRightIcon.setImageResource(R.drawable.ic_eye_crossed);
+                } else {
+                    bottomRightIcon.setVisibility(View.GONE);
+                }
+            }
         } else {
             appIcon.setImageDrawable(null);
             appIcon.setVisibility(View.GONE);
+            if (bottomRightIcon != null)
+                bottomRightIcon.setVisibility(View.GONE);
         }
+
+        ResultViewHelper.applyPreferences(drawFlags, nameView, appIcon);
     }
 
     private void displayListResult(@NonNull View view, int drawFlags) {
-        Context context = view.getContext();
+        final Context context = view.getContext();
 
         TextView nameView = view.findViewById(R.id.item_app_name);
-        nameView.setTextColor(UIColors.getResultTextColor(context));
         ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, nameView);
 
         TextView tagsView = view.findViewById(R.id.item_app_tag);
-        tagsView.setTextColor(UIColors.getResultText2Color(context));
         // Hide tags view if tags are empty
         if (getTags().isEmpty()) {
             tagsView.setVisibility(View.GONE);
@@ -196,12 +203,20 @@ public final class AppEntry extends EntryWithTags {
         }
 
         ImageView appIcon = view.findViewById(android.R.id.icon);
+        ImageView bottomRightIcon = view.findViewById(android.R.id.icon2);
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
             appIcon.setVisibility(View.VISIBLE);
             ResultViewHelper.setIconAsync(drawFlags, this, appIcon, AsyncSetEntryIcon.class);
+            if (isHiddenByUser()) {
+                bottomRightIcon.setVisibility(View.VISIBLE);
+                bottomRightIcon.setImageResource(R.drawable.ic_eye_crossed);
+            } else {
+                bottomRightIcon.setVisibility(View.GONE);
+            }
         } else {
             appIcon.setImageDrawable(null);
             appIcon.setVisibility(View.GONE);
+            bottomRightIcon.setVisibility(View.GONE);
         }
 
         //TODO: enable notification badges
@@ -214,6 +229,8 @@ public final class AppEntry extends EntryWithTags {
 //            int primaryColor = UIColors.getPrimaryColor(context);
 //            notificationView.setColorFilter(primaryColor);
 //        }
+
+        ResultViewHelper.applyPreferences(drawFlags, nameView, tagsView, appIcon);
     }
 
     static class ShortcutItem extends LinearAdapter.ItemString {
@@ -227,13 +244,13 @@ public final class AppEntry extends EntryWithTags {
     }
 
     @Override
-    protected ListPopup buildPopupMenu(Context context, LinearAdapter adapter, final ResultAdapter resultAdapter, View parentView) {
+    protected ListPopup buildPopupMenu(Context context, LinearAdapter adapter, View parentView, int flags) {
 //        if (!(context instanceof TBLauncherActivity) || ((TBLauncherActivity) context).isViewingSearchResults()) {
 //            adapter.add(new ListPopup.Item(context, R.string.menu_remove));
 //        }
 
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            List<ShortcutInfo> list = ShortcutUtil.getShortcut(context, getPackageName(), FLAG_MATCH_MANIFEST | FLAG_MATCH_PINNED | FLAG_MATCH_DYNAMIC);
+            List<ShortcutInfo> list = ShortcutUtil.getShortcut(context, getPackageName(), FLAG_MATCH_MANIFEST | FLAG_MATCH_DYNAMIC);
             for (ShortcutInfo info : list) {
                 CharSequence label = info.getLongLabel();
                 if (label == null)
@@ -245,9 +262,13 @@ public final class AppEntry extends EntryWithTags {
         }
 
         adapter.add(new LinearAdapter.ItemTitle(context, R.string.popup_title_hist_fav));
-        adapter.add(new LinearAdapter.Item(context, R.string.menu_exclude));
+        //adapter.add(new LinearAdapter.Item(context, R.string.menu_exclude));
         adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_add));
         adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_remove));
+        if (isHiddenByUser())
+            adapter.add(new LinearAdapter.Item(context, R.string.menu_show));
+        else
+            adapter.add(new LinearAdapter.Item(context, R.string.menu_hide));
 
         adapter.add(new LinearAdapter.ItemTitle(context, R.string.popup_title_customize));
         if (getTags().isEmpty())
@@ -286,6 +307,11 @@ public final class AppEntry extends EntryWithTags {
 //        if (TBApplication.getApplication(context).getRootHandler().isRootActivated() && TBApplication.getApplication(context).getRootHandler().isRootAvailable()) {
 //            adapter.add(new ListPopup.Item(context, R.string.menu_app_hibernate));
 //        }
+
+        if (Utilities.checkFlag(flags, FLAG_POPUP_MENU_QUICK_LIST)) {
+            adapter.add(new LinearAdapter.ItemTitle(context, R.string.menu_popup_title_settings));
+            adapter.add(new LinearAdapter.Item(context, R.string.menu_popup_quick_list_customize));
+        }
 
         return inflatePopupMenu(context, adapter);
     }
@@ -342,6 +368,20 @@ public final class AppEntry extends EntryWithTags {
                 TBApplication.behaviour(ctx).registerPopup(menu);
                 return true;
             }
+            case R.string.menu_hide:
+                if (TBApplication.dataHandler(ctx).addToHidden(this)) {
+                    setHiddenByUser(true);
+                    TBApplication.behaviour(ctx).refreshSearchRecords();
+                    //Toast.makeText(ctx, "App "+getName()+" hidden from search", Toast.LENGTH_LONG).show();
+                }
+                break;
+            case R.string.menu_show:
+                if (TBApplication.dataHandler(ctx).removeFromHidden(this)) {
+                    setHiddenByUser(false);
+                    TBApplication.behaviour(ctx).refreshSearchRecords();
+                    //Toast.makeText(ctx, "App "+getName()+" shown in searches", Toast.LENGTH_LONG).show();
+                }
+                break;
             case R.string.menu_tags_add:
             case R.string.menu_tags_edit:
                 TBApplication.behaviour(ctx).launchEditTagsDialog(this);
@@ -461,7 +501,9 @@ public final class AppEntry extends EntryWithTags {
         AlertDialog dialog = builder.create();
         dialog.show();
         // call after dialog got inflated (show call)
-        ((TextView) dialog.findViewById(R.id.rename)).setText(getName());
+        TextView nameView = dialog.findViewById(R.id.rename);
+        nameView.setText(getName());
+        nameView.requestFocus();
     }
 
     /**

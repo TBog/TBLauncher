@@ -1,5 +1,6 @@
 package rocks.tbog.tblauncher.result;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -9,6 +10,8 @@ import android.text.SpannableStringBuilder;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.util.Pair;
+import android.util.TypedValue;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -28,6 +31,7 @@ import rocks.tbog.tblauncher.entry.EntryWithTags;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
 import rocks.tbog.tblauncher.utils.UIColors;
+import rocks.tbog.tblauncher.utils.UISizes;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public final class ResultViewHelper {
@@ -132,6 +136,39 @@ public final class ResultViewHelper {
         task.executeOnExecutor(iconAsyncExecutor);
     }
 
+    public static void applyPreferences(int drawFlags, TextView nameView, ImageView iconView) {
+        Context ctx = nameView.getContext();
+
+        nameView.setTextColor(UIColors.getResultTextColor(ctx));
+        nameView.setTextSize(TypedValue.COMPLEX_UNIT_PX, UISizes.getResultTextSize(ctx));
+
+        if (Utilities.checkAnyFlag(drawFlags, EntryItem.FLAG_DRAW_LIST | EntryItem.FLAG_DRAW_GRID)) {
+            ViewGroup.LayoutParams params = iconView.getLayoutParams();
+            int size = UISizes.getResultIconSize(ctx);
+            if (params.width != size || params.height != size) {
+                params.width = size;
+                params.height = size;
+                iconView.setLayoutParams(params);
+            }
+        }
+
+//        if (Utilities.checkFlag(drawFlags, EntryItem.FLAG_DRAW_LIST))
+//        {
+//            int[] colors = new int[] {0xFF000000, 0xFF00ff00, 0xFF000000};
+//            GradientDrawable bkg = new GradientDrawable(GradientDrawable.Orientation.TOP_BOTTOM, colors);
+//            iconView.setBackground(bkg);
+//        }
+    }
+
+    public static void applyPreferences(int drawFlags, TextView nameView, TextView tagsView, ImageView iconView) {
+        applyPreferences(drawFlags, nameView, iconView);
+
+        Context ctx = tagsView.getContext();
+
+        tagsView.setTextColor(UIColors.getResultText2Color(ctx));
+        tagsView.setTextSize(TypedValue.COMPLEX_UNIT_PX, UISizes.getResultText2Size(ctx));
+    }
+
     public static abstract class AsyncSetEntryDrawable extends AsyncTask<Void, Void, Drawable> {
         private final WeakReference<ImageView> weakImage;
         protected final String cacheId;
@@ -163,7 +200,12 @@ public final class ResultViewHelper {
 
         @Nullable
         public ImageView getImageView() {
-            return weakImage.get();
+            ImageView imageView = weakImage.get();
+            // make sure we have a valid activity
+            Activity act = Utilities.getActivity(imageView);
+            if (act == null)
+                return null;
+            return imageView;
         }
 
         @Override

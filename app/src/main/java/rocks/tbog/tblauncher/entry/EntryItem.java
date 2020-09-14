@@ -14,14 +14,17 @@ import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.db.FavRecord;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
-import rocks.tbog.tblauncher.result.ResultAdapter;
 import rocks.tbog.tblauncher.result.ResultHelper;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.DebugInfo;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
+import rocks.tbog.tblauncher.utils.Utilities;
 
 public abstract class EntryItem {
+
+    public static final RelevanceComparator RELEVANCE_COMPARATOR = new RelevanceComparator();
+    public static final NameComparator NAME_COMPARATOR = new NameComparator();
 
     /**
      * the layout will be used in a ListView
@@ -64,11 +67,19 @@ public abstract class EntryItem {
     public static final int FLAG_DRAW_NO_CACHE = 0x0080; // 1 << 7
 
     /**
+     * the item will be drawn on a while background
+     */
+    public static final int FLAG_DRAW_WHITE_BG = 0x0100; // 1 << 8
+
+    /**
      * use cache but also run the load task
      * Note: used for shortcuts as we don't have a way to cache multiple icons for the same entry id
      */
-    public static final int FLAG_RELOAD = 0x0100; // 1 << 8
+    public static final int FLAG_RELOAD = 0x0200; // 1 << 9
 
+    // Popup menu flags
+    public static final int FLAG_POPUP_MENU_RESULT_LIST = 0x01;
+    public static final int FLAG_POPUP_MENU_QUICK_LIST = 0x02;
 
     // Globally unique ID.
     // Usually starts with provider scheme, e.g. "app://" or "contact://" to
@@ -152,6 +163,10 @@ public abstract class EntryItem {
         return this.id;
     }
 
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    // Result methods
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
     @LayoutRes
     public abstract int getResultLayout(int drawFlags);
 
@@ -170,20 +185,31 @@ public abstract class EntryItem {
         }
 
     }
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    // Result methods
-    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    public static class NameComparator implements java.util.Comparator<EntryItem> {
+        @Override
+        public int compare(EntryItem lhs, EntryItem rhs) {
+            if (lhs.normalizedName != null && rhs.normalizedName != null)
+                return lhs.normalizedName.compareTo(rhs.normalizedName);
+            return lhs.name.compareTo(rhs.name);
+        }
+
+    }
 
     /**
      * Default popup menu implementation, can be overridden by children class to display a more specific menu
      *
      * @return an inflated, listener-free PopupMenu
      */
-    ListPopup buildPopupMenu(Context context, LinearAdapter adapter, final ResultAdapter parent, View parentView) {
+    ListPopup buildPopupMenu(Context context, LinearAdapter adapter, View parentView, int flags) {
         adapter.add(new LinearAdapter.ItemTitle(context, R.string.popup_title_hist_fav));
-        adapter.add(new LinearAdapter.Item(context, R.string.menu_remove));
+        //adapter.add(new LinearAdapter.Item(context, R.string.menu_remove_history));
         adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_add));
         adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_remove));
+        if (Utilities.checkFlag(flags, FLAG_POPUP_MENU_QUICK_LIST)) {
+            adapter.add(new LinearAdapter.ItemTitle(context, R.string.menu_popup_title_settings));
+            adapter.add(new LinearAdapter.Item(context, R.string.menu_popup_quick_list_customize));
+        }
         return inflatePopupMenu(context, adapter);
     }
 
@@ -194,10 +220,8 @@ public abstract class EntryItem {
         // otherwise don't show the "remove favorite button"
         boolean foundInFavorites = false;
         ArrayList<FavRecord> favRecords = TBApplication.dataHandler(context).getFavorites();
-        for (FavRecord fav : favRecords)
-        {
-            if (id.equals(fav.record))
-            {
+        for (FavRecord fav : favRecords) {
+            if (id.equals(fav.record)) {
                 foundInFavorites = true;
                 break;
             }
@@ -234,9 +258,10 @@ public abstract class EntryItem {
      * @return a PopupMenu object
      */
     @NonNull
-    public ListPopup getPopupMenu(final Context context, final ResultAdapter resultAdapter, final View parentView) {
+    public ListPopup getPopupMenu(final View parentView, int flags) {
+        final Context context = parentView.getContext();
         LinearAdapter menuAdapter = new LinearAdapter();
-        ListPopup menu = buildPopupMenu(context, menuAdapter, resultAdapter, parentView);
+        ListPopup menu = buildPopupMenu(context, menuAdapter, parentView, flags);
 
         menu.setOnItemClickListener((adapter, view, position) -> {
             LinearAdapter.MenuItem item = ((LinearAdapter) adapter).getItem(position);
@@ -250,6 +275,11 @@ public abstract class EntryItem {
         return menu;
     }
 
+    @NonNull
+    public ListPopup getPopupMenu(final View parentView) {
+        return getPopupMenu(parentView, FLAG_POPUP_MENU_RESULT_LIST);
+    }
+
     /**
      * Handler for popup menu action.
      * Default implementation only handle remove from history action.
@@ -258,17 +288,21 @@ public abstract class EntryItem {
      */
     @CallSuper
     boolean popupMenuClickHandler(@NonNull View view, @NonNull LinearAdapter.MenuItem item, @StringRes int stringId, View parentView) {
-        Context context = view.getContext();
+        Context context = parentView.getContext();
         switch (stringId) {
-            case R.string.menu_remove:
+            case R.string.menu_remove_history:
                 ResultHelper.removeFromResultsAndHistory(this, context);
                 return true;
             case R.string.menu_favorites_add:
                 ResultHelper.launchAddToFavorites(context, this);
-                break;
+                return true;
             case R.string.menu_favorites_remove:
                 ResultHelper.launchRemoveFromFavorites(context, this);
-                break;
+                TBApplication.quickList(context).onFavoritesChanged();
+                return true;
+            case R.string.menu_popup_quick_list_customize:
+                TBApplication.behaviour(context).launchEditQuickListDialog();
+                return true;
         }
 
 //        FullscreenActivity mainActivity = (FullscreenActivity) context;

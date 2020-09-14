@@ -39,12 +39,14 @@ import java.util.List;
 import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.EntryWithTags;
+import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.result.ResultAdapter;
 import rocks.tbog.tblauncher.searcher.ISearchActivity;
 import rocks.tbog.tblauncher.searcher.QuerySearcher;
 import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
 import rocks.tbog.tblauncher.ui.AnimatedListView;
 import rocks.tbog.tblauncher.ui.DialogFragment;
+import rocks.tbog.tblauncher.ui.EditQuickListDialog;
 import rocks.tbog.tblauncher.ui.KeyboardScrollHider;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
@@ -203,8 +205,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 
         // clear button actions
         mClearButton.setOnClickListener(v -> {
-            mSearchEditText.setText("");
-            showKeyboard();
+            clearSearch();
         });
         mClearButton.setOnLongClickListener(v -> {
             mSearchEditText.setText("");
@@ -594,6 +595,17 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         mResultList.post(() -> mResultList.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL));
     }
 
+    public void clearSearch() {
+        if (mSearchEditText == null)
+            return;
+        mSearchEditText.setText("");
+        showKeyboard();
+    }
+
+    public void refreshSearchRecords() {
+        mResultList.setAdapter(mResultAdapter);
+    }
+
     public void updateSearchRecords() {
         if (mSearchEditText != null)
             updateSearchRecords(true, mSearchEditText.getText().toString());
@@ -680,8 +692,10 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         CustomIconDialog dialog = new CustomIconDialog();
         openFragmentDialog(dialog);
 
-        // We assume the mResultLayout is visible
-        mResultLayout.setVisibility(View.INVISIBLE);
+        // If mResultLayout is visible
+        boolean bResultListVisible = TBApplication.state().isResultListVisible();
+        if (bResultListVisible)
+            mResultLayout.setVisibility(View.INVISIBLE);
 
         // set args
         {
@@ -690,17 +704,49 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             args.putLong("customIcon", appEntry.getCustomIcon());
             dialog.setArguments(args);
         }
-        // OnDismiss: We assume the mResultLayout was visible
-        dialog.setOnDismissListener(dlg -> mResultLayout.setVisibility(View.VISIBLE));
+        // OnDismiss: We restore mResultLayout visibility
+        if (bResultListVisible)
+            dialog.setOnDismissListener(dlg -> mResultLayout.setVisibility(View.VISIBLE));
 
         dialog.setOnConfirmListener(drawable -> {
             if (drawable == null)
-                TBApplication.getApplication(mTBLauncherActivity).getIconsHandler().restoreAppIcon(appEntry);
+                TBApplication.getApplication(mTBLauncherActivity).getIconsHandler().restoreDefaultIcon(appEntry);
             else
-                TBApplication.getApplication(mTBLauncherActivity).getIconsHandler().changeAppIcon(appEntry, drawable);
+                TBApplication.getApplication(mTBLauncherActivity).getIconsHandler().changeIcon(appEntry, drawable);
             // force a result refresh to update the icon in the view
-            //TODO: find a better way to update the result icon
-            updateSearchRecords();
+            refreshSearchRecords();
+            TBApplication.quickList(mTBLauncherActivity).onFavoritesChanged();
+        });
+        dialog.show(mTBLauncherActivity.getSupportFragmentManager(), "custom_icon_dialog");
+    }
+
+    public void launchCustomIconDialog(StaticEntry staticEntry) {
+        CustomIconDialog dialog = new CustomIconDialog();
+        openFragmentDialog(dialog);
+
+        // If mResultLayout is visible
+        boolean bResultListVisible = TBApplication.state().isResultListVisible();
+        if (bResultListVisible)
+            mResultLayout.setVisibility(View.INVISIBLE);
+
+        // set args
+        {
+            Bundle args = new Bundle();
+            args.putString("entryId", staticEntry.id);
+            dialog.setArguments(args);
+        }
+        // OnDismiss: We restore mResultLayout visibility
+        if (bResultListVisible)
+            dialog.setOnDismissListener(dlg -> mResultLayout.setVisibility(View.VISIBLE));
+
+        dialog.setOnConfirmListener(drawable -> {
+            if (drawable == null)
+                TBApplication.getApplication(mTBLauncherActivity).getIconsHandler().restoreDefaultIcon(staticEntry);
+            else
+                TBApplication.getApplication(mTBLauncherActivity).getIconsHandler().changeIcon(staticEntry, drawable);
+            // force a result refresh to update the icon in the view
+            refreshSearchRecords();
+            TBApplication.quickList(mTBLauncherActivity).onFavoritesChanged();
         });
         dialog.show(mTBLauncherActivity.getSupportFragmentManager(), "custom_icon_dialog");
     }
@@ -719,11 +765,16 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 
         dialog.setOnConfirmListener(newTags -> {
             TBApplication.tagsHandler(mTBLauncherActivity).setTags(entry, newTags);
-            //TODO: find a better way to update the views
-            updateSearchRecords();
+            refreshSearchRecords();
         });
 
         dialog.show(mTBLauncherActivity.getSupportFragmentManager(), "dialog_edit_tags");
+    }
+
+    public void launchEditQuickListDialog() {
+        EditQuickListDialog dialog = new EditQuickListDialog();
+        openFragmentDialog(dialog);
+        dialog.show(mTBLauncherActivity.getSupportFragmentManager(), "dialog_edit_quick_list");
     }
 
     private boolean isCustomIconDialogVisible() {

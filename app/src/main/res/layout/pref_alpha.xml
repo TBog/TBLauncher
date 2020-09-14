@@ -3,25 +3,25 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
-    android:padding="@dimen/launcher_button_padding"
     android:orientation="vertical"
+    android:paddingHorizontal="@dimen/dialog_padding_horizontal"
+    android:paddingVertical="@dimen/dialog_padding_vertical"
     android:theme="@style/SettingsDialogTheme">
 
     <TextView
         android:id="@android:id/text1"
-        android:text="@string/select_alpha"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:text="@string/title_select_alpha" />
 
     <SeekBar
         android:id="@+id/seekBar"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/bar_height"
-        />
+        android:layout_height="wrap_content" />
 
     <TextView
         android:id="@android:id/text2"
-        android:text="@string/value"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"/>
+        android:layout_height="wrap_content"
+        android:text="@string/value" />
 </LinearLayout>

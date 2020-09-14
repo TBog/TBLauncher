@@ -24,6 +24,7 @@ import androidx.preference.PreferenceManager;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -32,6 +33,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import rocks.tbog.tblauncher.dataprovider.ActionProvider;
 import rocks.tbog.tblauncher.dataprovider.AppCacheProvider;
 import rocks.tbog.tblauncher.dataprovider.AppProvider;
 import rocks.tbog.tblauncher.dataprovider.ContactsProvider;
@@ -48,6 +50,7 @@ import rocks.tbog.tblauncher.db.ValuedHistoryRecord;
 import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.ShortcutEntry;
+import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.searcher.Searcher;
 import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
@@ -124,6 +127,11 @@ public class DataHandler extends BroadcastReceiver
             ProviderEntry providerEntry = new ProviderEntry();
             providerEntry.provider = new FavProvider(context);
             providers.put("favorites", providerEntry);
+        }
+        {
+            ProviderEntry providerEntry = new ProviderEntry();
+            providerEntry.provider = new ActionProvider(context);
+            providers.put("actions", providerEntry);
         }
 
 //        ProviderEntry calculatorEntry = new ProviderEntry();
@@ -580,75 +588,15 @@ public class DataHandler extends BroadcastReceiver
         return excluded;
     }
 
-//    public void addToExcludedFromHistory(AppEntry app) {
-//        // The set needs to be cloned and then edited,
-//        // modifying in place is not supported by putStringSet()
-//        Set<String> excluded = new HashSet<>(getExcludedFromHistory());
-//        excluded.add(app.id);
-//
-//        if (ShortcutUtil.areShortcutsEnabled(context)) {
-//            // Add all shortcuts for given package name to being excluded from history
-//            List<ShortcutRecord> shortcutsList = DBHelper.getShortcuts(context, app.getPackageName());
-//            for (ShortcutRecord shortcut : shortcutsList) {
-//                String id = ShortcutEntry.generateShortcutId(shortcut.displayName);
-//                excluded.add(id);
-//            }
-//            // Refresh shortcuts
-//            if (!shortcutsList.isEmpty() && this.getShortcutsProvider() != null) {
-//                this.getShortcutsProvider().reload();
-//            }
-//        }
-//
-//        PreferenceManager.getDefaultSharedPreferences(context).edit().putStringSet("excluded-apps-from-history", excluded).apply();
-//        app.setExcludedFromHistory(true);
-//    }
+    public boolean addToHidden(AppEntry entry) {
+        // if it's hidden it shouldn't be a favorite, right?
+        removeFromFavorites(entry);
+        return DBHelper.setAppHidden(context, entry.getUserComponentName());
+    }
 
-//    public void removeFromExcludedFromHistory(AppEntry app) {
-//        // The set needs to be cloned and then edited,
-//        // modifying in place is not supported by putStringSet()
-//        Set<String> excluded = new HashSet<>(getExcludedFromHistory());
-//        excluded.remove(app.id);
-//
-//        if (ShortcutUtil.areShortcutsEnabled(context)) {
-//            // Add all shortcuts for given package name to being included in history
-//            List<ShortcutRecord> shortcutsList = DBHelper.getShortcuts(context, app.getPackageName());
-//            for (ShortcutRecord shortcut : shortcutsList) {
-//                String id = ShortcutEntry.generateShortcutId(shortcut.displayName);
-//                excluded.remove(id);
-//            }
-//        }
-//
-//        PreferenceManager.getDefaultSharedPreferences(context).edit().putStringSet("excluded-apps-from-history", excluded).apply();
-//        app.setExcludedFromHistory(false);
-//    }
-
-//    public void addToExcluded(AppEntry app) {
-//        // The set needs to be cloned and then edited,
-//        // modifying in place is not supported by putStringSet()
-//        Set<String> excluded = new HashSet<>(getExcluded());
-//        excluded.add(app.getUserComponentName());
-//        PreferenceManager.getDefaultSharedPreferences(context).edit().putStringSet("excluded-apps", excluded).apply();
-//        app.setExcluded(true);
-//
-//        // Ensure it's removed from favorites too
-//        DataHandler dataHandler = TBApplication.getApplication(context).getDataHandler();
-//        dataHandler.removeFromFavorites(app.id);
-//
-//        // Exclude shortcuts for this app
-//        removeShortcuts(app.getPackageName());
-//    }
-
-//    public void removeFromExcluded(AppEntry app) {
-//        // The set needs to be cloned and then edited,
-//        // modifying in place is not supported by putStringSet()
-//        Set<String> excluded = new HashSet<>(getExcluded());
-//        excluded.remove(app.getUserComponentName());
-//        PreferenceManager.getDefaultSharedPreferences(context).edit().putStringSet("excluded-apps", excluded).apply();
-//        app.setExcluded(false);
-//
-//        // Add shortcuts for this app
-//        addShortcut(app.getPackageName());
-//    }
+    public boolean removeFromHidden(AppEntry entry) {
+        return DBHelper.removeAppHidden(context, entry.getUserComponentName());
+    }
 
     public void removeFromExcluded(String packageName) {
         Set<String> excluded = getExcluded();
@@ -696,9 +644,9 @@ public class DataHandler extends BroadcastReceiver
      * @return pojos for all applications
      */
     @Nullable
-    public List<AppEntry> getApplicationsWithoutExcluded() {
+    public List<AppEntry> getApplicationsWithoutHidden() {
         AppProvider appProvider = getAppProvider();
-        return appProvider != null ? appProvider.getAllAppsWithoutExcluded() : null;
+        return appProvider != null ? appProvider.getAllAppsWithoutHidden() : null;
     }
 
     @Nullable
@@ -729,6 +677,12 @@ public class DataHandler extends BroadcastReceiver
     public FilterProvider getFilterProvider() {
         ProviderEntry entry = this.providers.get("filters");
         return (entry != null) ? ((FilterProvider) entry.provider) : null;
+    }
+
+    @Nullable
+    public ActionProvider getActionProvider() {
+        ProviderEntry entry = this.providers.get("actions");
+        return (entry != null) ? ((ActionProvider) entry.provider) : null;
     }
 
 //    @Nullable
@@ -787,12 +741,19 @@ public class DataHandler extends BroadcastReceiver
         record.record = entry.id;
         record.position = "0";
         DBHelper.setFavorite(context, record);
+        FavProvider favProvider = getFavProvider();
+        if (favProvider != null)
+            favProvider.reload(true);
     }
 
     public void removeFromFavorites(EntryItem entry) {
         FavRecord record = new FavRecord();
         record.record = entry.id;
-        DBHelper.removeFavorite(context, record);
+        if (DBHelper.removeFavorite(context, record)) {
+            FavProvider favProvider = getFavProvider();
+            if (favProvider != null)
+                favProvider.reload(true);
+        }
     }
 
     @SuppressWarnings("StringSplitter")
@@ -867,6 +828,13 @@ public class DataHandler extends BroadcastReceiver
         DBHelper.setCustomAppName(context, componentName, newName);
     }
 
+    public void renameStaticEntry(@NonNull String entryId, @Nullable String newName) {
+        if (newName == null)
+            DBHelper.removeCustomStaticEntryName(context, entryId);
+        else
+            DBHelper.setCustomStaticEntryName(context, entryId, newName);
+    }
+
     public void removeRenameApp(String componentName, String defaultName) {
         DBHelper.removeCustomAppName(context, componentName, defaultName);
     }
@@ -889,6 +857,23 @@ public class DataHandler extends BroadcastReceiver
         return DBHelper.setCustomAppIcon(context, componentName, stream.toByteArray());
     }
 
+    public void setCustomStaticEntryIcon(String entryId, Bitmap bitmap) {
+        ByteArrayOutputStream stream = null;
+        try {
+            stream = new ByteArrayOutputStream(1024);
+            if (!bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream))
+                stream = null;
+            else {
+                stream.flush();
+                stream.close();
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Unable to convert bitmap", e);
+        }
+        if (stream != null)
+            DBHelper.setCustomStaticEntryIcon(context, entryId, stream.toByteArray());
+    }
+
     public Bitmap getCustomAppIcon(String componentName) {
         byte[] bytes = DBHelper.getCustomAppIcon(context, componentName);
         if (bytes == null)
@@ -898,6 +883,17 @@ public class DataHandler extends BroadcastReceiver
 
     public AppRecord removeCustomAppIcon(String componentName) {
         return DBHelper.removeCustomAppIcon(context, componentName);
+    }
+
+    public void removeCustomStaticEntryIcon(String entryId) {
+        DBHelper.removeCustomStaticEntryIcon(context, entryId);
+    }
+
+    public Bitmap getCustomStaticEntryIcon(StaticEntry staticEntry) {
+        byte[] bytes = DBHelper.getCustomFavIcon(context, staticEntry.id);
+        if (bytes == null)
+            return null;
+        return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
     }
 
     public void renameShortcut(ShortcutEntry shortcutEntry, String newName) {
@@ -962,22 +958,23 @@ public class DataHandler extends BroadcastReceiver
 
     public void setQuickList(Iterable<String> records) {
         ArrayList<FavRecord> oldFav = getFavorites();
-        int pos = 0;
+        int pos = 1;
         for (String record : records) {
+            // remove from oldFav the current record
             for (Iterator<FavRecord> iterator = oldFav.iterator(); iterator.hasNext(); ) {
                 FavRecord favRecord = iterator.next();
                 if (favRecord.record.equals(record))
                     iterator.remove();
             }
-            String position = String.valueOf(pos);
+            String position = String.format("%08x", pos);
             if (!DBHelper.setQuickListPosition(context, record, position)) {
                 FavRecord favRecord = new FavRecord();
                 favRecord.record = record;
-                favRecord.flags = FavRecord.FLAG_SHOW_IN_QUICK_LIST;
+                favRecord.flags |= FavRecord.FLAG_SHOW_IN_QUICK_LIST;
                 favRecord.position = position;
                 DBHelper.setFavorite(context, favRecord);
             }
-            pos += 1000;
+            pos += 11;
         }
 
         for (FavRecord favRecord : oldFav) {

@@ -199,7 +199,7 @@ public class AppProvider extends Provider<AppEntry> {
         boolean match;
 
         for (AppEntry pojo : pojos) {
-            if (pojo.isExcluded()) {
+            if (pojo.isHiddenByUser()) {
                 continue;
             }
 
@@ -229,7 +229,7 @@ public class AppProvider extends Provider<AppEntry> {
      * Return a Pojo
      *
      * @param id we're looking for
-     * @return an AppPojo, or null
+     * @return an AppEntry, or null
      */
     @Override
     public EntryItem findById(@NonNull String id) {
@@ -252,11 +252,11 @@ public class AppProvider extends Provider<AppEntry> {
         return records;
     }
 
-    public ArrayList<AppEntry> getAllAppsWithoutExcluded() {
+    public ArrayList<AppEntry> getAllAppsWithoutHidden() {
         ArrayList<AppEntry> records = new ArrayList<>(pojos.size());
 
         for (AppEntry pojo : pojos) {
-            if (pojo.isExcluded())
+            if (pojo.isHiddenByUser())
                 continue;
 
             pojo.resetRelevance();

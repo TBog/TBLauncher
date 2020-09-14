@@ -21,12 +21,15 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.preference.PreferenceManager;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import rocks.tbog.tblauncher.dataprovider.FavProvider;
 import rocks.tbog.tblauncher.dataprovider.IProvider;
 import rocks.tbog.tblauncher.dataprovider.Provider;
 import rocks.tbog.tblauncher.entry.EntryItem;
+import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.UIColors;
 
 public class QuickList {
@@ -41,9 +44,11 @@ public class QuickList {
 
     // is any filter activated?
     private boolean bFilterOn = false;
+    // is any action activated?
+    private boolean bActionOn = false;
 
     // last filter scheme, used for better toggle behaviour
-    private String mLastFilter = null;
+    private String mLastSelection = null;
 
     public Context getContext() {
         return mTBLauncherActivity;
@@ -72,6 +77,10 @@ public class QuickList {
             drawFlags |= EntryItem.FLAG_DRAW_ICON;
         if (prefs.getBoolean("quick-list-show-badge", true))
             drawFlags |= EntryItem.FLAG_DRAW_ICON_BADGE;
+        if (UIColors.luminance(UIColors.getColor(prefs, "quick-list-color")) > .666) {
+            drawFlags |= EntryItem.FLAG_DRAW_WHITE_BG;
+            //drawFlags |= EntryItem.FLAG_DRAW_NO_CACHE; // no need, we already have it
+        }
         return drawFlags;
     }
 
@@ -94,9 +103,66 @@ public class QuickList {
             mQuickList.addView(view);
 
             view.setOnClickListener(entry::doLaunch);
+            view.setOnLongClickListener(v -> {
+                ListPopup menu = entry.getPopupMenu(v, EntryItem.FLAG_POPUP_MENU_QUICK_LIST);
+
+//                LinearAdapter adapter = menu.getAdapter() instanceof LinearAdapter ? (LinearAdapter) menu.getAdapter() : null;
+//                if (adapter != null) {
+//                    Context ctx = v.getContext();
+//                    adapter.add(new LinearAdapter.ItemTitle(ctx, R.string.menu_popup_title_settings));
+//                    adapter.add(new LinearAdapter.Item(ctx, R.string.menu_popup_quick_list_customize));
+//
+//                    //menu.setOnItemClickListener(entry::);
+//                }
+
+                // check if menu contains elements and if yes show it
+                if (!menu.getAdapter().isEmpty()) {
+                    TBApplication.behaviour(v.getContext()).registerPopup(menu);
+                    menu.show(v);
+                    return true;
+                }
+
+                return false;
+            });
         }
         //mQuickList.setVisibility(mQuickList.getChildCount() == 0 ? View.GONE : View.VISIBLE);
         mQuickList.requestLayout();
+    }
+
+    public void toggleProvider(View v, IProvider provider, @NonNull java.util.Comparator<? super EntryItem> comparator) {
+        Context ctx = v.getContext();
+        TBApplication app = TBApplication.getApplication(ctx);
+        Object tag_actionId = v.getTag(R.id.tag_actionId);
+        String actionId = tag_actionId instanceof String ? (String) tag_actionId : "";
+
+        // toggle off any filter
+        if (bFilterOn) {
+            animToggleOff();
+            bFilterOn = false;
+            app.behaviour().filterResults(null);
+        }
+
+        // show action provider content
+        {
+            // if the last action is not the current action, toggle on this action
+            if (!bActionOn || !actionId.equals(mLastSelection)) {
+                List<? extends EntryItem> list;
+                list = provider != null ? provider.getPojos() : null;
+                if (list != null) {
+                    // copy list in order to sort it
+                    list = new ArrayList<>(list);
+                    //TODO: do we need this on another thread?
+                    Collections.sort(list, comparator);
+                    app.behaviour().clearSearch();
+                    app.behaviour().updateAdapter(list, false);
+                    mLastSelection = actionId;
+                    bActionOn = true;
+                }
+            } else {
+                // to toggle off the action, set bActionOn to false
+                app.behaviour().clearSearch();
+            }
+        }
     }
 
     public void toggleFilter(View v, IProvider provider, @NonNull String filterName) {
@@ -105,7 +171,7 @@ public class QuickList {
 
         // if there is no search we need to filter, just show all matching entries
         if (bAdapterEmpty) {
-            if (bFilterOn && provider != null && filterName.equals(mLastFilter)) {
+            if (bFilterOn && provider != null && filterName.equals(mLastSelection)) {
                 app.behaviour().clearAdapter();
                 bFilterOn = false;
             } else {
@@ -113,7 +179,7 @@ public class QuickList {
                 list = provider != null ? provider.getPojos() : null;
                 if (list != null) {
                     app.behaviour().updateAdapter(list, false);
-                    mLastFilter = filterName;
+                    mLastSelection = filterName;
                     bFilterOn = true;
                 } else {
                     bFilterOn = false;
@@ -122,14 +188,14 @@ public class QuickList {
             // updateAdapter will change `bAdapterEmpty` and we change it back because we want
             // bAdapterEmpty to represent a search we need to filter
             bAdapterEmpty = true;
-        } else if (bFilterOn && (provider == null || filterName.equals(mLastFilter))) {
+        } else if (bFilterOn && (provider == null || filterName.equals(mLastSelection))) {
             animToggleOff();
             bFilterOn = false;
             app.behaviour().filterResults(null);
         } else if (provider != null) {
             animToggleOff();
             bFilterOn = true;
-            mLastFilter = filterName;
+            mLastSelection = filterName;
             app.behaviour().filterResults(filterName);
         }
 
@@ -171,7 +237,7 @@ public class QuickList {
         int n = mQuickList.getChildCount();
         for (int i = 0; i < n; i += 1) {
             View view = mQuickList.getChildAt(i);
-            if (mLastFilter == null || mLastFilter == view.getTag(R.id.tag_filterName)) {
+            if (mLastSelection == null || mLastSelection == view.getTag(R.id.tag_filterName)) {
                 if (view.getTag(R.id.tag_anim) instanceof ValueAnimator) {
                     ValueAnimator colorAnim = (ValueAnimator) view.getTag(R.id.tag_anim);
                     colorAnim.reverse();
@@ -255,6 +321,7 @@ public class QuickList {
     public void adapterCleared() {
         animToggleOff();
         bFilterOn = false;
+        bActionOn = false;
         bAdapterEmpty = true;
         if (!mAlwaysVisible)
             hideQuickList(true);
@@ -264,6 +331,7 @@ public class QuickList {
         show();
         animToggleOff();
         bFilterOn = false;
+        bActionOn = false;
         bAdapterEmpty = false;
     }
 
@@ -272,17 +340,16 @@ public class QuickList {
         // size
         int percent = pref.getInt("quick-list-size", 0);
 
+        if (!(quickList.getLayoutParams() instanceof LinearLayout.LayoutParams))
+            throw new IllegalStateException("mSearchBarContainer has the wrong layout params");
+
+        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) quickList.getLayoutParams();
         // set layout height
         {
             int smallSize = resources.getDimensionPixelSize(R.dimen.bar_height);
             int largeSize = resources.getDimensionPixelSize(R.dimen.large_quick_list_bar_height);
-            ViewGroup.LayoutParams params = quickList.getLayoutParams();
-            if (params instanceof LinearLayout.LayoutParams) {
-                params.height = smallSize + (largeSize - smallSize) * percent / 100;
-                quickList.setLayoutParams(params);
-            } else {
-                throw new IllegalStateException("mSearchBarContainer has the wrong layout params");
-            }
+            params.height = smallSize + (largeSize - smallSize) * percent / 100;
+            quickList.setLayoutParams(params);
         }
 
         int color = getBackgroundColor(pref);
@@ -290,7 +357,6 @@ public class QuickList {
         // rounded drawable
         PaintDrawable drawable = new PaintDrawable();
         drawable.getPaint().setColor(color);
-        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) quickList.getLayoutParams();
         drawable.setCornerRadius(resources.getDimension(R.dimen.bar_corner_radius));
         quickList.setBackground(drawable);
         int margin = (int) (params.height * .25f);

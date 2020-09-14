@@ -43,7 +43,8 @@ public class TagsHandler {
         }, () -> {
             mTagsCache.clear();
             mTagsCache.putAll(tags);
-            addDefaultAliases();
+            if (mTagsCache.isEmpty())
+                addDefaultAliases();
         });
     }
 

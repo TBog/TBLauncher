@@ -1,21 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:measureWithLargestChild="true"
     android:orientation="vertical"
-    android:padding="@dimen/launcher_button_padding"
     android:theme="@style/SettingsDialogTheme">
 
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/label_preview" />
+        android:layout_marginHorizontal="@dimen/dialog_padding_horizontal"
+        android:layout_marginTop="@dimen/dialog_padding_vertical"
+        android:text="@string/edit_quick_list_preview" />
 
+    <!-- The preview will get the same margin as the real thing (25% of the height) -->
     <LinearLayout
         android:id="@+id/preview"
         android:layout_width="match_parent"
         android:layout_height="@dimen/large_quick_list_bar_height"
+        android:layout_marginHorizontal="@dimen/dialog_padding_horizontal"
         android:background="?attr/listBackgroundColor"
         android:gravity="center"
         android:measureWithLargestChild="true"
@@ -23,43 +27,48 @@
         android:paddingHorizontal="@dimen/result_margin_horizontal"
         android:paddingVertical="@dimen/result_margin_vertical" />
 
-    <View
-        style="@style/SeparatorHorizontal"
-        android:layout_marginVertical="@dimen/result_margin_vertical" />
-
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/filter_list" />
+        android:layout_marginHorizontal="@dimen/dialog_padding_horizontal"
+        android:text="@string/edit_quick_list_filters_and_actions" />
 
     <GridView
         android:id="@+id/filterGrid"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="@dimen/dialog_padding_horizontal"
+        android:layout_weight="1"
+        android:clipToPadding="false"
         android:columnWidth="@dimen/app_grid_column_width"
         android:gravity="center"
         android:numColumns="auto_fit"
+        android:paddingHorizontal="@dimen/app_grid_horizontal_padding"
+        android:paddingVertical="@dimen/app_grid_vertical_padding"
         android:stretchMode="columnWidth"
         android:verticalSpacing="@dimen/app_grid_vertical_spacing"
         tools:layout_height="200dp"
         tools:listitem="@layout/item_grid" />
 
-    <View
-        style="@style/SeparatorHorizontal"
-        android:layout_marginVertical="@dimen/result_margin_vertical" />
-
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/favorites_list" />
+        android:layout_marginHorizontal="@dimen/dialog_padding_horizontal"
+        android:layout_marginTop="@dimen/dialog_padding_vertical"
+        android:text="@string/edit_quick_list_favorites" />
 
     <GridView
         android:id="@+id/favoritesGrid"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="@dimen/dialog_padding_horizontal"
+        android:layout_weight="1"
+        android:clipToPadding="false"
         android:columnWidth="@dimen/app_grid_column_width"
         android:gravity="center"
         android:numColumns="auto_fit"
+        android:paddingHorizontal="@dimen/app_grid_horizontal_padding"
+        android:paddingVertical="@dimen/app_grid_vertical_padding"
         android:stretchMode="columnWidth"
         android:verticalSpacing="@dimen/app_grid_vertical_spacing"
         tools:layout_height="200dp"

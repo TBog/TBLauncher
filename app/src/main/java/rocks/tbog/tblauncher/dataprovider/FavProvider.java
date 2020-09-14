@@ -19,6 +19,7 @@ import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.TBLauncherActivity;
 import rocks.tbog.tblauncher.db.FavRecord;
 import rocks.tbog.tblauncher.entry.EntryItem;
+import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.searcher.Searcher;
 
 public class FavProvider implements IProvider {
@@ -121,6 +122,13 @@ public class FavProvider implements IProvider {
                 EntryItem entry = dataHandler.getPojo(fav.record);
                 if (entry == null)
                     continue;
+                else if (entry instanceof StaticEntry)
+                {
+                    if (fav.hasCustomIcon())
+                        ((StaticEntry)entry).setCustomIcon();
+                    if (fav.hasCustomName())
+                        entry.setName(fav.displayName);
+                }
                 favList.add(entry);
                 if (fav.isInQuickList())
                     quickList.add(entry);

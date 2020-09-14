@@ -105,5 +105,14 @@ public class CustomDialogPreference extends androidx.preference.DialogPreference
                 ((TextView) view).setText(text);
             }
         }
+        {
+            View view = holder.findViewById(R.id.prefSizePreview);
+            if (view instanceof TextView) {
+                int size = -1;
+                if (value instanceof Integer)
+                    size = (int) value;
+                ((TextView) view).setText( view.getResources().getString(R.string.size, size) );
+            }
+        }
     }
 }

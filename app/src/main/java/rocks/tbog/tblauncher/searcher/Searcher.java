@@ -41,7 +41,7 @@ public abstract class Searcher extends AsyncTask<Void, EntryItem, Void> {
     }
 
     PriorityQueue<EntryItem> getPojoProcessor(ISearchActivity activity) {
-        return new PriorityQueue<>(INITIAL_CAPACITY, new EntryItem.RelevanceComparator());
+        return new PriorityQueue<>(INITIAL_CAPACITY, EntryItem.RELEVANCE_COMPARATOR);
     }
 
     /**

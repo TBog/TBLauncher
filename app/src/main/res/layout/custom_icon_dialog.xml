@@ -5,11 +5,10 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_gravity="center"
-    android:background="@drawable/dialog_background"
     android:orientation="vertical"
     android:paddingHorizontal="@dimen/result_margin_horizontal"
     android:paddingVertical="@dimen/result_margin_vertical"
-    android:theme="@style/TitleDialogTheme">
+    android:theme="@style/NoTitleDialogTheme">
 
     <TextView
         android:layout_width="match_parent"
@@ -54,6 +53,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:clipToPadding="false"
         android:columnWidth="@dimen/custom_icon_column_width"
         android:gravity="center"
         android:horizontalSpacing="1dp"

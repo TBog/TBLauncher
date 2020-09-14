@@ -29,6 +29,7 @@ import java.util.List;
 
 import rocks.tbog.tblauncher.db.AppRecord;
 import rocks.tbog.tblauncher.entry.AppEntry;
+import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.icons.IconPack;
 import rocks.tbog.tblauncher.icons.IconPackXML;
 import rocks.tbog.tblauncher.icons.SystemIconPack;
@@ -223,6 +224,15 @@ public class IconsHandler {
         return mIconPack != null ? mIconPack : mSystemPack;
     }
 
+    public Drawable getCustomIcon(StaticEntry staticEntry) {
+        Bitmap bitmap = TBApplication.dataHandler(ctx).getCustomStaticEntryIcon(staticEntry);
+        if (bitmap != null)
+            return new BitmapDrawable(ctx.getResources(), bitmap);
+
+        Log.e(TAG, "Unable to get custom icon for " + staticEntry.id);
+        return null;
+    }
+
     public Drawable getCustomIcon(String componentName, long customIcon) {
         Bitmap bitmap = TBApplication.dataHandler(ctx).getCustomAppIcon(componentName);
         if (bitmap != null)
@@ -232,7 +242,7 @@ public class IconsHandler {
         return null;
     }
 
-    public void changeAppIcon(AppEntry appEntry, Drawable drawable) {
+    public void changeIcon(AppEntry appEntry, Drawable drawable) {
         Bitmap bitmap = Utilities.drawableToBitmap(drawable);
         TBApplication app = TBApplication.getApplication(ctx);
         AppRecord appRecord = app.getDataHandler().setCustomAppIcon(appEntry.getUserComponentName(), bitmap);
@@ -241,11 +251,26 @@ public class IconsHandler {
         app.getDrawableCache().cacheDrawable(appEntry.id, drawable);
     }
 
-    public void restoreAppIcon(AppEntry appEntry) {
+    public void changeIcon(StaticEntry staticEntry, Drawable drawable) {
+        Bitmap bitmap = Utilities.drawableToBitmap(drawable);
+        TBApplication app = TBApplication.getApplication(ctx);
+        app.getDataHandler().setCustomStaticEntryIcon(staticEntry.id, bitmap);
+        staticEntry.setCustomIcon();
+        app.getDrawableCache().cacheDrawable(staticEntry.id, drawable);
+    }
+
+    public void restoreDefaultIcon(AppEntry appEntry) {
         TBApplication app = TBApplication.getApplication(ctx);
         AppRecord appRecord = app.getDataHandler().removeCustomAppIcon(appEntry.getUserComponentName());
         appEntry.clearCustomIcon();
         app.getDrawableCache().cacheDrawable(appEntry.id, null);
+    }
+
+    public void restoreDefaultIcon(StaticEntry staticEntry) {
+        TBApplication app = TBApplication.getApplication(ctx);
+        app.getDataHandler().removeCustomStaticEntryIcon(staticEntry.id);
+        staticEntry.clearCustomIcon();
+        app.getDrawableCache().cacheDrawable(staticEntry.id, null);
     }
 
     public Drawable applyContactMask(@NonNull Context ctx, @NonNull Drawable drawable) {

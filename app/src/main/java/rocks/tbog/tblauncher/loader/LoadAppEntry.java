@@ -165,6 +165,7 @@ public class LoadAppEntry extends LoadEntryItem<AppEntry> {
             app.setName(user.getBadgedLabelForUser(context.get(), appName));
         if (rec.hasCustomIcon())
             app.setCustomIcon(rec.dbId);
+        app.setHiddenByUser(rec.isHidden());
         app.setTags(tagsHandler.getTags(app.id));
 
         return app;

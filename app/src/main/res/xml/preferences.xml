@@ -205,16 +205,37 @@
                 android:widgetLayout="@layout/pref_color_preview" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@integer/default_size_text"
+                android:dialogLayout="@layout/pref_size"
+                android:key="result-text-size"
+                android:title="@string/result_text_size"
+                android:widgetLayout="@layout/pref_size_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@integer/default_color_text2"
                 android:key="result-text2-color"
                 android:title="@string/result_text2_color"
                 android:widgetLayout="@layout/pref_color_preview" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@integer/default_size_text2"
+                android:dialogLayout="@layout/pref_size"
+                android:key="result-text2-size"
+                android:title="@string/result_text2_size"
+                android:widgetLayout="@layout/pref_size_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@integer/default_color_text"
                 android:key="contact-action-color"
                 android:title="@string/contact_action_color"
                 android:widgetLayout="@layout/pref_color_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@integer/default_size_icon"
+                android:dialogLayout="@layout/pref_size"
+                android:key="result-icon-size"
+                android:title="@string/result_icon_size"
+                android:widgetLayout="@layout/pref_size_preview" />
 
         </PreferenceCategory>
 
