@@ -18,7 +18,7 @@
     <!-- To call a phone number directly without displaying the dialer -->
     <uses-permission android:name="android.permission.CALL_PHONE" />
     <!-- To read phone state -->
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+<!--    <uses-permission android:name="android.permission.READ_PHONE_STATE" />-->
     <!-- Display notification drawer -->
     <uses-permission android:name="android.permission.EXPAND_STATUS_BAR" />
     <!-- Ability to uninstall an app from KISS -->
