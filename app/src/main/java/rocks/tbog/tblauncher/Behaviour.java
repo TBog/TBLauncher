@@ -12,6 +12,7 @@ import android.content.pm.LauncherApps;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Parcelable;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
@@ -51,6 +52,7 @@ import rocks.tbog.tblauncher.ui.KeyboardScrollHider;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.ui.LoadingDrawable;
+import rocks.tbog.tblauncher.ui.TagsManagerDialog;
 import rocks.tbog.tblauncher.utils.SystemUiVisibility;
 
 
@@ -235,6 +237,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             adapter.add(new LinearAdapter.Item(ctx, R.string.menu_widget_remove));
         adapter.add(new LinearAdapter.ItemTitle(ctx, R.string.menu_popup_title_settings));
         adapter.add(new LinearAdapter.Item(ctx, R.string.menu_popup_launcher_settings));
+        adapter.add(new LinearAdapter.Item(ctx, R.string.menu_popup_tags_manager));
         adapter.add(new LinearAdapter.Item(ctx, R.string.menu_popup_android_settings));
 
         menu.setOnItemClickListener((a, v, pos) -> {
@@ -244,6 +247,9 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                 stringId = ((LinearAdapter.Item) a.getItem(pos)).stringId;
             }
             switch (stringId) {
+                case R.string.menu_popup_tags_manager:
+                    launchTagsManagerDialog();
+                    break;
                 case R.string.menu_popup_launcher_settings:
                     beforeLaunchOccurred();
                     mClearButton.postDelayed(() -> {
@@ -603,7 +609,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     public void refreshSearchRecords() {
-        mResultList.setAdapter(mResultAdapter);
+        mResultList.post(() -> mResultList.refreshViews());
     }
 
     public void updateSearchRecords() {
@@ -693,9 +699,9 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         openFragmentDialog(dialog);
 
         // If mResultLayout is visible
-        boolean bResultListVisible = TBApplication.state().isResultListVisible();
-        if (bResultListVisible)
-            mResultLayout.setVisibility(View.INVISIBLE);
+//        boolean bResultListVisible = TBApplication.state().isResultListVisible();
+//        if (bResultListVisible)
+//            mResultLayout.setVisibility(View.INVISIBLE);
 
         // set args
         {
@@ -705,8 +711,8 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             dialog.setArguments(args);
         }
         // OnDismiss: We restore mResultLayout visibility
-        if (bResultListVisible)
-            dialog.setOnDismissListener(dlg -> mResultLayout.setVisibility(View.VISIBLE));
+//        if (bResultListVisible)
+//            dialog.setOnDismissListener(dlg -> mResultLayout.setVisibility(View.VISIBLE));
 
         dialog.setOnConfirmListener(drawable -> {
             if (drawable == null)
@@ -777,6 +783,12 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         dialog.show(mTBLauncherActivity.getSupportFragmentManager(), "dialog_edit_quick_list");
     }
 
+    public void launchTagsManagerDialog() {
+        TagsManagerDialog dialog = new TagsManagerDialog();
+        openFragmentDialog(dialog);
+        dialog.show(mTBLauncherActivity.getSupportFragmentManager(), "dialog_tags_manager");
+    }
+
     private boolean isCustomIconDialogVisible() {
         return mFragmentDialog != null && mFragmentDialog.isVisible();
     }
@@ -833,7 +845,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             mSearchEditText.setText("");
             hideKeyboard();
             hideSearchBar(false);
-        } else {
+        } else if (!TBApplication.state().isResultListVisible()) {
             toggleSearchBar();
         }
 
@@ -852,7 +864,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         Log.i(TAG, "onWindowFocusChanged " + hasFocus);
         LauncherState state = TBApplication.state();
         if (hasFocus && state.isSearchBarVisible()) {
-            if (!state.isKeyboardVisible()) {
+            if (!state.isKeyboardVisible() && !state.isResultListVisible()) {
                 mSearchEditText.requestFocus();
                 // UI_ANIMATION_DURATION should be the exact time the full-screen animation ends
                 mSearchEditText.postDelayed(this::showKeyboard, UI_ANIMATION_DURATION);

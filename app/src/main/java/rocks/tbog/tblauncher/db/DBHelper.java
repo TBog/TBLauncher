@@ -414,12 +414,28 @@ public class DBHelper {
      *
      * @param context android context
      * @param tag     tag name to remove
-     * @param entry   EntryItem
+     * @param entryId EntryItem.id
+     * @return number of records affected
      */
-    public static void removeTag(Context context, String tag, EntryItem entry) {
+    public static int removeTag(Context context, String tag, String entryId) {
         SQLiteDatabase db = getDatabase(context);
 
-        db.delete("tags", "tag = ? AND record = ?", new String[]{tag, entry.id});
+        return db.delete("tags", "tag = ? AND record = ?", new String[]{tag, entryId});
+    }
+
+    /**
+     * @param context android context
+     * @param tagName what tag to rename
+     * @param newName the new name of the tag
+     * @return number of records affected
+     */
+    public static int renameTag(Context context, String tagName, String newName) {
+        SQLiteDatabase db = getDatabase(context);
+
+        ContentValues values = new ContentValues();
+        values.put("tag", newName);
+
+        return db.update("tags", values, "tag = ?", new String[]{tagName});
     }
 
     /**

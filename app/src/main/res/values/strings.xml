@@ -7,9 +7,9 @@
 
     <string name="removed_item">Removed</string>
 
-    <string name="unable_to_initialize_shortcuts">Unable to initialize shortcuts. Is TBLauncher your default launcher?</string>
-    <string name="cant_pin_shortcut">Could not add shortcut. Is TBLauncher your default launcher\?</string>
-    <string name="cant_save_shortcuts">Could not add shortcuts. Is TBLauncher your default launcher\?</string>
+    <string name="unable_to_initialize_shortcuts">Unable to initialize shortcuts. Is TinyBit your default launcher?</string>
+    <string name="cant_pin_shortcut">Could not add shortcut. Is TinyBit your default launcher\?</string>
+    <string name="cant_save_shortcuts">Could not add shortcuts. Is TinyBit your default launcher\?</string>
     <string name="toast_favorites_added">%s was added to favorites</string>
     <string name="toast_favorites_removed">%s was removed from favorites</string>
     <string name="menu_favorites_add">Add to favorites</string>
@@ -30,9 +30,9 @@
     <string name="menu_app_store">View in store</string>
     <string name="menu_app_uninstall">Uninstall</string>
     <string name="menu_exclude_history">from history</string>
-    <string name="menu_exclude_kiss">from TBLauncher</string>
-    <string name="excluded_app_history_added">App excluded from history. Reset through the TBLauncher settings</string>
-    <string name="excluded_app_list_added">App excluded from TBLauncher. Reset through the TBLauncher settings</string>
+    <string name="menu_exclude_kiss">from TinyBit</string>
+    <string name="excluded_app_history_added">App excluded from history. Reset through the TinyBit settings</string>
+    <string name="excluded_app_list_added">App excluded from TinyBit. Reset through the TinyBit settings</string>
     <string name="application_not_found">Whoops… unable to launch that app.</string>
     <string name="change_wallpaper">Change wallpaper</string>
     <string name="menu_widget_title">Widget menu</string>
@@ -42,7 +42,8 @@
     <string name="menu_popup_title">Main menu</string>
     <string name="menu_popup_title_settings">Settings</string>
     <string name="menu_popup_android_settings">Device settings</string>
-    <string name="menu_popup_launcher_settings">TBLauncher settings</string>
+    <string name="menu_popup_launcher_settings">TinyBit settings</string>
+    <string name="menu_popup_tags_manager">Tags manager</string>
     <string name="rate_the_app">Rate the app</string>
     <string name="user_interface_summary">Themes, transparency and colors</string>
     <string name="title_ui">User interface</string>
@@ -57,7 +58,7 @@
     <string name="transparent_favorites_bar">Transparent favorites bar</string>
     <string name="large_search_bar">Bigger search bar</string>
     <string name="round_corners">Rounded corners</string>
-    <string name="swap_kiss_button_with_menu">TBLauncher button on the right</string>
+    <string name="swap_kiss_button_with_menu">TinyBit button on the right</string>
 
     <!-- Default title for color picker dialog [CHAR LIMIT=30] -->
     <string name="color_picker_default_title">Select a Color</string>
@@ -86,6 +87,7 @@
     <string name="menu_shortcut_rename">Rename shortcut</string>
     <string name="menu_custom_icon">Change icon</string>
     <string name="app_rename_title">Choose a custom name for this application</string>
+    <string name="rename_tag">Choose a different name for this tag</string>
     <string name="shortcut_rename_title">Choose a custom name for this shortcut</string>
     <string name="app_rename_confirmation">App name is now %s</string>
     <string name="shortcut_rename_confirmation">Shortcut name is now %s</string>
@@ -112,7 +114,10 @@
     <string name="cd_icon_preview">Preview</string>
     <string name="hint_new_tag">add tag</string>
     <string name="cd_add_tag">Add tag</string>
+    <string name="cd_undo_remove_tag">Undo remove tag</string>
     <string name="cd_remove_tag">Remove tag</string>
+    <string name="cd_rename_tag">Rename tag</string>
+    <string name="cd_icon_tag">Set tag icon</string>
     <string name="title_features">Features</string>
     <string name="features_summary">Toggle and customize app features</string>
     <string name="quick_list_section">Quick-List</string>
@@ -219,4 +224,9 @@
     <string name="menu_popup_quick_list_customize">Customize quick list</string>
     <string name="result_text_size">Text size</string>
     <string name="result_text2_size">Secondary text size</string>
+    <string name="invalid_rename">Tag name \"%s\" is invalid</string>
+    <plurals name="tag_entry_count">
+        <item quantity="one">%d entry</item>
+        <item quantity="other">%d entries</item>
+    </plurals>
 </resources>

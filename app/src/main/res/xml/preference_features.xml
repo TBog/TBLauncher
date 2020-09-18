@@ -36,7 +36,7 @@
 
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
             android:dependency="quick-list-enabled"
-            android:dialogLayout="@layout/pref_quick_list"
+            android:dialogLayout="@layout/quick_list_editor"
             android:key="quick-list-content"
             android:summary="@string/quick_list_content_summary"
             android:title="@string/quick_list_content" />

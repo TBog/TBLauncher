@@ -17,21 +17,21 @@ import androidx.annotation.Nullable;
 import rocks.tbog.tblauncher.R;
 
 public abstract class DialogFragment<Output> extends androidx.fragment.app.DialogFragment {
-    private OnDismissListener mOnDismissListener = null;
+    private OnDismissListener<Output> mOnDismissListener = null;
     private OnConfirmListener<Output> mOnConfirmListener = null;
 
     @LayoutRes
     protected abstract int layoutRes();
 
-    public interface OnDismissListener {
-        void onDismiss(@NonNull DialogFragment dialog);
+    public interface OnDismissListener<T> {
+        void onDismiss(@NonNull DialogFragment<T> dialog);
     }
 
     public interface OnConfirmListener<T> {
         void onConfirm(@Nullable T output);
     }
 
-    public void setOnDismissListener(OnDismissListener listener) {
+    public void setOnDismissListener(OnDismissListener<Output> listener) {
         mOnDismissListener = listener;
     }
 

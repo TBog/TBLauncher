@@ -1,6 +1,7 @@
 package rocks.tbog.tblauncher.ui;
 
 import android.content.Context;
+import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -95,6 +96,20 @@ public class AnimatedListView extends BlockableListView {
                 return false;
             }
         });
+    }
+
+    public void refreshViews() {
+        blockTouchEvents();
+        // save scroll position
+        final Parcelable resultListState = onSaveInstanceState();
+        // force the list to repopulate and inflate the views
+        handleDataChanged();
+        // restore scroll position
+        post(() -> {
+            onRestoreInstanceState(resultListState);
+            unblockTouchEvents();
+        });
+        //onRestoreInstanceState(resultListState);
     }
 
     static class ItemInfo {

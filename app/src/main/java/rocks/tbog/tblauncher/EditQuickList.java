@@ -50,7 +50,7 @@ public class EditQuickList {
         TBApplication.dataHandler(context).setQuickList(idList);
     }
 
-    public void bindView(View view) {
+    public void bindView(@NonNull View view) {
         final Context context = view.getContext();
         // keep the preview the same as the actual thing
         mQuickListContainer = view.findViewById(R.id.preview);

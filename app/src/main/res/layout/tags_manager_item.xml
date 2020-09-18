@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/relativeLayout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:descendantFocusability="blocksDescendants"
+    android:gravity="center_vertical"
+    android:paddingHorizontal="@dimen/result_margin_horizontal"
+    android:paddingVertical="@dimen/result_margin_vertical"
+    tools:layout_gravity="center"
+    tools:theme="@style/SettingsDialogTheme">
+
+    <ImageView
+        android:id="@android:id/icon"
+        android:layout_width="@dimen/icon_width"
+        android:layout_height="@dimen/icon_height"
+        android:layout_marginStart="@dimen/icon_margin_left"
+        android:layout_marginTop="@dimen/icon_margin_top"
+        android:layout_marginEnd="@dimen/icon_margin_right"
+        android:layout_marginBottom="@dimen/icon_margin_bottom"
+        android:importantForAccessibility="no"
+        android:src="@null" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@android:id/text1"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:shadowColor="?attr/resultShadowColor"
+            android:shadowDx="1"
+            android:shadowDy="2"
+            android:shadowRadius="?attr/textShadowRadius"
+            android:singleLine="true"
+            android:textColor="?attr/resultColor"
+            android:textSize="@dimen/result_title_size"
+            tools:text="@tools:sample/last_names" />
+
+        <TextView
+            android:id="@android:id/text2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:importantForAccessibility="no"
+            android:paddingEnd="2dp"
+            android:shadowColor="?attr/resultShadowColor"
+            android:shadowDx="1"
+            android:shadowDy="2"
+            android:shadowRadius="?attr/textShadowRadius"
+            android:textColor="?android:attr/textColorSecondary"
+            android:textSize="@dimen/result_small_size"
+            tools:ignore="RtlSymmetry"
+            tools:text="@tools:sample/first_names" />
+    </LinearLayout>
+
+    <ImageView
+        android:id="@android:id/button1"
+        android:layout_width="@dimen/icon_width"
+        android:layout_height="@dimen/icon_height"
+        android:layout_gravity="center"
+        android:background="?attr/appSelectableItemBackground"
+        android:contentDescription="@string/cd_remove_tag"
+        android:scaleType="center"
+        android:src="@drawable/ic_remove_tag" />
+
+    <ImageView
+        android:id="@android:id/button2"
+        android:layout_width="@dimen/icon_width"
+        android:layout_height="@dimen/icon_height"
+        android:layout_gravity="center"
+        android:background="?attr/appSelectableItemBackground"
+        android:contentDescription="@string/cd_rename_tag"
+        android:scaleType="center"
+        android:src="@drawable/ic_edit" />
+
+    <ImageView
+        android:id="@android:id/button3"
+        android:layout_width="@dimen/icon_width"
+        android:layout_height="@dimen/icon_height"
+        android:layout_gravity="center"
+        android:background="?attr/appSelectableItemBackground"
+        android:contentDescription="@string/cd_icon_tag"
+        android:scaleType="center"
+        android:src="@drawable/ic_icon" />
+
+</LinearLayout>
