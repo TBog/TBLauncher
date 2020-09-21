@@ -3,6 +3,7 @@ package rocks.tbog.tblauncher;
 import android.content.Context;
 import android.graphics.Paint;
 import android.graphics.Typeface;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.view.ContextThemeWrapper;
 import android.view.View;
@@ -19,6 +20,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import rocks.tbog.tblauncher.ui.CodePointDrawable;
+import rocks.tbog.tblauncher.utils.DrawableUtils;
 import rocks.tbog.tblauncher.utils.ViewHolderAdapter;
 
 public class TagsManager {
@@ -69,6 +72,11 @@ public class TagsManager {
         mAdapter.setOnRenameListener((adapter, v, position) -> {
             TagInfo info = adapter.getItem(position);
             launchRenameDialog(v.getContext(), info);
+        });
+
+        mAdapter.setOnEditIconListener((adapter, v, position) -> {
+            TagInfo info = adapter.getItem(position);
+            launchCustomTagIconDialog(v.getContext(), info);
         });
 
         // refresh tags
@@ -134,6 +142,10 @@ public class TagsManager {
         nameView.requestFocus();
     }
 
+    private void launchCustomTagIconDialog(Context ctx, TagInfo info) {
+        Toast.makeText(ctx, "Not implemented yet", Toast.LENGTH_LONG).show();
+    }
+
     public void onStart() {
         // Set list adapter after the view inflated
         // This is a workaround to fix listview items not having the correct width
@@ -144,6 +156,7 @@ public class TagsManager {
         private final ArrayList<TagInfo> mTags;
         private OnItemClickListener mOnRemoveListener = null;
         private OnItemClickListener mOnRenameListener = null;
+        private OnItemClickListener mOnEditIconListener = null;
 
         public interface OnItemClickListener {
             void onClick(TagsAdapter adapter, View view, int position);
@@ -160,6 +173,10 @@ public class TagsManager {
 
         void setOnRenameListener(OnItemClickListener listener) {
             mOnRenameListener = listener;
+        }
+
+        void setOnEditIconListener(OnItemClickListener listener) {
+            mOnEditIconListener = listener;
         }
 
         @Override
@@ -232,12 +249,19 @@ public class TagsManager {
             int count = content.entryList.size();
             text2View.setText(text2View.getResources().getQuantityString(R.plurals.tag_entry_count, count, count));
 
-            iconView.setImageDrawable(null);
+            Drawable icon = new CodePointDrawable(content.name);
+            icon = DrawableUtils.applyIconMaskShape(iconView.getContext(), icon, DrawableUtils.SHAPE_SQUIRCLE, false);
+            iconView.setImageDrawable(icon);
             changeIconBtnView.setVisibility(View.GONE);
 
             renameBtnView.setOnClickListener(v -> {
                 if (tagsAdapter.mOnRenameListener != null)
                     tagsAdapter.mOnRenameListener.onClick(tagsAdapter, v, position);
+            });
+
+            changeIconBtnView.setOnClickListener(v -> {
+                if (tagsAdapter.mOnEditIconListener != null)
+                    tagsAdapter.mOnEditIconListener.onClick(tagsAdapter, v, position);
             });
         }
     }

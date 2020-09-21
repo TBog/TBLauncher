@@ -25,17 +25,17 @@ import rocks.tbog.tblauncher.TBApplication;
 public class DrawableUtils {
 
     public static final int SHAPE_SYSTEM = 0;
-    private static final int SHAPE_CIRCLE = 1;
+    public static final int SHAPE_CIRCLE = 1;
     public static final int SHAPE_SQUARE = 2;
-    private static final int SHAPE_SQUIRCLE = 3;
-    private static final int SHAPE_ROUND_RECT = 4;
+    public static final int SHAPE_SQUIRCLE = 3;
+    public static final int SHAPE_ROUND_RECT = 4;
     private static final int SHAPE_TEARDROP_BR = 5;
     private static final int SHAPE_TEARDROP_BL = 6;
     private static final int SHAPE_TEARDROP_TL = 7;
     private static final int SHAPE_TEARDROP_TR = 8;
     private static final int SHAPE_TEARDROP_RND = 9;
-    private static final int SHAPE_HEXAGON = 10;
-    private static final int SHAPE_OCTAGON = 11;
+    public static final int SHAPE_HEXAGON = 10;
+    public static final int SHAPE_OCTAGON = 11;
 
     private static final Paint PAINT = new Paint();
     private static final Path SHAPE_PATH = new Path();

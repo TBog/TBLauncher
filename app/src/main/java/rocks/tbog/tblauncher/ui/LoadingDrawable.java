@@ -2,18 +2,13 @@ package rocks.tbog.tblauncher.ui;
 
 import android.animation.ValueAnimator;
 import android.graphics.Canvas;
-import android.graphics.ColorFilter;
 import android.graphics.Matrix;
-import android.graphics.Paint;
 import android.graphics.Path;
-import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.graphics.drawable.Animatable;
-import android.graphics.drawable.Drawable;
 import android.view.animation.LinearInterpolator;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 
@@ -25,10 +20,9 @@ import java.util.ArrayList;
  * Set Intrinsic size to 1x1 if you want to use scaleType="fitXY" in the view
  */
 
-public class LoadingDrawable extends Drawable implements Animatable, ValueAnimator.AnimatorUpdateListener {
+public class LoadingDrawable extends SquareDrawable implements Animatable, ValueAnimator.AnimatorUpdateListener {
     private final ArrayList<Shape> mShapeList = new ArrayList<>(0);
     private final Path mShapePath;
-    private final Paint mPaint;
     private ValueAnimator mShapeListAnimator = null;
 
     final static private float SHAPE_SIZE_PERCENT = 0.22f;
@@ -37,10 +31,6 @@ public class LoadingDrawable extends Drawable implements Animatable, ValueAnimat
     public LoadingDrawable() {
         super();
         mShapePath = new Path();
-        mPaint = new Paint();
-        mPaint.setColor(0xffffffff);
-        mPaint.setStyle(Paint.Style.FILL);
-        mPaint.setAntiAlias(false);
     }
 
     @Override
@@ -55,48 +45,10 @@ public class LoadingDrawable extends Drawable implements Animatable, ValueAnimat
     }
 
     @Override
-    public void setAlpha(int alpha) {
-        mPaint.setAlpha(alpha);
-    }
-
-    @Override
-    public void setColorFilter(@Nullable ColorFilter colorFilter) {
-        mPaint.setColorFilter(colorFilter);
-    }
-
-    @Override
-    public int getOpacity() {
-        return PixelFormat.TRANSLUCENT;
-    }
-
-//    @Override
-//    public int getIntrinsicWidth() {
-//        return 1;
-//    }
-//
-//    @Override
-//    public int getIntrinsicHeight() {
-//        return 1;
-//    }
-
-    @Override
     protected void onBoundsChange(Rect bounds) {
         super.onBoundsChange(bounds);
 
-        Rect rect = new Rect();
-        rect.set(bounds);
-
-        // make it a square and center the content
-        if (rect.width() != rect.height()) {
-            int size = Math.min(rect.width(), rect.height());
-            int rad = size / 2;
-            // compute width
-            rect.left = rect.centerX() - rad;
-            rect.right = rect.left + size;
-            // compute height
-            rect.top = rect.centerY() - rad;
-            rect.bottom = rect.top + size;
-        }
+        Rect rect = getCenterRect(bounds);
 
         // generate shapes
         mShapeList.clear();
