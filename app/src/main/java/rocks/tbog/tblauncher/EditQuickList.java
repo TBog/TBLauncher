@@ -2,7 +2,6 @@ package rocks.tbog.tblauncher;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.drawable.PaintDrawable;
 import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -17,11 +16,9 @@ import androidx.preference.PreferenceManager;
 
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 
 import rocks.tbog.tblauncher.dataprovider.ActionProvider;
-import rocks.tbog.tblauncher.dataprovider.FavProvider;
 import rocks.tbog.tblauncher.dataprovider.FilterProvider;
 import rocks.tbog.tblauncher.db.FavRecord;
 import rocks.tbog.tblauncher.entry.ActionEntry;
@@ -55,10 +52,8 @@ public class EditQuickList {
         // keep the preview the same as the actual thing
         mQuickListContainer = view.findViewById(R.id.preview);
         {
-            FavProvider provider = TBApplication.getApplication(context).getDataHandler().getFavProvider();
-            List<? extends EntryItem> list = provider != null ? provider.getQuickList() : null;
-            if (list != null)
-                mQuickList.addAll(list);
+            List<? extends EntryItem> list = TBApplication.dataHandler(context).getQuickList();
+            mQuickList.addAll(list);
         }
         mPref = PreferenceManager.getDefaultSharedPreferences(context);
         QuickList.applyUiPref(mPref, mQuickListContainer);

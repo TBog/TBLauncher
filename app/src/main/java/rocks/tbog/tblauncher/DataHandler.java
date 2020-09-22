@@ -42,6 +42,7 @@ import rocks.tbog.tblauncher.dataprovider.FilterProvider;
 import rocks.tbog.tblauncher.dataprovider.IProvider;
 import rocks.tbog.tblauncher.dataprovider.Provider;
 import rocks.tbog.tblauncher.dataprovider.ShortcutsProvider;
+import rocks.tbog.tblauncher.dataprovider.TagsProvider;
 import rocks.tbog.tblauncher.db.AppRecord;
 import rocks.tbog.tblauncher.db.DBHelper;
 import rocks.tbog.tblauncher.db.FavRecord;
@@ -132,6 +133,13 @@ public class DataHandler extends BroadcastReceiver
             ProviderEntry providerEntry = new ProviderEntry();
             providerEntry.provider = new ActionProvider(context);
             providers.put("actions", providerEntry);
+        }
+
+        // Tag provider
+        {
+            ProviderEntry providerEntry = new ProviderEntry();
+            providerEntry.provider = new TagsProvider();
+            providers.put("tags", providerEntry);
         }
 
 //        ProviderEntry calculatorEntry = new ProviderEntry();
@@ -954,6 +962,14 @@ public class DataHandler extends BroadcastReceiver
                 break;
             }
         }
+    }
+
+    @NonNull
+    public List<? extends EntryItem> getQuickList() {
+        FavProvider favProvider = getFavProvider();
+        if (favProvider == null)
+            return Collections.emptyList();
+        return favProvider.getQuickList();
     }
 
     public void setQuickList(Iterable<String> records) {
