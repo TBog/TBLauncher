@@ -16,8 +16,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import rocks.tbog.tblauncher.DataHandler;
 import rocks.tbog.tblauncher.TBApplication;
@@ -463,6 +465,25 @@ public class DBHelper {
 
     /**
      * @param context android context
+     * @return List of all tags
+     */
+    @NonNull
+    public static List<String> loadTagList(Context context) {
+        List<String> tags;
+        SQLiteDatabase db = getDatabase(context);
+        try (Cursor cursor = db.query("tags", new String[]{"tag"},
+                null, null, "tag", null, null)) {
+            tags = new ArrayList<>(cursor.getCount());
+            while (cursor.moveToNext()) {
+                String tag = cursor.getString(0);
+                tags.add(tag);
+            }
+        }
+        return tags;
+    }
+
+    /**
+     * @param context android context
      * @param record  the id of the app
      * @return HashMap with EntryItem id as key and an ArrayList of tags for each
      */
@@ -792,11 +813,11 @@ public class DBHelper {
         }
     }
 
-    public static boolean removeFavorite(Context context, FavRecord fav) {
+    public static boolean removeFavorite(Context context, String record) {
         SQLiteDatabase db = getDatabase(context);
 
-        if (0 == db.delete("favorites", "record=?", new String[]{fav.record})) {
-            Log.e(TAG, "removeFavorite " + fav.record);
+        if (0 == db.delete("favorites", "record=?", new String[]{record})) {
+            Log.e(TAG, "removeFavorite " + record);
             return false;
         }
         return true;
@@ -820,7 +841,7 @@ public class DBHelper {
         return list;
     }
 
-    public static boolean setQuickListPosition(@NonNull Context context, String record, String position) {
+    public static boolean updateQuickListPosition(@NonNull Context context, String record, String position) {
         SQLiteDatabase db = getDatabase(context);
         String sql = "UPDATE \"favorites\" SET \"custom_flags\"=(\"custom_flags\"|?), \"position\"=? WHERE \"record\"=?";
         try {

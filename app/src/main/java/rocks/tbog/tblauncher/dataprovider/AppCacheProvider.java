@@ -18,7 +18,7 @@ import rocks.tbog.tblauncher.searcher.Searcher;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 
-public class AppCacheProvider implements IProvider {
+public class AppCacheProvider implements IProvider<AppEntry> {
 
     final private Context context;
     final private HashMap<String, AppRecord> apps;
@@ -89,12 +89,12 @@ public class AppCacheProvider implements IProvider {
     }
 
     @Override
-    public EntryItem findById(@NonNull String id) {
+    public AppEntry findById(@NonNull String id) {
         return null;
     }
 
     @Override
-    public List<? extends EntryItem> getPojos() {
+    public List<AppEntry> getPojos() {
         return null;
     }
 }

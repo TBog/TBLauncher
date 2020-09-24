@@ -43,6 +43,8 @@ import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.result.ResultAdapter;
 import rocks.tbog.tblauncher.searcher.ISearchActivity;
 import rocks.tbog.tblauncher.searcher.QuerySearcher;
+import rocks.tbog.tblauncher.searcher.Searcher;
+import rocks.tbog.tblauncher.searcher.TagSearcher;
 import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
 import rocks.tbog.tblauncher.ui.AnimatedListView;
 import rocks.tbog.tblauncher.ui.DialogFragment;
@@ -600,6 +602,13 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         mResultList.post(() -> mResultList.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL));
     }
 
+    public void runTagSearch(@NonNull String tagName) {
+        if (mSearchEditText == null)
+            return;
+        mSearchEditText.setText("");
+        updateSearchRecords(false, new TagSearcher(this, tagName));
+    }
+
     public void clearSearch() {
         if (mSearchEditText == null)
             return;
@@ -633,18 +642,19 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 //            return;
 //        }
 
+        updateSearchRecords(isRefresh, new QuerySearcher(this, query));
+    }
+
+    private void updateSearchRecords(boolean isRefresh, @NonNull Searcher searcher) {
         resetTask();
         mTBLauncherActivity.dismissPopup();
 
-//        forwarderManager.updateSearchRecords(isRefresh, query);
-
-        if (query.isEmpty()) {
+        if (searcher.getQuery().isEmpty()) {
             clearAdapter();
 //            systemUiVisibilityHelper.resetScroll();
         } else {
-            QuerySearcher querySearcher = new QuerySearcher(this, query);
-            querySearcher.setRefresh(isRefresh);
-            TBApplication.runTask(getContext(), querySearcher);
+            searcher.setRefresh(isRefresh);
+            TBApplication.runTask(getContext(), searcher);
         }
     }
 

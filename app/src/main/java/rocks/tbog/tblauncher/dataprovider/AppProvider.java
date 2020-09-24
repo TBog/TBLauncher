@@ -20,7 +20,6 @@ import rocks.tbog.tblauncher.DataHandler;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.broadcast.PackageAddedRemovedHandler;
 import rocks.tbog.tblauncher.entry.AppEntry;
-import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.EntryWithTags;
 import rocks.tbog.tblauncher.loader.LoadAppEntry;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
@@ -232,8 +231,8 @@ public class AppProvider extends Provider<AppEntry> {
      * @return an AppEntry, or null
      */
     @Override
-    public EntryItem findById(@NonNull String id) {
-        for (EntryItem pojo : pojos) {
+    public AppEntry findById(@NonNull String id) {
+        for (AppEntry pojo : pojos) {
             if (pojo.id.equals(id)) {
                 return pojo;
             }

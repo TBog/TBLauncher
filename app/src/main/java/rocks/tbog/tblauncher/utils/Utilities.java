@@ -107,7 +107,7 @@ public class Utilities {
             protected Drawable getDrawable(Context context) {
                 return callback.getDrawable(context);
             }
-        }.execute();
+        }.executeOnExecutor(ResultViewHelper.EXECUTOR_LOAD_ICON);
     }
 
     public static void setIntentSourceBounds(@NonNull Intent intent, @NonNull View v) {

@@ -154,8 +154,10 @@
     <string name="quick_list_content">Customize content</string>
     <string name="quick_list_content_summary">Change order and add entries</string>
     <string name="edit_quick_list_preview">Preview <em>(touch to remove from quick list)</em></string>
-    <string name="edit_quick_list_filters_and_actions">Possible filters and actions</string>
-    <string name="edit_quick_list_favorites">From the favorites</string>
+    <string name="edit_quick_list_tab_filters">Filters</string>
+    <string name="edit_quick_list_tab_actions">Actions</string>
+    <string name="edit_quick_list_tab_favorites">Favorites</string>
+    <string name="edit_quick_list_tab_tags">Tags</string>
     <string name="quick_list_icons_visible">Show Quick List icons</string>
     <string name="quick_list_text_visible">Show names</string>
     <string name="cache_drawable">Cache icons</string>

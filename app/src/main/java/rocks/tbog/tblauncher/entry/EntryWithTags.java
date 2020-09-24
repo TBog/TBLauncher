@@ -5,6 +5,7 @@ import androidx.annotation.Nullable;
 import androidx.collection.ArraySet;
 
 import java.util.List;
+import java.util.Objects;
 
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 
@@ -13,15 +14,29 @@ public abstract class EntryWithTags extends EntryItem {
     private final ArraySet<TagDetails> tags = new ArraySet<>(0);
 
     public static class TagDetails {
+        @NonNull
         public final String name;
         public final StringNormalizer.Result normalized;
 
-        public TagDetails(String name) {
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            TagDetails that = (TagDetails) o;
+            return name.equals(that.name);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(name);
+        }
+
+        public TagDetails(@NonNull String name) {
             this.name = name;
             normalized = StringNormalizer.normalizeWithResult(name, true);
         }
 
-        public TagDetails(String name, StringNormalizer.Result normalized) {
+        public TagDetails(@NonNull String name, StringNormalizer.Result normalized) {
             this.name = name;
             this.normalized = normalized;
         }

@@ -3,6 +3,7 @@ package rocks.tbog.tblauncher.searcher;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 import androidx.preference.PreferenceManager;
 
@@ -28,7 +29,7 @@ public class QuerySearcher extends Searcher {
      */
     private final SharedPreferences prefs;
 
-    public QuerySearcher(ISearchActivity activity, String query) {
+    public QuerySearcher(ISearchActivity activity, @NonNull String query) {
         super(activity, query);
         this.trimmedQuery = query.trim();
         prefs = PreferenceManager.getDefaultSharedPreferences(activity.getContext());

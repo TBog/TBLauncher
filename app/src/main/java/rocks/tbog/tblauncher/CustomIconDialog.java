@@ -44,6 +44,7 @@ import rocks.tbog.tblauncher.icons.IconPack;
 import rocks.tbog.tblauncher.icons.IconPackXML;
 import rocks.tbog.tblauncher.icons.SystemIconPack;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
+import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.ui.DialogFragment;
 import rocks.tbog.tblauncher.utils.DrawableUtils;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
@@ -567,7 +568,7 @@ public class CustomIconDialog extends DialogFragment<Drawable> {
                 if (loader != null)
                     loader.cancel(true);
                 loader = new AsyncLoad(this);
-                loader.execute(content);
+                loader.executeOnExecutor(ResultViewHelper.EXECUTOR_LOAD_ICON, content);
             }
         }
     }
