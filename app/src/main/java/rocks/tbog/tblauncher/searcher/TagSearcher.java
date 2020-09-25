@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 
 import java.util.HashSet;
+import java.util.PriorityQueue;
 
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.entry.EntryItem;
@@ -18,6 +19,11 @@ public class TagSearcher extends Searcher {
     public TagSearcher(ISearchActivity activity, @NonNull String query) {
         super(activity, query);
         tagDetails = new EntryWithTags.TagDetails(query);
+    }
+
+    @Override
+    PriorityQueue<EntryItem> getPojoProcessor(ISearchActivity activity) {
+        return new PriorityQueue<>(INITIAL_CAPACITY, EntryItem.NAME_COMPARATOR);
     }
 
     @WorkerThread
