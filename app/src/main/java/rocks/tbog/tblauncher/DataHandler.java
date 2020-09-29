@@ -46,6 +46,7 @@ import rocks.tbog.tblauncher.dataprovider.FilterProvider;
 import rocks.tbog.tblauncher.dataprovider.IProvider;
 import rocks.tbog.tblauncher.dataprovider.Provider;
 import rocks.tbog.tblauncher.dataprovider.QuickListProvider;
+import rocks.tbog.tblauncher.dataprovider.SearchProvider;
 import rocks.tbog.tblauncher.dataprovider.ShortcutsProvider;
 import rocks.tbog.tblauncher.dataprovider.TagsProvider;
 import rocks.tbog.tblauncher.db.AppRecord;
@@ -167,6 +168,12 @@ public class DataHandler extends BroadcastReceiver
             ProviderEntry providerEntry = new ProviderEntry();
             providerEntry.provider = new QuickListProvider(context);
             providers.put("quickList", providerEntry);
+        }
+
+        {
+            ProviderEntry providerEntry = new ProviderEntry();
+            providerEntry.provider = new SearchProvider(context);
+            providers.put("search", providerEntry);
         }
 
 //        ProviderEntry calculatorEntry = new ProviderEntry();
