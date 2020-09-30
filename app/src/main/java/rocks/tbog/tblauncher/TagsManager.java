@@ -88,8 +88,8 @@ public class TagsManager {
                 tagInfo.name = tagName;
                 tagInfo.entryList = tagsHandler.getIds(tagName);
                 mTagList.add(tagInfo);
-                Collections.sort(mTagList, (lhs, rhs) -> lhs.tagName.compareTo(rhs.tagName));
             }
+            Collections.sort(mTagList, (lhs, rhs) -> lhs.tagName.compareTo(rhs.tagName));
         }
     }
 
