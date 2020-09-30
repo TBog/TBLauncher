@@ -1,6 +1,8 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">TinyBit launcher</string>
     <string name="hint_ui_search">Search apps, contacts, …</string>
+    <string name="ui_item_search">Search %1$s for “%2$s”</string>
+    <string name="ui_item_visit">Visit “%1$s”</string>
 
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>

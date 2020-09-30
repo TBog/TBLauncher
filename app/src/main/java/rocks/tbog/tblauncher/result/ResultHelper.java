@@ -12,12 +12,18 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 
 import rocks.tbog.tblauncher.Behaviour;
+import rocks.tbog.tblauncher.BuildConfig;
 import rocks.tbog.tblauncher.Permission;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.db.DBHelper;
+import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.entry.ContactEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
+import rocks.tbog.tblauncher.entry.FilterEntry;
+import rocks.tbog.tblauncher.entry.SearchEntry;
+import rocks.tbog.tblauncher.entry.ShortcutEntry;
+import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public class ResultHelper {
@@ -146,5 +152,27 @@ public class ResultHelper {
         context.startActivity(phoneIntent);
 
         TBApplication.behaviour(context).afterLaunchOccurred();
+    }
+
+    public static int getItemViewTypeCount() {
+        return 7;
+    }
+
+    public static int getItemViewType(EntryItem item) {
+        if (item instanceof AppEntry)
+            return 1;
+        if (item instanceof ContactEntry)
+            return 2;
+        if (item instanceof FilterEntry)
+            return 3;
+        if (item instanceof ShortcutEntry)
+            return 4;
+        if (item instanceof StaticEntry)
+            return 5;
+        if (item instanceof SearchEntry)
+            return 6;
+        if (BuildConfig.DEBUG)
+            throw new IllegalStateException("view type not set for adapter");
+        return 0;
     }
 }

@@ -6,6 +6,7 @@ import android.view.View;
 import androidx.annotation.CallSuper;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 
 import java.util.ArrayList;
@@ -140,9 +141,9 @@ public abstract class EntryItem {
         return relevance == null ? 0 : relevance.score;
     }
 
-    public void setRelevance(StringNormalizer.Result normalizedName, FuzzyScore.MatchInfo matchInfo) {
-        this.relevanceSource = normalizedName;
-        this.relevance = new FuzzyScore.MatchInfo(matchInfo);
+    public void setRelevance(StringNormalizer.Result normalizedName, @Nullable FuzzyScore.MatchInfo matchInfo) {
+        relevanceSource = normalizedName;
+        relevance = matchInfo != null ? new FuzzyScore.MatchInfo(matchInfo) : new FuzzyScore.MatchInfo();
     }
 
     public void boostRelevance(int boost) {

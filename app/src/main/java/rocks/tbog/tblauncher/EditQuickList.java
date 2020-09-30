@@ -30,13 +30,10 @@ import rocks.tbog.tblauncher.dataprovider.FilterProvider;
 import rocks.tbog.tblauncher.dataprovider.QuickListProvider;
 import rocks.tbog.tblauncher.dataprovider.TagsProvider;
 import rocks.tbog.tblauncher.db.FavRecord;
-import rocks.tbog.tblauncher.entry.AppEntry;
-import rocks.tbog.tblauncher.entry.ContactEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
-import rocks.tbog.tblauncher.entry.FilterEntry;
-import rocks.tbog.tblauncher.entry.ShortcutEntry;
 import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.entry.TagEntry;
+import rocks.tbog.tblauncher.result.ResultHelper;
 
 public class EditQuickList {
 
@@ -253,20 +250,12 @@ public class EditQuickList {
 
         @Override
         public int getViewTypeCount() {
-            return 5;
+            return ResultHelper.getItemViewTypeCount();
         }
 
         @Override
         public int getItemViewType(int position) {
-            if (mItems.get(position) instanceof AppEntry)
-                return 1;
-            if (mItems.get(position) instanceof ContactEntry)
-                return 2;
-            if (mItems.get(position) instanceof FilterEntry)
-                return 3;
-            if (mItems.get(position) instanceof ShortcutEntry)
-                return 4;
-            return super.getItemViewType(position);
+            return ResultHelper.getItemViewType(mItems.get(position));
         }
 
         @Override

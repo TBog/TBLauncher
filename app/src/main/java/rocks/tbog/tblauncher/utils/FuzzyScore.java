@@ -243,7 +243,7 @@ public class FuzzyScore {
         public boolean match;
         final ArrayList<Integer> matchedIndices;
 
-        MatchInfo() {
+        public MatchInfo() {
             matchedIndices = null;
         }
 
@@ -251,8 +251,7 @@ public class FuzzyScore {
             matchedIndices = new ArrayList<>(patternLength);
         }
 
-        public MatchInfo(@NonNull MatchInfo o)
-        {
+        public MatchInfo(@NonNull MatchInfo o) {
             score = o.score;
             match = o.match;
             matchedIndices = o.matchedIndices != null ? new ArrayList<>(o.matchedIndices) : null;

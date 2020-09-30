@@ -13,14 +13,27 @@ import rocks.tbog.tblauncher.searcher.Searcher;
  * so whenever we can, we avoid using them.
  */
 public abstract class SimpleProvider<T extends EntryItem> implements IProvider<T> {
+
+    @Override
+    public void requestResults(String s, Searcher searcher) {
+    }
+
     @Override
     public void reload(boolean cancelCurrentLoadTask) {
-        // Simple providers can't be reloaded
     }
 
     @Override
     public final boolean isLoaded() {
         return true;
+    }
+
+    @Override
+    public void setDirty() {
+    }
+
+    @Override
+    public int getLoadStep() {
+        return LOAD_STEP_1;
     }
 
     @Override
@@ -31,19 +44,6 @@ public abstract class SimpleProvider<T extends EntryItem> implements IProvider<T
     @Override
     public T findById(@NotNull String id) {
         return null;
-    }
-
-    @Override
-    public void requestResults(String s, Searcher searcher) {
-    }
-
-    @Override
-    public void setDirty() {
-    }
-
-    @Override
-    public int getLoadStep() {
-        return LOAD_STEP_1;
     }
 
     @Override
