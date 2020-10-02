@@ -57,6 +57,8 @@ public class EditSearchEngines {
         }
 
         for (SearchEngineInfo searchEngineInfo : mSearchEngineList) {
+            if (searchEngineInfo.action == SearchEngineInfo.Action.DELETE)
+                continue;
             availableProviders.add(SearchProvider.makeProvider(searchEngineInfo.name, searchEngineInfo.url));
             if (searchEngineInfo.selected)
                 selectedProviderNames.add(searchEngineInfo.name);
