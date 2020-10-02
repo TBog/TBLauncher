@@ -315,7 +315,7 @@ public final class ShortcutEntry extends EntryWithTags {
     private void launchRenameDialog(@NonNull Context ctx) {
         ContextThemeWrapper context = new ContextThemeWrapper(ctx, R.style.NoTitleDialogTheme);
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle(context.getResources().getString(R.string.shortcut_rename_title));
+        builder.setTitle(context.getResources().getString(R.string.title_shortcut_rename));
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             builder.setView(R.layout.dialog_rename);

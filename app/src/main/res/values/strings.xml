@@ -3,6 +3,7 @@
     <string name="hint_ui_search">Search apps, contacts, …</string>
     <string name="ui_item_search">Search %1$s for “%2$s”</string>
     <string name="ui_item_visit">Visit “%1$s”</string>
+    <string name="copy_confirmation">Copied `%s` to clipboard</string>
 
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
@@ -19,8 +20,6 @@
     <string name="menu_favorites_remove">Remove favorite</string>
     <string name="stub_application">App Name</string>
     <string name="stub_app_tag">app tag list</string>
-    <string name="cd_main_menu">Menu</string>
-    <string name="cd_main_clear">Clear search bar</string>
     <string name="permission_denied">Permission has been denied</string>
     <string name="menu_exclude">Exclude…</string>
     <string name="menu_hide">Hide</string>
@@ -62,19 +61,19 @@
     <string name="round_corners">Rounded corners</string>
     <string name="swap_kiss_button_with_menu">TinyBit button on the right</string>
 
-    <!-- Default title for color picker dialog [CHAR LIMIT=30] -->
-    <string name="color_picker_default_title">Select a Color</string>
-    <!-- Content description for a color square. -->
-    <string name="color_swatch_description">Color %1$d</string>
-    <!-- Content description for a selected color square. -->
-    <string name="color_swatch_description_selected" tools:ignore="PluralsCandidate">Color %1$d selected</string>
-    <string name="color_transparent_dark">Transparent dark</string>
-    <string name="color_transparent_white">Transparent white</string>
-    <string name="color_transparent">Transparent</string>
-
-
     <!-- Content Description -->
+    <string name="cd_main_menu">Menu</string>
+    <string name="cd_main_clear">Clear search bar</string>
     <string name="cd_show_all_apps">Show all applications</string>
+    <string name="cd_item_contact_message">Message</string>
+    <string name="cd_item_contact_call">Call</string>
+    <string name="cd_icon_preview">Preview</string>
+    <string name="cd_add_tag">Add tag</string>
+    <string name="cd_undo_remove_tag">Undo remove tag</string>
+    <string name="cd_remove_tag">Remove tag</string>
+    <string name="cd_rename_tag">Rename tag</string>
+    <string name="cd_icon_tag">Set tag icon</string>
+
     <string name="title_select_alpha">Drag the slider to select the desired opacity</string>
     <string name="title_select_size">Drag the slider to select the desired size</string>
     <string name="search_bar_section">Search bar</string>
@@ -84,13 +83,16 @@
     <string name="icons_pack_default_name">System icons</string>
     <string name="value">value %d</string>
     <string name="size">&lt;%d&gt;</string>
+
     <string name="menu_app_rename">Rename app</string>
     <string name="menu_action_rename">Rename</string>
     <string name="menu_shortcut_rename">Rename shortcut</string>
     <string name="menu_custom_icon">Change icon</string>
-    <string name="app_rename_title">Choose a custom name for this application</string>
-    <string name="rename_tag">Choose a different name for this tag</string>
-    <string name="shortcut_rename_title">Choose a custom name for this shortcut</string>
+    <string name="title_app_rename">Choose a custom name for this application</string>
+    <string name="title_rename_tag">Choose a different name for this tag</string>
+    <string name="title_rename_search_engine">Choose a different name for this search engine</string>
+    <string name="title_edit_url_search_engine">Choose a different url for this search engine</string>
+    <string name="title_shortcut_rename">Choose a custom name for this shortcut</string>
     <string name="app_rename_confirmation">App name is now %s</string>
     <string name="shortcut_rename_confirmation">Shortcut name is now %s</string>
     <string name="hint_custom_icon">Filter by name</string>
@@ -110,16 +112,8 @@
     <string name="custom_icon_preview">Selection\npreview</string>
     <string name="custom_name_set_default">Default name</string>
     <string name="custom_name_rename">Rename</string>
-    <string name="cd_item_contact_message">Message</string>
-    <string name="cd_item_contact_call">Call</string>
     <string name="adaptive_shape_name">Adaptive icon shape</string>
-    <string name="cd_icon_preview">Preview</string>
     <string name="hint_new_tag">add tag</string>
-    <string name="cd_add_tag">Add tag</string>
-    <string name="cd_undo_remove_tag">Undo remove tag</string>
-    <string name="cd_remove_tag">Remove tag</string>
-    <string name="cd_rename_tag">Rename tag</string>
-    <string name="cd_icon_tag">Set tag icon</string>
     <string name="title_features">Features</string>
     <string name="features_summary">Toggle and customize app features</string>
     <string name="quick_list_section">Quick-List</string>
@@ -127,7 +121,9 @@
     <string name="quick_list_size">Bar height</string>
     <string name="tags_section">Tags</string>
     <string name="fuzzy_search_tags">Fuzzy-search tags</string>
-    <string name="tags_enabled">Use tags for apps</string>
+    <string name="fuzzy_search_tags_summary">When searching include tags as possible match candidates</string>
+    <string name="tags_enabled">Display tags for apps</string>
+    <string name="tags_enabled_summary">Show tags for each app in the result list</string>
     <string name="icons_section">Icons</string>
     <string name="icons_visible">Show Icons</string>
     <string name="popup_title_hist_fav">Preferences</string>
@@ -228,7 +224,23 @@
     <string name="menu_popup_quick_list_customize">Customize quick list</string>
     <string name="result_text_size">Text size</string>
     <string name="result_text2_size">Secondary text size</string>
-    <string name="invalid_rename">Tag name \"%s\" is invalid</string>
+    <string name="invalid_rename_tag">Tag name \"%s\" is invalid, already used</string>
+    <string name="invalid_rename_search_engine">Search engine name \"%s\" is already used</string>
+    <string name="provider_section">Providers</string>
+    <string name="enable_search">Search engine</string>
+    <string name="enable_url">Web url</string>
+    <string name="enable_calculator">Calculator</string>
+    <string name="edit_search_engines">Edit search engines</string>
+    <string name="edit_search_engines_summary">Toggle and select search providers</string>
+    <string name="add_search_engine">Add search engine</string>
+    <string name="search_engine_rename">Rename</string>
+    <string name="search_engine_delete">Delete</string>
+    <string name="search_engine_edit_url">Edit url</string>
+    <string name="confirm_edit_url_search_engine">Save</string>
+    <string name="search_engine_set_default">Make default</string>
+    <string name="hint_add_search_engine_url">https://search.engine/query=%s</string>
+    <string name="label_search_engine_name">Search provider name</string>
+    <string name="label_search_engine_url">Url to execute, %s will be replaced by your query</string>
     <plurals name="tag_entry_count">
         <item quantity="one">%d entry</item>
         <item quantity="other">%d entries</item>

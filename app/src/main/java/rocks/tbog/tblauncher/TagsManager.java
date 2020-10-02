@@ -20,7 +20,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.ui.CodePointDrawable;
 import rocks.tbog.tblauncher.utils.DrawableUtils;
 import rocks.tbog.tblauncher.utils.ViewHolderAdapter;
@@ -96,7 +95,7 @@ public class TagsManager {
     private void launchRenameDialog(Context ctx, TagInfo info) {
         ContextThemeWrapper context = new ContextThemeWrapper(ctx, R.style.NoTitleDialogTheme);
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle(context.getResources().getString(R.string.rename_tag));
+        builder.setTitle(context.getResources().getString(R.string.title_rename_tag));
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             builder.setView(R.layout.dialog_rename);
@@ -119,7 +118,7 @@ public class TagsManager {
                 }
             }
             if (!isValid) {
-                Toast.makeText(ctx, ctx.getString(R.string.invalid_rename, newName), Toast.LENGTH_LONG).show();
+                Toast.makeText(ctx, ctx.getString(R.string.invalid_rename_tag, newName), Toast.LENGTH_LONG).show();
                 return;
             }
 

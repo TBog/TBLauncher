@@ -40,6 +40,7 @@ import java.util.concurrent.TimeUnit;
 import rocks.tbog.tblauncher.dataprovider.ActionProvider;
 import rocks.tbog.tblauncher.dataprovider.AppCacheProvider;
 import rocks.tbog.tblauncher.dataprovider.AppProvider;
+import rocks.tbog.tblauncher.dataprovider.CalculatorProvider;
 import rocks.tbog.tblauncher.dataprovider.ContactsProvider;
 import rocks.tbog.tblauncher.dataprovider.FavProvider;
 import rocks.tbog.tblauncher.dataprovider.FilterProvider;
@@ -85,8 +86,6 @@ public class DataHandler extends BroadcastReceiver
      * List all known providers
      */
     final static private List<String> PROVIDER_NAMES = Arrays.asList(
-            //TODO: enable providers when ready
-//            "app", "contacts", "shortcuts"
             "app"
             , "contacts"
             , "shortcuts"
@@ -170,27 +169,34 @@ public class DataHandler extends BroadcastReceiver
             providers.put("quickList", providerEntry);
         }
 
+        // add providers that may be toggled by preferences
+        toggleableProviders(prefs);
+    }
+
+    private void toggleableProviders(SharedPreferences prefs) {
+        // Search engine provider,
         {
-            ProviderEntry providerEntry = new ProviderEntry();
-            providerEntry.provider = new SearchProvider(context);
-            providers.put("search", providerEntry);
+            String providerName = "search";
+            if (prefs.getBoolean("enable-" + providerName, true)) {
+                ProviderEntry providerEntry = new ProviderEntry();
+                providerEntry.provider = new SearchProvider(context);
+                providers.put(providerName, providerEntry);
+            } else {
+                providers.remove(providerName);
+            }
         }
 
-//        ProviderEntry calculatorEntry = new ProviderEntry();
-//        calculatorEntry.provider = new CalculatorProvider();
-//        this.providers.put("calculator", calculatorEntry);
-//        ProviderEntry phoneEntry = new ProviderEntry();
-//        phoneEntry.provider = new PhoneProvider(context);
-//        this.providers.put("phone", phoneEntry);
-//        ProviderEntry searchEntry = new ProviderEntry();
-//        searchEntry.provider = new SearchProvider(context);
-//        this.providers.put("search", searchEntry);
-//        ProviderEntry settingsEntry = new ProviderEntry();
-//        settingsEntry.provider = new SettingsProvider(context);
-//        this.providers.put("settings", settingsEntry);
-//        ProviderEntry tagsEntry = new ProviderEntry();
-//        tagsEntry.provider = new TagsProvider();
-//        this.providers.put("tags", tagsEntry);
+        // Calculator provider, may be toggled by preference
+        {
+            String providerName = "calculator";
+            if (prefs.getBoolean("enable-" + providerName, true)) {
+                ProviderEntry providerEntry = new ProviderEntry();
+                providerEntry.provider = new CalculatorProvider();
+                providers.put(providerName, providerEntry);
+            } else {
+                providers.remove(providerName);
+            }
+        }
     }
 
     @Override
@@ -983,12 +989,14 @@ public class DataHandler extends BroadcastReceiver
         start = System.currentTimeMillis();
 
         IntentFilter intentFilter = new IntentFilter(TBLauncherActivity.LOAD_OVER);
-        this.context.registerReceiver(this, intentFilter);
+        context.registerReceiver(this, intentFilter);
 
         Intent i = new Intent(TBLauncherActivity.START_LOAD);
-        this.context.sendBroadcast(i);
+        context.sendBroadcast(i);
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        toggleableProviders(prefs);
+
         for (String providerName : PROVIDER_NAMES) {
             if (prefs.getBoolean("enable-" + providerName, true)) {
                 connectToProvider(providerName, 0);
@@ -996,7 +1004,7 @@ public class DataHandler extends BroadcastReceiver
         }
 
         for (int step : IProvider.LOAD_STEPS) {
-            for (ProviderEntry entry : this.providers.values()) {
+            for (ProviderEntry entry : providers.values()) {
                 if (entry.provider != null && step == entry.provider.getLoadStep())
                     entry.provider.reload(true);
             }

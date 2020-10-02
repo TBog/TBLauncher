@@ -93,11 +93,13 @@
         <androidx.preference.SwitchPreference
             android:defaultValue="true"
             android:key="tags-enabled"
+            android:summary="@string/tags_enabled_summary"
             android:title="@string/tags_enabled" />
         <androidx.preference.SwitchPreference
             android:defaultValue="true"
             android:dependency="tags-enabled"
             android:key="fuzzy-search-tags"
+            android:summary="@string/fuzzy_search_tags_summary"
             android:title="@string/fuzzy_search_tags" />
 
     </androidx.preference.PreferenceCategory>
@@ -165,6 +167,43 @@
             android:key="screen-off-cache-clear"
             android:summary="@string/screen_off_cache_clear_summary"
             android:title="@string/screen_off_cache_clear" />
+
+    </androidx.preference.PreferenceCategory>
+
+    <!-- Providers -->
+    <androidx.preference.PreferenceCategory
+        android:key="provider-section"
+        android:title="@string/provider_section"
+        app:initialExpandedChildrenCount="0">
+
+        <androidx.preference.SwitchPreference
+            android:defaultValue="true"
+            android:key="enable-search"
+            android:title="@string/enable_search" />
+
+        <androidx.preference.SwitchPreference
+            android:defaultValue="true"
+            android:dependency="enable-search"
+            android:key="enable-url"
+            android:title="@string/enable_url" />
+
+        <rocks.tbog.tblauncher.preference.CustomDialogPreference
+            android:dependency="enable-search"
+            android:dialogLayout="@layout/edit_search_engines"
+            android:key="edit-search-engines"
+            android:summary="@string/edit_search_engines_summary"
+            android:title="@string/edit_search_engines" />
+
+        <rocks.tbog.tblauncher.preference.CustomDialogPreference
+            android:dependency="enable-search"
+            android:dialogLayout="@layout/add_search_engine"
+            android:key="add-search-engine"
+            android:title="@string/add_search_engine" />
+
+        <androidx.preference.SwitchPreference
+            android:defaultValue="true"
+            android:key="enable-calculator"
+            android:title="@string/enable_calculator" />
 
     </androidx.preference.PreferenceCategory>
 

@@ -6,16 +6,17 @@ import android.webkit.URLUtil;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.collection.ArraySet;
 import androidx.preference.PreferenceManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashSet;
 import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import rocks.tbog.tblauncher.BuildConfig;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.entry.SearchEngineEntry;
 import rocks.tbog.tblauncher.entry.SearchEntry;
@@ -34,7 +35,29 @@ public class SearchProvider extends SimpleProvider<SearchEntry> {
     @NonNull
     public static Set<String> getDefaultSearchProviders(Context context) {
         String[] defaultSearchProviders = context.getResources().getStringArray(R.array.defaultSearchProviders);
-        return new HashSet<>(Arrays.asList(defaultSearchProviders));
+        return new ArraySet<>(Arrays.asList(defaultSearchProviders));
+    }
+
+    @NonNull
+    public static Set<String> getAvailableSearchProviders(Context context, SharedPreferences prefs) {
+        Set<String> availableProviders = prefs.getStringSet("available-search-providers", null);
+        if (availableProviders == null)
+            availableProviders = SearchProvider.getDefaultSearchProviders(context);
+        if (BuildConfig.DEBUG)
+            return Collections.unmodifiableSet(availableProviders);
+        return availableProviders;
+    }
+
+    @NonNull
+    public static Set<String> getSelectedProviderNames(Context context, SharedPreferences prefs) {
+        Set<String> selectedProviders = prefs.getStringSet("selected-search-provider-names", null);
+        if (selectedProviders == null) {
+            Set<String> availableProviders = getAvailableSearchProviders(context, prefs);
+            selectedProviders = new ArraySet<>(availableProviders.size());
+            for (String availableProvider : availableProviders)
+                selectedProviders.add(getProviderName(availableProvider));
+        }
+        return selectedProviders;
     }
 
     public SearchProvider(Context context) {
@@ -48,16 +71,17 @@ public class SearchProvider extends SimpleProvider<SearchEntry> {
     public void reload(boolean cancelCurrentLoadTask) {
         searchEngines.clear();
 
-        Set<String> availableProviders = prefs.getStringSet("available-search-providers", null);
-        if (availableProviders == null)
-            availableProviders = SearchProvider.getDefaultSearchProviders(context);
+        Set<String> availableSearchProviders = SearchProvider.getAvailableSearchProviders(context, prefs);
+        Set<String> selectedProviderNames = SearchProvider.getSelectedProviderNames(context, prefs);
 
-        for (String searchProvider : availableProviders) {
-            String url = getProviderUrl(searchProvider);
+        for (String searchProvider : availableSearchProviders) {
             String name = getProviderName(searchProvider);
-            SearchEngineEntry entry = new SearchEngineEntry(name, url);
-            if (url != null)
-                searchEngines.add(entry);
+            if (selectedProviderNames.contains(name)) {
+                String url = getProviderUrl(searchProvider);
+                SearchEngineEntry entry = new SearchEngineEntry(name, url);
+                if (url != null)
+                    searchEngines.add(entry);
+            }
         }
     }
 
@@ -96,26 +120,29 @@ public class SearchProvider extends SimpleProvider<SearchEntry> {
             }
         }
 
-        FuzzyScore fuzzyScore = new FuzzyScore(queryNormalized.codePoints);
+        if (prefs.getBoolean("enable-url", true)) {
+            FuzzyScore fuzzyScore = new FuzzyScore(queryNormalized.codePoints);
 
-        // Open URLs directly (if I type http://something.com for instance)
-        Matcher m = urlPattern.matcher(query);
-        if (m.find()) {
-            String guessedUrl = URLUtil.guessUrl(query);
-            if (URLUtil.isHttpUrl(guessedUrl))
-                guessedUrl = "https://" + guessedUrl.substring(7);
-            if (URLUtil.isValidUrl(guessedUrl)) {
-                SearchEntry pojo = new UrlEntry(query, guessedUrl);
-                pojo.setName(guessedUrl);
-                FuzzyScore.MatchInfo matchInfo = fuzzyScore.match(pojo.normalizedName.codePoints);
-                pojo.setRelevance(pojo.normalizedName, matchInfo);
-                records.add(pojo);
+            // Open URLs directly (if I type http://something.com for instance)
+            Matcher m = urlPattern.matcher(query);
+            if (m.find()) {
+                String guessedUrl = URLUtil.guessUrl(query);
+                if (URLUtil.isHttpUrl(guessedUrl))
+                    guessedUrl = "https://" + guessedUrl.substring(7);
+                if (URLUtil.isValidUrl(guessedUrl)) {
+                    SearchEntry pojo = new UrlEntry(query, guessedUrl);
+                    pojo.setName(guessedUrl);
+                    FuzzyScore.MatchInfo matchInfo = fuzzyScore.match(pojo.normalizedName.codePoints);
+                    pojo.setRelevance(pojo.normalizedName, matchInfo);
+                    records.add(pojo);
+                }
             }
         }
         return records;
     }
 
-    private static String getProviderUrl(String searchProvider) {
+    @Nullable
+    public static String getProviderUrl(@NonNull String searchProvider) {
         int pos = searchProvider.indexOf("|");
         if (pos >= 0)
             return searchProvider.substring(pos + 1);
@@ -125,10 +152,15 @@ public class SearchProvider extends SimpleProvider<SearchEntry> {
     }
 
     @NonNull
-    private static String getProviderName(String searchProvider) {
+    public static String getProviderName(@NonNull String searchProvider) {
         int pos = searchProvider.indexOf("|");
         if (pos >= 0)
             return searchProvider.substring(0, pos);
         return "null";
+    }
+
+    @NonNull
+    public static String makeProvider(@NonNull String name, @NonNull String url) {
+        return name + "|" + url;
     }
 }

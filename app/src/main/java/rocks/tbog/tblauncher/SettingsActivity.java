@@ -34,6 +34,7 @@ import androidx.preference.SwitchPreference;
 import rocks.tbog.tblauncher.preference.ChooseColorDialog;
 import rocks.tbog.tblauncher.preference.ConfirmDialog;
 import rocks.tbog.tblauncher.preference.CustomDialogPreference;
+import rocks.tbog.tblauncher.preference.EditSearchEnginesPreferenceDialog;
 import rocks.tbog.tblauncher.preference.QuickListPreferenceDialog;
 import rocks.tbog.tblauncher.preference.SliderDialog;
 import rocks.tbog.tblauncher.utils.SystemUiVisibility;
@@ -270,6 +271,10 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "quick-list-content":
                         dialogFragment = QuickListPreferenceDialog.newInstance(key);
                         break;
+                    case "edit-search-engines":
+                    case "add-search-engine":
+                        dialogFragment = EditSearchEnginesPreferenceDialog.newInstance(key);
+                        break;
                     default:
                         throw new RuntimeException("CustomDialogPreference \"" + key + "\" has no dialog defined");
                 }
@@ -379,6 +384,11 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 case "cache-drawable":
                 case "cache-half-apps":
                     TBApplication.drawableCache(activity).onPrefChanged(activity, sharedPreferences);
+                    break;
+                case "enable-search":
+                case "enable-url":
+                case "enable-calculator":
+                    TBApplication.dataHandler(activity).reloadProviders();
                     break;
             }
         }
