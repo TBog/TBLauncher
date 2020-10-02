@@ -67,6 +67,8 @@ public class EditSearchEngines {
                 .putStringSet("selected-search-provider-names", selectedProviderNames)
                 .putString("default-search-provider", defaultProviderName)
                 .apply();
+
+        TBApplication.dataHandler(context).reloadProviders();
     }
 
     public void bindEditView(@NonNull View view) {
@@ -92,7 +94,7 @@ public class EditSearchEngines {
                 Context ctx = listView.getContext();
                 ArrayAdapter<ListPopup.Item> adapter = new ArrayAdapter<>(ctx, android.R.layout.simple_list_item_1);
                 ListPopup popup = ListPopup.create(ctx, adapter);
-                if (!info.name.equals(defaultProviderName))
+                if (!info.name.equals(defaultProviderName) && info.selected)
                     adapter.add(new ListPopup.Item(ctx, R.string.search_engine_set_default));
                 adapter.add(new ListPopup.Item(ctx, R.string.search_engine_rename));
                 adapter.add(new ListPopup.Item(ctx, R.string.search_engine_edit_url));
