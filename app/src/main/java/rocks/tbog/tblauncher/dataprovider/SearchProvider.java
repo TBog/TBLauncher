@@ -60,6 +60,24 @@ public class SearchProvider extends SimpleProvider<SearchEntry> {
         return selectedProviders;
     }
 
+    @NonNull
+    public static String sanitizeProviderName(@Nullable String name) {
+        if (name == null)
+            return "[name]";
+        while (name.contains("|"))
+            name = name.replace('|', ' ');
+        return name;
+    }
+
+    @NonNull
+    public static String sanitizeProviderUrl(@Nullable String url) {
+        if (url == null)
+            return "%s";
+        if (!url.contains("%s"))
+            return url + "%s";
+        return url;
+    }
+
     public SearchProvider(Context context) {
         super();
         this.context = context.getApplicationContext();
@@ -161,6 +179,6 @@ public class SearchProvider extends SimpleProvider<SearchEntry> {
 
     @NonNull
     public static String makeProvider(@NonNull String name, @NonNull String url) {
-        return name + "|" + url;
+        return sanitizeProviderName(name) + "|" + sanitizeProviderUrl(url);
     }
 }

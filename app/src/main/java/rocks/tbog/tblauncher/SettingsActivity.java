@@ -271,6 +271,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "quick-list-content":
                         dialogFragment = QuickListPreferenceDialog.newInstance(key);
                         break;
+                    case "reset-search-engines":
                     case "edit-search-engines":
                     case "add-search-engine":
                         dialogFragment = EditSearchEnginesPreferenceDialog.newInstance(key);

@@ -34,14 +34,18 @@ public class EditSearchEnginesPreferenceDialog extends PreferenceDialogFragmentC
         super.onBindDialogView(view);
 
         Context context = requireContext();
-        mEditor.loadData(context, PreferenceManager.getDefaultSharedPreferences(context));
-
         String key = getPreference().getKey();
         switch (key) {
+            case "reset-search-engines":
+                mEditor.loadDefaults(context);
+                mEditor.bindEditView(view);
+                break;
             case "edit-search-engines":
+                mEditor.loadData(context, PreferenceManager.getDefaultSharedPreferences(context));
                 mEditor.bindEditView(view);
                 break;
             case "add-search-engine":
+                mEditor.loadData(context, PreferenceManager.getDefaultSharedPreferences(context));
                 mEditor.bindAddView(view);
                 break;
         }

@@ -200,6 +200,13 @@
             android:key="add-search-engine"
             android:title="@string/add_search_engine" />
 
+        <rocks.tbog.tblauncher.preference.CustomDialogPreference
+            android:dependency="enable-search"
+            android:dialogLayout="@layout/edit_search_engines"
+            android:key="reset-search-engines"
+            android:summary="@string/reset_search_engines_summary"
+            android:title="@string/reset_search_engines" />
+
         <androidx.preference.SwitchPreference
             android:defaultValue="true"
             android:key="enable-calculator"

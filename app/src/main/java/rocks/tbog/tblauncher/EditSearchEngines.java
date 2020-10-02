@@ -47,8 +47,8 @@ public class EditSearchEngines {
         Set<String> selectedProviderNames = new ArraySet<>();
 
         if (mAddName != null && mAddUrl != null) {
-            String name = mAddName.getText().toString().trim();
-            String url = mAddUrl.getText().toString().trim();
+            String name = SearchProvider.sanitizeProviderName(mAddName.getText().toString()).trim();
+            String url = SearchProvider.sanitizeProviderUrl(mAddUrl.getText().toString()).trim();
             if (!name.isEmpty() && !url.isEmpty()) {
                 String searchProvider = SearchProvider.makeProvider(name, url);
                 availableProviders.add(searchProvider);
@@ -150,7 +150,7 @@ public class EditSearchEngines {
             EditText input = ((AlertDialog) dialog).findViewById(R.id.rename);
             if (input == null)
                 return;
-            String newName = input.getText().toString().trim();
+            String newName = SearchProvider.sanitizeProviderName(input.getText().toString()).trim();
             boolean isValid = !newName.isEmpty();
             for (SearchEngineInfo searchEngineInfo : mSearchEngineList) {
                 if (searchEngineInfo == info)
@@ -205,7 +205,7 @@ public class EditSearchEngines {
                 return;
 
             // Set new name
-            info.url = input.getText().toString().trim();
+            info.url = SearchProvider.sanitizeProviderUrl(input.getText().toString()).trim();
             if (info.url.equals(SearchProvider.getProviderUrl(info.provider))) {
                 info.action = SearchProvider.getProviderName(info.provider).equals(info.name) ? SearchEngineInfo.Action.NONE : SearchEngineInfo.Action.RENAME;
             } else {
@@ -236,7 +236,7 @@ public class EditSearchEngines {
     }
 
     public void loadData(@NonNull Context context, @NonNull SharedPreferences prefs) {
-        // refresh tags
+        // load search engines
         {
             Set<String> availableSearchProviders = SearchProvider.getAvailableSearchProviders(context, prefs);
             Set<String> selectedProviderNames = SearchProvider.getSelectedProviderNames(context, prefs);
@@ -257,6 +257,17 @@ public class EditSearchEngines {
             else
                 defaultProviderName = providerName;
         }
+    }
+
+    public void loadDefaults(@NonNull Context context) {
+        Set<String> defaultSearchProviders = SearchProvider.getDefaultSearchProviders(context);
+        for (String searchProvider : defaultSearchProviders) {
+            SearchEngineInfo searchEngineInfo = new SearchEngineInfo(searchProvider);
+            searchEngineInfo.selected = true;
+            mSearchEngineList.add(searchEngineInfo);
+        }
+        Collections.sort(mSearchEngineList, (lhs, rhs) -> lhs.provider.compareTo(rhs.provider));
+        defaultProviderName = "Google";
     }
 
     static class SearchEngineAdapter extends ViewHolderAdapter<SearchEngineInfo, TagViewHolder> {
