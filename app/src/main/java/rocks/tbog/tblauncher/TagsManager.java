@@ -20,6 +20,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import rocks.tbog.tblauncher.dataprovider.TagsProvider;
+import rocks.tbog.tblauncher.entry.TagEntry;
 import rocks.tbog.tblauncher.ui.CodePointDrawable;
 import rocks.tbog.tblauncher.utils.DrawableUtils;
 import rocks.tbog.tblauncher.utils.ViewHolderAdapter;
@@ -143,11 +145,13 @@ public class TagsManager {
     }
 
     private void launchCustomTagIconDialog(Context ctx, TagInfo info) {
-//        DataHandler dataHandler = TBApplication.dataHandler(ctx);
-//        List<? extends EntryItem> list = dataHandler.getQuickList();
-//
-//        dataHandler.setQuickList(list);
-        Toast.makeText(ctx, "Not implemented yet", Toast.LENGTH_LONG).show();
+        TagsProvider tagsProvider = TBApplication.dataHandler(ctx).getTagsProvider();
+        if (tagsProvider == null)
+            return;
+        TagEntry tagEntry = tagsProvider.getTagEntry(info.tagName);
+        // add this tag to the provider before launchCustomIconDialog, in case it isn't already
+        tagsProvider.addTagEntry(tagEntry);
+        TBApplication.behaviour(ctx).launchCustomIconDialog(tagEntry);
     }
 
     public void onStart() {

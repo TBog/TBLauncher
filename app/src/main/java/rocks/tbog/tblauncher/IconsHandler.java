@@ -205,7 +205,7 @@ public class IconsHandler {
         }
     }
 
-    HashMap<String, String> getIconPackNames() {
+    public HashMap<String, String> getIconPackNames() {
         return mIconPackNames;
     }
 

@@ -168,7 +168,7 @@
     <string name="icon_pack_section">Icon pack</string>
     <string name="shortcut_shape_name">Shortcut icon shape</string>
     <string name="icon_pack_list">Installed icon packs</string>
-    <string name="icon_pack_content_list">Icons from the selected icon pack</string>
+    <string name="icon_pack_content_list">Icons from\n%s</string>
     <string name="icon_pack_quick_list">System icon variations</string>
 
     <string name="title_wallpaper">Wallpaper interactions</string>
@@ -243,6 +243,9 @@
     <string name="hint_add_search_engine_url">https://search.engine/query=%s</string>
     <string name="label_search_engine_name">Search provider name</string>
     <string name="label_search_engine_url">Url to execute, %s will be replaced by your query</string>
+    <string name="selected_pack">%s\n[current pack]</string>
+    <string name="tab_app_icons">%s\n[app icons]</string>
+    <string name="tab_static_icons">Default icon</string>
     <plurals name="tag_entry_count">
         <item quantity="one">%d entry</item>
         <item quantity="other">%d entries</item>

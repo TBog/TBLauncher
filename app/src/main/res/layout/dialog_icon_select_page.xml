@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:theme="@style/NoTitleDialogTheme">
+
+    <TextView
+        android:id="@android:id/text1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center_horizontal|bottom"
+        android:paddingHorizontal="@dimen/result_corner_radius"
+        android:text="@string/icon_pack_content_list"
+        android:textColor="?android:attr/textColorPrimary"
+        tools:drawableLeft="@drawable/ic_android" />
+
+    <ProgressBar
+        android:id="@+id/iconLoadingBar"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:indeterminate="true"
+        android:indeterminateOnly="true"
+        android:visibility="gone"
+        tools:visibility="visible" />
+
+    <GridView
+        android:id="@+id/iconGrid"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:clipToPadding="false"
+        android:columnWidth="@dimen/custom_icon_column_width"
+        android:gravity="center"
+        android:horizontalSpacing="1dp"
+        android:numColumns="auto_fit"
+        android:stretchMode="spacingWidth"
+        android:verticalSpacing="1dp"
+        tools:itemCount="20"
+        tools:listitem="@layout/custom_icon_item" />
+
+    <EditText
+        android:id="@+id/search"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:autofillHints="application,text"
+        android:hint="@string/hint_custom_icon"
+        android:inputType="textAutoCorrect" />
+
+</LinearLayout>

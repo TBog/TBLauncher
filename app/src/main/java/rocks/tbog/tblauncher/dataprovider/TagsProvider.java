@@ -49,27 +49,17 @@ public class TagsProvider extends DBProvider<TagEntry> {
         return id.startsWith(TagEntry.SCHEME);
     }
 
-//    @Override
-//    public EntryItem findById(@NonNull String id) {
-//        EntryItem entryItem = super.findById(id);
-//        if (entryItem == null) {
-//            Set<String> cachedTags = TBApplication.tagsHandler(context).getAllTagsAsSet();
-//            String tagName = id.substring(TagEntry.SCHEME.length());
-//            if (cachedTags.contains(tagName)) {
-//                entryItem = new TagEntry(id);
-//                entryItem.setName(tagName);
-//                entryList.add(entryItem);
-//            }
-//        }
-//        return entryItem;
-//    }
-
     public TagEntry getTagEntry(String tagName) {
         String id = TagEntry.SCHEME + tagName;
         TagEntry entryItem = findById(id);
         if (entryItem == null)
             return newTagEntry(id, tagName);
         return entryItem;
+    }
+
+    public void addTagEntry(TagEntry tagEntry) {
+        if (null == findById(tagEntry.id))
+            entryList.add(tagEntry);
     }
 
     private static class FavLoader extends DBProvider.DBLoader<TagEntry> {

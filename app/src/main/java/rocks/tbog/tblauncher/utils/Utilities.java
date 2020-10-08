@@ -166,16 +166,10 @@ public class Utilities {
         return null;
     }
 
-    public static void positionToast(@NonNull Toast toast, @Nullable View anchor, int offsetX, int offsetY) {
-        Activity activity = Utilities.getActivity(anchor);
-        if (activity != null)
-            positionToast(toast, anchor, activity.getWindow(), offsetX, offsetY);
-    }
-
-    public static void positionToast(@NonNull Toast toast, @NonNull View anchor, @NonNull Window window, int offsetX, int offsetY) {
+    public static void positionToast(@NonNull Toast toast, @NonNull View anchor, int offsetX, int offsetY) {
         // toasts are positioned relatively to decor view, views relatively to their parents, we have to gather additional data to have a common coordinate system
         Rect rect = new Rect();
-        window.getDecorView().getWindowVisibleDisplayFrame(rect);
+        anchor.getWindowVisibleDisplayFrame(rect);
 
         // covert anchor view absolute position to a position which is relative to decor view
         int[] viewLocation = new int[2];
@@ -185,7 +179,7 @@ public class Utilities {
 
         // measure toast to center it relatively to the anchor view
         DisplayMetrics metrics = new DisplayMetrics();
-        window.getWindowManager().getDefaultDisplay().getMetrics(metrics);
+        anchor.getDisplay().getMetrics(metrics);
         int widthMeasureSpec = View.MeasureSpec.makeMeasureSpec(metrics.widthPixels, View.MeasureSpec.UNSPECIFIED);
         int heightMeasureSpec = View.MeasureSpec.makeMeasureSpec(metrics.heightPixels, View.MeasureSpec.UNSPECIFIED);
         toast.getView().measure(widthMeasureSpec, heightMeasureSpec);

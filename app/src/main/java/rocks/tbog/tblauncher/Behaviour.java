@@ -36,6 +36,7 @@ import androidx.preference.PreferenceManager;
 import java.util.ArrayList;
 import java.util.List;
 
+import rocks.tbog.tblauncher.CustomIcon.IconSelectDialog;
 import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.EntryWithTags;
@@ -704,7 +705,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     public void launchCustomIconDialog(AppEntry appEntry) {
-        CustomIconDialog dialog = new CustomIconDialog();
+        IconSelectDialog dialog = new IconSelectDialog();
         openFragmentDialog(dialog);
 
         // If mResultLayout is visible
@@ -717,6 +718,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             Bundle args = new Bundle();
             args.putString("componentName", appEntry.getUserComponentName());
             args.putLong("customIcon", appEntry.getCustomIcon());
+            args.putString("entryName", appEntry.getName());
             dialog.setArguments(args);
         }
         // OnDismiss: We restore mResultLayout visibility
@@ -736,7 +738,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     public void launchCustomIconDialog(StaticEntry staticEntry) {
-        CustomIconDialog dialog = new CustomIconDialog();
+        IconSelectDialog dialog = new IconSelectDialog();
         openFragmentDialog(dialog);
 
         // If mResultLayout is visible
@@ -765,6 +767,37 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         });
         dialog.show(mTBLauncherActivity.getSupportFragmentManager(), "custom_icon_dialog");
     }
+
+//    public void launchCustomIconDialog(TagEntry tagEntry) {
+//        CustomIconDialog dialog = new CustomIconDialog();
+//        openFragmentDialog(dialog);
+//
+//        // If mResultLayout is visible
+//        boolean bResultListVisible = TBApplication.state().isResultListVisible();
+//        if (bResultListVisible)
+//            mResultLayout.setVisibility(View.INVISIBLE);
+//
+//        // set args
+//        {
+//            Bundle args = new Bundle();
+//            args.putString("entryId", staticEntry.id);
+//            dialog.setArguments(args);
+//        }
+//        // OnDismiss: We restore mResultLayout visibility
+//        if (bResultListVisible)
+//            dialog.setOnDismissListener(dlg -> mResultLayout.setVisibility(View.VISIBLE));
+//
+//        dialog.setOnConfirmListener(drawable -> {
+//            if (drawable == null)
+//                TBApplication.getApplication(mTBLauncherActivity).getIconsHandler().restoreDefaultIcon(staticEntry);
+//            else
+//                TBApplication.getApplication(mTBLauncherActivity).getIconsHandler().changeIcon(staticEntry, drawable);
+//            // force a result refresh to update the icon in the view
+//            refreshSearchRecords();
+//            TBApplication.quickList(mTBLauncherActivity).onFavoritesChanged();
+//        });
+//        dialog.show(mTBLauncherActivity.getSupportFragmentManager(), "custom_icon_dialog");
+//    }
 
     public void launchEditTagsDialog(EntryWithTags entry) {
         EditTagsDialog dialog = new EditTagsDialog();
