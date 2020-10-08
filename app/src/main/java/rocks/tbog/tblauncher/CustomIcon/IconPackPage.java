@@ -110,13 +110,13 @@ class IconPackPage extends PageAdapter.Page {
             if (activity != null)
                 pack.loadDrawables(activity.getPackageManager());
         }, () -> {
-            Activity activity = Utilities.getActivity(pageView);
-            if (activity != null)
-                mIconPack = pack;
-            else
-                mIconPack = null;
             mLoadIconPackTask = null;
-            refreshList();
+            Activity activity = Utilities.getActivity(pageView);
+            if (activity != null) {
+                mIconPack = pack;
+                refreshList();
+            } else
+                mIconPack = null;
         });
     }
 

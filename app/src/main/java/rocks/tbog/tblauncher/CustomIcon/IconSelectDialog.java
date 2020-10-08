@@ -25,7 +25,6 @@ import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.icons.IconPack;
-import rocks.tbog.tblauncher.icons.IconPackXML;
 import rocks.tbog.tblauncher.ui.DialogFragment;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
@@ -34,6 +33,7 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
     private Drawable mSelectedDrawable = null;
     private ImageView mPreview;
     private ViewPager mViewPager;
+    private SystemPage mSystemPage = null;
 
     @Override
     protected int layoutRes() {
@@ -69,7 +69,7 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
                 ComponentName cn = UserHandleCompat.unflattenComponentName(name);
                 UserHandleCompat userHandle = UserHandleCompat.fromComponentName(context, name);
 
-                pageAdapter.addSystemPage(inflater, mViewPager, cn, userHandle, pageName);
+                mSystemPage = pageAdapter.addSystemPage(inflater, mViewPager, cn, userHandle, pageName);
             } else if (args.containsKey("entryId")) {
                 String entryId = args.getString("entryId", "");
                 EntryItem entryItem = TBApplication.dataHandler(context).getPojo(entryId);
@@ -78,16 +78,17 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
                 } else {
                     StaticEntry staticEntry = (StaticEntry) entryItem;
                     String pageName = context.getString(R.string.tab_static_icons);
-                    pageAdapter.addSystemPage(inflater, mViewPager, staticEntry, pageName);
+                    pageAdapter.addStaticEntryPage(inflater, mViewPager, staticEntry, pageName);
                 }
             }
         }
 
+        ArrayList<Pair<String, String>> iconPacks;
         // add icon packs
         {
             IconsHandler iconsHandler = TBApplication.iconsHandler(context);
             Map<String, String> iconPackNames = iconsHandler.getIconPackNames();
-            ArrayList<Pair<String, String>> iconPacks = new ArrayList<>(iconPackNames.size());
+            iconPacks = new ArrayList<>(iconPackNames.size());
             for (Map.Entry<String, String> packInfo : iconPackNames.entrySet())
                 iconPacks.add(new Pair<>(packInfo.getKey(), packInfo.getValue()));
             IconPack<?> iconPack = iconsHandler.getCustomIconPack();
@@ -106,7 +107,7 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
                     packName = context.getString(R.string.selected_pack, packName);
 
                 // add page to ViewPager
-                pageAdapter.addIconPack(inflater, mViewPager, packName, packPackageName);
+                pageAdapter.addIconPackPage(inflater, mViewPager, packName, packPackageName);
             }
         }
         pageAdapter.notifyDataSetChanged();
@@ -122,6 +123,10 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
                 mPreview.setImageDrawable(item.getPreview());
             }
         });
+
+        if (mSystemPage != null) {
+            mSystemPage.loadIconPackIcons(iconPacks);
+        }
 
         return view;
     }

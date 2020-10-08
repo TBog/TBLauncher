@@ -21,21 +21,22 @@ class PageAdapter extends androidx.viewpager.widget.PagerAdapter implements View
 
     private ArrayList<Page> pageList = new ArrayList<>(0);
 
-    public void addIconPack(@NonNull LayoutInflater inflater, ViewGroup container, String packName, String packPackageName) {
+    public void addIconPackPage(@NonNull LayoutInflater inflater, ViewGroup container, String packName, String packPackageName) {
         View view = inflater.inflate(R.layout.dialog_icon_select_page, container, false);
-        Page page = new IconPackPage(packName, packPackageName, view);
+        IconPackPage page = new IconPackPage(packName, packPackageName, view);
         pageList.add(page);
     }
 
-    public void addSystemPage(LayoutInflater inflater, ViewPager container, ComponentName cn, UserHandleCompat userHandle, String pageName) {
+    public SystemPage addSystemPage(LayoutInflater inflater, ViewPager container, ComponentName cn, UserHandleCompat userHandle, String pageName) {
         View view = inflater.inflate(R.layout.dialog_icon_select_page, container, false);
-        Page page = new SystemPage(pageName, view, cn, userHandle);
+        SystemPage page = new SystemPage(pageName, view, cn, userHandle);
         pageList.add(page);
+        return page;
     }
 
-    public void addSystemPage(LayoutInflater inflater, ViewPager container, StaticEntry staticEntry, String pageName) {
+    public void addStaticEntryPage(LayoutInflater inflater, ViewPager container, StaticEntry staticEntry, String pageName) {
         View view = inflater.inflate(R.layout.dialog_icon_select_page, container, false);
-        Page page = new StaticEntryPage(pageName, view, staticEntry);
+        StaticEntryPage page = new StaticEntryPage(pageName, view, staticEntry);
         pageList.add(page);
     }
 

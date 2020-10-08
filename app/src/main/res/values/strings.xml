@@ -246,6 +246,7 @@
     <string name="selected_pack">%s\n[current pack]</string>
     <string name="tab_app_icons">%s\n[app icons]</string>
     <string name="tab_static_icons">Default icon</string>
+    <string name="icon_pack_loading">Loading from icon packs...</string>
     <plurals name="tag_entry_count">
         <item quantity="one">%d entry</item>
         <item quantity="other">%d entries</item>

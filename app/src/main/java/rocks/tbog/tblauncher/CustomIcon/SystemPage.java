@@ -1,5 +1,6 @@
 package rocks.tbog.tblauncher.CustomIcon;
 
+import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.LauncherActivityInfo;
@@ -9,6 +10,7 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.util.Pair;
 import android.view.View;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -21,7 +23,9 @@ import androidx.annotation.StringRes;
 import androidx.collection.ArraySet;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 import rocks.tbog.tblauncher.IconsHandler;
@@ -31,12 +35,14 @@ import rocks.tbog.tblauncher.icons.IconPackXML;
 import rocks.tbog.tblauncher.icons.SystemIconPack;
 import rocks.tbog.tblauncher.utils.DrawableUtils;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
+import rocks.tbog.tblauncher.utils.Utilities;
 import rocks.tbog.tblauncher.utils.ViewHolderAdapter;
 
 public class SystemPage extends PageAdapter.Page {
-    ComponentName componentName;
-    UserHandleCompat userHandle;
+    private ComponentName componentName;
+    private UserHandleCompat userHandle;
     private IconPackXML mShownIconPack;
+    private GridView mGridView;
 
     SystemPage(CharSequence name, View view, ComponentName cn, UserHandleCompat uh) {
         super(name, view);
@@ -56,7 +62,7 @@ public class SystemPage extends PageAdapter.Page {
         TextView mSearch = pageView.findViewById(R.id.search);
         mSearch.setVisibility(View.GONE);
 
-        GridView mGridView = pageView.findViewById(R.id.iconGrid);
+        mGridView = pageView.findViewById(R.id.iconGrid);
         SystemPageAdapter adapter = new SystemPageAdapter(SystemPageViewHolder.class, iconClickListener);
         mGridView.setAdapter(adapter);
 
@@ -154,30 +160,70 @@ public class SystemPage extends PageAdapter.Page {
         if (!(drawable instanceof BitmapDrawable))
             return;
 
-//        ViewGroup layout = (ViewGroup) LayoutInflater.from(adapter.getContext()).inflate(R.layout.custom_icon_quick, adapter, false);
-//        ImageView icon = layout.findViewById(android.R.id.icon);
-//        TextView text = layout.findViewById(android.R.id.text1);
-//
-//        icon.setImageDrawable(drawable);
-//        icon.setOnClickListener(v -> {
-//            mSelectedDrawable = ((ImageView) v).getDrawable();
-//            mPreview.setImageDrawable(mSelectedDrawable);
-//        });
-//
-//        text.setText(textId);
-//
-//        adapter.addView(layout);
-
         SystemIconInfo iconInfo = new SystemIconInfo();
         iconInfo.iconDrawable = drawable;
         iconInfo.textId = textId;
         adapter.addItem(iconInfo);
     }
 
+    private void addIconPackOption(String packName, Drawable drawable, SystemPageAdapter adapter) {
+        if (!(drawable instanceof BitmapDrawable))
+            return;
+
+        IconPackIconInfo iconInfo = new IconPackIconInfo(packName);
+        iconInfo.iconDrawable = drawable;
+        adapter.addItem(iconInfo);
+    }
+
+    public void loadIconPackIcons(List<Pair<String, String>> iconPacks) {
+        if (iconPacks.isEmpty())
+            return;
+
+        final SystemIconInfo placeholderItem = new SystemIconInfo();
+        placeholderItem.iconDrawable = null;
+        placeholderItem.textId = R.string.icon_pack_loading;
+        {
+            SystemPageAdapter adapter = (SystemPageAdapter) mGridView.getAdapter();
+            adapter.addItem(placeholderItem);
+        }
+        final HashMap<String, Drawable> options = new HashMap<>(iconPacks.size());
+        Utilities.runAsync(() -> {
+            for (Pair<String, String> packInfo : iconPacks) {
+                String packPackageName = packInfo.first;
+                String packName = packInfo.second;
+                Activity activity = Utilities.getActivity(mGridView);
+                if (activity != null) {
+                    IconPackXML pack = new IconPackXML(packPackageName);
+                    pack.load(activity.getPackageManager());
+                    Drawable drawable = pack.getComponentDrawable(activity, componentName, userHandle);
+                    options.put(packName, drawable);
+                } else {
+                    break;
+                }
+            }
+        }, () -> {
+            Activity activity = Utilities.getActivity(mGridView);
+            if (activity != null) {
+                SystemPageAdapter adapter = (SystemPageAdapter) mGridView.getAdapter();
+                adapter.removeItem(placeholderItem);
+                for (Map.Entry<String, Drawable> entry : options.entrySet())
+                    addIconPackOption(entry.getKey(), entry.getValue(), adapter);
+            }
+        });
+    }
+
     static class DefaultIconInfo extends SystemIconInfo {
         @Override
         Drawable getIcon() {
             return null;
+        }
+    }
+
+    static class IconPackIconInfo extends SystemIconInfo {
+        final CharSequence name;
+
+        IconPackIconInfo(CharSequence name) {
+            this.name = name;
         }
     }
 
@@ -224,9 +270,18 @@ public class SystemPage extends PageAdapter.Page {
         @Override
         protected void setContent(SystemIconInfo content, int position, @NonNull ViewHolderAdapter<SystemIconInfo, ? extends ViewHolderAdapter.ViewHolder<SystemIconInfo>> adapter) {
             SystemPageAdapter systemPageAdapter = (SystemPageAdapter) adapter;
+            // set icon
             icon.setImageDrawable(content.iconDrawable);
-            text1.setText(content.textId);
-            if (systemPageAdapter.mIconClickListener != null)
+            icon.setVisibility(content.iconDrawable == null ? View.GONE : View.VISIBLE);
+
+            //set text
+            if (content instanceof IconPackIconInfo)
+                text1.setText(((IconPackIconInfo) content).name);
+            else
+                text1.setText(content.textId);
+
+            // setOnClickListener when we have an icon
+            if (systemPageAdapter.mIconClickListener != null && content.iconDrawable != null)
                 root.setOnClickListener(v -> systemPageAdapter.mIconClickListener.onItemClick(adapter, v, position));
         }
     }
@@ -244,6 +299,11 @@ public class SystemPage extends PageAdapter.Page {
 
         void addItem(SystemIconInfo item) {
             mList.add(item);
+            notifyDataSetChanged();
+        }
+
+        void removeItem(SystemIconInfo item) {
+            mList.remove(item);
             notifyDataSetChanged();
         }
 
