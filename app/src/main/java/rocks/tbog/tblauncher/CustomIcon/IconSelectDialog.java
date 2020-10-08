@@ -190,113 +190,28 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
         Utilities.setIconAsync(mPreview, staticEntry::getIconDrawable);
     }
 
-//    private void populateIconPackList() {
-//        mIconPackList.removeAllViews();
-//
-//        LayoutInflater inflater = LayoutInflater.from(getContext());
-//        Map<String, String> iconPacks = TBApplication.iconsHandler(getContext()).getIconPackNames();
-//        for (Map.Entry<String, String> packInfo : iconPacks.entrySet()) {
-//            String packageName = packInfo.getKey();
-//            String packName = packInfo.getValue();
-//            View packView = inflater.inflate(R.layout.item_quick_list, mIconPackList, false);
-//            mIconPackList.addView(packView);
-//
-//            ImageView icon = packView.findViewById(android.R.id.icon);
-//            TextView name = packView.findViewById(android.R.id.text1);
-//
-//            name.setText(packName);
-//
-//            Utilities.setIconAsync(icon, (ctx) -> {
-//                Drawable drawable = null;
-//                try {
-//                    drawable = ctx.getPackageManager().getApplicationIcon(packageName);
-//                } catch (PackageManager.NameNotFoundException ignored) {
-//                }
-//                return drawable;
-//            });
-//
-//            packView.setTag(packageName);
-//            packView.setOnClickListener((v) -> {
-//                String tag = v.getTag().toString();
-//                setShownIconPack(tag);
-//            });
-//        }
-//
-//        if (mIconPackList.getChildCount() == 0)
-//            mIconPackList.setVisibility(View.GONE);
-//        else
-//            mIconPackList.requestLayout();
-//    }
-
-//    private void refreshQuickList() {
-//        Context context = requireContext();
-//        View view = getView();
-//        if (view == null)
-//            return;
-//
-//        Bundle args = getArguments() != null ? getArguments() : new Bundle();
-//        if (args.containsKey("componentName")) {
-//            String name = args.getString("componentName", "");
-//
-//            IconsHandler iconsHandler = TBApplication.getApplication(context).getIconsHandler();
-//            ComponentName cn = UserHandleCompat.unflattenComponentName(name);
-//            UserHandleCompat userHandle = UserHandleCompat.fromComponentName(context, name);
-//
-//            //TODO: move this in an async task
-//            setQuickList(iconsHandler, view, cn, userHandle);
-//        } else if (args.containsKey("entryId")) {
-//            String entryId = args.getString("entryId", "");
-//            EntryItem entryItem = TBApplication.dataHandler(context).getPojo(entryId);
-//            if (!(entryItem instanceof StaticEntry)) {
-//                dismiss();
-//                return;
-//            }
-//            StaticEntry staticEntry = (StaticEntry) entryItem;
-//            setQuickList(view, staticEntry);
-//        }
-//    }
-
-//    private void setQuickList(View view, StaticEntry staticEntry) {
-//        Context context = view.getContext();
-//        ViewGroup quickList = view.findViewById(R.id.quickList);
-//        quickList.removeViews(1, quickList.getChildCount() - 1);
-//
-//        // add default icon
-//        {
-//            Drawable drawable = staticEntry.getDefaultDrawable(context);
-//
-//            ImageView icon = quickList.findViewById(android.R.id.icon);
-//            icon.setImageDrawable(drawable);
-//            icon.setOnClickListener(v -> {
-//                mSelectedDrawable = null;
-//                mPreview.setImageDrawable(((ImageView) v).getDrawable());
-//            });
-//            ((TextView) quickList.findViewById(android.R.id.text1)).setText(R.string.default_icon);
-//        }
-//    }
-
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-        IconsHandler iconsHandler = TBApplication.getApplication(requireContext()).getIconsHandler();
-        IconPackXML iconPack = iconsHandler.getCustomIconPack();
-        String packageName = iconPack != null ? iconPack.getPackPackageName() : null;
+//        IconsHandler iconsHandler = TBApplication.getApplication(requireContext()).getIconsHandler();
+//        IconPackXML iconPack = iconsHandler.getCustomIconPack();
+//        String packageName = iconPack != null ? iconPack.getPackPackageName() : null;
 
         PageAdapter adapter = (PageAdapter) mViewPager.getAdapter();
         if (adapter != null) {
             int selectedPage = mViewPager.getCurrentItem();
-            if (packageName != null) {
-                int idx = 0;
-                for (PageAdapter.Page page : adapter.getPageIterable()) {
-                    if (page instanceof IconPackPage)
-                        if (packageName.equals(((IconPackPage) page).packageName)) {
-                            selectedPage = idx;
-                            break;
-                        }
-                    idx += 1;
-                }
-            }
-            mViewPager.setCurrentItem(selectedPage);
+//            if (packageName != null) {
+//                int idx = 0;
+//                for (PageAdapter.Page page : adapter.getPageIterable()) {
+//                    if (page instanceof IconPackPage)
+//                        if (packageName.equals(((IconPackPage) page).packageName)) {
+//                            selectedPage = idx;
+//                            break;
+//                        }
+//                    idx += 1;
+//                }
+//            }
+//            mViewPager.setCurrentItem(selectedPage);
             // allow the adapter to load as needed
             mViewPager.addOnPageChangeListener(adapter);
             // make sure we load the selected page
