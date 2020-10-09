@@ -4,14 +4,16 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:paddingHorizontal="@dimen/dialog_padding_horizontal"
+    android:paddingVertical="@dimen/dialog_padding_vertical"
     android:theme="@style/NoTitleDialogTheme">
 
     <TextView
         android:id="@android:id/text1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="@dimen/app_grid_vertical_padding"
         android:gravity="center_horizontal|bottom"
-        android:paddingHorizontal="@dimen/result_corner_radius"
         android:text="@string/icon_pack_content_list"
         android:textColor="?android:attr/textColorPrimary"
         tools:drawableLeft="@drawable/ic_android" />

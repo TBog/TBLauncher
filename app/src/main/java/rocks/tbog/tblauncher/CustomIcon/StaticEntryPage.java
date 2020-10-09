@@ -40,8 +40,7 @@ public class StaticEntryPage extends PageAdapter.Page {
         {
             Drawable drawable = mStaticEntry.getDefaultDrawable(context);
 
-            SystemPage.SystemIconInfo iconInfo = new SystemPage.DefaultIconInfo();
-            iconInfo.iconDrawable = drawable;
+            SystemPage.SystemIconInfo iconInfo = new SystemPage.DefaultIconInfo(drawable);
             iconInfo.textId = R.string.default_icon;
             adapter.addItem(iconInfo);
         }

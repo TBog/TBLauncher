@@ -24,6 +24,7 @@ import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.icons.IconPackXML;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
+import rocks.tbog.tblauncher.utils.UISizes;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 class IconPackPage extends PageAdapter.Page {
@@ -60,7 +61,11 @@ class IconPackPage extends PageAdapter.Page {
             packIcon = context.getPackageManager().getApplicationIcon(packageName);
         } catch (PackageManager.NameNotFoundException ignored) {
         }
-        textView.setCompoundDrawablesWithIntrinsicBounds(packIcon, null, null, null);
+        if (packIcon != null) {
+            int size = UISizes.getResultIconSize(context);
+            packIcon.setBounds(0, 0, size, size);
+            textView.setCompoundDrawables(packIcon, null, null, null);
+        }
 
         // set page icon grid
         mGridView = pageView.findViewById(R.id.iconGrid);

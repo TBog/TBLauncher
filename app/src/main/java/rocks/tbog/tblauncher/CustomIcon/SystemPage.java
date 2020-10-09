@@ -75,8 +75,7 @@ public class SystemPage extends PageAdapter.Page {
 
             //checkDuplicateDrawable(dSet, drawable);
 
-            SystemIconInfo iconInfo = new DefaultIconInfo();
-            iconInfo.iconDrawable = drawable;
+            SystemIconInfo iconInfo = new DefaultIconInfo(drawable);
             iconInfo.textId = R.string.default_icon;
             adapter.addItem(iconInfo);
         }
@@ -160,8 +159,7 @@ public class SystemPage extends PageAdapter.Page {
         if (!(drawable instanceof BitmapDrawable))
             return;
 
-        SystemIconInfo iconInfo = new SystemIconInfo();
-        iconInfo.iconDrawable = drawable;
+        SystemIconInfo iconInfo = new SystemIconInfo(drawable);
         iconInfo.textId = textId;
         adapter.addItem(iconInfo);
     }
@@ -170,8 +168,7 @@ public class SystemPage extends PageAdapter.Page {
         if (!(drawable instanceof BitmapDrawable))
             return;
 
-        IconPackIconInfo iconInfo = new IconPackIconInfo(packName);
-        iconInfo.iconDrawable = drawable;
+        IconPackIconInfo iconInfo = new IconPackIconInfo(packName, drawable);
         adapter.addItem(iconInfo);
     }
 
@@ -179,8 +176,7 @@ public class SystemPage extends PageAdapter.Page {
         if (iconPacks.isEmpty())
             return;
 
-        final SystemIconInfo placeholderItem = new SystemIconInfo();
-        placeholderItem.iconDrawable = null;
+        final SystemIconInfo placeholderItem = new SystemIconInfo(null);
         placeholderItem.textId = R.string.icon_pack_loading;
         {
             SystemPageAdapter adapter = (SystemPageAdapter) mGridView.getAdapter();
@@ -213,6 +209,11 @@ public class SystemPage extends PageAdapter.Page {
     }
 
     static class DefaultIconInfo extends SystemIconInfo {
+
+        DefaultIconInfo(Drawable icon) {
+            super(icon);
+        }
+
         @Override
         Drawable getIcon() {
             return null;
@@ -222,15 +223,20 @@ public class SystemPage extends PageAdapter.Page {
     static class IconPackIconInfo extends SystemIconInfo {
         final CharSequence name;
 
-        IconPackIconInfo(CharSequence name) {
+        IconPackIconInfo(CharSequence name, Drawable icon) {
+            super(icon);
             this.name = name;
         }
     }
 
     static class SystemIconInfo {
-        Drawable iconDrawable;
+        final Drawable iconDrawable;
         @StringRes
         int textId;
+
+        SystemIconInfo(Drawable icon) {
+            iconDrawable = icon;
+        }
 
         Drawable getIcon() {
             return iconDrawable;
@@ -271,8 +277,8 @@ public class SystemPage extends PageAdapter.Page {
         protected void setContent(SystemIconInfo content, int position, @NonNull ViewHolderAdapter<SystemIconInfo, ? extends ViewHolderAdapter.ViewHolder<SystemIconInfo>> adapter) {
             SystemPageAdapter systemPageAdapter = (SystemPageAdapter) adapter;
             // set icon
-            icon.setImageDrawable(content.iconDrawable);
-            icon.setVisibility(content.iconDrawable == null ? View.GONE : View.VISIBLE);
+            icon.setImageDrawable(content.getPreview());
+            icon.setVisibility(content.getPreview() == null ? View.GONE : View.VISIBLE);
 
             //set text
             if (content instanceof IconPackIconInfo)
@@ -281,7 +287,7 @@ public class SystemPage extends PageAdapter.Page {
                 text1.setText(content.textId);
 
             // setOnClickListener when we have an icon
-            if (systemPageAdapter.mIconClickListener != null && content.iconDrawable != null)
+            if (systemPageAdapter.mIconClickListener != null && content.getPreview() != null)
                 root.setOnClickListener(v -> systemPageAdapter.mIconClickListener.onItemClick(adapter, v, position));
         }
     }
@@ -293,7 +299,6 @@ public class SystemPage extends PageAdapter.Page {
 
         protected SystemPageAdapter(@NonNull Class<SystemPageViewHolder> viewHolderClass, @Nullable OnItemClickListener iconClickListener) {
             super(viewHolderClass, R.layout.item_grid);
-            //super(viewHolderClass, R.layout.custom_icon_quick);
             mIconClickListener = iconClickListener;
         }
 
