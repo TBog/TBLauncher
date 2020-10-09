@@ -189,7 +189,7 @@ public class SystemPage extends PageAdapter.Page {
                 String packName = packInfo.second;
                 Activity activity = Utilities.getActivity(mGridView);
                 if (activity != null) {
-                    IconPackXML pack = new IconPackXML(packPackageName);
+                    IconPackXML pack = TBApplication.iconPackCache(activity).getIconPack(packPackageName);
                     pack.load(activity.getPackageManager());
                     Drawable drawable = pack.getComponentDrawable(activity, componentName, userHandle);
                     options.put(packName, drawable);

@@ -108,7 +108,7 @@ public class IconsHandler {
             return;
         }
 
-        mIconPack = new IconPackXML(packageName);
+        mIconPack = TBApplication.iconPackCache(ctx).getIconPack(packageName);
         Utilities.runAsync(()->mIconPack.load(ctx.getPackageManager()), null);
     }
 

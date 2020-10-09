@@ -80,6 +80,8 @@ public class IconPackXML implements IconPack<IconPackXML.DrawableInfo> {
 
     @Override
     public void load(PackageManager packageManager) {
+        if (loaded)
+            return;
         try {
             packResources = packageManager.getResourcesForApplication(iconPackPackageName);
         } catch (PackageManager.NameNotFoundException e) {

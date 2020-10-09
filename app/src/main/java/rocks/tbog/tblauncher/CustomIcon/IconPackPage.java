@@ -21,6 +21,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import rocks.tbog.tblauncher.R;
+import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.icons.IconPackXML;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
@@ -109,7 +110,7 @@ class IconPackPage extends PageAdapter.Page {
             mLoadIconPackTask.cancel(true);
 
         // load the new pack
-        final IconPackXML pack = new IconPackXML(packageName);
+        final IconPackXML pack = TBApplication.iconPackCache(pageView.getContext()).getIconPack(packageName);
         mLoadIconPackTask = Utilities.runAsync(() -> {
             Activity activity = Utilities.getActivity(pageView);
             if (activity != null)
