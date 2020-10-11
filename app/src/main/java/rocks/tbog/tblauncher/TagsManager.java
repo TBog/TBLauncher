@@ -20,8 +20,12 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import rocks.tbog.tblauncher.dataprovider.FavProvider;
 import rocks.tbog.tblauncher.dataprovider.TagsProvider;
+import rocks.tbog.tblauncher.entry.EntryItem;
+import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.entry.TagEntry;
+import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.ui.CodePointDrawable;
 import rocks.tbog.tblauncher.utils.DrawableUtils;
 import rocks.tbog.tblauncher.utils.ViewHolderAdapter;
@@ -84,8 +88,10 @@ public class TagsManager {
         // refresh tags
         {
             TagsHandler tagsHandler = TBApplication.tagsHandler(context);
+            TagsProvider tagsProvider = TBApplication.dataHandler(context).getTagsProvider();
             for (String tagName : tagsHandler.getAllTagsAsSet()) {
-                TagInfo tagInfo = new TagInfo(tagName);
+                TagEntry tagEntry = tagsProvider != null ? tagsProvider.getTagEntry(tagName) : null;
+                TagInfo tagInfo = tagEntry == null ? new TagInfo(tagName) : new TagInfo(tagEntry);
                 tagInfo.name = tagName;
                 tagInfo.entryList = tagsHandler.getIds(tagName);
                 mTagList.add(tagInfo);
@@ -145,12 +151,22 @@ public class TagsManager {
     }
 
     private void launchCustomTagIconDialog(Context ctx, TagInfo info) {
-        TagsProvider tagsProvider = TBApplication.dataHandler(ctx).getTagsProvider();
+        TBApplication app = TBApplication.getApplication(ctx);
+        DataHandler dh = app.getDataHandler();
+        TagsProvider tagsProvider = dh.getTagsProvider();
         if (tagsProvider == null)
             return;
         TagEntry tagEntry = tagsProvider.getTagEntry(info.tagName);
         // add this tag to the provider before launchCustomIconDialog, in case it isn't already
         tagsProvider.addTagEntry(tagEntry);
+
+        FavProvider favProvider = dh.getFavProvider();
+        if (favProvider != null)
+        {
+            EntryItem item = favProvider.findById(tagEntry.id);
+            if (item == null)
+                dh.addToFavorites(tagEntry);
+        }
         TBApplication.behaviour(ctx).launchCustomIconDialog(tagEntry);
     }
 
@@ -257,9 +273,14 @@ public class TagsManager {
             int count = content.entryList.size();
             text2View.setText(text2View.getResources().getQuantityString(R.plurals.tag_entry_count, count, count));
 
-            Drawable icon = new CodePointDrawable(content.name);
-            icon = DrawableUtils.applyIconMaskShape(iconView.getContext(), icon, DrawableUtils.SHAPE_SQUIRCLE, false);
-            iconView.setImageDrawable(icon);
+            if (content.tagEntry != null) {
+                int drawFlags = EntryItem.FLAG_DRAW_ICON | EntryItem.FLAG_DRAW_NO_CACHE;
+                ResultViewHelper.setIconAsync(drawFlags, content.tagEntry, iconView, StaticEntry.AsyncSetEntryIcon.class);
+            } else {
+                Drawable icon = new CodePointDrawable(content.name);
+                icon = DrawableUtils.applyIconMaskShape(iconView.getContext(), icon, DrawableUtils.SHAPE_SQUIRCLE, false);
+                iconView.setImageDrawable(icon);
+            }
 
             renameBtnView.setOnClickListener(v -> {
                 if (tagsAdapter.mOnRenameListener != null)
@@ -274,6 +295,7 @@ public class TagsManager {
     }
 
     static class TagInfo {
+        final TagEntry tagEntry;
         final String tagName;
         String name;
         List<String> entryList;
@@ -281,8 +303,14 @@ public class TagsManager {
 
         enum Action {NONE, DELETE, RENAME}
 
-        public TagInfo(String tagName) {
-            this.tagName = tagName;
+        public TagInfo(String name) {
+            tagEntry = null;
+            tagName = name;
+        }
+
+        public TagInfo(TagEntry entry) {
+            tagEntry = entry;
+            tagName = entry.getName();
         }
     }
 }

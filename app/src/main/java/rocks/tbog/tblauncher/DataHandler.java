@@ -1059,7 +1059,9 @@ public class DataHandler extends BroadcastReceiver
             }
             // don't keep tags as favorites
             if (tagsProvider != null && tagsProvider.mayFindById(favRecord.record)) {
-                DBHelper.removeFavorite(context, favRecord.record);
+                // keep custom icons
+                if (!favRecord.hasCustomIcon())
+                    DBHelper.removeFavorite(context, favRecord.record);
             }
         }
 
