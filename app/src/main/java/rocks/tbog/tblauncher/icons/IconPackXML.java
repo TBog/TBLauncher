@@ -79,7 +79,7 @@ public class IconPackXML implements IconPack<IconPackXML.DrawableInfo> {
 //    }
 
     @Override
-    public void load(PackageManager packageManager) {
+    public synchronized void load(PackageManager packageManager) {
         if (loaded)
             return;
         try {
@@ -92,7 +92,7 @@ public class IconPackXML implements IconPack<IconPackXML.DrawableInfo> {
         loaded = true;
     }
 
-    public void loadDrawables(PackageManager packageManager) {
+    public synchronized void loadDrawables(PackageManager packageManager) {
         if (!loaded)
             load(packageManager);
         try {
