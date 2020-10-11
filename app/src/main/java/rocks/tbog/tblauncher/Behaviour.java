@@ -690,6 +690,9 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         mSearchEditText.setText("");
         hideSearchBar();
 
+        if (closeFragmentDialog())
+            return true;
+
         // Calling super.onBackPressed() will quit the launcher, only do this if KISS is not the user's default home.
         // Action not handled (return false) if not the default launcher.
         return TBApplication.isDefaultLauncher(mTBLauncherActivity);
@@ -840,9 +843,12 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         mFragmentDialog = dialog;
     }
 
-    private void closeFragmentDialog() {
-        if (mFragmentDialog != null && mFragmentDialog.isVisible())
+    private boolean closeFragmentDialog() {
+        if (mFragmentDialog != null && mFragmentDialog.isVisible()) {
             mFragmentDialog.dismiss();
+            return true;
+        }
+        return false;
     }
 
     public void registerPopup(ListPopup menu) {
@@ -899,7 +905,8 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                 ShortcutUtil.addShortcut(mTBLauncherActivity, intent);
             }
         }
-
+        
+        closeFragmentDialog();
     }
 
     public void onWindowFocusChanged(boolean hasFocus) {
