@@ -3,7 +3,6 @@ package rocks.tbog.tblauncher.db;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 import android.text.TextUtils;
@@ -16,10 +15,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import rocks.tbog.tblauncher.DataHandler;
 import rocks.tbog.tblauncher.TBApplication;
@@ -803,14 +800,14 @@ public class DBHelper {
         values.put("position", fav.position);
         values.put("custom_flags", fav.flags);
 
-//        int rows = db.update("favorites", values, "record=?", new String[]{fav.record});
-//        if (rows == 0)
-//            db.insertWithOnConflict("favorites", null, values, SQLiteDatabase.CONFLICT_REPLACE);
-        try {
-            db.replaceOrThrow("favorites", null, values);
-        } catch (SQLException e) {
-            Log.e(TAG, "setFavorite " + fav.record);
-        }
+        int rows = db.update("favorites", values, "record=?", new String[]{fav.record});
+        if (rows == 0)
+            db.insertWithOnConflict("favorites", null, values, SQLiteDatabase.CONFLICT_REPLACE);
+//        try {
+//            db.replaceOrThrow("favorites", null, values);
+//        } catch (SQLException e) {
+//            Log.e(TAG, "setFavorite " + fav.record);
+//        }
     }
 
     public static boolean removeFavorite(Context context, String record) {

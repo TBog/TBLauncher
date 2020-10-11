@@ -933,8 +933,13 @@ public class DataHandler extends BroadcastReceiver
         } catch (Exception e) {
             Log.e(TAG, "Unable to convert bitmap", e);
         }
-        if (stream != null)
+        if (stream != null) {
             DBHelper.setCustomStaticEntryIcon(context, entryId, stream.toByteArray());
+            // reload provider to make sure we're up to date
+            FavProvider favProvider = getFavProvider();
+            if (favProvider != null)
+                favProvider.reload(true);
+        }
     }
 
     public Bitmap getCustomAppIcon(String componentName) {
@@ -1057,11 +1062,12 @@ public class DataHandler extends BroadcastReceiver
                 favRecord.flags &= ~FavRecord.FLAG_SHOW_IN_QUICK_LIST;
                 DBHelper.setFavorite(context, favRecord);
             }
-            // don't keep tags as favorites
-            if (tagsProvider != null && tagsProvider.mayFindById(favRecord.record)) {
-                // keep custom icons
-                if (!favRecord.hasCustomIcon())
+            // keep custom icons
+            if (!favRecord.hasCustomIcon()) {
+                // don't keep tags as favorites
+                if (tagsProvider != null && tagsProvider.mayFindById(favRecord.record)) {
                     DBHelper.removeFavorite(context, favRecord.record);
+                }
             }
         }
 
