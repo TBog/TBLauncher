@@ -144,6 +144,50 @@
             android:title="@string/sensor_orientation" />
     </PreferenceCategory>
 
+    <!-- Gestures -->
+    <PreferenceCategory
+        android:key="gesture-section"
+        android:title="@string/gesture_section">
+        <ListPreference
+            android:defaultValue="toggleSearchAndWidget"
+            android:entries="@array/gestureEntries"
+            android:entryValues="@array/gestureValues"
+            android:key="gesture-click"
+            android:title="@string/gesture_click" />
+        <ListPreference
+            android:defaultValue="expandNotificationsPanel"
+            android:entries="@array/gestureEntries"
+            android:entryValues="@array/gestureValues"
+            android:key="gesture-fling-down-left"
+            android:summary="@string/gesture_fling_down_left_summary"
+            android:title="@string/gesture_fling_down_left" />
+        <ListPreference
+            android:defaultValue="expandNotificationsPanel"
+            android:entries="@array/gestureEntries"
+            android:entryValues="@array/gestureValues"
+            android:key="gesture-fling-down-right"
+            android:summary="@string/gesture_fling_down_right_summary"
+            android:title="@string/gesture_fling_down_right" />
+        <ListPreference
+            android:defaultValue="none"
+            android:entries="@array/gestureEntries"
+            android:entryValues="@array/gestureValues"
+            android:key="gesture-fling-up"
+            android:title="@string/gesture_fling_up" />
+        <ListPreference
+            android:defaultValue="none"
+            android:entries="@array/gestureEntries"
+            android:entryValues="@array/gestureValues"
+            android:key="gesture-fling-left"
+            android:title="@string/gesture_fling_left" />
+        <ListPreference
+            android:defaultValue="none"
+            android:entries="@array/gestureEntries"
+            android:entryValues="@array/gestureValues"
+            android:key="gesture-fling-right"
+            android:title="@string/gesture_fling_right" />
+    </PreferenceCategory>
+
     <!-- Memory -->
     <androidx.preference.PreferenceCategory
         android:key="memory-section"
@@ -174,7 +218,7 @@
     <androidx.preference.PreferenceCategory
         android:key="provider-section"
         android:title="@string/provider_section"
-        app:initialExpandedChildrenCount="0">
+        app:initialExpandedChildrenCount="2">
 
         <androidx.preference.SwitchPreference
             android:defaultValue="true"

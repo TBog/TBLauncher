@@ -246,7 +246,16 @@
     <string name="selected_pack">%s\n[current pack]</string>
     <string name="tab_app_icons">%s\n[app icons]</string>
     <string name="tab_static_icons">Default icon</string>
-    <string name="icon_pack_loading">Loading from icon packs...</string>
+    <string name="icon_pack_loading">Loading from icon packs…</string>
+    <string name="gesture_section">Gestures</string>
+    <string name="gesture_fling_down_left">Left fling down</string>
+    <string name="gesture_fling_down_left_summary">Fling downward starting on the left side of the screen</string>
+    <string name="gesture_fling_down_right">Right fling down</string>
+    <string name="gesture_fling_down_right_summary">Fling downward starting on the right side of the screen</string>
+    <string name="gesture_fling_up">Fling up</string>
+    <string name="gesture_fling_left">Fling left</string>
+    <string name="gesture_fling_right">Fling right</string>
+    <string name="gesture_click">Tap</string>
     <plurals name="tag_entry_count">
         <item quantity="one">%d entry</item>
         <item quantity="other">%d entries</item>

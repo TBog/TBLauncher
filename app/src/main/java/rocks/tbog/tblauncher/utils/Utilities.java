@@ -1,5 +1,6 @@
 package rocks.tbog.tblauncher.utils;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.ContextWrapper;
@@ -29,6 +30,7 @@ import androidx.annotation.WorkerThread;
 import androidx.core.content.res.ResourcesCompat;
 
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Method;
 
 import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.ui.CutoutFactory;
@@ -205,6 +207,44 @@ public class Utilities {
             return;
         ColorFilter cf = new PorterDuffColorFilter(color, PorterDuff.Mode.MULTIPLY);
         drawable.setColorFilter(cf);
+    }
+
+    @SuppressLint("ObsoleteSdkInt")
+    public static void expandNotificationsPanel(Activity activity) {
+        @SuppressLint("WrongConstant")
+        Object statusBarService = activity.getSystemService("statusbar");
+        if (statusBarService != null) {
+            try {
+                Class<?> statusbarManager = Class.forName("android.app.StatusBarManager");
+                Method expand;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                    expand = statusbarManager.getMethod("expandNotificationsPanel");
+                } else {
+                    expand = statusbarManager.getMethod("expand");
+                }
+                expand.invoke(statusBarService);
+            } catch (Exception ignored) {
+            }
+        }
+    }
+
+    @SuppressLint("ObsoleteSdkInt")
+    public static void expandSettingsPanel(Activity activity) {
+        @SuppressLint("WrongConstant")
+        Object statusBarService = activity.getSystemService("statusbar");
+        if (statusBarService != null) {
+            try {
+                Class<?> statusbarManager = Class.forName("android.app.StatusBarManager");
+                Method expand;
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                    expand = statusbarManager.getMethod("expandSettingsPanel");
+                } else {
+                    expand = statusbarManager.getMethod("expand");
+                }
+                expand.invoke(statusBarService);
+            } catch (Exception ignored) {
+            }
+        }
     }
 
     public interface GetDrawable {

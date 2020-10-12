@@ -48,6 +48,23 @@
         <item>YouTube|https://www.youtube.com/results?search_query=%s</item>
     </string-array>
 
+    <string-array name="gestureEntries">
+        <item>Do nothing</item>
+        <item>Show notifications panel</item>
+        <item>Show settings panel</item>
+        <item>Show search bar</item>
+        <item>Show widget screen</item>
+        <item>Toggle between search and widget</item>
+    </string-array>
+    <array name="gestureValues" translatable="false">
+        <item>none</item>
+        <item>expandNotificationsPanel</item>
+        <item>expandSettingsPanel</item>
+        <item>showSearchBar</item>
+        <item>showWidgets</item>
+        <item>toggleSearchAndWidget</item>
+    </array>
+
     <array name="material_colors">
         <item>@array/mm2d_cc_red</item>
         <item>@array/mm2d_cc_pink</item>

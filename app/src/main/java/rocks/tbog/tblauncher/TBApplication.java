@@ -9,9 +9,12 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
+
+import java.util.Map;
 
 import rocks.tbog.tblauncher.icons.IconPackCache;
 import rocks.tbog.tblauncher.searcher.Searcher;
@@ -75,6 +78,17 @@ public class TBApplication extends Application {
         PreferenceManager.setDefaultValues(this, R.xml.preferences, true);
         PreferenceManager.setDefaultValues(this, R.xml.preference_features, true);
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+//        SharedPreferences.Editor editor = mSharedPreferences.edit();
+//        for (Map.Entry<String, ?> entry : mSharedPreferences.getAll().entrySet() )
+//        {
+//            if (entry.getKey().startsWith("gesture-")) {
+//                Log.d("Pref", entry.getKey() + "=" + entry.getValue());
+//                editor.putString(entry.getKey(), "none");
+//            }
+//        }
+//        editor.commit();
+
         mDrawableCache.onPrefChanged(this, mSharedPreferences);
         mWidgetManager.start(this);
     }

@@ -29,6 +29,7 @@ import android.widget.TextView;
 
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.ActionBar;
 import androidx.preference.PreferenceManager;
@@ -56,6 +57,7 @@ import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.ui.LoadingDrawable;
 import rocks.tbog.tblauncher.ui.TagsManagerDialog;
 import rocks.tbog.tblauncher.utils.SystemUiVisibility;
+import rocks.tbog.tblauncher.utils.Utilities;
 
 
 /**
@@ -905,7 +907,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                 ShortcutUtil.addShortcut(mTBLauncherActivity, intent);
             }
         }
-        
+
         closeFragmentDialog();
     }
 
@@ -924,5 +926,54 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                 hideSearchBar(0, false);
             }
         }
+    }
+
+    private boolean executeGesture(@Nullable String gesture) {
+        if (gesture == null)
+            return false;
+        switch (gesture) {
+            case "expandNotificationsPanel":
+                Utilities.expandNotificationsPanel(mTBLauncherActivity);
+                return true;
+            case "expandSettingsPanel":
+                Utilities.expandSettingsPanel(mTBLauncherActivity);
+                return true;
+            case "showSearchBar":
+                showKeyboard();
+                showSearchBar();
+                return true;
+            case "showWidgets":
+                hideKeyboard();
+                hideSearchBar();
+                return true;
+            case "toggleSearchAndWidget":
+                toggleSearchBar();
+                return true;
+        }
+        return false;
+    }
+
+    public boolean onFlingDownLeft() {
+        return executeGesture(mPref.getString("gesture-fling-down-left", null));
+    }
+
+    public boolean onFlingDownRight() {
+        return executeGesture(mPref.getString("gesture-fling-down-right", null));
+    }
+
+    public boolean onFlingUp() {
+        return executeGesture(mPref.getString("gesture-fling-up", null));
+    }
+
+    public boolean onFlingLeft() {
+        return executeGesture(mPref.getString("gesture-fling-left", null));
+    }
+
+    public boolean onFlingRight() {
+        return executeGesture(mPref.getString("gesture-fling-right", null));
+    }
+
+    public boolean onClick() {
+        return executeGesture(mPref.getString("gesture-click", null));
     }
 }
