@@ -94,37 +94,29 @@ public class StaticEntryPage extends PageAdapter.Page {
         iconDataList.clear();
 
         int length = Utilities.codePointsLength(text);
-        if (length >= 1) {
-            Drawable icon = new CodePointDrawable(text);
-            for (int shape : DrawableUtils.SHAPE_LIST) {
+        for (int shape : DrawableUtils.SHAPE_LIST) {
+            if (length >= 1) {
+                Drawable icon = new CodePointDrawable(text);
                 Drawable shapedIcon = DrawableUtils.applyIconMaskShape(ctx, icon, shape, true);
                 iconDataList.add(new DrawableData(shapedIcon));
             }
-        }
-        if (length >= 2) {
-            Drawable icon = TwoCodePointDrawable.fromText(text, false);
-            for (int shape : DrawableUtils.SHAPE_LIST) {
+            if (length >= 2) {
+                Drawable icon = TwoCodePointDrawable.fromText(text, false);
                 Drawable shapedIcon = DrawableUtils.applyIconMaskShape(ctx, icon, shape, true);
                 iconDataList.add(new DrawableData(shapedIcon));
             }
-        }
-        if (length >= 2) {
-            Drawable icon = TwoCodePointDrawable.fromText(text, true);
-            for (int shape : DrawableUtils.SHAPE_LIST) {
+            if (length >= 2) {
+                Drawable icon = TwoCodePointDrawable.fromText(text, true);
                 Drawable shapedIcon = DrawableUtils.applyIconMaskShape(ctx, icon, shape, true);
                 iconDataList.add(new DrawableData(shapedIcon));
             }
-        }
-        if (length >= 3) {
-            Drawable icon = FourCodePointDrawable.fromText(text, true);
-            for (int shape : DrawableUtils.SHAPE_LIST) {
+            if (length >= 3) {
+                Drawable icon = FourCodePointDrawable.fromText(text, true);
                 Drawable shapedIcon = DrawableUtils.applyIconMaskShape(ctx, icon, shape, true);
                 iconDataList.add(new DrawableData(shapedIcon));
             }
-        }
-        if (length >= 3) {
-            Drawable icon = FourCodePointDrawable.fromText(text, false);
-            for (int shape : DrawableUtils.SHAPE_LIST) {
+            if (length >= 3) {
+                Drawable icon = FourCodePointDrawable.fromText(text, false);
                 Drawable shapedIcon = DrawableUtils.applyIconMaskShape(ctx, icon, shape, true);
                 iconDataList.add(new DrawableData(shapedIcon));
             }
