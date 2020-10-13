@@ -1,5 +1,9 @@
 package rocks.tbog.tblauncher.ui;
 
+import androidx.annotation.NonNull;
+
+import rocks.tbog.tblauncher.utils.Utilities;
+
 public class TwoCodePointDrawable extends TextDrawable {
 
     final int mCodePoint1;
@@ -12,10 +16,13 @@ public class TwoCodePointDrawable extends TextDrawable {
         mCodePoint2 = cp2;
     }
 
-    public static TwoCodePointDrawable fromText(CharSequence text) {
+    @NonNull
+    public static TwoCodePointDrawable fromText(CharSequence text, boolean vertical) {
         int cp1 = Character.codePointAt(text, 0);
-        int cp2 = Character.codePointAt(text, Character.charCount(cp1));
-        return new TwoCodePointDrawable(cp1, cp2);
+        int cp2 = Character.codePointAt(text, Utilities.getNextCodePointIndex(text, 0));
+        TwoCodePointDrawable drawable = new TwoCodePointDrawable(cp1, cp2);
+        drawable.setVertical(vertical);
+        return drawable;
     }
 
     public void setVertical(boolean vertical) {

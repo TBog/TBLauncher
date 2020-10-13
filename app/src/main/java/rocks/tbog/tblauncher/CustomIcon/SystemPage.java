@@ -10,6 +10,8 @@ import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Pair;
 import android.view.View;
 import android.widget.GridView;
@@ -24,6 +26,7 @@ import androidx.collection.ArraySet;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -33,6 +36,10 @@ import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.icons.IconPackXML;
 import rocks.tbog.tblauncher.icons.SystemIconPack;
+import rocks.tbog.tblauncher.ui.CodePointDrawable;
+import rocks.tbog.tblauncher.ui.FourCodePointDrawable;
+import rocks.tbog.tblauncher.ui.TextDrawable;
+import rocks.tbog.tblauncher.ui.TwoCodePointDrawable;
 import rocks.tbog.tblauncher.utils.DrawableUtils;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
@@ -53,6 +60,10 @@ public class SystemPage extends PageAdapter.Page {
 
     @Override
     void setupView(@NonNull Context context, @Nullable OnItemClickListener iconClickListener) {
+        mGridView = pageView.findViewById(R.id.iconGrid);
+        SystemPageAdapter adapter = new SystemPageAdapter(SystemPageViewHolder.class, iconClickListener);
+        mGridView.setAdapter(adapter);
+
         ProgressBar mIconLoadingBar = pageView.findViewById(R.id.iconLoadingBar);
         mIconLoadingBar.setVisibility(View.GONE);
 
@@ -60,11 +71,21 @@ public class SystemPage extends PageAdapter.Page {
         textView.setVisibility(View.GONE);
 
         TextView mSearch = pageView.findViewById(R.id.search);
-        mSearch.setVisibility(View.GONE);
+        mSearch.setHint(R.string.static_icon_letters_label);
+        mSearch.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
 
-        mGridView = pageView.findViewById(R.id.iconGrid);
-        SystemPageAdapter adapter = new SystemPageAdapter(SystemPageViewHolder.class, iconClickListener);
-        mGridView.setAdapter(adapter);
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                generateTextIcons(s);
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+            }
+        });
 
         ArraySet<Bitmap> dSet = new ArraySet<>(3);
 
@@ -96,6 +117,11 @@ public class SystemPage extends PageAdapter.Page {
                     if (iconPack != null && iconPack.hasMask())
                         addQuickOption(R.string.custom_icon_activity_with_pack, iconPack.applyBackgroundAndMask(context, drawable, true), adapter);
                     addQuickOption(R.string.custom_icon_activity_adaptive, sysPack.applyBackgroundAndMask(context, drawable, true), adapter);
+                    for (int shape : DrawableUtils.SHAPE_LIST) {
+                        Drawable shapedDrawable = DrawableUtils.applyIconMaskShape(context, drawable, shape, true);
+                        String name = context.getString(R.string.custom_icon_activity_shaped, DrawableUtils.shapeName(context, shape));
+                        addIconPackOption(name, shapedDrawable, adapter);
+                    }
                     if (!DrawableUtils.isAdaptiveIconDrawable(drawable))
                         addQuickOption(R.string.custom_icon_activity_adaptive_fill, sysPack.applyBackgroundAndMask(context, drawable, false), adapter);
                 }
@@ -115,6 +141,11 @@ public class SystemPage extends PageAdapter.Page {
                     if (iconPack != null && iconPack.hasMask())
                         addQuickOption(R.string.custom_icon_application_with_pack, iconPack.applyBackgroundAndMask(context, drawable, true), adapter);
                     addQuickOption(R.string.custom_icon_application_adaptive, sysPack.applyBackgroundAndMask(context, drawable, true), adapter);
+                    for (int shape : DrawableUtils.SHAPE_LIST) {
+                        Drawable shapedDrawable = DrawableUtils.applyIconMaskShape(context, drawable, shape, true);
+                        String name = context.getString(R.string.custom_icon_application_shaped, DrawableUtils.shapeName(context, shape));
+                        addIconPackOption(name, shapedDrawable, adapter);
+                    }
                     if (!DrawableUtils.isAdaptiveIconDrawable(drawable))
                         addQuickOption(R.string.custom_icon_application_adaptive_fill, sysPack.applyBackgroundAndMask(context, drawable, false), adapter);
                 }
@@ -141,6 +172,43 @@ public class SystemPage extends PageAdapter.Page {
                 }
             }
         }
+
+        // this will call generateTextIcons
+        //mSearch.setText(pageName);
+    }
+
+    private void generateTextIcons(CharSequence text) {
+        SystemPageAdapter adapter = (SystemPageAdapter) mGridView.getAdapter();
+
+        // remove all TextDrawable icons
+        for (Iterator<SystemIconInfo> iterator = adapter.mList.iterator(); iterator.hasNext(); ) {
+            SystemIconInfo info = iterator.next();
+            if (info.iconDrawable instanceof TextDrawable)
+                iterator.remove();
+        }
+        adapter.notifyDataSetChanged();
+
+        int length = Utilities.codePointsLength(text);
+        if (length >= 1) {
+            SystemIconInfo dd = new TextIconInfo(new CodePointDrawable(text));
+            adapter.addItem(dd);
+        }
+        if (length >= 2) {
+            SystemIconInfo dd = new TextIconInfo(TwoCodePointDrawable.fromText(text, false));
+            adapter.addItem(dd);
+        }
+        if (length >= 2) {
+            SystemIconInfo dd = new TextIconInfo(TwoCodePointDrawable.fromText(text, true));
+            adapter.addItem(dd);
+        }
+        if (length >= 3) {
+            SystemIconInfo dd = new TextIconInfo(FourCodePointDrawable.fromText(text, true));
+            adapter.addItem(dd);
+        }
+        if (length >= 3) {
+            SystemIconInfo dd = new TextIconInfo(FourCodePointDrawable.fromText(text, false));
+            adapter.addItem(dd);
+        }
     }
 
     private boolean checkDuplicateDrawable(ArraySet<Bitmap> set, Drawable drawable) {
@@ -155,7 +223,7 @@ public class SystemPage extends PageAdapter.Page {
         return true;
     }
 
-    private void addQuickOption(@StringRes int textId, Drawable drawable, SystemPageAdapter adapter) {
+    private static void addQuickOption(@StringRes int textId, Drawable drawable, SystemPageAdapter adapter) {
         if (!(drawable instanceof BitmapDrawable))
             return;
 
@@ -164,7 +232,7 @@ public class SystemPage extends PageAdapter.Page {
         adapter.addItem(iconInfo);
     }
 
-    private void addIconPackOption(String packName, Drawable drawable, SystemPageAdapter adapter) {
+    private static void addIconPackOption(String packName, Drawable drawable, SystemPageAdapter adapter) {
         if (!(drawable instanceof BitmapDrawable))
             return;
 
@@ -206,6 +274,13 @@ public class SystemPage extends PageAdapter.Page {
                     addIconPackOption(entry.getKey(), entry.getValue(), adapter);
             }
         });
+    }
+
+    static class TextIconInfo extends IconPackIconInfo {
+
+        TextIconInfo(Drawable icon) {
+            super("", icon);
+        }
     }
 
     static class DefaultIconInfo extends SystemIconInfo {
@@ -295,7 +370,7 @@ public class SystemPage extends PageAdapter.Page {
     static class SystemPageAdapter extends ViewHolderAdapter<SystemIconInfo, SystemPageViewHolder> {
         ArrayList<SystemIconInfo> mList = new ArrayList<>();
         @Nullable
-        OnItemClickListener mIconClickListener;
+        private OnItemClickListener mIconClickListener;
 
         protected SystemPageAdapter(@NonNull Class<SystemPageViewHolder> viewHolderClass, @Nullable OnItemClickListener iconClickListener) {
             super(viewHolderClass, R.layout.item_grid);

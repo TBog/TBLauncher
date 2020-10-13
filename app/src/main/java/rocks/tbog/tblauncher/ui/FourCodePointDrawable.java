@@ -1,5 +1,9 @@
 package rocks.tbog.tblauncher.ui;
 
+import androidx.annotation.NonNull;
+
+import rocks.tbog.tblauncher.utils.Utilities;
+
 public class FourCodePointDrawable extends TextDrawable {
 
     final int[] mCodePoint = new int[4];
@@ -12,17 +16,18 @@ public class FourCodePointDrawable extends TextDrawable {
         mCodePoint[3] = cp4;
     }
 
+    @NonNull
     public static FourCodePointDrawable fromText(CharSequence text, boolean soloFirstLine) {
         int idx = 0;
         int cp1 = Character.codePointAt(text, idx);
-        idx += Character.charCount(cp1);
+        idx = Utilities.getNextCodePointIndex(text, idx);
         int cp2 = 0;
         if (!soloFirstLine) {
             cp2 = Character.codePointAt(text, idx);
-            idx += Character.charCount(cp2);
+            idx = Utilities.getNextCodePointIndex(text, idx);
         }
         int cp3 = Character.codePointAt(text, idx);
-        idx += Character.charCount(cp3);
+        idx = Utilities.getNextCodePointIndex(text, idx);
         int cp4 = idx < text.length() ? Character.codePointAt(text, idx) : 0;
         return new FourCodePointDrawable(cp1, cp2, cp3, cp4);
     }

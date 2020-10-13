@@ -246,6 +246,38 @@ public class Utilities {
         }
     }
 
+    public static int getNextCodePointIndex(CharSequence s, int startPosition) {
+        int codePoint = Character.codePointAt(s, startPosition);
+        int next = startPosition + Character.charCount(codePoint);
+
+        if (next < s.length()) {
+            // skip next character if it's not helpful
+            codePoint = Character.codePointAt(s, next);
+            boolean skip = codePoint == 0x200D;
+            skip = skip || Character.UnicodeBlock.of(codePoint) == Character.UnicodeBlock.VARIATION_SELECTORS;
+            if (skip)
+                return getNextCodePointIndex(s, next);
+        }
+
+        return next;
+    }
+
+    public static int codePointsLength(CharSequence s) {
+        int n = 0;
+        for (int i = 0; i < s.length(); ) {
+            int codePoint = Character.codePointAt(s, i);
+            i += Character.charCount(codePoint);
+            // skip this if it's ZERO WIDTH JOINER
+            if (codePoint == 0x200D)
+                continue;
+            if (Character.UnicodeBlock.of(codePoint) == Character.UnicodeBlock.VARIATION_SELECTORS)
+                continue;
+            ++n;
+        }
+        return n;
+    }
+
+
     public interface GetDrawable {
         @Nullable
         Drawable getDrawable(@NonNull Context context);

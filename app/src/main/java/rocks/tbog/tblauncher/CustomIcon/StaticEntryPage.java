@@ -25,6 +25,7 @@ import rocks.tbog.tblauncher.ui.CodePointDrawable;
 import rocks.tbog.tblauncher.ui.FourCodePointDrawable;
 import rocks.tbog.tblauncher.ui.TwoCodePointDrawable;
 import rocks.tbog.tblauncher.utils.UISizes;
+import rocks.tbog.tblauncher.utils.Utilities;
 
 public class StaticEntryPage extends PageAdapter.Page {
     final ArrayList<DrawableData> iconDataList = new ArrayList<>();
@@ -87,19 +88,9 @@ public class StaticEntryPage extends PageAdapter.Page {
         }
     }
 
-    int codePointsLength(String s) {
-        int n = 0;
-        for (int i = 0; i < s.length(); ) {
-            int codePoint = s.codePointAt(i);
-            i += Character.charCount(codePoint);
-            ++n;
-        }
-        return n;
-    }
-
     private void generateIcons(CharSequence text) {
         iconDataList.clear();
-        int length = codePointsLength(text.toString());
+        int length = Utilities.codePointsLength(text);
         if (length >= 1) {
             DrawableData dd = new DrawableData();
             dd.icon = new CodePointDrawable(text);
@@ -107,14 +98,12 @@ public class StaticEntryPage extends PageAdapter.Page {
         }
         if (length >= 2) {
             DrawableData dd = new DrawableData();
-            dd.icon = TwoCodePointDrawable.fromText(text);
-            ((TwoCodePointDrawable) dd.icon).setVertical(false);
+            dd.icon = TwoCodePointDrawable.fromText(text, false);
             iconDataList.add(dd);
         }
         if (length >= 2) {
             DrawableData dd = new DrawableData();
-            dd.icon = TwoCodePointDrawable.fromText(text);
-            ((TwoCodePointDrawable) dd.icon).setVertical(true);
+            dd.icon = TwoCodePointDrawable.fromText(text, true);
             iconDataList.add(dd);
         }
         if (length >= 3) {
