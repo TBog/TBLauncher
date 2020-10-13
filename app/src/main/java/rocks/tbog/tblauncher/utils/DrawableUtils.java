@@ -17,10 +17,8 @@ import android.os.Build;
 import android.util.TypedValue;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
 
 import rocks.tbog.tblauncher.R;
-import rocks.tbog.tblauncher.TBApplication;
 
 public class DrawableUtils {
 
@@ -44,9 +42,7 @@ public class DrawableUtils {
     // https://stackoverflow.com/questions/3035692/how-to-convert-a-drawable-to-a-bitmap
 
     @NonNull
-    public static Bitmap drawableToBitmap(@NonNull Drawable drawable) {
-        Bitmap bitmap;
-
+    public static Bitmap drawableToBitmap(@NonNull Drawable drawable, int width, int height) {
         if (drawable instanceof BitmapDrawable) {
             BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
             if (bitmapDrawable.getBitmap() != null) {
@@ -54,11 +50,7 @@ public class DrawableUtils {
             }
         }
 
-        if (drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
-            bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888); // Single color bitmap will be created of 1x1 pixel
-        } else {
-            bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-        }
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888); // Single color bitmap will be created of 1x1 pixel
 
         Canvas canvas = new Canvas(bitmap);
         drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
@@ -156,14 +148,14 @@ public class DrawableUtils {
 
         switch (shape) {
             case SHAPE_CIRCLE: {
-                int radius = (int)iconSize / 2;
+                int radius = (int) iconSize / 2;
                 canvas.drawCircle(radius, radius, radius, paint);
 
                 path.addCircle(radius, radius, radius, Path.Direction.CCW);
                 break;
             }
             case SHAPE_SQUIRCLE: {
-                int h = (int)iconSize / 2;
+                int h = (int) iconSize / 2;
                 float c = iconSize / 2.333f;
                 path.moveTo(h, 0f);
                 path.cubicTo(h + c, 0, iconSize, h - c, iconSize, h);

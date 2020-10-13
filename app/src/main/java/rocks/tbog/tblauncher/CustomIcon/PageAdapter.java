@@ -35,7 +35,7 @@ class PageAdapter extends androidx.viewpager.widget.PagerAdapter implements View
     }
 
     public void addStaticEntryPage(LayoutInflater inflater, ViewPager container, StaticEntry staticEntry, String pageName) {
-        View view = inflater.inflate(R.layout.dialog_icon_select_page, container, false);
+        View view = inflater.inflate(R.layout.dialog_static_icon_select_page, container, false);
         StaticEntryPage page = new StaticEntryPage(pageName, view, staticEntry);
         pageList.add(page);
     }

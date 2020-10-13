@@ -33,8 +33,10 @@ import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.icons.IconPack;
 import rocks.tbog.tblauncher.icons.IconPackXML;
 import rocks.tbog.tblauncher.icons.SystemIconPack;
+import rocks.tbog.tblauncher.ui.TextDrawable;
 import rocks.tbog.tblauncher.utils.DrawableUtils;
 import rocks.tbog.tblauncher.utils.UIColors;
+import rocks.tbog.tblauncher.utils.UISizes;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
 
@@ -109,7 +111,7 @@ public class IconsHandler {
         }
 
         mIconPack = TBApplication.iconPackCache(ctx).getIconPack(packageName);
-        Utilities.runAsync(()->mIconPack.load(ctx.getPackageManager()), null);
+        Utilities.runAsync(() -> mIconPack.load(ctx.getPackageManager()), null);
     }
 
     /**
@@ -252,7 +254,12 @@ public class IconsHandler {
     }
 
     public void changeIcon(StaticEntry staticEntry, Drawable drawable) {
-        Bitmap bitmap = Utilities.drawableToBitmap(drawable);
+        Bitmap bitmap;
+        if (drawable instanceof TextDrawable) {
+            int size = UISizes.getResultIconSize(ctx);
+            bitmap = DrawableUtils.drawableToBitmap(drawable, size, size);
+        } else
+            bitmap = Utilities.drawableToBitmap(drawable);
         TBApplication app = TBApplication.getApplication(ctx);
         app.getDataHandler().setCustomStaticEntryIcon(staticEntry.id, bitmap);
         staticEntry.setCustomIcon();
@@ -291,10 +298,9 @@ public class IconsHandler {
         return new BitmapDrawable(ctx.getResources(), b);
     }
 
-    public Drawable applyShortcutMask(@NonNull Context ctx, Bitmap bitmap)
-    {
+    public Drawable applyShortcutMask(@NonNull Context ctx, Bitmap bitmap) {
         Drawable drawable = new BitmapDrawable(ctx.getResources(), bitmap);
-        if (!mShortcutPackMask )
+        if (!mShortcutPackMask)
             return DrawableUtils.applyIconMaskShape(ctx, drawable, mShortcutsShape, false);
         if (mIconPack != null && mIconPack.hasMask())
             return mIconPack.applyBackgroundAndMask(ctx, drawable, false);

@@ -121,6 +121,10 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
                 SystemPage.SystemIconInfo item = ((SystemPage.SystemPageAdapter) adapter).getItem(position);
                 mSelectedDrawable = item.getIcon();
                 mPreview.setImageDrawable(item.getPreview());
+            } else if (adapter instanceof StaticEntryPage.DrawableAdapter) {
+                StaticEntryPage.DrawableData item = ((StaticEntryPage.DrawableAdapter) adapter).getItem(position);
+                mSelectedDrawable = item.icon;
+                mPreview.setImageDrawable(mSelectedDrawable);
             }
         });
 

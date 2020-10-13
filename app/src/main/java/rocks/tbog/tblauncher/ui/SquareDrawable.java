@@ -1,6 +1,5 @@
 package rocks.tbog.tblauncher.ui;
 
-import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
@@ -54,7 +53,7 @@ public abstract class SquareDrawable extends Drawable {
         return PixelFormat.TRANSLUCENT;
     }
 
-    protected Rect getCenterRect(Rect bounds) {
+    protected Rect getCenterRect(@NonNull Rect bounds) {
         Rect rect = new Rect();
         rect.set(bounds);
 

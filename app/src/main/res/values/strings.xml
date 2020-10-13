@@ -97,6 +97,7 @@
     <string name="shortcut_rename_confirmation">Shortcut name is now %s</string>
     <string name="hint_custom_icon">Filter by name</string>
     <string name="default_icon">default icon</string>
+    <string name="default_static_icon">%s default icon</string>
     <string name="custom_icon_application">application</string>
     <string name="custom_icon_application_with_pack">application with pack</string>
     <string name="custom_icon_application_adaptive">application adaptive</string>
@@ -256,6 +257,7 @@
     <string name="gesture_fling_left">Fling left</string>
     <string name="gesture_fling_right">Fling right</string>
     <string name="gesture_click">Tap</string>
+    <string name="static_icon_letters_label">Letters to use for generating icons</string>
     <plurals name="tag_entry_count">
         <item quantity="one">%d entry</item>
         <item quantity="other">%d entries</item>
