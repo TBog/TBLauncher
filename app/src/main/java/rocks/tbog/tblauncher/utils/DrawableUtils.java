@@ -17,6 +17,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.TypedValue;
 
+import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 
 import rocks.tbog.tblauncher.R;
@@ -37,6 +38,7 @@ public class DrawableUtils {
     public static final int SHAPE_OCTAGON = 11;
 
     public static final int[] SHAPE_LIST = {
+            SHAPE_SYSTEM,
             SHAPE_CIRCLE,
             SHAPE_SQUARE,
             SHAPE_SQUIRCLE,
@@ -85,11 +87,46 @@ public class DrawableUtils {
         return bitmap;
     }
 
+    public static Drawable applyIconMaskShape(Context ctx, Drawable icon, int shape, boolean fitInside) {
+        return applyIconMaskShape(ctx, icon, shape, fitInside, Color.WHITE);
+    }
+
+    public static Drawable applyIconMaskShape(Context ctx, Drawable icon, int shape, @ColorInt int backgroundColor) {
+        return applyIconMaskShape(ctx, icon, shape, false, backgroundColor);
+    }
+
+    /**
+     * Get percent of icon to use as margin. We use this to avoid clipping the image.
+     * @param shape from SHAPE_*
+     * @return margin size
+     */
+    private static float getScaleToFit(int shape)
+    {
+        switch (shape)
+        {
+            case SHAPE_CIRCLE:
+            case SHAPE_TEARDROP_BR:
+            case SHAPE_TEARDROP_BL:
+            case SHAPE_TEARDROP_TL:
+            case SHAPE_TEARDROP_TR:
+                return 0.2071f;  // (sqrt(2)-1)/2 to make a square fit in a circle
+            case SHAPE_SQUIRCLE:
+                return 0.1f;
+            case SHAPE_ROUND_RECT:
+                return 0.05f;
+            case SHAPE_HEXAGON:
+                return 0.26f;
+            case SHAPE_OCTAGON:
+                return 0.25f;
+        }
+        return 0.f;
+    }
+
     /**
      * Handle adaptive icons for compatible devices
      */
     @SuppressLint("NewApi")
-    public static Drawable applyIconMaskShape(Context ctx, Drawable icon, int shape, boolean fitInside) {
+    public static Drawable applyIconMaskShape(Context ctx, Drawable icon, int shape, boolean fitInside, @ColorInt int backgroundColor) {
         if (shape == SHAPE_SYSTEM)
             return icon;
         if (shape == SHAPE_TEARDROP_RND)
@@ -133,9 +170,12 @@ public class DrawableUtils {
             int iconSize;
             int iconOffset = 0;
             if (fitInside) {
-                float marginPercent = 0.2071f;  // (sqrt(2)-1)/2 to make a square fit in a circle
-                iconSize = Math.round((1f + 2f * marginPercent) * icon.getIntrinsicHeight());
-                iconOffset = Math.round(marginPercent * icon.getIntrinsicHeight());
+                float marginPercent = getScaleToFit(shape);
+                int iconHeight = icon.getIntrinsicHeight();
+                if (iconHeight <= 0)
+                    iconHeight = ctx.getResources().getDimensionPixelSize(R.dimen.icon_height);
+                iconSize = Math.round((1f + 2f * marginPercent) * iconHeight);
+                iconOffset = Math.round(marginPercent * iconHeight);
             } else {
                 // we don't have antialiasing when clipping so we make the icon bigger and let the View downscale
                 iconSize = 2 * ctx.getResources().getDimensionPixelSize(R.dimen.icon_height);
@@ -143,7 +183,7 @@ public class DrawableUtils {
 
             outputBitmap = Bitmap.createBitmap(iconSize, iconSize, Bitmap.Config.ARGB_8888);
             outputCanvas = new Canvas(outputBitmap);
-            outputPaint.setColor(Color.WHITE);
+            outputPaint.setColor(backgroundColor);
 
             // Shrink icon so that it fits the shape
             int bottomRightCorner = iconSize - iconOffset;

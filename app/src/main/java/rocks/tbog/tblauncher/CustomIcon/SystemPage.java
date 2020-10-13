@@ -178,36 +178,52 @@ public class SystemPage extends PageAdapter.Page {
     }
 
     private void generateTextIcons(CharSequence text) {
+        Context ctx = mGridView.getContext();
         SystemPageAdapter adapter = (SystemPageAdapter) mGridView.getAdapter();
 
         // remove all TextDrawable icons
         for (Iterator<SystemIconInfo> iterator = adapter.mList.iterator(); iterator.hasNext(); ) {
             SystemIconInfo info = iterator.next();
-            if (info.iconDrawable instanceof TextDrawable)
+            if (info instanceof TextIconInfo)
                 iterator.remove();
         }
         adapter.notifyDataSetChanged();
 
         int length = Utilities.codePointsLength(text);
         if (length >= 1) {
-            SystemIconInfo dd = new TextIconInfo(new CodePointDrawable(text));
-            adapter.addItem(dd);
+            Drawable icon = new CodePointDrawable(text);
+            for (int shape : DrawableUtils.SHAPE_LIST) {
+                Drawable shapedIcon = DrawableUtils.applyIconMaskShape(ctx, icon, shape, true);
+                adapter.addItem(new TextIconInfo(shapedIcon));
+            }
         }
         if (length >= 2) {
-            SystemIconInfo dd = new TextIconInfo(TwoCodePointDrawable.fromText(text, false));
-            adapter.addItem(dd);
+            Drawable icon = TwoCodePointDrawable.fromText(text, false);
+            for (int shape : DrawableUtils.SHAPE_LIST) {
+                Drawable shapedIcon = DrawableUtils.applyIconMaskShape(ctx, icon, shape, true);
+                adapter.addItem(new TextIconInfo(shapedIcon));
+            }
         }
         if (length >= 2) {
-            SystemIconInfo dd = new TextIconInfo(TwoCodePointDrawable.fromText(text, true));
-            adapter.addItem(dd);
+            Drawable icon =TwoCodePointDrawable.fromText(text, true);
+            for (int shape : DrawableUtils.SHAPE_LIST) {
+                Drawable shapedIcon = DrawableUtils.applyIconMaskShape(ctx, icon, shape, true);
+                adapter.addItem(new TextIconInfo(shapedIcon));
+            }
         }
         if (length >= 3) {
-            SystemIconInfo dd = new TextIconInfo(FourCodePointDrawable.fromText(text, true));
-            adapter.addItem(dd);
+            Drawable icon =FourCodePointDrawable.fromText(text, true);
+            for (int shape : DrawableUtils.SHAPE_LIST) {
+                Drawable shapedIcon = DrawableUtils.applyIconMaskShape(ctx, icon, shape, true);
+                adapter.addItem(new TextIconInfo(shapedIcon));
+            }
         }
         if (length >= 3) {
-            SystemIconInfo dd = new TextIconInfo(FourCodePointDrawable.fromText(text, false));
-            adapter.addItem(dd);
+            Drawable icon =FourCodePointDrawable.fromText(text, false);
+            for (int shape : DrawableUtils.SHAPE_LIST) {
+                Drawable shapedIcon = DrawableUtils.applyIconMaskShape(ctx, icon, shape, true);
+                adapter.addItem(new TextIconInfo(shapedIcon));
+            }
         }
     }
 

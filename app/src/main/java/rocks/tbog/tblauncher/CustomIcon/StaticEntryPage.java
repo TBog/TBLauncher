@@ -24,6 +24,7 @@ import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.ui.CodePointDrawable;
 import rocks.tbog.tblauncher.ui.FourCodePointDrawable;
 import rocks.tbog.tblauncher.ui.TwoCodePointDrawable;
+import rocks.tbog.tblauncher.utils.DrawableUtils;
 import rocks.tbog.tblauncher.utils.UISizes;
 import rocks.tbog.tblauncher.utils.Utilities;
 
@@ -89,38 +90,54 @@ public class StaticEntryPage extends PageAdapter.Page {
     }
 
     private void generateIcons(CharSequence text) {
+        Context ctx = pageView.getContext();
         iconDataList.clear();
+
         int length = Utilities.codePointsLength(text);
         if (length >= 1) {
-            DrawableData dd = new DrawableData();
-            dd.icon = new CodePointDrawable(text);
-            iconDataList.add(dd);
+            Drawable icon = new CodePointDrawable(text);
+            for (int shape : DrawableUtils.SHAPE_LIST) {
+                Drawable shapedIcon = DrawableUtils.applyIconMaskShape(ctx, icon, shape, true);
+                iconDataList.add(new DrawableData(shapedIcon));
+            }
         }
         if (length >= 2) {
-            DrawableData dd = new DrawableData();
-            dd.icon = TwoCodePointDrawable.fromText(text, false);
-            iconDataList.add(dd);
+            Drawable icon = TwoCodePointDrawable.fromText(text, false);
+            for (int shape : DrawableUtils.SHAPE_LIST) {
+                Drawable shapedIcon = DrawableUtils.applyIconMaskShape(ctx, icon, shape, true);
+                iconDataList.add(new DrawableData(shapedIcon));
+            }
         }
         if (length >= 2) {
-            DrawableData dd = new DrawableData();
-            dd.icon = TwoCodePointDrawable.fromText(text, true);
-            iconDataList.add(dd);
+            Drawable icon = TwoCodePointDrawable.fromText(text, true);
+            for (int shape : DrawableUtils.SHAPE_LIST) {
+                Drawable shapedIcon = DrawableUtils.applyIconMaskShape(ctx, icon, shape, true);
+                iconDataList.add(new DrawableData(shapedIcon));
+            }
         }
         if (length >= 3) {
-            DrawableData dd = new DrawableData();
-            dd.icon = FourCodePointDrawable.fromText(text, true);
-            iconDataList.add(dd);
+            Drawable icon = FourCodePointDrawable.fromText(text, true);
+            for (int shape : DrawableUtils.SHAPE_LIST) {
+                Drawable shapedIcon = DrawableUtils.applyIconMaskShape(ctx, icon, shape, true);
+                iconDataList.add(new DrawableData(shapedIcon));
+            }
         }
         if (length >= 3) {
-            DrawableData dd = new DrawableData();
-            dd.icon = FourCodePointDrawable.fromText(text, false);
-            iconDataList.add(dd);
+            Drawable icon = FourCodePointDrawable.fromText(text, false);
+            for (int shape : DrawableUtils.SHAPE_LIST) {
+                Drawable shapedIcon = DrawableUtils.applyIconMaskShape(ctx, icon, shape, true);
+                iconDataList.add(new DrawableData(shapedIcon));
+            }
         }
         ((DrawableAdapter) mGridView.getAdapter()).notifyDataSetChanged();
     }
 
     static class DrawableData {
-        Drawable icon;
+        final Drawable icon;
+
+        DrawableData(Drawable icon) {
+            this.icon = icon;
+        }
     }
 
     static class DrawableAdapter extends BaseAdapter {
