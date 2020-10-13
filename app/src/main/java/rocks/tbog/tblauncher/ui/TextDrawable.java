@@ -98,7 +98,7 @@ public abstract class TextDrawable extends SquareDrawable {
             float y = expectedSize[line] * .5f + lineRect[line].height() * .5f - lineRect[line].bottom;
 
             y += lineOffset;
-            cachedLinePos[line] = new PointF(x, y);
+            cachedLinePos[line] = new PointF(rect.left + x, rect.top + y);
 
             lineOffset += expectedSize[line];
         }
