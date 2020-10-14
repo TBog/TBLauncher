@@ -20,6 +20,7 @@ import rocks.tbog.tblauncher.utils.UserHandleCompat;
 class PageAdapter extends androidx.viewpager.widget.PagerAdapter implements ViewPager.OnPageChangeListener {
 
     private ArrayList<Page> pageList = new ArrayList<>(0);
+    private int mScrollState = ViewPager.SCROLL_STATE_IDLE;
 
     public void addIconPackPage(@NonNull LayoutInflater inflater, ViewGroup container, String packName, String packPackageName) {
         View view = inflater.inflate(R.layout.dialog_icon_select_page, container, false);
@@ -56,18 +57,22 @@ class PageAdapter extends androidx.viewpager.widget.PagerAdapter implements View
 
     @Override
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-        Page pageLeft = pageList.get(position);
-        if (!pageLeft.bDataLoaded)
-            pageLeft.loadData();
-        if ((position + 1) < pageList.size()) {
-            Page pageRight = pageList.get(position + 1);
-            if (!pageRight.bDataLoaded)
-                pageRight.loadData();
+        //Log.d("ISDialog", String.format("onPageScrolled %d %.2f", position, positionOffset));
+        if (mScrollState != ViewPager.SCROLL_STATE_SETTLING) {
+            Page pageLeft = pageList.get(position);
+            if (!pageLeft.bDataLoaded)
+                pageLeft.loadData();
+            if ((position + 1) < pageList.size()) {
+                Page pageRight = pageList.get(position + 1);
+                if (!pageRight.bDataLoaded)
+                    pageRight.loadData();
+            }
         }
     }
 
     @Override
     public void onPageSelected(int position) {
+        //Log.d("ISDialog", String.format("onPageSelected %d", position));
         Page page = pageList.get(position);
         if (!page.bDataLoaded)
             page.loadData();
@@ -75,6 +80,8 @@ class PageAdapter extends androidx.viewpager.widget.PagerAdapter implements View
 
     @Override
     public void onPageScrollStateChanged(int state) {
+        //Log.d("ISDialog", String.format("onPageScrollStateChanged %d", state));
+        mScrollState = state;
     }
 
     static abstract class Page {
