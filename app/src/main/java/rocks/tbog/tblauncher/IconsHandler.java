@@ -73,7 +73,7 @@ public class IconsHandler {
      * Set values from preferences
      */
     public void onPrefChanged(SharedPreferences pref) {
-        loadIconsPack(pref.getString("icons-pack", "default"));
+        loadIconsPack(pref.getString("icons-pack", null));
         mSystemPack.setAdaptiveShape(getAdaptiveShape(pref, "adaptive-shape"));
         mForceAdaptive = pref.getBoolean("force-adaptive", true);
         mForceShape = pref.getBoolean("force-shape", true);
@@ -100,18 +100,18 @@ public class IconsHandler {
      *
      * @param packageName Android package ID of the package to parse
      */
-    private void loadIconsPack(@NonNull String packageName) {
+    private void loadIconsPack(@Nullable String packageName) {
 
         //clear icons pack
         mIconPack = null;
 
         // system icons, nothing to do
-        if (packageName.equalsIgnoreCase("default")) {
+        if (packageName == null || packageName.equalsIgnoreCase("default")) {
             return;
         }
 
         mIconPack = TBApplication.iconPackCache(ctx).getIconPack(packageName);
-        Utilities.runAsync(() -> mIconPack.load(ctx.getPackageManager()), null);
+        Utilities.runAsync(() -> mIconPack.load(ctx.getPackageManager()), () -> TBApplication.quickList(ctx).onFavoritesChanged());
     }
 
     /**
@@ -121,6 +121,9 @@ public class IconsHandler {
     public Drawable getDrawableIconForPackage(ComponentName componentName, UserHandleCompat userHandle) {
         // check the icon pack for a resource
         if (mIconPack != null) {
+            // just checking will make this thread wait for the icon pack to load
+            if (!mIconPack.isLoaded())
+                return null;
             String componentString = componentName.toString();
             Drawable drawable = mIconPack.getComponentDrawable(componentString);
             if (drawable != null) {
@@ -157,6 +160,9 @@ public class IconsHandler {
     public Drawable getDrawableBadgeForPackage(ComponentName componentName, UserHandleCompat userHandle) {
         // check the icon pack for a resource
         if (mIconPack != null) {
+            // just checking will make this thread wait for the icon pack to load
+            if (!mIconPack.isLoaded())
+                return null;
             String componentString = componentName.toString();
             Drawable drawable = mIconPack.getComponentDrawable(componentString);
             if (drawable != null) {

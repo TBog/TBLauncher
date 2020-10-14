@@ -250,8 +250,8 @@ public class SystemPage extends PageAdapter.Page {
     public void loadIconPackIcons(List<Pair<String, String>> iconPacks) {
         if (iconPacks.isEmpty())
             return;
-
-        final SystemIconInfo placeholderItem = new SystemIconInfo(null);
+        final Context ctx = pageView.getContext();
+        final SystemIconInfo placeholderItem = new SystemIconInfo(DrawableUtils.getProgressBarIndeterminate(ctx));
         placeholderItem.textId = R.string.icon_pack_loading;
         {
             SystemPageAdapter adapter = (SystemPageAdapter) mGridView.getAdapter();

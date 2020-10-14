@@ -30,12 +30,14 @@ import androidx.core.content.res.ResourcesCompat;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
+import java.util.concurrent.Executor;
 
 import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.ui.CutoutFactory;
 import rocks.tbog.tblauncher.ui.ICutout;
 
 public class Utilities {
+    final static Executor EXECUTOR_RUN_ASYNC = AsyncTask.THREAD_POOL_EXECUTOR;
     private final static int[] ON_SCREEN_POS = new int[2];
     private final static Rect ON_SCREEN_RECT = new Rect();
 
@@ -194,7 +196,7 @@ public class Utilities {
     }
 
     public static Utilities.AsyncRun runAsync(Runnable background, Runnable after) {
-        return (Utilities.AsyncRun) new Utilities.AsyncRun(background, after).execute();
+        return (Utilities.AsyncRun) new Utilities.AsyncRun(background, after).executeOnExecutor(EXECUTOR_RUN_ASYNC);
     }
 
     public static void setColorFilterMultiply(@NonNull ImageView imageView, int color) {
@@ -338,6 +340,12 @@ public class Utilities {
         protected Void doInBackground(Void... voids) {
             mBackground.run();
             return null;
+        }
+
+        @Override
+        protected void onCancelled(Void aVoid) {
+            if (mAfter != null)
+                mAfter.run();
         }
 
         @Override

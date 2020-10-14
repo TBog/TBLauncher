@@ -54,7 +54,10 @@ public class QuickListProvider extends DBProvider<EntryItem> {
             for (FavRecord fav : list) {
                 if (!fav.isInQuickList())
                     continue;
-                EntryItem entry = new PlaceholderEntry(fav.record);
+                PlaceholderEntry entry = new PlaceholderEntry(fav.record);
+                entry.setName(fav.displayName);
+                if (fav.hasCustomIcon())
+                    entry.setCustomIcon();
                 quickList.add(entry);
             }
 

@@ -1,45 +1,44 @@
 package rocks.tbog.tblauncher.entry;
 
+import android.content.Context;
+import android.graphics.drawable.Animatable;
+import android.graphics.drawable.AnimatedVectorDrawable;
+import android.graphics.drawable.Drawable;
 import android.view.View;
-import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 
 import rocks.tbog.tblauncher.R;
+import rocks.tbog.tblauncher.ui.LinearAdapter;
+import rocks.tbog.tblauncher.ui.ListPopup;
+import rocks.tbog.tblauncher.utils.DrawableUtils;
 import rocks.tbog.tblauncher.utils.Utilities;
 
-public class PlaceholderEntry extends EntryItem {
+public class PlaceholderEntry extends StaticEntry {
 
     public PlaceholderEntry(@NonNull String id) {
-        super(id);
+        super(id, R.drawable.ic_loading);
     }
 
     @Override
-    public int getResultLayout(int drawFlags) {
-        return Utilities.checkFlag(drawFlags, FLAG_DRAW_LIST) ? R.layout.item_builtin :
-                (Utilities.checkFlag(drawFlags, FLAG_DRAW_GRID) ? R.layout.item_grid :
-                        R.layout.item_quick_list);
+    ListPopup buildPopupMenu(Context context, LinearAdapter adapter, View parentView, int flags) {
+        if (Utilities.checkFlag(flags, FLAG_POPUP_MENU_QUICK_LIST)) {
+            adapter.add(new LinearAdapter.ItemTitle(context, R.string.menu_popup_title_settings));
+            adapter.add(new LinearAdapter.Item(context, R.string.menu_popup_quick_list_customize));
+        }
+        return inflatePopupMenu(context, adapter);
     }
 
     @Override
-    public void displayResult(@NonNull View view, int drawFlags) {
-        TextView nameView = view.findViewById(android.R.id.text1);
-        //nameView.setTextColor(UIColors.getResultTextColor(view.getContext()));
-        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_NAME)) {
-            //nameView.setText(getName());
-        } else {
-            nameView.setVisibility(View.GONE);
-        }
+    public Drawable getDefaultDrawable(Context context) {
+        Drawable drawable = super.getDefaultDrawable(context);
+        if (drawable instanceof Animatable)
+            ((Animatable) drawable).start();
+        return drawable;
+    }
 
-        ImageView appIcon = view.findViewById(android.R.id.icon);
-        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
-            appIcon.setVisibility(View.VISIBLE);
-            //ResultViewHelper.setIconAsync(drawFlags, this, appIcon, StaticEntry.AsyncSetEntryIcon.class);
-        } else {
-            appIcon.setImageDrawable(null);
-            appIcon.setVisibility(View.GONE);
-        }
-
+    @Override
+    public void doLaunch(@NonNull View view) {
+        // do nothing
     }
 }

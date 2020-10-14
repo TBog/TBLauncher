@@ -78,6 +78,12 @@ public class IconPackXML implements IconPack<IconPackXML.DrawableInfo> {
 //        }
 //    }
 
+
+    @Override
+    public synchronized boolean isLoaded() {
+        return loaded;
+    }
+
     @Override
     public synchronized void load(PackageManager packageManager) {
         if (loaded)

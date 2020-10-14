@@ -36,7 +36,7 @@ import rocks.tbog.tblauncher.utils.Utilities;
 
 public final class ResultViewHelper {
 
-    public final static Executor EXECUTOR_LOAD_ICON = AsyncTask.THREAD_POOL_EXECUTOR;
+    public final static Executor EXECUTOR_LOAD_ICON = AsyncTask.SERIAL_EXECUTOR;
     private static final String TAG = "RVH";
 
     private ResultViewHelper() {

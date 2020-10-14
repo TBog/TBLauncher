@@ -3,6 +3,7 @@ package rocks.tbog.tblauncher.utils;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
@@ -19,6 +20,7 @@ import android.util.TypedValue;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import rocks.tbog.tblauncher.R;
 
@@ -97,13 +99,12 @@ public class DrawableUtils {
 
     /**
      * Get percent of icon to use as margin. We use this to avoid clipping the image.
+     *
      * @param shape from SHAPE_*
      * @return margin size
      */
-    private static float getScaleToFit(int shape)
-    {
-        switch (shape)
-        {
+    private static float getScaleToFit(int shape) {
+        switch (shape) {
             case SHAPE_CIRCLE:
             case SHAPE_TEARDROP_BR:
             case SHAPE_TEARDROP_BL:
@@ -327,5 +328,19 @@ public class DrawableUtils {
             return drawable instanceof AdaptiveIconDrawable;
         }
         return false;
+    }
+
+    @Nullable
+    public static Drawable getProgressBarIndeterminate(Context context) {
+        final int[] attrs = {android.R.attr.indeterminateDrawable};
+        final int attrs_indeterminateDrawable_index = 0;
+        TypedArray a = context.obtainStyledAttributes(android.R.style.Widget_ProgressBar, attrs);
+        try {
+            return a.getDrawable(attrs_indeterminateDrawable_index);
+        } catch (Exception ignored) {
+            return null;
+        } finally {
+            a.recycle();
+        }
     }
 }
