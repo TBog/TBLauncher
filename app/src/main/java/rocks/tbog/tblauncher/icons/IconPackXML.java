@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
@@ -40,7 +41,7 @@ import rocks.tbog.tblauncher.utils.Utilities;
 public class IconPackXML implements IconPack<IconPackXML.DrawableInfo> {
     private final static String TAG = IconPackXML.class.getSimpleName();
     private final Map<String, ArraySet<DrawableInfo>> drawablesByComponent = new ArrayMap<>(0);
-    private final ArraySet<DrawableInfo> drawableList = new ArraySet<>(0);
+    private final LinkedHashSet<DrawableInfo> drawableList = new LinkedHashSet<>(0);
     // instance of a resource object of an icon pack
     private Resources packResources;
     // package name of the icons pack
