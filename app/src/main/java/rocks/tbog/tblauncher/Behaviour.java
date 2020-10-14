@@ -608,8 +608,12 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     public void runTagSearch(@NonNull String tagName) {
         if (mSearchEditText == null)
             return;
-        mSearchEditText.setText("");
-        updateSearchRecords(false, new TagSearcher(this, tagName));
+        if (TBApplication.state().isResultListVisible() && mSearchEditText.getText().length() == 0) {
+            mSearchEditText.setText("");
+        } else {
+            mSearchEditText.setText("");
+            updateSearchRecords(false, new TagSearcher(this, tagName));
+        }
     }
 
     public void clearSearch() {
