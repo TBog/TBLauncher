@@ -329,7 +329,8 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 
         hideWidgets();
 
-        mNotificationBackground.setTranslationY(-mNotificationBackground.getLayoutParams().height);
+        if (!TBApplication.state().isNotificationBarVisible())
+            mNotificationBackground.setTranslationY(-mNotificationBackground.getLayoutParams().height);
         mNotificationBackground.animate()
                 .translationY(0f)
                 .setStartDelay(0)
