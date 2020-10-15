@@ -24,11 +24,13 @@ import androidx.preference.PreferenceManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Set;
 
 import rocks.tbog.tblauncher.dataprovider.SearchProvider;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.ViewHolderAdapter;
+import rocks.tbog.tblauncher.utils.ViewHolderListAdapter;
 
 public class EditSearchEngines {
 
@@ -270,34 +272,17 @@ public class EditSearchEngines {
         defaultProviderName = "Google";
     }
 
-    static class SearchEngineAdapter extends ViewHolderAdapter<SearchEngineInfo, TagViewHolder> {
-        private final ArrayList<SearchEngineInfo> mTags;
+    static class SearchEngineAdapter extends ViewHolderListAdapter<SearchEngineInfo, TagViewHolder> {
 
         SearchEngineAdapter(@NonNull ArrayList<SearchEngineInfo> tags) {
-            super(TagViewHolder.class, android.R.layout.simple_list_item_checked);
-            mTags = tags;
+            super(TagViewHolder.class, android.R.layout.simple_list_item_checked, tags);
         }
 
         @Override
-        protected int getListItemLayout(int position) {
-            if (getItemViewType(position) == 1)
+        protected int getItemViewTypeLayout(int viewType) {
+            if (viewType == 1)
                 return android.R.layout.simple_list_item_1;
-            return super.getListItemLayout(position);
-        }
-
-        @Override
-        public int getCount() {
-            return mTags.size();
-        }
-
-        @Override
-        public SearchEngineInfo getItem(int position) {
-            return mTags.get(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return getItem(position).hashCode();
+            return super.getItemViewTypeLayout(viewType);
         }
 
         public int getItemViewType(int position) {
@@ -351,6 +336,23 @@ public class EditSearchEngines {
             provider = searchProvider;
             name = SearchProvider.getProviderName(searchProvider);
             url = SearchProvider.getProviderUrl(searchProvider);
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            SearchEngineInfo that = (SearchEngineInfo) o;
+            return selected == that.selected &&
+                    provider.equals(that.provider) &&
+                    Objects.equals(name, that.name) &&
+                    Objects.equals(url, that.url) &&
+                    action == that.action;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(provider, name, url, selected, action);
         }
     }
 }

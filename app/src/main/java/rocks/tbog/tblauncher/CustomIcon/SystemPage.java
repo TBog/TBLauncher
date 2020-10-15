@@ -60,7 +60,7 @@ public class SystemPage extends PageAdapter.Page {
     @Override
     void setupView(@NonNull Context context, @Nullable OnItemClickListener iconClickListener) {
         mGridView = pageView.findViewById(R.id.iconGrid);
-        SystemPageAdapter adapter = new SystemPageAdapter(SystemPageViewHolder.class, iconClickListener);
+        SystemPageAdapter adapter = new SystemPageAdapter(iconClickListener);
         mGridView.setAdapter(adapter);
 
         ProgressBar mIconLoadingBar = pageView.findViewById(R.id.iconLoadingBar);
@@ -379,8 +379,8 @@ public class SystemPage extends PageAdapter.Page {
         @Nullable
         private OnItemClickListener mIconClickListener;
 
-        protected SystemPageAdapter(@NonNull Class<SystemPageViewHolder> viewHolderClass, @Nullable OnItemClickListener iconClickListener) {
-            super(viewHolderClass, R.layout.item_grid);
+        protected SystemPageAdapter(@Nullable OnItemClickListener iconClickListener) {
+            super(SystemPageViewHolder.class, R.layout.item_grid);
             mIconClickListener = iconClickListener;
         }
 
@@ -402,11 +402,6 @@ public class SystemPage extends PageAdapter.Page {
         @Override
         public SystemIconInfo getItem(int position) {
             return mList.get(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return getItem(position).hashCode();
         }
     }
 }

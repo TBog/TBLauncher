@@ -19,6 +19,7 @@ import androidx.appcompat.app.AlertDialog;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import rocks.tbog.tblauncher.dataprovider.FavProvider;
 import rocks.tbog.tblauncher.dataprovider.TagsProvider;
@@ -29,6 +30,7 @@ import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.ui.CodePointDrawable;
 import rocks.tbog.tblauncher.utils.DrawableUtils;
 import rocks.tbog.tblauncher.utils.ViewHolderAdapter;
+import rocks.tbog.tblauncher.utils.ViewHolderListAdapter;
 
 public class TagsManager {
 
@@ -161,8 +163,7 @@ public class TagsManager {
         tagsProvider.addTagEntry(tagEntry);
 
         FavProvider favProvider = dh.getFavProvider();
-        if (favProvider != null)
-        {
+        if (favProvider != null) {
             EntryItem item = favProvider.findById(tagEntry.id);
             if (item == null)
                 dh.addToFavorites(tagEntry);
@@ -176,8 +177,7 @@ public class TagsManager {
         mListView.post(() -> mListView.setAdapter(mAdapter));
     }
 
-    static class TagsAdapter extends ViewHolderAdapter<TagInfo, TagViewHolder> {
-        private final ArrayList<TagInfo> mTags;
+    static class TagsAdapter extends ViewHolderListAdapter<TagInfo, TagViewHolder> {
         private OnItemClickListener mOnRemoveListener = null;
         private OnItemClickListener mOnRenameListener = null;
         private OnItemClickListener mOnEditIconListener = null;
@@ -187,8 +187,7 @@ public class TagsManager {
         }
 
         TagsAdapter(@NonNull ArrayList<TagInfo> tags) {
-            super(TagViewHolder.class, R.layout.tags_manager_item);
-            mTags = tags;
+            super(TagViewHolder.class, R.layout.tags_manager_item, tags);
         }
 
         void setOnRemoveListener(OnItemClickListener listener) {
@@ -204,25 +203,10 @@ public class TagsManager {
         }
 
         @Override
-        protected int getListItemLayout(int position) {
-            if (getItemViewType(position) == 1)
+        protected int getItemViewTypeLayout(int viewType) {
+            if (viewType == 1)
                 return R.layout.tags_manager_item_deleted;
-            return super.getListItemLayout(position);
-        }
-
-        @Override
-        public int getCount() {
-            return mTags.size();
-        }
-
-        @Override
-        public TagInfo getItem(int position) {
-            return mTags.get(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return getItem(position).hashCode();
+            return super.getItemViewTypeLayout(viewType);
         }
 
         public int getItemViewType(int position) {
@@ -298,6 +282,7 @@ public class TagsManager {
         final TagEntry tagEntry;
         final String tagName;
         String name;
+
         List<String> entryList;
         Action action = Action.NONE;
 
@@ -311,6 +296,22 @@ public class TagsManager {
         public TagInfo(TagEntry entry) {
             tagEntry = entry;
             tagName = entry.getName();
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            TagInfo tagInfo = (TagInfo) o;
+            return Objects.equals(tagEntry, tagInfo.tagEntry) &&
+                    Objects.equals(tagName, tagInfo.tagName) &&
+                    Objects.equals(name, tagInfo.name) &&
+                    action == tagInfo.action;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(tagEntry, tagName, name, action);
         }
     }
 }

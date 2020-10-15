@@ -1,14 +1,10 @@
 package rocks.tbog.tblauncher.CustomIcon;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.EditText;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -18,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.entry.StaticEntry;
@@ -27,13 +24,15 @@ import rocks.tbog.tblauncher.ui.TwoCodePointDrawable;
 import rocks.tbog.tblauncher.utils.DrawableUtils;
 import rocks.tbog.tblauncher.utils.UISizes;
 import rocks.tbog.tblauncher.utils.Utilities;
+import rocks.tbog.tblauncher.utils.ViewHolderAdapter;
+import rocks.tbog.tblauncher.utils.ViewHolderListAdapter;
 
 public class StaticEntryPage extends PageAdapter.Page {
     final ArrayList<DrawableData> iconDataList = new ArrayList<>();
     private StaticEntry mStaticEntry;
     private GridView mGridView;
 
-    SystemPage.SystemPageAdapter mDefaultItemAdapter = new SystemPage.SystemPageAdapter(SystemPage.SystemPageViewHolder.class, null) {
+    SystemPage.SystemPageAdapter mDefaultItemAdapter = new SystemPage.SystemPageAdapter(null) {
         @Override
         public SystemPage.SystemIconInfo getItem(int position) {
             Context ctx = pageView.getContext();
@@ -72,7 +71,6 @@ public class StaticEntryPage extends PageAdapter.Page {
             editText.addTextChangedListener(new TextWatcher() {
                 @Override
                 public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
                 }
 
                 @Override
@@ -82,7 +80,6 @@ public class StaticEntryPage extends PageAdapter.Page {
 
                 @Override
                 public void afterTextChanged(Editable s) {
-
                 }
             });
             editText.setText(mStaticEntry.getName());
@@ -130,48 +127,49 @@ public class StaticEntryPage extends PageAdapter.Page {
         DrawableData(Drawable icon) {
             this.icon = icon;
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            DrawableData that = (DrawableData) o;
+            return Objects.equals(icon, that.icon);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(icon);
+        }
     }
 
-    static class DrawableAdapter extends BaseAdapter {
-        private final ArrayList<DrawableData> mList;
-        private OnItemClickListener mIconClickListener;
+    public static class DrawableDataVH extends ViewHolderAdapter.ViewHolder<DrawableData> {
+        View root;
+        ImageView icon;
+        TextView text;
 
-        DrawableAdapter(ArrayList<DrawableData> list, @Nullable OnItemClickListener iconClickListener) {
-            mList = list;
-            mIconClickListener = iconClickListener;
+        public DrawableDataVH(View view) {
+            super(view);
+            root = view;
+            icon = view.findViewById(android.R.id.icon);
+            text = view.findViewById(android.R.id.text1);
         }
 
         @Override
-        public int getCount() {
-            return mList.size();
-        }
-
-        @Override
-        public DrawableData getItem(int position) {
-            return mList.get(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return getItem(position).hashCode();
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            LayoutInflater inflater = LayoutInflater.from(parent.getContext());
-            @SuppressLint("ViewHolder")
-            View view = inflater.inflate(R.layout.item_grid, parent, false);
-
-            ImageView icon = view.findViewById(android.R.id.icon);
-            icon.setImageDrawable(getItem(position).icon);
-
-            TextView text = view.findViewById(android.R.id.text1);
+        protected void setContent(DrawableData content, int position, @NonNull ViewHolderAdapter<DrawableData, ? extends ViewHolderAdapter.ViewHolder<DrawableData>> adapter) {
+            icon.setImageDrawable(content.icon);
             text.setVisibility(View.GONE);
+            final DrawableAdapter drawableAdapter = (DrawableAdapter) adapter;
+            if (drawableAdapter.mIconClickListener != null)
+                root.setOnClickListener(v -> drawableAdapter.mIconClickListener.onItemClick(drawableAdapter, v, position));
+        }
+    }
 
-            if (mIconClickListener != null)
-                view.setOnClickListener(v -> mIconClickListener.onItemClick(this, v, position));
+    static class DrawableAdapter extends ViewHolderListAdapter<DrawableData, DrawableDataVH> {
+        private final OnItemClickListener mIconClickListener;
 
-            return view;
+        protected DrawableAdapter(ArrayList<DrawableData> list, @Nullable OnItemClickListener iconClickListener) {
+            super(DrawableDataVH.class, R.layout.item_grid, list);
+            mIconClickListener = iconClickListener;
         }
     }
 }

@@ -10,6 +10,14 @@ import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import rocks.tbog.tblauncher.BuildConfig;
+
+/**
+ * Adapter class that implements the View holder pattern.
+ * The ViewHolder is held as a tag in the list item view.
+ * @param <T>   Type of data to send to the ViewHolder
+ * @param <VH>  ViewHolder class
+ */
 public abstract class ViewHolderAdapter<T, VH extends ViewHolderAdapter.ViewHolder<T>> extends BaseAdapter {
     @NonNull
     final Class<VH> mViewHolderClass;
@@ -22,12 +30,22 @@ public abstract class ViewHolderAdapter<T, VH extends ViewHolderAdapter.ViewHold
     }
 
     @LayoutRes
-    protected int getListItemLayout(int position) {
+    protected int getItemViewTypeLayout(int viewType) {
         return mListItemLayout;
     }
 
     @Override
     public abstract T getItem(int position);
+
+    @Override
+    public long getItemId(int position) {
+        return getItem(position).hashCode();
+    }
+
+    @Override
+    public boolean hasStableIds() {
+        return true;
+    }
 
     @Nullable
     protected VH getNewViewHolder(View view) {
@@ -44,7 +62,15 @@ public abstract class ViewHolderAdapter<T, VH extends ViewHolderAdapter.ViewHold
     public View getView(int position, View convertView, ViewGroup parent) {
         final View view;
         if (convertView == null) {
-            view = LayoutInflater.from(parent.getContext()).inflate(getListItemLayout(position), parent, false);
+            int viewType = getItemViewType(position);
+            if (BuildConfig.DEBUG) {
+                int viewTypeCount = getViewTypeCount();
+                if (viewType >= viewTypeCount)
+                    throw new IllegalStateException("ViewType " + viewType + " >= ViewTypeCount " + viewTypeCount);
+            }
+            @LayoutRes
+            int itemLayout = getItemViewTypeLayout(viewType);
+            view = LayoutInflater.from(parent.getContext()).inflate(itemLayout, parent, false);
         } else {
             view = convertView;
         }
