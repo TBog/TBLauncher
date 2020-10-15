@@ -105,8 +105,8 @@ public class LiveWallpaper {
         root.setOnTouchListener(this::onRootTouch);
     }
 
-    static void onClick(View view) {
-        TBApplication.behaviour(view.getContext()).onClick();
+    static boolean onClick(View view) {
+        return TBApplication.behaviour(view.getContext()).onClick();
     }
 
     private boolean onFling(View view, float xMove, float yMove, float xVel, float yVel) {
@@ -149,6 +149,7 @@ public class LiveWallpaper {
 
         Log.d(TAG, "onRootTouch\r\n" + event);
         int actionMasked = event.getActionMasked();
+        boolean eventConsumed = false;
 
         switch (actionMasked) {
             case MotionEvent.ACTION_DOWN: {
@@ -178,7 +179,8 @@ public class LiveWallpaper {
                 //send touch event to the LWP
                 if (isPreferenceLWPTouch())
                     sendTouchEvent(view, event);
-                return true;
+                eventConsumed = true;
+                break;
             }
             case MotionEvent.ACTION_MOVE: {
                 mLastTouchPos.set(event.getRawX(), event.getRawY());
@@ -199,24 +201,20 @@ public class LiveWallpaper {
                 if (isPreferenceLWPDrag())
                     sendTouchEvent(view, event);
                 if (isPreferenceWPDragAnimate())
-                    return true;
-                else
-                    break;
+                    eventConsumed = true;
+                break;
             }
             case MotionEvent.ACTION_UP: {
-                view.removeCallbacks(mLongClickRunnable);
                 // was this a click?
                 float xMove = (mFirstTouchPos.x - mLastTouchPos.x) / mWindowSize.x;
                 float yMove = (mFirstTouchPos.y - mLastTouchPos.y) / mWindowSize.y;
                 if (mVelocityTracker == null) {
                     Log.d(TAG, String.format(Locale.US, "Move=(%.3f, %.3f)", xMove, yMove));
                     if (Math.abs(xMove) < .01f && Math.abs(yMove) < .01f) {
-                        if (event.getEventTime() - event.getDownTime() < longPressTimeout)
-                            onClick(view);
+                        if (event.getEventTime() - event.getDownTime() < longPressTimeout) {
+                            eventConsumed = onClick(view);
+                        }
                     }
-                    if (mAnimation.init())
-                        mContentView.startAnimation(mAnimation);
-                    return true;
                 } else {
                     mVelocityTracker.addMovement(event);
                     mVelocityTracker.computeCurrentVelocity(1000 / 30);
@@ -233,10 +231,9 @@ public class LiveWallpaper {
                         // snap position if needed
                         if (isPreferenceWPDragAnimate() && mAnimation.init())
                             mContentView.startAnimation(mAnimation);
-                        return true;
+                        eventConsumed = true;
                     } else {
-                        if (onFling(view, xMove, yMove, xVel, yVel))
-                            return true;
+                        eventConsumed = onFling(view, xMove, yMove, xVel, yVel);
                     }
                 }
                 //fallthrough
@@ -257,14 +254,13 @@ public class LiveWallpaper {
                         if (mAnimation.init())
                             mContentView.startAnimation(mAnimation);
                     }
-                    return true;
-                } else
-                    break;
+                    eventConsumed = true;
+                }
+                break;
         }
 
-        Log.d(TAG, "onRootTouch event NOT consumed");
-        // do not consume the event
-        return false;
+        Log.d(TAG, "onRootTouch event " + (eventConsumed ? "" : "NOT") + "consumed");
+        return eventConsumed;
     }
 
     public Context getContext() {
