@@ -195,7 +195,7 @@ public class Utilities {
         toast.setGravity(Gravity.START | Gravity.TOP, toastX, toastY);
     }
 
-    public static Utilities.AsyncRun runAsync(Runnable background, Runnable after) {
+    public static Utilities.AsyncRun runAsync(@NonNull AsyncRun.Run background, @Nullable AsyncRun.Run after) {
         return (Utilities.AsyncRun) new Utilities.AsyncRun(background, after).executeOnExecutor(EXECUTOR_RUN_ASYNC);
     }
 
@@ -327,10 +327,14 @@ public class Utilities {
     }
 
     public static class AsyncRun extends AsyncTask<Void, Void, Void> {
-        private final Runnable mBackground;
-        private final Runnable mAfter;
+        private final Run mBackground;
+        private final Run mAfter;
 
-        public AsyncRun(@NonNull Runnable background, @Nullable Runnable after) {
+        public interface Run {
+            void run(@NonNull Utilities.AsyncRun task);
+        }
+
+        public AsyncRun(@NonNull Run background, @Nullable Run after) {
             super();
             mBackground = background;
             mAfter = after;
@@ -338,20 +342,20 @@ public class Utilities {
 
         @Override
         protected Void doInBackground(Void... voids) {
-            mBackground.run();
+            mBackground.run(this);
             return null;
         }
 
         @Override
         protected void onCancelled(Void aVoid) {
             if (mAfter != null)
-                mAfter.run();
+                mAfter.run(this);
         }
 
         @Override
         protected void onPostExecute(Void aVoid) {
             if (mAfter != null)
-                mAfter.run();
+                mAfter.run(this);
         }
     }
 }

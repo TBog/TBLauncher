@@ -39,11 +39,11 @@ public class TagsHandler {
 
     public void loadFromDB() {
         final HashMap<String, List<String>> tags = new HashMap<>();
-        Utilities.runAsync(() -> {
+        Utilities.runAsync((t) -> {
             Map<String, List<String>> dbTags = DBHelper.loadTags(getContext());
             tags.clear();
             tags.putAll(dbTags);
-        }, () -> {
+        }, (t) -> {
             mTagsCache.clear();
             mTagsCache.putAll(tags);
             if (mTagsCache.isEmpty())

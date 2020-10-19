@@ -177,7 +177,7 @@ public abstract class StaticEntry extends EntryItem {
     @WorkerThread
     public Drawable getIconDrawable(Context context) {
         if (customIcon) {
-            IconsHandler iconsHandler = TBApplication.getApplication(context).getIconsHandler();
+            IconsHandler iconsHandler = TBApplication.getApplication(context).iconsHandler();
             Drawable drawable = iconsHandler.getCustomIcon(this);
             if (drawable != null)
                 return drawable;

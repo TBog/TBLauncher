@@ -6,7 +6,6 @@ import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
-import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.os.Build;
 import android.os.Bundle;
@@ -94,18 +93,22 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
         mReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+                TBApplication app = TBApplication.getApplication(TBLauncherActivity.this);
                 if (START_LOAD.equalsIgnoreCase(intent.getAction())) {
-                    TBApplication.behaviour(TBLauncherActivity.this).displayLoader(true);
+                    app.behaviour().displayLoader(true);
                 } else if (LOAD_OVER.equalsIgnoreCase(intent.getAction())) {
                     //updateSearchRecords(true);
-                    TBApplication.behaviour(TBLauncherActivity.this).updateSearchRecords();
+                    app.behaviour().updateSearchRecords();
                 } else if (FULL_LOAD_OVER.equalsIgnoreCase(intent.getAction())) {
                     Log.v(TAG, "All providers are done loading.");
 
-                    TBApplication.behaviour(TBLauncherActivity.this).displayLoader(false);
+                    app.behaviour().displayLoader(false);
 
                     SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(TBLauncherActivity.this);
-                    TBApplication.drawableCache(TBLauncherActivity.this).onPrefChanged(TBLauncherActivity.this, prefs);
+                    // we need to set drawable cache preferences after we load all the apps
+                    app.drawableCache().onPrefChanged(TBLauncherActivity.this, prefs);
+                    // make sure we load the icon pack as early as possible
+                    app.iconsHandler().onPrefChanged(prefs);
 
                     // Run GC once to free all the garbage accumulated during provider initialization
                     System.gc();

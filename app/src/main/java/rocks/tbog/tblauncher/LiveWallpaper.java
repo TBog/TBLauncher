@@ -1,10 +1,8 @@
 package rocks.tbog.tblauncher;
 
-import android.annotation.SuppressLint;
 import android.app.WallpaperManager;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.Insets;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
@@ -16,7 +14,6 @@ import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
-import android.view.WindowInsets;
 import android.view.WindowMetrics;
 import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
@@ -24,11 +21,9 @@ import android.view.animation.Transformation;
 
 import androidx.preference.PreferenceManager;
 
-import java.lang.reflect.Method;
 import java.util.Locale;
 
 import rocks.tbog.tblauncher.ui.ListPopup;
-import rocks.tbog.tblauncher.utils.Utilities;
 
 public class LiveWallpaper {
     private static final int longPressTimeout = ViewConfiguration.getLongPressTimeout();
@@ -54,7 +49,7 @@ public class LiveWallpaper {
     private boolean wpStickToSides = false;
 
     private Runnable mLongClickRunnable = () -> {
-        if (!TBApplication.state().isWidgetVisible())
+        if (!TBApplication.state().isWidgetScreenVisible())
             return;
         View view = mTBLauncherActivity.findViewById(R.id.root_layout);
         onLongClick(view);

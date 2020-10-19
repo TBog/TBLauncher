@@ -76,7 +76,7 @@ public class ShortcutsProvider extends Provider<ShortcutEntry> {
                     }
                 }
                 if (icon == null) {
-                    icon = TBApplication.getApplication(context).getIconsHandler().getDefaultActivityIcon(context);
+                    icon = TBApplication.getApplication(context).iconsHandler().getDefaultActivityIcon(context);
                 }
 
                 ShortcutRecord record = new ShortcutRecord();

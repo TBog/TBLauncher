@@ -148,7 +148,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 //                }
                 String text = s.toString();
                 updateSearchRecords(false, text);
-                displayClearOnInput();
+                updateClearButton();
             }
         });
 
@@ -296,7 +296,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         // are available.
         //delayedHide(100);
         hideSearchBar();
-        displayClearOnInput();
+        updateClearButton();
     }
 
     @SuppressWarnings("TypeParameterUnusedInFormals")
@@ -304,7 +304,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         return mTBLauncherActivity.findViewById(id);
     }
 
-    private void displayClearOnInput() {
+    private void updateClearButton() {
         if (mSearchEditText.getText().length() > 0) {
             mClearButton.setVisibility(View.VISIBLE);
             mMenuButton.setVisibility(View.INVISIBLE);
@@ -378,7 +378,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     private void hideWidgets() {
-        TBApplication.state().setWidgets(LauncherState.AnimatedVisibility.HIDDEN);
+        TBApplication.state().setWidgetScreen(LauncherState.AnimatedVisibility.HIDDEN);
         mWidgetContainer.setVisibility(View.GONE);
         mResultLayout.setVisibility(View.INVISIBLE);
     }
@@ -466,7 +466,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     private void showWidgets() {
-        TBApplication.state().setWidgets(LauncherState.AnimatedVisibility.VISIBLE);
+        TBApplication.state().setWidgetScreen(LauncherState.AnimatedVisibility.VISIBLE);
         mWidgetContainer.setVisibility(View.VISIBLE);
         mResultLayout.setVisibility(View.GONE);
     }
@@ -539,7 +539,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         TBApplication.state().setResultList(LauncherState.AnimatedVisibility.HIDDEN);
         mResultLayout.setVisibility(View.INVISIBLE);
         TBApplication.quickList(getContext()).adapterCleared();
-        displayClearOnInput();
+        updateClearButton();
     }
 
     @Override
@@ -737,9 +737,9 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 
         dialog.setOnConfirmListener(drawable -> {
             if (drawable == null)
-                TBApplication.getApplication(mTBLauncherActivity).getIconsHandler().restoreDefaultIcon(appEntry);
+                TBApplication.getApplication(mTBLauncherActivity).iconsHandler().restoreDefaultIcon(appEntry);
             else
-                TBApplication.getApplication(mTBLauncherActivity).getIconsHandler().changeIcon(appEntry, drawable);
+                TBApplication.getApplication(mTBLauncherActivity).iconsHandler().changeIcon(appEntry, drawable);
             // force a result refresh to update the icon in the view
             refreshSearchRecords();
             TBApplication.quickList(mTBLauncherActivity).onFavoritesChanged();
@@ -768,9 +768,9 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 
         dialog.setOnConfirmListener(drawable -> {
             if (drawable == null)
-                TBApplication.getApplication(mTBLauncherActivity).getIconsHandler().restoreDefaultIcon(staticEntry);
+                TBApplication.getApplication(mTBLauncherActivity).iconsHandler().restoreDefaultIcon(staticEntry);
             else
-                TBApplication.getApplication(mTBLauncherActivity).getIconsHandler().changeIcon(staticEntry, drawable);
+                TBApplication.getApplication(mTBLauncherActivity).iconsHandler().changeIcon(staticEntry, drawable);
             // force a result refresh to update the icon in the view
             refreshSearchRecords();
             TBApplication.quickList(mTBLauncherActivity).onFavoritesChanged();
@@ -883,7 +883,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 
         TBApplication.dataHandler(getContext()).checkServices();
         LauncherState state = TBApplication.state();
-        if (state.isWidgetVisible()) {
+        if (state.isWidgetScreenVisible()) {
             if (state.isSearchBarVisible())
                 hideSearchBar(0, false);
         } else {
@@ -926,17 +926,17 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                 mSearchEditText.postDelayed(this::showKeyboard, UI_ANIMATION_DURATION);
             }
         } else {
-            if (state.isWidgetVisible()) {
+            if (state.isWidgetScreenVisible()) {
                 hideKeyboard();
                 hideSearchBar(0, false);
             }
         }
     }
 
-    private boolean executeGesture(@Nullable String gesture) {
-        if (gesture == null)
+    private boolean executeAction(@Nullable String action) {
+        if (action == null)
             return false;
-        switch (gesture) {
+        switch (action) {
             case "expandNotificationsPanel":
                 Utilities.expandNotificationsPanel(mTBLauncherActivity);
                 return true;
@@ -959,26 +959,26 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     public boolean onFlingDownLeft() {
-        return executeGesture(mPref.getString("gesture-fling-down-left", null));
+        return executeAction(mPref.getString("gesture-fling-down-left", null));
     }
 
     public boolean onFlingDownRight() {
-        return executeGesture(mPref.getString("gesture-fling-down-right", null));
+        return executeAction(mPref.getString("gesture-fling-down-right", null));
     }
 
     public boolean onFlingUp() {
-        return executeGesture(mPref.getString("gesture-fling-up", null));
+        return executeAction(mPref.getString("gesture-fling-up", null));
     }
 
     public boolean onFlingLeft() {
-        return executeGesture(mPref.getString("gesture-fling-left", null));
+        return executeAction(mPref.getString("gesture-fling-left", null));
     }
 
     public boolean onFlingRight() {
-        return executeGesture(mPref.getString("gesture-fling-right", null));
+        return executeAction(mPref.getString("gesture-fling-right", null));
     }
 
     public boolean onClick() {
-        return executeGesture(mPref.getString("gesture-click", null));
+        return executeAction(mPref.getString("gesture-click", null));
     }
 }

@@ -30,11 +30,10 @@ import rocks.tbog.tblauncher.utils.Utilities;
 
 class IconPackPage extends PageAdapter.Page {
     final ArrayList<IconData> iconDataList = new ArrayList<>();
-    String packageName;
+    final String packageName;
     private ProgressBar mIconLoadingBar;
     private GridView mGridView;
     private TextView mSearch;
-    private Utilities.AsyncRun mLoadIconPackTask = null;
     private IconPackXML mIconPack = null;
 
     private void displayToast(View v, CharSequence message) {
@@ -106,17 +105,14 @@ class IconPackPage extends PageAdapter.Page {
     @Override
     void loadData() {
         super.loadData();
-        if (mLoadIconPackTask != null)
-            mLoadIconPackTask.cancel(true);
 
         // load the new pack
         final IconPackXML pack = TBApplication.iconPackCache(pageView.getContext()).getIconPack(packageName);
-        mLoadIconPackTask = Utilities.runAsync(() -> {
+        Utilities.runAsync((t) -> {
             Activity activity = Utilities.getActivity(pageView);
             if (activity != null)
                 pack.loadDrawables(activity.getPackageManager());
-        }, () -> {
-            mLoadIconPackTask = null;
+        }, (t) -> {
             Activity activity = Utilities.getActivity(pageView);
             if (activity != null) {
                 mIconPack = pack;

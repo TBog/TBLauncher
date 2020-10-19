@@ -179,7 +179,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             Context context = getContext();
             if (context == null)
                 return;
-            IconsHandler iph = TBApplication.getApplication(context).getIconsHandler();
+            IconsHandler iph = TBApplication.getApplication(context).iconsHandler();
 
             CharSequence[] entries = new CharSequence[iph.getIconPackNames().size() + 1];
             CharSequence[] entryValues = new CharSequence[iph.getIconPackNames().size() + 1];

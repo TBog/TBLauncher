@@ -107,7 +107,7 @@ public final class AppEntry extends EntryWithTags {
 
     @WorkerThread
     public Drawable getIconDrawable(Context context) {
-        IconsHandler iconsHandler = TBApplication.getApplication(context).getIconsHandler();
+        IconsHandler iconsHandler = TBApplication.getApplication(context).iconsHandler();
         if (customIcon != 0) {
             Drawable drawable = iconsHandler.getCustomIcon(getUserComponentName(), customIcon);
             if (drawable != null)

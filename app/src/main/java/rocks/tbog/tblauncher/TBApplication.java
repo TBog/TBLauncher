@@ -9,12 +9,9 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.sqlite.SQLiteDatabase;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
-
-import java.util.Map;
 
 import rocks.tbog.tblauncher.icons.IconPackCache;
 import rocks.tbog.tblauncher.searcher.Searcher;
@@ -195,7 +192,7 @@ public class TBApplication extends Application {
     }
 
     @NonNull
-    public DrawableCache getDrawableCache() {
+    public DrawableCache drawableCache() {
         return mDrawableCache;
     }
 
@@ -210,10 +207,10 @@ public class TBApplication extends Application {
     }
 
     public static IconsHandler iconsHandler(Context ctx) {
-        return getApplication(ctx).getIconsHandler();
+        return getApplication(ctx).iconsHandler();
     }
 
-    public IconsHandler getIconsHandler() {
+    public IconsHandler iconsHandler() {
         if (iconsPackHandler == null) {
             iconsPackHandler = new IconsHandler(this);
         }
@@ -281,7 +278,7 @@ public class TBApplication extends Application {
         if (level >= ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) {
             // this is called every time the screen is off
             SQLiteDatabase.releaseMemory();
-            mIconPackCache.clearCache();
+            mIconPackCache.clearCache(this);
             if (mSharedPreferences.getBoolean("screen-off-cache-clear", false))
                 mDrawableCache.clearCache();
         }

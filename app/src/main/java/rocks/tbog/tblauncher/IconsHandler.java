@@ -60,6 +60,7 @@ public class IconsHandler {
     private boolean mContactPackMask;
     private boolean mShortcutPackMask;
     private boolean mShortcutBadgePackMask;
+    private Utilities.AsyncRun mLoadIconsPackTask = null;
 
     public IconsHandler(Context ctx) {
         super();
@@ -101,17 +102,30 @@ public class IconsHandler {
      * @param packageName Android package ID of the package to parse
      */
     private void loadIconsPack(@Nullable String packageName) {
-
-        //clear icons pack
-        mIconPack = null;
-
         // system icons, nothing to do
         if (packageName == null || packageName.equalsIgnoreCase("default")) {
+            mIconPack = null;
             return;
         }
 
-        mIconPack = TBApplication.iconPackCache(ctx).getIconPack(packageName);
-        Utilities.runAsync(() -> mIconPack.load(ctx.getPackageManager()), () -> TBApplication.quickList(ctx).onFavoritesChanged());
+        // don't reload the icon pack
+        if (mIconPack == null || !mIconPack.getPackPackageName().equals(packageName)) {
+            if (mLoadIconsPackTask != null)
+                mLoadIconsPackTask.cancel(false);
+            final IconPackXML iconPack = TBApplication.iconPackCache(ctx).getIconPack(packageName);
+            // set the current icon pack
+            mIconPack = iconPack;
+            // start async loading
+            mLoadIconsPackTask = Utilities.runAsync((task) -> {
+                if (task == mLoadIconsPackTask)
+                    iconPack.load(ctx.getPackageManager());
+            }, (task) -> {
+                if (!task.isCancelled() && task == mLoadIconsPackTask) {
+                    mLoadIconsPackTask = null;
+                    TBApplication.quickList(ctx).onFavoritesChanged();
+                }
+            });
+        }
     }
 
     /**
@@ -256,7 +270,7 @@ public class IconsHandler {
         AppRecord appRecord = app.getDataHandler().setCustomAppIcon(appEntry.getUserComponentName(), bitmap);
         //storeDrawable(customIconFileName(appRecord.componentName, appRecord.dbId), drawable);
         appEntry.setCustomIcon(appRecord.dbId);
-        app.getDrawableCache().cacheDrawable(appEntry.id, drawable);
+        app.drawableCache().cacheDrawable(appEntry.id, drawable);
     }
 
     public void changeIcon(StaticEntry staticEntry, Drawable drawable) {
@@ -269,21 +283,21 @@ public class IconsHandler {
         TBApplication app = TBApplication.getApplication(ctx);
         app.getDataHandler().setCustomStaticEntryIcon(staticEntry.id, bitmap);
         staticEntry.setCustomIcon();
-        app.getDrawableCache().cacheDrawable(staticEntry.id, drawable);
+        app.drawableCache().cacheDrawable(staticEntry.id, drawable);
     }
 
     public void restoreDefaultIcon(AppEntry appEntry) {
         TBApplication app = TBApplication.getApplication(ctx);
         AppRecord appRecord = app.getDataHandler().removeCustomAppIcon(appEntry.getUserComponentName());
         appEntry.clearCustomIcon();
-        app.getDrawableCache().cacheDrawable(appEntry.id, null);
+        app.drawableCache().cacheDrawable(appEntry.id, null);
     }
 
     public void restoreDefaultIcon(StaticEntry staticEntry) {
         TBApplication app = TBApplication.getApplication(ctx);
         app.getDataHandler().removeCustomStaticEntryIcon(staticEntry.id);
         staticEntry.clearCustomIcon();
-        app.getDrawableCache().cacheDrawable(staticEntry.id, null);
+        app.drawableCache().cacheDrawable(staticEntry.id, null);
     }
 
     public Drawable applyContactMask(@NonNull Context ctx, @NonNull Drawable drawable) {

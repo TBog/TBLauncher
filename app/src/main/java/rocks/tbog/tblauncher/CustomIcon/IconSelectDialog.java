@@ -171,7 +171,7 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
             return;
         }
 
-        IconsHandler iconsHandler = TBApplication.getApplication(context).getIconsHandler();
+        IconsHandler iconsHandler = TBApplication.getApplication(context).iconsHandler();
         ComponentName cn = UserHandleCompat.unflattenComponentName(name);
         UserHandleCompat userHandle = UserHandleCompat.fromComponentName(context, name);
 

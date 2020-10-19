@@ -45,6 +45,7 @@ public class IconPackXML implements IconPack<IconPackXML.DrawableInfo> {
     // instance of a resource object of an icon pack
     private Resources packResources;
     // package name of the icons pack
+    @NonNull
     private final String iconPackPackageName;
     // list of back images available on an icons pack
     private final ArrayList<DrawableInfo> backImages = new ArrayList<>();
@@ -60,7 +61,7 @@ public class IconPackXML implements IconPack<IconPackXML.DrawableInfo> {
 
     private boolean loaded;
 
-    public IconPackXML(String packageName) {
+    public IconPackXML(@NonNull String packageName) {
         iconPackPackageName = packageName;
         loaded = false;
     }

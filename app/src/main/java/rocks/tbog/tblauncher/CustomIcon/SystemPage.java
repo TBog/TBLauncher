@@ -88,7 +88,7 @@ public class SystemPage extends PageAdapter.Page {
 
         ArraySet<Bitmap> dSet = new ArraySet<>(3);
 
-        IconsHandler iconsHandler = TBApplication.getApplication(context).getIconsHandler();
+        IconsHandler iconsHandler = TBApplication.getApplication(context).iconsHandler();
         // add default icon
         {
             Drawable drawable = iconsHandler.getDrawableIconForPackage(componentName, userHandle);
@@ -258,7 +258,7 @@ public class SystemPage extends PageAdapter.Page {
             adapter.addItem(placeholderItem);
         }
         final HashMap<String, Drawable> options = new HashMap<>(iconPacks.size());
-        Utilities.runAsync(() -> {
+        Utilities.runAsync((t) -> {
             for (Pair<String, String> packInfo : iconPacks) {
                 String packPackageName = packInfo.first;
                 String packName = packInfo.second;
@@ -272,7 +272,7 @@ public class SystemPage extends PageAdapter.Page {
                     break;
                 }
             }
-        }, () -> {
+        }, (t) -> {
             Activity activity = Utilities.getActivity(mGridView);
             if (activity != null) {
                 SystemPageAdapter adapter = (SystemPageAdapter) mGridView.getAdapter();
