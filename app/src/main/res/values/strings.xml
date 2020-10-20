@@ -260,6 +260,11 @@
     <string name="gesture_fling_right">Fling right</string>
     <string name="gesture_click">Tap</string>
     <string name="static_icon_letters_label">Letters to use for generating icons</string>
+    <string name="backup_summary">Save, backup, export and import settings</string>
+    <string name="title_backup">Backup</string>
+    <string name="export_tags">Export tags</string>
+    <string name="export_description">You will be asked to choose an application to save the exported settings as an XML file.</string>
+    <string name="error">Error %s</string>
     <plurals name="tag_entry_count">
         <item quantity="one">%d entry</item>
         <item quantity="other">%d entries</item>

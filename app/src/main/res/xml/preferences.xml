@@ -279,12 +279,26 @@
         <!--        </PreferenceCategory>-->
     </PreferenceScreen>
 
+    <!-- We hold everything from features in a different xml because we have some interface settings there and we
+    can't have the same keys used in an xml file -->
     <PreferenceScreen
         android:key="feature-holder"
         android:summary="@string/features_summary"
         android:title="@string/title_features">
         <!-- include preference_features.xml -->
         <Preference />
+
+    </PreferenceScreen>
+
+    <PreferenceScreen
+        android:key="backup-holder"
+        android:summary="@string/backup_summary"
+        android:title="@string/title_backup">
+
+        <rocks.tbog.tblauncher.preference.CustomDialogPreference
+            android:dialogLayout="@layout/pref_confirm"
+            android:key="export-tags"
+            android:title="@string/export_tags"/>
 
     </PreferenceScreen>
 
