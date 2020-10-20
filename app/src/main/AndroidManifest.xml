@@ -39,6 +39,15 @@
         android:name="android.hardware.nfc"
         android:required="false" />
 
+    <!-- more info on queries here: https://medium.com/androiddevelopers/package-visibility-in-android-11-cc857f221cd9 -->
+    <queries>
+        <!-- for exporting the settings -->
+        <intent>
+            <action android:name="android.intent.action.SEND" />
+            <data android:mimeType="text/xml" />
+        </intent>
+    </queries>
+
     <application
         android:name=".TBApplication"
         android:allowBackup="true"
@@ -114,6 +123,16 @@
         <service android:name=".dataprovider.ContactsProvider" />
         <service android:name=".dataprovider.ShortcutsProvider" />
 
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
     </application>
 
 </manifest>

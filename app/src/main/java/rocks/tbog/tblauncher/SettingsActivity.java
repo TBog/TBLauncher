@@ -266,6 +266,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         break;
                     case "exit-app":
                     case "reset-default-launcher":
+                    case "export-tags":
                         dialogFragment = ConfirmDialog.newInstance(key);
                         break;
                     case "quick-list-content":
