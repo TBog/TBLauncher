@@ -153,7 +153,9 @@ public class ListPopup extends PopupWindow {
         updateItems();
 
         if (mIsModal) {
-            setTouchModal(true);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                setTouchModal(true);
+            }
             setOutsideTouchable(false);
             setFocusable(true);
         } else {
