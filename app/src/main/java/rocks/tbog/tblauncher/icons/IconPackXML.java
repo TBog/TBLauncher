@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
@@ -40,10 +41,11 @@ import rocks.tbog.tblauncher.utils.Utilities;
 public class IconPackXML implements IconPack<IconPackXML.DrawableInfo> {
     private final static String TAG = IconPackXML.class.getSimpleName();
     private final Map<String, ArraySet<DrawableInfo>> drawablesByComponent = new ArrayMap<>(0);
-    private final ArraySet<DrawableInfo> drawableList = new ArraySet<>(0);
+    private final LinkedHashSet<DrawableInfo> drawableList = new LinkedHashSet<>(0);
     // instance of a resource object of an icon pack
     private Resources packResources;
     // package name of the icons pack
+    @NonNull
     private final String iconPackPackageName;
     // list of back images available on an icons pack
     private final ArrayList<DrawableInfo> backImages = new ArrayList<>();
@@ -59,7 +61,7 @@ public class IconPackXML implements IconPack<IconPackXML.DrawableInfo> {
 
     private boolean loaded;
 
-    public IconPackXML(String packageName) {
+    public IconPackXML(@NonNull String packageName) {
         iconPackPackageName = packageName;
         loaded = false;
     }
@@ -78,8 +80,16 @@ public class IconPackXML implements IconPack<IconPackXML.DrawableInfo> {
 //        }
 //    }
 
+
     @Override
-    public void load(PackageManager packageManager) {
+    public synchronized boolean isLoaded() {
+        return loaded;
+    }
+
+    @Override
+    public synchronized void load(PackageManager packageManager) {
+        if (loaded)
+            return;
         try {
             packResources = packageManager.getResourcesForApplication(iconPackPackageName);
         } catch (PackageManager.NameNotFoundException e) {
@@ -90,7 +100,7 @@ public class IconPackXML implements IconPack<IconPackXML.DrawableInfo> {
         loaded = true;
     }
 
-    public void loadDrawables(PackageManager packageManager) {
+    public synchronized void loadDrawables(PackageManager packageManager) {
         if (!loaded)
             load(packageManager);
         try {

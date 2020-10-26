@@ -76,7 +76,11 @@ public class WidgetView extends AppWidgetHostView {
 
             @Override
             public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-                Log.d(TAG, "onFling mSendCancel = true");
+                Log.d(TAG, "onFling mSendCancel = true" +
+                        String.format("\r\nvelocity( %.2f, %.2f )", velocityX, velocityY) +
+                        String.format("\r\ndown pos ( %.2f, %.2f )", e1.getX(), e1.getY()) +
+                        String.format("\r\n up  pos ( %.2f, %.2f )", e2.getX(), e2.getY())
+                        );
                 mSendCancel = true;
                 return true;
             }

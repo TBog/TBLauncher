@@ -22,7 +22,7 @@
         <item>Octagon</item>
     </string-array>
 
-<!-- Values come from DrawableUtils.SHAPE_*    -->
+    <!-- Values come from DrawableUtils.SHAPE_*    -->
     <string-array name="adaptiveValues" translatable="false">
         <item>0</item>  <!-- SHAPE_SYSTEM -->
         <item>1</item>  <!-- SHAPE_CIRCLE -->
@@ -37,7 +37,34 @@
         <item>10</item> <!-- SHAPE_HEXAGON -->
         <item>11</item> <!-- SHAPE_OCTAGON -->
     </string-array>
-    
+
+    <string-array name="defaultSearchProviders" tools:ignore="InconsistentArrays">
+        <item>Bing|https://www.bing.com/search?q=%s</item>
+        <item>Ecosia|https://www.ecosia.org/search?q=%s</item>
+        <item>DuckDuckGo|https://start.duckduckgo.com/?q=%s</item>
+        <item>Google|https://encrypted.google.com/search?q=%s</item>
+        <item>Google Maps|https://www.google.com/maps/search/?api=1&amp;query=%s</item>
+        <item>Google Play Store|https://play.google.com/store/search?q=%s</item>
+        <item>YouTube|https://www.youtube.com/results?search_query=%s</item>
+    </string-array>
+
+    <string-array name="gestureEntries">
+        <item>Do nothing</item>
+        <item>Show notifications panel</item>
+        <item>Show settings panel</item>
+        <item>Show search bar</item>
+        <item>Show widget screen</item>
+        <item>Toggle between search and widget</item>
+    </string-array>
+    <array name="gestureValues" translatable="false">
+        <item>none</item>
+        <item>expandNotificationsPanel</item>
+        <item>expandSettingsPanel</item>
+        <item>showSearchBar</item>
+        <item>showWidgets</item>
+        <item>toggleSearchAndWidget</item>
+    </array>
+
     <array name="material_colors">
         <item>@array/mm2d_cc_red</item>
         <item>@array/mm2d_cc_pink</item>

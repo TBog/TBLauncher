@@ -8,6 +8,9 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.os.Build;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -36,11 +39,11 @@ public class TagsHandler {
 
     public void loadFromDB() {
         final HashMap<String, List<String>> tags = new HashMap<>();
-        Utilities.runAsync(() -> {
+        Utilities.runAsync((t) -> {
             Map<String, List<String>> dbTags = DBHelper.loadTags(getContext());
             tags.clear();
             tags.putAll(dbTags);
-        }, () -> {
+        }, (t) -> {
             mTagsCache.clear();
             mTagsCache.putAll(tags);
             if (mTagsCache.isEmpty())
@@ -62,16 +65,31 @@ public class TagsHandler {
         tags.add(tag);
     }
 
-    public void removeTag(EntryItem entry, String tag) {
+    private boolean removeTag(String entryId, String tag) {
+        boolean changesMade = false;
         // remove from DB
-        DBHelper.removeTag(getContext(), tag, entry);
+        if (DBHelper.removeTag(getContext(), tag, entryId) > 0)
+            changesMade = true;
         // remove from cache
-        List<String> tags = mTagsCache.get(entry.id);
-        if (tags == null)
-            return;
-        tags.remove(tag);
+        List<String> tags = mTagsCache.get(entryId);
+        if (tags != null) {
+            tags.remove(tag);
+            changesMade = true;
+        }
+        return changesMade;
     }
 
+    public boolean removeTag(@Nullable EntryItem entry, String tag) {
+        if (entry instanceof EntryWithTags) {
+            if (removeTag(entry.id, tag)) {
+                ((EntryWithTags) entry).setTags(getTags(entry.id));
+                return true;
+            }
+        }
+        return false;
+    }
+
+    @NonNull
     public List<String> getTags(String id) {
         List<String> tags = mTagsCache.get(id);
         if (tags == null) {
@@ -85,6 +103,7 @@ public class TagsHandler {
 //        return tags.toArray(new String[0]);
 //    }
 
+    @NonNull
     public Set<String> getAllTagsAsSet() {
         Set<String> tags = new HashSet<>();
         for (Map.Entry<String, List<String>> entry : mTagsCache.entrySet()) {
@@ -92,6 +111,16 @@ public class TagsHandler {
         }
         tags.remove("");
         return tags;
+    }
+
+    @NonNull
+    public List<String> getIds(String tagName) {
+        ArrayList<String> ids = new ArrayList<>();
+        for (Map.Entry<String, List<String>> entry : mTagsCache.entrySet()) {
+            if (entry.getValue().indexOf(tagName) != -1)
+                ids.add(entry.getKey());
+        }
+        return ids;
     }
 
     private void addDefaultAliases() {
@@ -241,7 +270,7 @@ public class TagsHandler {
         if (tags == null || tags.isEmpty()) {
             ArrayList<String> tagsToRemove = new ArrayList<>(getTags(entry.id));
             for (String tag : tagsToRemove)
-                removeTag(entry, tag);
+                removeTag(entry.id, tag);
         } else {
             List<String> oldTags = DBHelper.loadTags(getContext(), entry.id);
 
@@ -252,7 +281,7 @@ public class TagsHandler {
                     if (!tags.contains(tag))
                         tagsToRemove.add(tag);
                 for (String tag : tagsToRemove)
-                    removeTag(entry, tag);
+                    removeTag(entry.id, tag);
             }
 
             // add new tags
@@ -263,5 +292,19 @@ public class TagsHandler {
             }
         }
         entry.setTags(getTags(entry.id));
+    }
+
+    public boolean renameTag(String tagName, String newName) {
+        DataHandler dataHandler = mApplication.getDataHandler();
+        for (Map.Entry<String, List<String>> entry : mTagsCache.entrySet()) {
+            int pos = entry.getValue().indexOf(tagName);
+            if (pos >= 0) {
+                entry.getValue().set(pos, newName);
+                EntryItem entryItem = dataHandler.getPojo(entry.getKey());
+                if (entryItem instanceof EntryWithTags)
+                    ((EntryWithTags) entryItem).setTags(entry.getValue());
+            }
+        }
+        return DBHelper.renameTag(getContext(), tagName, newName) > 0;
     }
 }

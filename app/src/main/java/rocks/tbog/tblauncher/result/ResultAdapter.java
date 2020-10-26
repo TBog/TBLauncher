@@ -21,11 +21,7 @@ import java.util.Collection;
 import java.util.HashMap;
 
 import rocks.tbog.tblauncher.TBApplication;
-import rocks.tbog.tblauncher.entry.AppEntry;
-import rocks.tbog.tblauncher.entry.ContactEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
-import rocks.tbog.tblauncher.entry.FilterEntry;
-import rocks.tbog.tblauncher.entry.ShortcutEntry;
 import rocks.tbog.tblauncher.ui.ListPopup;
 
 public class ResultAdapter extends BaseAdapter implements SectionIndexer, Filterable {
@@ -50,20 +46,12 @@ public class ResultAdapter extends BaseAdapter implements SectionIndexer, Filter
 
     @Override
     public int getViewTypeCount() {
-        return 5;
+        return ResultHelper.getItemViewTypeCount();
     }
 
     @Override
     public int getItemViewType(int position) {
-        if (results.get(position) instanceof AppEntry)
-            return 1;
-        if (results.get(position) instanceof ContactEntry)
-            return 2;
-        if (results.get(position) instanceof FilterEntry)
-            return 3;
-        if (results.get(position) instanceof ShortcutEntry)
-            return 4;
-        return super.getItemViewType(position); // return 0;
+        return ResultHelper.getItemViewType(results.get(position));
     }
 
     @Override

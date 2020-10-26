@@ -2,6 +2,8 @@ package rocks.tbog.tblauncher.utils;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
@@ -16,37 +18,62 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.TypedValue;
 
+import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
-import androidx.annotation.RequiresApi;
+import androidx.annotation.Nullable;
 
 import rocks.tbog.tblauncher.R;
-import rocks.tbog.tblauncher.TBApplication;
 
 public class DrawableUtils {
 
     public static final int SHAPE_SYSTEM = 0;
-    private static final int SHAPE_CIRCLE = 1;
+    public static final int SHAPE_CIRCLE = 1;
     public static final int SHAPE_SQUARE = 2;
-    private static final int SHAPE_SQUIRCLE = 3;
-    private static final int SHAPE_ROUND_RECT = 4;
+    public static final int SHAPE_SQUIRCLE = 3;
+    public static final int SHAPE_ROUND_RECT = 4;
     private static final int SHAPE_TEARDROP_BR = 5;
     private static final int SHAPE_TEARDROP_BL = 6;
     private static final int SHAPE_TEARDROP_TL = 7;
     private static final int SHAPE_TEARDROP_TR = 8;
     private static final int SHAPE_TEARDROP_RND = 9;
-    private static final int SHAPE_HEXAGON = 10;
-    private static final int SHAPE_OCTAGON = 11;
+    public static final int SHAPE_HEXAGON = 10;
+    public static final int SHAPE_OCTAGON = 11;
+
+    public static final int[] SHAPE_LIST = {
+            SHAPE_SYSTEM,
+            SHAPE_CIRCLE,
+            SHAPE_SQUARE,
+            SHAPE_SQUIRCLE,
+            SHAPE_ROUND_RECT,
+            SHAPE_TEARDROP_BR,
+            SHAPE_TEARDROP_BL,
+            SHAPE_TEARDROP_TL,
+            SHAPE_TEARDROP_TR,
+            SHAPE_HEXAGON,
+            SHAPE_OCTAGON,
+    };
 
     private static final Paint PAINT = new Paint();
     private static final Path SHAPE_PATH = new Path();
     private static final RectF RECT_F = new RectF();
 
-    // https://stackoverflow.com/questions/3035692/how-to-convert-a-drawable-to-a-bitmap
-
     @NonNull
-    public static Bitmap drawableToBitmap(@NonNull Drawable drawable) {
-        Bitmap bitmap;
+    public static String shapeName(Context context, int shape) {
+        Resources res = context.getResources();
+        String[] values = res.getStringArray(R.array.adaptiveValues);
+        String strShape = String.valueOf(shape);
+        for (int i = 0; i < values.length; i += 1) {
+            if (strShape.equals(values[i])) {
+                String[] names = res.getStringArray(R.array.adaptiveEntries);
+                return names[i];
+            }
+        }
+        return "";
+    }
 
+    // https://stackoverflow.com/questions/3035692/how-to-convert-a-drawable-to-a-bitmap
+    @NonNull
+    public static Bitmap drawableToBitmap(@NonNull Drawable drawable, int width, int height) {
         if (drawable instanceof BitmapDrawable) {
             BitmapDrawable bitmapDrawable = (BitmapDrawable) drawable;
             if (bitmapDrawable.getBitmap() != null) {
@@ -54,11 +81,7 @@ public class DrawableUtils {
             }
         }
 
-        if (drawable.getIntrinsicWidth() <= 0 || drawable.getIntrinsicHeight() <= 0) {
-            bitmap = Bitmap.createBitmap(1, 1, Bitmap.Config.ARGB_8888); // Single color bitmap will be created of 1x1 pixel
-        } else {
-            bitmap = Bitmap.createBitmap(drawable.getIntrinsicWidth(), drawable.getIntrinsicHeight(), Bitmap.Config.ARGB_8888);
-        }
+        Bitmap bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888); // Single color bitmap will be created of 1x1 pixel
 
         Canvas canvas = new Canvas(bitmap);
         drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
@@ -66,11 +89,45 @@ public class DrawableUtils {
         return bitmap;
     }
 
+    public static Drawable applyIconMaskShape(Context ctx, Drawable icon, int shape, boolean fitInside) {
+        return applyIconMaskShape(ctx, icon, shape, fitInside, Color.WHITE);
+    }
+
+    public static Drawable applyIconMaskShape(Context ctx, Drawable icon, int shape, @ColorInt int backgroundColor) {
+        return applyIconMaskShape(ctx, icon, shape, false, backgroundColor);
+    }
+
+    /**
+     * Get percent of icon to use as margin. We use this to avoid clipping the image.
+     *
+     * @param shape from SHAPE_*
+     * @return margin size
+     */
+    private static float getScaleToFit(int shape) {
+        switch (shape) {
+            case SHAPE_CIRCLE:
+            case SHAPE_TEARDROP_BR:
+            case SHAPE_TEARDROP_BL:
+            case SHAPE_TEARDROP_TL:
+            case SHAPE_TEARDROP_TR:
+                return 0.2071f;  // (sqrt(2)-1)/2 to make a square fit in a circle
+            case SHAPE_SQUIRCLE:
+                return 0.1f;
+            case SHAPE_ROUND_RECT:
+                return 0.05f;
+            case SHAPE_HEXAGON:
+                return 0.26f;
+            case SHAPE_OCTAGON:
+                return 0.25f;
+        }
+        return 0.f;
+    }
+
     /**
      * Handle adaptive icons for compatible devices
      */
     @SuppressLint("NewApi")
-    public static Drawable applyIconMaskShape(Context ctx, Drawable icon, int shape, boolean fitInside) {
+    public static Drawable applyIconMaskShape(Context ctx, Drawable icon, int shape, boolean fitInside, @ColorInt int backgroundColor) {
         if (shape == SHAPE_SYSTEM)
             return icon;
         if (shape == SHAPE_TEARDROP_RND)
@@ -114,9 +171,12 @@ public class DrawableUtils {
             int iconSize;
             int iconOffset = 0;
             if (fitInside) {
-                float marginPercent = 0.2071f;  // (sqrt(2)-1)/2 to make a square fit in a circle
-                iconSize = Math.round((1f + 2f * marginPercent) * icon.getIntrinsicHeight());
-                iconOffset = Math.round(marginPercent * icon.getIntrinsicHeight());
+                float marginPercent = getScaleToFit(shape);
+                int iconHeight = icon.getIntrinsicHeight();
+                if (iconHeight <= 0)
+                    iconHeight = ctx.getResources().getDimensionPixelSize(R.dimen.icon_height);
+                iconSize = Math.round((1f + 2f * marginPercent) * iconHeight);
+                iconOffset = Math.round(marginPercent * iconHeight);
             } else {
                 // we don't have antialiasing when clipping so we make the icon bigger and let the View downscale
                 iconSize = 2 * ctx.getResources().getDimensionPixelSize(R.dimen.icon_height);
@@ -124,7 +184,7 @@ public class DrawableUtils {
 
             outputBitmap = Bitmap.createBitmap(iconSize, iconSize, Bitmap.Config.ARGB_8888);
             outputCanvas = new Canvas(outputBitmap);
-            outputPaint.setColor(Color.WHITE);
+            outputPaint.setColor(backgroundColor);
 
             // Shrink icon so that it fits the shape
             int bottomRightCorner = iconSize - iconOffset;
@@ -156,14 +216,14 @@ public class DrawableUtils {
 
         switch (shape) {
             case SHAPE_CIRCLE: {
-                int radius = (int)iconSize / 2;
+                int radius = (int) iconSize / 2;
                 canvas.drawCircle(radius, radius, radius, paint);
 
                 path.addCircle(radius, radius, radius, Path.Direction.CCW);
                 break;
             }
             case SHAPE_SQUIRCLE: {
-                int h = (int)iconSize / 2;
+                int h = (int) iconSize / 2;
                 float c = iconSize / 2.333f;
                 path.moveTo(h, 0f);
                 path.cubicTo(h + c, 0, iconSize, h - c, iconSize, h);
@@ -268,5 +328,19 @@ public class DrawableUtils {
             return drawable instanceof AdaptiveIconDrawable;
         }
         return false;
+    }
+
+    @Nullable
+    public static Drawable getProgressBarIndeterminate(Context context) {
+        final int[] attrs = {android.R.attr.indeterminateDrawable};
+        final int attrs_indeterminateDrawable_index = 0;
+        TypedArray a = context.obtainStyledAttributes(android.R.style.Widget_ProgressBar, attrs);
+        try {
+            return a.getDrawable(attrs_indeterminateDrawable_index);
+        } catch (Exception ignored) {
+            return null;
+        } finally {
+            a.recycle();
+        }
     }
 }

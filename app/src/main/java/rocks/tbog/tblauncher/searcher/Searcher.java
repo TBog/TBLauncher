@@ -5,6 +5,7 @@ import android.os.AsyncTask;
 import android.util.Log;
 
 import androidx.annotation.CallSuper;
+import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 
 import java.lang.ref.WeakReference;
@@ -22,7 +23,7 @@ public abstract class Searcher extends AsyncTask<Void, EntryItem, Void> {
     public static final ExecutorService SEARCH_THREAD = Executors.newSingleThreadExecutor();
     static final int INITIAL_CAPACITY = 50;
     final WeakReference<ISearchActivity> activityWeakReference;
-    private final PriorityQueue<EntryItem> processedPojos;
+    protected final PriorityQueue<EntryItem> processedPojos;
     private boolean tagsEnabled;
     private long start;
     /**
@@ -30,14 +31,20 @@ public abstract class Searcher extends AsyncTask<Void, EntryItem, Void> {
      * When false, we reset the scroll back to the last item in the list
      */
     private boolean isRefresh = false;
+    @NonNull
     protected final String query;
 
-    Searcher(ISearchActivity activity, String query) {
+    Searcher(ISearchActivity activity, @NonNull String query) {
         super();
         this.query = query;
         this.activityWeakReference = new WeakReference<>(activity);
         this.processedPojos = getPojoProcessor(activity);
         this.tagsEnabled = activity.tagsEnabled();
+    }
+
+    @NonNull
+    public String getQuery() {
+        return query;
     }
 
     PriorityQueue<EntryItem> getPojoProcessor(ISearchActivity activity) {

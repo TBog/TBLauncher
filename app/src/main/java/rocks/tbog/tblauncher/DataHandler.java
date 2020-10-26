@@ -24,24 +24,32 @@ import androidx.preference.PreferenceManager;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.Executor;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 import rocks.tbog.tblauncher.dataprovider.ActionProvider;
 import rocks.tbog.tblauncher.dataprovider.AppCacheProvider;
 import rocks.tbog.tblauncher.dataprovider.AppProvider;
+import rocks.tbog.tblauncher.dataprovider.CalculatorProvider;
 import rocks.tbog.tblauncher.dataprovider.ContactsProvider;
 import rocks.tbog.tblauncher.dataprovider.FavProvider;
 import rocks.tbog.tblauncher.dataprovider.FilterProvider;
 import rocks.tbog.tblauncher.dataprovider.IProvider;
 import rocks.tbog.tblauncher.dataprovider.Provider;
+import rocks.tbog.tblauncher.dataprovider.QuickListProvider;
+import rocks.tbog.tblauncher.dataprovider.SearchProvider;
 import rocks.tbog.tblauncher.dataprovider.ShortcutsProvider;
+import rocks.tbog.tblauncher.dataprovider.TagsProvider;
 import rocks.tbog.tblauncher.db.AppRecord;
 import rocks.tbog.tblauncher.db.DBHelper;
 import rocks.tbog.tblauncher.db.FavRecord;
@@ -59,6 +67,17 @@ public class DataHandler extends BroadcastReceiver
         implements SharedPreferences.OnSharedPreferenceChangeListener {
     final static private String TAG = "DataHandler";
 
+    public static final Executor EXECUTOR_PROVIDERS;
+
+    static {
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(
+                1, 1, 1, TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>());
+        threadPoolExecutor.allowCoreThreadTimeOut(true);
+
+        EXECUTOR_PROVIDERS = threadPoolExecutor;
+    }
+
     /**
      * Package the providers reside in
      */
@@ -67,8 +86,6 @@ public class DataHandler extends BroadcastReceiver
      * List all known providers
      */
     final static private List<String> PROVIDER_NAMES = Arrays.asList(
-            //TODO: enable providers when ready
-//            "app", "contacts", "shortcuts"
             "app"
             , "contacts"
             , "shortcuts"
@@ -76,7 +93,7 @@ public class DataHandler extends BroadcastReceiver
 
     final private Context context;
     private String currentQuery;
-    private final Map<String, ProviderEntry> providers = new HashMap<>();
+    private final Map<String, ProviderEntry> providers = new LinkedHashMap<>(); // preserve insert order
     private boolean mFullLoadOverSent = false;
     private long start;
 
@@ -117,38 +134,69 @@ public class DataHandler extends BroadcastReceiver
          * to them dynamically.
          */
 
-        // QuickListProvider
+        // Filters
         {
             ProviderEntry providerEntry = new ProviderEntry();
             providerEntry.provider = new FilterProvider(context);
             providers.put("filters", providerEntry);
         }
-        {
-            ProviderEntry providerEntry = new ProviderEntry();
-            providerEntry.provider = new FavProvider(context);
-            providers.put("favorites", providerEntry);
-        }
+
+        // Actions
         {
             ProviderEntry providerEntry = new ProviderEntry();
             providerEntry.provider = new ActionProvider(context);
             providers.put("actions", providerEntry);
         }
 
-//        ProviderEntry calculatorEntry = new ProviderEntry();
-//        calculatorEntry.provider = new CalculatorProvider();
-//        this.providers.put("calculator", calculatorEntry);
-//        ProviderEntry phoneEntry = new ProviderEntry();
-//        phoneEntry.provider = new PhoneProvider(context);
-//        this.providers.put("phone", phoneEntry);
-//        ProviderEntry searchEntry = new ProviderEntry();
-//        searchEntry.provider = new SearchProvider(context);
-//        this.providers.put("search", searchEntry);
-//        ProviderEntry settingsEntry = new ProviderEntry();
-//        settingsEntry.provider = new SettingsProvider(context);
-//        this.providers.put("settings", settingsEntry);
-//        ProviderEntry tagsEntry = new ProviderEntry();
-//        tagsEntry.provider = new TagsProvider();
-//        this.providers.put("tags", tagsEntry);
+        // Tag provider
+        {
+            ProviderEntry providerEntry = new ProviderEntry();
+            providerEntry.provider = new TagsProvider(context);
+            providers.put("tags", providerEntry);
+        }
+
+        // Favorites
+        {
+            ProviderEntry providerEntry = new ProviderEntry();
+            providerEntry.provider = new FavProvider(context);
+            providers.put("favorites", providerEntry);
+        }
+
+        // QuickList
+        {
+            ProviderEntry providerEntry = new ProviderEntry();
+            providerEntry.provider = new QuickListProvider(context);
+            providers.put("quickList", providerEntry);
+        }
+
+        // add providers that may be toggled by preferences
+        toggleableProviders(prefs);
+    }
+
+    private void toggleableProviders(SharedPreferences prefs) {
+        // Search engine provider,
+        {
+            String providerName = "search";
+            if (prefs.getBoolean("enable-" + providerName, true)) {
+                ProviderEntry providerEntry = new ProviderEntry();
+                providerEntry.provider = new SearchProvider(context);
+                providers.put(providerName, providerEntry);
+            } else {
+                providers.remove(providerName);
+            }
+        }
+
+        // Calculator provider, may be toggled by preference
+        {
+            String providerName = "calculator";
+            if (prefs.getBoolean("enable-" + providerName, true)) {
+                ProviderEntry providerEntry = new ProviderEntry();
+                providerEntry.provider = new CalculatorProvider();
+                providers.put(providerName, providerEntry);
+            } else {
+                providers.remove(providerName);
+            }
+        }
     }
 
     @Override
@@ -274,7 +322,7 @@ public class DataHandler extends BroadcastReceiver
 
                 // We've bound to LocalService, cast the IBinder and get LocalService instance
                 Provider<?>.LocalBinder binder = (Provider<?>.LocalBinder) service;
-                IProvider provider = binder.getService();
+                IProvider<?> provider = binder.getService();
 
                 // Update provider info so that it contains something useful
                 entry.provider = provider;
@@ -392,7 +440,7 @@ public class DataHandler extends BroadcastReceiver
         for (Map.Entry<String, ProviderEntry> setEntry : this.providers.entrySet()) {
             if (searcher.isCancelled())
                 break;
-            IProvider provider = setEntry.getValue().provider;
+            IProvider<?> provider = setEntry.getValue().provider;
             if (provider == null || !provider.isLoaded()) {
                 // if the apps provider has not finished yet, return the cached ones
                 if ("app".equals(setEntry.getKey()))
@@ -685,6 +733,18 @@ public class DataHandler extends BroadcastReceiver
         return (entry != null) ? ((ActionProvider) entry.provider) : null;
     }
 
+    @Nullable
+    public TagsProvider getTagsProvider() {
+        ProviderEntry entry = this.providers.get("tags");
+        return (entry != null) ? ((TagsProvider) entry.provider) : null;
+    }
+
+    @Nullable
+    public QuickListProvider getQuickListProvider() {
+        ProviderEntry entry = this.providers.get("quickList");
+        return (entry != null) ? ((QuickListProvider) entry.provider) : null;
+    }
+
 //    @Nullable
 //    public SearchProvider getSearchProvider() {
 //        ProviderEntry entry = this.providers.get("search");
@@ -699,6 +759,11 @@ public class DataHandler extends BroadcastReceiver
     @NonNull
     public ArrayList<FavRecord> getFavorites() {
         return DBHelper.getFavorites(context);
+    }
+
+    @NonNull
+    public List<String> getTagList() {
+        return DBHelper.loadTagList(context);
     }
 
 //    /**
@@ -747,9 +812,7 @@ public class DataHandler extends BroadcastReceiver
     }
 
     public void removeFromFavorites(EntryItem entry) {
-        FavRecord record = new FavRecord();
-        record.record = entry.id;
-        if (DBHelper.removeFavorite(context, record)) {
+        if (DBHelper.removeFavorite(context, entry.id)) {
             FavProvider favProvider = getFavProvider();
             if (favProvider != null)
                 favProvider.reload(true);
@@ -870,8 +933,13 @@ public class DataHandler extends BroadcastReceiver
         } catch (Exception e) {
             Log.e(TAG, "Unable to convert bitmap", e);
         }
-        if (stream != null)
+        if (stream != null) {
             DBHelper.setCustomStaticEntryIcon(context, entryId, stream.toByteArray());
+            // reload provider to make sure we're up to date
+            FavProvider favProvider = getFavProvider();
+            if (favProvider != null)
+                favProvider.reload(true);
+        }
     }
 
     public Bitmap getCustomAppIcon(String componentName) {
@@ -926,12 +994,14 @@ public class DataHandler extends BroadcastReceiver
         start = System.currentTimeMillis();
 
         IntentFilter intentFilter = new IntentFilter(TBLauncherActivity.LOAD_OVER);
-        this.context.registerReceiver(this, intentFilter);
+        context.registerReceiver(this, intentFilter);
 
         Intent i = new Intent(TBLauncherActivity.START_LOAD);
-        this.context.sendBroadcast(i);
+        context.sendBroadcast(i);
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        toggleableProviders(prefs);
+
         for (String providerName : PROVIDER_NAMES) {
             if (prefs.getBoolean("enable-" + providerName, true)) {
                 connectToProvider(providerName, 0);
@@ -939,7 +1009,7 @@ public class DataHandler extends BroadcastReceiver
         }
 
         for (int step : IProvider.LOAD_STEPS) {
-            for (ProviderEntry entry : this.providers.values()) {
+            for (ProviderEntry entry : providers.values()) {
                 if (entry.provider != null && step == entry.provider.getLoadStep())
                     entry.provider.reload(true);
             }
@@ -956,6 +1026,14 @@ public class DataHandler extends BroadcastReceiver
         }
     }
 
+//    @NonNull
+//    public List<? extends EntryItem> getQuickList() {
+//        FavProvider favProvider = getFavProvider();
+//        if (favProvider == null)
+//            return Collections.emptyList();
+//        return favProvider.getQuickList();
+//    }
+
     public void setQuickList(Iterable<String> records) {
         ArrayList<FavRecord> oldFav = getFavorites();
         int pos = 1;
@@ -967,7 +1045,7 @@ public class DataHandler extends BroadcastReceiver
                     iterator.remove();
             }
             String position = String.format("%08x", pos);
-            if (!DBHelper.setQuickListPosition(context, record, position)) {
+            if (!DBHelper.updateQuickListPosition(context, record, position)) {
                 FavRecord favRecord = new FavRecord();
                 favRecord.record = record;
                 favRecord.flags |= FavRecord.FLAG_SHOW_IN_QUICK_LIST;
@@ -977,16 +1055,38 @@ public class DataHandler extends BroadcastReceiver
             pos += 11;
         }
 
+        TagsProvider tagsProvider = getTagsProvider();
+
         for (FavRecord favRecord : oldFav) {
             if (favRecord.isInQuickList()) {
                 favRecord.flags &= ~FavRecord.FLAG_SHOW_IN_QUICK_LIST;
                 DBHelper.setFavorite(context, favRecord);
             }
+            // keep custom icons
+            if (!favRecord.hasCustomIcon()) {
+                // don't keep tags as favorites
+                if (tagsProvider != null && tagsProvider.mayFindById(favRecord.record)) {
+                    DBHelper.removeFavorite(context, favRecord.record);
+                }
+            }
         }
 
-        FavProvider provider = getFavProvider();
-        if (provider != null)
-            provider.reload(true);
+        // refresh Favorites provider
+        {
+            IProvider<?> provider = getFavProvider();
+            if (provider != null)
+                provider.reload(true);
+        }
+        {
+            IProvider<?> provider = getTagsProvider();
+            if (provider != null)
+                provider.reload(true);
+        }
+        {
+            IProvider<?> provider = getQuickListProvider();
+            if (provider != null)
+                provider.reload(true);
+        }
     }
 
     public boolean fullLoadOverSent() {
@@ -994,7 +1094,7 @@ public class DataHandler extends BroadcastReceiver
     }
 
     static final class ProviderEntry {
-        public IProvider provider = null;
+        public IProvider<?> provider = null;
         ServiceConnection connection = null;
     }
 }

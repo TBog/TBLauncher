@@ -76,7 +76,7 @@ public abstract class StaticEntry extends EntryItem {
     private void launchRenameDialog(@NonNull Context ctx) {
         ContextThemeWrapper context = new ContextThemeWrapper(ctx, R.style.NoTitleDialogTheme);
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle(context.getResources().getString(R.string.app_rename_title));
+        builder.setTitle(context.getResources().getString(R.string.title_app_rename));
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             builder.setView(R.layout.dialog_rename);
@@ -177,7 +177,7 @@ public abstract class StaticEntry extends EntryItem {
     @WorkerThread
     public Drawable getIconDrawable(Context context) {
         if (customIcon) {
-            IconsHandler iconsHandler = TBApplication.getApplication(context).getIconsHandler();
+            IconsHandler iconsHandler = TBApplication.getApplication(context).iconsHandler();
             Drawable drawable = iconsHandler.getCustomIcon(this);
             if (drawable != null)
                 return drawable;

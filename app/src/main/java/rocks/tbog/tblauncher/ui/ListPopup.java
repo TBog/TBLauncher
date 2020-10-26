@@ -15,6 +15,7 @@ import android.widget.PopupWindow;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
+import androidx.appcompat.widget.ListPopupWindow;
 
 import rocks.tbog.tblauncher.R;
 
@@ -29,6 +30,7 @@ public class ListPopup extends PopupWindow {
     private ListAdapter mAdapter;
     private boolean dismissOnClick = true;
     private float dimAmount = .7f;
+    private boolean mIsModal = false; // send all touch events to this window
 
     public static ListPopup create(@NonNull Context context, ListAdapter adapter) {
         ContextThemeWrapper ctx = new ContextThemeWrapper(context, R.style.ListPopupTheme);
@@ -150,8 +152,16 @@ public class ListPopup extends PopupWindow {
     private void beforeShow() {
         updateItems();
 
-        // don't steal the focus, this will prevent the keyboard from changing
-        setFocusable(false);
+        if (mIsModal) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                setTouchModal(true);
+            }
+            setOutsideTouchable(false);
+            setFocusable(true);
+        } else {
+            // don't steal the focus, this will prevent the keyboard from changing
+            setFocusable(false);
+        }
         // draw over stuff if needed
         setClippingEnabled(false);
 
@@ -176,7 +186,8 @@ public class ListPopup extends PopupWindow {
         anchor.getWindowVisibleDisplayFrame(displayFrame);
 
         final int[] anchorPos = mTempLocation;
-        anchor.getLocationOnScreen(anchorPos);
+        anchor.getLocationInWindow(anchorPos);
+        //anchor.getLocationOnScreen(anchorPos);
 
         final int distanceToBottom = displayFrame.bottom - (anchorPos[1] + anchor.getHeight());
         final int distanceToTop = anchorPos[1] - displayFrame.top;
@@ -300,6 +311,10 @@ public class ListPopup extends PopupWindow {
             wm.updateViewLayout(container, p);
         }
 
+    }
+
+    public void setModal(boolean modal) {
+        mIsModal = modal;
     }
 
     public interface OnItemClickListener {

@@ -1,15 +1,18 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
     <string name="app_name">TinyBit launcher</string>
     <string name="hint_ui_search">Search apps, contacts, …</string>
+    <string name="ui_item_search">Search %1$s for “%2$s”</string>
+    <string name="ui_item_visit">Visit “%1$s”</string>
+    <string name="copy_confirmation">Copied `%s` to clipboard</string>
 
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
 
     <string name="removed_item">Removed</string>
 
-    <string name="unable_to_initialize_shortcuts">Unable to initialize shortcuts. Is TBLauncher your default launcher?</string>
-    <string name="cant_pin_shortcut">Could not add shortcut. Is TBLauncher your default launcher\?</string>
-    <string name="cant_save_shortcuts">Could not add shortcuts. Is TBLauncher your default launcher\?</string>
+    <string name="unable_to_initialize_shortcuts">Unable to initialize shortcuts. Is TinyBit your default launcher?</string>
+    <string name="cant_pin_shortcut">Could not add shortcut. Is TinyBit your default launcher\?</string>
+    <string name="cant_save_shortcuts">Could not add shortcuts. Is TinyBit your default launcher\?</string>
     <string name="toast_favorites_added">%s was added to favorites</string>
     <string name="toast_favorites_removed">%s was removed from favorites</string>
     <string name="menu_favorites_add">Add to favorites</string>
@@ -17,8 +20,6 @@
     <string name="menu_favorites_remove">Remove favorite</string>
     <string name="stub_application">App Name</string>
     <string name="stub_app_tag">app tag list</string>
-    <string name="cd_main_menu">Menu</string>
-    <string name="cd_main_clear">Clear search bar</string>
     <string name="permission_denied">Permission has been denied</string>
     <string name="menu_exclude">Exclude…</string>
     <string name="menu_hide">Hide</string>
@@ -30,9 +31,9 @@
     <string name="menu_app_store">View in store</string>
     <string name="menu_app_uninstall">Uninstall</string>
     <string name="menu_exclude_history">from history</string>
-    <string name="menu_exclude_kiss">from TBLauncher</string>
-    <string name="excluded_app_history_added">App excluded from history. Reset through the TBLauncher settings</string>
-    <string name="excluded_app_list_added">App excluded from TBLauncher. Reset through the TBLauncher settings</string>
+    <string name="menu_exclude_kiss">from TinyBit</string>
+    <string name="excluded_app_history_added">App excluded from history. Reset through the TinyBit settings</string>
+    <string name="excluded_app_list_added">App excluded from TinyBit. Reset through the TinyBit settings</string>
     <string name="application_not_found">Whoops… unable to launch that app.</string>
     <string name="change_wallpaper">Change wallpaper</string>
     <string name="menu_widget_title">Widget menu</string>
@@ -42,7 +43,8 @@
     <string name="menu_popup_title">Main menu</string>
     <string name="menu_popup_title_settings">Settings</string>
     <string name="menu_popup_android_settings">Device settings</string>
-    <string name="menu_popup_launcher_settings">TBLauncher settings</string>
+    <string name="menu_popup_launcher_settings">TinyBit settings</string>
+    <string name="menu_popup_tags_manager">Tags manager</string>
     <string name="rate_the_app">Rate the app</string>
     <string name="user_interface_summary">Themes, transparency and colors</string>
     <string name="title_ui">User interface</string>
@@ -57,21 +59,21 @@
     <string name="transparent_favorites_bar">Transparent favorites bar</string>
     <string name="large_search_bar">Bigger search bar</string>
     <string name="round_corners">Rounded corners</string>
-    <string name="swap_kiss_button_with_menu">TBLauncher button on the right</string>
-
-    <!-- Default title for color picker dialog [CHAR LIMIT=30] -->
-    <string name="color_picker_default_title">Select a Color</string>
-    <!-- Content description for a color square. -->
-    <string name="color_swatch_description">Color %1$d</string>
-    <!-- Content description for a selected color square. -->
-    <string name="color_swatch_description_selected" tools:ignore="PluralsCandidate">Color %1$d selected</string>
-    <string name="color_transparent_dark">Transparent dark</string>
-    <string name="color_transparent_white">Transparent white</string>
-    <string name="color_transparent">Transparent</string>
-
+    <string name="swap_kiss_button_with_menu">TinyBit button on the right</string>
 
     <!-- Content Description -->
+    <string name="cd_main_menu">Menu</string>
+    <string name="cd_main_clear">Clear search bar</string>
     <string name="cd_show_all_apps">Show all applications</string>
+    <string name="cd_item_contact_message">Message</string>
+    <string name="cd_item_contact_call">Call</string>
+    <string name="cd_icon_preview">Preview</string>
+    <string name="cd_add_tag">Add tag</string>
+    <string name="cd_undo_remove_tag">Undo remove tag</string>
+    <string name="cd_remove_tag">Remove tag</string>
+    <string name="cd_rename_tag">Rename tag</string>
+    <string name="cd_icon_tag">Set tag icon</string>
+
     <string name="title_select_alpha">Drag the slider to select the desired opacity</string>
     <string name="title_select_size">Drag the slider to select the desired size</string>
     <string name="search_bar_section">Search bar</string>
@@ -81,24 +83,31 @@
     <string name="icons_pack_default_name">System icons</string>
     <string name="value">value %d</string>
     <string name="size">&lt;%d&gt;</string>
+
     <string name="menu_app_rename">Rename app</string>
     <string name="menu_action_rename">Rename</string>
     <string name="menu_shortcut_rename">Rename shortcut</string>
     <string name="menu_custom_icon">Change icon</string>
-    <string name="app_rename_title">Choose a custom name for this application</string>
-    <string name="shortcut_rename_title">Choose a custom name for this shortcut</string>
+    <string name="title_app_rename">Choose a custom name for this application</string>
+    <string name="title_rename_tag">Choose a different name for this tag</string>
+    <string name="title_rename_search_engine">Choose a different name for this search engine</string>
+    <string name="title_edit_url_search_engine">Choose a different url for this search engine</string>
+    <string name="title_shortcut_rename">Choose a custom name for this shortcut</string>
     <string name="app_rename_confirmation">App name is now %s</string>
     <string name="shortcut_rename_confirmation">Shortcut name is now %s</string>
     <string name="hint_custom_icon">Filter by name</string>
     <string name="default_icon">default icon</string>
+    <string name="default_static_icon">%s default icon</string>
     <string name="custom_icon_application">application</string>
     <string name="custom_icon_application_with_pack">application with pack</string>
     <string name="custom_icon_application_adaptive">application adaptive</string>
     <string name="custom_icon_application_adaptive_fill">application adaptive fill</string>
+    <string name="custom_icon_application_shaped">%s application shape</string>
     <string name="custom_icon_activity">activity</string>
     <string name="custom_icon_activity_with_pack">activity with pack</string>
     <string name="custom_icon_activity_adaptive">activity adaptive</string>
     <string name="custom_icon_activity_adaptive_fill">activity adaptive fill</string>
+    <string name="custom_icon_activity_shaped">%s activity shape</string>
     <string name="custom_icon_badged">badged</string>
     <string name="custom_icon_badged_with_pack">badged with pack</string>
     <string name="custom_icon_badged_adaptive">badged adaptive</string>
@@ -106,13 +115,8 @@
     <string name="custom_icon_preview">Selection\npreview</string>
     <string name="custom_name_set_default">Default name</string>
     <string name="custom_name_rename">Rename</string>
-    <string name="cd_item_contact_message">Message</string>
-    <string name="cd_item_contact_call">Call</string>
     <string name="adaptive_shape_name">Adaptive icon shape</string>
-    <string name="cd_icon_preview">Preview</string>
     <string name="hint_new_tag">add tag</string>
-    <string name="cd_add_tag">Add tag</string>
-    <string name="cd_remove_tag">Remove tag</string>
     <string name="title_features">Features</string>
     <string name="features_summary">Toggle and customize app features</string>
     <string name="quick_list_section">Quick-List</string>
@@ -120,7 +124,9 @@
     <string name="quick_list_size">Bar height</string>
     <string name="tags_section">Tags</string>
     <string name="fuzzy_search_tags">Fuzzy-search tags</string>
-    <string name="tags_enabled">Use tags for apps</string>
+    <string name="fuzzy_search_tags_summary">When searching include tags as possible match candidates</string>
+    <string name="tags_enabled">Display tags for apps</string>
+    <string name="tags_enabled_summary">Show tags for each app in the result list</string>
     <string name="icons_section">Icons</string>
     <string name="icons_visible">Show Icons</string>
     <string name="popup_title_hist_fav">Preferences</string>
@@ -149,8 +155,10 @@
     <string name="quick_list_content">Customize content</string>
     <string name="quick_list_content_summary">Change order and add entries</string>
     <string name="edit_quick_list_preview">Preview <em>(touch to remove from quick list)</em></string>
-    <string name="edit_quick_list_filters_and_actions">Possible filters and actions</string>
-    <string name="edit_quick_list_favorites">From the favorites</string>
+    <string name="edit_quick_list_tab_filters">Filters</string>
+    <string name="edit_quick_list_tab_actions">Actions</string>
+    <string name="edit_quick_list_tab_favorites">Favorites</string>
+    <string name="edit_quick_list_tab_tags">Tags</string>
     <string name="quick_list_icons_visible">Show Quick List icons</string>
     <string name="quick_list_text_visible">Show names</string>
     <string name="cache_drawable">Cache icons</string>
@@ -163,7 +171,7 @@
     <string name="icon_pack_section">Icon pack</string>
     <string name="shortcut_shape_name">Shortcut icon shape</string>
     <string name="icon_pack_list">Installed icon packs</string>
-    <string name="icon_pack_content_list">Icons from the selected icon pack</string>
+    <string name="icon_pack_content_list">Icons from\n%s</string>
     <string name="icon_pack_quick_list">System icon variations</string>
 
     <string name="title_wallpaper">Wallpaper interactions</string>
@@ -219,4 +227,41 @@
     <string name="menu_popup_quick_list_customize">Customize quick list</string>
     <string name="result_text_size">Text size</string>
     <string name="result_text2_size">Secondary text size</string>
+    <string name="invalid_rename_tag">Tag name \"%s\" is invalid, already used</string>
+    <string name="invalid_rename_search_engine">Search engine name \"%s\" is already used</string>
+    <string name="provider_section">Providers</string>
+    <string name="enable_search">Search engine</string>
+    <string name="enable_url">Web url</string>
+    <string name="enable_calculator">Calculator</string>
+    <string name="edit_search_engines">Edit search engines</string>
+    <string name="edit_search_engines_summary">Toggle and select search providers</string>
+    <string name="reset_search_engines">Reset search engines</string>
+    <string name="reset_search_engines_summary">Restore default search engines</string>
+    <string name="add_search_engine">Add search engine</string>
+    <string name="search_engine_rename">Rename</string>
+    <string name="search_engine_delete">Delete</string>
+    <string name="search_engine_edit_url">Edit url</string>
+    <string name="confirm_edit_url_search_engine">Save</string>
+    <string name="search_engine_set_default">Make default</string>
+    <string name="hint_add_search_engine_url">https://search.engine/query=%s</string>
+    <string name="label_search_engine_name">Search provider name</string>
+    <string name="label_search_engine_url">Url to execute, %s will be replaced by your query</string>
+    <string name="selected_pack">%s\n[current pack]</string>
+    <string name="tab_app_icons">%s\n[app icons]</string>
+    <string name="tab_static_icons">Default icon</string>
+    <string name="icon_pack_loading">Loading from icon packs…</string>
+    <string name="gesture_section">Gestures</string>
+    <string name="gesture_fling_down_left">Left fling down</string>
+    <string name="gesture_fling_down_left_summary">Fling downward starting on the left side of the screen</string>
+    <string name="gesture_fling_down_right">Right fling down</string>
+    <string name="gesture_fling_down_right_summary">Fling downward starting on the right side of the screen</string>
+    <string name="gesture_fling_up">Fling up</string>
+    <string name="gesture_fling_left">Fling left</string>
+    <string name="gesture_fling_right">Fling right</string>
+    <string name="gesture_click">Tap</string>
+    <string name="static_icon_letters_label">Letters to use for generating icons</string>
+    <plurals name="tag_entry_count">
+        <item quantity="one">%d entry</item>
+        <item quantity="other">%d entries</item>
+    </plurals>
 </resources>

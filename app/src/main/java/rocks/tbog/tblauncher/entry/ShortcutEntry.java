@@ -191,28 +191,6 @@ public final class ShortcutEntry extends EntryWithTags {
             appIcon.setVisibility(View.GONE);
         }
 
-
-//        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
-//            Bitmap icon = getIcon(context);
-//            shortcutIcon.setVisibility(View.VISIBLE);
-//            if (icon != null) {
-//                BitmapDrawable drawable = new BitmapDrawable(context.getResources(), icon);
-//                shortcutIcon.setImageDrawable(drawable);
-//                appIcon.setImageDrawable(appDrawable);
-//            } else {
-//                // No icon for this shortcut, use app icon
-//                shortcutIcon.setImageDrawable(appDrawable);
-//                appIcon.setImageResource(R.drawable.ic_send);
-//            }
-//            if (!prefs.getBoolean("subicon-visible", true)) {
-//                appIcon.setVisibility(View.GONE);
-//            }
-//        } else {
-//            appIcon.setImageDrawable(null);
-//            shortcutIcon.setImageDrawable(null);
-//            shortcutIcon.setVisibility(View.GONE);
-//        }
-
         ResultViewHelper.applyPreferences(drawFlags, shortcutName, tagsView, shortcutIcon);
     }
 
@@ -256,22 +234,6 @@ public final class ShortcutEntry extends EntryWithTags {
             }
         }
 
-//        LauncherApps.ShortcutQuery query = new LauncherApps.ShortcutQuery();
-//        query.setPackage(packageName);
-//        query.setShortcutIds(Collections.singletonList(getOreoId()));
-//        query.setQueryFlags(FLAG_MATCH_DYNAMIC | FLAG_MATCH_MANIFEST | FLAG_MATCH_PINNED);
-//
-//        List<UserHandle> userHandles = launcherApps.getProfiles();
-//
-//        // Find the correct UserHandle, and launch the shortcut.
-//        for (UserHandle userHandle : userHandles) {
-//            List<ShortcutInfo> shortcuts = launcherApps.getShortcuts(query, userHandle);
-//            if (shortcuts != null && shortcuts.size() > 0 && shortcuts.get(0).isEnabled()) {
-//                launcherApps.startShortcut(shortcuts.get(0), Utilities.getOnScreenRect(v), null);
-//                return;
-//            }
-//        }
-
         // Application removed? Invalid shortcut? Shortcut to an app on an unmounted SD card?
         Toast.makeText(context, R.string.application_not_found, Toast.LENGTH_LONG).show();
     }
@@ -289,6 +251,12 @@ public final class ShortcutEntry extends EntryWithTags {
             adapter.add(new LinearAdapter.Item(context, R.string.menu_tags_edit));
         adapter.add(new LinearAdapter.Item(context, R.string.menu_shortcut_rename));
         //adapter.add(new LinearAdapter.Item(context, R.string.menu_custom_icon));
+
+        if (Utilities.checkFlag(flags, FLAG_POPUP_MENU_QUICK_LIST)) {
+            adapter.add(new LinearAdapter.ItemTitle(context, R.string.menu_popup_title_settings));
+            adapter.add(new LinearAdapter.Item(context, R.string.menu_popup_quick_list_customize));
+        }
+
         return inflatePopupMenu(context, adapter);
     }
 
@@ -315,7 +283,7 @@ public final class ShortcutEntry extends EntryWithTags {
     private void launchRenameDialog(@NonNull Context ctx) {
         ContextThemeWrapper context = new ContextThemeWrapper(ctx, R.style.NoTitleDialogTheme);
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle(context.getResources().getString(R.string.shortcut_rename_title));
+        builder.setTitle(context.getResources().getString(R.string.title_shortcut_rename));
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             builder.setView(R.layout.dialog_rename);

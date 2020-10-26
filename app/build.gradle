@@ -10,8 +10,8 @@ android {
         applicationId "rocks.tbog.tblauncher"
         minSdkVersion 19
         targetSdkVersion 30
-        versionCode 15
-        versionName "4.6"
+        versionCode 16
+        versionName "4.7"
     }
 
     buildTypes {

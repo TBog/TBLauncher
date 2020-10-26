@@ -11,7 +11,7 @@ import rocks.tbog.tblauncher.searcher.Searcher;
 /**
  * Public interface exposed by every KISS data provider
  */
-public interface IProvider {
+public interface IProvider<T extends EntryItem> {
     int LOAD_STEP_1 = 0;
     int LOAD_STEP_2 = 1;
     int[] LOAD_STEPS = new int[] {LOAD_STEP_1, LOAD_STEP_2};
@@ -72,12 +72,12 @@ public interface IProvider {
      * @param id id we're looking for
      * @return null if not found
      */
-    EntryItem findById(@NonNull String id);
+    T findById(@NonNull String id);
 
     /**
      * Get a list of all pojos, do not modify this list!
      *
      * @return list of all entries
      */
-    List<? extends EntryItem> getPojos();
+    List<T> getPojos();
 }

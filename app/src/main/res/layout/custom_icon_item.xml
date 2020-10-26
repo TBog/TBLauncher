@@ -10,7 +10,7 @@
     android:background="?attr/selectableItemBackgroundBorderless"
     android:contentDescription="@null"
     android:scaleType="centerCrop"
-    tools:showIn="@layout/custom_icon_dialog"
+    tools:showIn="@layout/dialog_icon_select_page"
     tools:src="@android:drawable/ic_menu_call">
 
 </ImageView>

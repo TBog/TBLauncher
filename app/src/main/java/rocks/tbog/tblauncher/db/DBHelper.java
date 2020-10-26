@@ -3,7 +3,6 @@ package rocks.tbog.tblauncher.db;
 import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
-import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 import android.text.TextUtils;
@@ -414,12 +413,28 @@ public class DBHelper {
      *
      * @param context android context
      * @param tag     tag name to remove
-     * @param entry   EntryItem
+     * @param entryId EntryItem.id
+     * @return number of records affected
      */
-    public static void removeTag(Context context, String tag, EntryItem entry) {
+    public static int removeTag(Context context, String tag, String entryId) {
         SQLiteDatabase db = getDatabase(context);
 
-        db.delete("tags", "tag = ? AND record = ?", new String[]{tag, entry.id});
+        return db.delete("tags", "tag = ? AND record = ?", new String[]{tag, entryId});
+    }
+
+    /**
+     * @param context android context
+     * @param tagName what tag to rename
+     * @param newName the new name of the tag
+     * @return number of records affected
+     */
+    public static int renameTag(Context context, String tagName, String newName) {
+        SQLiteDatabase db = getDatabase(context);
+
+        ContentValues values = new ContentValues();
+        values.put("tag", newName);
+
+        return db.update("tags", values, "tag = ?", new String[]{tagName});
     }
 
     /**
@@ -443,6 +458,25 @@ public class DBHelper {
             }
         }
         return records;
+    }
+
+    /**
+     * @param context android context
+     * @return List of all tags
+     */
+    @NonNull
+    public static List<String> loadTagList(Context context) {
+        List<String> tags;
+        SQLiteDatabase db = getDatabase(context);
+        try (Cursor cursor = db.query("tags", new String[]{"tag"},
+                null, null, "tag", null, null)) {
+            tags = new ArrayList<>(cursor.getCount());
+            while (cursor.moveToNext()) {
+                String tag = cursor.getString(0);
+                tags.add(tag);
+            }
+        }
+        return tags;
     }
 
     /**
@@ -766,21 +800,21 @@ public class DBHelper {
         values.put("position", fav.position);
         values.put("custom_flags", fav.flags);
 
-//        int rows = db.update("favorites", values, "record=?", new String[]{fav.record});
-//        if (rows == 0)
-//            db.insertWithOnConflict("favorites", null, values, SQLiteDatabase.CONFLICT_REPLACE);
-        try {
-            db.replaceOrThrow("favorites", null, values);
-        } catch (SQLException e) {
-            Log.e(TAG, "setFavorite " + fav.record);
-        }
+        int rows = db.update("favorites", values, "record=?", new String[]{fav.record});
+        if (rows == 0)
+            db.insertWithOnConflict("favorites", null, values, SQLiteDatabase.CONFLICT_REPLACE);
+//        try {
+//            db.replaceOrThrow("favorites", null, values);
+//        } catch (SQLException e) {
+//            Log.e(TAG, "setFavorite " + fav.record);
+//        }
     }
 
-    public static boolean removeFavorite(Context context, FavRecord fav) {
+    public static boolean removeFavorite(Context context, String record) {
         SQLiteDatabase db = getDatabase(context);
 
-        if (0 == db.delete("favorites", "record=?", new String[]{fav.record})) {
-            Log.e(TAG, "removeFavorite " + fav.record);
+        if (0 == db.delete("favorites", "record=?", new String[]{record})) {
+            Log.e(TAG, "removeFavorite " + record);
             return false;
         }
         return true;
@@ -804,7 +838,7 @@ public class DBHelper {
         return list;
     }
 
-    public static boolean setQuickListPosition(@NonNull Context context, String record, String position) {
+    public static boolean updateQuickListPosition(@NonNull Context context, String record, String position) {
         SQLiteDatabase db = getDatabase(context);
         String sql = "UPDATE \"favorites\" SET \"custom_flags\"=(\"custom_flags\"|?), \"position\"=? WHERE \"record\"=?";
         try {

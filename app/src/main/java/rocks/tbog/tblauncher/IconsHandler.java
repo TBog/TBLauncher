@@ -33,8 +33,10 @@ import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.icons.IconPack;
 import rocks.tbog.tblauncher.icons.IconPackXML;
 import rocks.tbog.tblauncher.icons.SystemIconPack;
+import rocks.tbog.tblauncher.ui.TextDrawable;
 import rocks.tbog.tblauncher.utils.DrawableUtils;
 import rocks.tbog.tblauncher.utils.UIColors;
+import rocks.tbog.tblauncher.utils.UISizes;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
 
@@ -58,6 +60,7 @@ public class IconsHandler {
     private boolean mContactPackMask;
     private boolean mShortcutPackMask;
     private boolean mShortcutBadgePackMask;
+    private Utilities.AsyncRun mLoadIconsPackTask = null;
 
     public IconsHandler(Context ctx) {
         super();
@@ -71,7 +74,7 @@ public class IconsHandler {
      * Set values from preferences
      */
     public void onPrefChanged(SharedPreferences pref) {
-        loadIconsPack(pref.getString("icons-pack", "default"));
+        loadIconsPack(pref.getString("icons-pack", null));
         mSystemPack.setAdaptiveShape(getAdaptiveShape(pref, "adaptive-shape"));
         mForceAdaptive = pref.getBoolean("force-adaptive", true);
         mForceShape = pref.getBoolean("force-shape", true);
@@ -98,18 +101,31 @@ public class IconsHandler {
      *
      * @param packageName Android package ID of the package to parse
      */
-    private void loadIconsPack(@NonNull String packageName) {
-
-        //clear icons pack
-        mIconPack = null;
-
+    private void loadIconsPack(@Nullable String packageName) {
         // system icons, nothing to do
-        if (packageName.equalsIgnoreCase("default")) {
+        if (packageName == null || packageName.equalsIgnoreCase("default")) {
+            mIconPack = null;
             return;
         }
 
-        mIconPack = new IconPackXML(packageName);
-        Utilities.runAsync(()->mIconPack.load(ctx.getPackageManager()), null);
+        // don't reload the icon pack
+        if (mIconPack == null || !mIconPack.getPackPackageName().equals(packageName)) {
+            if (mLoadIconsPackTask != null)
+                mLoadIconsPackTask.cancel();
+            final IconPackXML iconPack = TBApplication.iconPackCache(ctx).getIconPack(packageName);
+            // set the current icon pack
+            mIconPack = iconPack;
+            // start async loading
+            mLoadIconsPackTask = Utilities.runAsync((task) -> {
+                if (task == mLoadIconsPackTask)
+                    iconPack.load(ctx.getPackageManager());
+            }, (task) -> {
+                if (!task.isCancelled() && task == mLoadIconsPackTask) {
+                    mLoadIconsPackTask = null;
+                    TBApplication.quickList(ctx).onFavoritesChanged();
+                }
+            });
+        }
     }
 
     /**
@@ -119,6 +135,9 @@ public class IconsHandler {
     public Drawable getDrawableIconForPackage(ComponentName componentName, UserHandleCompat userHandle) {
         // check the icon pack for a resource
         if (mIconPack != null) {
+            // just checking will make this thread wait for the icon pack to load
+            if (!mIconPack.isLoaded())
+                return null;
             String componentString = componentName.toString();
             Drawable drawable = mIconPack.getComponentDrawable(componentString);
             if (drawable != null) {
@@ -155,6 +174,9 @@ public class IconsHandler {
     public Drawable getDrawableBadgeForPackage(ComponentName componentName, UserHandleCompat userHandle) {
         // check the icon pack for a resource
         if (mIconPack != null) {
+            // just checking will make this thread wait for the icon pack to load
+            if (!mIconPack.isLoaded())
+                return null;
             String componentString = componentName.toString();
             Drawable drawable = mIconPack.getComponentDrawable(componentString);
             if (drawable != null) {
@@ -205,7 +227,7 @@ public class IconsHandler {
         }
     }
 
-    HashMap<String, String> getIconPackNames() {
+    public HashMap<String, String> getIconPackNames() {
         return mIconPackNames;
     }
 
@@ -248,29 +270,34 @@ public class IconsHandler {
         AppRecord appRecord = app.getDataHandler().setCustomAppIcon(appEntry.getUserComponentName(), bitmap);
         //storeDrawable(customIconFileName(appRecord.componentName, appRecord.dbId), drawable);
         appEntry.setCustomIcon(appRecord.dbId);
-        app.getDrawableCache().cacheDrawable(appEntry.id, drawable);
+        app.drawableCache().cacheDrawable(appEntry.id, drawable);
     }
 
     public void changeIcon(StaticEntry staticEntry, Drawable drawable) {
-        Bitmap bitmap = Utilities.drawableToBitmap(drawable);
+        Bitmap bitmap;
+        if (drawable instanceof TextDrawable) {
+            int size = UISizes.getResultIconSize(ctx);
+            bitmap = DrawableUtils.drawableToBitmap(drawable, size, size);
+        } else
+            bitmap = Utilities.drawableToBitmap(drawable);
         TBApplication app = TBApplication.getApplication(ctx);
         app.getDataHandler().setCustomStaticEntryIcon(staticEntry.id, bitmap);
         staticEntry.setCustomIcon();
-        app.getDrawableCache().cacheDrawable(staticEntry.id, drawable);
+        app.drawableCache().cacheDrawable(staticEntry.id, drawable);
     }
 
     public void restoreDefaultIcon(AppEntry appEntry) {
         TBApplication app = TBApplication.getApplication(ctx);
         AppRecord appRecord = app.getDataHandler().removeCustomAppIcon(appEntry.getUserComponentName());
         appEntry.clearCustomIcon();
-        app.getDrawableCache().cacheDrawable(appEntry.id, null);
+        app.drawableCache().cacheDrawable(appEntry.id, null);
     }
 
     public void restoreDefaultIcon(StaticEntry staticEntry) {
         TBApplication app = TBApplication.getApplication(ctx);
         app.getDataHandler().removeCustomStaticEntryIcon(staticEntry.id);
         staticEntry.clearCustomIcon();
-        app.getDrawableCache().cacheDrawable(staticEntry.id, null);
+        app.drawableCache().cacheDrawable(staticEntry.id, null);
     }
 
     public Drawable applyContactMask(@NonNull Context ctx, @NonNull Drawable drawable) {
@@ -291,10 +318,9 @@ public class IconsHandler {
         return new BitmapDrawable(ctx.getResources(), b);
     }
 
-    public Drawable applyShortcutMask(@NonNull Context ctx, Bitmap bitmap)
-    {
+    public Drawable applyShortcutMask(@NonNull Context ctx, Bitmap bitmap) {
         Drawable drawable = new BitmapDrawable(ctx.getResources(), bitmap);
-        if (!mShortcutPackMask )
+        if (!mShortcutPackMask)
             return DrawableUtils.applyIconMaskShape(ctx, drawable, mShortcutsShape, false);
         if (mIconPack != null && mIconPack.hasMask())
             return mIconPack.applyBackgroundAndMask(ctx, drawable, false);

@@ -43,6 +43,7 @@ import androidx.preference.PreferenceManager;
 import rocks.tbog.tblauncher.db.ShortcutRecord;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.ShortcutEntry;
+import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
 import rocks.tbog.tblauncher.utils.DebugInfo;
 import rocks.tbog.tblauncher.utils.Utilities;
@@ -162,7 +163,7 @@ public class PinShortcutConfirm extends Activity implements OnClickListener {
                 int drawFlags = EntryItem.FLAG_DRAW_ICON | EntryItem.FLAG_DRAW_ICON_BADGE;
                 ShortcutEntry.setIcons(drawFlags, icon1, drawable, appDrawable);
             }
-        }.execute();
+        }.executeOnExecutor(ResultViewHelper.EXECUTOR_LOAD_ICON);
     }
 
     @NonNull

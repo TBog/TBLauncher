@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.inputmethod.EditorInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.BaseAdapter;
@@ -133,7 +134,6 @@ public class EditTagsDialog extends DialogFragment<Set<String>> {
             Collections.sort(allTags);
             mNewTag.setAdapter(new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, allTags));
         }
-        mNewTag.requestFocus();
 
         // initialize add tag button
         ImageView addTag = view.findViewById(R.id.addTag);
@@ -159,6 +159,17 @@ public class EditTagsDialog extends DialogFragment<Set<String>> {
             View button = view.findViewById(android.R.id.button2);
             button.setOnClickListener(v -> dismiss());
         }
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        mNewTag.post(() -> {
+            mNewTag.requestFocus();
+            InputMethodManager mgr = (InputMethodManager) requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
+            assert mgr != null;
+            mgr.showSoftInput(mNewTag, InputMethodManager.SHOW_IMPLICIT);
+        });
     }
 
     private void addTag(String tag) {

@@ -18,7 +18,7 @@ public class EditQuickListDialog extends DialogFragment<Void> {
 
     @Override
     protected int layoutRes() {
-        return R.layout.pref_quick_list;
+        return R.layout.quick_list_editor;
     }
 
     @Nullable

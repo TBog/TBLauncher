@@ -36,7 +36,7 @@ import rocks.tbog.tblauncher.utils.Utilities;
 
 public final class ResultViewHelper {
 
-    private final static Executor iconAsyncExecutor = Executors.newSingleThreadExecutor();
+    public final static Executor EXECUTOR_LOAD_ICON = AsyncTask.SERIAL_EXECUTOR;
     private static final String TAG = "RVH";
 
     private ResultViewHelper() {
@@ -133,7 +133,7 @@ public final class ResultViewHelper {
             Log.e(TAG, "new <? extends AsyncSetEntryDrawable>", e);
             return;
         }
-        task.executeOnExecutor(iconAsyncExecutor);
+        task.executeOnExecutor(EXECUTOR_LOAD_ICON);
     }
 
     public static void applyPreferences(int drawFlags, TextView nameView, ImageView iconView) {

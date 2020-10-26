@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:measureWithLargestChild="true"
+    android:orientation="vertical"
+    android:theme="@style/SettingsDialogTheme">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/dialog_padding_horizontal"
+        android:layout_marginTop="@dimen/dialog_padding_vertical"
+        android:text="@string/edit_quick_list_preview" />
+
+    <!-- The preview will get the same margin as the real thing (25% of the height) -->
+    <LinearLayout
+        android:id="@+id/preview"
+        android:layout_width="match_parent"
+        android:layout_height="@dimen/large_quick_list_bar_height"
+        android:layout_marginHorizontal="@dimen/dialog_padding_horizontal"
+        android:background="?attr/listBackgroundColor"
+        android:gravity="center"
+        android:measureWithLargestChild="true"
+        android:orientation="horizontal"
+        android:paddingVertical="@dimen/result_margin_vertical" />
+
+    <androidx.viewpager.widget.ViewPager
+        android:id="@+id/viewPager"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="@dimen/dialog_padding_horizontal"
+        android:layout_weight="1">
+
+        <com.google.android.material.tabs.TabLayout
+            android:id="@+id/tabLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@drawable/window_title_background"
+            app:tabMode="scrollable"
+            app:tabTextAppearance="@android:style/TextAppearance.Widget.TabWidget" />
+
+    </androidx.viewpager.widget.ViewPager>
+
+</LinearLayout>

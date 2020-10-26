@@ -13,6 +13,7 @@ import android.database.sqlite.SQLiteDatabase;
 import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 
+import rocks.tbog.tblauncher.icons.IconPackCache;
 import rocks.tbog.tblauncher.searcher.Searcher;
 
 public class TBApplication extends Application {
@@ -49,6 +50,11 @@ public class TBApplication extends Application {
     private DrawableCache mDrawableCache = new DrawableCache();
 
     /**
+     * We store a number of icon packs so we don't have to parse the XML
+     */
+    private IconPackCache mIconPackCache = new IconPackCache();
+
+    /**
      * Manage live wallpaper interaction
      */
     private LiveWallpaper mLiveWallpaper = new LiveWallpaper();
@@ -69,6 +75,17 @@ public class TBApplication extends Application {
         PreferenceManager.setDefaultValues(this, R.xml.preferences, true);
         PreferenceManager.setDefaultValues(this, R.xml.preference_features, true);
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+//        SharedPreferences.Editor editor = mSharedPreferences.edit();
+//        for (Map.Entry<String, ?> entry : mSharedPreferences.getAll().entrySet() )
+//        {
+//            if (entry.getKey().startsWith("gesture-")) {
+//                Log.d("Pref", entry.getKey() + "=" + entry.getValue());
+//                editor.putString(entry.getKey(), "none");
+//            }
+//        }
+//        editor.commit();
+
         mDrawableCache.onPrefChanged(this, mSharedPreferences);
         mWidgetManager.start(this);
     }
@@ -102,6 +119,11 @@ public class TBApplication extends Application {
     @NonNull
     public static DrawableCache drawableCache(Context context) {
         return getApplication(context).mDrawableCache;
+    }
+
+    @NonNull
+    public static IconPackCache iconPackCache(Context context) {
+        return getApplication(context).mIconPackCache;
     }
 
     @NonNull
@@ -170,7 +192,7 @@ public class TBApplication extends Application {
     }
 
     @NonNull
-    public DrawableCache getDrawableCache() {
+    public DrawableCache drawableCache() {
         return mDrawableCache;
     }
 
@@ -185,10 +207,10 @@ public class TBApplication extends Application {
     }
 
     public static IconsHandler iconsHandler(Context ctx) {
-        return getApplication(ctx).getIconsHandler();
+        return getApplication(ctx).iconsHandler();
     }
 
-    public IconsHandler getIconsHandler() {
+    public IconsHandler iconsHandler() {
         if (iconsPackHandler == null) {
             iconsPackHandler = new IconsHandler(this);
         }
@@ -252,9 +274,11 @@ public class TBApplication extends Application {
         if (level >= ComponentCallbacks2.TRIM_MEMORY_BACKGROUND) {
             // the process had been showing a user interface, and is no longer doing so
             mDrawableCache.clearCache();
-        } else if (level >= ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) {
+        }
+        if (level >= ComponentCallbacks2.TRIM_MEMORY_UI_HIDDEN) {
             // this is called every time the screen is off
             SQLiteDatabase.releaseMemory();
+            mIconPackCache.clearCache(this);
             if (mSharedPreferences.getBoolean("screen-off-cache-clear", false))
                 mDrawableCache.clearCache();
         }

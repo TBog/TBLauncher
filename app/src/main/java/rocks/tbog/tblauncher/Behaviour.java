@@ -29,6 +29,7 @@ import android.widget.TextView;
 
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.ActionBar;
 import androidx.preference.PreferenceManager;
@@ -36,6 +37,7 @@ import androidx.preference.PreferenceManager;
 import java.util.ArrayList;
 import java.util.List;
 
+import rocks.tbog.tblauncher.CustomIcon.IconSelectDialog;
 import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.EntryWithTags;
@@ -43,6 +45,8 @@ import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.result.ResultAdapter;
 import rocks.tbog.tblauncher.searcher.ISearchActivity;
 import rocks.tbog.tblauncher.searcher.QuerySearcher;
+import rocks.tbog.tblauncher.searcher.Searcher;
+import rocks.tbog.tblauncher.searcher.TagSearcher;
 import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
 import rocks.tbog.tblauncher.ui.AnimatedListView;
 import rocks.tbog.tblauncher.ui.DialogFragment;
@@ -51,7 +55,9 @@ import rocks.tbog.tblauncher.ui.KeyboardScrollHider;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.ui.LoadingDrawable;
+import rocks.tbog.tblauncher.ui.TagsManagerDialog;
 import rocks.tbog.tblauncher.utils.SystemUiVisibility;
+import rocks.tbog.tblauncher.utils.Utilities;
 
 
 /**
@@ -142,7 +148,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 //                }
                 String text = s.toString();
                 updateSearchRecords(false, text);
-                displayClearOnInput();
+                updateClearButton();
             }
         });
 
@@ -235,6 +241,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             adapter.add(new LinearAdapter.Item(ctx, R.string.menu_widget_remove));
         adapter.add(new LinearAdapter.ItemTitle(ctx, R.string.menu_popup_title_settings));
         adapter.add(new LinearAdapter.Item(ctx, R.string.menu_popup_launcher_settings));
+        adapter.add(new LinearAdapter.Item(ctx, R.string.menu_popup_tags_manager));
         adapter.add(new LinearAdapter.Item(ctx, R.string.menu_popup_android_settings));
 
         menu.setOnItemClickListener((a, v, pos) -> {
@@ -244,6 +251,9 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                 stringId = ((LinearAdapter.Item) a.getItem(pos)).stringId;
             }
             switch (stringId) {
+                case R.string.menu_popup_tags_manager:
+                    launchTagsManagerDialog();
+                    break;
                 case R.string.menu_popup_launcher_settings:
                     beforeLaunchOccurred();
                     mClearButton.postDelayed(() -> {
@@ -286,7 +296,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         // are available.
         //delayedHide(100);
         hideSearchBar();
-        displayClearOnInput();
+        updateClearButton();
     }
 
     @SuppressWarnings("TypeParameterUnusedInFormals")
@@ -294,7 +304,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         return mTBLauncherActivity.findViewById(id);
     }
 
-    private void displayClearOnInput() {
+    private void updateClearButton() {
         if (mSearchEditText.getText().length() > 0) {
             mClearButton.setVisibility(View.VISIBLE);
             mMenuButton.setVisibility(View.INVISIBLE);
@@ -319,7 +329,8 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 
         hideWidgets();
 
-        mNotificationBackground.setTranslationY(-mNotificationBackground.getLayoutParams().height);
+        if (!TBApplication.state().isNotificationBarVisible())
+            mNotificationBackground.setTranslationY(-mNotificationBackground.getLayoutParams().height);
         mNotificationBackground.animate()
                 .translationY(0f)
                 .setStartDelay(0)
@@ -367,7 +378,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     private void hideWidgets() {
-        TBApplication.state().setWidgets(LauncherState.AnimatedVisibility.HIDDEN);
+        TBApplication.state().setWidgetScreen(LauncherState.AnimatedVisibility.HIDDEN);
         mWidgetContainer.setVisibility(View.GONE);
         mResultLayout.setVisibility(View.INVISIBLE);
     }
@@ -455,7 +466,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     private void showWidgets() {
-        TBApplication.state().setWidgets(LauncherState.AnimatedVisibility.VISIBLE);
+        TBApplication.state().setWidgetScreen(LauncherState.AnimatedVisibility.VISIBLE);
         mWidgetContainer.setVisibility(View.VISIBLE);
         mResultLayout.setVisibility(View.GONE);
     }
@@ -528,7 +539,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         TBApplication.state().setResultList(LauncherState.AnimatedVisibility.HIDDEN);
         mResultLayout.setVisibility(View.INVISIBLE);
         TBApplication.quickList(getContext()).adapterCleared();
-        displayClearOnInput();
+        updateClearButton();
     }
 
     @Override
@@ -595,6 +606,17 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         mResultList.post(() -> mResultList.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL));
     }
 
+    public void runTagSearch(@NonNull String tagName) {
+        if (mSearchEditText == null)
+            return;
+        if (TBApplication.state().isResultListVisible() && mSearchEditText.getText().length() == 0) {
+            mSearchEditText.setText("");
+        } else {
+            mSearchEditText.setText("");
+            updateSearchRecords(false, new TagSearcher(this, tagName));
+        }
+    }
+
     public void clearSearch() {
         if (mSearchEditText == null)
             return;
@@ -603,7 +625,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     public void refreshSearchRecords() {
-        mResultList.setAdapter(mResultAdapter);
+        mResultList.post(() -> mResultList.refreshViews());
     }
 
     public void updateSearchRecords() {
@@ -628,18 +650,19 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 //            return;
 //        }
 
+        updateSearchRecords(isRefresh, new QuerySearcher(this, query));
+    }
+
+    private void updateSearchRecords(boolean isRefresh, @NonNull Searcher searcher) {
         resetTask();
         mTBLauncherActivity.dismissPopup();
 
-//        forwarderManager.updateSearchRecords(isRefresh, query);
-
-        if (query.isEmpty()) {
+        if (searcher.getQuery().isEmpty()) {
             clearAdapter();
 //            systemUiVisibilityHelper.resetScroll();
         } else {
-            QuerySearcher querySearcher = new QuerySearcher(this, query);
-            querySearcher.setRefresh(isRefresh);
-            TBApplication.runTask(getContext(), querySearcher);
+            searcher.setRefresh(isRefresh);
+            TBApplication.runTask(getContext(), searcher);
         }
     }
 
@@ -674,6 +697,9 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         mSearchEditText.setText("");
         hideSearchBar();
 
+        if (closeFragmentDialog())
+            return true;
+
         // Calling super.onBackPressed() will quit the launcher, only do this if KISS is not the user's default home.
         // Action not handled (return false) if not the default launcher.
         return TBApplication.isDefaultLauncher(mTBLauncherActivity);
@@ -689,30 +715,31 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     public void launchCustomIconDialog(AppEntry appEntry) {
-        CustomIconDialog dialog = new CustomIconDialog();
+        IconSelectDialog dialog = new IconSelectDialog();
         openFragmentDialog(dialog);
 
         // If mResultLayout is visible
-        boolean bResultListVisible = TBApplication.state().isResultListVisible();
-        if (bResultListVisible)
-            mResultLayout.setVisibility(View.INVISIBLE);
+//        boolean bResultListVisible = TBApplication.state().isResultListVisible();
+//        if (bResultListVisible)
+//            mResultLayout.setVisibility(View.INVISIBLE);
 
         // set args
         {
             Bundle args = new Bundle();
             args.putString("componentName", appEntry.getUserComponentName());
             args.putLong("customIcon", appEntry.getCustomIcon());
+            args.putString("entryName", appEntry.getName());
             dialog.setArguments(args);
         }
         // OnDismiss: We restore mResultLayout visibility
-        if (bResultListVisible)
-            dialog.setOnDismissListener(dlg -> mResultLayout.setVisibility(View.VISIBLE));
+//        if (bResultListVisible)
+//            dialog.setOnDismissListener(dlg -> mResultLayout.setVisibility(View.VISIBLE));
 
         dialog.setOnConfirmListener(drawable -> {
             if (drawable == null)
-                TBApplication.getApplication(mTBLauncherActivity).getIconsHandler().restoreDefaultIcon(appEntry);
+                TBApplication.getApplication(mTBLauncherActivity).iconsHandler().restoreDefaultIcon(appEntry);
             else
-                TBApplication.getApplication(mTBLauncherActivity).getIconsHandler().changeIcon(appEntry, drawable);
+                TBApplication.getApplication(mTBLauncherActivity).iconsHandler().changeIcon(appEntry, drawable);
             // force a result refresh to update the icon in the view
             refreshSearchRecords();
             TBApplication.quickList(mTBLauncherActivity).onFavoritesChanged();
@@ -721,7 +748,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     public void launchCustomIconDialog(StaticEntry staticEntry) {
-        CustomIconDialog dialog = new CustomIconDialog();
+        IconSelectDialog dialog = new IconSelectDialog();
         openFragmentDialog(dialog);
 
         // If mResultLayout is visible
@@ -741,15 +768,46 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 
         dialog.setOnConfirmListener(drawable -> {
             if (drawable == null)
-                TBApplication.getApplication(mTBLauncherActivity).getIconsHandler().restoreDefaultIcon(staticEntry);
+                TBApplication.getApplication(mTBLauncherActivity).iconsHandler().restoreDefaultIcon(staticEntry);
             else
-                TBApplication.getApplication(mTBLauncherActivity).getIconsHandler().changeIcon(staticEntry, drawable);
+                TBApplication.getApplication(mTBLauncherActivity).iconsHandler().changeIcon(staticEntry, drawable);
             // force a result refresh to update the icon in the view
             refreshSearchRecords();
             TBApplication.quickList(mTBLauncherActivity).onFavoritesChanged();
         });
         dialog.show(mTBLauncherActivity.getSupportFragmentManager(), "custom_icon_dialog");
     }
+
+//    public void launchCustomIconDialog(TagEntry tagEntry) {
+//        CustomIconDialog dialog = new CustomIconDialog();
+//        openFragmentDialog(dialog);
+//
+//        // If mResultLayout is visible
+//        boolean bResultListVisible = TBApplication.state().isResultListVisible();
+//        if (bResultListVisible)
+//            mResultLayout.setVisibility(View.INVISIBLE);
+//
+//        // set args
+//        {
+//            Bundle args = new Bundle();
+//            args.putString("entryId", staticEntry.id);
+//            dialog.setArguments(args);
+//        }
+//        // OnDismiss: We restore mResultLayout visibility
+//        if (bResultListVisible)
+//            dialog.setOnDismissListener(dlg -> mResultLayout.setVisibility(View.VISIBLE));
+//
+//        dialog.setOnConfirmListener(drawable -> {
+//            if (drawable == null)
+//                TBApplication.getApplication(mTBLauncherActivity).getIconsHandler().restoreDefaultIcon(staticEntry);
+//            else
+//                TBApplication.getApplication(mTBLauncherActivity).getIconsHandler().changeIcon(staticEntry, drawable);
+//            // force a result refresh to update the icon in the view
+//            refreshSearchRecords();
+//            TBApplication.quickList(mTBLauncherActivity).onFavoritesChanged();
+//        });
+//        dialog.show(mTBLauncherActivity.getSupportFragmentManager(), "custom_icon_dialog");
+//    }
 
     public void launchEditTagsDialog(EntryWithTags entry) {
         EditTagsDialog dialog = new EditTagsDialog();
@@ -777,6 +835,12 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         dialog.show(mTBLauncherActivity.getSupportFragmentManager(), "dialog_edit_quick_list");
     }
 
+    public void launchTagsManagerDialog() {
+        TagsManagerDialog dialog = new TagsManagerDialog();
+        openFragmentDialog(dialog);
+        dialog.show(mTBLauncherActivity.getSupportFragmentManager(), "dialog_tags_manager");
+    }
+
     private boolean isCustomIconDialogVisible() {
         return mFragmentDialog != null && mFragmentDialog.isVisible();
     }
@@ -786,9 +850,12 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         mFragmentDialog = dialog;
     }
 
-    private void closeFragmentDialog() {
-        if (mFragmentDialog != null && mFragmentDialog.isVisible())
+    private boolean closeFragmentDialog() {
+        if (mFragmentDialog != null && mFragmentDialog.isVisible()) {
             mFragmentDialog.dismiss();
+            return true;
+        }
+        return false;
     }
 
     public void registerPopup(ListPopup menu) {
@@ -816,7 +883,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 
         TBApplication.dataHandler(getContext()).checkServices();
         LauncherState state = TBApplication.state();
-        if (state.isWidgetVisible()) {
+        if (state.isWidgetScreenVisible()) {
             if (state.isSearchBarVisible())
                 hideSearchBar(0, false);
         } else {
@@ -833,7 +900,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             mSearchEditText.setText("");
             hideKeyboard();
             hideSearchBar(false);
-        } else {
+        } else if (!TBApplication.state().isResultListVisible()) {
             toggleSearchBar();
         }
 
@@ -846,22 +913,72 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             }
         }
 
+        closeFragmentDialog();
     }
 
     public void onWindowFocusChanged(boolean hasFocus) {
         Log.i(TAG, "onWindowFocusChanged " + hasFocus);
         LauncherState state = TBApplication.state();
         if (hasFocus && state.isSearchBarVisible()) {
-            if (!state.isKeyboardVisible()) {
+            if (!state.isKeyboardVisible() && !state.isResultListVisible()) {
                 mSearchEditText.requestFocus();
                 // UI_ANIMATION_DURATION should be the exact time the full-screen animation ends
                 mSearchEditText.postDelayed(this::showKeyboard, UI_ANIMATION_DURATION);
             }
         } else {
-            if (state.isWidgetVisible()) {
+            if (state.isWidgetScreenVisible()) {
                 hideKeyboard();
                 hideSearchBar(0, false);
             }
         }
+    }
+
+    private boolean executeAction(@Nullable String action) {
+        if (action == null)
+            return false;
+        switch (action) {
+            case "expandNotificationsPanel":
+                Utilities.expandNotificationsPanel(mTBLauncherActivity);
+                return true;
+            case "expandSettingsPanel":
+                Utilities.expandSettingsPanel(mTBLauncherActivity);
+                return true;
+            case "showSearchBar":
+                showKeyboard();
+                showSearchBar();
+                return true;
+            case "showWidgets":
+                hideKeyboard();
+                hideSearchBar();
+                return true;
+            case "toggleSearchAndWidget":
+                toggleSearchBar();
+                return true;
+        }
+        return false;
+    }
+
+    public boolean onFlingDownLeft() {
+        return executeAction(mPref.getString("gesture-fling-down-left", null));
+    }
+
+    public boolean onFlingDownRight() {
+        return executeAction(mPref.getString("gesture-fling-down-right", null));
+    }
+
+    public boolean onFlingUp() {
+        return executeAction(mPref.getString("gesture-fling-up", null));
+    }
+
+    public boolean onFlingLeft() {
+        return executeAction(mPref.getString("gesture-fling-left", null));
+    }
+
+    public boolean onFlingRight() {
+        return executeAction(mPref.getString("gesture-fling-right", null));
+    }
+
+    public boolean onClick() {
+        return executeAction(mPref.getString("gesture-click", null));
     }
 }

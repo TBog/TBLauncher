@@ -32,6 +32,11 @@ public class SystemIconPack implements IconPack<Void> {
     }
 
     @Override
+    public boolean isLoaded() {
+        return true;
+    }
+
+    @Override
     public void load(PackageManager packageManager) {
     }
 

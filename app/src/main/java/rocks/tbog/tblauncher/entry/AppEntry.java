@@ -107,7 +107,7 @@ public final class AppEntry extends EntryWithTags {
 
     @WorkerThread
     public Drawable getIconDrawable(Context context) {
-        IconsHandler iconsHandler = TBApplication.getApplication(context).getIconsHandler();
+        IconsHandler iconsHandler = TBApplication.getApplication(context).iconsHandler();
         if (customIcon != 0) {
             Drawable drawable = iconsHandler.getCustomIcon(getUserComponentName(), customIcon);
             if (drawable != null)
@@ -444,7 +444,7 @@ public final class AppEntry extends EntryWithTags {
     private void launchRenameDialog(@NonNull Context ctx) {
         ContextThemeWrapper context = new ContextThemeWrapper(ctx, R.style.NoTitleDialogTheme);
         AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle(context.getResources().getString(R.string.app_rename_title));
+        builder.setTitle(context.getResources().getString(R.string.title_app_rename));
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             builder.setView(R.layout.dialog_rename);

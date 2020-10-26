@@ -36,7 +36,7 @@
 
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
             android:dependency="quick-list-enabled"
-            android:dialogLayout="@layout/pref_quick_list"
+            android:dialogLayout="@layout/quick_list_editor"
             android:key="quick-list-content"
             android:summary="@string/quick_list_content_summary"
             android:title="@string/quick_list_content" />
@@ -93,11 +93,13 @@
         <androidx.preference.SwitchPreference
             android:defaultValue="true"
             android:key="tags-enabled"
+            android:summary="@string/tags_enabled_summary"
             android:title="@string/tags_enabled" />
         <androidx.preference.SwitchPreference
             android:defaultValue="true"
             android:dependency="tags-enabled"
             android:key="fuzzy-search-tags"
+            android:summary="@string/fuzzy_search_tags_summary"
             android:title="@string/fuzzy_search_tags" />
 
     </androidx.preference.PreferenceCategory>
@@ -142,6 +144,50 @@
             android:title="@string/sensor_orientation" />
     </PreferenceCategory>
 
+    <!-- Gestures -->
+    <PreferenceCategory
+        android:key="gesture-section"
+        android:title="@string/gesture_section">
+        <ListPreference
+            android:defaultValue="toggleSearchAndWidget"
+            android:entries="@array/gestureEntries"
+            android:entryValues="@array/gestureValues"
+            android:key="gesture-click"
+            android:title="@string/gesture_click" />
+        <ListPreference
+            android:defaultValue="expandNotificationsPanel"
+            android:entries="@array/gestureEntries"
+            android:entryValues="@array/gestureValues"
+            android:key="gesture-fling-down-left"
+            android:summary="@string/gesture_fling_down_left_summary"
+            android:title="@string/gesture_fling_down_left" />
+        <ListPreference
+            android:defaultValue="expandNotificationsPanel"
+            android:entries="@array/gestureEntries"
+            android:entryValues="@array/gestureValues"
+            android:key="gesture-fling-down-right"
+            android:summary="@string/gesture_fling_down_right_summary"
+            android:title="@string/gesture_fling_down_right" />
+        <ListPreference
+            android:defaultValue="none"
+            android:entries="@array/gestureEntries"
+            android:entryValues="@array/gestureValues"
+            android:key="gesture-fling-up"
+            android:title="@string/gesture_fling_up" />
+        <ListPreference
+            android:defaultValue="none"
+            android:entries="@array/gestureEntries"
+            android:entryValues="@array/gestureValues"
+            android:key="gesture-fling-left"
+            android:title="@string/gesture_fling_left" />
+        <ListPreference
+            android:defaultValue="none"
+            android:entries="@array/gestureEntries"
+            android:entryValues="@array/gestureValues"
+            android:key="gesture-fling-right"
+            android:title="@string/gesture_fling_right" />
+    </PreferenceCategory>
+
     <!-- Memory -->
     <androidx.preference.PreferenceCategory
         android:key="memory-section"
@@ -165,6 +211,50 @@
             android:key="screen-off-cache-clear"
             android:summary="@string/screen_off_cache_clear_summary"
             android:title="@string/screen_off_cache_clear" />
+
+    </androidx.preference.PreferenceCategory>
+
+    <!-- Providers -->
+    <androidx.preference.PreferenceCategory
+        android:key="provider-section"
+        android:title="@string/provider_section"
+        app:initialExpandedChildrenCount="2">
+
+        <androidx.preference.SwitchPreference
+            android:defaultValue="true"
+            android:key="enable-search"
+            android:title="@string/enable_search" />
+
+        <androidx.preference.SwitchPreference
+            android:defaultValue="true"
+            android:dependency="enable-search"
+            android:key="enable-url"
+            android:title="@string/enable_url" />
+
+        <rocks.tbog.tblauncher.preference.CustomDialogPreference
+            android:dependency="enable-search"
+            android:dialogLayout="@layout/edit_search_engines"
+            android:key="edit-search-engines"
+            android:summary="@string/edit_search_engines_summary"
+            android:title="@string/edit_search_engines" />
+
+        <rocks.tbog.tblauncher.preference.CustomDialogPreference
+            android:dependency="enable-search"
+            android:dialogLayout="@layout/add_search_engine"
+            android:key="add-search-engine"
+            android:title="@string/add_search_engine" />
+
+        <rocks.tbog.tblauncher.preference.CustomDialogPreference
+            android:dependency="enable-search"
+            android:dialogLayout="@layout/edit_search_engines"
+            android:key="reset-search-engines"
+            android:summary="@string/reset_search_engines_summary"
+            android:title="@string/reset_search_engines" />
+
+        <androidx.preference.SwitchPreference
+            android:defaultValue="true"
+            android:key="enable-calculator"
+            android:title="@string/enable_calculator" />
 
     </androidx.preference.PreferenceCategory>
 

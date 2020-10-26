@@ -12,7 +12,6 @@ import android.graphics.drawable.PaintDrawable;
 import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.LinearLayout;
@@ -25,9 +24,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import rocks.tbog.tblauncher.dataprovider.FavProvider;
 import rocks.tbog.tblauncher.dataprovider.IProvider;
 import rocks.tbog.tblauncher.dataprovider.Provider;
+import rocks.tbog.tblauncher.dataprovider.QuickListProvider;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.UIColors;
@@ -91,8 +90,8 @@ public class QuickList {
             mQuickList.setVisibility(View.GONE);
             return;
         }
-        FavProvider provider = TBApplication.getApplication(getContext()).getDataHandler().getFavProvider();
-        List<? extends EntryItem> list = provider != null ? provider.getQuickList() : null;
+        QuickListProvider provider = TBApplication.dataHandler(getContext()).getQuickListProvider();
+        List<EntryItem> list = provider != null ? provider.getPojos() : null;
         if (list == null)
             return;
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mQuickList.getContext());
@@ -129,7 +128,7 @@ public class QuickList {
         mQuickList.requestLayout();
     }
 
-    public void toggleProvider(View v, IProvider provider, @NonNull java.util.Comparator<? super EntryItem> comparator) {
+    public void toggleProvider(View v, IProvider<?> provider, @NonNull java.util.Comparator<? super EntryItem> comparator) {
         Context ctx = v.getContext();
         TBApplication app = TBApplication.getApplication(ctx);
         Object tag_actionId = v.getTag(R.id.tag_actionId);
@@ -165,7 +164,7 @@ public class QuickList {
         }
     }
 
-    public void toggleFilter(View v, IProvider provider, @NonNull String filterName) {
+    public void toggleFilter(View v, IProvider<?> provider, @NonNull String filterName) {
         Context ctx = v.getContext();
         TBApplication app = TBApplication.getApplication(ctx);
 

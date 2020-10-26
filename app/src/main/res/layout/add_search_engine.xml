@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:paddingHorizontal="@dimen/dialog_padding_horizontal"
+    android:paddingVertical="@dimen/dialog_padding_vertical"
+    android:theme="@style/SettingsDialogTheme">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:labelFor="@android:id/text1"
+        android:text="@string/label_search_engine_name" />
+
+    <EditText
+        android:id="@android:id/text1"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:importantForAutofill="no"
+        android:inputType="textAutoCorrect" />
+
+    <include layout="@layout/popup_divider" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:text="@string/label_search_engine_url" />
+
+    <EditText
+        android:id="@android:id/text2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="10dp"
+        android:hint="@string/hint_add_search_engine_url"
+        android:importantForAutofill="no"
+        android:inputType="textUri" />
+
+</LinearLayout>

@@ -9,7 +9,7 @@ import rocks.tbog.tblauncher.BuildConfig;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.searcher.Searcher;
 
-public abstract class StaticProvider<T extends EntryItem> implements IProvider {
+public abstract class StaticProvider<T extends EntryItem> implements IProvider<T> {
     @NonNull
     final List<T> pojos;
 
@@ -40,18 +40,17 @@ public abstract class StaticProvider<T extends EntryItem> implements IProvider {
     }
 
     @Override
-    public EntryItem findById(@NonNull String id) {
-        for (EntryItem pojo : pojos) {
+    public T findById(@NonNull String id) {
+        for (T pojo : pojos) {
             if (pojo.id.equals(id)) {
                 return pojo;
             }
         }
-
         return null;
     }
 
     @Override
-    public List<? extends EntryItem> getPojos() {
+    public List<T> getPojos() {
         if (BuildConfig.DEBUG)
             return Collections.unmodifiableList(pojos);
         return pojos;

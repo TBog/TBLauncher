@@ -2,7 +2,6 @@ package rocks.tbog.tblauncher.dataprovider;
 
 import android.app.Service;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Binder;
 import android.os.IBinder;
 import android.util.Log;
@@ -14,12 +13,13 @@ import java.util.Collections;
 import java.util.List;
 
 import rocks.tbog.tblauncher.BuildConfig;
+import rocks.tbog.tblauncher.DataHandler;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.TBLauncherActivity;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.loader.LoadEntryItem;
 
-public abstract class Provider<T extends EntryItem> extends Service implements IProvider {
+public abstract class Provider<T extends EntryItem> extends Service implements IProvider<T> {
     final static String TAG = "Provider";
 
     /**
@@ -60,14 +60,14 @@ public abstract class Provider<T extends EntryItem> extends Service implements I
         start = System.currentTimeMillis();
 
         if (this.loader != null)
-            this.loader.cancel(true);
+            this.loader.cancel(false);
 
         Log.i(TAG, "Starting provider: " + this.getClass().getSimpleName());
 
         loader.setProvider(this);
         this.loader = loader;
         this.pojoScheme = loader.getScheme();
-        loader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        loader.executeOnExecutor(DataHandler.EXECUTOR_PROVIDERS);
     }
 
     public void reload(boolean cancelCurrentLoadTask) {
@@ -133,18 +133,17 @@ public abstract class Provider<T extends EntryItem> extends Service implements I
      * @param id id we're looking for
      * @return null if not found
      */
-    public EntryItem findById(@NonNull String id) {
-        for (EntryItem pojo : pojos) {
+    public T findById(@NonNull String id) {
+        for (T pojo : pojos) {
             if (pojo.id.equals(id)) {
                 return pojo;
             }
         }
-
         return null;
     }
 
     @Override
-    public List<? extends EntryItem> getPojos() {
+    public List<T> getPojos() {
         if (BuildConfig.DEBUG)
             return Collections.unmodifiableList(pojos);
         return pojos;
@@ -167,7 +166,7 @@ public abstract class Provider<T extends EntryItem> extends Service implements I
      * runs in the same process as its clients, we don't need to deal with IPC.
      */
     public class LocalBinder extends Binder {
-        public IProvider getService() {
+        public IProvider<T> getService() {
             // Return this instance of the provider so that clients can call public methods
             return Provider.this;
         }

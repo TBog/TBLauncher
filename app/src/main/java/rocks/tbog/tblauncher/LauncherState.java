@@ -12,7 +12,8 @@ public class LauncherState {
     private AnimatedVisibility searchBar = AnimatedVisibility.HIDDEN;
     private AnimatedVisibility resultList = AnimatedVisibility.HIDDEN;
     private AnimatedVisibility notificationBar = AnimatedVisibility.HIDDEN;
-    private AnimatedVisibility widgets = AnimatedVisibility.HIDDEN;
+    private AnimatedVisibility widgetScreen = AnimatedVisibility.HIDDEN;
+    private AnimatedVisibility clearScreen = AnimatedVisibility.HIDDEN;
     private AnimatedVisibility keyboard = AnimatedVisibility.HIDDEN;
 
     private static boolean isVisible(AnimatedVisibility state) {
@@ -36,8 +37,12 @@ public class LauncherState {
         return isVisible(notificationBar);
     }
 
-    public boolean isWidgetVisible() {
-        return isVisible(widgets);
+    public boolean isWidgetScreenVisible() {
+        return isVisible(widgetScreen);
+    }
+
+    public boolean isClearScreenVisible() {
+        return isVisible(clearScreen);
     }
 
     public boolean isKeyboardVisible() {
@@ -60,8 +65,8 @@ public class LauncherState {
         quickList = state;
     }
 
-    public void setWidgets(AnimatedVisibility state) {
-        widgets = state;
+    public void setWidgetScreen(AnimatedVisibility state) {
+        widgetScreen = state;
     }
 
     public void setKeyboard(AnimatedVisibility state) {
