@@ -357,5 +357,9 @@ public class Utilities {
             if (mAfter != null)
                 mAfter.run(this);
         }
+
+        public boolean cancel() {
+            return cancel(false);
+        }
     }
 }

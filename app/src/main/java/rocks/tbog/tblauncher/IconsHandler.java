@@ -111,7 +111,7 @@ public class IconsHandler {
         // don't reload the icon pack
         if (mIconPack == null || !mIconPack.getPackPackageName().equals(packageName)) {
             if (mLoadIconsPackTask != null)
-                mLoadIconsPackTask.cancel(false);
+                mLoadIconsPackTask.cancel();
             final IconPackXML iconPack = TBApplication.iconPackCache(ctx).getIconPack(packageName);
             // set the current icon pack
             mIconPack = iconPack;

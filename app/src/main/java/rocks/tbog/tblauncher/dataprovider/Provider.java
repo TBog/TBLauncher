@@ -60,7 +60,7 @@ public abstract class Provider<T extends EntryItem> extends Service implements I
         start = System.currentTimeMillis();
 
         if (this.loader != null)
-            this.loader.cancel(true);
+            this.loader.cancel(false);
 
         Log.i(TAG, "Starting provider: " + this.getClass().getSimpleName());
 

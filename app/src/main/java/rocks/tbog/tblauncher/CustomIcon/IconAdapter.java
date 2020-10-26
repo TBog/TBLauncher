@@ -125,7 +125,7 @@ class IconAdapter extends BaseAdapter {
 
         public void setContent(IconData content) {
             if (loader != null)
-                loader.cancel(true);
+                loader.cancel(false);
             loader = new ViewHolder.AsyncLoad(this);
             loader.executeOnExecutor(ResultViewHelper.EXECUTOR_LOAD_ICON, content);
         }
