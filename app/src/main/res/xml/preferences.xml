@@ -298,7 +298,11 @@
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
             android:dialogLayout="@layout/pref_confirm"
             android:key="export-tags"
-            android:title="@string/export_tags"/>
+            android:title="@string/export_tags" />
+
+        <Preference
+            android:key="import-settings"
+            android:title="@string/import_settings" />
 
     </PreferenceScreen>
 

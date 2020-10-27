@@ -5,36 +5,87 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.app.ShareCompat;
 import androidx.core.content.FileProvider;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
+
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import rocks.tbog.tblauncher.R;
 
 public class FileUtils {
     private static final String TAG = "FileUtils";
+    private static final String SETTINGS_FOLDER = "settings";
+    private static final String SETTINGS_EXT = ".xml";
 
-    public interface ContentGenerator {
-        void generate(Writer writer) throws IOException;
+    @Nullable
+    public static FileDescriptor getFileDescriptor(@NonNull Context context, @NonNull Uri uri) {
+        try {
+            return context.getContentResolver().openFileDescriptor(uri, "r").getFileDescriptor();
+        } catch (FileNotFoundException e) {
+            Log.e(TAG, "openFileDescriptor " + uri, e);
+        }
+        return null;
     }
 
-    public static void sendFile(@NonNull Activity activity, @NonNull String directory, @NonNull String filename, @NonNull String extension, @NonNull ContentGenerator content) {
+    @Nullable
+    public static String getPath(@NonNull Context context, @NonNull Uri uri) {
+        if ("content".equalsIgnoreCase(uri.getScheme())) {
+            String[] projection = {"_data"}; // MediaStore.MediaColumns.DATA is deprecated
+
+
+            try (Cursor cursor = context.getContentResolver().query(uri, projection, null, null, null)) {
+                int column_index = cursor.getColumnIndexOrThrow("_data");
+                if (cursor.moveToFirst()) {
+                    return cursor.getString(column_index);
+                }
+            } catch (Exception e) {
+                // Eat it
+            }
+        } else if ("file".equalsIgnoreCase(uri.getScheme())) {
+            return uri.getPath();
+        }
+
+        return null;
+    }
+
+    @Nullable
+    public static InputStream getInputStream(Context context, Uri uri) {
+        FileDescriptor fd = getFileDescriptor(context, uri);
+        if (fd != null)
+            return new FileInputStream(fd);
+        return null;
+    }
+
+    private static void sendFile(@NonNull Activity activity, @NonNull String directory, @NonNull String filename, @NonNull String extension, @Nullable ContentGenerator content) {
         Context context = activity.getApplicationContext();
         File cacheDir = new File(context.getCacheDir(), directory);
         File cacheFile = new File(cacheDir, filename + extension);
 
-        {
+        if (content != null) {
             try {
                 cacheDir.mkdirs();
             } catch (Exception ignored) {
@@ -46,7 +97,7 @@ public class FileUtils {
                 content.generate(bw);
                 bw.close();
             } catch (IOException e) {
-                Log.e(TAG, "Failed to write", e);
+                Log.e(TAG, "Failed to write " + filename, e);
             }
         }
 
@@ -73,13 +124,140 @@ public class FileUtils {
 
             activity.startActivity(intent);
         } catch (Exception e) {
-            Log.d(TAG, "startActivity", e);
+            Log.d(TAG, "startChooserIntent", e);
             Toast.makeText(activity, context.getString(R.string.error, e.getLocalizedMessage()), Toast.LENGTH_LONG).show();
         }
     }
 
-    public static void sendSettingsFile(@NonNull Activity activity, @NonNull String filename, ContentGenerator generator) {
-        sendFile(activity, "settings", filename, ".xml", generator);
+    public static void sendSettingsFile(@NonNull Activity activity, @NonNull String filename) {
+        sendFile(activity, SETTINGS_FOLDER, filename, SETTINGS_EXT, null);
     }
 
+    public static void writeSettingsFile(@NonNull Context context, @NonNull String filename, @NonNull ContentGenerator generator) {
+        writeFile(context, SETTINGS_FOLDER, filename, SETTINGS_EXT, generator);
+    }
+
+    private static File writeFile(Context context, String directory, String filename, String extension, @NonNull ContentGenerator content) {
+        File cacheDir = new File(context.getCacheDir(), directory);
+        File cacheFile = new File(cacheDir, filename + extension);
+
+        try {
+            cacheDir.mkdirs();
+        } catch (Exception ignored) {
+        }
+        try {
+            OutputStream os = new FileOutputStream(cacheFile);
+            OutputStreamWriter osw = new OutputStreamWriter(os, StandardCharsets.UTF_8);
+            BufferedWriter bw = new BufferedWriter(osw);
+            content.generate(bw);
+            bw.close();
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to write " + filename, e);
+        }
+        return cacheFile;
+    }
+
+    @Nullable
+    private static InputStream getInputStream(Context context, String directory, String filename, String extension) {
+        File cacheDir = new File(context.getCacheDir(), directory);
+        File cacheFile = new File(cacheDir, filename + extension);
+        try {
+            return new FileInputStream(cacheFile);
+        } catch (FileNotFoundException e) {
+            Log.e(TAG, "new FileInputStream " + filename, e);
+        }
+        return null;
+    }
+
+    @Nullable
+    public static XmlPullParser getSettingsFromFile(@NonNull Context context, @NonNull String filename) {
+        XmlPullParser parser;
+        try {
+            XmlPullParserFactory xppf = XmlPullParserFactory.newInstance();
+            //xppf.setNamespaceAware(true);
+            parser = xppf.newPullParser();
+        } catch (XmlPullParserException e) {
+            //TODO: implement custom parser if this ever happens
+            Log.e(TAG, "XmlPullParserFactory::newPullParser", e);
+            return null;
+        }
+        InputStream inputStream = getInputStream(context, SETTINGS_FOLDER, filename, SETTINGS_EXT);
+        if (inputStream == null)
+            return null;
+        try {
+            parser.setInput(inputStream, StandardCharsets.UTF_8.name());
+        } catch (XmlPullParserException e) {
+            Log.e(TAG, "XmlPullParser.setInput", e);
+            parser = null;
+        }
+        return parser;
+    }
+
+    @Nullable
+    public static XmlPullParser getXmlParser(@NonNull Context context, @Nullable Uri uri) {
+        return getXmlParser(context, getInputStream(context, uri));
+    }
+
+    @Nullable
+    public static XmlPullParser getXmlParser(@NonNull Context context, @Nullable InputStream inputStream) {
+        if (inputStream == null)
+            return null;
+        XmlPullParser parser;
+        try {
+            XmlPullParserFactory xppf = XmlPullParserFactory.newInstance();
+            //xppf.setNamespaceAware(true);
+            parser = xppf.newPullParser();
+        } catch (XmlPullParserException e) {
+            //TODO: implement custom parser if this ever happens
+            Log.e(TAG, "XmlPullParserFactory::newPullParser", e);
+            return null;
+        }
+        try {
+            parser.setInput(inputStream, StandardCharsets.UTF_8.name());
+        } catch (XmlPullParserException e) {
+            Log.e(TAG, "XmlPullParser.setInput", e);
+            parser = null;
+        }
+        return parser;
+    }
+
+    public static void chooseFile(@NonNull Activity activity, int requestCode) {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setTypeAndNormalize("text/plain; charset=utf-8");
+        intent.addCategory(Intent.CATEGORY_OPENABLE);
+
+        try {
+            activity.startActivityForResult(
+                    Intent.createChooser(intent, "Select a File to Upload"),
+                    requestCode);
+        } catch (android.content.ActivityNotFoundException ex) {
+            // Potentially direct the user to the Market with a Dialog
+            Toast.makeText(activity, "Please install a File Manager.", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+//    private static BufferedReader loadFile(Context context, String directory, String filename, String extension) {
+//        File cacheDir = new File(context.getCacheDir(), directory);
+//        File cacheFile = new File(cacheDir, filename + extension);
+//
+//        try {
+//            InputStream is = new FileInputStream(cacheFile);
+//            InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8);
+//            BufferedReader br = new BufferedReader(isr);
+//            return br;
+////            String line;
+////            while ((line = br.readLine()) != null) {
+////                text.append(line);
+////                text.append('\n');
+////            }
+////            br.close();
+//        }
+//        catch (IOException ignored) {
+//        }
+//        return null;
+//    }
+
+    public interface ContentGenerator {
+        void generate(Writer writer) throws IOException;
+    }
 }
