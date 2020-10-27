@@ -1,20 +1,17 @@
 package rocks.tbog.tblauncher.preference;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.preference.PreferenceDialogFragmentCompat;
-
-import java.util.Set;
 
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
-import rocks.tbog.tblauncher.TagsHandler;
 import rocks.tbog.tblauncher.db.XmlExport;
 import rocks.tbog.tblauncher.utils.FileUtils;
 import rocks.tbog.tblauncher.utils.Utilities;
@@ -80,18 +77,18 @@ public class ConfirmDialog extends PreferenceDialogFragmentCompat {
         final String key = preference.getKey();
         if ("export-tags".equals(key)) {
             {
-                Dialog dialog = requireDialog();
+                Dialog dialog = getDialog();
                 // disable positive button while we generate the file
                 if (dialog instanceof AlertDialog)
                     ((AlertDialog) dialog).getButton(DialogInterface.BUTTON_POSITIVE).setEnabled(false);
             }
             Utilities.runAsync((t) -> {
-                Activity activity = Utilities.getActivity(getView());
+                Activity activity = Utilities.getActivity(getContext());
                 if (activity == null)
                     return;
                 FileUtils.writeSettingsFile(activity, "tags", w -> XmlExport.tagsXml(activity, w));
             }, (t) -> {
-                Activity activity = Utilities.getActivity(getView());
+                Activity activity = Utilities.getActivity(getContext());
                 Dialog dialog = getDialog();
                 // enable positive button after we generate the file
                 if (activity != null && dialog instanceof AlertDialog)
