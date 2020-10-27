@@ -12,6 +12,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -26,7 +27,7 @@ import rocks.tbog.tblauncher.entry.ShortcutEntry;
 
 public class DBHelper {
     private static final String TAG = DBHelper.class.getSimpleName();
-    private static SQLiteDatabase database = null;
+    private static DB database = null;
     private static final String[] TABLE_COLUMNS_APPS = new String[]{"_id", "display_name", "component_name", "custom_flags"};//, "custom_icon"};
     private static final String[] TABLE_APPS_CUSTOM_ICON = new String[]{"custom_icon"};
     private static final String[] TABLE_FAVORITES_CUSTOM_ICON = new String[]{"custom_icon"};
@@ -38,9 +39,9 @@ public class DBHelper {
 
     private static SQLiteDatabase getDatabase(Context context) {
         if (database == null) {
-            database = new DB(context).getReadableDatabase();
+            database = new DB(context);
         }
-        return database;
+        return database.getReadableDatabase();
     }
 
     private static ArrayList<ValuedHistoryRecord> readCursor(Cursor cursor) {
@@ -458,6 +459,33 @@ public class DBHelper {
             }
         }
         return records;
+    }
+
+    /**
+     * Drop all previous tags and set the ones provided in the map
+     * @param context android context
+     * @param tagsMap map with tag names as key and a list of ids as value
+     */
+    public static void setTags(Context context, Map<String, ? extends Collection<String>> tagsMap) {
+        SQLiteDatabase db = getDatabase(context);
+        db.beginTransaction();
+        try {
+            //db.delete("tags", null, null);
+            db.execSQL("DROP TABLE IF EXISTS \"tags\"");
+            database.createTags(db);
+            ContentValues values = new ContentValues(2);
+            for (Map.Entry<String, ? extends Collection<String>> entry : tagsMap.entrySet()) {
+                values.put("tag", entry.getKey());
+                for (String record : entry.getValue()) {
+                    values.put("record", record);
+                    db.insert("tags", null, values);
+                }
+            }
+
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
     }
 
     /**

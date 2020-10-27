@@ -18,90 +18,50 @@ import rocks.tbog.tblauncher.searcher.Searcher;
 
 public class TBApplication extends Application {
 
+    /**
+     * The state of certain launcher features
+     */
+    private static LauncherState mState = new LauncherState();
     private DataHandler dataHandler;
     private IconsHandler iconsPackHandler;
     private TagsHandler tagsHandler = null;
     private boolean bLayoutUpdateRequired = false;
     private SharedPreferences mSharedPreferences = null;
-
     /**
      * Task launched on text change
      */
     private Searcher mSearchTask;
-
     /**
      * Everything that has to do with the UI behaviour
      */
     private Behaviour mBehaviour = new Behaviour();
-
     /**
      * Everything that has to do with the UI customization (drawables and colors)
      */
     private CustomizeUI mCustomizeUI = new CustomizeUI();
-
     /**
      * The favorite / quick access bar
      */
     private QuickList mQuickList = new QuickList();
-
     /**
      * We store a number of drawables in memory for fast redraw
      */
     private DrawableCache mDrawableCache = new DrawableCache();
-
     /**
      * We store a number of icon packs so we don't have to parse the XML
      */
     private IconPackCache mIconPackCache = new IconPackCache();
-
     /**
      * Manage live wallpaper interaction
      */
     private LiveWallpaper mLiveWallpaper = new LiveWallpaper();
-
     /**
      * Manage widgets
      */
     private WidgetManager mWidgetManager = new WidgetManager();
 
-    /**
-     * The state of certain launcher features
-     */
-    private static LauncherState mState = new LauncherState();
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        PreferenceManager.setDefaultValues(this, R.xml.preferences, true);
-        PreferenceManager.setDefaultValues(this, R.xml.preference_features, true);
-        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-
-//        SharedPreferences.Editor editor = mSharedPreferences.edit();
-//        for (Map.Entry<String, ?> entry : mSharedPreferences.getAll().entrySet() )
-//        {
-//            if (entry.getKey().startsWith("gesture-")) {
-//                Log.d("Pref", entry.getKey() + "=" + entry.getValue());
-//                editor.putString(entry.getKey(), "none");
-//            }
-//        }
-//        editor.commit();
-
-        mDrawableCache.onPrefChanged(this, mSharedPreferences);
-        mWidgetManager.start(this);
-    }
-
-    @Override
-    public void onTerminate() {
-        mWidgetManager.stop();
-        super.onTerminate();
-    }
-
     public static TBApplication getApplication(Context context) {
         return (TBApplication) context.getApplicationContext();
-    }
-
-    public Behaviour behaviour() {
-        return mBehaviour;
     }
 
     public static Behaviour behaviour(Context context) {
@@ -138,10 +98,7 @@ public class TBApplication extends Application {
 
     @NonNull
     public static TagsHandler tagsHandler(Context context) {
-        TBApplication app = getApplication(context);
-        if (app.tagsHandler == null)
-            app.tagsHandler = new TagsHandler(app);
-        return app.tagsHandler;
+        return getApplication(context).tagsHandler();
     }
 
     @NonNull
@@ -183,43 +140,8 @@ public class TBApplication extends Application {
         }
     }
 
-    @NonNull
-    public DataHandler getDataHandler() {
-        if (dataHandler == null) {
-            dataHandler = new DataHandler(this);
-        }
-        return dataHandler;
-    }
-
-    @NonNull
-    public DrawableCache drawableCache() {
-        return mDrawableCache;
-    }
-
-    public void initDataHandler() {
-        if (dataHandler == null) {
-            dataHandler = new DataHandler(this);
-        } else if (dataHandler.fullLoadOverSent()) {
-            // Already loaded! We still need to fire the FULL_LOAD event
-            Intent i = new Intent(TBLauncherActivity.FULL_LOAD_OVER);
-            sendBroadcast(i);
-        }
-    }
-
     public static IconsHandler iconsHandler(Context ctx) {
         return getApplication(ctx).iconsHandler();
-    }
-
-    public IconsHandler iconsHandler() {
-        if (iconsPackHandler == null) {
-            iconsPackHandler = new IconsHandler(this);
-        }
-
-        return iconsPackHandler;
-    }
-
-    public void resetIconsHandler() {
-        iconsPackHandler = new IconsHandler(this);
     }
 
     public static boolean isDefaultLauncher(Context context) {
@@ -248,6 +170,79 @@ public class TBApplication extends Application {
         context.startActivity(selector);
 
         packageManager.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_DEFAULT, PackageManager.DONT_KILL_APP);
+    }
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, true);
+        PreferenceManager.setDefaultValues(this, R.xml.preference_features, true);
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+//        SharedPreferences.Editor editor = mSharedPreferences.edit();
+//        for (Map.Entry<String, ?> entry : mSharedPreferences.getAll().entrySet() )
+//        {
+//            if (entry.getKey().startsWith("gesture-")) {
+//                Log.d("Pref", entry.getKey() + "=" + entry.getValue());
+//                editor.putString(entry.getKey(), "none");
+//            }
+//        }
+//        editor.commit();
+
+        mDrawableCache.onPrefChanged(this, mSharedPreferences);
+        mWidgetManager.start(this);
+    }
+
+    @Override
+    public void onTerminate() {
+        mWidgetManager.stop();
+        super.onTerminate();
+    }
+
+    public Behaviour behaviour() {
+        return mBehaviour;
+    }
+
+    @NonNull
+    public TagsHandler tagsHandler() {
+        if (tagsHandler == null)
+            tagsHandler = new TagsHandler(this);
+        return tagsHandler;
+    }
+
+    @NonNull
+    public DataHandler getDataHandler() {
+        if (dataHandler == null) {
+            dataHandler = new DataHandler(this);
+        }
+        return dataHandler;
+    }
+
+    @NonNull
+    public DrawableCache drawableCache() {
+        return mDrawableCache;
+    }
+
+    public void initDataHandler() {
+        if (dataHandler == null) {
+            dataHandler = new DataHandler(this);
+        } else if (dataHandler.fullLoadOverSent()) {
+            // Already loaded! We still need to fire the FULL_LOAD event
+            Intent i = new Intent(TBLauncherActivity.FULL_LOAD_OVER);
+            sendBroadcast(i);
+        }
+    }
+
+    public IconsHandler iconsHandler() {
+        if (iconsPackHandler == null) {
+            iconsPackHandler = new IconsHandler(this);
+        }
+
+        return iconsPackHandler;
+    }
+
+    public void resetIconsHandler() {
+        iconsPackHandler = new IconsHandler(this);
     }
 
     public boolean isLayoutUpdateRequired() {

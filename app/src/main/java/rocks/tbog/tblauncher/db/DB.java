@@ -29,7 +29,7 @@ class DB extends SQLiteOpenHelper {
         createWidgetsTable(database);
     }
 
-    private void createTags(SQLiteDatabase database) {
+    void createTags(SQLiteDatabase database) {
         database.execSQL("CREATE TABLE \"tags\" (\"tag\" TEXT NOT NULL, \"record\" TEXT NOT NULL)");
         database.execSQL("CREATE INDEX idx_tags_record ON \"tags\"(\"record\");");
     }

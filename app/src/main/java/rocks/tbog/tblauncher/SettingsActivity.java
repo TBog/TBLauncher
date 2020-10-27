@@ -2,8 +2,10 @@ package rocks.tbog.tblauncher;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
@@ -31,12 +33,14 @@ import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceScreen;
 import androidx.preference.SwitchPreference;
 
+import rocks.tbog.tblauncher.db.XmlImport;
 import rocks.tbog.tblauncher.preference.ChooseColorDialog;
 import rocks.tbog.tblauncher.preference.ConfirmDialog;
 import rocks.tbog.tblauncher.preference.CustomDialogPreference;
 import rocks.tbog.tblauncher.preference.EditSearchEnginesPreferenceDialog;
 import rocks.tbog.tblauncher.preference.QuickListPreferenceDialog;
 import rocks.tbog.tblauncher.preference.SliderDialog;
+import rocks.tbog.tblauncher.utils.FileUtils;
 import rocks.tbog.tblauncher.utils.SystemUiVisibility;
 import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.UISizes;
@@ -44,6 +48,7 @@ import rocks.tbog.tblauncher.utils.UISizes;
 public class SettingsActivity extends AppCompatActivity implements PreferenceFragmentCompat.OnPreferenceStartScreenCallback/*, PreferenceFragmentCompat.OnPreferenceStartFragmentCallback*/ {
 
     private final static String PREF_THAT_REQUIRE_LAYOUT_UPDATE = "result-list-rounded search-bar-rounded search-bar-gradient";
+    private static final int FILE_SELECT_XML = 63;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -83,20 +88,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         return super.onSupportNavigateUp();
     }
 
-    @Override
-    public boolean onPreferenceStartScreen(PreferenceFragmentCompat caller, PreferenceScreen preferenceScreen) {
-        String key = preferenceScreen.getKey();
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        SettingsFragment fragment = new SettingsFragment();
-        Bundle args = new Bundle();
-        args.putString(PreferenceFragmentCompat.ARG_PREFERENCE_ROOT, key);
-        fragment.setArguments(args);
-        ft.replace(R.id.settings_container, fragment, key);
-        ft.addToBackStack(key);
-        ft.commit();
-        return true;
-    }
-
 //    @Override
 //    public boolean onPreferenceStartFragment(PreferenceFragmentCompat caller, Preference pref) {
 //        // Instantiate the new Fragment
@@ -113,6 +104,32 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 //                .commit();
 //        return true;
 //    }
+
+    @Override
+    public boolean onPreferenceStartScreen(PreferenceFragmentCompat caller, PreferenceScreen preferenceScreen) {
+        String key = preferenceScreen.getKey();
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        SettingsFragment fragment = new SettingsFragment();
+        Bundle args = new Bundle();
+        args.putString(PreferenceFragmentCompat.ARG_PREFERENCE_ROOT, key);
+        fragment.setArguments(args);
+        ft.replace(R.id.settings_container, fragment, key);
+        ft.addToBackStack(key);
+        ft.commit();
+        return true;
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        if (resultCode == RESULT_OK) {
+            if (requestCode == FILE_SELECT_XML) {
+                Uri uri = data != null ? data.getData() : null;
+                XmlImport.settingsXml(this, FileUtils.getXmlParser(this, uri));
+                return;
+            }
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
 
     public static class SettingsFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
         static final String FRAGMENT_TAG = SettingsFragment.class.getName();
@@ -132,6 +149,16 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
                 removePreference("black-notification-icons");
+            }
+
+            // import settings
+            {
+                Preference pref = findPreference("import-settings");
+                if (pref != null)
+                    pref.setOnPreferenceClickListener(preference -> {
+                        FileUtils.chooseFile(requireActivity(), FILE_SELECT_XML);
+                        return true;
+                    });
             }
 
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());

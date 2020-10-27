@@ -46,8 +46,10 @@ public class TagsHandler {
         }, (t) -> {
             mTagsCache.clear();
             mTagsCache.putAll(tags);
-            if (mTagsCache.isEmpty())
+            if (mTagsCache.isEmpty()) {
                 addDefaultAliases();
+                //DBHelper.setTags(getContext(), mTagsCache);
+            }
         });
     }
 
