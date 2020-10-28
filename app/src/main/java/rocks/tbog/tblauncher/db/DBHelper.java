@@ -7,6 +7,7 @@ import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteStatement;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -463,6 +464,7 @@ public class DBHelper {
 
     /**
      * Drop all previous tags and set the ones provided in the map
+     *
      * @param context android context
      * @param tagsMap map with tag names as key and a list of ids as value
      */
@@ -826,7 +828,7 @@ public class DBHelper {
         ContentValues values = new ContentValues();
         values.put("record", fav.record);
         values.put("position", fav.position);
-        values.put("custom_flags", fav.flags);
+        values.put("custom_flags", fav.getFlagsDB());
 
         int rows = db.update("favorites", values, "record=?", new String[]{fav.record});
         if (rows == 0)
@@ -836,6 +838,30 @@ public class DBHelper {
 //        } catch (SQLException e) {
 //            Log.e(TAG, "setFavorite " + fav.record);
 //        }
+    }
+
+    public static void setFavorites(Context context, Collection<Pair<FavRecord, byte[]>> favRecords) {
+        SQLiteDatabase db = getDatabase(context);
+        db.beginTransaction();
+        try {
+            db.execSQL("DROP TABLE IF EXISTS \"favorites\"");
+            database.createFavoritesTable(db, false);
+
+            ContentValues values = new ContentValues();
+            for (Pair<FavRecord, byte[]> pair : favRecords) {
+                FavRecord fav = pair.first;
+                byte[] icon = pair.second;
+                values.put("record", fav.record);
+                values.put("position", fav.position == null ? "" : fav.position);
+                values.put("custom_flags", fav.getFlagsDB());
+                values.put(TABLE_FAVORITES_CUSTOM_ICON[0], icon);
+                db.insertWithOnConflict("favorites", null, values, SQLiteDatabase.CONFLICT_REPLACE);
+            }
+
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
     }
 
     public static boolean removeFavorite(Context context, String record) {
@@ -858,7 +884,7 @@ public class DBHelper {
                 FavRecord fav = new FavRecord();
                 fav.record = c.getString(0);
                 fav.position = c.getString(1);
-                fav.flags = c.getInt(2);
+                fav.setFlags(c.getInt(2));
                 fav.displayName = c.getString(3);
                 list.add(fav);
             }

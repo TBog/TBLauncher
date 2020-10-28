@@ -10,10 +10,22 @@ public class FavRecord {
     public String record;
     public String position;
     public String displayName;
-    public int flags = 0;
+    private int flags = 0;
 
     public int getFlagsDB() {
         return flags & MASK_SAVE_DB_FLAGS;
+    }
+
+    public void setFlags(int flags) {
+        this.flags = flags;
+    }
+
+    public void addFlags(int flags) {
+        this.flags |= flags;
+    }
+
+    public void clearFlags(int flags) {
+        this.flags &= ~flags;
     }
 
     public boolean isInQuickList() {

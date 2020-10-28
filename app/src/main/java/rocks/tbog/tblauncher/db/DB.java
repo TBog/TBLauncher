@@ -25,7 +25,7 @@ class DB extends SQLiteOpenHelper {
         addAppsTable(database);
         //createQuickList(database);
         createShortcutsTable(database);
-        createFavoritesTable(database);
+        createFavoritesTable(database, true);
         createWidgetsTable(database);
     }
 
@@ -47,8 +47,11 @@ class DB extends SQLiteOpenHelper {
         db.execSQL("CREATE TABLE \"shortcuts\" ( _id INTEGER PRIMARY KEY AUTOINCREMENT, \"name\" TEXT NOT NULL, \"package\" TEXT, \"info_data\" TEXT, \"icon_png\" BLOB, \"custom_flags\" INTEGER DEFAULT 0)");
     }
 
-    private void createFavoritesTable(SQLiteDatabase db) {
+    void createFavoritesTable(SQLiteDatabase db, boolean generateDefaults) {
         db.execSQL("CREATE TABLE \"favorites\" ( \"record\" TEXT NOT NULL UNIQUE, \"position\" TEXT NOT NULL, \"custom_flags\" INTEGER DEFAULT 0, \"name\" TEXT DEFAULT NULL, \"custom_icon\" BLOB DEFAULT NULL )");
+
+        if (!generateDefaults)
+            return;
 
         // generate default values
         ContentValues values = new ContentValues();
@@ -72,8 +75,7 @@ class DB extends SQLiteOpenHelper {
         }
     }
 
-    private void createWidgetsTable(SQLiteDatabase db)
-    {
+    private void createWidgetsTable(SQLiteDatabase db) {
         db.execSQL("CREATE TABLE \"widgets\" (_id INTEGER PRIMARY KEY AUTOINCREMENT, \"appWidgetId\" INTEGER NOT NULL UNIQUE, \"properties\" TEXT)");
     }
 
@@ -104,7 +106,7 @@ class DB extends SQLiteOpenHelper {
                     createTags(database);
                     // fall through
                 case 7:
-                    createFavoritesTable(database);
+                    createFavoritesTable(database, true);
                     // fall through
                 case 8:
                     database.execSQL("ALTER TABLE \"apps\" ADD COLUMN \"custom_icon\" BLOB DEFAULT NULL");
