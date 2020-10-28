@@ -1,33 +1,85 @@
 package rocks.tbog.tblauncher.db;
 
 import android.content.Context;
+import android.util.Base64;
 
 import androidx.annotation.NonNull;
 
 import java.io.IOException;
 import java.io.Writer;
+import java.util.List;
 import java.util.Set;
 
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.TagsHandler;
+import rocks.tbog.tblauncher.utils.SimpleXmlWriter;
 
 public class XmlExport {
-    public static void tagsXml(@NonNull Context context, @NonNull Writer w) throws IOException {
-        w.write("<taglist version=\"1\">\n");
+
+    public static void tagsXml(@NonNull Context context, @NonNull Writer writer) throws IOException {
+        SimpleXmlWriter sx = SimpleXmlWriter.getNewInstance();
+        sx.setOutput(writer);
+
+        sx.setIndentation(true);
+        sx.startDocument();
+        sx.startTag("taglist").attribute("version", "1");
+
         TagsHandler tagsHandler = TBApplication.tagsHandler(context);
         Set<String> tags = tagsHandler.getAllTagsAsSet();
         for (String tagName : tags) {
-            w.write("\t<tag name=\"");
-            w.write(tagName);
-            w.write("\">\n");
+            sx.startTag("tag").attribute("name", tagName);
             for (String idName : tagsHandler.getIds(tagName)) {
-                w.write("\t\t<item>");
-                w.write(idName);
-                w.write("</item>\n");
+                sx.startTag("item").content(idName).endTag("item");
             }
-            w.write("\t</tag>\n");
+            sx.endTag("tag");
         }
-        w.write("</taglist>\n");
 
+        sx.endTag("taglist");
+
+        sx.endDocument();
     }
+
+    public static void favoritesXml(@NonNull Context context, @NonNull Writer writer) throws IOException {
+        SimpleXmlWriter sx = SimpleXmlWriter.getNewInstance();
+        sx.setOutput(writer);
+
+        sx.setIndentation(true);
+        sx.startDocument();
+        sx.startTag("favlist").attribute("version", "1");
+
+        List<FavRecord> favRecords = TBApplication.dataHandler(context).getFavorites();
+        for (FavRecord fav : favRecords) {
+            sx.startTag("favorite")
+                    .startTag("id").content(fav.record).endTag("id")
+                    .startTag("flags").content(fav.getFlagsDB()).endTag("flags");
+
+            if (fav.hasCustomName()) {
+                sx.startTag("name")
+                        .content(fav.displayName)
+                        .endTag("name");
+            }
+
+            if (fav.hasCustomIcon()) {
+                byte[] favIcon = DBHelper.getCustomFavIcon(context, fav.record);
+                byte[] base64enc = Base64.encode(favIcon, Base64.NO_WRAP);
+                sx.startTag("icon")
+                        .attribute("encoding", "base64")
+                        .content(base64enc)
+                        .endTag("icon");
+            }
+
+            if (fav.isInQuickList()) {
+                sx.startTag("quicklist")
+                        .content(fav.position)
+                        .endTag("quicklist");
+            }
+
+            sx.endTag("favorite");
+        }
+
+        sx.endTag("favlist");
+
+        sx.endDocument();
+    }
+
 }

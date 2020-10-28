@@ -300,6 +300,12 @@
             android:key="export-tags"
             android:title="@string/export_tags" />
 
+        <rocks.tbog.tblauncher.preference.CustomDialogPreference
+            android:dialogLayout="@layout/pref_confirm"
+            android:key="export-favs"
+            android:summary="@string/export_favs_summary"
+            android:title="@string/export_favs" />
+
         <Preference
             android:key="import-settings"
             android:title="@string/import_settings" />

@@ -1048,7 +1048,7 @@ public class DataHandler extends BroadcastReceiver
             if (!DBHelper.updateQuickListPosition(context, record, position)) {
                 FavRecord favRecord = new FavRecord();
                 favRecord.record = record;
-                favRecord.flags |= FavRecord.FLAG_SHOW_IN_QUICK_LIST;
+                favRecord.addFlags(FavRecord.FLAG_SHOW_IN_QUICK_LIST);
                 favRecord.position = position;
                 DBHelper.setFavorite(context, favRecord);
             }
@@ -1059,7 +1059,7 @@ public class DataHandler extends BroadcastReceiver
 
         for (FavRecord favRecord : oldFav) {
             if (favRecord.isInQuickList()) {
-                favRecord.flags &= ~FavRecord.FLAG_SHOW_IN_QUICK_LIST;
+                favRecord.clearFlags(FavRecord.FLAG_SHOW_IN_QUICK_LIST);
                 DBHelper.setFavorite(context, favRecord);
             }
             // keep custom icons

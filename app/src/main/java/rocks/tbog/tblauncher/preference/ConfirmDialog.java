@@ -45,6 +45,9 @@ public class ConfirmDialog extends PreferenceDialogFragmentCompat {
             case "export-tags":
                 FileUtils.sendSettingsFile(requireActivity(), "tags");
                 break;
+            case "export-favs":
+                FileUtils.sendSettingsFile(requireActivity(), "favorites");
+                break;
         }
     }
 
@@ -64,7 +67,8 @@ public class ConfirmDialog extends PreferenceDialogFragmentCompat {
                 ((TextView) view.findViewById(android.R.id.text2)).setText(R.string.reset_default_launcher_description);
                 break;
             case "export-tags":
-                ((TextView) view.findViewById(android.R.id.text1)).setText(R.string.export_tags);
+            case "export-favs":
+                ((TextView) view.findViewById(android.R.id.text1)).setText(R.string.export_xml);
                 ((TextView) view.findViewById(android.R.id.text2)).setText(R.string.export_description);
                 break;
         }
@@ -75,7 +79,10 @@ public class ConfirmDialog extends PreferenceDialogFragmentCompat {
         super.onStart();
         CustomDialogPreference preference = (CustomDialogPreference) getPreference();
         final String key = preference.getKey();
-        if ("export-tags".equals(key)) {
+        switch (key) {
+            case "export-tags":
+            case "export-favs":
+                //
             {
                 Dialog dialog = getDialog();
                 // disable positive button while we generate the file
@@ -87,6 +94,7 @@ public class ConfirmDialog extends PreferenceDialogFragmentCompat {
                 if (activity == null)
                     return;
                 FileUtils.writeSettingsFile(activity, "tags", w -> XmlExport.tagsXml(activity, w));
+                FileUtils.writeSettingsFile(activity, "favorites", w -> XmlExport.favoritesXml(activity, w));
             }, (t) -> {
                 Activity activity = Utilities.getActivity(getContext());
                 Dialog dialog = getDialog();
@@ -94,6 +102,7 @@ public class ConfirmDialog extends PreferenceDialogFragmentCompat {
                 if (activity != null && dialog instanceof AlertDialog)
                     ((AlertDialog) dialog).getButton(DialogInterface.BUTTON_POSITIVE).setEnabled(true);
             });
+            break;
         }
     }
 }
