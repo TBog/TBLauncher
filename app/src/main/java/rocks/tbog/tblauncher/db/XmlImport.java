@@ -364,6 +364,7 @@ public class XmlImport {
         public void saveToDB(@NonNull Context context, @NonNull Method method) {
             saveTags(context, method);
             saveFavorites(context, method);
+            saveApplications(context, method);
             TBApplication.dataHandler(context).reloadProviders();
         }
 
@@ -411,6 +412,65 @@ public class XmlImport {
                 favs.put(fav.record, new Pair<>(fav, mIcons.get(fav)));
             }
             DBHelper.setFavorites(context, favs.values());
+        }
+
+        private void saveApplications(Context context, Method method) {
+            if (!bAppListLoaded)
+                return;
+
+            Map<String, AppRecord> cachedApps = TBApplication.dataHandler(context).getCachedApps();
+            if (method == Method.OVERWRITE || method == Method.SET) {
+                // make sure the validate flag is off
+                for (AppRecord rec : cachedApps.values())
+                    rec.clearFlags(AppRecord.FLAG_VALIDATED);
+
+                for (AppRecord importedRec : mApplications) {
+                    AppRecord rec = cachedApps.get(importedRec.componentName);
+                    if (rec == null)
+                        continue;
+                    // validate apps that are found in the imported list
+                    rec.setFlags(AppRecord.FLAG_VALIDATED);
+
+                    // overwrite
+                    if (rec.isHidden() && !importedRec.isHidden())
+                        DBHelper.removeAppHidden(context, rec.componentName);
+                    if (rec.hasCustomName() && !importedRec.hasCustomName()) {
+                        String name = importedRec.displayName != null ? importedRec.displayName : "";
+                        DBHelper.removeCustomAppName(context, rec.componentName, name);
+                    }
+                    if (rec.hasCustomIcon() && importedRec.hasCustomIcon())
+                        DBHelper.removeCustomAppIcon(context, rec.componentName);
+                }
+                if (method == Method.SET)
+                {
+                    // clean apps that don't appear in the import
+                    for (AppRecord rec : cachedApps.values()) {
+                        if (rec.isFlagSet(AppRecord.FLAG_VALIDATED))
+                            continue;
+                        if (rec.isHidden())
+                            DBHelper.removeAppHidden(context, rec.componentName);
+                        if (rec.hasCustomName()) {
+                            String name = rec.displayName != null ? rec.displayName : "";
+                            DBHelper.removeCustomAppName(context, rec.componentName, name);
+                        }
+                        if (rec.hasCustomIcon())
+                            DBHelper.removeCustomAppIcon(context, rec.componentName);
+                    }
+                }
+            }
+
+            for (AppRecord importedRec : mApplications) {
+                AppRecord rec = cachedApps.get(importedRec.componentName);
+                // if app not found (on device) there no need to customize it
+                if (rec == null)
+                    continue;
+                if (importedRec.isHidden())
+                    DBHelper.setAppHidden(context, importedRec.componentName);
+                if (importedRec.hasCustomName())
+                    DBHelper.setCustomAppName(context, importedRec.componentName, importedRec.displayName);
+                if (importedRec.hasCustomIcon())
+                    DBHelper.setCustomAppIcon(context, importedRec.componentName, mIcons.get(importedRec));
+            }
         }
 
         public enum Method {OVERWRITE, APPEND, SET}

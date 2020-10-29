@@ -269,7 +269,7 @@
     <string name="export_favs">Export favorites</string>
     <string name="export_favs_summary">Quick list, favorites and custom icons, tag icons</string>
     <string name="export_apps">Export applications</string>
-    <string name="export_apps_summary">Application renames and custom icons</string>
+    <string name="export_apps_summary">Application renames, hidden and custom icons</string>
     <string name="import_settings_section">Import settings</string>
     <string name="import_settings_set">Set imported settings</string>
     <string name="import_settings_set_summary">Clear relevant settings before importing</string>
