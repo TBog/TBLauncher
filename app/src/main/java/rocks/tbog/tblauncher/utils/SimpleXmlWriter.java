@@ -45,18 +45,19 @@ public class SimpleXmlWriter implements XmlSerializer {
     }
 
     public boolean setIndentation(boolean turnOn) {
-        try {
-            xmlSerializer.setFeature("http://xmlpull.org/v1/doc/features.html#indent-output", turnOn);
-        } catch (Exception e) {
-            return false;
-        }
-        return true;
+        return setIndentation(turnOn, null);
     }
 
+    /**
+     * Most probably not supported
+     *
+     * @param separator line separator
+     * @return true if serializer property exists
+     */
     public boolean setLineSeparator(String separator) {
         try {
             xmlSerializer.setProperty("http://xmlpull.org/v1/doc/properties.html#serializer-line-separator", separator);
-        } catch (IllegalArgumentException | IllegalStateException e) {
+        } catch (Exception e) {
             return false;
         }
         return true;

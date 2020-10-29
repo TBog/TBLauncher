@@ -8,6 +8,7 @@ import android.content.pm.ResolveInfo;
 import android.database.Cursor;
 import android.net.Uri;
 import android.util.Log;
+import android.util.Xml;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -105,7 +106,7 @@ public class FileUtils {
 
         try {
             Intent intent = ShareCompat.IntentBuilder.from(activity)
-                    .setType("text/xml")
+                    .setType("text/plain")
                     //.setSubject(context.getString(R.string.share_subject))
                     .setSubject("[subject]")
                     .setStream(uri)
@@ -114,6 +115,9 @@ public class FileUtils {
                     .createChooserIntent()
                     .addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
                     .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+            if (extension.endsWith(SETTINGS_EXT))
+                intent.setTypeAndNormalize("text/xml; charset=utf-8");
 
             // grant permission for all apps that can handle given intent
             List<ResolveInfo> resInfoList = context.getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
@@ -157,41 +161,41 @@ public class FileUtils {
         return cacheFile;
     }
 
-    @Nullable
-    private static InputStream getInputStream(Context context, String directory, String filename, String extension) {
-        File cacheDir = new File(context.getCacheDir(), directory);
-        File cacheFile = new File(cacheDir, filename + extension);
-        try {
-            return new FileInputStream(cacheFile);
-        } catch (FileNotFoundException e) {
-            Log.e(TAG, "new FileInputStream " + filename, e);
-        }
-        return null;
-    }
+//    @Nullable
+//    private static InputStream getInputStream(Context context, String directory, String filename, String extension) {
+//        File cacheDir = new File(context.getCacheDir(), directory);
+//        File cacheFile = new File(cacheDir, filename + extension);
+//        try {
+//            return new FileInputStream(cacheFile);
+//        } catch (FileNotFoundException e) {
+//            Log.e(TAG, "new FileInputStream " + filename, e);
+//        }
+//        return null;
+//    }
 
-    @Nullable
-    public static XmlPullParser getSettingsFromFile(@NonNull Context context, @NonNull String filename) {
-        XmlPullParser parser;
-        try {
-            XmlPullParserFactory xppf = XmlPullParserFactory.newInstance();
-            //xppf.setNamespaceAware(true);
-            parser = xppf.newPullParser();
-        } catch (XmlPullParserException e) {
-            //TODO: implement custom parser if this ever happens
-            Log.e(TAG, "XmlPullParserFactory::newPullParser", e);
-            return null;
-        }
-        InputStream inputStream = getInputStream(context, SETTINGS_FOLDER, filename, SETTINGS_EXT);
-        if (inputStream == null)
-            return null;
-        try {
-            parser.setInput(inputStream, StandardCharsets.UTF_8.name());
-        } catch (XmlPullParserException e) {
-            Log.e(TAG, "XmlPullParser.setInput", e);
-            parser = null;
-        }
-        return parser;
-    }
+//    @Nullable
+//    public static XmlPullParser getSettingsFromFile(@NonNull Context context, @NonNull String filename) {
+//        XmlPullParser parser;
+//        try {
+//            XmlPullParserFactory xppf = XmlPullParserFactory.newInstance();
+//            //xppf.setNamespaceAware(true);
+//            parser = xppf.newPullParser();
+//        } catch (XmlPullParserException e) {
+//            //TODO: implement custom parser if this ever happens
+//            Log.e(TAG, "XmlPullParserFactory::newPullParser", e);
+//            return null;
+//        }
+//        InputStream inputStream = getInputStream(context, SETTINGS_FOLDER, filename, SETTINGS_EXT);
+//        if (inputStream == null)
+//            return null;
+//        try {
+//            parser.setInput(inputStream, StandardCharsets.UTF_8.name());
+//        } catch (XmlPullParserException e) {
+//            Log.e(TAG, "XmlPullParser.setInput", e);
+//            parser = null;
+//        }
+//        return parser;
+//    }
 
     @Nullable
     public static XmlPullParser getXmlParser(@NonNull Context context, @Nullable Uri uri) {
@@ -202,16 +206,7 @@ public class FileUtils {
     public static XmlPullParser getXmlParser(@NonNull Context context, @Nullable InputStream inputStream) {
         if (inputStream == null)
             return null;
-        XmlPullParser parser;
-        try {
-            XmlPullParserFactory xppf = XmlPullParserFactory.newInstance();
-            //xppf.setNamespaceAware(true);
-            parser = xppf.newPullParser();
-        } catch (XmlPullParserException e) {
-            //TODO: implement custom parser if this ever happens
-            Log.e(TAG, "XmlPullParserFactory::newPullParser", e);
-            return null;
-        }
+        XmlPullParser parser = Xml.newPullParser();
         try {
             parser.setInput(inputStream, StandardCharsets.UTF_8.name());
         } catch (XmlPullParserException e) {
