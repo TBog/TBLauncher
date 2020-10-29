@@ -103,7 +103,7 @@ public class XmlExport {
                     .startTag("component").content(app.componentName).endTag("component")
                     .startTag("flags").content(app.getFlagsDB()).endTag("flags");
 
-            if (app.hasCustomName() && app.displayName != null) {
+            if (app.displayName != null && !app.displayName.isEmpty()) {
                 sx.startTag("name")
                         .content(app.displayName)
                         .endTag("name");
