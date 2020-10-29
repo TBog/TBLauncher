@@ -121,7 +121,7 @@ public class LoadAppEntry extends LoadEntryItem<AppEntry> {
 
         for (Map.Entry<String, AppRecord> entry : dbApps.entrySet()) {
             AppRecord rec = entry.getValue();
-            if ((rec.flags & AppRecord.FLAG_VALIDATED) == AppRecord.FLAG_VALIDATED)
+            if (rec.isFlagSet(AppRecord.FLAG_VALIDATED))
                 continue;
             pendingChanges.add(rec);
         }
@@ -152,7 +152,7 @@ public class LoadAppEntry extends LoadEntryItem<AppEntry> {
             pendingChanges.add(rec);
         }
 
-        rec.flags |= AppRecord.FLAG_VALIDATED;
+        rec.addFlags(AppRecord.FLAG_VALIDATED);
 
         String id = getScheme() + componentName;
 //        boolean isExcluded = excludedAppList.contains(componentName);

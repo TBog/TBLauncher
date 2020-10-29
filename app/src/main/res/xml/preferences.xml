@@ -295,20 +295,52 @@
         android:summary="@string/backup_summary"
         android:title="@string/title_backup">
 
-        <rocks.tbog.tblauncher.preference.CustomDialogPreference
-            android:dialogLayout="@layout/pref_confirm"
-            android:key="export-tags"
-            android:title="@string/export_tags" />
+        <!-- Export -->
+        <PreferenceCategory
+            android:key="export-settings-section"
+            android:title="@string/export_settings_section">
 
-        <rocks.tbog.tblauncher.preference.CustomDialogPreference
-            android:dialogLayout="@layout/pref_confirm"
-            android:key="export-favs"
-            android:summary="@string/export_favs_summary"
-            android:title="@string/export_favs" />
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:dialogLayout="@layout/pref_confirm"
+                android:key="export-tags"
+                android:summary="@string/export_tags_summary"
+                android:title="@string/export_tags" />
 
-        <Preference
-            android:key="import-settings"
-            android:title="@string/import_settings" />
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:dialogLayout="@layout/pref_confirm"
+                android:key="export-favs"
+                android:summary="@string/export_favs_summary"
+                android:title="@string/export_favs" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:dialogLayout="@layout/pref_confirm"
+                android:key="export-apps"
+                android:summary="@string/export_apps_summary"
+                android:title="@string/export_apps" />
+
+        </PreferenceCategory>
+
+        <!-- Import -->
+        <PreferenceCategory
+            android:key="import-settings-section"
+            android:title="@string/import_settings_section">
+
+            <Preference
+                android:key="import-settings-set"
+                android:summary="@string/import_settings_set_summary"
+                android:title="@string/import_settings_set" />
+
+            <Preference
+                android:key="import-settings-overwrite"
+                android:summary="@string/import_settings_overwrite_summary"
+                android:title="@string/import_settings_overwrite" />
+
+            <Preference
+                android:key="import-settings-append"
+                android:summary="@string/import_settings_append_summary"
+                android:title="@string/import_settings_append" />
+
+        </PreferenceCategory>
 
     </PreferenceScreen>
 

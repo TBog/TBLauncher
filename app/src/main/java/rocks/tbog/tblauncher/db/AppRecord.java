@@ -1,6 +1,6 @@
 package rocks.tbog.tblauncher.db;
 
-public final class AppRecord {
+public final class AppRecord extends FlagsRecord {
     public static final int FLAG_DEFAULT_NAME = 0x000001;
     public static final int FLAG_CUSTOM_NAME = 0x000002;
     public static final int FLAG_CUSTOM_ICON = 0x000004;
@@ -14,7 +14,14 @@ public final class AppRecord {
 
     public String componentName;
 
-    public int flags = FLAG_DEFAULT_NAME;
+    public AppRecord() {
+        flags = FLAG_DEFAULT_NAME;
+    }
+
+    @Override
+    public int getFlagsDB() {
+        return flags & MASK_SAVE_DB_FLAGS;
+    }
 
     public boolean hasCustomName() {
         return (flags & FLAG_CUSTOM_NAME) == FLAG_CUSTOM_NAME;
@@ -26,9 +33,5 @@ public final class AppRecord {
 
     public boolean isHidden() {
         return (flags & FLAG_APP_HIDDEN) == FLAG_APP_HIDDEN;
-    }
-
-    public int getFlagsDB() {
-        return flags & MASK_SAVE_DB_FLAGS;
     }
 }

@@ -14,13 +14,12 @@ import android.os.Build;
 import android.os.Process;
 import android.os.UserHandle;
 import android.os.UserManager;
+import android.text.TextUtils;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 import androidx.preference.PreferenceManager;
-
-import android.text.TextUtils;
-import android.util.Log;
 
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
@@ -125,7 +124,7 @@ public class ShortcutUtil {
         ShortcutRecord record = new ShortcutRecord();
         record.packageName = shortcutInfo.getPackage();
         record.infoData = shortcutInfo.getId();
-        record.flags |= ShortcutRecord.FLAG_OREO;
+        record.addFlags(ShortcutRecord.FLAG_OREO);
 
         LauncherApps launcherApps = (LauncherApps) context.getSystemService(Context.LAUNCHER_APPS_SERVICE);
         assert launcherApps != null;

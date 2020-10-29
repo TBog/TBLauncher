@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import rocks.tbog.tblauncher.TBApplication;
@@ -53,7 +54,7 @@ public class XmlExport {
                     .startTag("id").content(fav.record).endTag("id")
                     .startTag("flags").content(fav.getFlagsDB()).endTag("flags");
 
-            if (fav.hasCustomName()) {
+            if (fav.hasCustomName() && fav.displayName != null) {
                 sx.startTag("name")
                         .content(fav.displayName)
                         .endTag("name");
@@ -61,11 +62,13 @@ public class XmlExport {
 
             if (fav.hasCustomIcon()) {
                 byte[] favIcon = DBHelper.getCustomFavIcon(context, fav.record);
-                byte[] base64enc = Base64.encode(favIcon, Base64.NO_WRAP);
-                sx.startTag("icon")
-                        .attribute("encoding", "base64")
-                        .content(base64enc)
-                        .endTag("icon");
+                if (favIcon != null) {
+                    byte[] base64enc = Base64.encode(favIcon, Base64.NO_WRAP);
+                    sx.startTag("icon")
+                            .attribute("encoding", "base64")
+                            .content(base64enc)
+                            .endTag("icon");
+                }
             }
 
             if (fav.isInQuickList()) {
@@ -82,4 +85,46 @@ public class XmlExport {
         sx.endDocument();
     }
 
+    public static void applicationsXml(Context context, Writer writer) throws IOException {
+        SimpleXmlWriter sx = SimpleXmlWriter.getNewInstance();
+        sx.setOutput(writer);
+
+        sx.setIndentation(true);
+        sx.startDocument();
+        sx.startTag("applist").attribute("version", "1");
+
+        Map<String, AppRecord> cachedApps = TBApplication.dataHandler(context).getCachedApps();
+        for (AppRecord app : cachedApps.values()) {
+            // if there is no custom settings, skip this app
+            if (app.getFlagsDB() == AppRecord.FLAG_DEFAULT_NAME)
+                continue;
+
+            sx.startTag("app")
+                    .startTag("component").content(app.componentName).endTag("component")
+                    .startTag("flags").content(app.getFlagsDB()).endTag("flags");
+
+            if (app.hasCustomName() && app.displayName != null) {
+                sx.startTag("name")
+                        .content(app.displayName)
+                        .endTag("name");
+            }
+
+            if (app.hasCustomIcon()) {
+                byte[] appIcon = DBHelper.getCustomAppIcon(context, app.componentName);
+                if (appIcon != null) {
+                    byte[] base64enc = Base64.encode(appIcon, Base64.NO_WRAP);
+                    sx.startTag("icon")
+                            .attribute("encoding", "base64")
+                            .content(base64enc)
+                            .endTag("icon");
+                }
+            }
+
+            sx.endTag("app");
+        }
+
+        sx.endTag("applist");
+
+        sx.endDocument();
+    }
 }

@@ -48,7 +48,9 @@ import rocks.tbog.tblauncher.utils.UISizes;
 public class SettingsActivity extends AppCompatActivity implements PreferenceFragmentCompat.OnPreferenceStartScreenCallback/*, PreferenceFragmentCompat.OnPreferenceStartFragmentCallback*/ {
 
     private final static String PREF_THAT_REQUIRE_LAYOUT_UPDATE = "result-list-rounded search-bar-rounded search-bar-gradient";
-    private static final int FILE_SELECT_XML = 63;
+    private static final int FILE_SELECT_XML_SET = 63;
+    private static final int FILE_SELECT_XML_OVERWRITE = 62;
+    private static final int FILE_SELECT_XML_APPEND = 61;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -122,9 +124,21 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         if (resultCode == RESULT_OK) {
-            if (requestCode == FILE_SELECT_XML) {
+            XmlImport.SettingsData.Method method = null;
+            switch (requestCode) {
+                case FILE_SELECT_XML_APPEND:
+                    method = XmlImport.SettingsData.Method.APPEND;
+                    break;
+                case FILE_SELECT_XML_OVERWRITE:
+                    method = XmlImport.SettingsData.Method.OVERWRITE;
+                    break;
+                case FILE_SELECT_XML_SET:
+                    method = XmlImport.SettingsData.Method.SET;
+                    break;
+            }
+            if (method != null) {
                 Uri uri = data != null ? data.getData() : null;
-                XmlImport.settingsXml(this, FileUtils.getXmlParser(this, uri));
+                XmlImport.settingsXml(this, uri, method);
                 return;
             }
         }
@@ -153,10 +167,22 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
             // import settings
             {
-                Preference pref = findPreference("import-settings");
+                Preference pref = findPreference("import-settings-set");
                 if (pref != null)
                     pref.setOnPreferenceClickListener(preference -> {
-                        FileUtils.chooseFile(requireActivity(), FILE_SELECT_XML);
+                        FileUtils.chooseFile(requireActivity(), FILE_SELECT_XML_SET);
+                        return true;
+                    });
+                pref = findPreference("import-settings-overwrite");
+                if (pref != null)
+                    pref.setOnPreferenceClickListener(preference -> {
+                        FileUtils.chooseFile(requireActivity(), FILE_SELECT_XML_OVERWRITE);
+                        return true;
+                    });
+                pref = findPreference("import-settings-append");
+                if (pref != null)
+                    pref.setOnPreferenceClickListener(preference -> {
+                        FileUtils.chooseFile(requireActivity(), FILE_SELECT_XML_APPEND);
                         return true;
                     });
             }
@@ -295,6 +321,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "reset-default-launcher":
                     case "export-tags":
                     case "export-favs":
+                    case "export-apps":
                         dialogFragment = ConfirmDialog.newInstance(key);
                         break;
                     case "quick-list-content":
