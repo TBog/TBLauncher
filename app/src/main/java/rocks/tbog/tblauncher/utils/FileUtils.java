@@ -18,7 +18,6 @@ import androidx.core.content.FileProvider;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.BufferedWriter;
 import java.io.File;

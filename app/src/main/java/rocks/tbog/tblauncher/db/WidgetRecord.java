@@ -2,17 +2,13 @@ package rocks.tbog.tblauncher.db;
 
 import android.appwidget.AppWidgetHostView;
 import android.util.Log;
-import android.view.ViewGroup;
+import android.util.Xml;
 
 import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlPullParserFactory;
 
-import java.io.IOException;
 import java.io.StringReader;
 
 import rocks.tbog.tblauncher.ui.WidgetLayout;
-import rocks.tbog.tblauncher.ui.WidgetView;
 
 public class WidgetRecord {
 
@@ -26,10 +22,8 @@ public class WidgetRecord {
     private String packedProperties = null;
 
     public void loadProperties(String properties) {
+        XmlPullParser xpp = Xml.newPullParser();
         try {
-            XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
-            factory.setNamespaceAware(true);
-            XmlPullParser xpp = factory.newPullParser();
             xpp.setInput(new StringReader(properties));
             int eventType = xpp.getEventType();
             while (eventType != XmlPullParser.END_DOCUMENT) {
@@ -74,7 +68,7 @@ public class WidgetRecord {
                 }
                 eventType = xpp.next();
             }
-        } catch (XmlPullParserException | IOException e) {
+        } catch (Exception e) {
             Log.e(TAG, "parse XML properties", e);
         }
     }
