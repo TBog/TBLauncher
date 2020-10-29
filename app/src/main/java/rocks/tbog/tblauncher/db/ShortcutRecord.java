@@ -1,6 +1,6 @@
 package rocks.tbog.tblauncher.db;
 
-public class ShortcutRecord {
+public class ShortcutRecord extends FlagsRecord {
     public static final int FLAG_HIDE_BADGE = 1;
     public static final int FLAG_OREO = 1 << 1;
     private static final int MASK_SAVE_DB_FLAGS = FLAG_HIDE_BADGE | FLAG_OREO;
@@ -16,8 +16,7 @@ public class ShortcutRecord {
 
     public byte[] iconPng;
 
-    public int flags = 0;
-
+    @Override
     public int getFlagsDB() {
         return flags & MASK_SAVE_DB_FLAGS;
     }

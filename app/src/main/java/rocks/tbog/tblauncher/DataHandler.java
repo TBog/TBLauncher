@@ -873,6 +873,7 @@ public class DataHandler extends BroadcastReceiver
         return null;
     }
 
+    @NonNull
     public HashMap<String, AppRecord> getCachedApps() {
         return DBHelper.getAppsData(context);
     }

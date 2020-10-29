@@ -798,6 +798,7 @@ public class DBHelper {
         //return getFavRecord(db, entryId);
     }
 
+    @Nullable
     public static byte[] getCustomAppIcon(Context context, String componentName) {
         SQLiteDatabase db = getDatabase(context);
         String[] selArgs = new String[]{componentName};
@@ -810,6 +811,7 @@ public class DBHelper {
         return null;
     }
 
+    @Nullable
     public static byte[] getCustomFavIcon(Context context, String record) {
         SQLiteDatabase db = getDatabase(context);
         String[] selArgs = new String[]{record};

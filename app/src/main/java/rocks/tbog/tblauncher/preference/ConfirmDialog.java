@@ -48,6 +48,9 @@ public class ConfirmDialog extends PreferenceDialogFragmentCompat {
             case "export-favs":
                 FileUtils.sendSettingsFile(requireActivity(), "favorites");
                 break;
+            case "export-apps":
+                FileUtils.sendSettingsFile(requireActivity(), "applications");
+                break;
         }
     }
 
@@ -68,6 +71,7 @@ public class ConfirmDialog extends PreferenceDialogFragmentCompat {
                 break;
             case "export-tags":
             case "export-favs":
+            case "export-apps":
                 ((TextView) view.findViewById(android.R.id.text1)).setText(R.string.export_xml);
                 ((TextView) view.findViewById(android.R.id.text2)).setText(R.string.export_description);
                 break;
@@ -82,6 +86,7 @@ public class ConfirmDialog extends PreferenceDialogFragmentCompat {
         switch (key) {
             case "export-tags":
             case "export-favs":
+            case "export-apps":
                 //
             {
                 Dialog dialog = getDialog();
@@ -95,6 +100,7 @@ public class ConfirmDialog extends PreferenceDialogFragmentCompat {
                     return;
                 FileUtils.writeSettingsFile(activity, "tags", w -> XmlExport.tagsXml(activity, w));
                 FileUtils.writeSettingsFile(activity, "favorites", w -> XmlExport.favoritesXml(activity, w));
+                FileUtils.writeSettingsFile(activity, "applications", w -> XmlExport.applicationsXml(activity, w));
             }, (t) -> {
                 Activity activity = Utilities.getActivity(getContext());
                 Dialog dialog = getDialog();

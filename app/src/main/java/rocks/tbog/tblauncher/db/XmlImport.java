@@ -1,6 +1,7 @@
 package rocks.tbog.tblauncher.db;
 
 import android.content.Context;
+import android.net.Uri;
 import android.util.Base64;
 import android.util.Log;
 import android.util.Pair;
@@ -19,11 +20,16 @@ import java.util.List;
 import java.util.Map;
 
 import rocks.tbog.tblauncher.TBApplication;
+import rocks.tbog.tblauncher.utils.FileUtils;
 
 public class XmlImport {
     private static final String TAG = "Import";
 
-    public static void settingsXml(@NonNull Context context, @Nullable XmlPullParser xpp) {
+    public static void settingsXml(@NonNull Context context, @Nullable Uri uri, @NonNull SettingsData.Method method) {
+        settingsXml(context, FileUtils.getXmlParser(context, uri), method);
+    }
+
+    public static void settingsXml(@NonNull Context context, @Nullable XmlPullParser xpp, @NonNull SettingsData.Method method) {
         if (xpp == null)
             return;
         SettingsData settings = new SettingsData();
@@ -38,6 +44,9 @@ public class XmlImport {
                         case SettingsData.XTN_FAV_LIST:
                             settings.parseFavorites(xpp, eventType);
                             break;
+                        case SettingsData.XTN_APP_LIST:
+                            settings.parseApplications(xpp, eventType);
+                            break;
                         default:
                             Log.d(TAG, "ignored " + xpp.getName());
                     }
@@ -47,23 +56,29 @@ public class XmlImport {
         } catch (XmlPullParserException | IOException e) {
             Log.e(TAG, "parsing settingsXml", e);
         }
-        settings.saveToDB(context, SettingsData.Method.SET);
+        settings.saveToDB(context, method);
     }
 
-    private static class SettingsData {
+    public static class SettingsData {
         // XTN = xml tag name
         private static final String XTN_TAG_LIST = "taglist";
-        private static final String XTN_TAG_LIST_TAG = "tag";
-        private static final String XTN_TAG_LIST_TAG_RECORD = "item";
+        private static final String XTN_TAG_LIST_ITEM = "tag";
+        private static final String XTN_TAG_LIST_ITEM_ID = "item";
         private static final String XTN_FAV_LIST = "favlist";
-        private static final String XTN_FAV_LIST_RECORD = "id";
+        private static final String XTN_FAV_LIST_ITEM = "favorite";
+        private static final String XTN_FAV_LIST_ITEM_ID = "id";
+        private static final String XTN_APP_LIST = "applist";
+        private static final String XTN_APP_LIST_ITEM = "app";
+        private static final String XTN_APP_LIST_ITEM_ID = "component";
 
         // HashMap with tag name as key and an ArrayList of records for each
         private final HashMap<String, List<String>> mTags = new HashMap<>();
         private final ArrayList<FavRecord> mFavorites = new ArrayList<>();
-        private final HashMap<FavRecord, byte[]> mIcons = new HashMap<>();
+        private final ArrayList<AppRecord> mApplications = new ArrayList<>();
+        private final HashMap<FlagsRecord, byte[]> mIcons = new HashMap<>();
         private boolean bTagListLoaded = false;
         private boolean bFavListLoaded = false;
+        private boolean bAppListLoaded = false;
 
         void parseTagList(@NonNull XmlPullParser xpp, int eventType) throws IOException, XmlPullParserException {
             String currentTag = null;
@@ -74,7 +89,7 @@ public class XmlImport {
                     case XmlPullParser.START_TAG:
                         int attrCount = xpp.getAttributeCount();
                         switch (xpp.getName()) {
-                            case XTN_TAG_LIST_TAG:
+                            case XTN_TAG_LIST_ITEM:
                                 for (int attrIdx = 0; attrIdx < attrCount; attrIdx += 1) {
                                     String attrName = xpp.getAttributeName(attrIdx);
                                     if ("name".equals(attrName)) {
@@ -82,7 +97,7 @@ public class XmlImport {
                                     }
                                 }
                                 break;
-                            case XTN_TAG_LIST_TAG_RECORD:
+                            case XTN_TAG_LIST_ITEM_ID:
                                 bTagItem = currentTag != null;
                                 break;
                             case XTN_TAG_LIST:
@@ -100,10 +115,10 @@ public class XmlImport {
                         break;
                     case XmlPullParser.END_TAG:
                         switch (xpp.getName()) {
-                            case XTN_TAG_LIST_TAG:
+                            case XTN_TAG_LIST_ITEM:
                                 currentTag = null;
                                 // fall-through
-                            case XTN_TAG_LIST_TAG_RECORD:
+                            case XTN_TAG_LIST_ITEM_ID:
                                 bTagItem = false;
                                 break;
                             case XTN_TAG_LIST:
@@ -134,10 +149,10 @@ public class XmlImport {
                     case XmlPullParser.START_TAG:
                         int attrCount = xpp.getAttributeCount();
                         switch (xpp.getName()) {
-                            case "favorite":
+                            case XTN_FAV_LIST_ITEM:
                                 currentFav = new FavRecord();
                                 break;
-                            case XTN_FAV_LIST_RECORD:
+                            case XTN_FAV_LIST_ITEM_ID:
                             case "flags":
                             case "name":
                             case "quicklist":
@@ -170,12 +185,12 @@ public class XmlImport {
                         break;
                     case XmlPullParser.END_TAG:
                         switch (xpp.getName()) {
-                            case "favorite":
+                            case XTN_FAV_LIST_ITEM:
                                 if (currentFav != null && currentFav.record != null)
                                     mFavorites.add(currentFav);
                                 currentFav = null;
                                 // fall-through
-                            case XTN_FAV_LIST_RECORD:
+                            case XTN_FAV_LIST_ITEM_ID:
                             case "flags":
                             case "name":
                             case "icon":
@@ -190,7 +205,7 @@ public class XmlImport {
                     case XmlPullParser.TEXT:
                         if (lastTag != null && currentFav != null) {
                             switch (lastTag) {
-                                case XTN_FAV_LIST_RECORD:
+                                case XTN_FAV_LIST_ITEM_ID:
                                     currentFav.record = xpp.getText();
                                     if (currentFav.record.isEmpty())
                                         currentFav.record = null;
@@ -222,9 +237,102 @@ public class XmlImport {
             bFavListLoaded = true;
         }
 
-        private void addIcon(@NonNull FavRecord fav, String text, @Nullable String encoding) {
+        public void parseApplications(XmlPullParser xpp, int eventType) throws IOException, XmlPullParserException {
+            AppRecord currentApp = null;
+            boolean bAppListFinished = false;
+            String lastTag = null;
+            String iconEncoding = null;
+            while (eventType != XmlPullParser.END_DOCUMENT) {
+                switch (eventType) {
+                    case XmlPullParser.START_TAG:
+                        int attrCount = xpp.getAttributeCount();
+                        switch (xpp.getName()) {
+                            case XTN_APP_LIST_ITEM:
+                                currentApp = new AppRecord();
+                                break;
+                            case XTN_APP_LIST_ITEM_ID:
+                            case "flags":
+                            case "name":
+                                if (currentApp != null)
+                                    lastTag = xpp.getName();
+                                break;
+                            case "icon":
+                                if (currentApp != null)
+                                    lastTag = xpp.getName();
+                                iconEncoding = null;
+                                for (int attrIdx = 0; attrIdx < attrCount; attrIdx += 1) {
+                                    String attrName = xpp.getAttributeName(attrIdx);
+                                    if ("encoding".equals(attrName)) {
+                                        iconEncoding = xpp.getAttributeValue(attrIdx);
+                                    }
+                                }
+                                break;
+                            case XTN_APP_LIST:
+                                for (int attrIdx = 0; attrIdx < attrCount; attrIdx += 1) {
+                                    String attrName = xpp.getAttributeName(attrIdx);
+                                    if ("version".equals(attrName)) {
+                                        String tagListVersion = xpp.getAttributeValue(attrIdx);
+                                        Log.d(TAG, "appList version " + tagListVersion);
+                                    }
+                                }
+                                break;
+                            default:
+                                Log.d(TAG, "ignored " + xpp.getName());
+                        }
+                        break;
+                    case XmlPullParser.END_TAG:
+                        switch (xpp.getName()) {
+                            case XTN_APP_LIST_ITEM:
+                                if (currentApp != null && currentApp.componentName != null)
+                                    mApplications.add(currentApp);
+                                currentApp = null;
+                                // fall-through
+                            case XTN_APP_LIST_ITEM_ID:
+                            case "flags":
+                            case "name":
+                            case "icon":
+                                lastTag = null;
+                                break;
+                            case XTN_APP_LIST:
+                                bAppListFinished = true;
+                                break;
+                        }
+                        break;
+                    case XmlPullParser.TEXT:
+                        if (lastTag != null && currentApp != null) {
+                            switch (lastTag) {
+                                case XTN_APP_LIST_ITEM_ID:
+                                    currentApp.componentName = xpp.getText();
+                                    if (currentApp.componentName.isEmpty())
+                                        currentApp.componentName = null;
+                                    break;
+                                case "flags":
+                                    try {
+                                        currentApp.setFlags(Integer.parseInt(xpp.getText()));
+                                    } catch (NumberFormatException ignored) {
+                                        currentApp.setFlags(0);
+                                    }
+                                    break;
+                                case "name":
+                                    currentApp.displayName = xpp.getText();
+                                    break;
+                                case "icon":
+                                    addIcon(currentApp, xpp.getText(), iconEncoding);
+                                    break;
+                            }
+                        }
+                        break;
+                }
+                if (bAppListFinished)
+                    break;
+                eventType = xpp.next();
+            }
+            bAppListLoaded = true;
+        }
+
+        private void addIcon(@NonNull FlagsRecord rec, String text, @Nullable String encoding) {
             if (text == null) {
-                mIcons.remove(fav);
+                mIcons.remove(rec);
                 return;
             }
             text = text.trim();
@@ -236,7 +344,7 @@ public class XmlImport {
                     base64enc[i] = (byte) (c & 0xff);
                 }
                 byte[] icon = Base64.decode(base64enc, Base64.NO_WRAP);
-                mIcons.put(fav, icon);
+                mIcons.put(rec, icon);
             }
         }
 
@@ -253,7 +361,7 @@ public class XmlImport {
         }
 
 
-        public void saveToDB(@NonNull Context context, Method method) {
+        public void saveToDB(@NonNull Context context, @NonNull Method method) {
             saveTags(context, method);
             saveFavorites(context, method);
             TBApplication.dataHandler(context).reloadProviders();
@@ -305,6 +413,6 @@ public class XmlImport {
             DBHelper.setFavorites(context, favs.values());
         }
 
-        enum Method {OVERWRITE, APPEND, SET}
+        public enum Method {OVERWRITE, APPEND, SET}
     }
 }

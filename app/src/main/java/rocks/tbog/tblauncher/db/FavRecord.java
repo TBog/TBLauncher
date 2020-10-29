@@ -1,6 +1,6 @@
 package rocks.tbog.tblauncher.db;
 
-public class FavRecord {
+public class FavRecord extends FlagsRecord {
     public static final int FLAG_SHOW_IN_QUICK_LIST = 1;
     public static final int FLAG_CUSTOM_NAME = 1 << 1;
     public static final int FLAG_CUSTOM_ICON = 1 << 2;
@@ -10,22 +10,10 @@ public class FavRecord {
     public String record;
     public String position;
     public String displayName;
-    private int flags = 0;
 
+    @Override
     public int getFlagsDB() {
         return flags & MASK_SAVE_DB_FLAGS;
-    }
-
-    public void setFlags(int flags) {
-        this.flags = flags;
-    }
-
-    public void addFlags(int flags) {
-        this.flags |= flags;
-    }
-
-    public void clearFlags(int flags) {
-        this.flags &= ~flags;
     }
 
     public boolean isInQuickList() {

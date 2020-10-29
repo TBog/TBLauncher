@@ -105,8 +105,12 @@ public class FileUtils {
         Uri uri = FileProvider.getUriForFile(context, context.getPackageName() + ".provider", cacheFile);
 
         try {
+            String type = "text/plain";
+            if (extension.endsWith(SETTINGS_EXT))
+                type = ("text/xml");
+
             Intent intent = ShareCompat.IntentBuilder.from(activity)
-                    .setType("text/plain")
+                    .setType(type)
                     //.setSubject(context.getString(R.string.share_subject))
                     .setSubject("[subject]")
                     .setStream(uri)
@@ -115,9 +119,6 @@ public class FileUtils {
                     .createChooserIntent()
                     .addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
                     .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
-
-            if (extension.endsWith(SETTINGS_EXT))
-                intent.setTypeAndNormalize("text/xml; charset=utf-8");
 
             // grant permission for all apps that can handle given intent
             List<ResolveInfo> resInfoList = context.getPackageManager().queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
