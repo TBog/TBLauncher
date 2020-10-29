@@ -45,7 +45,7 @@ public class XmlImport {
                 eventType = xpp.next();
             }
         } catch (XmlPullParserException | IOException e) {
-            Log.e(TAG, "parsing drawable.xml", e);
+            Log.e(TAG, "parsing settingsXml", e);
         }
         settings.saveToDB(context, SettingsData.Method.SET);
     }
@@ -128,6 +128,7 @@ public class XmlImport {
             FavRecord currentFav = null;
             boolean bFavListFinished = false;
             String lastTag = null;
+            String iconEncoding = null;
             while (eventType != XmlPullParser.END_DOCUMENT) {
                 switch (eventType) {
                     case XmlPullParser.START_TAG:
@@ -139,10 +140,20 @@ public class XmlImport {
                             case XTN_FAV_LIST_RECORD:
                             case "flags":
                             case "name":
-                            case "icon":
                             case "quicklist":
                                 if (currentFav != null)
                                     lastTag = xpp.getName();
+                                break;
+                            case "icon":
+                                if (currentFav != null)
+                                    lastTag = xpp.getName();
+                                iconEncoding = null;
+                                for (int attrIdx = 0; attrIdx < attrCount; attrIdx += 1) {
+                                    String attrName = xpp.getAttributeName(attrIdx);
+                                    if ("encoding".equals(attrName)) {
+                                        iconEncoding = xpp.getAttributeValue(attrIdx);
+                                    }
+                                }
                                 break;
                             case XTN_FAV_LIST:
                                 for (int attrIdx = 0; attrIdx < attrCount; attrIdx += 1) {
@@ -195,7 +206,7 @@ public class XmlImport {
                                     currentFav.displayName = xpp.getText();
                                     break;
                                 case "icon":
-                                    addIcon(currentFav, xpp.getText());
+                                    addIcon(currentFav, xpp.getText(), iconEncoding);
                                     break;
                                 case "quicklist":
                                     currentFav.position = xpp.getText();
@@ -211,20 +222,22 @@ public class XmlImport {
             bFavListLoaded = true;
         }
 
-        private void addIcon(@NonNull FavRecord fav, String text) {
+        private void addIcon(@NonNull FavRecord fav, String text, @Nullable String encoding) {
             if (text == null) {
                 mIcons.remove(fav);
                 return;
             }
             text = text.trim();
             int size = text.length();
-            byte[] base64enc = new byte[size];
-            for (int i = 0; i < size; i += 1) {
-                char c = text.charAt(i);
-                base64enc[i] = (byte) (c & 0xff);
+            if (encoding == null || "base64".equals(encoding)) {
+                byte[] base64enc = new byte[size];
+                for (int i = 0; i < size; i += 1) {
+                    char c = text.charAt(i);
+                    base64enc[i] = (byte) (c & 0xff);
+                }
+                byte[] icon = Base64.decode(base64enc, Base64.NO_WRAP);
+                mIcons.put(fav, icon);
             }
-            byte[] icon = Base64.decode(base64enc, Base64.NO_WRAP);
-            mIcons.put(fav, icon);
         }
 
         private void addRecordTag(@Nullable String record, @NonNull String tagName) {
