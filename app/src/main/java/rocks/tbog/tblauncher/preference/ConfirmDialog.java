@@ -51,6 +51,9 @@ public class ConfirmDialog extends PreferenceDialogFragmentCompat {
             case "export-apps":
                 FileUtils.sendSettingsFile(requireActivity(), "applications");
                 break;
+            case "export-interface":
+                FileUtils.sendSettingsFile(requireActivity(), "interface");
+                break;
         }
     }
 
@@ -72,6 +75,7 @@ public class ConfirmDialog extends PreferenceDialogFragmentCompat {
             case "export-tags":
             case "export-favs":
             case "export-apps":
+            case "export-interface":
                 ((TextView) view.findViewById(android.R.id.text1)).setText(R.string.export_xml);
                 ((TextView) view.findViewById(android.R.id.text2)).setText(R.string.export_description);
                 break;
@@ -82,33 +86,53 @@ public class ConfirmDialog extends PreferenceDialogFragmentCompat {
     public void onStart() {
         super.onStart();
         CustomDialogPreference preference = (CustomDialogPreference) getPreference();
+        Utilities.AsyncRun.Run asyncWrite = null;
         final String key = preference.getKey();
+
         switch (key) {
             case "export-tags":
+                asyncWrite = t -> {
+                    Activity activity = Utilities.getActivity(getContext());
+                    if (activity != null)
+                        FileUtils.writeSettingsFile(activity, "tags", w -> XmlExport.tagsXml(activity, w));
+                };
+                break;
             case "export-favs":
+                asyncWrite = t -> {
+                    Activity activity = Utilities.getActivity(getContext());
+                    if (activity != null)
+                        FileUtils.writeSettingsFile(activity, "favorites", w -> XmlExport.favoritesXml(activity, w));
+                };
+                break;
             case "export-apps":
-                //
+                asyncWrite = t -> {
+                    Activity activity = Utilities.getActivity(getContext());
+                    if (activity != null)
+                        FileUtils.writeSettingsFile(activity, "applications", w -> XmlExport.applicationsXml(activity, w));
+                };
+                break;
+            case "export-interface":
+                asyncWrite = t -> {
+                    Activity activity = Utilities.getActivity(getContext());
+                    if (activity != null)
+                        FileUtils.writeSettingsFile(activity, "interface", w -> XmlExport.interfaceXml(activity, w));
+                };
+                break;
+        }
+        if (asyncWrite != null) {
             {
                 Dialog dialog = getDialog();
                 // disable positive button while we generate the file
                 if (dialog instanceof AlertDialog)
                     ((AlertDialog) dialog).getButton(DialogInterface.BUTTON_POSITIVE).setEnabled(false);
             }
-            Utilities.runAsync((t) -> {
-                Activity activity = Utilities.getActivity(getContext());
-                if (activity == null)
-                    return;
-                FileUtils.writeSettingsFile(activity, "tags", w -> XmlExport.tagsXml(activity, w));
-                FileUtils.writeSettingsFile(activity, "favorites", w -> XmlExport.favoritesXml(activity, w));
-                FileUtils.writeSettingsFile(activity, "applications", w -> XmlExport.applicationsXml(activity, w));
-            }, (t) -> {
+            Utilities.runAsync(asyncWrite, (t) -> {
                 Activity activity = Utilities.getActivity(getContext());
                 Dialog dialog = getDialog();
                 // enable positive button after we generate the file
                 if (activity != null && dialog instanceof AlertDialog)
                     ((AlertDialog) dialog).getButton(DialogInterface.BUTTON_POSITIVE).setEnabled(true);
             });
-            break;
         }
     }
 }
