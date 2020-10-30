@@ -1,9 +1,12 @@
 package rocks.tbog.tblauncher.db;
 
+import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Base64;
 
 import androidx.annotation.NonNull;
+import androidx.preference.PreferenceManager;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -124,6 +127,23 @@ public class XmlExport {
         }
 
         sx.endTag("applist");
+
+        sx.endDocument();
+    }
+
+    public static void interfaceXml(Context context, Writer writer) throws IOException {
+        SimpleXmlWriter sx = SimpleXmlWriter.getNewInstance();
+        sx.setOutput(writer);
+
+        sx.setIndentation(true);
+        sx.startDocument();
+        sx.startTag("interface").attribute("version", "1");
+
+        //PreferenceManager prefMgr = new PreferenceManager(context);
+        //SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+        //Map<String, ?> prefMap = pref.getAll();
+
+        sx.endTag("interface");
 
         sx.endDocument();
     }

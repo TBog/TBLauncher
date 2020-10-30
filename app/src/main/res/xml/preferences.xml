@@ -318,6 +318,12 @@
                 android:summary="@string/export_apps_summary"
                 android:title="@string/export_apps" />
 
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:dialogLayout="@layout/pref_confirm"
+                android:key="export-interface"
+                android:summary="@string/export_interface_summary"
+                android:title="@string/export_interface" />
+
         </PreferenceCategory>
 
         <!-- Import -->

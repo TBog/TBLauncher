@@ -322,6 +322,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "export-tags":
                     case "export-favs":
                     case "export-apps":
+                    case "export-interface":
                         dialogFragment = ConfirmDialog.newInstance(key);
                         break;
                     case "quick-list-content":

@@ -279,6 +279,8 @@
     <string name="import_settings_append_summary">Only new settings get imported</string>
     <string name="export_description">You will be asked to choose an application to save the exported settings as an XML file.</string>
     <string name="error">Error %s</string>
+    <string name="export_interface">Export interface</string>
+    <string name="export_interface_summary">All interface colors, sizes, toggles and icon shapes</string>
     <plurals name="tag_entry_count">
         <item quantity="one">%d entry</item>
         <item quantity="other">%d entries</item>
