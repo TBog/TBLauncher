@@ -114,6 +114,7 @@
                 android:title="@string/gradient" />
 
             <SwitchPreference
+                android:defaultValue="false"
                 android:key="black-notification-icons"
                 android:title="@string/black_notification_icons" />
 
