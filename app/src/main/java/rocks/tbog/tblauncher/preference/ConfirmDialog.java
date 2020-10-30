@@ -1,15 +1,21 @@
 package rocks.tbog.tblauncher.preference;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Bundle;
+import android.os.Looper;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.WorkerThread;
 import androidx.appcompat.app.AlertDialog;
 import androidx.preference.PreferenceDialogFragmentCompat;
 import androidx.preference.PreferenceGroup;
+import androidx.preference.PreferenceManager;
 
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
@@ -55,6 +61,9 @@ public class ConfirmDialog extends PreferenceDialogFragmentCompat {
             case "export-interface":
                 FileUtils.sendSettingsFile(requireActivity(), "interface");
                 break;
+            case "export-backup":
+                FileUtils.sendSettingsFile(requireActivity(), "backup");
+                break;
         }
     }
 
@@ -77,10 +86,36 @@ public class ConfirmDialog extends PreferenceDialogFragmentCompat {
             case "export-favs":
             case "export-apps":
             case "export-interface":
+            case "export-backup":
                 ((TextView) view.findViewById(android.R.id.text1)).setText(R.string.export_xml);
                 ((TextView) view.findViewById(android.R.id.text2)).setText(R.string.export_description);
                 break;
         }
+    }
+
+    @WorkerThread
+    @SuppressLint("RestrictedApi")
+    private static PreferenceGroup loadAllPreferences(@NonNull Context context) {
+        boolean looperCreated = false;
+        if (Looper.myLooper() == null) {
+            //because inflateFromResource needs a looper and we don't have one, we make one
+            Looper.prepare();
+            looperCreated = true;
+        }
+
+        // load the preference XML
+        PreferenceManager manager = new PreferenceManager(context);
+        PreferenceGroup root = manager.inflateFromResource(context, R.xml.preferences, null);
+        // add `R.xml.preference_features` to rootPreference even if it means we'll get some duplicated key errors
+        // it's easier to handle only one root
+        manager.inflateFromResource(context, R.xml.preference_features, root.findPreference("feature-holder"));
+
+        // we don't need the looper anymore
+        if (looperCreated) {
+            Looper.myLooper().quitSafely();
+            Looper.loop();
+        }
+        return root;
     }
 
     @Override
@@ -93,46 +128,42 @@ public class ConfirmDialog extends PreferenceDialogFragmentCompat {
         switch (key) {
             case "export-tags":
                 asyncWrite = t -> {
-                    Activity activity = Utilities.getActivity(getContext());
+                    final Activity activity = Utilities.getActivity(getContext());
                     if (activity != null)
                         FileUtils.writeSettingsFile(activity, "tags", w -> XmlExport.tagsXml(activity, w));
                 };
                 break;
             case "export-favs":
                 asyncWrite = t -> {
-                    Activity activity = Utilities.getActivity(getContext());
+                    final Activity activity = Utilities.getActivity(getContext());
                     if (activity != null)
                         FileUtils.writeSettingsFile(activity, "favorites", w -> XmlExport.favoritesXml(activity, w));
                 };
                 break;
             case "export-apps":
                 asyncWrite = t -> {
-                    Activity activity = Utilities.getActivity(getContext());
+                    final Activity activity = Utilities.getActivity(getContext());
                     if (activity != null)
                         FileUtils.writeSettingsFile(activity, "applications", w -> XmlExport.applicationsXml(activity, w));
                 };
                 break;
             case "export-interface": {
-                PreferenceGroup group = preference.getParent();
-                while (group != null && group.getParent() != null)
-                    group = group.getParent();
-                final PreferenceGroup rootPreference = group;
                 asyncWrite = t -> {
-                    Activity activity = Utilities.getActivity(rootPreference.getContext());
-                    if (activity != null)
+                    final Activity activity = Utilities.getActivity(getContext());
+                    if (activity != null) {
+                        final PreferenceGroup rootPreference = loadAllPreferences(activity);
                         FileUtils.writeSettingsFile(activity, "interface", w -> XmlExport.interfaceXml(rootPreference, w));
+                    }
                 };
                 break;
             }
             case "export-backup": {
-                PreferenceGroup group = preference.getParent();
-                while (group != null && group.getParent() != null)
-                    group = group.getParent();
-                final PreferenceGroup rootPreference = group;
                 asyncWrite = t -> {
-                    Activity activity = Utilities.getActivity(rootPreference.getContext());
-                    if (activity != null)
+                    final Activity activity = Utilities.getActivity(getContext());
+                    if (activity != null) {
+                        final PreferenceGroup rootPreference = loadAllPreferences(activity);
                         FileUtils.writeSettingsFile(activity, "backup", w -> XmlExport.backupXml(rootPreference, w));
+                    }
                 };
                 break;
             }

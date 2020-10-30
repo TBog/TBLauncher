@@ -325,6 +325,12 @@
                 android:summary="@string/export_interface_summary"
                 android:title="@string/export_interface" />
 
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:dialogLayout="@layout/pref_confirm"
+                android:key="export-backup"
+                android:summary="@string/export_backup_summary"
+                android:title="@string/export_backup" />
+
         </PreferenceCategory>
 
         <!-- Import -->

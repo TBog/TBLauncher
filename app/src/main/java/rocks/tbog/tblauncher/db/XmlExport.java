@@ -37,8 +37,6 @@ public class XmlExport {
     }
 
     public static void tagsXml(@NonNull Context context, @NonNull SimpleXmlWriter sx) throws IOException {
-        sx.setIndentation(true);
-        sx.startDocument();
         sx.startTag("taglist").attribute("version", "1");
 
         TagsHandler tagsHandler = TBApplication.tagsHandler(context);
@@ -200,6 +198,7 @@ public class XmlExport {
         sx.startTag("preferences").attribute("version", "1");
 
         Map<String, ?> prefMap = new HashMap<>(rootPref.getSharedPreferences().getAll());
+
         recursiveWritePreferences(sx, rootPref, prefMap);
 
         sx.endTag("preferences");
@@ -230,6 +229,7 @@ public class XmlExport {
         for (int prefIdx = 0; prefIdx < prefCount; prefIdx += 1) {
             Preference pref = prefGroup.getPreference(prefIdx);
             if (pref instanceof PreferenceGroup) {
+                Log.d(TAG, "recursiveWritePreferences " + pref.getKey());
                 recursiveWritePreferences(sx, (PreferenceGroup) pref, prefMap);
                 continue;
             }
