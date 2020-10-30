@@ -1,6 +1,8 @@
 package rocks.tbog.tblauncher.db;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.util.Base64;
 import android.util.Log;
@@ -8,6 +10,7 @@ import android.util.Pair;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.preference.PreferenceManager;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -19,11 +22,12 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
+import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.utils.FileUtils;
 
 public class XmlImport {
-    private static final String TAG = "Import";
+    private static final String TAG = "XImport";
 
     public static void settingsXml(@NonNull Context context, @Nullable Uri uri, @NonNull SettingsData.Method method) {
         settingsXml(context, FileUtils.getXmlParser(context, uri), method);
@@ -46,6 +50,10 @@ public class XmlImport {
                             break;
                         case SettingsData.XTN_APP_LIST:
                             settings.parseApplications(xpp, eventType);
+                            break;
+                        case SettingsData.XTN_UI_LIST:
+                        case SettingsData.XTN_PREF_LIST:
+                            settings.parsePreferences(xpp, eventType);
                             break;
                         default:
                             Log.d(TAG, "ignored " + xpp.getName());
@@ -70,15 +78,20 @@ public class XmlImport {
         private static final String XTN_APP_LIST = "applist";
         private static final String XTN_APP_LIST_ITEM = "app";
         private static final String XTN_APP_LIST_ITEM_ID = "component";
+        private static final String XTN_UI_LIST = "interface";
+        private static final String XTN_PREF_LIST = "preferences";
+        private static final String XTN_PREF_LIST_ITEM = "preference";
 
         // HashMap with tag name as key and an ArrayList of records for each
         private final HashMap<String, List<String>> mTags = new HashMap<>();
+        private final HashMap<String, Object> mPreferences = new HashMap<>();
         private final ArrayList<FavRecord> mFavorites = new ArrayList<>();
         private final ArrayList<AppRecord> mApplications = new ArrayList<>();
         private final HashMap<FlagsRecord, byte[]> mIcons = new HashMap<>();
         private boolean bTagListLoaded = false;
         private boolean bFavListLoaded = false;
         private boolean bAppListLoaded = false;
+        private boolean bPrefListLoaded = false;
 
         void parseTagList(@NonNull XmlPullParser xpp, int eventType) throws IOException, XmlPullParserException {
             String currentTag = null;
@@ -330,6 +343,86 @@ public class XmlImport {
             bAppListLoaded = true;
         }
 
+        void parsePreferences(@NonNull XmlPullParser xpp, int eventType) throws IOException, XmlPullParserException {
+            String prefName = null;
+            Object prefValue = null;
+            boolean bPrefListFinished = false;
+            while (eventType != XmlPullParser.END_DOCUMENT) {
+                switch (eventType) {
+                    case XmlPullParser.START_TAG:
+                        int attrCount = xpp.getAttributeCount();
+                        switch (xpp.getName()) {
+                            case XTN_PREF_LIST_ITEM:
+                                for (int attrIdx = 0; attrIdx < attrCount; attrIdx += 1) {
+                                    String attrName = xpp.getAttributeName(attrIdx);
+                                    switch (attrName) {
+                                        case "key":
+                                            prefName = xpp.getAttributeValue(attrIdx);
+                                            break;
+                                        case "value":
+                                            prefValue = xpp.getAttributeValue(attrIdx);
+                                            break;
+                                        case "bool":
+                                            prefValue = Boolean.parseBoolean(xpp.getAttributeValue(attrIdx));
+                                            break;
+                                        case "int":
+                                            try {
+                                                prefValue = Integer.parseInt(xpp.getAttributeValue(attrIdx));
+                                            } catch (NumberFormatException ignored) {
+                                                prefValue = 0;
+                                            }
+                                            break;
+                                        case "color":
+                                            try {
+                                                String str = xpp.getAttributeValue(attrIdx).substring(1);
+                                                prefValue = Integer.parseInt(str, 16);
+                                            } catch (NumberFormatException ignored) {
+                                                prefValue = 0;
+                                            }
+                                            break;
+                                    }
+                                }
+                                if (prefName != null && prefValue != null)
+                                    mPreferences.put(prefName, prefValue);
+                                break;
+                            case XTN_UI_LIST:
+                            case XTN_PREF_LIST:
+                                for (int attrIdx = 0; attrIdx < attrCount; attrIdx += 1) {
+                                    String attrName = xpp.getAttributeName(attrIdx);
+                                    if ("version".equals(attrName)) {
+                                        String prefListVersion = xpp.getAttributeValue(attrIdx);
+                                        Log.d(TAG, "prefList version " + prefListVersion);
+                                    }
+                                }
+                                break;
+                            default:
+                                Log.d(TAG, "ignored " + xpp.getName());
+                        }
+                        break;
+                    case XmlPullParser.END_TAG:
+                        switch (xpp.getName()) {
+                            case XTN_PREF_LIST_ITEM:
+                                prefName = null;
+                                prefValue = null;
+                                break;
+                            case XTN_UI_LIST:
+                            case XTN_PREF_LIST:
+                                bPrefListFinished = true;
+                                break;
+                        }
+                        break;
+                    case XmlPullParser.TEXT:
+                        if (prefName != null)
+                            Log.d(TAG, "preference `" + prefName + "` has text `" + xpp.getText() + "`");
+                        break;
+                }
+                if (bPrefListFinished)
+                    break;
+                eventType = xpp.next();
+            }
+            bPrefListLoaded = true;
+        }
+
         private void addIcon(@NonNull FlagsRecord rec, String text, @Nullable String encoding) {
             if (text == null) {
                 mIcons.remove(rec);
@@ -365,6 +458,7 @@ public class XmlImport {
             saveTags(context, method);
             saveFavorites(context, method);
             saveApplications(context, method);
+            savePreferences(context, method);
             TBApplication.dataHandler(context).reloadProviders();
         }
 
@@ -441,8 +535,7 @@ public class XmlImport {
                     if (rec.hasCustomIcon() && importedRec.hasCustomIcon())
                         DBHelper.removeCustomAppIcon(context, rec.componentName);
                 }
-                if (method == Method.SET)
-                {
+                if (method == Method.SET) {
                     // clean apps that don't appear in the import
                     for (AppRecord rec : cachedApps.values()) {
                         if (rec.isFlagSet(AppRecord.FLAG_VALIDATED))
@@ -471,6 +564,36 @@ public class XmlImport {
                 if (importedRec.hasCustomIcon())
                     DBHelper.setCustomAppIcon(context, importedRec.componentName, mIcons.get(importedRec));
             }
+        }
+
+        @SuppressLint("ApplySharedPref")
+        private void savePreferences(Context context, Method method) {
+            if (!bPrefListLoaded || method == Method.APPEND)
+                return;
+
+            SharedPreferences preferences = PreferenceManager.getDefaultSharedPreferences(context);
+            SharedPreferences.Editor editor = preferences.edit();
+
+            if (method == Method.SET) {
+                editor.clear().commit();
+
+                PreferenceManager.setDefaultValues(context, R.xml.preferences, true);
+                PreferenceManager.setDefaultValues(context, R.xml.preference_features, true);
+
+                editor = preferences.edit();
+            }
+
+            for (Map.Entry<String, Object> entry : mPreferences.entrySet()) {
+                Object value = entry.getValue();
+                if (value instanceof String)
+                    editor.putString(entry.getKey(), (String) value);
+                else if (value instanceof Integer)
+                    editor.putInt(entry.getKey(), (Integer) value);
+                else if (value instanceof Boolean)
+                    editor.putBoolean(entry.getKey(), (Boolean) value);
+            }
+
+            editor.commit();
         }
 
         public enum Method {OVERWRITE, APPEND, SET}

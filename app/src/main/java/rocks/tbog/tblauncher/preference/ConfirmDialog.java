@@ -9,6 +9,7 @@ import android.widget.TextView;
 
 import androidx.appcompat.app.AlertDialog;
 import androidx.preference.PreferenceDialogFragmentCompat;
+import androidx.preference.PreferenceGroup;
 
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
@@ -111,13 +112,30 @@ public class ConfirmDialog extends PreferenceDialogFragmentCompat {
                         FileUtils.writeSettingsFile(activity, "applications", w -> XmlExport.applicationsXml(activity, w));
                 };
                 break;
-            case "export-interface":
+            case "export-interface": {
+                PreferenceGroup group = preference.getParent();
+                while (group != null && group.getParent() != null)
+                    group = group.getParent();
+                final PreferenceGroup rootPreference = group;
                 asyncWrite = t -> {
-                    Activity activity = Utilities.getActivity(getContext());
+                    Activity activity = Utilities.getActivity(rootPreference.getContext());
                     if (activity != null)
-                        FileUtils.writeSettingsFile(activity, "interface", w -> XmlExport.interfaceXml(activity, w));
+                        FileUtils.writeSettingsFile(activity, "interface", w -> XmlExport.interfaceXml(rootPreference, w));
                 };
                 break;
+            }
+            case "export-backup": {
+                PreferenceGroup group = preference.getParent();
+                while (group != null && group.getParent() != null)
+                    group = group.getParent();
+                final PreferenceGroup rootPreference = group;
+                asyncWrite = t -> {
+                    Activity activity = Utilities.getActivity(rootPreference.getContext());
+                    if (activity != null)
+                        FileUtils.writeSettingsFile(activity, "backup", w -> XmlExport.backupXml(rootPreference, w));
+                };
+                break;
+            }
         }
         if (asyncWrite != null) {
             {

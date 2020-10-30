@@ -126,16 +126,50 @@
         <item name="android:windowTitleStyle">@style/SettingsDialogTitle</item>
     </style>
 
-    <!--
-        Because I can't find a way to theme the PreferenceCategory divider,
-        (it should be `android:listSeparatorTextViewStyle`)
-        I'll use a light background for the SettingsActivity for now
-    -->
+    <style name="SwitchPreferenceStyle" parent="Preference.SwitchPreference.Material">
+        <item name="iconSpaceReserved">false</item>
+    </style>
+
+    <style name="DialogPreferenceStyle" parent="Preference.DialogPreference.Material">
+        <item name="iconSpaceReserved">false</item>
+    </style>
+
+    <style name="ScreenPreferenceStyle" parent="Preference.PreferenceScreen.Material">
+        <item name="iconSpaceReserved">false</item>
+    </style>
+
+    <style name="PreferenceStyle" parent="Preference.Material">
+        <item name="iconSpaceReserved">false</item>
+    </style>
+
+    <style name="CategoryTitleTextAppearance" parent="TextAppearance.AppCompat.Body2">
+        <item name="android:textSize">@dimen/abc_text_size_title_material</item>
+    </style>
+
+    <style name="CategoryPreferenceStyle" parent="Preference.Category.Material">
+        <item name="iconSpaceReserved">true</item>
+    </style>
+
+    <style name="FragmentPreferenceStyle" parent="PreferenceFragment.Material">
+        <item name="android:divider">@drawable/list_separator_dark</item>
+    </style>
+
+    <style name="PreferenceTheme" parent="PreferenceThemeOverlay">
+        <item name="dialogPreferenceStyle">@style/DialogPreferenceStyle</item>
+        <item name="preferenceCategoryStyle">@style/CategoryPreferenceStyle</item>
+        <item name="preferenceScreenStyle">@style/ScreenPreferenceStyle</item>
+        <item name="switchPreferenceStyle">@style/SwitchPreferenceStyle</item>
+        <item name="preferenceStyle">@style/PreferenceStyle</item>
+        <item name="preferenceFragmentCompatStyle">@style/FragmentPreferenceStyle</item>
+        <item name="preferenceCategoryTitleTextAppearance">@style/CategoryTitleTextAppearance</item>
+    </style>
+
     <style name="SettingTheme" parent="AppThemeTransparent">
         <item name="windowActionBar">true</item>
         <item name="windowNoTitle">false</item>
         <item name="android:windowBackground">@color/settingsBackground</item>
         <item name="alertDialogTheme">@style/SettingsDialogTheme</item>
+        <item name="preferenceTheme">@style/PreferenceTheme</item>
         <item name="android:textColor">@color/primary_text_color_selector_black</item>
         <item name="android:textColorPrimary">@color/primary_text_color_selector_black</item>
         <item name="android:textColorSecondary">@color/secondary_text_color_selector_black</item>
