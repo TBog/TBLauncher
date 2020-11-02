@@ -375,7 +375,19 @@ public class XmlImport {
                                         case "color":
                                             try {
                                                 String str = xpp.getAttributeValue(attrIdx).substring(1);
+                                                int length = str.length();
+                                                if (length > 6)
+                                                    str = str.substring(length - 6);
                                                 prefValue = Integer.parseInt(str, 16);
+                                            } catch (NumberFormatException ignored) {
+                                                prefValue = 0;
+                                            }
+                                            break;
+                                        case "argb":
+                                            try {
+                                                String str = xpp.getAttributeValue(attrIdx).substring(1);
+                                                long parsed = Long.parseLong(str, 16);
+                                                prefValue = (int)parsed;
                                             } catch (NumberFormatException ignored) {
                                                 prefValue = 0;
                                             }
