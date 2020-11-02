@@ -4,11 +4,16 @@ import android.appwidget.AppWidgetHostView;
 import android.util.Log;
 import android.util.Xml;
 
-import org.xmlpull.v1.XmlPullParser;
+import androidx.annotation.NonNull;
 
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+
+import java.io.IOException;
 import java.io.StringReader;
 
 import rocks.tbog.tblauncher.ui.WidgetLayout;
+import rocks.tbog.tblauncher.utils.SimpleXmlWriter;
 
 public class WidgetRecord {
 
@@ -26,8 +31,17 @@ public class WidgetRecord {
         try {
             xpp.setInput(new StringReader(properties));
             int eventType = xpp.getEventType();
-            while (eventType != XmlPullParser.END_DOCUMENT) {
-                if (eventType == XmlPullParser.START_TAG) {
+            parseProperties(xpp, eventType);
+        } catch (Exception e) {
+            Log.e(TAG, "parse XML properties", e);
+        }
+    }
+
+    public void parseProperties(@NonNull XmlPullParser xpp, int eventType) throws IOException, XmlPullParserException {
+        boolean bWidgetFinished = false;
+        while (eventType != XmlPullParser.END_DOCUMENT) {
+            switch (eventType) {
+                case XmlPullParser.START_TAG:
                     int attrCount = xpp.getAttributeCount();
                     switch (xpp.getName()) {
                         case "size":
@@ -59,18 +73,38 @@ public class WidgetRecord {
                                 }
                             }
                             break;
-                        case "widget":
-                            // root element
-                            break;
                         default:
                             Log.d(TAG, "ignored " + xpp.getName());
                     }
-                }
-                eventType = xpp.next();
+                    break;
+                case XmlPullParser.END_TAG:
+                    if ("widget".equals(xpp.getName())) {
+                        bWidgetFinished = true;
+                    }
             }
-        } catch (Exception e) {
-            Log.e(TAG, "parse XML properties", e);
+            if (bWidgetFinished)
+                break;
+            eventType = xpp.next();
         }
+    }
+
+    public void writeProperties(@NonNull SimpleXmlWriter simpleXmlWriter, boolean addRoot) throws IOException {
+        if (addRoot)
+            simpleXmlWriter.startTag("widget");
+
+        simpleXmlWriter
+                .startTag("size")
+                .attribute("width", width)
+                .attribute("height", height)
+                .endTag("size")
+                .startTag("position")
+                .attribute("left", left)
+                .attribute("top", top)
+                .attribute("screen", screen)
+                .endTag("position");
+
+        if (addRoot)
+            simpleXmlWriter.endTag("widget");
     }
 
     static int parseInt(String value) {
