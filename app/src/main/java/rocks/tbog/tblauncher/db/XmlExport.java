@@ -1,6 +1,8 @@
 package rocks.tbog.tblauncher.db;
 
+import android.appwidget.AppWidgetProviderInfo;
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.util.Base64;
 import android.util.Log;
 
@@ -18,6 +20,8 @@ import java.util.Set;
 
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.TagsHandler;
+import rocks.tbog.tblauncher.WidgetManager;
+import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
 import rocks.tbog.tblauncher.utils.SimpleXmlWriter;
 
 public class XmlExport {
@@ -165,6 +169,7 @@ public class XmlExport {
     public static void interfaceXml(@NonNull PreferenceGroup rootPref, @NonNull SimpleXmlWriter sx) throws IOException {
         sx.startTag("interface").attribute("version", "1");
 
+        // we remove the key from the map after it's exported to avoid duplicates
         Map<String, ?> prefMap = new HashMap<>(rootPref.getSharedPreferences().getAll());
         Preference pref;
 
@@ -197,11 +202,60 @@ public class XmlExport {
     public static void preferencesXml(@NonNull PreferenceGroup rootPref, @NonNull SimpleXmlWriter sx) throws IOException {
         sx.startTag("preferences").attribute("version", "1");
 
+        // we remove the key from the map after it's exported to avoid duplicates
         Map<String, ?> prefMap = new HashMap<>(rootPref.getSharedPreferences().getAll());
 
         recursiveWritePreferences(sx, rootPref, prefMap);
 
         sx.endTag("preferences");
+    }
+
+    public static void widgetsXml(@NonNull Context context, @NonNull Writer writer) throws IOException {
+        SimpleXmlWriter sx = SimpleXmlWriter.getNewInstance();
+        sx.setOutput(writer);
+
+        sx.setIndentation(true);
+        sx.startDocument();
+
+        widgetsXml(context, sx);
+
+        sx.endDocument();
+    }
+
+    public static void widgetsXml(@NonNull Context context, @NonNull SimpleXmlWriter sx) throws IOException {
+        sx.startTag("widgets").attribute("version", "1");
+
+        //TBApplication.widgetManager(context).
+
+        List<WidgetRecord> widgets = DBHelper.getWidgets(context);
+        for (WidgetRecord widget : widgets) {
+            AppWidgetProviderInfo appWidgetProviderInfo = WidgetManager.getWidgetProviderInfo(context, widget.appWidgetId);
+            sx.startTag("widget").attribute("id", widget.appWidgetId);
+            // write name
+            {
+                String name = WidgetManager.getWidgetName(context, appWidgetProviderInfo);
+                sx.startTag("name").content(name).endTag("name");
+            }
+            // app to suggest in case the widget id no longer works
+            if (appWidgetProviderInfo != null) {
+                sx.startTag("provider").content(appWidgetProviderInfo.provider.flattenToString()).endTag("provider");
+            }
+            // write preview icon
+            {
+                Drawable preview = WidgetManager.getWidgetPreview(context, appWidgetProviderInfo);
+                byte[] icon = ShortcutUtil.getIconBlob(preview);
+                byte[] base64enc = Base64.encode(icon, Base64.NO_WRAP);
+                sx.startTag("preview")
+                        .attribute("encoding", "base64")
+                        .content(base64enc)
+                        .endTag("preview");
+            }
+            widget.writeProperties(sx, false);
+
+            sx.endTag("widget");
+        }
+
+        sx.endTag("widgets");
     }
 
     public static void backupXml(@NonNull PreferenceGroup rootPref, @NonNull Writer writer) throws IOException {
@@ -218,6 +272,7 @@ public class XmlExport {
         favoritesXml(context, sx);
         applicationsXml(context, sx);
         preferencesXml(rootPref, sx);
+        widgetsXml(context, sx);
 
         sx.endTag("backup");
 
@@ -229,7 +284,7 @@ public class XmlExport {
         for (int prefIdx = 0; prefIdx < prefCount; prefIdx += 1) {
             Preference pref = prefGroup.getPreference(prefIdx);
             if (pref instanceof PreferenceGroup) {
-                Log.d(TAG, "recursiveWritePreferences " + pref.getKey());
+                //Log.d(TAG, "recursiveWritePreferences " + pref.getKey());
                 recursiveWritePreferences(sx, (PreferenceGroup) pref, prefMap);
                 continue;
             }

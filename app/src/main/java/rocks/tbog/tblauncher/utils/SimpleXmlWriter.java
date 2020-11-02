@@ -156,6 +156,11 @@ public class SimpleXmlWriter implements XmlSerializer {
         return this;
     }
 
+    public SimpleXmlWriter attribute(String name, int value) throws IOException, IllegalArgumentException, IllegalStateException {
+        xmlSerializer.attribute(namespace, name, Integer.toString(value));
+        return this;
+    }
+
     @Override
     public XmlSerializer endTag(String namespace, String name) throws IOException, IllegalArgumentException, IllegalStateException {
         return xmlSerializer.endTag(namespace, name);

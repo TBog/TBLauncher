@@ -416,8 +416,7 @@ public class WidgetManager {
         return menu;
     }
 
-    public void showRemoveWidgetPopup()
-    {
+    public void showRemoveWidgetPopup() {
         Context context = mLayout.getContext();
         ListPopup removeWidgetPopup = TBApplication.widgetManager(context).getWidgetListPopup(R.string.menu_widget_remove);
         removeWidgetPopup.setOnItemClickListener((a1, v1, pos1) -> {
@@ -639,8 +638,20 @@ public class WidgetManager {
         mLayout.scrollToPage(pageX, pageY);
     }
 
+    @Nullable
+    public static AppWidgetProviderInfo getWidgetProviderInfo(@NonNull Context ctx, int appWidgetId) {
+        AppWidgetManager appWidgetManager = AppWidgetManager.getInstance(ctx);
+        AppWidgetProviderInfo info;
+        try {
+            info = appWidgetManager.getAppWidgetInfo(appWidgetId);
+        } catch (Exception ignored) {
+            return null;
+        }
+        return info;
+    }
+
     @NonNull
-    public static String getWidgetName(Context ctx, AppWidgetProviderInfo info) {
+    public static String getWidgetName(@NonNull Context ctx, @Nullable AppWidgetProviderInfo info) {
         String name = null;
         if (info != null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
