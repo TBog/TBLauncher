@@ -250,8 +250,10 @@ public class XmlExport {
         else if (value instanceof Integer) {
             sx.startTag("preference")
                     .attribute("key", key);
-            if (key.contains("color"))
-                sx.attribute("color", String.format("#%08x", (Integer) value));
+            if (key.contains("-color"))
+                sx.attribute("color", String.format("#%06x", ((Integer) value) & 0xffffff));
+            else if (key.contains("-argb"))
+                sx.attribute("argb", String.format("#%08x", (Integer) value));
             else
                 sx.attribute("int", ((Integer) value).toString());
             sx.endTag("preference");
