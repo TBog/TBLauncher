@@ -250,8 +250,11 @@ public class XmlExport {
                         .content(base64enc)
                         .endTag("preview");
             }
-            widget.writeProperties(sx, false);
-
+            {
+                sx.startTag("properties");
+                widget.writeProperties(sx, false);
+                sx.endTag("properties");
+            }
             sx.endTag("widget");
         }
 

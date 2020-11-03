@@ -285,6 +285,7 @@
     <string name="export_backup_summary">All custom icons, tags and preferences</string>
     <string name="export_widgets">Export widgets</string>
     <string name="export_widgets_summary">Import may not work and require each widget be added by hand</string>
+    <string name="error_fail_import">Failed to import file, check logcat.</string>
     <plurals name="tag_entry_count">
         <item quantity="one">%d entry</item>
         <item quantity="other">%d entries</item>

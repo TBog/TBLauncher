@@ -31,6 +31,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
+import java.nio.channels.FileChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 
@@ -229,6 +230,57 @@ public class FileUtils {
             // Potentially direct the user to the Market with a Dialog
             Toast.makeText(activity, "Please install a File Manager.", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    public static boolean copyFile(@NonNull Context context, @Nullable Uri uri, @NonNull String filename) {
+        if (uri == null)
+            return false;
+        InputStream is = getInputStream(context, uri);
+        if (!(is instanceof FileInputStream)) {
+            try {
+                if (is != null)
+                    is.close();
+            } catch (IOException ignored) {
+            }
+            return false;
+        }
+        File cacheFile = new File(context.getCacheDir(), filename);
+        boolean bCopyOk = false;
+        FileChannel inChannel = null;
+        FileChannel outChannel = null;
+        try {
+            FileOutputStream os = new FileOutputStream(cacheFile);
+
+            inChannel = ((FileInputStream) is).getChannel();
+            outChannel = os.getChannel();
+            long amount = 8 * 1024;
+            final long size = inChannel.size();
+            long position = 0;
+            while (position < size)
+                position += inChannel.transferTo(position, amount, outChannel);
+
+            inChannel.close();
+            outChannel.close();
+            is.close();
+            os.close();
+
+            bCopyOk = true;
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to copy " + uri, e);
+        }
+        try {
+            if (inChannel != null)
+                inChannel.close();
+            else
+                is.close();
+        } catch (Exception ignored) {
+        }
+        try {
+            if (outChannel != null)
+                outChannel.close();
+        } catch (Exception ignored) {
+        }
+        return bCopyOk;
     }
 
 //    private static BufferedReader loadFile(Context context, String directory, String filename, String extension) {
