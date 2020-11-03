@@ -5,8 +5,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
-import android.database.Cursor;
 import android.net.Uri;
+import android.os.ParcelFileDescriptor;
 import android.util.Log;
 import android.util.Xml;
 import android.widget.Toast;
@@ -20,8 +20,8 @@ import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.BufferedWriter;
+import java.io.Closeable;
 import java.io.File;
-import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
@@ -43,41 +43,18 @@ public class FileUtils {
     private static final String SETTINGS_EXT = ".xml";
 
     @Nullable
-    public static FileDescriptor getFileDescriptor(@NonNull Context context, @NonNull Uri uri) {
+    public static FileInputStream getFileInputStream(@NonNull Context context, @Nullable Uri uri) {
+        if (uri == null)
+            return null;
+        ParcelFileDescriptor descriptor;
         try {
-            return context.getContentResolver().openFileDescriptor(uri, "r").getFileDescriptor();
+            descriptor = context.getContentResolver().openFileDescriptor(uri, "r");
         } catch (FileNotFoundException e) {
             Log.e(TAG, "openFileDescriptor " + uri, e);
+            return null;
         }
-        return null;
-    }
-
-    @Nullable
-    public static String getPath(@NonNull Context context, @NonNull Uri uri) {
-        if ("content".equalsIgnoreCase(uri.getScheme())) {
-            String[] projection = {"_data"}; // MediaStore.MediaColumns.DATA is deprecated
-
-
-            try (Cursor cursor = context.getContentResolver().query(uri, projection, null, null, null)) {
-                int column_index = cursor.getColumnIndexOrThrow("_data");
-                if (cursor.moveToFirst()) {
-                    return cursor.getString(column_index);
-                }
-            } catch (Exception e) {
-                // Eat it
-            }
-        } else if ("file".equalsIgnoreCase(uri.getScheme())) {
-            return uri.getPath();
-        }
-
-        return null;
-    }
-
-    @Nullable
-    public static InputStream getInputStream(Context context, Uri uri) {
-        FileDescriptor fd = getFileDescriptor(context, uri);
-        if (fd != null)
-            return new FileInputStream(fd);
+        if (descriptor != null)
+            return new ParcelFileDescriptor.AutoCloseInputStream(descriptor);
         return null;
     }
 
@@ -198,10 +175,10 @@ public class FileUtils {
 //        return parser;
 //    }
 
-    @Nullable
-    public static XmlPullParser getXmlParser(@NonNull Context context, @Nullable Uri uri) {
-        return getXmlParser(context, getInputStream(context, uri));
-    }
+//    @Nullable
+//    public static XmlPullParser getXmlParser(@NonNull Context context, @Nullable Uri uri) {
+//        return getXmlParser(context, getInputStream(context, uri));
+//    }
 
     @Nullable
     public static XmlPullParser getXmlParser(@NonNull Context context, @Nullable InputStream inputStream) {
@@ -232,55 +209,56 @@ public class FileUtils {
         }
     }
 
-    public static boolean copyFile(@NonNull Context context, @Nullable Uri uri, @NonNull String filename) {
-        if (uri == null)
-            return false;
-        InputStream is = getInputStream(context, uri);
-        if (!(is instanceof FileInputStream)) {
-            try {
-                if (is != null)
-                    is.close();
-            } catch (IOException ignored) {
-            }
-            return false;
+    public static void closeQuietly(@Nullable Closeable c) {
+        if (c == null)
+            return;
+        try {
+            c.close();
+        } catch (Exception ignored) {
         }
-        File cacheFile = new File(context.getCacheDir(), filename);
-        boolean bCopyOk = false;
+    }
+
+    /**
+     * Copy file from Uri to Cache and return the cache file
+     *
+     * @param context  application context
+     * @param uri      source file
+     * @param filename cache file name
+     * @return new cache file or null if we failed to copy
+     */
+    @Nullable
+    public static File copyFile(@NonNull Context context, @Nullable Uri uri, @NonNull String filename) {
+        FileInputStream inputStream = getFileInputStream(context, uri);
+        if (inputStream == null)
+            return null;
+        FileOutputStream outputStream = null;
         FileChannel inChannel = null;
         FileChannel outChannel = null;
-        try {
-            FileOutputStream os = new FileOutputStream(cacheFile);
 
-            inChannel = ((FileInputStream) is).getChannel();
-            outChannel = os.getChannel();
+        File cacheFile = new File(context.getCacheDir(), filename);
+        try {
+            outputStream = new FileOutputStream(cacheFile);
+
+            // prepare channels
+            inChannel = inputStream.getChannel();
+            outChannel = outputStream.getChannel();
+
+            // copy from `inChannel` to `outChannel` 8 KB at a time
             long amount = 8 * 1024;
             final long size = inChannel.size();
             long position = 0;
             while (position < size)
                 position += inChannel.transferTo(position, amount, outChannel);
-
-            inChannel.close();
-            outChannel.close();
-            is.close();
-            os.close();
-
-            bCopyOk = true;
         } catch (IOException e) {
             Log.e(TAG, "Failed to copy " + uri, e);
+            // we must return null if we failed to copy
+            cacheFile = null;
         }
-        try {
-            if (inChannel != null)
-                inChannel.close();
-            else
-                is.close();
-        } catch (Exception ignored) {
-        }
-        try {
-            if (outChannel != null)
-                outChannel.close();
-        } catch (Exception ignored) {
-        }
-        return bCopyOk;
+        closeQuietly(inChannel);
+        closeQuietly(outChannel);
+        closeQuietly(inputStream);
+        closeQuietly(outputStream);
+        return cacheFile;
     }
 
 //    private static BufferedReader loadFile(Context context, String directory, String filename, String extension) {

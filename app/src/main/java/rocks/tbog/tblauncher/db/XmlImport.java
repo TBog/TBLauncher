@@ -3,7 +3,6 @@ package rocks.tbog.tblauncher.db;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.net.Uri;
 import android.util.Base64;
 import android.util.Log;
 import android.util.Pair;
@@ -16,7 +15,10 @@ import androidx.preference.PreferenceManager;
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -32,8 +34,14 @@ import rocks.tbog.tblauncher.utils.FileUtils;
 public class XmlImport {
     private static final String TAG = "XImport";
 
-    public static void settingsXml(@NonNull Context context, @Nullable Uri uri, @NonNull SettingsData.Method method) {
-        settingsXml(context, FileUtils.getXmlParser(context, uri), method);
+    public static boolean settingsXml(@NonNull Context context, @NonNull File file, @NonNull SettingsData.Method method) {
+        boolean ok = false;
+        try (InputStream inputStream = new FileInputStream(file)) {
+            ok = settingsXml(context, FileUtils.getXmlParser(context, inputStream), method);
+        } catch (Exception e) {
+            Log.e(TAG, "new FileInputStream " + file.toString(), e);
+        }
+        return ok;
     }
 
     public static boolean settingsXml(@NonNull Context context, @Nullable XmlPullParser xpp, @NonNull SettingsData.Method method) {
@@ -362,8 +370,7 @@ public class XmlImport {
                     break;
                 try {
                     eventType = xpp.next();
-                } catch (IOException e)
-                {
+                } catch (IOException e) {
                     if (currentApp != null)
                         Log.e(TAG, "currentApp " + currentApp.componentName + " " + currentApp.displayName);
                     Log.e(TAG, "app xpp.next", e);
