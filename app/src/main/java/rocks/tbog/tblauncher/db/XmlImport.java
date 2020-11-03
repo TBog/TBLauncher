@@ -7,6 +7,7 @@ import android.net.Uri;
 import android.util.Base64;
 import android.util.Log;
 import android.util.Pair;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -23,7 +24,9 @@ import java.util.List;
 import java.util.Map;
 
 import rocks.tbog.tblauncher.R;
+import rocks.tbog.tblauncher.SettingsActivity;
 import rocks.tbog.tblauncher.TBApplication;
+import rocks.tbog.tblauncher.WidgetManager;
 import rocks.tbog.tblauncher.utils.FileUtils;
 
 public class XmlImport {
@@ -33,9 +36,9 @@ public class XmlImport {
         settingsXml(context, FileUtils.getXmlParser(context, uri), method);
     }
 
-    public static void settingsXml(@NonNull Context context, @Nullable XmlPullParser xpp, @NonNull SettingsData.Method method) {
+    public static boolean settingsXml(@NonNull Context context, @Nullable XmlPullParser xpp, @NonNull SettingsData.Method method) {
         if (xpp == null)
-            return;
+            return false;
         SettingsData settings = new SettingsData();
         try {
             int eventType = xpp.getEventType();
@@ -55,6 +58,9 @@ public class XmlImport {
                         case SettingsData.XTN_PREF_LIST:
                             settings.parsePreferences(xpp, eventType);
                             break;
+                        case SettingsData.XTN_WIDGET_LIST:
+                            settings.parseWidgets(xpp, eventType);
+                            break;
                         default:
                             Log.d(TAG, "ignored " + xpp.getName());
                     }
@@ -63,8 +69,11 @@ public class XmlImport {
             }
         } catch (XmlPullParserException | IOException e) {
             Log.e(TAG, "parsing settingsXml", e);
+            Toast.makeText(context, R.string.error_fail_import, Toast.LENGTH_LONG).show();
+            return false;
         }
         settings.saveToDB(context, method);
+        return true;
     }
 
     public static class SettingsData {
@@ -81,17 +90,28 @@ public class XmlImport {
         private static final String XTN_UI_LIST = "interface";
         private static final String XTN_PREF_LIST = "preferences";
         private static final String XTN_PREF_LIST_ITEM = "preference";
+        private static final String XTN_WIDGET_LIST = "widgets";
+        private static final String XTN_WIDGET_LIST_ITEM = "widget";
 
         // HashMap with tag name as key and an ArrayList of records for each
         private final HashMap<String, List<String>> mTags = new HashMap<>();
         private final HashMap<String, Object> mPreferences = new HashMap<>();
         private final ArrayList<FavRecord> mFavorites = new ArrayList<>();
         private final ArrayList<AppRecord> mApplications = new ArrayList<>();
+        private final ArrayList<SavedWidget> mWidgets = new ArrayList<>();
         private final HashMap<FlagsRecord, byte[]> mIcons = new HashMap<>();
         private boolean bTagListLoaded = false;
         private boolean bFavListLoaded = false;
         private boolean bAppListLoaded = false;
         private boolean bPrefListLoaded = false;
+        private boolean bWidgetListLoaded = false;
+
+        private static class SavedWidget {
+            String name;
+            String provider;
+            byte[] preview;
+            WidgetRecord record = new WidgetRecord();
+        }
 
         void parseTagList(@NonNull XmlPullParser xpp, int eventType) throws IOException, XmlPullParserException {
             String currentTag = null;
@@ -164,6 +184,7 @@ public class XmlImport {
                         switch (xpp.getName()) {
                             case XTN_FAV_LIST_ITEM:
                                 currentFav = new FavRecord();
+                                lastTag = null;
                                 break;
                             case XTN_FAV_LIST_ITEM_ID:
                             case "flags":
@@ -262,6 +283,7 @@ public class XmlImport {
                         switch (xpp.getName()) {
                             case XTN_APP_LIST_ITEM:
                                 currentApp = new AppRecord();
+                                lastTag = null;
                                 break;
                             case XTN_APP_LIST_ITEM_ID:
                             case "flags":
@@ -338,7 +360,14 @@ public class XmlImport {
                 }
                 if (bAppListFinished)
                     break;
-                eventType = xpp.next();
+                try {
+                    eventType = xpp.next();
+                } catch (IOException e)
+                {
+                    if (currentApp != null)
+                        Log.e(TAG, "currentApp " + currentApp.componentName + " " + currentApp.displayName);
+                    Log.e(TAG, "app xpp.next", e);
+                }
             }
             bAppListLoaded = true;
         }
@@ -387,7 +416,7 @@ public class XmlImport {
                                             try {
                                                 String str = xpp.getAttributeValue(attrIdx).substring(1);
                                                 long parsed = Long.parseLong(str, 16);
-                                                prefValue = (int)parsed;
+                                                prefValue = (int) parsed;
                                             } catch (NumberFormatException ignored) {
                                                 prefValue = 0;
                                             }
@@ -435,22 +464,127 @@ public class XmlImport {
             bPrefListLoaded = true;
         }
 
+        public void parseWidgets(XmlPullParser xpp, int eventType) throws IOException, XmlPullParserException {
+            SavedWidget currentWidget = null;
+            boolean bWidgetListFinished = false;
+            String lastTag = null;
+            String iconEncoding = null;
+            while (eventType != XmlPullParser.END_DOCUMENT) {
+                switch (eventType) {
+                    case XmlPullParser.START_TAG:
+                        int attrCount = xpp.getAttributeCount();
+                        switch (xpp.getName()) {
+                            case XTN_WIDGET_LIST_ITEM:
+                                currentWidget = new SavedWidget();
+                                lastTag = null;
+                                for (int attrIdx = 0; attrIdx < attrCount; attrIdx += 1) {
+                                    String attrName = xpp.getAttributeName(attrIdx);
+                                    if ("id".equals(attrName)) {
+                                        try {
+                                            currentWidget.record.appWidgetId = Integer.parseInt(xpp.getAttributeValue(attrIdx));
+                                        } catch (NumberFormatException ignored) {
+                                            currentWidget.record.appWidgetId = 0;
+                                        }
+                                    }
+                                }
+                                break;
+                            case "name":
+                            case "provider":
+                                if (currentWidget != null)
+                                    lastTag = xpp.getName();
+                                break;
+                            case "preview":
+                                if (currentWidget != null)
+                                    lastTag = xpp.getName();
+                                iconEncoding = null;
+                                for (int attrIdx = 0; attrIdx < attrCount; attrIdx += 1) {
+                                    String attrName = xpp.getAttributeName(attrIdx);
+                                    if ("encoding".equals(attrName)) {
+                                        iconEncoding = xpp.getAttributeValue(attrIdx);
+                                    }
+                                }
+                                break;
+                            case "properties":
+                                if (currentWidget != null)
+                                    currentWidget.record.parseProperties(xpp, eventType);
+                                break;
+                            case XTN_WIDGET_LIST:
+                                for (int attrIdx = 0; attrIdx < attrCount; attrIdx += 1) {
+                                    String attrName = xpp.getAttributeName(attrIdx);
+                                    if ("version".equals(attrName)) {
+                                        String prefListVersion = xpp.getAttributeValue(attrIdx);
+                                        Log.d(TAG, "widgetList version " + prefListVersion);
+                                    }
+                                }
+                                break;
+                            default:
+                                Log.d(TAG, "ignored " + xpp.getName());
+                        }
+                        break;
+                    case XmlPullParser.END_TAG:
+                        switch (xpp.getName()) {
+                            case XTN_WIDGET_LIST_ITEM:
+                                if (currentWidget != null)
+                                    mWidgets.add(currentWidget);
+                                currentWidget = null;
+                                // fall-through
+                            case "name":
+                            case "provider":
+                            case "preview":
+                                lastTag = null;
+                                break;
+                            case XTN_WIDGET_LIST:
+                                bWidgetListFinished = true;
+                                break;
+                        }
+                        break;
+                    case XmlPullParser.TEXT:
+                        if (lastTag != null && currentWidget != null)
+                            switch (lastTag) {
+                                case "name":
+                                    currentWidget.name = xpp.getText();
+                                    break;
+                                case "provider":
+                                    currentWidget.provider = xpp.getText();
+                                    break;
+                                case "preview":
+                                    currentWidget.preview = decodeIcon(xpp.getText(), iconEncoding);
+                                    break;
+                            }
+                        break;
+                }
+                if (bWidgetListFinished)
+                    break;
+                eventType = xpp.next();
+            }
+            bWidgetListLoaded = true;
+        }
+
+        @Nullable
+        private byte[] decodeIcon(@Nullable String text, @Nullable String encoding) {
+            if (text != null) {
+                text = text.trim();
+                int size = text.length();
+                if (encoding == null || "base64".equals(encoding)) {
+                    byte[] base64enc = new byte[size];
+                    for (int i = 0; i < size; i += 1) {
+                        char c = text.charAt(i);
+                        base64enc[i] = (byte) (c & 0xff);
+                    }
+                    return Base64.decode(base64enc, Base64.NO_WRAP);
+                }
+            }
+            return null;
+        }
+
         private void addIcon(@NonNull FlagsRecord rec, String text, @Nullable String encoding) {
             if (text == null) {
                 mIcons.remove(rec);
                 return;
             }
-            text = text.trim();
-            int size = text.length();
-            if (encoding == null || "base64".equals(encoding)) {
-                byte[] base64enc = new byte[size];
-                for (int i = 0; i < size; i += 1) {
-                    char c = text.charAt(i);
-                    base64enc[i] = (byte) (c & 0xff);
-                }
-                byte[] icon = Base64.decode(base64enc, Base64.NO_WRAP);
+            byte[] icon = decodeIcon(text, encoding);
+            if (icon != null)
                 mIcons.put(rec, icon);
-            }
         }
 
         private void addRecordTag(@Nullable String record, @NonNull String tagName) {
@@ -471,6 +605,7 @@ public class XmlImport {
             saveFavorites(context, method);
             saveApplications(context, method);
             savePreferences(context, method);
+            restoreWidgets(context, method);
             TBApplication.dataHandler(context).reloadProviders();
         }
 
@@ -606,6 +741,19 @@ public class XmlImport {
             }
 
             editor.commit();
+
+            for (String key : mPreferences.keySet())
+                SettingsActivity.onSharedPreferenceChanged(context, preferences, key);
+        }
+
+        private void restoreWidgets(Context context, Method method) {
+            if (!bWidgetListLoaded)
+                return;
+
+            WidgetManager wm = TBApplication.widgetManager(context);
+            for (SavedWidget widget : mWidgets) {
+                wm.restoreFromBackup(widget.name, widget.provider, widget.preview, widget.record);
+            }
         }
 
         public enum Method {OVERWRITE, APPEND, SET}

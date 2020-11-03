@@ -8,13 +8,21 @@ import android.appwidget.AppWidgetProviderInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.PointF;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.view.LayoutInflater;
+import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -25,6 +33,7 @@ import java.util.ArrayList;
 
 import rocks.tbog.tblauncher.db.DBHelper;
 import rocks.tbog.tblauncher.db.WidgetRecord;
+import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.LinearAdapterPlus;
 import rocks.tbog.tblauncher.ui.ListPopup;
@@ -190,6 +199,36 @@ public class WidgetManager {
         });
 
         mLayout.addView(hostView);
+    }
+
+    private void addPlaceholderToLayout(String name, String provider, byte[] preview, WidgetRecord rec) {
+        Context context = mLayout.getContext();
+        View placeholder = LayoutInflater.from(context).inflate(R.layout.widget_placeholder, mLayout, false);
+        {
+            WidgetLayout.LayoutParams params = new WidgetLayout.LayoutParams(rec.width, rec.height);
+            params.leftMargin = rec.left;
+            params.topMargin = rec.top;
+            params.screen = rec.screen;
+            params.placement = WidgetLayout.LayoutParams.Placement.MARGIN_TL_AS_POSITION;
+            placeholder.setLayoutParams(params);
+        }
+        {
+            EditText text = placeholder.findViewById(android.R.id.text1);
+            text.setText(name);
+        }
+        {
+            Bitmap bitmap = BitmapFactory.decodeByteArray(preview, 0, preview.length);
+            if (bitmap != null) {
+                ImageView icon = placeholder.findViewById(android.R.id.icon);
+                icon.setImageDrawable(new BitmapDrawable(context.getResources(), bitmap));
+            }
+        }
+        placeholder.setOnClickListener(v -> {
+            Context ctx = v.getContext();
+            Toast.makeText(ctx, provider, Toast.LENGTH_SHORT).show();
+        });
+
+        mLayout.addView(placeholder);
     }
 
     public boolean usingActivity(Activity activity) {
@@ -692,6 +731,43 @@ public class WidgetManager {
         }
         assert icon != null;
         return icon;
+    }
+
+    public void restoreFromBackup(String name, String provider, byte[] preview, WidgetRecord record) {
+        final int appWidgetId = record.appWidgetId;
+        WidgetRecord widgetRecord = mWidgets.get(appWidgetId);
+        boolean bFound = false;
+        // check if appWidgetId can be restored
+        if (widgetRecord != null)
+        {
+            bFound = true;
+            AppWidgetProviderInfo info = mAppWidgetManager.getAppWidgetInfo(appWidgetId);
+            if (!provider.equals(info.provider.flattenToString()))
+                bFound = false;
+        }
+        //TODO: check if we can recycle a widget based on provider
+
+        if (bFound) {
+            // widget found, apply the properties
+            mWidgets.put(appWidgetId, record);
+            mLayout.removeWidget(appWidgetId);
+            restoreWidget(record);
+        } else {
+            // widget not found, add a placeholder
+            addPlaceholderToLayout(name, provider, preview, record);
+        }
+
+        // save all restored widgets
+        mLayout.addOnAfterLayoutTask(() -> {
+            for (WidgetRecord rec : mWidgets.values()) {
+                AppWidgetHostView widgetHostView = mLayout.getWidget(rec.appWidgetId);
+                if (widgetHostView != null) {
+                    rec.saveProperties(widgetHostView);
+                    DBHelper.setWidgetProperties(mLayout.getContext(), rec);
+                }
+            }
+        });
+        mLayout.requestLayout();
     }
 
     static class WidgetOptionItem extends LinearAdapter.Item {
