@@ -35,9 +35,6 @@ import androidx.preference.PreferenceScreen;
 import androidx.preference.SwitchPreference;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 
 import rocks.tbog.tblauncher.db.XmlImport;
 import rocks.tbog.tblauncher.preference.ChooseColorDialog;
@@ -145,15 +142,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             }
             if (method != null) {
                 Uri uri = data != null ? data.getData() : null;
-                InputStream is = null;
-                if (FileUtils.copyFile(this, uri, "imported.xml")) {
-                    try {
-                        is = new FileInputStream(new File(getCacheDir(), "imported.xml"));
-                    } catch (FileNotFoundException e) {
-                        Log.e("SettAct", "open imported copy", e);
-                    }
-                }
-                if (!XmlImport.settingsXml(this, FileUtils.getXmlParser(this, is), method)) {
+                File imported = FileUtils.copyFile(this, uri, "imported.xml");
+                if (imported == null || !XmlImport.settingsXml(this, imported, method)) {
                     Toast.makeText(this, R.string.error_fail_import, Toast.LENGTH_LONG).show();
                 }
                 return;
