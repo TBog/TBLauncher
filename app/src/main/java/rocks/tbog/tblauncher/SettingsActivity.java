@@ -172,29 +172,30 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 removePreference("black-notification-icons");
             }
 
+            final Activity activity = requireActivity();
             // import settings
             {
                 Preference pref = findPreference("import-settings-set");
                 if (pref != null)
                     pref.setOnPreferenceClickListener(preference -> {
-                        FileUtils.chooseFile(requireActivity(), FILE_SELECT_XML_SET);
+                        FileUtils.chooseFile(activity, FILE_SELECT_XML_SET);
                         return true;
                     });
                 pref = findPreference("import-settings-overwrite");
                 if (pref != null)
                     pref.setOnPreferenceClickListener(preference -> {
-                        FileUtils.chooseFile(requireActivity(), FILE_SELECT_XML_OVERWRITE);
+                        FileUtils.chooseFile(activity, FILE_SELECT_XML_OVERWRITE);
                         return true;
                     });
                 pref = findPreference("import-settings-append");
                 if (pref != null)
                     pref.setOnPreferenceClickListener(preference -> {
-                        FileUtils.chooseFile(requireActivity(), FILE_SELECT_XML_APPEND);
+                        FileUtils.chooseFile(activity, FILE_SELECT_XML_APPEND);
                         return true;
                     });
             }
 
-            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(getContext());
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext());
 
             // quick-list
             {

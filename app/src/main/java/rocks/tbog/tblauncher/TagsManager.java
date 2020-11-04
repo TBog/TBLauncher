@@ -1,5 +1,6 @@
 package rocks.tbog.tblauncher;
 
+import android.app.Activity;
 import android.content.Context;
 import android.graphics.Paint;
 import android.graphics.Typeface;
@@ -17,6 +18,7 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
@@ -29,6 +31,7 @@ import rocks.tbog.tblauncher.entry.TagEntry;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.ui.CodePointDrawable;
 import rocks.tbog.tblauncher.utils.DrawableUtils;
+import rocks.tbog.tblauncher.utils.Utilities;
 import rocks.tbog.tblauncher.utils.ViewHolderAdapter;
 import rocks.tbog.tblauncher.utils.ViewHolderListAdapter;
 
@@ -87,19 +90,26 @@ public class TagsManager {
             launchCustomTagIconDialog(v.getContext(), info);
         });
 
-        // refresh tags
-        {
-            TagsHandler tagsHandler = TBApplication.tagsHandler(context);
-            TagsProvider tagsProvider = TBApplication.dataHandler(context).getTagsProvider();
-            for (String tagName : tagsHandler.getAllTagsAsSet()) {
+        mAdapter.newLoadAsyncList(() -> {
+            Activity activity = Utilities.getActivity(context);
+            if (activity == null)
+                return null;
+
+            TagsHandler tagsHandler = TBApplication.tagsHandler(activity);
+            TagsProvider tagsProvider = TBApplication.dataHandler(activity).getTagsProvider();
+            Collection<String> validTags = tagsHandler.getValidTags();
+            ArrayList<TagInfo> tags = new ArrayList<>(validTags.size());
+            for (String tagName : validTags) {
                 TagEntry tagEntry = tagsProvider != null ? tagsProvider.getTagEntry(tagName) : null;
-                TagInfo tagInfo = tagEntry == null ? new TagInfo(tagName) : new TagInfo(tagEntry);
+                TagInfo tagInfo = tagEntry != null ? new TagInfo(tagEntry) : new TagInfo(tagName);
                 tagInfo.name = tagName;
-                tagInfo.entryList = tagsHandler.getIds(tagName);
-                mTagList.add(tagInfo);
+                tagInfo.entryList = tagsHandler.getValidEntryIds(tagName);
+                tags.add(tagInfo);
             }
-            Collections.sort(mTagList, (lhs, rhs) -> lhs.tagName.compareTo(rhs.tagName));
-        }
+            Collections.sort(tags, (lhs, rhs) -> lhs.tagName.compareTo(rhs.tagName));
+
+            return tags;
+        }).execute();
     }
 
     private void launchRenameDialog(Context ctx, TagInfo info) {

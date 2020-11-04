@@ -282,6 +282,11 @@ public class DBHelper {
         db.delete("shortcuts", "package = ? AND info_data = ?", new String[]{shortcut.packageName, shortcut.shortcutData});
     }
 
+    public static void removeShortcut(@NonNull Context context, long dbId) {
+        SQLiteDatabase db = getDatabase(context);
+        db.delete("shortcuts", "_id=?", new String[]{String.valueOf(dbId)});
+    }
+
     public static void renameShortcut(@NonNull Context context, @NonNull ShortcutEntry shortcut, String newName) {
         SQLiteDatabase db = getDatabase(context);
         String sql = "UPDATE \"shortcuts\" SET \"name\"=? WHERE \"package\"=? AND \"info_data\"=?";

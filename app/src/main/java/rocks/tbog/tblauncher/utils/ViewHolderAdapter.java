@@ -1,5 +1,6 @@
 package rocks.tbog.tblauncher.utils;
 
+import android.os.AsyncTask;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -10,13 +11,16 @@ import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.util.Collection;
+
 import rocks.tbog.tblauncher.BuildConfig;
 
 /**
  * Adapter class that implements the View holder pattern.
  * The ViewHolder is held as a tag in the list item view.
- * @param <T>   Type of data to send to the ViewHolder
- * @param <VH>  ViewHolder class
+ *
+ * @param <T>  Type of data to send to the ViewHolder
+ * @param <VH> ViewHolder class
  */
 public abstract class ViewHolderAdapter<T, VH extends ViewHolderAdapter.ViewHolder<T>> extends BaseAdapter {
     @NonNull
@@ -91,5 +95,36 @@ public abstract class ViewHolderAdapter<T, VH extends ViewHolderAdapter.ViewHold
         }
 
         protected abstract void setContent(T content, int position, @NonNull ViewHolderAdapter<T, ? extends ViewHolder<T>> adapter);
+    }
+
+    public static abstract class LoadAsyncData<T> extends AsyncTask<Void, Void, Collection<T>> {
+        private final ViewHolderAdapter<T, ? extends ViewHolder<T>> adapter;
+        private final LoadInBackground<T> task;
+
+        public interface LoadInBackground<T> {
+            @Nullable
+            Collection<T> loadInBackground();
+        }
+
+        public LoadAsyncData(@NonNull ViewHolderAdapter<T, ? extends ViewHolder<T>> adapter, @NonNull LoadInBackground<T> loadInBackground) {
+            super();
+            this.adapter = adapter;
+            task = loadInBackground;
+        }
+
+        @Override
+        protected Collection<T> doInBackground(Void... voids) {
+            return task.loadInBackground();
+        }
+
+        @Override
+        protected void onPostExecute(Collection<T> data) {
+            if (data == null)
+                return;
+            //adapter.addAll(data);
+            onDataLoadFinished(adapter, data);
+        }
+
+        protected abstract void onDataLoadFinished(@NonNull ViewHolderAdapter<T, ? extends ViewHolder<T>> adapter, @NonNull Collection<T> data);
     }
 }
