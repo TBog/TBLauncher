@@ -78,8 +78,10 @@ public class WidgetRecord {
                     }
                     break;
                 case XmlPullParser.END_TAG:
-                    if ("widget".equals(xpp.getName())) {
-                        bWidgetFinished = true;
+                    switch (xpp.getName()) {
+                        case "widget":  // reading from DB
+                        case "properties": // importing from backup
+                            bWidgetFinished = true;
                     }
             }
             if (bWidgetFinished)

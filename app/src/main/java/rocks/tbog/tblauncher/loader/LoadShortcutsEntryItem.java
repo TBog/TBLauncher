@@ -6,7 +6,6 @@ import android.content.pm.LauncherApps.ShortcutQuery;
 import android.content.pm.ShortcutInfo;
 import android.os.Build;
 import android.os.Process;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -77,11 +76,12 @@ public class LoadShortcutsEntryItem extends LoadEntryItem<ShortcutEntry> {
 
             if (mLauncherApps.hasShortcutHostPermission())
                 shortcutInfos = mLauncherApps.getShortcuts(q, Process.myUserHandle());
-            if (shortcutInfos == null)
+            if (shortcutInfos == null) {
                 shortcutInfos = Collections.emptyList();
+            }
 
             for (ShortcutInfo shortcutInfo : shortcutInfos) {
-                ShortcutRecord record = oreoMap.get(shortcutInfo.getId());
+                ShortcutRecord record = oreoMap.remove(shortcutInfo.getId());
                 long dbId = 0;
                 String name = null;
                 if (record != null) {
@@ -93,6 +93,12 @@ public class LoadShortcutsEntryItem extends LoadEntryItem<ShortcutEntry> {
                 pojo.setTags(tagsHandler.getTags(pojo.id));
 
                 pojos.add(pojo);
+            }
+
+            // clear remaining shortcuts
+            for (ShortcutRecord record : oreoMap.values()) {
+                DBHelper.removeShortcut(ctx, record.dbId);
+                //tagsHandler.removeAllTags(ShortcutEntry.SCHEME + record.infoData);
             }
         }
 

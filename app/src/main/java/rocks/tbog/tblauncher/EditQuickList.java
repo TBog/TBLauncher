@@ -126,7 +126,7 @@ public class EditQuickList {
                     {
                         TagsProvider tagsProvider = TBApplication.dataHandler(ctx).getTagsProvider();
                         if (tagsProvider != null) {
-                            List<String> tagNameList = new ArrayList<>(TBApplication.tagsHandler(ctx).getAllTagsAsSet());
+                            List<String> tagNameList = new ArrayList<>(TBApplication.tagsHandler(ctx).getValidTags());
                             Collections.sort(tagNameList);
                             for (String tagName : tagNameList) {
                                 TagEntry tagEntry = tagsProvider.getTagEntry(tagName);

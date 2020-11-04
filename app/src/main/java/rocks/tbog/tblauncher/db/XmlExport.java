@@ -44,10 +44,10 @@ public class XmlExport {
         sx.startTag("taglist").attribute("version", "1");
 
         TagsHandler tagsHandler = TBApplication.tagsHandler(context);
-        Set<String> tags = tagsHandler.getAllTagsAsSet();
+        Set<String> tags = tagsHandler.getAllTags();
         for (String tagName : tags) {
             sx.startTag("tag").attribute("name", tagName);
-            for (String idName : tagsHandler.getIds(tagName)) {
+            for (String idName : tagsHandler.getAllEntryIds(tagName)) {
                 sx.startTag("item").content(idName).endTag("item");
             }
             sx.endTag("tag");

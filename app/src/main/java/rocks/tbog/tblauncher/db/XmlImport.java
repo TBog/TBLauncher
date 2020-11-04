@@ -616,7 +616,7 @@ public class XmlImport {
             TBApplication.dataHandler(context).reloadProviders();
         }
 
-        public void saveTags(@NonNull Context context, Method method) {
+        private void saveTags(@NonNull Context context, Method method) {
             if (!bTagListLoaded)
                 return;
             HashMap<String, HashSet<String>> tags = new HashMap<>();

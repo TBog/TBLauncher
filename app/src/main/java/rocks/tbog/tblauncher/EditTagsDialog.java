@@ -130,7 +130,7 @@ public class EditTagsDialog extends DialogFragment<Set<String>> {
         });
         // set the auto complete list
         {
-            List<String> allTags = new ArrayList<>(TBApplication.tagsHandler(context).getAllTagsAsSet());
+            List<String> allTags = new ArrayList<>(TBApplication.tagsHandler(context).getValidTags());
             Collections.sort(allTags);
             mNewTag.setAdapter(new ArrayAdapter<>(context, android.R.layout.simple_list_item_1, allTags));
         }

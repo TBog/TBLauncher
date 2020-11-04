@@ -13,6 +13,7 @@ import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -92,37 +93,74 @@ public class TagsHandler {
     }
 
     @NonNull
-    public List<String> getTags(String id) {
-        List<String> tags = mTagsCache.get(id);
+    public List<String> getTags(String entryId) {
+        List<String> tags = mTagsCache.get(entryId);
         if (tags == null) {
             return Collections.emptyList();
         }
         return Collections.unmodifiableList(tags);
     }
 
-//    public String[] getAllTagsAsArray() {
-//        Set<String> tags = getAllTagsAsSet();
-//        return tags.toArray(new String[0]);
-//    }
-
+    /**
+     * Get tags currently used
+     *
+     * @return a set of tags
+     */
     @NonNull
-    public Set<String> getAllTagsAsSet() {
+    public Set<String> getValidTags() {
         Set<String> tags = new HashSet<>();
+        DataHandler dataHandler = TBApplication.dataHandler(getContext());
         for (Map.Entry<String, List<String>> entry : mTagsCache.entrySet()) {
-            tags.addAll(entry.getValue());
+            EntryItem entryItem = dataHandler.getPojo(entry.getKey());
+            if (entryItem != null)
+                tags.addAll(entry.getValue());
         }
         tags.remove("");
         return tags;
     }
 
+    /**
+     * Get all tags from DB, even if not used
+     *
+     * @return a set of tags
+     */
     @NonNull
-    public List<String> getIds(String tagName) {
+    public Set<String> getAllTags() {
+        Set<String> allTags = new HashSet<>();
+        for (List<String> tags : mTagsCache.values()) {
+            allTags.addAll(tags);
+        }
+        allTags.remove("");
+        return allTags;
+    }
+
+    @NonNull
+    public List<String> getValidEntryIds(String tagName) {
+        ArrayList<String> ids = new ArrayList<>();
+        DataHandler dataHandler = TBApplication.dataHandler(getContext());
+        for (Map.Entry<String, List<String>> entry : mTagsCache.entrySet()) {
+            if (entry.getValue().contains(tagName)) {
+                EntryItem entryItem = dataHandler.getPojo(entry.getKey());
+                if (entryItem != null)
+                    ids.add(entryItem.id);
+            }
+        }
+        return ids;
+    }
+
+    @NonNull
+    public List<String> getAllEntryIds(String tagName) {
         ArrayList<String> ids = new ArrayList<>();
         for (Map.Entry<String, List<String>> entry : mTagsCache.entrySet()) {
-            if (entry.getValue().indexOf(tagName) != -1)
+            if (entry.getValue().contains(tagName))
                 ids.add(entry.getKey());
         }
         return ids;
+    }
+
+    @NonNull
+    public Collection<String> getAllEntryIds() {
+        return Collections.unmodifiableSet(mTagsCache.keySet());
     }
 
     private void addDefaultAliases() {
@@ -308,5 +346,21 @@ public class TagsHandler {
             }
         }
         return DBHelper.renameTag(getContext(), tagName, newName) > 0;
+    }
+
+    /**
+     * Remove all tags from the Entry.
+     * We keep the DB as is, maybe later we'll reinstall the app.
+     *
+     * @param entryId what Entry
+     */
+    public void removeAllTags(String entryId) {
+        // remove from cache
+        List<String> tags = mTagsCache.remove(entryId);
+        // remove from DB
+//        if (tags != null) {
+//            for (String tag : tags)
+//                DBHelper.removeTag(getContext(), tag, entryId);
+//        }
     }
 }
