@@ -548,7 +548,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             // We're refreshing an existing dataset, do not reset scroll!
             temporarilyDisableTranscriptMode();
         }
-        if (isCustomIconDialogVisible()) {
+        if (isFragmentDialogVisible()) {
             mResultAdapter.updateResults(results);
         } else {
             TBApplication.state().setResultList(LauncherState.AnimatedVisibility.VISIBLE);
@@ -841,7 +841,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         dialog.show(mTBLauncherActivity.getSupportFragmentManager(), "dialog_tags_manager");
     }
 
-    private boolean isCustomIconDialogVisible() {
+    private boolean isFragmentDialogVisible() {
         return mFragmentDialog != null && mFragmentDialog.isVisible();
     }
 

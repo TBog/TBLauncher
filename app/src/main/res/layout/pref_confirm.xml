@@ -4,13 +4,14 @@
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical"
-    android:padding="@dimen/launcher_button_padding"
     android:theme="@style/SettingsDialogTheme">
 
     <TextView
         android:id="@android:id/text1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/dialog_padding_horizontal"
+        android:layout_marginVertical="@dimen/dialog_padding_vertical"
         android:textAppearance="?android:attr/textAppearanceMedium"
         tools:text="Are you sure you want to ... ?" />
 
@@ -18,6 +19,8 @@
         android:id="@android:id/text2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/dialog_padding_horizontal"
+        android:layout_marginVertical="@dimen/dialog_padding_vertical"
         android:textAppearance="?android:attr/textAppearanceSmall"
         tools:text="This will do such and such..." />
 </LinearLayout>

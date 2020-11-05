@@ -277,6 +277,8 @@
     <string name="import_settings_overwrite_summary">Imported settings overwrite current settings</string>
     <string name="import_settings_append">Append imported settings</string>
     <string name="import_settings_append_summary">Only new settings get imported</string>
+    <string name="please_wait">Please wait.</string>
+    <string name="import_dialog_description">Your settings are being loaded.\nThe XML file is in cache and it\'s being parsed and imported.\nYou are safe to OK this dialog when the button enables.</string>
     <string name="export_description">Once you click OK you will be asked to choose an application to save the exported settings as an XML file.\nWhile you read the above text the XML file got generated.</string>
     <string name="error">Error %s</string>
     <string name="export_interface">Export interface</string>
