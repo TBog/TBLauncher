@@ -1,6 +1,7 @@
 package rocks.tbog.tblauncher.db;
 
 import android.annotation.SuppressLint;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Base64;
@@ -759,7 +760,8 @@ public class XmlImport {
 
             WidgetManager wm = TBApplication.widgetManager(context);
             for (SavedWidget widget : mWidgets) {
-                wm.restoreFromBackup(widget.name, widget.provider, widget.preview, widget.record);
+                ComponentName componentName = ComponentName.unflattenFromString(widget.provider);
+                wm.restoreFromBackup(widget.name, componentName, widget.preview, widget.record);
             }
         }
 

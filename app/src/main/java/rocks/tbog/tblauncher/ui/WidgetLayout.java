@@ -2,6 +2,7 @@ package rocks.tbog.tblauncher.ui;
 
 import android.annotation.SuppressLint;
 import android.appwidget.AppWidgetHostView;
+import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.Point;
 import android.graphics.PointF;
@@ -431,6 +432,21 @@ public class WidgetLayout extends ViewGroup {
             }
         }
         return null;
+    }
+
+    @Nullable
+    public View getPlaceholder(@NonNull ComponentName provider) {
+        for (int idx = 0; idx < getChildCount(); idx += 1) {
+            View child = getChildAt(idx);
+            if (provider.equals(child.getTag()))
+                return child;
+        }
+        return null;
+    }
+
+    public void addPlaceholder(View placeholder, ComponentName provider) {
+        addView(placeholder);
+        placeholder.setTag(provider);
     }
 
     public void removeWidget(AppWidgetHostView view) {
