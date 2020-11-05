@@ -13,6 +13,7 @@ import android.graphics.Path;
 import android.graphics.RectF;
 import android.graphics.Shader.TileMode;
 import android.graphics.drawable.AdaptiveIconDrawable;
+import android.graphics.drawable.Animatable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -336,7 +337,10 @@ public class DrawableUtils {
         final int attrs_indeterminateDrawable_index = 0;
         TypedArray a = context.obtainStyledAttributes(android.R.style.Widget_ProgressBar, attrs);
         try {
-            return a.getDrawable(attrs_indeterminateDrawable_index);
+            Drawable drawable = a.getDrawable(attrs_indeterminateDrawable_index);
+            if (drawable instanceof Animatable)
+                ((Animatable) drawable).start();
+            return drawable;
         } catch (Exception ignored) {
             return null;
         } finally {
