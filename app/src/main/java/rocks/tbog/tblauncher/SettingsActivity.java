@@ -43,6 +43,7 @@ import rocks.tbog.tblauncher.preference.CustomDialogPreference;
 import rocks.tbog.tblauncher.preference.EditSearchEnginesPreferenceDialog;
 import rocks.tbog.tblauncher.preference.QuickListPreferenceDialog;
 import rocks.tbog.tblauncher.preference.SliderDialog;
+import rocks.tbog.tblauncher.ui.PleaseWaitDialog;
 import rocks.tbog.tblauncher.utils.FileUtils;
 import rocks.tbog.tblauncher.utils.SystemUiVisibility;
 import rocks.tbog.tblauncher.utils.UIColors;
@@ -127,6 +128,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
         if (resultCode == RESULT_OK) {
             XmlImport.SettingsData.Method method = null;
             switch (requestCode) {
@@ -142,14 +144,34 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             }
             if (method != null) {
                 Uri uri = data != null ? data.getData() : null;
-                File imported = FileUtils.copyFile(this, uri, "imported.xml");
-                if (imported == null || !XmlImport.settingsXml(this, imported, method)) {
+                File importedFile = FileUtils.copyFile(this, uri, "imported.xml");
+                if (importedFile != null) {
+                    PleaseWaitDialog dialog = new PleaseWaitDialog();
+                    // set args
+                    {
+                        Bundle args = new Bundle();
+                        //args.putString(PleaseWaitDialog.ARG_TITLE, getString(R.string.import_dialog_title));
+                        args.putString(PleaseWaitDialog.ARG_DESCRIPTION, getString(R.string.import_dialog_description));
+                        dialog.setArguments(args);
+                    }
+                    final XmlImport.SettingsData.Method importMethod = method;
+                    dialog.setWork(()->{
+                        Activity activity = Utilities.getActivity(dialog.getContext());
+                        if (activity != null)
+                        {
+                            if (!XmlImport.settingsXml(activity, importedFile, importMethod)) {
+                                Toast.makeText(activity, R.string.error_fail_import, Toast.LENGTH_LONG).show();
+                                dialog.dismiss();
+                            }
+                        }
+                        dialog.onWorkFinished();
+                    });
+                    dialog.show(getSupportFragmentManager(), "load_imported");
+                } else {
                     Toast.makeText(this, R.string.error_fail_import, Toast.LENGTH_LONG).show();
                 }
-                return;
             }
         }
-        super.onActivityResult(requestCode, resultCode, data);
     }
 
     public static class SettingsFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
