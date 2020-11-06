@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.BitmapShader;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -18,6 +19,7 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.TypedValue;
+import android.widget.ImageView;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
@@ -346,5 +348,24 @@ public class DrawableUtils {
         } finally {
             a.recycle();
         }
+    }
+
+    public static boolean setImageDrawable(@Nullable ImageView icon, @Nullable byte[] bitmap) {
+        if (icon == null)
+            return false;
+        BitmapDrawable drawable = getBitmapDrawable(icon.getContext(), bitmap);
+        icon.setImageDrawable(drawable);
+        return drawable != null;
+    }
+
+    @Nullable
+    public static BitmapDrawable getBitmapDrawable(@NonNull Context context, @Nullable byte[] bitmap) {
+        if (bitmap != null) {
+            Bitmap decodedBitmap = BitmapFactory.decodeByteArray(bitmap, 0, bitmap.length);
+            if (decodedBitmap != null) {
+                return new BitmapDrawable(context.getResources(), decodedBitmap);
+            }
+        }
+        return null;
     }
 }

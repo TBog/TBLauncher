@@ -954,6 +954,8 @@ public class DBHelper {
         ContentValues values = new ContentValues();
         values.put("properties", rec.packedProperties());
 
-        db.update("widgets", values, "appWidgetId=?", new String[]{String.valueOf(rec.appWidgetId)});
+        int affectedRows = db.update("widgets", values, "appWidgetId=?", new String[]{String.valueOf(rec.appWidgetId)});
+        if (affectedRows == 0)
+            addWidget(context, rec);
     }
 }

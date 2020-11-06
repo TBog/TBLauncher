@@ -4,7 +4,6 @@
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:background="@drawable/handle_background"
-    android:padding="10dp"
     tools:layout_height="200dp"
     tools:layout_width="100dp">
 
@@ -12,19 +11,25 @@
         android:id="@android:id/icon"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="top|center_horizontal"
+        android:layout_gravity="center"
         android:importantForAccessibility="no"
-        android:scaleType="fitStart"
+        android:scaleType="fitCenter"
         tools:src="@drawable/ic_android" />
 
     <TextView
         android:id="@android:id/text1"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|center_horizontal"
+        android:layout_gravity="center"
+        android:background="@color/black_overlay"
         android:gravity="center"
         android:maxLines="3"
         android:minLines="1"
-        tools:text="Widget name" />
+        android:shadowColor="?attr/resultShadowColor"
+        android:shadowDx="3"
+        android:shadowDy="3"
+        android:shadowRadius="?attr/textShadowRadius"
+        android:textAppearance="?android:attr/textAppearance"
+        android:text="@string/widget_placeholder" />
 
 </FrameLayout>

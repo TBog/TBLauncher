@@ -9,27 +9,29 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.PointF;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
+import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.res.ResourcesCompat;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 import rocks.tbog.tblauncher.db.DBHelper;
 import rocks.tbog.tblauncher.db.WidgetRecord;
@@ -39,6 +41,7 @@ import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.ui.WidgetLayout;
 import rocks.tbog.tblauncher.ui.WidgetView;
 import rocks.tbog.tblauncher.utils.DebugInfo;
+import rocks.tbog.tblauncher.utils.DrawableUtils;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public class WidgetManager {
@@ -50,9 +53,17 @@ public class WidgetManager {
     private WidgetLayout.Handle mLastResizeType = WidgetLayout.Handle.RESIZE_DIAGONAL;
     private WidgetLayout.Handle mLastMoveResizeType = WidgetLayout.Handle.MOVE_FREE_RESIZE_AXIAL;
     private final ArrayMap<Integer, WidgetRecord> mWidgets = new ArrayMap<>(0);
+    private final ArrayList<PlaceholderWidget> mPlaceholders = new ArrayList<>(0);
     private static final int APPWIDGET_HOST_ID = 1337;
     private static final int REQUEST_PICK_APPWIDGET = 101;
     private static final int REQUEST_CREATE_APPWIDGET = 102;
+
+    static class PlaceholderWidget {
+        String name;
+        ComponentName provider;
+        byte[] preview;
+        WidgetRecord record;
+    }
 
     /**
      * Registers the AppWidgetHost to listen for updates to any widgets this app has.
@@ -161,6 +172,46 @@ public class WidgetManager {
         for (WidgetRecord rec : mWidgets.values()) {
             restoreWidget(rec);
         }
+
+        // restore placeholders
+//        Context ctx = mLayout.getContext();
+//        for (Map.Entry<ComponentName, WidgetRecord> entry : mPlaceholders.entrySet()) {
+//            ComponentName componentName = entry.getKey();
+//            WidgetRecord widgetRecord = entry.getValue();
+//            List<AppWidgetProviderInfo> providers = getWidgetsForPackage(componentName.getPackageName());
+//            AppWidgetProviderInfo info = providers.isEmpty() ? null : providers.get(0);
+//            for (AppWidgetProviderInfo appWidgetProviderInfo : providers)
+//                if (appWidgetProviderInfo.provider.equals(componentName)) {
+//                    info = appWidgetProviderInfo;
+//                    break;
+//                }
+//            if (info != null) {
+//                String name = getWidgetName(ctx, info);
+//                Drawable preview = getWidgetPreview(ctx, info);
+//                addPlaceholderToLayout(name, componentName, preview, widgetRecord);
+//            } else {
+//                addPlaceholderToLayout(componentName.flattenToShortString(), componentName, (Drawable) null, widgetRecord);
+//            }
+//        }
+        for (PlaceholderWidget placeholderWidget : mPlaceholders)
+        {
+            addPlaceholderToLayout(placeholderWidget);
+        }
+    }
+
+    public List<AppWidgetProviderInfo> getWidgetsForPackage(String packageName) {
+        List<AppWidgetProviderInfo> providers;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            providers = mAppWidgetManager.getInstalledProvidersForPackage(packageName, null);
+        } else {
+            providers = new ArrayList<>();
+            for (AppWidgetProviderInfo prov : mAppWidgetManager.getInstalledProviders()) {
+                if (prov.provider.getPackageName().equals(packageName)) {
+                    providers.add(prov);
+                }
+            }
+        }
+        return providers;
     }
 
     private void restoreWidget(WidgetRecord rec) {
@@ -172,6 +223,50 @@ public class WidgetManager {
         AppWidgetHostView hostView = mAppWidgetHost.createView(ctx, appWidgetId, appWidgetInfo);
 
         addWidgetToLayout(hostView, appWidgetInfo, rec);
+    }
+
+    public void restoreFromBackup(String name, ComponentName provider, byte[] preview, WidgetRecord record) {
+        final int appWidgetId = record.appWidgetId;
+        WidgetRecord widgetRecord = mWidgets.get(appWidgetId);
+        boolean bFound = false;
+        // check if appWidgetId can be restored
+        if (widgetRecord != null) {
+            bFound = true;
+            AppWidgetProviderInfo info = mAppWidgetManager.getAppWidgetInfo(appWidgetId);
+            if (!provider.equals(info.provider))
+                bFound = false;
+        }
+        //TODO: check if we can recycle a widget based on provider
+
+        if (bFound) {
+            // widget found, apply the properties
+            mWidgets.put(appWidgetId, record);
+            mLayout.removeWidget(appWidgetId);
+            restoreWidget(record);
+        } else {
+            // widget not found, add a placeholder
+            record.appWidgetId = -1;
+            //mPlaceholders.put(provider, record);
+            PlaceholderWidget placeholderWidget = new PlaceholderWidget();
+            mPlaceholders.add(placeholderWidget);
+            placeholderWidget.name = name;
+            placeholderWidget.provider = provider;
+            placeholderWidget.preview = preview;
+            placeholderWidget.record = record;
+            addPlaceholderToLayout(placeholderWidget);
+        }
+
+        // save all restored widgets
+        mLayout.addOnAfterLayoutTask(() -> {
+            for (WidgetRecord rec : mWidgets.values()) {
+                AppWidgetHostView widgetHostView = mLayout.getWidget(rec.appWidgetId);
+                if (widgetHostView != null) {
+                    rec.saveProperties(widgetHostView);
+                    DBHelper.setWidgetProperties(mLayout.getContext(), rec);
+                }
+            }
+        });
+        mLayout.requestLayout();
     }
 
     private void addWidgetToLayout(AppWidgetHostView hostView, AppWidgetProviderInfo appWidgetInfo, WidgetRecord rec) {
@@ -211,8 +306,18 @@ public class WidgetManager {
         }
     }
 
-    private void addPlaceholderToLayout(String name, ComponentName provider, byte[] preview, WidgetRecord rec) {
-        Context context = mLayout.getContext();
+    private void addPlaceholderToLayout(PlaceholderWidget pw) {
+        addPlaceholderToLayout(pw.name, pw.provider, pw.preview, pw.record);
+    }
+
+    private void addPlaceholderToLayout(String name, ComponentName provider, byte[] preview, WidgetRecord widgetRecord) {
+        final Context context = mLayout.getContext();
+        final Drawable drawable = DrawableUtils.getBitmapDrawable(context, preview);
+        addPlaceholderToLayout(name, provider, drawable, widgetRecord);
+    }
+
+    private void addPlaceholderToLayout(String name, ComponentName provider, Drawable preview, WidgetRecord rec) {
+        final Context context = mLayout.getContext();
         View placeholder = LayoutInflater.from(context).inflate(R.layout.widget_placeholder, mLayout, false);
         {
             WidgetLayout.LayoutParams params = new WidgetLayout.LayoutParams(rec.width, rec.height);
@@ -224,14 +329,11 @@ public class WidgetManager {
         }
         {
             TextView text = placeholder.findViewById(android.R.id.text1);
-            text.setText(name);
+            text.setText(context.getString(R.string.widget_placeholder, name));
         }
         {
-            Bitmap bitmap = BitmapFactory.decodeByteArray(preview, 0, preview.length);
-            if (bitmap != null) {
-                ImageView icon = placeholder.findViewById(android.R.id.icon);
-                icon.setImageDrawable(new BitmapDrawable(context.getResources(), bitmap));
-            }
+            ImageView icon = placeholder.findViewById(android.R.id.icon);
+            icon.setImageDrawable(preview);
         }
         placeholder.setOnClickListener(v -> {
             Activity activity = Utilities.getActivity(v);
@@ -248,6 +350,21 @@ public class WidgetManager {
             }
 
             //Toast.makeText(activity, provider.flattenToString(), Toast.LENGTH_SHORT).show();
+        });
+        placeholder.setOnLongClickListener(v -> {
+            Activity activity = Utilities.getActivity(v);
+            if (activity == null)
+                return false;
+            ContextThemeWrapper ctxDialog = new ContextThemeWrapper(activity, R.style.TitleDialogTheme);
+            new AlertDialog.Builder(ctxDialog)
+                    .setTitle(R.string.widget_placeholder_remove)
+                    .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                        mLayout.removeView(placeholder);
+                        dialog.dismiss();
+                    })
+                    .setNegativeButton(android.R.string.cancel, (dialog, which) -> dialog.dismiss())
+                    .show();
+            return true;
         });
 
         mLayout.addPlaceholder(placeholder, provider);
@@ -375,20 +492,27 @@ public class WidgetManager {
      * @return if this result was processed here
      */
     public boolean onActivityResult(Activity activity, int requestCode, int resultCode, @Nullable Intent data) {
-        if (resultCode == Activity.RESULT_OK) {
-            if (requestCode == REQUEST_PICK_APPWIDGET) {
-                configureWidget(activity, data);
-                return true;
-            } else if (requestCode == REQUEST_CREATE_APPWIDGET) {
-                createWidget(activity, data);
-                return true;
-            }
-        } else if (resultCode == Activity.RESULT_CANCELED && data != null) {
-            int appWidgetId = data.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1);
-            if (appWidgetId != -1) {
-                removeWidget(appWidgetId);
-                return true;
-            }
+        switch (resultCode) {
+            case Activity.RESULT_OK:
+                if (requestCode == REQUEST_PICK_APPWIDGET) {
+                    configureWidget(activity, data);
+                    return true;
+                } else if (requestCode == REQUEST_CREATE_APPWIDGET) {
+                    createWidget(activity, data);
+                    return true;
+                }
+                break;
+            case Activity.RESULT_CANCELED:
+                if (data != null) {
+                    int appWidgetId = data.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, -1);
+                    if (appWidgetId != -1) {
+                        removeWidget(appWidgetId);
+                        return true;
+                    }
+                } else if (requestCode == REQUEST_PICK_APPWIDGET) {
+                    Toast.makeText(activity, R.string.add_widget_failed, Toast.LENGTH_LONG).show();
+                }
+                break;
         }
         return false;
     }
@@ -753,42 +877,6 @@ public class WidgetManager {
         }
         assert icon != null;
         return icon;
-    }
-
-    public void restoreFromBackup(String name, ComponentName provider, byte[] preview, WidgetRecord record) {
-        final int appWidgetId = record.appWidgetId;
-        WidgetRecord widgetRecord = mWidgets.get(appWidgetId);
-        boolean bFound = false;
-        // check if appWidgetId can be restored
-        if (widgetRecord != null) {
-            bFound = true;
-            AppWidgetProviderInfo info = mAppWidgetManager.getAppWidgetInfo(appWidgetId);
-            if (!provider.equals(info.provider))
-                bFound = false;
-        }
-        //TODO: check if we can recycle a widget based on provider
-
-        if (bFound) {
-            // widget found, apply the properties
-            mWidgets.put(appWidgetId, record);
-            mLayout.removeWidget(appWidgetId);
-            restoreWidget(record);
-        } else {
-            // widget not found, add a placeholder
-            addPlaceholderToLayout(name, provider, preview, record);
-        }
-
-        // save all restored widgets
-        mLayout.addOnAfterLayoutTask(() -> {
-            for (WidgetRecord rec : mWidgets.values()) {
-                AppWidgetHostView widgetHostView = mLayout.getWidget(rec.appWidgetId);
-                if (widgetHostView != null) {
-                    rec.saveProperties(widgetHostView);
-                    DBHelper.setWidgetProperties(mLayout.getContext(), rec);
-                }
-            }
-        });
-        mLayout.requestLayout();
     }
 
     static class WidgetOptionItem extends LinearAdapter.Item {
