@@ -759,10 +759,15 @@ public class XmlImport {
                 return;
 
             WidgetManager wm = TBApplication.widgetManager(context);
+            wm.onBeforeRestoreFromBackup(method != Method.APPEND);
+
+            final boolean append = method == Method.APPEND;
             for (SavedWidget widget : mWidgets) {
                 ComponentName componentName = ComponentName.unflattenFromString(widget.provider);
-                wm.restoreFromBackup(widget.name, componentName, widget.preview, widget.record);
+                wm.restoreFromBackup(append, widget.name, componentName, widget.preview, widget.record);
             }
+
+            wm.onAfterRestoreFromBackup(method == Method.SET);
         }
 
         public enum Method {OVERWRITE, APPEND, SET}

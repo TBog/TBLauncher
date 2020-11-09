@@ -21,7 +21,9 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:paddingStart="?android:attr/listPreferredItemPaddingStart"
+        android:minLines="1"
+        android:maxLines="3"
         tools:ignore="RtlSymmetry"
-        tools:text="Placeholder Widget name" />
+        tools:text="Placeholder \n Widget \n name" />
 </LinearLayout>
 
