@@ -30,8 +30,8 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.res.ResourcesCompat;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import rocks.tbog.tblauncher.db.DBHelper;
 import rocks.tbog.tblauncher.db.WidgetRecord;
@@ -193,8 +193,7 @@ public class WidgetManager {
 //                addPlaceholderToLayout(componentName.flattenToShortString(), componentName, (Drawable) null, widgetRecord);
 //            }
 //        }
-        for (PlaceholderWidget placeholderWidget : mPlaceholders)
-        {
+        for (PlaceholderWidget placeholderWidget : mPlaceholders) {
             addPlaceholderToLayout(placeholderWidget);
         }
     }
@@ -225,22 +224,91 @@ public class WidgetManager {
         addWidgetToLayout(hostView, appWidgetInfo, rec);
     }
 
-    public void restoreFromBackup(String name, ComponentName provider, byte[] preview, WidgetRecord record) {
-        final int appWidgetId = record.appWidgetId;
-        WidgetRecord widgetRecord = mWidgets.get(appWidgetId);
+    public void onBeforeRestoreFromBackup(boolean clearAll) {
+        if (mAppWidgetHost == null) {
+            Log.e(TAG, "`onBeforeRestoreFromBackup` called prior to `startListening`");
+            return;
+        }
+
+        if (clearAll)
+            mLayout.removeAllViews();
+
+
+    }
+
+    public void onAfterRestoreFromBackup(boolean clearExtra) {
+        if (clearExtra) {
+            // remove all widgets not found in mLayout
+            for (WidgetRecord rec : mWidgets.values()) {
+                AppWidgetHostView widgetHostView = mLayout.getWidget(rec.appWidgetId);
+                if (widgetHostView != null)
+                    removeWidget(widgetHostView);
+            }
+        } else {
+            // restore widgets from mWidgets that are not in mLayout yet
+            for (WidgetRecord rec : mWidgets.values()) {
+                if (mLayout.getWidget(rec.appWidgetId) == null)
+                    restoreWidget(rec);
+            }
+        }
+
+        // save all restored widgets
+        mLayout.addOnAfterLayoutTask(() -> {
+            for (WidgetRecord rec : mWidgets.values()) {
+                AppWidgetHostView widgetHostView = mLayout.getWidget(rec.appWidgetId);
+                if (widgetHostView != null) {
+                    rec.saveProperties(widgetHostView);
+                    DBHelper.setWidgetProperties(mLayout.getContext(), rec);
+                }
+            }
+        });
+        mLayout.requestLayout();
+    }
+
+    /**
+     * called when importing from backup / XML
+     *
+     * @param append   if true widget information will not be changed / imported / restored
+     * @param name     display name for the widget
+     * @param provider what package is providing the widget
+     * @param preview  image to use as preview
+     * @param record   position and size information
+     */
+    public void restoreFromBackup(boolean append, String name, ComponentName provider, byte[] preview, WidgetRecord record) {
+        int appWidgetId = record.appWidgetId;
         boolean bFound = false;
-        // check if appWidgetId can be restored
-        if (widgetRecord != null) {
-            bFound = true;
-            AppWidgetProviderInfo info = mAppWidgetManager.getAppWidgetInfo(appWidgetId);
-            if (!provider.equals(info.provider))
-                bFound = false;
+        {
+            WidgetRecord widgetRecord = mWidgets.get(appWidgetId);
+            AppWidgetProviderInfo info = widgetRecord != null ? getWidgetProviderInfo(widgetRecord.appWidgetId) : null;
+            // check if appWidgetId can be restored
+            if (info != null) {
+                bFound = provider.equals(info.provider);
+            }
+        }
+        // check if we can find a provider match
+        if (!bFound) {
+            for (WidgetRecord rec : mWidgets.values()) {
+                // if we already restored this widget, skip
+                if (mLayout.getWidget(rec.appWidgetId) != null)
+                    continue;
+                AppWidgetProviderInfo info = getWidgetProviderInfo(rec.appWidgetId);
+                if (info == null)
+                    continue;
+                if (provider.equals(info.provider)) {
+                    appWidgetId = rec.appWidgetId;
+                    bFound = true;
+                    break;
+                }
+            }
         }
         //TODO: check if we can recycle a widget based on provider
 
         if (bFound) {
-            // widget found, apply the properties
-            mWidgets.put(appWidgetId, record);
+            record.appWidgetId = appWidgetId;
+            if (!append) {
+                // widget found, apply the properties
+                mWidgets.put(appWidgetId, record);
+            }
             mLayout.removeWidget(appWidgetId);
             restoreWidget(record);
         } else {
@@ -255,18 +323,6 @@ public class WidgetManager {
             placeholderWidget.record = record;
             addPlaceholderToLayout(placeholderWidget);
         }
-
-        // save all restored widgets
-        mLayout.addOnAfterLayoutTask(() -> {
-            for (WidgetRecord rec : mWidgets.values()) {
-                AppWidgetHostView widgetHostView = mLayout.getWidget(rec.appWidgetId);
-                if (widgetHostView != null) {
-                    rec.saveProperties(widgetHostView);
-                    DBHelper.setWidgetProperties(mLayout.getContext(), rec);
-                }
-            }
-        });
-        mLayout.requestLayout();
     }
 
     private void addWidgetToLayout(AppWidgetHostView hostView, AppWidgetProviderInfo appWidgetInfo, WidgetRecord rec) {
@@ -304,20 +360,31 @@ public class WidgetManager {
                 mLayout.removeViewAt(insertPosition);
             mLayout.addView(hostView, insertPosition, params);
         }
+
+        // remove from `mPlaceholders`
+        {
+            for (Iterator<PlaceholderWidget> iterator = mPlaceholders.iterator(); iterator.hasNext(); ) {
+                PlaceholderWidget placeholderWidget = iterator.next();
+                if (placeholderWidget.provider.equals(appWidgetInfo.provider)) {
+                    iterator.remove();
+                }
+            }
+        }
     }
 
-    private void addPlaceholderToLayout(PlaceholderWidget pw) {
-        addPlaceholderToLayout(pw.name, pw.provider, pw.preview, pw.record);
-    }
-
-    private void addPlaceholderToLayout(String name, ComponentName provider, byte[] preview, WidgetRecord widgetRecord) {
+    private void addPlaceholderToLayout(@NonNull PlaceholderWidget pw) {
         final Context context = mLayout.getContext();
-        final Drawable drawable = DrawableUtils.getBitmapDrawable(context, preview);
-        addPlaceholderToLayout(name, provider, drawable, widgetRecord);
-    }
+        String name;
+        ComponentName provider;
+        Drawable preview;
+        WidgetRecord rec;
+        {
+            name = pw.name;
+            provider = pw.provider;
+            preview = DrawableUtils.getBitmapDrawable(context, pw.preview);
+            rec = pw.record;
+        }
 
-    private void addPlaceholderToLayout(String name, ComponentName provider, Drawable preview, WidgetRecord rec) {
-        final Context context = mLayout.getContext();
         View placeholder = LayoutInflater.from(context).inflate(R.layout.widget_placeholder, mLayout, false);
         {
             WidgetLayout.LayoutParams params = new WidgetLayout.LayoutParams(rec.width, rec.height);
@@ -536,6 +603,10 @@ public class WidgetManager {
             adapter.add(WidgetPopupItem.create(ctx, mAppWidgetManager, rec.appWidgetId));
         }
 
+        for (PlaceholderWidget placeholder : mPlaceholders) {
+            adapter.add(PlaceholderPopupItem.create(ctx, placeholder));
+        }
+
         return ListPopup.create(ctx, adapter);
     }
 
@@ -578,6 +649,11 @@ public class WidgetManager {
                             ListPopup popup = getConfigPopup((WidgetView) widgetView);
                             TBApplication.behaviour(mLayout.getContext()).registerPopup(popup);
                             popup.show(widgetView, 0.f);
+                        } else if (item1 instanceof PlaceholderPopupItem) {
+                            PlaceholderWidget placeholder = ((PlaceholderPopupItem) item1).placeholder;
+                            View placeholderView = mLayout.getPlaceholder(placeholder.provider);
+                            if (placeholderView != null)
+                                placeholderView.performClick();
                         }
                     });
 
@@ -608,6 +684,11 @@ public class WidgetManager {
             Object item1 = a1.getItem(pos1);
             if (item1 instanceof WidgetPopupItem) {
                 removeWidget(((WidgetPopupItem) item1).appWidgetId);
+            } else if (item1 instanceof PlaceholderPopupItem) {
+                PlaceholderWidget placeholder = ((PlaceholderPopupItem) item1).placeholder;
+                View placeholderView = mLayout.getPlaceholder(placeholder.provider);
+                if (placeholderView != null)
+                    placeholderView.performLongClick();
             }
         });
 
@@ -628,6 +709,7 @@ public class WidgetManager {
 
         WidgetRecord widget = mWidgets.get(appWidgetId);
         if (widget != null) {
+            adapter.add(new LinearAdapter.ItemTitle(getWidgetName(ctx, view.getAppWidgetInfo())));
             final WidgetLayout.Handle handleType = mLayout.getHandleType(view);
             if (handleType.isMove()) {
                 adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_move_switch, WidgetOptionItem.Action.MOVE_SWITCH));
@@ -650,6 +732,7 @@ public class WidgetManager {
                 adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_move_resize, WidgetOptionItem.Action.MOVE_RESIZE));
             }
 
+            adapter.add(new LinearAdapter.ItemDivider());
             final ViewGroup.LayoutParams lp = view.getLayoutParams();
             if (lp instanceof WidgetLayout.LayoutParams) {
                 if (((WidgetLayout.LayoutParams) lp).screen != WidgetLayout.LayoutParams.SCREEN_LEFT)
@@ -658,6 +741,8 @@ public class WidgetManager {
                     adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_screen_middle, WidgetOptionItem.Action.MOVE2SCREEN_MIDDLE));
                 if (((WidgetLayout.LayoutParams) lp).screen != WidgetLayout.LayoutParams.SCREEN_RIGHT)
                     adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_screen_right, WidgetOptionItem.Action.MOVE2SCREEN_RIGHT));
+                adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_back, WidgetOptionItem.Action.MOVE_BELOW));
+                adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_front, WidgetOptionItem.Action.MOVE_ABOVE));
             }
 
             adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_remove, WidgetOptionItem.Action.REMOVE));
@@ -782,6 +867,20 @@ public class WidgetManager {
                         saveWidgetProperties(view);
                         break;
                     }
+                    case MOVE_ABOVE: {
+                        int idx = mLayout.indexOfChild(view);
+                        mLayout.removeViewAt(idx);
+                        mLayout.addView(view);
+                        saveWidgetProperties(view);
+                        break;
+                    }
+                    case MOVE_BELOW: {
+                        int idx = mLayout.indexOfChild(view);
+                        mLayout.removeViewAt(idx);
+                        mLayout.addView(view, 0);
+                        saveWidgetProperties(view);
+                        break;
+                    }
                 }
             }
         });
@@ -829,6 +928,17 @@ public class WidgetManager {
         AppWidgetProviderInfo info;
         try {
             info = appWidgetManager.getAppWidgetInfo(appWidgetId);
+        } catch (Exception ignored) {
+            return null;
+        }
+        return info;
+    }
+
+    @Nullable
+    public AppWidgetProviderInfo getWidgetProviderInfo(int appWidgetId) {
+        AppWidgetProviderInfo info;
+        try {
+            info = mAppWidgetManager.getAppWidgetInfo(appWidgetId);
         } catch (Exception ignored) {
             return null;
         }
@@ -887,6 +997,7 @@ public class WidgetManager {
             RESET,
             REMOVE,
             MOVE2SCREEN_LEFT, MOVE2SCREEN_MIDDLE, MOVE2SCREEN_RIGHT,
+            MOVE_BELOW, MOVE_ABOVE,
         }
 
         final Action mAction;
@@ -894,6 +1005,27 @@ public class WidgetManager {
         public WidgetOptionItem(Context ctx, @StringRes int stringId, Action action) {
             super(ctx, stringId);
             mAction = action;
+        }
+    }
+
+    static class PlaceholderPopupItem extends LinearAdapterPlus.ItemStringIcon {
+        final PlaceholderWidget placeholder;
+
+        @NonNull
+        static PlaceholderPopupItem create(Context ctx, PlaceholderWidget placeholder) {
+            Drawable icon = DrawableUtils.getBitmapDrawable(ctx, placeholder.preview);
+            String name = ctx.getString(R.string.widget_placeholder, placeholder.name);
+            return new PlaceholderPopupItem(placeholder, name, icon);
+        }
+
+        private PlaceholderPopupItem(@NonNull PlaceholderWidget placeholder, @NonNull String name, Drawable icon) {
+            super(name, icon);
+            this.placeholder = placeholder;
+        }
+
+        @Override
+        public int getLayoutResource() {
+            return R.layout.popup_list_item_icon;
         }
     }
 

@@ -39,7 +39,7 @@
     <string name="menu_widget_title">Widget menu</string>
     <string name="menu_widget_add">Add Widget…</string>
     <string name="menu_widget_remove">Remove Widget…</string>
-    <string name="menu_widget_configure">Configure Widget…</string>
+    <string name="menu_widget_configure">Customize Widget…</string>
     <string name="menu_popup_title">Main menu</string>
     <string name="menu_popup_title_settings">Settings</string>
     <string name="menu_popup_android_settings">Device settings</string>
@@ -199,6 +199,8 @@
     <string name="cfg_widget_screen_left">Move to <br />\n<b>left</b> screen</string>
     <string name="cfg_widget_screen_middle">Move to <br />\n<b>middle</b> screen</string>
     <string name="cfg_widget_screen_right">Move to <br />\n<b>right</b> screen</string>
+    <string name="cfg_widget_back">Move <b>below</b> all</string>
+    <string name="cfg_widget_front">Move <b>above</b> all</string>
 
     <string name="shortcut_with_appName">%1$s: %2$s</string>
 
