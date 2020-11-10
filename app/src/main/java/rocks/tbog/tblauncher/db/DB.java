@@ -11,7 +11,7 @@ import rocks.tbog.tblauncher.entry.FilterEntry;
 class DB extends SQLiteOpenHelper {
 
     private final static String DB_NAME = "kiss.s3db";
-    private final static int DB_VERSION = 11;
+    private final static int DB_VERSION = 12;
 
     DB(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -76,7 +76,7 @@ class DB extends SQLiteOpenHelper {
     }
 
     private void createWidgetsTable(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE \"widgets\" (_id INTEGER PRIMARY KEY AUTOINCREMENT, \"appWidgetId\" INTEGER NOT NULL UNIQUE, \"properties\" TEXT)");
+        db.execSQL("CREATE TABLE \"widgets\" (_id INTEGER PRIMARY KEY AUTOINCREMENT, \"appWidgetId\" INTEGER NOT NULL, \"properties\" TEXT)");
     }
 
     @Override
@@ -118,6 +118,21 @@ class DB extends SQLiteOpenHelper {
                     database.execSQL("ALTER TABLE \"favorites\" ADD COLUMN \"name\" TEXT DEFAULT NULL");
                     database.execSQL("ALTER TABLE \"favorites\" ADD COLUMN \"custom_icon\" BLOB DEFAULT NULL");
                     // fall through
+                case 11:
+                    database.execSQL("PRAGMA foreign_keys=off");
+                    database.beginTransaction();
+                    try {
+                        database.execSQL("DROP TABLE IF EXISTS \"widgets_old\"");
+                        database.execSQL("ALTER TABLE \"widgets\" RENAME TO \"widgets_old\"");
+                        createWidgetsTable(database);
+                        database.execSQL("INSERT INTO \"widgets\" SELECT * FROM \"widgets_old\"");
+                        database.execSQL("DROP TABLE \"widgets_old\"");
+
+                        database.setTransactionSuccessful();
+                    } finally {
+                        database.endTransaction();
+                        database.execSQL("PRAGMA foreign_keys=on");
+                    }
                 default:
                     break;
             }
