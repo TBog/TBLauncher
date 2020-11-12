@@ -926,9 +926,9 @@ public class DBHelper {
         try (Cursor c = db.query("widgets", new String[]{"appWidgetId", "properties"}, null, null, null, null, null)) {
             list = new ArrayList<>(c.getCount());
             while (c.moveToNext()) {
-                WidgetRecord rec = new WidgetRecord();
-                rec.appWidgetId = c.getInt(0);
-                rec.loadProperties(c.getString(1));
+                int appWidgetId = c.getInt(0);
+                String properties = c.getString(1);
+                WidgetRecord rec = WidgetRecord.loadFromDB(appWidgetId, properties);
                 list.add(rec);
             }
         }

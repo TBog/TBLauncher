@@ -18,6 +18,7 @@ import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
 import android.view.View;
@@ -281,6 +282,23 @@ public class Utilities {
             ++n;
         }
         return n;
+    }
+
+    @Nullable
+    public static byte[] decodeIcon(@Nullable String text, @Nullable String encoding) {
+        if (text != null) {
+            text = text.trim();
+            int size = text.length();
+            if (encoding == null || "base64".equals(encoding)) {
+                byte[] base64enc = new byte[size];
+                for (int i = 0; i < size; i += 1) {
+                    char c = text.charAt(i);
+                    base64enc[i] = (byte) (c & 0xff);
+                }
+                return Base64.decode(base64enc, Base64.NO_WRAP);
+            }
+        }
+        return null;
     }
 
 
