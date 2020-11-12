@@ -345,11 +345,13 @@ public class WidgetManager {
             mLayout.addView(hostView, insertPosition, params);
         }
 
+        Context context = mLayout.getContext();
         // remove from `mPlaceholders`
         {
             for (Iterator<PlaceholderWidgetRecord> iterator = mPlaceholders.iterator(); iterator.hasNext(); ) {
                 PlaceholderWidgetRecord placeholderWidget = iterator.next();
                 if (placeholderWidget.provider.equals(appWidgetInfo.provider)) {
+                    DBHelper.removeWidgetPlaceholder(context, INVALID_WIDGET_ID, placeholderWidget.provider.flattenToString());
                     iterator.remove();
                 }
             }
@@ -408,8 +410,10 @@ public class WidgetManager {
                         mLayout.removeView(placeholderView);
                         for (Iterator<PlaceholderWidgetRecord> iterator = mPlaceholders.iterator(); iterator.hasNext(); ) {
                             PlaceholderWidgetRecord placeholderWidgetRecord = iterator.next();
-                            if (provider.equals(placeholderWidgetRecord.provider))
+                            if (provider.equals(placeholderWidgetRecord.provider)) {
+                                DBHelper.removeWidgetPlaceholder(activity, INVALID_WIDGET_ID, placeholderWidgetRecord.provider.flattenToString());
                                 iterator.remove();
+                            }
                         }
                         dialog.dismiss();
                     })

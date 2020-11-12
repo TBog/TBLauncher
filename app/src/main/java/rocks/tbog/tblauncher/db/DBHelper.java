@@ -948,6 +948,13 @@ public class DBHelper {
         db.delete("widgets", "appWidgetId=?", new String[]{String.valueOf(appWidgetId)});
     }
 
+    public static void removeWidgetPlaceholder(@NonNull Context context, int appWidgetId, String provider) {
+        SQLiteDatabase db = getDatabase(context);
+        //TODO: escape the provider
+        String[] whereArgs = new String[]{String.valueOf(appWidgetId), "<provider>" + provider + "</provider>"};
+        db.delete("widgets", "appWidgetId=? AND properties LIKE '%' || ? || '%'", whereArgs);
+    }
+
     public static void setWidgetProperties(@NonNull Context context, WidgetRecord rec) {
         SQLiteDatabase db = getDatabase(context);
 
