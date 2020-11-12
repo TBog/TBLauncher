@@ -11,7 +11,9 @@ import org.xmlpull.v1.XmlPullParserException;
 
 import java.io.IOException;
 import java.io.StringReader;
+import java.io.StringWriter;
 
+import rocks.tbog.tblauncher.WidgetManager;
 import rocks.tbog.tblauncher.ui.WidgetLayout;
 import rocks.tbog.tblauncher.utils.SimpleXmlWriter;
 
@@ -24,17 +26,37 @@ public class WidgetRecord {
     public int left;
     public int top;
     public int screen;
-    private String packedProperties = null;
+    protected String packedProperties = null;
 
-    public void loadProperties(String properties) {
+    protected <T extends WidgetRecord> void copyFrom(@NonNull T o) {
+        appWidgetId = o.appWidgetId;
+        width = o.width;
+        height = o.height;
+        left = o.left;
+        top = o.top;
+        screen = o.screen;
+        packedProperties = o.packedProperties;
+    }
+
+    @NonNull
+    public static WidgetRecord loadFromDB(int widgetId, String properties) {
+        WidgetRecord rec;
+        if (widgetId == WidgetManager.INVALID_WIDGET_ID)
+            rec = new PlaceholderWidgetRecord();
+        else
+            rec = new WidgetRecord();
+
         XmlPullParser xpp = Xml.newPullParser();
         try {
             xpp.setInput(new StringReader(properties));
             int eventType = xpp.getEventType();
-            parseProperties(xpp, eventType);
+            rec.parseProperties(xpp, eventType);
         } catch (Exception e) {
             Log.e(TAG, "parse XML properties", e);
         }
+
+        rec.appWidgetId = widgetId;
+        return rec;
     }
 
     public void parseProperties(@NonNull XmlPullParser xpp, int eventType) throws IOException, XmlPullParserException {
@@ -119,17 +141,17 @@ public class WidgetRecord {
 
     public String packedProperties() {
         if (packedProperties == null) {
-            packedProperties = "<widget>\n" +
-                    "\t<size " +
-                    " width=\"" + width + "\"" +
-                    " height=\"" + height + "\"" +
-                    "/>\n" +
-                    "\t<position " +
-                    " left=\"" + left + "\"" +
-                    " top=\"" + top + "\"" +
-                    " screen=\"" + screen + "\"" +
-                    "/>\n" +
-                    "</widget>";
+            //TODO: use a writer that extends BufferedWriter because that's what KXmlSerializer expects
+            StringWriter writer = new StringWriter();
+            SimpleXmlWriter sx = SimpleXmlWriter.getNewInstance();
+            try {
+                sx.setOutput(writer);
+                writeProperties(sx, true);
+                sx.endDocument();
+            } catch (Exception e) {
+                Log.e(TAG, "pack properties", e);
+            }
+            packedProperties = writer.toString();
         }
         return packedProperties;
     }

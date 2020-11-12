@@ -223,7 +223,7 @@ public class XmlExport {
     }
 
     public static void widgetsXml(@NonNull Context context, @NonNull SimpleXmlWriter sx) throws IOException {
-        sx.startTag("widgets").attribute("version", "1");
+        sx.startTag("widgets").attribute("version", "2");
 
         //TBApplication.widgetManager(context).
 
@@ -231,28 +231,18 @@ public class XmlExport {
         for (WidgetRecord widget : widgets) {
             AppWidgetProviderInfo appWidgetProviderInfo = WidgetManager.getWidgetProviderInfo(context, widget.appWidgetId);
             sx.startTag("widget").attribute("id", widget.appWidgetId);
-            // write name
-            {
-                String name = WidgetManager.getWidgetName(context, appWidgetProviderInfo);
-                sx.startTag("name").content(name).endTag("name");
-            }
-            // app to suggest in case the widget id no longer works
+            // we use PlaceholderWidgetRecord because it has the info we need to restore
+            PlaceholderWidgetRecord widgetRecord = new PlaceholderWidgetRecord();
+            widgetRecord.copyFrom(widget);
             if (appWidgetProviderInfo != null) {
-                sx.startTag("provider").content(appWidgetProviderInfo.provider.flattenToString()).endTag("provider");
-            }
-            // write preview icon
-            {
+                widgetRecord.name = WidgetManager.getWidgetName(context, appWidgetProviderInfo);
+                widgetRecord.provider = appWidgetProviderInfo.provider;
                 Drawable preview = WidgetManager.getWidgetPreview(context, appWidgetProviderInfo);
-                byte[] icon = ShortcutUtil.getIconBlob(preview);
-                byte[] base64enc = Base64.encode(icon, Base64.NO_WRAP);
-                sx.startTag("preview")
-                        .attribute("encoding", "base64")
-                        .content(base64enc)
-                        .endTag("preview");
+                widgetRecord.preview = ShortcutUtil.getIconBlob(preview);;
             }
             {
                 sx.startTag("properties");
-                widget.writeProperties(sx, false);
+                widgetRecord.writeProperties(sx, false);
                 sx.endTag("properties");
             }
             sx.endTag("widget");
