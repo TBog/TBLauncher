@@ -155,10 +155,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         dialog.setArguments(args);
                     }
                     final XmlImport.SettingsData.Method importMethod = method;
-                    dialog.setWork(()->{
+                    dialog.setWork(() -> {
                         Activity activity = Utilities.getActivity(dialog.getContext());
-                        if (activity != null)
-                        {
+                        if (activity != null) {
                             if (!XmlImport.settingsXml(activity, importedFile, importMethod)) {
                                 Toast.makeText(activity, R.string.error_fail_import, Toast.LENGTH_LONG).show();
                                 dialog.dismiss();
@@ -346,6 +345,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "result-text-size":
                     case "result-text2-size":
                     case "result-icon-size":
+                    case "result-history-size":
                         dialogFragment = SliderDialog.newInstance(key);
                         break;
                     case "exit-app":
@@ -478,6 +478,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case "result-text2-size":
             case "result-icon-size":
                 UISizes.resetCache();
+                break;
+            case "result-history-size":
+                PrefCache.resetCache();
                 break;
             case "adaptive-shape":
             case "force-adaptive":

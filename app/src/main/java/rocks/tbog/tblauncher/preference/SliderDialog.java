@@ -1,16 +1,12 @@
 package rocks.tbog.tblauncher.preference;
 
-import android.content.Context;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
 import androidx.preference.DialogPreference;
 import androidx.preference.PreferenceDialogFragmentCompat;
-
-import java.util.Map;
 
 import rocks.tbog.tblauncher.R;
 
@@ -84,6 +80,9 @@ public class SliderDialog extends PreferenceDialogFragmentCompat {
                 mSliderOffset = 2;
                 seekBar.setMax(seekBar.getMax() - mSliderOffset);
                 break;
+            case "result-history-size":
+                mSliderOffset = 1;
+                seekBar.setMax(1000 - mSliderOffset);
         }
         seekBar.setProgress((Integer) preference.getValue() - mSliderOffset);
 

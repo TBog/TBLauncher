@@ -11,6 +11,7 @@ import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.entry.ActionEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
+import rocks.tbog.tblauncher.searcher.HistorySearcher;
 
 public class ActionProvider extends StaticProvider<ActionEntry> {
 
@@ -85,7 +86,7 @@ public class ActionProvider extends StaticProvider<ActionEntry> {
                 Provider<? extends EntryItem> provider = TBApplication.dataHandler(ctx).getShortcutsProvider();
                 TBApplication.quickList(ctx).toggleProvider(v, provider, Collections.reverseOrder(EntryItem.NAME_COMPARATOR));
             });
-            actionEntry.setName(context.getResources().getString(R.string.action_show_shortcuts));
+            actionEntry.setName(context.getResources().getString(R.string.action_show_shortcuts_reversed));
             pojos.add(actionEntry);
         }
         // show favorites sorted by name
@@ -98,6 +99,17 @@ public class ActionProvider extends StaticProvider<ActionEntry> {
                 TBApplication.quickList(ctx).toggleProvider(v, provider, EntryItem.NAME_COMPARATOR);
             });
             actionEntry.setName(context.getResources().getString(R.string.action_show_favorites));
+            pojos.add(actionEntry);
+        }
+        // show history sorted by how recent it was accessed
+        {
+            String id = ActionEntry.SCHEME + "show/history/recency";
+            ActionEntry actionEntry = new ActionEntry(id, R.drawable.ic_history);
+            actionEntry.setAction(v -> {
+                Context ctx = v.getContext();
+                TBApplication.behaviour(ctx).runSearcher("recency", HistorySearcher.class);
+            });
+            actionEntry.setName(context.getResources().getString(R.string.action_show_history_recency));
             pojos.add(actionEntry);
         }
     }

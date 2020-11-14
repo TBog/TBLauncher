@@ -238,6 +238,14 @@
                 android:title="@string/result_icon_size"
                 android:widgetLayout="@layout/pref_size_preview" />
 
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@integer/default_result_history_size"
+                android:dialogLayout="@layout/pref_size"
+                android:key="result-history-size"
+                android:title="@string/result_history_size"
+                android:summary="@string/result_history_size_summary"
+                android:widgetLayout="@layout/pref_size_preview" />
+
         </PreferenceCategory>
 
         <!-- Quick list -->
