@@ -34,6 +34,8 @@ import androidx.annotation.StringRes;
 import androidx.appcompat.app.ActionBar;
 import androidx.preference.PreferenceManager;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -614,6 +616,25 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         } else {
             mSearchEditText.setText("");
             updateSearchRecords(false, new TagSearcher(this, tagName));
+        }
+    }
+
+    public void runSearcher(@NonNull String query, Class<? extends Searcher> searcherClass) {
+        if (mSearchEditText == null)
+            return;
+        if (TBApplication.state().isResultListVisible() && mSearchEditText.getText().length() == 0) {
+            mSearchEditText.setText("");
+        } else {
+            mSearchEditText.setText("");
+            Searcher searcher = null;
+            try {
+                Constructor<? extends Searcher> constructor = searcherClass.getConstructor(ISearchActivity.class, String.class);
+                searcher = constructor.newInstance(this, query);
+            } catch (IllegalAccessException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {
+                Log.e(TAG, "new <? extends Searcher>", e);
+            }
+            if (searcher != null)
+                updateSearchRecords(false, searcher);
         }
     }
 

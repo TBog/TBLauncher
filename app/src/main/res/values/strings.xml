@@ -150,7 +150,8 @@
     <string name="action_show_apps_reversed">Applications Z→A</string>
     <string name="action_show_contacts">Contacts A→Z</string>
     <string name="action_show_contacts_reversed">Contacts Z→A</string>
-    <string name="action_show_shortcuts">Shortcuts</string>
+    <string name="action_show_shortcuts">Shortcuts A→Z</string>
+    <string name="action_show_shortcuts_reversed">Shortcuts Z→A</string>
     <string name="action_show_favorites">Favorites</string>
     <string name="quick_list_content">Customize content</string>
     <string name="quick_list_content_summary">Change order and add entries</string>
@@ -299,6 +300,9 @@
     <string name="add_widget_failed">Failed to add widget</string>
     <string name="widget_placeholder_remove">Are you OK to remove the placeholder?</string>
     <string name="choose_file_activity_not_found">Please install a File Manager.</string>
+    <string name="result_history_size">History max count</string>
+    <string name="result_history_size_summary">Maximum number of items when showing history</string>
+    <string name="action_show_history_recency">History recent</string>
     <plurals name="tag_entry_count">
         <item quantity="one">%d entry</item>
         <item quantity="other">%d entries</item>

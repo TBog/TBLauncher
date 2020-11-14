@@ -12,4 +12,5 @@
     <integer name="default_size_text" translatable="false">14</integer>                 <!-- sp -->
     <integer name="default_size_text2" translatable="false">12</integer>                <!-- sp -->
     <integer name="default_size_icon" translatable="false">48</integer>                 <!-- dp -->
+    <integer name="default_result_history_size" translatable="false">32</integer>       <!-- count -->
 </resources>

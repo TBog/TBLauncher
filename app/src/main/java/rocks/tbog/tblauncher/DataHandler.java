@@ -24,6 +24,7 @@ import androidx.preference.PreferenceManager;
 import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -471,51 +472,64 @@ public class DataHandler extends BroadcastReceiver
         }
     }
 
+    @NonNull
+    public static DBHelper.HistoryMode getHistoryMode(String historyMode) {
+        switch (historyMode) {
+            case "frecency":
+                return DBHelper.HistoryMode.FRECENCY;
+            case "frequency":
+                return DBHelper.HistoryMode.FREQUENCY;
+            case "adaptive":
+                return DBHelper.HistoryMode.ADAPTIVE;
+            default:
+                return DBHelper.HistoryMode.RECENCY;
+        }
+    }
+
     /**
      * Return previously selected items.<br />
      * May return null if no items were ever selected (app first use)<br />
      * May return an empty set if the providers are not done building records,
      * in this case it is probably a good idea to call this function 500ms after
      *
-     * @param context            android context
      * @param itemCount          max number of items to retrieve, total number may be less (search or calls are not returned for instance)
      * @param historyMode        Recency vs Frecency vs Frequency vs Adaptive
      * @param sortHistory        Sort history entries alphabetically
      * @param itemsToExcludeById Items to exclude from history by their id
      * @return pojos in recent history
      */
-    public ArrayList<EntryItem> getHistory(Context context, int itemCount, String historyMode,
-                                           boolean sortHistory, Set<String> itemsToExcludeById) {
-        // Pre-allocate array slots that are likely to be used based on the current maximum item
-        // count
-        ArrayList<EntryItem> history = new ArrayList<>(Math.min(itemCount, 256));
-
+    public List<EntryItem> getHistory(int itemCount, DBHelper.HistoryMode historyMode,
+                                      boolean sortHistory, Set<String> itemsToExcludeById) {
         // Max sure that we get enough items, regardless of how many may be excluded
         int extendedItemCount = itemCount + itemsToExcludeById.size();
 
         // Read history
-        List<ValuedHistoryRecord> ids = DBHelper.getHistory(context, extendedItemCount, historyMode, sortHistory);
+        List<ValuedHistoryRecord> ids = DBHelper.getHistory(context, extendedItemCount, historyMode);
+
+        // Pre-allocate array slots that are likely to be used
+        ArrayList<EntryItem> history = new ArrayList<>(ids.size());
 
         // Find associated items
         for (int i = 0; i < ids.size(); i++) {
             // Ask all providers if they know this id
             EntryItem pojo = getPojo(ids.get(i).record);
 
-            if (pojo == null) {
+            if (pojo == null)
                 continue;
-            }
 
-            if (itemsToExcludeById.contains(pojo.id)) {
+            if (itemsToExcludeById.contains(pojo.id))
                 continue;
-            }
 
             history.add(pojo);
-
-            // Break if maximum number of items have been retrieved
-            if (history.size() >= itemCount) {
-                break;
-            }
         }
+
+        // sort the list if needed
+        if (sortHistory)
+            Collections.sort(history, (a, b) -> a.getName().compareTo(b.getName()));
+
+        // enforce item count after the sort operation
+        if (history.size() > itemCount)
+            history.subList(itemCount, history.size()).clear();
 
         return history;
     }

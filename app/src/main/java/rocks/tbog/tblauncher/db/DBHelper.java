@@ -15,13 +15,10 @@ import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import rocks.tbog.tblauncher.DataHandler;
-import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.ShortcutEntry;
@@ -76,12 +73,13 @@ public class DBHelper {
         values.put("query", query);
         values.put("record", record);
         values.put("timeStamp", System.currentTimeMillis());
-        db.insert("history", null, values);
+        long rowId = db.insert("history", null, values);
+        Log.d(TAG, "insertHistory rowId " + rowId);
 
         if (Math.random() <= 0.005) {
             // Roughly every 200 inserts, clean up the history of items older than 3 months
-            long twoMonthsAgo = 7776000000L; // 1000 * 60 * 60 * 24 * 30 * 3;
-            db.delete("history", "timeStamp < ?", new String[]{Long.toString(System.currentTimeMillis() - twoMonthsAgo)});
+            long monthsAgo = 7776000000L; // 1000 * 60 * 60 * 24 * 30 * 3;
+            db.delete("history", "timeStamp < ?", new String[]{Long.toString(System.currentTimeMillis() - monthsAgo)});
             // And vacuum the DB for speed
             db.execSQL("VACUUM");
         }
@@ -191,53 +189,47 @@ public class DBHelper {
         return records;
     }
 
+    public enum HistoryMode {
+        RECENCY,
+        FRECENCY,
+        FREQUENCY,
+        ADAPTIVE,
+    }
+
     /**
      * Retrieve previous query history
      *
-     * @param context     android context
-     * @param limit       max number of items to retrieve
-     * @param sortHistory sort history entries alphabetically
+     * @param context android context
+     * @param limit   max number of items to retrieve
      * @return records with number of use
      */
-    public static ArrayList<ValuedHistoryRecord> getHistory(Context context, int limit, String historyMode, boolean sortHistory) {
-        ArrayList<ValuedHistoryRecord> records;
+    @NonNull
+    public static List<ValuedHistoryRecord> getHistory(Context context, int limit, HistoryMode historyMode) {
+        List<ValuedHistoryRecord> records = null;
 
         SQLiteDatabase db = getDatabase(context);
 
-        Cursor cursor;
+        Cursor cursor = null;
         switch (historyMode) {
-            case "frecency":
+            case FRECENCY:
                 cursor = getHistoryByFrecency(db, limit);
                 break;
-            case "frequency":
+            case FREQUENCY:
                 cursor = getHistoryByFrequency(db, limit);
                 break;
-            case "adaptive":
+            case ADAPTIVE:
                 cursor = getHistoryByAdaptive(db, 36, limit);
                 break;
-            default:
+            case RECENCY:
                 cursor = getHistoryByRecency(db, limit);
                 break;
         }
-
-        records = readCursor(cursor);
-        cursor.close();
-
-        // sort history entries alphabetically
-        if (sortHistory) {
-            DataHandler dataHandler = TBApplication.getApplication(context).getDataHandler();
-
-            for (ValuedHistoryRecord entry : records) {
-                entry.name = dataHandler.getItemName(entry.record);
-            }
-
-            Collections.sort(records, new Comparator<ValuedHistoryRecord>() {
-                @Override
-                public int compare(ValuedHistoryRecord a, ValuedHistoryRecord b) {
-                    return a.name.compareTo(b.name);
-                }
-            });
+        if (cursor != null) {
+            records = readCursor(cursor);
+            cursor.close();
         }
+        if (records == null)
+            records = Collections.emptyList();
 
         return records;
     }

@@ -128,7 +128,7 @@ public class QuickList {
         mQuickList.requestLayout();
     }
 
-    public void toggleProvider(View v, IProvider<?> provider, @NonNull java.util.Comparator<? super EntryItem> comparator) {
+    public void toggleProvider(View v, IProvider<?> provider, @Nullable java.util.Comparator<? super EntryItem> comparator) {
         Context ctx = v.getContext();
         TBApplication app = TBApplication.getApplication(ctx);
         Object tag_actionId = v.getTag(R.id.tag_actionId);
@@ -150,8 +150,10 @@ public class QuickList {
                 if (list != null) {
                     // copy list in order to sort it
                     list = new ArrayList<>(list);
-                    //TODO: do we need this on another thread?
-                    Collections.sort(list, comparator);
+                    if (comparator != null) {
+                        //TODO: do we need this on another thread?
+                        Collections.sort(list, comparator);
+                    }
                     app.behaviour().clearSearch();
                     app.behaviour().updateAdapter(list, false);
                     mLastSelection = actionId;
