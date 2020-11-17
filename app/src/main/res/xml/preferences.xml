@@ -246,6 +246,14 @@
                 android:summary="@string/result_history_size_summary"
                 android:widgetLayout="@layout/pref_size_preview" />
 
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@integer/default_result_history_adaptive"
+                android:dialogLayout="@layout/pref_size"
+                android:key="result-history-adaptive"
+                android:title="@string/result_history_adaptive"
+                android:summary="@string/result_history_adaptive_summary"
+                android:widgetLayout="@layout/pref_size_preview" />
+
         </PreferenceCategory>
 
         <!-- Quick list -->

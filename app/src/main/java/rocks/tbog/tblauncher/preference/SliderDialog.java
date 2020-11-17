@@ -81,6 +81,7 @@ public class SliderDialog extends PreferenceDialogFragmentCompat {
                 seekBar.setMax(seekBar.getMax() - mSliderOffset);
                 break;
             case "result-history-size":
+            case "result-history-adaptive":
                 mSliderOffset = 1;
                 seekBar.setMax(1000 - mSliderOffset);
         }

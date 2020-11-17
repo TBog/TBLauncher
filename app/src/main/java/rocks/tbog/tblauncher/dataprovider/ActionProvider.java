@@ -112,6 +112,41 @@ public class ActionProvider extends StaticProvider<ActionEntry> {
             actionEntry.setName(context.getResources().getString(R.string.action_show_history_recency));
             pojos.add(actionEntry);
         }
+        // show history sorted by how frequent it was accessed
+        {
+            String id = ActionEntry.SCHEME + "show/history/frequency";
+            ActionEntry actionEntry = new ActionEntry(id, R.drawable.ic_history);
+            actionEntry.setAction(v -> {
+                Context ctx = v.getContext();
+                TBApplication.behaviour(ctx).runSearcher("frequency", HistorySearcher.class);
+            });
+            actionEntry.setName(context.getResources().getString(R.string.action_show_history_frequency));
+            pojos.add(actionEntry);
+        }
+        // show history sorted based on frequency * recency
+        // frequency = #launches_for_app / #all_launches
+        // recency = 1 / position_of_app_in_normal_history
+        {
+            String id = ActionEntry.SCHEME + "show/history/frecency";
+            ActionEntry actionEntry = new ActionEntry(id, R.drawable.ic_history);
+            actionEntry.setAction(v -> {
+                Context ctx = v.getContext();
+                TBApplication.behaviour(ctx).runSearcher("frecency", HistorySearcher.class);
+            });
+            actionEntry.setName(context.getResources().getString(R.string.action_show_history_frecency));
+            pojos.add(actionEntry);
+        }
+        // show history sorted by how frequent it was accessed in the last 36 hours
+        {
+            String id = ActionEntry.SCHEME + "show/history/adaptive";
+            ActionEntry actionEntry = new ActionEntry(id, R.drawable.ic_history);
+            actionEntry.setAction(v -> {
+                Context ctx = v.getContext();
+                TBApplication.behaviour(ctx).runSearcher("adaptive", HistorySearcher.class);
+            });
+            actionEntry.setName(context.getResources().getString(R.string.action_show_history_adaptive));
+            pojos.add(actionEntry);
+        }
     }
 
     @Override

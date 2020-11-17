@@ -302,7 +302,12 @@
     <string name="choose_file_activity_not_found">Please install a File Manager.</string>
     <string name="result_history_size">History max count</string>
     <string name="result_history_size_summary">Maximum number of items when showing history</string>
-    <string name="action_show_history_recency">History recent</string>
+    <string name="action_show_history_recency">Recent history</string>
+    <string name="action_show_history_frequency">Most accessed</string>
+    <string name="action_show_history_frecency">Recent and frequent</string>
+    <string name="action_show_history_adaptive">Adaptive history</string>
+    <string name="result_history_adaptive">Adaptive duration</string>
+    <string name="result_history_adaptive_summary">Number of hours for adaptive history</string>
     <plurals name="tag_entry_count">
         <item quantity="one">%d entry</item>
         <item quantity="other">%d entries</item>

@@ -346,6 +346,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "result-text2-size":
                     case "result-icon-size":
                     case "result-history-size":
+                    case "result-history-adaptive":
                         dialogFragment = SliderDialog.newInstance(key);
                         break;
                     case "exit-app":
@@ -480,6 +481,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 UISizes.resetCache();
                 break;
             case "result-history-size":
+            case "result-history-adaptive":
                 PrefCache.resetCache();
                 break;
             case "adaptive-shape":

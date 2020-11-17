@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import rocks.tbog.tblauncher.PrefCache;
 import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.ShortcutEntry;
@@ -218,7 +219,7 @@ public class DBHelper {
                 cursor = getHistoryByFrequency(db, limit);
                 break;
             case ADAPTIVE:
-                cursor = getHistoryByAdaptive(db, 36, limit);
+                cursor = getHistoryByAdaptive(db, PrefCache.getHistoryAdaptive(context), limit);
                 break;
             case RECENCY:
                 cursor = getHistoryByRecency(db, limit);
