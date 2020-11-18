@@ -11,8 +11,10 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.View;
@@ -199,23 +201,34 @@ public final class ShortcutEntry extends EntryWithTags {
         Context context = view.getContext();
         if (isOreoShortcut()) {
             // Oreo shortcuts
-            doOreoLaunch(context, view);
+            doOreoLaunch(context, view, mShortcutInfo);
         } else {
-            // Pre-oreo shortcuts
-            try {
-                Intent intent = Intent.parseUri(shortcutData, Intent.URI_INTENT_SCHEME);
-                Utilities.setIntentSourceBounds(intent, view);
+            doShortcutLaunch(context, view, shortcutData);
+        }
+    }
 
-                context.startActivity(intent);
-            } catch (Exception e) {
-                // Application was just removed?
-                Toast.makeText(context, R.string.application_not_found, Toast.LENGTH_LONG).show();
-            }
+    public static void doShortcutLaunch(@NonNull Context context, @NonNull View view, @NonNull String shortcutData) {
+        View potentialIcon = view.findViewById(android.R.id.icon);
+        if (potentialIcon == null) {
+            // If favorite, find the icon
+            potentialIcon = view.findViewById(R.id.favorite);
+        }
+        Bundle startActivityOptions = Utilities.makeStartActivityOptions(potentialIcon);
+
+        // Non-oreo shortcuts
+        try {
+            Intent intent = Intent.parseUri(shortcutData, Intent.URI_INTENT_SCHEME);
+            Utilities.setIntentSourceBounds(intent, potentialIcon);
+
+            context.startActivity(intent, startActivityOptions);
+        } catch (Exception e) {
+            // Application was just removed?
+            Toast.makeText(context, R.string.application_not_found, Toast.LENGTH_LONG).show();
         }
     }
 
     @TargetApi(Build.VERSION_CODES.O)
-    private void doOreoLaunch(Context context, View v) {
+    public static void doOreoLaunch(@NonNull Context context, @NonNull View v, @Nullable ShortcutInfo shortcutInfo) {
         final LauncherApps launcherApps = (LauncherApps) context.getSystemService(Context.LAUNCHER_APPS_SERVICE);
         assert launcherApps != null;
 
@@ -225,9 +238,18 @@ public final class ShortcutEntry extends EntryWithTags {
             return;
         }
 
-        if (mShortcutInfo != null) {
+        View potentialIcon = v.findViewById(android.R.id.icon);
+        if (potentialIcon == null) {
+            // If favorite, find the icon
+            potentialIcon = v.findViewById(R.id.favorite);
+        }
+
+        Bundle startActivityOptions = Utilities.makeStartActivityOptions(potentialIcon);
+        Rect sourceBounds = Utilities.getOnScreenRect(potentialIcon);
+
+        if (shortcutInfo != null) {
             try {
-                launcherApps.startShortcut(mShortcutInfo, Utilities.getOnScreenRect(v), null);
+                launcherApps.startShortcut(shortcutInfo, sourceBounds, startActivityOptions);
                 return;
             } catch (ActivityNotFoundException e) {
                 Log.e(TAG, "startShortcut", e);

@@ -1,7 +1,7 @@
 package rocks.tbog.tblauncher.entry;
 
 import android.annotation.TargetApi;
-import android.app.ActivityOptions;
+import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
@@ -32,6 +32,7 @@ import androidx.appcompat.app.AlertDialog;
 
 import java.util.List;
 
+import rocks.tbog.tblauncher.Behaviour;
 import rocks.tbog.tblauncher.BuildConfig;
 import rocks.tbog.tblauncher.IconsHandler;
 import rocks.tbog.tblauncher.R;
@@ -98,11 +99,6 @@ public final class AppEntry extends EntryWithTags {
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public List<LauncherActivityInfo> getActivityList(LauncherApps launcher) {
         return launcher.getActivityList(componentName.getPackageName(), userHandle.getRealHandle());
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    public void launchAppDetails(LauncherApps launcher) {
-        launcher.startAppDetailsActivity(componentName, userHandle.getRealHandle(), null, null);
     }
 
     @WorkerThread
@@ -263,6 +259,7 @@ public final class AppEntry extends EntryWithTags {
 
         adapter.add(new LinearAdapter.ItemTitle(context, R.string.popup_title_hist_fav));
         //adapter.add(new LinearAdapter.Item(context, R.string.menu_exclude));
+        adapter.add(new LinearAdapter.Item(context, R.string.menu_remove_history));
         adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_add));
         adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_remove));
         if (isHiddenByUser())
@@ -320,19 +317,29 @@ public final class AppEntry extends EntryWithTags {
     protected boolean popupMenuClickHandler(@NonNull final View view, @NonNull LinearAdapter.MenuItem item, int stringId, View parentView) {
         Context ctx = view.getContext();
         if (item instanceof ShortcutItem) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                final LauncherApps launcherApps = (LauncherApps) ctx.getSystemService(Context.LAUNCHER_APPS_SERVICE);
-                assert launcherApps != null;
-                launcherApps.startShortcut(((ShortcutItem) item).shortcutInfo, null, null);
-            }
+            TBApplication.behaviour(ctx).beforeLaunchOccurred();
+            final ShortcutInfo shortcutInfo = ((ShortcutItem) item).shortcutInfo;
+            parentView.postDelayed(() -> {
+                Activity activity = Utilities.getActivity(parentView);
+                if (activity == null)
+                    return;
+
+                ShortcutEntry.doOreoLaunch(activity, parentView, shortcutInfo);
+
+                TBApplication.behaviour(activity).afterLaunchOccurred();
+            }, Behaviour.LAUNCH_DELAY);
+
             return true;
         }
         switch (stringId) {
+//            case R.string.menu_remove_history:
+//                ResultHelper.removeFromResultsAndHistory();
+//                return true;
             case R.string.menu_app_details:
-                launchAppDetails(ctx);
+                launchAppDetails(ctx, parentView);
                 return true;
             case R.string.menu_app_store:
-                launchAppStore(ctx);
+                launchAppStore(ctx, parentView);
                 return true;
             case R.string.menu_app_uninstall:
                 launchUninstall(ctx);
@@ -400,39 +407,29 @@ public final class AppEntry extends EntryWithTags {
     @Override
     public void doLaunch(@NonNull View v) {
         Context context = v.getContext();
+        // If AppResult, find the icon
+        View potentialIcon = v.findViewById(android.R.id.icon);
+        if (potentialIcon == null) {
+            // If favorite, find the icon
+            potentialIcon = v.findViewById(R.id.favorite);
+        }
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 LauncherApps launcher = (LauncherApps) context.getSystemService(Context.LAUNCHER_APPS_SERVICE);
                 assert launcher != null;
-                View potentialIcon = null;
-                Bundle opts = null;
 
                 // We're on a modern Android and can display activity animations
-                // If AppResult, find the icon
-                potentialIcon = v.findViewById(android.R.id.icon);
-                if (potentialIcon == null) {
-                    // If favorite, find the icon
-                    potentialIcon = v.findViewById(R.id.favorite);
-                }
-
-                if (potentialIcon != null) {
-                    // If we got an icon, we create options to get a nice animation
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                        opts = ActivityOptions.makeClipRevealAnimation(potentialIcon, 0, 0, potentialIcon.getMeasuredWidth(), potentialIcon.getMeasuredHeight()).toBundle();
-                    }
-                }
-                if (opts == null && potentialIcon != null)
-                    ActivityOptions.makeScaleUpAnimation(potentialIcon, 0, 0, potentialIcon.getMeasuredWidth(), potentialIcon.getMeasuredHeight());
-
+                Bundle startActivityOptions = Utilities.makeStartActivityOptions(potentialIcon);
                 Rect sourceBounds = Utilities.getOnScreenRect(potentialIcon);
-                launcher.startMainActivity(componentName, getRealHandle(), sourceBounds, opts);
+                launcher.startMainActivity(componentName, getRealHandle(), sourceBounds, startActivityOptions);
             } else {
                 Intent intent = new Intent(Intent.ACTION_MAIN);
                 intent.addCategory(Intent.CATEGORY_LAUNCHER);
                 intent.setComponent(componentName);
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED);
                 Utilities.setIntentSourceBounds(intent, v);
-                context.startActivity(intent);
+                Bundle startActivityOptions = Utilities.makeStartActivityOptions(potentialIcon);
+                context.startActivity(intent, startActivityOptions);
             }
         } catch (ActivityNotFoundException | NullPointerException | SecurityException e) {
             // Application was just removed?
@@ -509,24 +506,47 @@ public final class AppEntry extends EntryWithTags {
     /**
      * Open an activity displaying details regarding the current package
      */
-    private void launchAppDetails(Context context) {
+    private void launchAppDetails(Context context, View view) {
         if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            LauncherApps launcher = (LauncherApps) context.getSystemService(Context.LAUNCHER_APPS_SERVICE);
-            assert launcher != null;
-            launchAppDetails(launcher);
+            TBApplication.behaviour(context).beforeLaunchOccurred();
+            view.postDelayed(() -> {
+                Activity activity = Utilities.getActivity(view);
+                if (activity == null)
+                    return;
+                LauncherApps launcher = (LauncherApps) activity.getSystemService(Context.LAUNCHER_APPS_SERVICE);
+                assert launcher != null;
+                Rect bounds = Utilities.getOnScreenRect(view);
+                Bundle opts = Utilities.makeStartActivityOptions(view);
+                launcher.startAppDetailsActivity(componentName, userHandle.getRealHandle(), bounds, opts);
+
+                TBApplication.behaviour(activity).afterLaunchOccurred();
+            }, Behaviour.LAUNCH_DELAY);
         } else {
             Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
                     Uri.fromParts("package", getPackageName(), null));
-            context.startActivity(intent);
+            TBApplication.behaviour(context).launchIntent(view, intent);
         }
     }
 
-    private void launchAppStore(Context context) {
-        try {
-            context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + getPackageName())));
-        } catch (android.content.ActivityNotFoundException anfe) {
-            context.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + getPackageName())));
-        }
+    private void launchAppStore(Context context, View view) {
+        TBApplication.behaviour(context).beforeLaunchOccurred();
+        view.postDelayed(() -> {
+            Activity activity = Utilities.getActivity(view);
+            if (activity == null)
+                return;
+            Rect bound = Utilities.getOnScreenRect(view);
+            Bundle startActivityOptions = Utilities.makeStartActivityOptions(view);
+            Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse("market://details?id=" + getPackageName()));
+            try {
+                intent.setSourceBounds(bound);
+                activity.startActivity(intent, startActivityOptions);
+            } catch (ActivityNotFoundException ignored) {
+                intent = new Intent(Intent.ACTION_VIEW, Uri.parse("https://play.google.com/store/apps/details?id=" + getPackageName()));
+                intent.setSourceBounds(bound);
+                activity.startActivity(intent, startActivityOptions);
+            }
+            TBApplication.behaviour(activity).afterLaunchOccurred();
+        }, Behaviour.LAUNCH_DELAY);
     }
 
     /**

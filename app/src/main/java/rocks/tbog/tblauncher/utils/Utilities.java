@@ -2,6 +2,7 @@ package rocks.tbog.tblauncher.utils;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.ActivityOptions;
 import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
@@ -15,9 +16,9 @@ import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Build;
+import android.os.Bundle;
 import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.view.Gravity;
@@ -28,11 +29,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
-import androidx.core.app.ShareCompat;
-import androidx.core.content.FileProvider;
 import androidx.core.content.res.ResourcesCompat;
 
-import java.io.File;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Method;
 import java.util.concurrent.Executor;
@@ -124,6 +122,21 @@ public class Utilities {
             ON_SCREEN_RECT.set(ON_SCREEN_POS[0], ON_SCREEN_POS[1], ON_SCREEN_POS[0] + v.getWidth(), ON_SCREEN_POS[1] + v.getHeight());
             intent.setSourceBounds(ON_SCREEN_RECT);
         }
+    }
+
+    @Nullable
+    public static Bundle makeStartActivityOptions(@Nullable View source) {
+        if (source == null)
+            return null;
+        Bundle opts = null;
+        // If we got an icon, we create options to get a nice animation
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            opts = ActivityOptions.makeClipRevealAnimation(source, 0, 0, source.getMeasuredWidth(), source.getMeasuredHeight()).toBundle();
+        }
+        if (opts == null) {
+            opts = ActivityOptions.makeScaleUpAnimation(source, 0, 0, source.getMeasuredWidth(), source.getMeasuredHeight()).toBundle();
+        }
+        return opts;
     }
 
     @Nullable

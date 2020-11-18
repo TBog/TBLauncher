@@ -104,7 +104,7 @@ public class ResultAdapter extends BaseAdapter implements SectionIndexer, Filter
 
         try {
             result = results.get(position);
-            ResultHelper.launch(result, v);
+            ResultHelper.launch(v, result);
         } catch (ArrayIndexOutOfBoundsException e) {
 //            return;
         }

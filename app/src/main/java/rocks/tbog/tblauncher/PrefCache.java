@@ -37,4 +37,12 @@ public class PrefCache {
         }
         return RESULT_HISTORY_ADAPTIVE;
     }
+
+    public static boolean showWidgetScreenAfterLaunch(Context context) {
+        return true;
+    }
+
+    public static boolean clearSearchAfterLaunch(Context context) {
+        return true;
+    }
 }

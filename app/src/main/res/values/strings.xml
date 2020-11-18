@@ -8,7 +8,7 @@
     <string name="dummy_button">Dummy Button</string>
     <string name="dummy_content">DUMMY\nCONTENT</string>
 
-    <string name="removed_item">Removed</string>
+    <string name="removed_item">Removed %s</string>
 
     <string name="unable_to_initialize_shortcuts">Unable to initialize shortcuts. Is TinyBit your default launcher?</string>
     <string name="cant_pin_shortcut">Could not add shortcut. Is TinyBit your default launcher\?</string>
