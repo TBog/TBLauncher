@@ -549,11 +549,11 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     @Override
     public void clearAdapter() {
         mResultAdapter.clear();
+        TBApplication.quickList(getContext()).adapterCleared();
         if (!TBApplication.state().isSearchBarVisible())
             return;
         TBApplication.state().setResultList(LauncherState.AnimatedVisibility.HIDDEN);
         mResultLayout.setVisibility(View.INVISIBLE);
-        TBApplication.quickList(getContext()).adapterCleared();
         updateClearButton();
     }
 
