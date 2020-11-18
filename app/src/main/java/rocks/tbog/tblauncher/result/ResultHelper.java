@@ -35,20 +35,20 @@ public class ResultHelper {
      * How to launch a result. Most probably, will fire an intent.
      * This function will record history and then call EntryItem.doLaunch
      *
+     * @param view    {@link View} that was touched
      * @param pojo the {@link EntryItem} that the user is launching
-     * @param v    {@link View} that was touched
      */
-    static void launch(@NonNull EntryItem pojo, @NonNull View v) {
-        TBApplication.behaviour(v.getContext()).beforeLaunchOccurred();
+    static void launch(@NonNull View view, @NonNull EntryItem pojo) {
+        TBApplication.behaviour(view.getContext()).beforeLaunchOccurred();
 
         Log.i("log", "Launching " + pojo.id);
 
-        recordLaunch(pojo, v.getContext());
+        recordLaunch(pojo, view.getContext());
 
         // Launch
-        v.postDelayed(() -> {
-            pojo.doLaunch(v);
-            TBApplication.behaviour(v.getContext()).afterLaunchOccurred();
+        view.postDelayed(() -> {
+            pojo.doLaunch(view);
+            TBApplication.behaviour(view.getContext()).afterLaunchOccurred();
         }, Behaviour.LAUNCH_DELAY);
     }
 
@@ -70,10 +70,10 @@ public class ResultHelper {
      */
     public static void removeFromResultsAndHistory(@NonNull EntryItem pojo, @NonNull Context context) {
         removeFromHistory(pojo, context);
-        Toast.makeText(context, R.string.removed_item, Toast.LENGTH_SHORT).show();
-        //parent.removeResult(context, this);
-        //TODO: parent should be ISearchActivity
+        //TODO: remove from results only if we are showing history
         TBApplication.behaviour(context).removeResult(pojo);
+        //TODO: make an UndoBar
+        Toast.makeText(context, context.getString(R.string.removed_item, pojo.getName()), Toast.LENGTH_SHORT).show();
     }
 
     private static void removeFromHistory(@NonNull EntryItem pojo, @NonNull Context context) {

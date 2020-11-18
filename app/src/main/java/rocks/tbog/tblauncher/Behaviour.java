@@ -4,6 +4,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -252,44 +253,56 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             if (item instanceof LinearAdapter.Item) {
                 stringId = ((LinearAdapter.Item) a.getItem(pos)).stringId;
             }
+            Context c = mTBLauncherActivity;
+            Intent intent;
             switch (stringId) {
                 case R.string.menu_popup_tags_manager:
                     launchTagsManagerDialog();
                     break;
                 case R.string.menu_popup_launcher_settings:
-                    beforeLaunchOccurred();
-                    mClearButton.postDelayed(() -> {
-                        Context c = mTBLauncherActivity;
-                        c.startActivity(new Intent(c, SettingsActivity.class));
-                        afterLaunchOccurred();
-                    }, LAUNCH_DELAY);
+                    intent = new Intent(mClearButton.getContext(), SettingsActivity.class);
+                    launchIntent(this, mClearButton, intent);
                     break;
                 case R.string.change_wallpaper:
-                    beforeLaunchOccurred();
-                    mClearButton.postDelayed(() -> {
-                        Context c = mTBLauncherActivity;
-                        Intent intent = new Intent(Intent.ACTION_SET_WALLPAPER);
-                        c.startActivity(Intent.createChooser(intent, c.getString(R.string.change_wallpaper)));
-                        afterLaunchOccurred();
-                    }, LAUNCH_DELAY);
+                    intent = new Intent(Intent.ACTION_SET_WALLPAPER);
+                    intent = Intent.createChooser(intent, c.getString(R.string.change_wallpaper));
+                    launchIntent(this, mClearButton, intent);
                     break;
                 case R.string.menu_widget_add:
-                    TBApplication.widgetManager(mTBLauncherActivity).showSelectWidget(mTBLauncherActivity);
+                    TBApplication.widgetManager(c).showSelectWidget(mTBLauncherActivity);
                     break;
                 case R.string.menu_widget_remove:
-                    TBApplication.widgetManager(mTBLauncherActivity).showRemoveWidgetPopup();
+                    TBApplication.widgetManager(c).showRemoveWidgetPopup();
                     break;
                 case R.string.menu_popup_android_settings:
-                    beforeLaunchOccurred();
-                    mClearButton.postDelayed(() -> {
-                        mTBLauncherActivity.startActivity(new Intent(android.provider.Settings.ACTION_SETTINGS));
-                        afterLaunchOccurred();
-                    }, LAUNCH_DELAY);
+                    intent = new Intent(android.provider.Settings.ACTION_SETTINGS);
+                    launchIntent(this, mClearButton, intent);
                     break;
             }
         });
 
         return menu;
+    }
+
+    public void launchIntent(@NonNull View view, @NonNull Intent intent) {
+        launchIntent(this, view, intent);
+    }
+
+    static void launchIntent(@NonNull Behaviour behaviour, @NonNull View view, @NonNull Intent intent) {
+        behaviour.beforeLaunchOccurred();
+        view.postDelayed(() -> {
+            Activity activity = Utilities.getActivity(view);
+            if (activity == null)
+                return;
+            Utilities.setIntentSourceBounds(intent, view);
+            Bundle startActivityOptions = Utilities.makeStartActivityOptions(view);
+            try {
+                activity.startActivity(intent, startActivityOptions);
+            } catch (ActivityNotFoundException ignored) {
+                return;
+            }
+            behaviour.afterLaunchOccurred();
+        }, LAUNCH_DELAY);
     }
 
     public void onPostCreate() {
@@ -693,11 +706,17 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 
     public void afterLaunchOccurred() {
         mSearchEditText.postDelayed(() -> {
-            // We selected an item on the list, now we can cleanup the filter:
-            if (mSearchEditText.getText().length() > 0) {
-                mSearchEditText.setText("");
+            Context ctx = getContext();
+            if (PrefCache.clearSearchAfterLaunch(ctx)) {
+                // We selected an item on the list, now we can cleanup the filter:
+                if (mSearchEditText.getText().length() > 0) {
+                    mSearchEditText.setText("");
+                }
             }
-            hideSearchBar(0, true);
+            if (PrefCache.showWidgetScreenAfterLaunch(ctx)) {
+                // show widgets when we return to the launcher
+                hideSearchBar(0, true);
+            }
         }, UI_ANIMATION_DELAY);
     }
 
@@ -945,6 +964,10 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                 mSearchEditText.requestFocus();
                 // UI_ANIMATION_DURATION should be the exact time the full-screen animation ends
                 mSearchEditText.postDelayed(this::showKeyboard, UI_ANIMATION_DURATION);
+            }
+            if (mSearchEditText.getText().length() != 0 || !mResultAdapter.isEmpty()) {
+                //updateSearchRecords();
+                mResultLayout.setVisibility(View.VISIBLE);
             }
         } else {
             if (state.isWidgetScreenVisible()) {
