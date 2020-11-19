@@ -53,7 +53,7 @@ public class DBHelper {
             ValuedHistoryRecord entry = new ValuedHistoryRecord();
 
             entry.record = cursor.getString(0);
-            entry.value = cursor.getInt(1);
+            entry.value = cursor.getLong(1);
 
             records.add(entry);
             cursor.moveToNext();
@@ -95,6 +95,26 @@ public class DBHelper {
     public static void clearHistory(Context context) {
         SQLiteDatabase db = getDatabase(context);
         db.delete("history", "", null);
+    }
+
+    public static void setHistory(Context context, Collection<ValuedHistoryRecord> history) {
+        SQLiteDatabase db = getDatabase(context);
+        db.beginTransaction();
+        try {
+            db.execSQL("DROP TABLE IF EXISTS \"history\"");
+            database.createHistory(db);
+            ContentValues values = new ContentValues(3);
+            for (ValuedHistoryRecord rec : history) {
+                values.put("record", rec.record);
+                values.put("query", rec.name);
+                values.put("timeStamp", rec.value);
+                db.insert("history", null, values);
+            }
+
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
     }
 
     private static Cursor getHistoryByFrecency(SQLiteDatabase db, int limit) {
@@ -148,6 +168,27 @@ public class DBHelper {
                 " ORDER BY count(*) DESC " +
                 " LIMIT " + limit;
         return db.rawQuery(sql, null);
+    }
+
+    @NonNull
+    static ArrayList<ValuedHistoryRecord> getHistoryRaw(@NonNull Context context) {
+        SQLiteDatabase db = getDatabase(context);
+
+        ArrayList<ValuedHistoryRecord> records;
+        try (Cursor cursor = db.query("history", new String[]{"record", "query", "timeStamp"}, null, null, null, null, "\"_id\" ASC")) {
+
+            records = new ArrayList<>(cursor.getCount());
+            while (cursor.moveToNext()) {
+                ValuedHistoryRecord entry = new ValuedHistoryRecord();
+
+                entry.record = cursor.getString(0);
+                entry.name = cursor.getString(1);
+                entry.value = cursor.getLong(2);
+
+                records.add(entry);
+            }
+        }
+        return records;
     }
 
     /**
