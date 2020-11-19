@@ -81,7 +81,7 @@ public class QuerySearcher extends Searcher {
         List<ValuedHistoryRecord> lastIdsForQuery = DBHelper.getPreviousResultsForQuery(context, trimmedQuery);
         knownIds = new HashMap<>();
         for (ValuedHistoryRecord id : lastIdsForQuery) {
-            knownIds.put(id.record, id.value);
+            knownIds.put(id.record, (int) id.value);
         }
 
         // Request results via "addResult"

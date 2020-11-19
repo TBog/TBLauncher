@@ -305,7 +305,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     private void updateClearButton() {
-        if (mSearchEditText.getText().length() > 0) {
+        if (mSearchEditText.getText().length() > 0 || TBApplication.state().isResultListVisible()) {
             mClearButton.setVisibility(View.VISIBLE);
             mMenuButton.setVisibility(View.INVISIBLE);
         } else {

@@ -333,6 +333,12 @@
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:dialogLayout="@layout/pref_confirm"
+                android:key="export-history"
+                android:summary="@string/export_history_summary"
+                android:title="@string/export_history" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:dialogLayout="@layout/pref_confirm"
                 android:key="export-backup"
                 android:summary="@string/export_backup_summary"
                 android:title="@string/export_backup" />

@@ -76,13 +76,14 @@ public class XmlImport {
                                     widgetListVersion = xpp.getAttributeValue(attrIdx);
                                 }
                             }
-                            switch (widgetListVersion) {
-                                case "1":
-                                    settings.parseWidgets_v1(xpp, eventType);
-                                    break;
-                                default:
-                                    settings.parseWidgets_v2(xpp, eventType);
+                            if ("1".equals(widgetListVersion)) {
+                                settings.parseWidgets_v1(xpp, eventType);
+                            } else {
+                                settings.parseWidgets_v2(xpp, eventType);
                             }
+                            break;
+                        case SettingsData.XTN_HISTORY_LIST:
+                            settings.parseHistory(xpp, eventType);
                             break;
                         default:
                             Log.d(TAG, "ignored " + xpp.getName());
@@ -115,6 +116,8 @@ public class XmlImport {
         private static final String XTN_PREF_LIST_ITEM = "preference";
         private static final String XTN_WIDGET_LIST = "widgets";
         private static final String XTN_WIDGET_LIST_ITEM = "widget";
+        private static final String XTN_HISTORY_LIST = "history";
+        private static final String XTN_HISTORY_LIST_ITEM = "item";
 
         // HashMap with tag name as key and an ArrayList of records for each
         private final HashMap<String, List<String>> mTags = new HashMap<>();
@@ -123,11 +126,13 @@ public class XmlImport {
         private final ArrayList<AppRecord> mApplications = new ArrayList<>();
         private final ArrayList<PlaceholderWidgetRecord> mWidgets = new ArrayList<>();
         private final HashMap<FlagsRecord, byte[]> mIcons = new HashMap<>();
+        private final ArrayList<ValuedHistoryRecord> mHistory = new ArrayList<>();
         private boolean bTagListLoaded = false;
         private boolean bFavListLoaded = false;
         private boolean bAppListLoaded = false;
         private boolean bPrefListLoaded = false;
         private boolean bWidgetListLoaded = false;
+        private boolean bHistoryListLoaded = false;
 
         void parseTagList(@NonNull XmlPullParser xpp, int eventType) throws IOException, XmlPullParserException {
             String currentTag = null;
@@ -531,8 +536,8 @@ public class XmlImport {
                                 for (int attrIdx = 0; attrIdx < attrCount; attrIdx += 1) {
                                     String attrName = xpp.getAttributeName(attrIdx);
                                     if ("version".equals(attrName)) {
-                                        String prefListVersion = xpp.getAttributeValue(attrIdx);
-                                        Log.d(TAG, "widgetList version " + prefListVersion);
+                                        String listVersion = xpp.getAttributeValue(attrIdx);
+                                        Log.d(TAG, "widgetList version " + listVersion);
                                     }
                                 }
                                 break;
@@ -637,6 +642,82 @@ public class XmlImport {
             bWidgetListLoaded = true;
         }
 
+        public void parseHistory(XmlPullParser xpp, int eventType) throws IOException, XmlPullParserException {
+            ValuedHistoryRecord currentRecord = null;
+            boolean bHistoryListFinished = false;
+            String lastTag = null;
+            while (eventType != XmlPullParser.END_DOCUMENT) {
+                switch (eventType) {
+                    case XmlPullParser.START_TAG:
+                        int attrCount = xpp.getAttributeCount();
+                        switch (xpp.getName()) {
+                            case XTN_HISTORY_LIST_ITEM:
+                                lastTag = null;
+                                currentRecord = new ValuedHistoryRecord();
+                                for (int attrIdx = 0; attrIdx < attrCount; attrIdx += 1) {
+                                    String attrName = xpp.getAttributeName(attrIdx);
+                                    if ("time".equals(attrName)) {
+                                        try {
+                                            currentRecord.value = Long.parseLong(xpp.getAttributeValue(attrIdx));
+                                        } catch (NumberFormatException ignored) {
+                                            currentRecord.value = 0;
+                                        }
+                                    }
+                                }
+                                break;
+                            case "id":
+                            case "query":
+                                if (currentRecord != null)
+                                    lastTag = xpp.getName();
+                                break;
+                            case XTN_HISTORY_LIST:
+                                for (int attrIdx = 0; attrIdx < attrCount; attrIdx += 1) {
+                                    String attrName = xpp.getAttributeName(attrIdx);
+                                    if ("version".equals(attrName)) {
+                                        String listVersion = xpp.getAttributeValue(attrIdx);
+                                        Log.d(TAG, "historyList version " + listVersion);
+                                    }
+                                }
+                                break;
+                            default:
+                                Log.d(TAG, "ignored " + xpp.getName());
+                        }
+                        break;
+                    case XmlPullParser.TEXT:
+                        if (lastTag != null && currentRecord != null)
+                            switch (lastTag) {
+                                case "id":
+                                    currentRecord.record = xpp.getText();
+                                    break;
+                                case "query":
+                                    currentRecord.name = xpp.getText();
+                                    break;
+                            }
+                        break;
+                    case XmlPullParser.END_TAG:
+                        switch (xpp.getName()) {
+                            case XTN_HISTORY_LIST_ITEM:
+                                if (currentRecord != null)
+                                    mHistory.add(currentRecord);
+                                currentRecord = null;
+                                // fall-through
+                            case "id":
+                            case "query":
+                                lastTag = null;
+                                break;
+                            case XTN_HISTORY_LIST:
+                                bHistoryListFinished = true;
+                                break;
+                        }
+                        break;
+                }
+                if (bHistoryListFinished)
+                    break;
+                eventType = xpp.next();
+            }
+            bHistoryListLoaded = true;
+        }
+
         private void addIcon(@NonNull FlagsRecord rec, String text, @Nullable String encoding) {
             if (text == null) {
                 mIcons.remove(rec);
@@ -666,6 +747,7 @@ public class XmlImport {
             saveApplications(context, method);
             savePreferences(context, method);
             restoreWidgets(context, method);
+            saveHistory(context, method);
             TBApplication.dataHandler(context).reloadProviders();
         }
 
@@ -819,6 +901,26 @@ public class XmlImport {
             }
 
             wm.onAfterRestoreFromBackup(method == Method.SET);
+        }
+
+        private void saveHistory(Context context, Method method) {
+            if (!bHistoryListLoaded)
+                return;
+
+            List<ValuedHistoryRecord> history;
+            if (method == Method.SET) {
+                history = mHistory;
+            } else {
+                // load from DB first
+                history = DBHelper.getHistoryRaw(context);
+                long time = history.isEmpty() ? 0 : history.get(history.size() - 1).value;
+                for (ValuedHistoryRecord rec : mHistory) {
+                    if (rec.value > time)
+                        history.add(rec);
+                }
+            }
+
+            DBHelper.setHistory(context, history);
         }
 
         public enum Method {OVERWRITE, APPEND, SET}

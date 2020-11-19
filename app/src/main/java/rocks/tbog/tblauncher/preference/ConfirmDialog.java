@@ -64,6 +64,9 @@ public class ConfirmDialog extends PreferenceDialogFragmentCompat {
             case "export-widgets":
                 FileUtils.sendSettingsFile(requireActivity(), "widgets");
                 break;
+            case "export-history":
+                FileUtils.sendSettingsFile(requireActivity(), "history");
+                break;
             case "export-backup":
                 FileUtils.sendSettingsFile(requireActivity(), "backup");
                 break;
@@ -90,6 +93,7 @@ public class ConfirmDialog extends PreferenceDialogFragmentCompat {
             case "export-apps":
             case "export-interface":
             case "export-widgets":
+            case "export-history":
             case "export-backup":
                 ((TextView) view.findViewById(android.R.id.text1)).setText(R.string.export_xml);
                 ((TextView) view.findViewById(android.R.id.text2)).setText(R.string.export_description);
@@ -166,6 +170,14 @@ public class ConfirmDialog extends PreferenceDialogFragmentCompat {
                     final Activity activity = Utilities.getActivity(getContext());
                     if (activity != null)
                         FileUtils.writeSettingsFile(activity, "widgets", w -> XmlExport.widgetsXml(activity, w));
+                };
+                break;
+            }
+            case "export-history": {
+                asyncWrite = t -> {
+                    final Activity activity = Utilities.getActivity(getContext());
+                    if (activity != null)
+                        FileUtils.writeSettingsFile(activity, "history", w -> XmlExport.historyXml(activity, w));
                 };
                 break;
             }

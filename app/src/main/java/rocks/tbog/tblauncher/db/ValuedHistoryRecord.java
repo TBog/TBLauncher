@@ -14,5 +14,5 @@ public class ValuedHistoryRecord {
     /**
      * Context dependant value, e.g. number of access
      */
-    public int value;
+    public long value;
 }

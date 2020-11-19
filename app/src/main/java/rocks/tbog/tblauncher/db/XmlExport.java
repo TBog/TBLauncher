@@ -238,7 +238,7 @@ public class XmlExport {
                 widgetRecord.name = WidgetManager.getWidgetName(context, appWidgetProviderInfo);
                 widgetRecord.provider = appWidgetProviderInfo.provider;
                 Drawable preview = WidgetManager.getWidgetPreview(context, appWidgetProviderInfo);
-                widgetRecord.preview = ShortcutUtil.getIconBlob(preview);;
+                widgetRecord.preview = ShortcutUtil.getIconBlob(preview);
             }
             {
                 sx.startTag("properties");
@@ -249,6 +249,37 @@ public class XmlExport {
         }
 
         sx.endTag("widgets");
+    }
+
+    public static void historyXml(@NonNull Context context, @NonNull Writer writer) throws IOException {
+        SimpleXmlWriter sx = SimpleXmlWriter.getNewInstance();
+        sx.setOutput(writer);
+
+        sx.setIndentation(true);
+        sx.startDocument();
+
+        historyXml(context, sx);
+
+        sx.endDocument();
+    }
+
+    public static void historyXml(@NonNull Context context, @NonNull SimpleXmlWriter sx) throws IOException {
+        sx.startTag("history").attribute("version", "1");
+
+        List<ValuedHistoryRecord> history = DBHelper.getHistoryRaw(context);
+        for (ValuedHistoryRecord historyRecord : history) {
+            String query = historyRecord.name;
+            sx.startTag("item").attribute("time", historyRecord.value);
+
+            sx.startTag("id").content(historyRecord.record).endTag("id");
+
+            if (query != null)
+                sx.startTag("query").content(historyRecord.name).endTag("query");
+
+            sx.endTag("item");
+        }
+
+        sx.endTag("history");
     }
 
     public static void backupXml(@NonNull PreferenceGroup rootPref, @NonNull Writer writer) throws IOException {
@@ -266,6 +297,7 @@ public class XmlExport {
         applicationsXml(context, sx);
         preferencesXml(rootPref, sx);
         widgetsXml(context, sx);
+        historyXml(context, sx);
 
         sx.endTag("backup");
 

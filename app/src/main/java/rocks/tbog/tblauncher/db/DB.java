@@ -19,14 +19,16 @@ class DB extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase database) {
-        database.execSQL("CREATE TABLE history ( _id INTEGER PRIMARY KEY AUTOINCREMENT, \"query\" TEXT, record TEXT NOT NULL)");
+        createHistory(database);
         createTags(database);
-        addTimeStamps(database);
         addAppsTable(database);
-        //createQuickList(database);
         createShortcutsTable(database);
         createFavoritesTable(database, true);
         createWidgetsTable(database);
+    }
+
+    void createHistory(SQLiteDatabase database) {
+        database.execSQL("CREATE TABLE history ( _id INTEGER PRIMARY KEY AUTOINCREMENT, \"query\" TEXT, \"record\" TEXT NOT NULL, \"timeStamp\" INTEGER DEFAULT 0 NOT NULL)");
     }
 
     void createTags(SQLiteDatabase database) {
