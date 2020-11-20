@@ -265,6 +265,8 @@
     <string name="backup_summary">Save, backup, export and import settings</string>
     <string name="title_backup">Backup</string>
     <string name="export_settings_section">Export settings</string>
+    <string name="export_chooser">Export %s</string>
+    <string name="export_chooser_xml">Export %s as XML</string>
     <string name="export_xml">Export as XML</string>
     <string name="export_tags">Export tags</string>
     <string name="export_tags_summary">Export tag associations, no icons</string>
@@ -281,6 +283,7 @@
     <string name="import_settings_append_summary">Only new settings get imported</string>
     <string name="please_wait">Please wait.</string>
     <string name="import_dialog_description">Your settings are being loaded.\nThe XML file is in cache and it\'s being parsed and imported.\nYou are safe to OK this dialog when the button enables.</string>
+    <string name="import_chooser">Select a file to import</string>
     <string name="export_description">Once you click OK you will be asked to choose an application to save the exported settings as an XML file.\nWhile you read the above text the XML file got generated.</string>
     <string name="error">Error %s</string>
     <string name="export_interface">Export interface</string>
@@ -295,6 +298,7 @@
     <string name="widget_placeholder">Click to restore %s</string>
     <string name="add_widget_failed">Failed to add widget</string>
     <string name="widget_placeholder_remove">Are you OK to remove the placeholder?</string>
+    <string name="choose_file_activity_not_found">Please install a File Manager.</string>
     <plurals name="tag_entry_count">
         <item quantity="one">%d entry</item>
         <item quantity="other">%d entries</item>

@@ -82,17 +82,21 @@ public class FileUtils {
         Uri uri = FileProvider.getUriForFile(context, context.getPackageName() + ".provider", cacheFile);
 
         try {
-            String type = "text/plain";
-            if (extension.endsWith(SETTINGS_EXT))
+            String title;
+            String type;
+            if (extension.endsWith(SETTINGS_EXT)) {
+                title = activity.getString(R.string.export_chooser_xml, filename);
                 type = ("text/xml");
+            } else {
+                title = activity.getString(R.string.export_chooser, filename);
+                type = "text/plain";
+            }
 
             Intent intent = ShareCompat.IntentBuilder.from(activity)
                     .setType(type)
-                    //.setSubject(context.getString(R.string.share_subject))
-                    .setSubject("[subject]")
+                    .setSubject(title)
                     .setStream(uri)
-                    //.setChooserTitle(R.string.share_title)
-                    .setChooserTitle("[chooserTitle]")
+                    .setChooserTitle(title)
                     .createChooserIntent()
                     .addFlags(Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
                     .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
@@ -194,18 +198,22 @@ public class FileUtils {
         return parser;
     }
 
-    public static void chooseFile(@NonNull Activity activity, int requestCode) {
+    public static void chooseSettingsFile(@NonNull Activity activity, int requestCode) {
+        chooseFile(activity, "text/xml", requestCode);
+    }
+
+    private static void chooseFile(@NonNull Activity activity, String type, int requestCode) {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-        intent.setTypeAndNormalize("text/plain; charset=utf-8");
+        intent.setTypeAndNormalize(type);
         intent.addCategory(Intent.CATEGORY_OPENABLE);
 
         try {
             activity.startActivityForResult(
-                    Intent.createChooser(intent, "Select a File to Upload"),
+                    Intent.createChooser(intent, activity.getString(R.string.import_chooser)),
                     requestCode);
         } catch (android.content.ActivityNotFoundException ex) {
             // Potentially direct the user to the Market with a Dialog
-            Toast.makeText(activity, "Please install a File Manager.", Toast.LENGTH_SHORT).show();
+            Toast.makeText(activity, R.string.choose_file_activity_not_found, Toast.LENGTH_SHORT).show();
         }
     }
 
