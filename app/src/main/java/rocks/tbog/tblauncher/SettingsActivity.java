@@ -200,19 +200,19 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 Preference pref = findPreference("import-settings-set");
                 if (pref != null)
                     pref.setOnPreferenceClickListener(preference -> {
-                        FileUtils.chooseFile(activity, FILE_SELECT_XML_SET);
+                        FileUtils.chooseSettingsFile(activity, FILE_SELECT_XML_SET);
                         return true;
                     });
                 pref = findPreference("import-settings-overwrite");
                 if (pref != null)
                     pref.setOnPreferenceClickListener(preference -> {
-                        FileUtils.chooseFile(activity, FILE_SELECT_XML_OVERWRITE);
+                        FileUtils.chooseSettingsFile(activity, FILE_SELECT_XML_OVERWRITE);
                         return true;
                     });
                 pref = findPreference("import-settings-append");
                 if (pref != null)
                     pref.setOnPreferenceClickListener(preference -> {
-                        FileUtils.chooseFile(activity, FILE_SELECT_XML_APPEND);
+                        FileUtils.chooseSettingsFile(activity, FILE_SELECT_XML_APPEND);
                         return true;
                     });
             }
