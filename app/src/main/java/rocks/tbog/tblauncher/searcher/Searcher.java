@@ -1,6 +1,7 @@
 package rocks.tbog.tblauncher.searcher;
 
 
+import android.app.Activity;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -15,8 +16,10 @@ import java.util.PriorityQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import rocks.tbog.tblauncher.PrefCache;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.entry.EntryItem;
+import rocks.tbog.tblauncher.utils.Utilities;
 
 public abstract class Searcher extends AsyncTask<Void, EntryItem, Void> {
     // define a different thread than the default AsyncTask thread or else we will block everything else that uses AsyncTask while we search
@@ -24,7 +27,7 @@ public abstract class Searcher extends AsyncTask<Void, EntryItem, Void> {
     static final int INITIAL_CAPACITY = 50;
     final WeakReference<ISearchActivity> activityWeakReference;
     protected final PriorityQueue<EntryItem> processedPojos;
-    private boolean tagsEnabled;
+    private final boolean tagsEnabled;
     private long start;
     /**
      * Set to true when we are simply refreshing current results (scroll will not be reset)
@@ -39,7 +42,7 @@ public abstract class Searcher extends AsyncTask<Void, EntryItem, Void> {
         this.query = query;
         this.activityWeakReference = new WeakReference<>(activity);
         this.processedPojos = getPojoProcessor(activity);
-        this.tagsEnabled = activity.tagsEnabled();
+        this.tagsEnabled = PrefCache.getFuzzySearchTags(activity.getContext());
     }
 
     @NonNull
@@ -59,7 +62,8 @@ public abstract class Searcher extends AsyncTask<Void, EntryItem, Void> {
         if (isCancelled())
             return false;
 
-        ISearchActivity activity = activityWeakReference.get();
+        ISearchActivity searchActivity = activityWeakReference.get();
+        Activity activity = searchActivity != null ? Utilities.getActivity(searchActivity.getContext()) : null;
         if (activity == null)
             return false;
 
