@@ -10,34 +10,34 @@ package net.mm2d.color.chooser
 import android.content.Context
 import android.graphics.Color
 import android.util.AttributeSet
+import android.view.LayoutInflater
 import android.widget.FrameLayout
-import kotlinx.android.synthetic.main.mm2d_cc_view_hsv.view.*
 import net.mm2d.color.chooser.util.ColorUtils
-import rocks.tbog.tblauncher.R
+import rocks.tbog.tblauncher.databinding.Mm2dCcViewHsvBinding
 
 /**
  * @author [大前良介 (OHMAE Ryosuke)](mailto:ryo@mm2d.net)
  */
 internal class HsvView
 @JvmOverloads constructor(
-    context: Context,
-    attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
+        context: Context,
+        attrs: AttributeSet? = null,
+        defStyleAttr: Int = 0
 ) : FrameLayout(context, attrs, defStyleAttr), ColorObserver {
     private val colorChangeMediator by lazy {
         findColorChangeMediator()
     }
+    private var binding: Mm2dCcViewHsvBinding = Mm2dCcViewHsvBinding.inflate(LayoutInflater.from(context), this)
     private var color: Int = Color.BLACK
 
     init {
-        inflate(context, R.layout.mm2d_cc_view_hsv, this)
-        sv_view.onColorChanged = {
+        binding.svView.onColorChanged = {
             color = it
             colorChangeMediator?.onChangeColor(color)
         }
-        hue_view.onHueChanged = {
-            color = ColorUtils.hsvToColor(it, sv_view.saturation, sv_view.value)
-            sv_view.setHue(it)
+        binding.hueView.onHueChanged = {
+            color = ColorUtils.hsvToColor(it, binding.svView.saturation, binding.svView.value)
+            binding.svView.setHue(it)
             colorChangeMediator?.onChangeColor(color)
         }
     }
@@ -46,7 +46,7 @@ internal class HsvView
         if (color == null) return
         if (this.color == color) return
         this.color = color
-        sv_view.setColor(color)
-        hue_view.setColor(color)
+        binding.svView.setColor(color)
+        binding.hueView.setColor(color)
     }
 }
