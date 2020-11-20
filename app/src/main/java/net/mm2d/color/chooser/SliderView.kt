@@ -10,50 +10,50 @@ package net.mm2d.color.chooser
 import android.content.Context
 import android.graphics.Color
 import android.util.AttributeSet
+import android.view.LayoutInflater
 import android.widget.LinearLayout
-import kotlinx.android.synthetic.main.mm2d_cc_view_slider.view.*
-import rocks.tbog.tblauncher.R
+import rocks.tbog.tblauncher.databinding.Mm2dCcViewSliderBinding
 
 /**
  * @author [大前良介 (OHMAE Ryosuke)](mailto:ryo@mm2d.net)
  */
 internal class SliderView
 @JvmOverloads constructor(
-    context: Context,
-    attrs: AttributeSet? = null,
-    defStyleAttr: Int = 0
+        context: Context,
+        attrs: AttributeSet? = null,
+        defStyleAttr: Int = 0
 ) : LinearLayout(context, attrs, defStyleAttr), ColorObserver {
     private val colorChangeMediator by lazy {
         findColorChangeMediator()
     }
+    private var binding: Mm2dCcViewSliderBinding = Mm2dCcViewSliderBinding.inflate(LayoutInflater.from(context), this)
 
     init {
         orientation = VERTICAL
-        inflate(context, R.layout.mm2d_cc_view_slider, this)
-        seek_red.onValueChanged = { value, fromUser ->
-            text_red.text = value.toString()
+        binding.seekRed.onValueChanged = { value, fromUser ->
+            binding.textRed.text = value.toString()
             updateBySeekBar(fromUser)
         }
-        seek_green.onValueChanged = { value, fromUser ->
-            text_green.text = value.toString()
+        binding.seekGreen.onValueChanged = { value, fromUser ->
+            binding.textGreen.text = value.toString()
             updateBySeekBar(fromUser)
         }
-        seek_blue.onValueChanged = { value, fromUser ->
-            text_blue.text = value.toString()
+        binding.seekBlue.onValueChanged = { value, fromUser ->
+            binding.textBlue.text = value.toString()
             updateBySeekBar(fromUser)
         }
     }
 
     override fun onChanged(color: Int?) {
         if (color == null) return
-        seek_red.setValue(Color.red(color))
-        seek_green.setValue(Color.green(color))
-        seek_blue.setValue(Color.blue(color))
+        binding.seekRed.setValue(Color.red(color))
+        binding.seekGreen.setValue(Color.green(color))
+        binding.seekBlue.setValue(Color.blue(color))
     }
 
     private fun updateBySeekBar(fromUser: Boolean) {
         if (!fromUser) return
-        val color = Color.rgb(seek_red.value, seek_green.value, seek_blue.value)
+        val color = Color.rgb(binding.seekRed.value, binding.seekGreen.value, binding.seekBlue.value)
         colorChangeMediator?.onChangeColor(color)
     }
 }
