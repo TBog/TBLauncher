@@ -20,6 +20,8 @@
         <item>Teardrop random</item>
         <item>Hexagon</item>
         <item>Octagon</item>
+        <item>Rounded hexagon</item>
+        <item>Rounded octagon</item>
     </string-array>
 
     <!-- Values come from DrawableUtils.SHAPE_*    -->
@@ -36,6 +38,8 @@
         <item>9</item>  <!-- SHAPE_TEARDROP_RND -->
         <item>10</item> <!-- SHAPE_HEXAGON -->
         <item>11</item> <!-- SHAPE_OCTAGON -->
+        <item>12</item> <!-- SHAPE_ROUND_HEXAGON -->
+        <item>13</item> <!-- SHAPE_ROUND_OCTAGON -->
     </string-array>
 
     <string-array name="defaultSearchProviders" tools:ignore="InconsistentArrays">

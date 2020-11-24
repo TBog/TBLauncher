@@ -11,6 +11,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.PointF;
 import android.graphics.RectF;
 import android.graphics.Shader.TileMode;
 import android.graphics.drawable.AdaptiveIconDrawable;
@@ -41,6 +42,8 @@ public class DrawableUtils {
     private static final int SHAPE_TEARDROP_RND = 9;
     public static final int SHAPE_HEXAGON = 10;
     public static final int SHAPE_OCTAGON = 11;
+    public static final int SHAPE_ROUND_HEXAGON = 12;
+    public static final int SHAPE_ROUND_OCTAGON = 13;
 
     public static final int[] SHAPE_LIST = {
             SHAPE_SYSTEM,
@@ -54,6 +57,8 @@ public class DrawableUtils {
             SHAPE_TEARDROP_TR,
             SHAPE_HEXAGON,
             SHAPE_OCTAGON,
+            SHAPE_ROUND_HEXAGON,
+            SHAPE_ROUND_OCTAGON,
     };
 
     private static final Paint PAINT = new Paint();
@@ -118,8 +123,10 @@ public class DrawableUtils {
                 return 0.1f;
             case SHAPE_ROUND_RECT:
                 return 0.05f;
+            case SHAPE_ROUND_HEXAGON:
             case SHAPE_HEXAGON:
                 return 0.26f;
+            case SHAPE_ROUND_OCTAGON:
             case SHAPE_OCTAGON:
                 return 0.25f;
         }
@@ -219,8 +226,8 @@ public class DrawableUtils {
      * @param shape type of shape: DrawableUtils.SHAPE_*
      */
     private static void setIconShape(Canvas canvas, Paint paint, int shape) {
-        float iconSize = canvas.getHeight();
-        Path path = SHAPE_PATH;
+        final float iconSize = canvas.getHeight();
+        final Path path = SHAPE_PATH;
         path.rewind();
 
         switch (shape) {
@@ -298,8 +305,9 @@ public class DrawableUtils {
                 break;
             case SHAPE_HEXAGON:
                 for (int deg = 0; deg < 360; deg += 60) {
-                    float x = ((float) Math.cos(Math.toRadians(deg)) * .5f + .5f) * iconSize;
-                    float y = ((float) Math.sin(Math.toRadians(deg)) * .5f + .5f) * iconSize;
+                    double rad = Math.toRadians(deg);
+                    float x = ((float) Math.cos(rad) * .5f + .5f) * iconSize;
+                    float y = ((float) Math.sin(rad) * .5f + .5f) * iconSize;
                     if (deg == 0)
                         path.moveTo(x, y);
                     else
@@ -311,8 +319,9 @@ public class DrawableUtils {
                 break;
             case SHAPE_OCTAGON:
                 for (int deg = 22; deg < 360; deg += 45) {
-                    float x = ((float) Math.cos(Math.toRadians(deg + .5)) * .5f + .5f) * iconSize;
-                    float y = ((float) Math.sin(Math.toRadians(deg + .5)) * .5f + .5f) * iconSize;
+                    double rad = Math.toRadians(deg + .5);
+                    float x = ((float) Math.cos(rad) * .5f + .5f) * iconSize;
+                    float y = ((float) Math.sin(rad) * .5f + .5f) * iconSize;
 
                     // scale it up to fill the rectangle
                     x = x * 1.0824f - x * 0.0824f;
@@ -327,9 +336,158 @@ public class DrawableUtils {
 
                 canvas.drawPath(path, paint);
                 break;
+            case SHAPE_ROUND_HEXAGON: {
+                final PointProvider gen = (i, p) -> {
+                    int deg = i * 60;
+                    double rad = Math.toRadians(deg);
+                    p.x = ((float) Math.cos(rad) * .5f + .5f) * iconSize;
+                    p.y = ((float) Math.sin(rad) * .5f + .5f) * iconSize;
+                };
+                roundedPolyPath(path, gen, 6, iconSize * .16f);
+                path.close();
+
+                canvas.drawPath(path, paint);
+                break;
+            }
+            case SHAPE_ROUND_OCTAGON: {
+                final PointProvider gen = (i, p) -> {
+                    int deg = 22 + i * 45;
+                    double rad = Math.toRadians(deg + .5);
+                    p.x = ((float) Math.cos(rad) * .5f + .5f) * iconSize;
+                    p.y = ((float) Math.sin(rad) * .5f + .5f) * iconSize;
+                };
+                roundedPolyPath(path, gen, 8, iconSize * .2f);
+                path.close();
+
+                canvas.drawPath(path, paint);
+                break;
+            }
         }
         // make sure we don't draw outside the shape
         canvas.clipPath(path);
+    }
+
+    /**
+     * polygon vertices provider
+     */
+    interface PointProvider {
+        /**
+         * Generate vertex position for index
+         *
+         * @param in_pointIdx input vertex index
+         * @param out_point   output vertex position
+         */
+        void get(int in_pointIdx, @NonNull PointF out_point);
+    }
+
+    /**
+     * Helper class to store vector information
+     */
+    static class Vector2D {
+        float x, y;     // position
+        double len;     // magnitude
+        double nx, ny;  // normalized
+        double ang;     // direction
+
+        /**
+         * Compute vector information from two points
+         * @param A  vector from
+         * @param B  vector to
+         */
+        void set(PointF A, PointF B) {
+            // x,y as vec
+            x = B.x - A.x;
+            y = B.y - A.y;
+            // length of vec
+            len = Math.sqrt(x * x + y * y);
+            // normalised
+            nx = x / len;
+            ny = y / len;
+            // direction of vec
+            ang = Math.atan2(ny, nx);
+        }
+    }
+
+    /**
+     * Source: https://riptutorial.com/html5-canvas/example/18766/render-a-rounded-polygon-
+     * Adds from the `point` provider to `path` rounded corners of radius. If the corner angle is too small to fit
+     * the radius or the distance between corners does not allow room the corners radius is reduced to a best fit.
+     *
+     * @param path       geometric contour to add the polygon to
+     * @param point      provider of polygon vertices positions
+     * @param pointCount vertices count
+     * @param radius     desired circle radius to use for rounding
+     */
+    private static void roundedPolyPath(@NonNull Path path, PointProvider point, int pointCount, float radius) {
+        final PointF p1 = new PointF();
+        final PointF p2 = new PointF();
+        final PointF p3 = new PointF();
+        final Vector2D v1 = new Vector2D();
+        final Vector2D v2 = new Vector2D();
+
+        point.get(pointCount - 1, p1); // start at end of path
+        path.moveTo(p1.x, p1.y);
+        for (int i = 0; i < pointCount; i += 1) {
+            point.get(i, p2); // the corner point that is being rounded
+            point.get((i + 1) % pointCount, p3);
+            // get the corner as vectors out away from corner
+            v1.set(p2, p1); // vec back from corner point
+            v2.set(p2, p3); // vec forward from corner point
+            // get corners cross product (arc sin of angle)
+            final double sinA = v1.nx * v2.ny - v1.ny * v2.nx;    // cross product
+            // get cross product of first line and perpendicular second line
+            final double sinA90 = v1.nx * v2.nx - v1.ny * -v2.ny; // cross product to normal of line 2
+            double angle = Math.asin(sinA);                 // get the angle
+            int radDirection = 1;                           // may need to reverse the radius
+            boolean anticlockwise = false;
+            // find the correct quadrant for circle center
+            if (sinA90 < 0.0) {
+                if (angle < 0.0) {
+                    angle = Math.PI + angle; // add 180 to move us to the 3 quadrant
+                } else {
+                    angle = Math.PI - angle; // move back into the 2nd quadrant
+                    radDirection = -1;
+                    anticlockwise = true;
+                }
+            } else {
+                if (angle > 0.0) {
+                    radDirection = -1;
+                    anticlockwise = true;
+                }
+            }
+            final double halfAngle = angle / 2.0;
+            // get distance from corner to point where round corner touches line
+            double lenOut = Math.abs(Math.cos(halfAngle) * radius / Math.sin(halfAngle));
+            final double cRadius;
+            final double minHalfLineLength = Math.min(v1.len * .5, v2.len * .5);
+            if (lenOut > minHalfLineLength) { // fix if longer than half line length
+                lenOut = minHalfLineLength;
+                // adjust the radius of corner rounding to fit
+                cRadius = Math.abs(lenOut * Math.sin(halfAngle) / Math.cos(halfAngle));
+            } else {
+                cRadius = radius;
+            }
+            // move out from corner along second line to point where rounded circle touches
+            double x = p2.x + v2.nx * lenOut;
+            double y = p2.y + v2.ny * lenOut;
+            // move away from line to circle center
+            x += -v2.ny * cRadius * radDirection;
+            y += v2.nx * cRadius * radDirection;
+            // x,y is the rounded corner circle center
+            RECT_F.set((float) (x - cRadius), (float) (y - cRadius), (float) (x + cRadius), (float) (y + cRadius));
+
+            double startAngle = v1.ang + Math.PI / 2.0 * radDirection;
+            double endAngle = v2.ang - Math.PI / 2.0 * radDirection;
+            if (!anticlockwise && startAngle > endAngle)
+                endAngle += Math.PI * 2.0;
+            else if (anticlockwise && startAngle < endAngle)
+                endAngle -= Math.PI * 2.0;
+            final float sweepAngle = (float) Math.toDegrees(endAngle - startAngle);
+
+            path.arcTo(RECT_F, (float) Math.toDegrees(startAngle), sweepAngle, false); // draw the arc clockwise
+
+            p1.set(p2);
+        }
     }
 
     public static boolean isAdaptiveIconDrawable(Drawable drawable) {
