@@ -45,9 +45,9 @@ import rocks.tbog.tblauncher.utils.Utilities;
 import rocks.tbog.tblauncher.utils.ViewHolderAdapter;
 
 public class SystemPage extends PageAdapter.Page {
-    private ComponentName componentName;
-    private UserHandleCompat userHandle;
-    private IconPackXML mShownIconPack;
+    private final ComponentName componentName;
+    private final UserHandleCompat userHandle;
+    private final IconPackXML mShownIconPack;
     private GridView mGridView;
 
     SystemPage(CharSequence name, View view, ComponentName cn, UserHandleCompat uh) {
@@ -117,9 +117,13 @@ public class SystemPage extends PageAdapter.Page {
                         addQuickOption(R.string.custom_icon_activity_with_pack, iconPack.applyBackgroundAndMask(context, drawable, true), adapter);
                     addQuickOption(R.string.custom_icon_activity_adaptive, sysPack.applyBackgroundAndMask(context, drawable, true), adapter);
                     for (int shape : DrawableUtils.SHAPE_LIST) {
-                        Drawable shapedDrawable = DrawableUtils.applyIconMaskShape(context, drawable, shape, true);
                         String name = context.getString(R.string.custom_icon_activity_shaped, DrawableUtils.shapeName(context, shape));
+                        Drawable shapedDrawable = DrawableUtils.applyIconMaskShape(context, drawable, shape, true);
                         addIconPackOption(name, shapedDrawable, adapter);
+                        if (!DrawableUtils.isAdaptiveIconDrawable(drawable)) {
+                            shapedDrawable = DrawableUtils.applyIconMaskShape(context, drawable, shape, false);
+                            addIconPackOption(name, shapedDrawable, adapter);
+                        }
                     }
                     if (!DrawableUtils.isAdaptiveIconDrawable(drawable))
                         addQuickOption(R.string.custom_icon_activity_adaptive_fill, sysPack.applyBackgroundAndMask(context, drawable, false), adapter);
@@ -141,9 +145,13 @@ public class SystemPage extends PageAdapter.Page {
                         addQuickOption(R.string.custom_icon_application_with_pack, iconPack.applyBackgroundAndMask(context, drawable, true), adapter);
                     addQuickOption(R.string.custom_icon_application_adaptive, sysPack.applyBackgroundAndMask(context, drawable, true), adapter);
                     for (int shape : DrawableUtils.SHAPE_LIST) {
-                        Drawable shapedDrawable = DrawableUtils.applyIconMaskShape(context, drawable, shape, true);
                         String name = context.getString(R.string.custom_icon_application_shaped, DrawableUtils.shapeName(context, shape));
+                        Drawable shapedDrawable = DrawableUtils.applyIconMaskShape(context, drawable, shape, true);
                         addIconPackOption(name, shapedDrawable, adapter);
+                        if (!DrawableUtils.isAdaptiveIconDrawable(drawable)) {
+                            shapedDrawable = DrawableUtils.applyIconMaskShape(context, drawable, shape, false);
+                            addIconPackOption(name, shapedDrawable, adapter);
+                        }
                     }
                     if (!DrawableUtils.isAdaptiveIconDrawable(drawable))
                         addQuickOption(R.string.custom_icon_application_adaptive_fill, sysPack.applyBackgroundAndMask(context, drawable, false), adapter);
