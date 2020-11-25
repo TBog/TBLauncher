@@ -98,7 +98,8 @@ public class DrawableUtils {
     }
 
     public static Drawable applyIconMaskShape(Context ctx, Drawable icon, int shape, boolean fitInside) {
-        return applyIconMaskShape(ctx, icon, shape, fitInside, Color.WHITE);
+        int color = fitInside ? Color.WHITE : Color.TRANSPARENT;
+        return applyIconMaskShape(ctx, icon, shape, fitInside, color);
     }
 
     public static Drawable applyIconMaskShape(Context ctx, Drawable icon, int shape, @ColorInt int backgroundColor) {
