@@ -115,7 +115,6 @@
     <string name="custom_icon_preview">Selection\npreview</string>
     <string name="custom_name_set_default">Default name</string>
     <string name="custom_name_rename">Rename</string>
-    <string name="adaptive_shape_name">Adaptive icon shape</string>
     <string name="hint_new_tag">add tag</string>
     <string name="title_features">Features</string>
     <string name="features_summary">Toggle and customize app features</string>
@@ -168,9 +167,7 @@
     <string name="memory_section">Memory</string>
     <string name="cache_half_apps">Small cache size</string>
     <string name="cache_half_apps_summary">Make LRU cache size half the number of apps installed</string>
-    <string name="contacts_shape_name">Contacts shape</string>
     <string name="icon_pack_section">Icon pack</string>
-    <string name="shortcut_shape_name">Shortcut icon shape</string>
     <string name="icon_pack_list">Installed icon packs</string>
     <string name="icon_pack_content_list">Icons from\n%s</string>
     <string name="icon_pack_quick_list">System icon variations</string>
@@ -308,6 +305,23 @@
     <string name="action_show_history_adaptive">Adaptive history</string>
     <string name="result_history_adaptive">Adaptive duration</string>
     <string name="result_history_adaptive_summary">Number of hours for adaptive history</string>
+
+    <string name="adaptive_shape_name">Icon shape</string>
+    <string name="force_adaptive">Set icon background</string>
+    <string name="force_adaptive_summary">Reduce icon scale and place on a white background</string>
+    <string name="force_shape">Crop to shape</string>
+    <string name="force_shape_summary">Crop system icon to shape</string>
+    <string name="contact_pack_mask">Contacts</string>
+    <string name="contact_pack_mask_summary">Use icon pack shape for contacts</string>
+    <string name="contacts_shape_name">Contacts shape</string>
+    <string name="contacts_shape_summary">Shape of contacts icon</string>
+    <string name="shortcut_pack_mask">Shortcut icon</string>
+    <string name="shortcut_pack_mask_summary">Use icon pack mask for shortcut icon</string>
+    <string name="shortcut_shape_name">Shortcut icon shape</string>
+    <string name="shortcut_shape_summary">Shape of shortcut icon</string>
+    <string name="shortcut_pack_badge_mask">Shortcut badge</string>
+    <string name="shortcut_pack_badge_mask_summary">Use icon pack mask for shortcut badge</string>
+
     <plurals name="tag_entry_count">
         <item quantity="one">%d entry</item>
         <item quantity="other">%d entries</item>

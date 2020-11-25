@@ -29,15 +29,15 @@
             android:defaultValue="true"
             android:disableDependentsState="true"
             android:key="force-adaptive"
-            android:summary="For non-adaptive icons, reduce scale and place on a white background"
-            android:title="Force adaptive icons" />
+            android:summary="@string/force_adaptive_summary"
+            android:title="@string/force_adaptive" />
 
         <SwitchPreference
             android:defaultValue="false"
             android:dependency="force-adaptive"
             android:key="force-shape"
-            android:summary="Use adaptive mask on non-adaptive icons"
-            android:title="Force adaptive shape" />
+            android:summary="@string/force_shape_summary"
+            android:title="@string/force_shape" />
 
         <!-- Icon pack -->
         <PreferenceCategory
@@ -54,8 +54,8 @@
                 android:defaultValue="true"
                 android:disableDependentsState="true"
                 android:key="contact-pack-mask"
-                android:summary="Use icon pack mask for contacts"
-                android:title="Contacts" />
+                android:summary="@string/contact_pack_mask_summary"
+                android:title="@string/contact_pack_mask" />
 
             <ListPreference
                 android:defaultValue="0"
@@ -63,15 +63,15 @@
                 android:entries="@array/adaptiveEntries"
                 android:entryValues="@array/adaptiveValues"
                 android:key="contacts-shape"
-                android:summary="Shape of contacts icon"
+                android:summary="@string/contacts_shape_summary"
                 android:title="@string/contacts_shape_name" />
 
             <SwitchPreference
                 android:defaultValue="true"
                 android:disableDependentsState="true"
                 android:key="shortcut-pack-mask"
-                android:summary="Use icon pack mask for shortcut icon"
-                android:title="Shortcut icon" />
+                android:summary="@string/shortcut_pack_mask_summary"
+                android:title="@string/shortcut_pack_mask" />
 
             <ListPreference
                 android:defaultValue="0"
@@ -79,14 +79,14 @@
                 android:entries="@array/adaptiveEntries"
                 android:entryValues="@array/adaptiveValues"
                 android:key="shortcut-shape"
-                android:summary="Shape of shortcut icon"
+                android:summary="@string/shortcut_shape_summary"
                 android:title="@string/shortcut_shape_name" />
 
             <SwitchPreference
                 android:defaultValue="true"
                 android:key="shortcut-pack-badge-mask"
-                android:summary="Use icon pack mask for shortcut badge"
-                android:title="Shortcut badge" />
+                android:summary="@string/shortcut_pack_badge_mask_summary"
+                android:title="@string/shortcut_pack_badge_mask" />
 
         </PreferenceCategory>
 
