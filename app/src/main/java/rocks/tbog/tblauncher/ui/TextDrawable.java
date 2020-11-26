@@ -12,11 +12,16 @@ public abstract class TextDrawable extends SquareDrawable {
     PointF[] cachedLinePos = null;
     float[] cachedLineSize = null;
     char[][] cachedText = null;
+    int mTextColor = Color.WHITE;
 
     public TextDrawable() {
         super();
         mPaint.setTextAlign(Paint.Align.LEFT);
         mPaint.setAntiAlias(true);
+    }
+
+    public void setTextColor(int color) {
+        mTextColor = color;
     }
 
     protected int getLineCount() {
@@ -115,7 +120,7 @@ public abstract class TextDrawable extends SquareDrawable {
             mPaint.setTextSize(cachedLineSize[line]);
 
             mPaint.setStyle(Paint.Style.FILL);
-            mPaint.setColor(Color.WHITE);
+            mPaint.setColor(mTextColor);
             canvas.drawText(text, 0, text.length, x, y, mPaint);
 
             mPaint.setStyle(Paint.Style.STROKE);

@@ -151,19 +151,18 @@ public class CustomizeUI {
     }
 
     public void setResultListPref(View resultLayout) {
-        int color = UIColors.getColor(mPref, "result-list-color");
-        int alpha = UIColors.getAlpha(mPref, "result-list-alpha");
+        int background = UIColors.getResultListBackground(mPref);
         Drawable drawable;
         if (mPref.getBoolean("result-list-rounded", true)) {
             drawable = new GradientDrawable();  // can't use PaintDrawable when alpha < 255, ugly big darker borders
-            ((GradientDrawable) drawable).setColor(UIColors.setAlpha(color, alpha));
+            ((GradientDrawable) drawable).setColor(background);
             ((GradientDrawable) drawable).setCornerRadius(resultLayout.getResources().getDimension(R.dimen.result_corner_radius));
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 // clip list content to rounded corners
                 resultLayout.setClipToOutline(true);
             }
         } else {
-            drawable = new ColorDrawable(UIColors.setAlpha(color, alpha));
+            drawable = new ColorDrawable(background);
         }
         resultLayout.setBackground(drawable);
     }

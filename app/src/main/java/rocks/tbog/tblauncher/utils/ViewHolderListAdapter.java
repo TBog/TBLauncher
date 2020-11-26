@@ -11,7 +11,7 @@ import java.util.List;
 
 public abstract class ViewHolderListAdapter<T, VH extends ViewHolderAdapter.ViewHolder<T>> extends ViewHolderAdapter<T, VH> {
     @NonNull
-    final List<T> mList;
+    protected final List<T> mList;
 
     protected ViewHolderListAdapter(@NonNull Class<VH> viewHolderClass, int listItemLayout, @NonNull List<T> list) {
         super(viewHolderClass, listItemLayout);

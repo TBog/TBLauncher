@@ -467,6 +467,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 // toggle animation is also caching the color
                 TBApplication.quickList(context).onFavoritesChanged();
                 // fallthrough
+            case "result-list-color":
+            case "result-list-alpha":
             case "result-highlight-color":
             case "result-text-color":
             case "result-text2-color":

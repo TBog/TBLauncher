@@ -8,7 +8,7 @@
     </string-array>
 
     <string-array name="adaptiveEntries">
-        <item>System default</item>
+        <item>None</item>
         <item>Circle</item>
         <item>Square</item>
         <item>Squircle</item>
@@ -26,7 +26,7 @@
 
     <!-- Values come from DrawableUtils.SHAPE_*    -->
     <string-array name="adaptiveValues" translatable="false">
-        <item>0</item>  <!-- SHAPE_SYSTEM -->
+        <item>0</item>  <!-- SHAPE_NONE -->
         <item>1</item>  <!-- SHAPE_CIRCLE -->
         <item>2</item>  <!-- SHAPE_SQUARE -->
         <item>3</item>  <!-- SHAPE_SQUIRCLE -->

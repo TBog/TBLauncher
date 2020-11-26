@@ -3,31 +3,40 @@ package rocks.tbog.tblauncher.CustomIcon;
 import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.pm.LauncherActivityInfo;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Pair;
+import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.widget.GridView;
 import android.widget.ImageView;
-import android.widget.ProgressBar;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
+import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.collection.ArraySet;
+
+import net.mm2d.color.chooser.DialogView;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Objects;
 
@@ -35,43 +44,41 @@ import rocks.tbog.tblauncher.IconsHandler;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.icons.IconPackXML;
-import rocks.tbog.tblauncher.icons.SystemIconPack;
 import rocks.tbog.tblauncher.ui.CodePointDrawable;
 import rocks.tbog.tblauncher.ui.FourCodePointDrawable;
+import rocks.tbog.tblauncher.ui.TextDrawable;
 import rocks.tbog.tblauncher.ui.TwoCodePointDrawable;
 import rocks.tbog.tblauncher.utils.DrawableUtils;
+import rocks.tbog.tblauncher.utils.UISizes;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
 import rocks.tbog.tblauncher.utils.ViewHolderAdapter;
+import rocks.tbog.tblauncher.utils.ViewHolderListAdapter;
 
 public class SystemPage extends PageAdapter.Page {
     private final ComponentName componentName;
     private final UserHandleCompat userHandle;
-    private final IconPackXML mShownIconPack;
-    private GridView mGridView;
+    private ShapedIconAdapter mShapesAdapter;
+    private ShapedIconAdapter mShapedIconAdapter;
+    private TextView mLettersView;
+    private int mShape;
+    private float mScale = 1.f;
+    private int mBackground = Color.WHITE;
+    private int mLetters = Color.WHITE;
 
     SystemPage(CharSequence name, View view, ComponentName cn, UserHandleCompat uh) {
         super(name, view);
         componentName = cn;
         userHandle = uh;
-        mShownIconPack = TBApplication.iconsHandler(view.getContext()).getCustomIconPack();
+        mShape = TBApplication.iconsHandler(view.getContext()).getSystemIconPack().getAdaptiveShape();
+        if (mShape == DrawableUtils.SHAPE_NONE)
+            mShape = DrawableUtils.SHAPE_SQUARE;
     }
 
     @Override
     void setupView(@NonNull Context context, @Nullable OnItemClickListener iconClickListener) {
-        mGridView = pageView.findViewById(R.id.iconGrid);
-        SystemPageAdapter adapter = new SystemPageAdapter(iconClickListener);
-        mGridView.setAdapter(adapter);
-
-        ProgressBar mIconLoadingBar = pageView.findViewById(R.id.iconLoadingBar);
-        mIconLoadingBar.setVisibility(View.GONE);
-
-        TextView textView = pageView.findViewById(android.R.id.text1);
-        textView.setVisibility(View.GONE);
-
-        TextView mSearch = pageView.findViewById(R.id.search);
-        mSearch.setHint(R.string.static_icon_letters_label);
-        mSearch.addTextChangedListener(new TextWatcher() {
+        mLettersView = pageView.findViewById(R.id.letters);
+        mLettersView.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
             }
@@ -86,6 +93,182 @@ public class SystemPage extends PageAdapter.Page {
             }
         });
 
+        //    private final IconPackXML mShownIconPack;
+        //    private GridView mGridView;
+        //    private GridView mShapeGridView;
+        {
+            GridView shapeGridView = pageView.findViewById(R.id.shapeGrid);
+            mShapesAdapter = new ShapedIconAdapter((adapter, view, position) -> {
+                Activity activity = Utilities.getActivity(view);
+                if (activity == null)
+                    return;
+
+                Object objItem = adapter.getItem(position);
+                if (objItem instanceof IconPackIconInfo) {
+                    CharSequence name = ((IconPackIconInfo) objItem).name;
+                    for (int shape : DrawableUtils.SHAPE_LIST) {
+                        if (name.equals(DrawableUtils.shapeName(activity, shape))) {
+                            mShape = shape;
+                            break;
+                        }
+                    }
+                }
+                reshapeIcons(activity);
+            });
+            shapeGridView.setAdapter(mShapesAdapter);
+            TBApplication.ui(context).setResultListPref(shapeGridView);
+        }
+
+        {
+            GridView gridView = pageView.findViewById(R.id.iconGrid);
+            mShapedIconAdapter = new ShapedIconAdapter(iconClickListener);
+            gridView.setAdapter(mShapedIconAdapter);
+            TBApplication.ui(context).setResultListPref(gridView);
+        }
+
+        {
+            SeekBar seekBar = pageView.findViewById(R.id.scaleBar);
+            seekBar.setMax(200);
+            seekBar.setProgress((int) (100.f * mScale));
+            seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+                @Override
+                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                }
+
+                @Override
+                public void onStartTrackingTouch(SeekBar seekBar) {
+
+                }
+
+                @Override
+                public void onStopTrackingTouch(SeekBar seekBar) {
+                    mScale = 0.01f * seekBar.getProgress();
+                    reshapeIcons(seekBar.getContext());
+                }
+            });
+        }
+
+        int colorPreviewSize = UISizes.getResultIconSize(context) / 2;
+
+        // shape background color chooser
+        {
+            TextView colorView = pageView.findViewById(R.id.backgroundColor);
+            ColorDrawable colorDrawable = new ColorDrawable(mBackground);
+            colorDrawable.setBounds(0, 0, colorPreviewSize, colorPreviewSize);
+            colorView.setCompoundDrawables(null, null, colorDrawable, null);
+            colorView.setOnClickListener(v -> {
+                Context ctx = v.getContext();
+                launchCustomColorDialog(ctx, mBackground, color -> {
+                    mBackground = color;
+                    Activity activity = Utilities.getActivity(v);
+                    if (activity == null)
+                        return;
+                    colorDrawable.setColor(mBackground);
+                    colorView.setCompoundDrawables(null, null, colorDrawable, null);
+                    generateSystemShapes(activity);
+                    reshapeIcons(activity);
+                });
+            });
+        }
+
+        // text color chooser
+        {
+            TextView colorView = pageView.findViewById(R.id.lettersColor);
+            ColorDrawable colorDrawable = new ColorDrawable(mLetters);
+            colorDrawable.setBounds(0, 0, colorPreviewSize, colorPreviewSize);
+            colorView.setCompoundDrawables(null, null, colorDrawable, null);
+            colorView.setOnClickListener(v -> {
+                Context ctx = v.getContext();
+                launchCustomColorDialog(ctx, mLetters, color -> {
+                    mLetters = color;
+                    Activity activity = Utilities.getActivity(v);
+                    if (activity == null)
+                        return;
+                    colorDrawable.setColor(mLetters);
+                    colorView.setCompoundDrawables(null, null, colorDrawable, null);
+                    generateTextIcons(mLettersView.getText());
+                });
+            });
+        }
+
+        generateSystemShapes(context);
+        addSystemIcons(context, mShapedIconAdapter);
+
+        // this will call generateTextIcons
+        //mLettersView.setText(pageName);
+    }
+
+    interface OnColorChanged {
+        void onColorChanged(int color);
+    }
+
+    private static void launchCustomColorDialog(@Nullable Context context, int selectedColor, @NonNull OnColorChanged listener) {
+        Activity activity = Utilities.getActivity(context);
+        if (!(activity instanceof AppCompatActivity))
+            return;
+
+        ContextThemeWrapper themeWrapper = new ContextThemeWrapper(context, R.style.SettingsDialogTheme);
+        DialogView dialogView = new DialogView(themeWrapper);
+
+        dialogView.init(selectedColor, (AppCompatActivity) activity);
+        dialogView.setWithAlpha(true);
+
+        DialogInterface.OnClickListener buttonListener = (dialog, which) -> {
+            if (which == DialogInterface.BUTTON_POSITIVE) {
+                listener.onColorChanged(dialogView.getColor());
+            }
+            dialog.dismiss();
+        };
+
+        final AlertDialog.Builder builder = new AlertDialog.Builder(context)
+                .setPositiveButton(android.R.string.ok, buttonListener)
+                .setNegativeButton(android.R.string.cancel, buttonListener);
+        builder.setView(dialogView);
+        builder.show();
+    }
+
+    private void reshapeIcons(Context context) {
+        generateTextIcons(null);
+        for (ListIterator<ShapedIconInfo> iterator = mShapedIconAdapter.getList().listIterator(); iterator.hasNext(); ) {
+            ShapedIconInfo iconInfo = iterator.next();
+            if (iconInfo.textId == R.string.icon_pack_loading)
+                continue;
+            if (iconInfo.textId == R.string.default_icon)
+                continue;
+            ShapedIconInfo newInfo;
+            Drawable drawable = DrawableUtils.applyIconMaskShape(context, iconInfo.originalDrawable, mShape, mScale, mBackground);
+            if (iconInfo instanceof IconPackIconInfo) {
+                newInfo = new IconPackIconInfo(((IconPackIconInfo) iconInfo).name, drawable, iconInfo.originalDrawable);
+            } else {
+                newInfo = new ShapedIconInfo(drawable, iconInfo.originalDrawable);
+                newInfo.textId = iconInfo.textId;
+            }
+            iterator.set(newInfo);
+        }
+        mShapedIconAdapter.notifyDataSetChanged();
+        generateTextIcons(mLettersView.getText());
+    }
+
+    private void generateSystemShapes(Context context) {
+        final ShapedIconAdapter adapter = mShapesAdapter;
+        adapter.getList().clear();
+        adapter.notifyDataSetChanged();
+        Drawable drawable = new ColorDrawable(mBackground);
+        for (int shape : DrawableUtils.SHAPE_LIST) {
+            String name = DrawableUtils.shapeName(context, shape);
+            Drawable shapedDrawable;
+            if (shape == DrawableUtils.SHAPE_NONE) {
+                int size = UISizes.getResultIconSize(context);
+                Bitmap bitmap = DrawableUtils.drawableToBitmap(new ColorDrawable(Color.TRANSPARENT), size, size);
+                shapedDrawable = new BitmapDrawable(context.getResources(), bitmap);
+            } else {
+                shapedDrawable = DrawableUtils.applyIconMaskShape(context, drawable, shape, mScale, Color.TRANSPARENT);
+            }
+            addIconPackOption(name, shapedDrawable, adapter);
+        }
+    }
+
+    private void addSystemIcons(Context context, ShapedIconAdapter adapter) {
         ArraySet<Bitmap> dSet = new ArraySet<>(3);
 
         IconsHandler iconsHandler = TBApplication.getApplication(context).iconsHandler();
@@ -95,13 +278,10 @@ public class SystemPage extends PageAdapter.Page {
 
             //checkDuplicateDrawable(dSet, drawable);
 
-            SystemIconInfo iconInfo = new DefaultIconInfo(drawable);
+            ShapedIconInfo iconInfo = new DefaultIconInfo(drawable);
             iconInfo.textId = R.string.default_icon;
             adapter.addItem(iconInfo);
         }
-
-        IconPackXML iconPack = mShownIconPack;
-        SystemIconPack sysPack = iconsHandler.getSystemIconPack();
 
         // add getActivityIcon(componentName)
         {
@@ -112,21 +292,8 @@ public class SystemPage extends PageAdapter.Page {
             }
             if (drawable != null) {
                 if (checkDuplicateDrawable(dSet, drawable)) {
-                    addQuickOption(R.string.custom_icon_activity, drawable, adapter);
-                    if (iconPack != null && iconPack.hasMask())
-                        addQuickOption(R.string.custom_icon_activity_with_pack, iconPack.applyBackgroundAndMask(context, drawable, true), adapter);
-                    addQuickOption(R.string.custom_icon_activity_adaptive, sysPack.applyBackgroundAndMask(context, drawable, true), adapter);
-                    for (int shape : DrawableUtils.SHAPE_LIST) {
-                        String name = context.getString(R.string.custom_icon_activity_shaped, DrawableUtils.shapeName(context, shape));
-                        Drawable shapedDrawable = DrawableUtils.applyIconMaskShape(context, drawable, shape, true);
-                        addIconPackOption(name, shapedDrawable, adapter);
-                        if (!DrawableUtils.isAdaptiveIconDrawable(drawable)) {
-                            shapedDrawable = DrawableUtils.applyIconMaskShape(context, drawable, shape, false);
-                            addIconPackOption(name, shapedDrawable, adapter);
-                        }
-                    }
-                    if (!DrawableUtils.isAdaptiveIconDrawable(drawable))
-                        addQuickOption(R.string.custom_icon_activity_adaptive_fill, sysPack.applyBackgroundAndMask(context, drawable, false), adapter);
+                    Drawable shapedDrawable = DrawableUtils.applyIconMaskShape(context, drawable, mShape, mScale, mBackground);
+                    addQuickOption(R.string.custom_icon_activity, shapedDrawable, drawable, adapter);
                 }
             }
         }
@@ -140,21 +307,8 @@ public class SystemPage extends PageAdapter.Page {
             }
             if (drawable != null) {
                 if (checkDuplicateDrawable(dSet, drawable)) {
-                    addQuickOption(R.string.custom_icon_application, drawable, adapter);
-                    if (iconPack != null && iconPack.hasMask())
-                        addQuickOption(R.string.custom_icon_application_with_pack, iconPack.applyBackgroundAndMask(context, drawable, true), adapter);
-                    addQuickOption(R.string.custom_icon_application_adaptive, sysPack.applyBackgroundAndMask(context, drawable, true), adapter);
-                    for (int shape : DrawableUtils.SHAPE_LIST) {
-                        String name = context.getString(R.string.custom_icon_application_shaped, DrawableUtils.shapeName(context, shape));
-                        Drawable shapedDrawable = DrawableUtils.applyIconMaskShape(context, drawable, shape, true);
-                        addIconPackOption(name, shapedDrawable, adapter);
-                        if (!DrawableUtils.isAdaptiveIconDrawable(drawable)) {
-                            shapedDrawable = DrawableUtils.applyIconMaskShape(context, drawable, shape, false);
-                            addIconPackOption(name, shapedDrawable, adapter);
-                        }
-                    }
-                    if (!DrawableUtils.isAdaptiveIconDrawable(drawable))
-                        addQuickOption(R.string.custom_icon_application_adaptive_fill, sysPack.applyBackgroundAndMask(context, drawable, false), adapter);
+                    Drawable shapedDrawable = DrawableUtils.applyIconMaskShape(context, drawable, mShape, mScale, mBackground);
+                    addQuickOption(R.string.custom_icon_application, shapedDrawable, drawable, adapter);
                 }
             }
         }
@@ -169,61 +323,55 @@ public class SystemPage extends PageAdapter.Page {
 
                 if (drawable != null) {
                     if (checkDuplicateDrawable(dSet, drawable)) {
-                        addQuickOption(R.string.custom_icon_badged, drawable, adapter);
-                        if (iconPack != null && iconPack.hasMask())
-                            addQuickOption(R.string.custom_icon_badged_with_pack, iconPack.applyBackgroundAndMask(context, drawable, true), adapter);
-                        addQuickOption(R.string.custom_icon_badged_adaptive, sysPack.applyBackgroundAndMask(context, drawable, true), adapter);
-                        if (!DrawableUtils.isAdaptiveIconDrawable(drawable))
-                            addQuickOption(R.string.custom_icon_badged_adaptive_fill, sysPack.applyBackgroundAndMask(context, drawable, false), adapter);
+                        Drawable shapedDrawable = DrawableUtils.applyIconMaskShape(context, drawable, mShape, mScale, mBackground);
+                        addQuickOption(R.string.custom_icon_badged, shapedDrawable, drawable, adapter);
                     }
                 }
             }
         }
-
-        // this will call generateTextIcons
-        //mSearch.setText(pageName);
     }
 
-    private void generateTextIcons(CharSequence text) {
-        Context ctx = mGridView.getContext();
-        SystemPageAdapter adapter = (SystemPageAdapter) mGridView.getAdapter();
+    private void generateTextIcons(@Nullable CharSequence text) {
+        final ShapedIconAdapter adapter = mShapedIconAdapter;
 
         // remove all TextDrawable icons
-        for (Iterator<SystemIconInfo> iterator = adapter.mList.iterator(); iterator.hasNext(); ) {
-            SystemIconInfo info = iterator.next();
+        for (Iterator<ShapedIconInfo> iterator = adapter.getList().iterator(); iterator.hasNext(); ) {
+            ShapedIconInfo info = iterator.next();
             if (info instanceof TextIconInfo)
                 iterator.remove();
         }
         adapter.notifyDataSetChanged();
 
-        int length = Utilities.codePointsLength(text);
-        for (int shape : DrawableUtils.SHAPE_LIST) {
-            if (length >= 1) {
-                Drawable icon = new CodePointDrawable(text);
-                Drawable shapedIcon = DrawableUtils.applyIconMaskShape(ctx, icon, shape, true);
-                adapter.addItem(new TextIconInfo(shapedIcon));
-            }
-            if (length >= 2) {
-                Drawable icon = TwoCodePointDrawable.fromText(text, false);
-                Drawable shapedIcon = DrawableUtils.applyIconMaskShape(ctx, icon, shape, true);
-                adapter.addItem(new TextIconInfo(shapedIcon));
-            }
-            if (length >= 2) {
-                Drawable icon = TwoCodePointDrawable.fromText(text, true);
-                Drawable shapedIcon = DrawableUtils.applyIconMaskShape(ctx, icon, shape, true);
-                adapter.addItem(new TextIconInfo(shapedIcon));
-            }
-            if (length >= 3) {
-                Drawable icon = FourCodePointDrawable.fromText(text, true);
-                Drawable shapedIcon = DrawableUtils.applyIconMaskShape(ctx, icon, shape, true);
-                adapter.addItem(new TextIconInfo(shapedIcon));
-            }
-            if (length >= 3) {
-                Drawable icon = FourCodePointDrawable.fromText(text, false);
-                Drawable shapedIcon = DrawableUtils.applyIconMaskShape(ctx, icon, shape, true);
-                adapter.addItem(new TextIconInfo(shapedIcon));
-            }
+        final int length = Utilities.codePointsLength(text);
+        if (length >= 1) {
+            TextDrawable icon = new CodePointDrawable(text);
+            addTextIcon(icon);
         }
+        if (length >= 2) {
+            TextDrawable icon = TwoCodePointDrawable.fromText(text, false);
+            addTextIcon(icon);
+        }
+        if (length >= 2) {
+            TextDrawable icon = TwoCodePointDrawable.fromText(text, true);
+            addTextIcon(icon);
+        }
+        if (length >= 3) {
+            TextDrawable icon = FourCodePointDrawable.fromText(text, true);
+            addTextIcon(icon);
+        }
+        if (length >= 3) {
+            TextDrawable icon = FourCodePointDrawable.fromText(text, false);
+            addTextIcon(icon);
+        }
+    }
+
+    private void addTextIcon(@NonNull TextDrawable icon) {
+        final Context ctx = pageView.getContext();
+        final ShapedIconAdapter adapter = mShapedIconAdapter;
+
+        icon.setTextColor(mLetters);
+        Drawable shapedIcon = DrawableUtils.applyIconMaskShape(ctx, icon, mShape, mScale, mBackground);
+        adapter.addItem(new TextIconInfo(shapedIcon));
     }
 
     private boolean checkDuplicateDrawable(ArraySet<Bitmap> set, Drawable drawable) {
@@ -238,20 +386,20 @@ public class SystemPage extends PageAdapter.Page {
         return true;
     }
 
-    private static void addQuickOption(@StringRes int textId, Drawable drawable, SystemPageAdapter adapter) {
+    private static void addQuickOption(@StringRes int textId, Drawable shapedDrawable, Drawable drawable, ShapedIconAdapter adapter) {
         if (!(drawable instanceof BitmapDrawable))
             return;
 
-        SystemIconInfo iconInfo = new SystemIconInfo(drawable);
+        ShapedIconInfo iconInfo = new ShapedIconInfo(shapedDrawable, drawable);
         iconInfo.textId = textId;
         adapter.addItem(iconInfo);
     }
 
-    private static void addIconPackOption(String packName, Drawable drawable, SystemPageAdapter adapter) {
+    private static void addIconPackOption(String packName, Drawable drawable, ShapedIconAdapter adapter) {
         if (!(drawable instanceof BitmapDrawable))
             return;
 
-        IconPackIconInfo iconInfo = new IconPackIconInfo(packName, drawable);
+        IconPackIconInfo iconInfo = new IconPackIconInfo(packName, drawable, drawable);
         adapter.addItem(iconInfo);
     }
 
@@ -259,18 +407,17 @@ public class SystemPage extends PageAdapter.Page {
         if (iconPacks.isEmpty())
             return;
         final Context ctx = pageView.getContext();
-        final SystemIconInfo placeholderItem = new SystemIconInfo(DrawableUtils.getProgressBarIndeterminate(ctx));
+        final ShapedIconInfo placeholderItem = new ShapedIconInfo(DrawableUtils.getProgressBarIndeterminate(ctx), null);
         placeholderItem.textId = R.string.icon_pack_loading;
         {
-            SystemPageAdapter adapter = (SystemPageAdapter) mGridView.getAdapter();
-            adapter.addItem(placeholderItem);
+            mShapedIconAdapter.addItem(placeholderItem);
         }
         final HashMap<String, Drawable> options = new HashMap<>(iconPacks.size());
         Utilities.runAsync((t) -> {
             for (Pair<String, String> packInfo : iconPacks) {
                 String packPackageName = packInfo.first;
                 String packName = packInfo.second;
-                Activity activity = Utilities.getActivity(mGridView);
+                Activity activity = Utilities.getActivity(pageView);
                 if (activity != null) {
                     IconPackXML pack = TBApplication.iconPackCache(activity).getIconPack(packPackageName);
                     pack.load(activity.getPackageManager());
@@ -281,9 +428,9 @@ public class SystemPage extends PageAdapter.Page {
                 }
             }
         }, (t) -> {
-            Activity activity = Utilities.getActivity(mGridView);
+            Activity activity = Utilities.getActivity(pageView);
             if (activity != null) {
-                SystemPageAdapter adapter = (SystemPageAdapter) mGridView.getAdapter();
+                final ShapedIconAdapter adapter = mShapedIconAdapter;
                 adapter.removeItem(placeholderItem);
                 for (Map.Entry<String, Drawable> entry : options.entrySet())
                     addIconPackOption(entry.getKey(), entry.getValue(), adapter);
@@ -294,14 +441,14 @@ public class SystemPage extends PageAdapter.Page {
     static class TextIconInfo extends IconPackIconInfo {
 
         TextIconInfo(Drawable icon) {
-            super("", icon);
+            super("", icon, icon);
         }
     }
 
-    static class DefaultIconInfo extends SystemIconInfo {
+    static class DefaultIconInfo extends ShapedIconInfo {
 
         DefaultIconInfo(Drawable icon) {
-            super(icon);
+            super(icon, icon);
         }
 
         @Override
@@ -310,22 +457,24 @@ public class SystemPage extends PageAdapter.Page {
         }
     }
 
-    static class IconPackIconInfo extends SystemIconInfo {
+    static class IconPackIconInfo extends ShapedIconInfo {
         final CharSequence name;
 
-        IconPackIconInfo(CharSequence name, Drawable icon) {
-            super(icon);
+        IconPackIconInfo(CharSequence name, Drawable icon, Drawable origin) {
+            super(icon, origin);
             this.name = name;
         }
     }
 
-    static class SystemIconInfo {
+    static class ShapedIconInfo {
+        final Drawable originalDrawable;
         final Drawable iconDrawable;
         @StringRes
         int textId;
 
-        SystemIconInfo(Drawable icon) {
+        ShapedIconInfo(Drawable icon, Drawable origin) {
             iconDrawable = icon;
+            originalDrawable = origin;
         }
 
         Drawable getIcon() {
@@ -340,7 +489,7 @@ public class SystemPage extends PageAdapter.Page {
         public boolean equals(Object o) {
             if (this == o) return true;
             if (o == null || getClass() != o.getClass()) return false;
-            SystemIconInfo that = (SystemIconInfo) o;
+            ShapedIconInfo that = (ShapedIconInfo) o;
             return Objects.equals(iconDrawable, that.iconDrawable) &&
                     Objects.equals(textId, that.textId);
         }
@@ -351,7 +500,7 @@ public class SystemPage extends PageAdapter.Page {
         }
     }
 
-    public static class SystemPageViewHolder extends ViewHolderAdapter.ViewHolder<SystemIconInfo> {
+    public static class SystemPageViewHolder extends ViewHolderAdapter.ViewHolder<ShapedIconInfo> {
         View root;
         ImageView icon;
         TextView text1;
@@ -364,8 +513,8 @@ public class SystemPage extends PageAdapter.Page {
         }
 
         @Override
-        protected void setContent(SystemIconInfo content, int position, @NonNull ViewHolderAdapter<SystemIconInfo, ? extends ViewHolderAdapter.ViewHolder<SystemIconInfo>> adapter) {
-            SystemPageAdapter systemPageAdapter = (SystemPageAdapter) adapter;
+        protected void setContent(ShapedIconInfo content, int position, @NonNull ViewHolderAdapter<ShapedIconInfo, ? extends ViewHolderAdapter.ViewHolder<ShapedIconInfo>> adapter) {
+            ShapedIconAdapter shapedIconAdapter = (ShapedIconAdapter) adapter;
             // set icon
             icon.setImageDrawable(content.getPreview());
             icon.setVisibility(content.getPreview() == null ? View.GONE : View.VISIBLE);
@@ -377,38 +526,36 @@ public class SystemPage extends PageAdapter.Page {
                 text1.setText(content.textId);
 
             // setOnClickListener when we have an icon
-            if (systemPageAdapter.mIconClickListener != null && content.getPreview() != null)
-                root.setOnClickListener(v -> systemPageAdapter.mIconClickListener.onItemClick(adapter, v, position));
+            if (shapedIconAdapter.mIconClickListener != null && content.getPreview() != null)
+                root.setOnClickListener(v -> shapedIconAdapter.mIconClickListener.onItemClick(adapter, v, position));
         }
     }
 
-    static class SystemPageAdapter extends ViewHolderAdapter<SystemIconInfo, SystemPageViewHolder> {
-        ArrayList<SystemIconInfo> mList = new ArrayList<>();
+    static class ShapedIconAdapter extends ViewHolderListAdapter<ShapedIconInfo, SystemPageViewHolder> {
         @Nullable
-        private OnItemClickListener mIconClickListener;
+        private final OnItemClickListener mIconClickListener;
 
-        protected SystemPageAdapter(@Nullable OnItemClickListener iconClickListener) {
-            super(SystemPageViewHolder.class, R.layout.item_grid);
+        protected ShapedIconAdapter(@Nullable OnItemClickListener iconClickListener) {
+            super(SystemPageViewHolder.class, R.layout.item_grid, new ArrayList<>());
             mIconClickListener = iconClickListener;
         }
 
-        void addItem(SystemIconInfo item) {
+        List<ShapedIconInfo> getList() {
+            return mList;
+        }
+
+        void addItem(ShapedIconInfo item) {
             mList.add(item);
             notifyDataSetChanged();
         }
 
-        void removeItem(SystemIconInfo item) {
+        void removeItem(ShapedIconInfo item) {
             mList.remove(item);
             notifyDataSetChanged();
         }
 
         @Override
-        public int getCount() {
-            return mList.size();
-        }
-
-        @Override
-        public SystemIconInfo getItem(int position) {
+        public ShapedIconInfo getItem(int position) {
             return mList.get(position);
         }
     }

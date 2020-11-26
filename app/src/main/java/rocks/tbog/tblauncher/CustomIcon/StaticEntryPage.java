@@ -32,9 +32,9 @@ public class StaticEntryPage extends PageAdapter.Page {
     private StaticEntry mStaticEntry;
     private GridView mGridView;
 
-    SystemPage.SystemPageAdapter mDefaultItemAdapter = new SystemPage.SystemPageAdapter(null) {
+    SystemPage.ShapedIconAdapter mDefaultItemAdapter = new SystemPage.ShapedIconAdapter(null) {
         @Override
-        public SystemPage.SystemIconInfo getItem(int position) {
+        public SystemPage.ShapedIconInfo getItem(int position) {
             Context ctx = pageView.getContext();
             return new SystemPage.DefaultIconInfo(mStaticEntry.getDefaultDrawable(ctx));
         }

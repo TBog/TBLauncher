@@ -51,8 +51,8 @@ public class IconsHandler {
     private final HashMap<String, String> mIconPackNames = new HashMap<>();
     private final Context ctx;
 
-    private int mContactsShape = DrawableUtils.SHAPE_SYSTEM;
-    private int mShortcutsShape = DrawableUtils.SHAPE_SYSTEM;
+    private int mContactsShape = DrawableUtils.SHAPE_NONE;
+    private int mShortcutsShape = DrawableUtils.SHAPE_NONE;
     private IconPackXML mIconPack = null;
     private SystemIconPack mSystemPack = new SystemIconPack();
     private boolean mForceAdaptive;
@@ -93,7 +93,7 @@ public class IconsHandler {
             return Integer.parseInt(pref.getString(key, null));
         } catch (Exception ignored) {
         }
-        return DrawableUtils.SHAPE_SYSTEM;
+        return DrawableUtils.SHAPE_NONE;
     }
 
     /**

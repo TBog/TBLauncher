@@ -30,7 +30,7 @@ import rocks.tbog.tblauncher.R;
 
 public class DrawableUtils {
 
-    public static final int SHAPE_SYSTEM = 0;
+    public static final int SHAPE_NONE = 0;
     public static final int SHAPE_CIRCLE = 1;
     public static final int SHAPE_SQUARE = 2;
     public static final int SHAPE_SQUIRCLE = 3;
@@ -46,7 +46,7 @@ public class DrawableUtils {
     public static final int SHAPE_ROUND_OCTAGON = 13;
 
     public static final int[] SHAPE_LIST = {
-            SHAPE_SYSTEM,
+            SHAPE_NONE,
             SHAPE_CIRCLE,
             SHAPE_SQUARE,
             SHAPE_SQUIRCLE,
@@ -99,12 +99,13 @@ public class DrawableUtils {
 
     public static Drawable applyIconMaskShape(Context ctx, Drawable icon, int shape, boolean fitInside) {
         int color = fitInside ? Color.WHITE : Color.TRANSPARENT;
-        return applyIconMaskShape(ctx, icon, shape, fitInside, color);
+        float scale = fitInside ? (1.f / (1.f + 2.f * getMarginToFit(shape))) : 1.f;
+        return applyIconMaskShape(ctx, icon, shape, scale, color);
     }
 
-    public static Drawable applyIconMaskShape(Context ctx, Drawable icon, int shape, @ColorInt int backgroundColor) {
-        return applyIconMaskShape(ctx, icon, shape, false, backgroundColor);
-    }
+//    public static Drawable applyIconMaskShape(Context ctx, Drawable icon, int shape, @ColorInt int backgroundColor) {
+//        return applyIconMaskShape(ctx, icon, shape, 1.f, backgroundColor);
+//    }
 
     /**
      * Get percent of icon to use as margin. We use this to avoid clipping the image.
@@ -112,7 +113,7 @@ public class DrawableUtils {
      * @param shape from SHAPE_*
      * @return margin size
      */
-    private static float getScaleToFit(int shape) {
+    private static float getMarginToFit(int shape) {
         switch (shape) {
             case SHAPE_CIRCLE:
             case SHAPE_TEARDROP_BR:
@@ -138,8 +139,8 @@ public class DrawableUtils {
      * Handle adaptive icons for compatible devices
      */
     @SuppressLint("NewApi")
-    public static Drawable applyIconMaskShape(Context ctx, Drawable icon, int shape, boolean fitInside, @ColorInt int backgroundColor) {
-        if (shape == SHAPE_SYSTEM)
+    public static Drawable applyIconMaskShape(Context ctx, Drawable icon, int shape, float scale, @ColorInt int backgroundColor) {
+        if (shape == SHAPE_NONE)
             return icon;
         if (shape == SHAPE_TEARDROP_RND)
             shape = SHAPE_TEARDROP_BR + (icon.hashCode() % 4);
@@ -185,19 +186,12 @@ public class DrawableUtils {
         // If icon is not adaptive, put it in a white canvas to make it have a unified shape
         else if (icon != null) {
             // Shrink icon fit inside the shape
-            int iconSize;
-            int iconOffset = 0;
-            if (fitInside) {
-                float marginPercent = getScaleToFit(shape);
-                int iconHeight = icon.getIntrinsicHeight();
-                if (iconHeight <= 0)
-                    iconHeight = ctx.getResources().getDimensionPixelSize(R.dimen.icon_height);
-                iconSize = Math.round((1f + 2f * marginPercent) * iconHeight);
-                iconOffset = Math.round(marginPercent * iconHeight);
-            } else {
-                // we don't have antialiasing when clipping so we make the icon bigger and let the View downscale
+            int iconSize = icon.getIntrinsicHeight();
+            if (iconSize <= 0)
                 iconSize = 2 * ctx.getResources().getDimensionPixelSize(R.dimen.icon_height);
-            }
+            int iconOffset = (int) (iconSize * (1.f - scale) * .5f + .5f);
+            if (iconOffset >= iconSize / 2)
+                iconOffset = iconSize / 2 - 1;
 
             outputBitmap = Bitmap.createBitmap(iconSize, iconSize, Bitmap.Config.ARGB_8888);
             outputCanvas = new Canvas(outputBitmap);
@@ -392,8 +386,9 @@ public class DrawableUtils {
 
         /**
          * Compute vector information from two points
-         * @param A  vector from
-         * @param B  vector to
+         *
+         * @param A vector from
+         * @param B vector to
          */
         void set(PointF A, PointF B) {
             // x,y as vec

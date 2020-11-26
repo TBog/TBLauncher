@@ -16,14 +16,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.utils.DrawableUtils;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 
 public class SystemIconPack implements IconPack<Void> {
 
     private static final String TAG = SystemIconPack.class.getSimpleName();
-    private int mAdaptiveShape = DrawableUtils.SHAPE_SYSTEM;
+    private int mAdaptiveShape = DrawableUtils.SHAPE_NONE;
 
     @NonNull
     @Override

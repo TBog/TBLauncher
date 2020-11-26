@@ -282,9 +282,10 @@ public class Utilities {
         return next;
     }
 
-    public static int codePointsLength(CharSequence s) {
+    public static int codePointsLength(@Nullable CharSequence s) {
+        final int length = s != null ? s.length() : 0;
         int n = 0;
-        for (int i = 0; i < s.length(); ) {
+        for (int i = 0; i < length; ) {
             int codePoint = Character.codePointAt(s, i);
             i += Character.charCount(codePoint);
             // skip this if it's ZERO WIDTH JOINER

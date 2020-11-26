@@ -29,7 +29,7 @@ class PageAdapter extends androidx.viewpager.widget.PagerAdapter implements View
     }
 
     public SystemPage addSystemPage(LayoutInflater inflater, ViewPager container, ComponentName cn, UserHandleCompat userHandle, String pageName) {
-        View view = inflater.inflate(R.layout.dialog_icon_select_page, container, false);
+        View view = inflater.inflate(R.layout.dialog_system_icon_select_page, container, false);
         SystemPage page = new SystemPage(pageName, view, cn, userHandle);
         pageList.add(page);
         return page;
