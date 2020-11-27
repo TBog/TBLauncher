@@ -260,7 +260,7 @@ public class SystemPage extends PageAdapter.Page {
             if (shape == DrawableUtils.SHAPE_NONE) {
                 shapedDrawable = new ColorDrawable(Color.TRANSPARENT);
             } else {
-                shapedDrawable = DrawableUtils.applyIconMaskShape(context, drawable, shape, mScale, Color.TRANSPARENT);
+                shapedDrawable = DrawableUtils.applyIconMaskShape(context, drawable, shape);
             }
             NamedIconInfo iconInfo = new NamedIconInfo(name, shapedDrawable, null);
             adapter.addItem(iconInfo);
