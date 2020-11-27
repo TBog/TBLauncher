@@ -33,7 +33,7 @@ public abstract class ViewHolderListAdapter<T, VH extends ViewHolderAdapter.View
         return mList.size();
     }
 
-    public void addItems(Collection<T> items) {
+    public void addItems(Collection<? extends T> items) {
         mList.addAll(items);
         notifyDataSetChanged();
     }

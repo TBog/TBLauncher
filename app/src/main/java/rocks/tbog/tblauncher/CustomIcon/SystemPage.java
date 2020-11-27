@@ -166,7 +166,7 @@ public class SystemPage extends CustomShapePage {
             if (activity != null) {
                 final ShapedIconAdapter adapter = mShapedIconAdapter;
                 adapter.removeItem(placeholderItem);
-                adapter.addAll(options);
+                adapter.addItems(options);
             }
         });
     }

@@ -421,16 +421,6 @@ class CustomShapePage extends PageAdapter.Page {
             return mList;
         }
 
-        void addItem(ShapedIconInfo item) {
-            mList.add(item);
-            notifyDataSetChanged();
-        }
-
-        void addAll(Collection<? extends ShapedIconInfo> collection) {
-            mList.addAll(collection);
-            notifyDataSetChanged();
-        }
-
         void removeItem(ShapedIconInfo item) {
             mList.remove(item);
             notifyDataSetChanged();
