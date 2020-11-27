@@ -136,6 +136,18 @@ public class DrawableUtils {
     }
 
     /**
+     * Get size of bitmap used when applying a shape on an icon
+     *
+     * @param ctx   android context to get resources
+     * @param shape from SHAPE_*
+     * @return icon size
+     */
+    private static int getIconSize(@NonNull Context ctx, int shape) {
+        int iconSize = ctx.getResources().getDimensionPixelSize(R.dimen.icon_size);
+        return (shape == SHAPE_NONE || shape == SHAPE_SQUARE) ? iconSize : (2 * iconSize);
+    }
+
+    /**
      * Handle adaptive icons for compatible devices
      */
     @SuppressLint("NewApi")
@@ -185,10 +197,9 @@ public class DrawableUtils {
         }
         // If icon is not adaptive, put it in a white canvas to make it have a unified shape
         else if (icon != null) {
-            // Shrink icon fit inside the shape
-            int iconSize = icon.getIntrinsicHeight();
-            if (iconSize <= 0)
-                iconSize = 2 * ctx.getResources().getDimensionPixelSize(R.dimen.icon_size);
+            // make icon bigger than required when we crop (cropping makes jagged edges)
+            int iconSize = getIconSize(ctx, shape);
+            // compute shrink factor and icon position to fit inside the shape
             int iconOffset = (int) (iconSize * (1.f - scale) * .5f + .5f);
             if (iconOffset >= iconSize / 2)
                 iconOffset = iconSize / 2 - 1;
@@ -204,7 +215,7 @@ public class DrawableUtils {
             setIconShape(outputCanvas, outputPaint, shape);
             icon.draw(outputCanvas);
         } else {
-            int iconSize = ctx.getResources().getDimensionPixelSize(R.dimen.icon_size);
+            int iconSize = getIconSize(ctx, shape);
 
             outputBitmap = Bitmap.createBitmap(iconSize, iconSize, Bitmap.Config.ARGB_8888);
             outputCanvas = new Canvas(outputBitmap);

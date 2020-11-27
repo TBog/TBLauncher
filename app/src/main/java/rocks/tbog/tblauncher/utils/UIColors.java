@@ -157,9 +157,16 @@ public final class UIColors {
         return CACHED_COLOR_SEARCH_ICON;
     }
 
+    public static int getResultListBackground(Context context) {
+        if (CACHED_BACKGROUND_RESULT_LIST == null) {
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+            return getResultListBackground(pref);
+        }
+        return CACHED_BACKGROUND_RESULT_LIST;
+    }
+
     public static int getResultListBackground(SharedPreferences pref) {
-        if (CACHED_BACKGROUND_RESULT_LIST == null)
-        {
+        if (CACHED_BACKGROUND_RESULT_LIST == null) {
             int color = UIColors.getColor(pref, "result-list-color");
             int alpha = UIColors.getAlpha(pref, "result-list-alpha");
             CACHED_BACKGROUND_RESULT_LIST = setAlpha(color, alpha);
