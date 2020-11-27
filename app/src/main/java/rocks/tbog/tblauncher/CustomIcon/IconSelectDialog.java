@@ -13,6 +13,7 @@ import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
 import androidx.viewpager.widget.ViewPager;
 
 import java.util.ArrayList;
@@ -26,6 +27,8 @@ import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.icons.IconPack;
 import rocks.tbog.tblauncher.ui.DialogFragment;
+import rocks.tbog.tblauncher.ui.LinearAdapter;
+import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
 
@@ -126,6 +129,11 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
                 mSelectedDrawable = item.icon;
                 mPreview.setImageDrawable(mSelectedDrawable);
             }
+        }, (adapter, v, position) -> {
+            if (adapter instanceof IconAdapter) {
+                IconData item = ((IconAdapter) adapter).getItem(position);
+                getIconPackMenu(item).show(v);
+            }
         });
 
         if (mSystemPage != null) {
@@ -133,6 +141,31 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
         }
 
         return view;
+    }
+
+    private ListPopup getIconPackMenu(IconData iconData) {
+        final Context ctx = getContext();
+        LinearAdapter adapter = new LinearAdapter();
+
+        adapter.add(new LinearAdapter.ItemTitle(iconData.drawableInfo.getDrawableName()));
+        adapter.add(new LinearAdapter.Item(ctx, R.string.choose_icon_menu_add));
+        adapter.add(new LinearAdapter.Item(ctx, R.string.choose_icon_menu_add2));
+
+        return ListPopup.create(ctx, adapter)
+                .setOnItemClickListener((a, v, pos) -> {
+                    LinearAdapter.MenuItem item = ((LinearAdapter) a).getItem(pos);
+                    @StringRes int stringId = 0;
+                    if (item instanceof LinearAdapter.Item) {
+                        stringId = ((LinearAdapter.Item) a.getItem(pos)).stringId;
+                    }
+                    if (stringId == R.string.choose_icon_menu_add2) {
+                        mSystemPage.addIcon(iconData.drawableInfo.getDrawableName(), iconData.getIcon());
+                        // set the first page (mSystemPage) as current
+                        mViewPager.setCurrentItem(0);
+                    } else if (stringId == R.string.choose_icon_menu_add) {
+                        mSystemPage.addIcon(iconData.drawableInfo.getDrawableName(), iconData.getIcon());
+                    }
+                });
     }
 
     @Override

@@ -50,7 +50,7 @@ class IconPackPage extends PageAdapter.Page {
     }
 
     @Override
-    void setupView(@NotNull Context context, @Nullable OnItemClickListener iconClickListener) {
+    void setupView(@NotNull Context context, @Nullable OnItemClickListener iconClickListener, @Nullable OnItemClickListener iconLongClickListener) {
         mIconLoadingBar = pageView.findViewById(R.id.iconLoadingBar);
 
         Drawable packIcon = null;
@@ -73,10 +73,12 @@ class IconPackPage extends PageAdapter.Page {
         mGridView.setAdapter(iconAdapter);
         if (iconClickListener != null)
             iconAdapter.setOnItemClickListener(iconClickListener::onItemClick);
-        iconAdapter.setOnItemLongClickListener(((adapter, v, position) -> {
-            String drawableName = adapter.getItem(position).drawableInfo.getDrawableName();
-            displayToast(v, drawableName);
-        }));
+        if (iconLongClickListener != null)
+            iconAdapter.setOnItemLongClickListener(iconLongClickListener::onItemClick);
+//        iconAdapter.setOnItemLongClickListener(((adapter, v, position) -> {
+//            String drawableName = adapter.getItem(position).drawableInfo.getDrawableName();
+//            displayToast(v, drawableName);
+//        }));
 
         // set page search bar
         mSearch = pageView.findViewById(R.id.search);

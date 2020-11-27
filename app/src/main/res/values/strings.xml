@@ -326,6 +326,8 @@
     <string name="choose_icon_scale">Scale icon</string>
     <string name="choose_icon_shape">Choose shape</string>
     <string name="choose_icon">Choose icon</string>
+    <string name="choose_icon_menu_add">Add as alternative</string>
+    <string name="choose_icon_menu_add2">Add alternative and show</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">%d entry</item>

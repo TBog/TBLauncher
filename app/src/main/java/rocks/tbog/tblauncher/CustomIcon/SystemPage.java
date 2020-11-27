@@ -79,7 +79,7 @@ public class SystemPage extends PageAdapter.Page {
     }
 
     @Override
-    void setupView(@NonNull Context context, @Nullable OnItemClickListener iconClickListener) {
+    void setupView(@NonNull Context context, @Nullable OnItemClickListener iconClickListener, @Nullable OnItemClickListener iconLongClickListener) {
         mLettersView = pageView.findViewById(R.id.letters);
         mLettersView.addTextChangedListener(new TextWatcher() {
             @Override
@@ -265,6 +265,13 @@ public class SystemPage extends PageAdapter.Page {
             NamedIconInfo iconInfo = new NamedIconInfo(name, shapedDrawable, null);
             adapter.addItem(iconInfo);
         }
+    }
+
+    public void addIcon(@NonNull String name, @NonNull Drawable drawable) {
+        Context context = pageView.getContext();
+        Drawable shapedDrawable = DrawableUtils.applyIconMaskShape(context, drawable, mShape, mScale, mBackground);
+        NamedIconInfo iconInfo = new NamedIconInfo(name, shapedDrawable, drawable);
+        mShapedIconAdapter.addItem(iconInfo);
     }
 
     private void addSystemIcons(Context context, ShapedIconAdapter adapter) {

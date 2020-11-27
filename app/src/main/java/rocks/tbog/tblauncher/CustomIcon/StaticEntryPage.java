@@ -46,7 +46,7 @@ public class StaticEntryPage extends PageAdapter.Page {
     }
 
     @Override
-    void setupView(@NonNull Context context, @Nullable OnItemClickListener iconClickListener) {
+    void setupView(@NonNull Context context, @Nullable OnItemClickListener iconClickListener, @Nullable OnItemClickListener iconLongClickListener) {
         int size = UISizes.getResultIconSize(context);
 
         // default icon

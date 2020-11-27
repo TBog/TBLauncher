@@ -72,20 +72,23 @@ public class ListPopup extends PopupWindow {
         };
     }
 
-    public void setOnItemClickListener(OnItemClickListener onItemClickListener) {
+    public ListPopup setOnItemClickListener(OnItemClickListener onItemClickListener) {
         mItemClickListener = onItemClickListener;
+        return this;
     }
 
-    public void setOnItemLongClickListener(OnItemLongClickListener onItemLongClickListener) {
+    public ListPopup setOnItemLongClickListener(OnItemLongClickListener onItemLongClickListener) {
         mItemLongClickListener = onItemLongClickListener;
+        return this;
     }
 
     public ListAdapter getAdapter() {
         return mAdapter;
     }
 
-    public void setDismissOnItemClick(boolean dismissOnClick) {
+    public ListPopup setDismissOnItemClick(boolean dismissOnClick) {
         this.dismissOnClick = dismissOnClick;
+        return this;
     }
 
     public boolean isInsideViewBounds(int x, int y) {
@@ -104,8 +107,9 @@ public class ListPopup extends PopupWindow {
      *
      * @param dimAmount a value of 0 or less to disable dimming
      */
-    public void setDimAmount(float dimAmount) {
+    public ListPopup setDimAmount(float dimAmount) {
         this.dimAmount = dimAmount;
+        return this;
     }
 
     /**

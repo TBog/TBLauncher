@@ -45,9 +45,9 @@ class PageAdapter extends androidx.viewpager.widget.PagerAdapter implements View
         return pageList;
     }
 
-    public void setupPageView(Context context, @Nullable Page.OnItemClickListener iconClickListener) {
+    public void setupPageView(Context context, @Nullable Page.OnItemClickListener iconClickListener, @Nullable Page.OnItemClickListener iconLongClickListener) {
         for (Page page : getPageIterable())
-            page.setupView(context, iconClickListener);
+            page.setupView(context, iconClickListener, iconLongClickListener);
     }
 
     public void loadPageData() {
@@ -98,7 +98,7 @@ class PageAdapter extends androidx.viewpager.widget.PagerAdapter implements View
             pageView = view;
         }
 
-        abstract void setupView(@NonNull Context context, @Nullable OnItemClickListener iconClickListener);
+        abstract void setupView(@NonNull Context context, @Nullable OnItemClickListener iconClickListener, @Nullable OnItemClickListener iconLongClickListener);
 
         void loadData() {
             bDataLoaded = true;
