@@ -152,6 +152,7 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
         adapter.add(new LinearAdapter.Item(ctx, R.string.choose_icon_menu_add2));
 
         return ListPopup.create(ctx, adapter)
+                .setModal(true)
                 .setOnItemClickListener((a, v, pos) -> {
                     LinearAdapter.MenuItem item = ((LinearAdapter) a).getItem(pos);
                     @StringRes int stringId = 0;

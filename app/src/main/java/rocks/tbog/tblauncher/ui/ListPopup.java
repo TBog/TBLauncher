@@ -317,8 +317,9 @@ public class ListPopup extends PopupWindow {
 
     }
 
-    public void setModal(boolean modal) {
+    public ListPopup setModal(boolean modal) {
         mIsModal = modal;
+        return this;
     }
 
     public interface OnItemClickListener {
