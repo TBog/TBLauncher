@@ -420,9 +420,11 @@ public class SystemPage extends PageAdapter.Page {
                     IconPackXML pack = TBApplication.iconPackCache(activity).getIconPack(packPackageName);
                     pack.load(activity.getPackageManager());
                     Drawable drawable = pack.getComponentDrawable(activity, componentName, userHandle);
-                    Drawable shapedDrawable = DrawableUtils.applyIconMaskShape(activity, drawable, mShape, mScale, mBackground);
-                    NamedIconInfo iconInfo = new NamedIconInfo(packName, shapedDrawable, drawable);
-                    options.add(iconInfo);
+                    if (drawable!=null) {
+                        Drawable shapedDrawable = DrawableUtils.applyIconMaskShape(activity, drawable, mShape, mScale, mBackground);
+                        NamedIconInfo iconInfo = new NamedIconInfo(packName, shapedDrawable, drawable);
+                        options.add(iconInfo);
+                    }
                 } else {
                     break;
                 }
