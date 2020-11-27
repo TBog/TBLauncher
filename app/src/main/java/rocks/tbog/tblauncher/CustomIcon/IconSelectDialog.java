@@ -36,7 +36,7 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
     private Drawable mSelectedDrawable = null;
     private ImageView mPreview;
     private ViewPager mViewPager;
-    private SystemPage mSystemPage = null;
+    private CustomShapePage mCustomShapePage = null;
 
     @Override
     protected int layoutRes() {
@@ -72,7 +72,7 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
                 ComponentName cn = UserHandleCompat.unflattenComponentName(name);
                 UserHandleCompat userHandle = UserHandleCompat.fromComponentName(context, name);
 
-                mSystemPage = pageAdapter.addSystemPage(inflater, mViewPager, cn, userHandle, pageName);
+                mCustomShapePage = addSystemPage(inflater, mViewPager, cn, userHandle, pageName);
             } else if (args.containsKey("entryId")) {
                 String entryId = args.getString("entryId", "");
                 EntryItem entryItem = TBApplication.dataHandler(context).getPojo(entryId);
@@ -81,7 +81,7 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
                 } else {
                     StaticEntry staticEntry = (StaticEntry) entryItem;
                     String pageName = context.getString(R.string.tab_static_icons);
-                    pageAdapter.addStaticEntryPage(inflater, mViewPager, staticEntry, pageName);
+                    mCustomShapePage = addStaticEntryPage(inflater, mViewPager, staticEntry, pageName);
                 }
             }
         }
@@ -110,7 +110,7 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
                     packName = context.getString(R.string.selected_pack, packName);
 
                 // add page to ViewPager
-                pageAdapter.addIconPackPage(inflater, mViewPager, packName, packPackageName);
+                addIconPackPage(inflater, mViewPager, packName, packPackageName);
             }
         }
         pageAdapter.notifyDataSetChanged();
@@ -120,14 +120,10 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
                 IconData item = ((IconAdapter) adapter).getItem(position);
                 mSelectedDrawable = item.getIcon();
                 mPreview.setImageDrawable(mSelectedDrawable);
-            } else if (adapter instanceof SystemPage.ShapedIconAdapter) {
-                SystemPage.ShapedIconInfo item = ((SystemPage.ShapedIconAdapter) adapter).getItem(position);
+            } else if (adapter instanceof CustomShapePage.ShapedIconAdapter) {
+                CustomShapePage.ShapedIconInfo item = ((CustomShapePage.ShapedIconAdapter) adapter).getItem(position);
                 mSelectedDrawable = item.getIcon();
                 mPreview.setImageDrawable(item.getPreview());
-            } else if (adapter instanceof StaticEntryPage.DrawableAdapter) {
-                StaticEntryPage.DrawableData item = ((StaticEntryPage.DrawableAdapter) adapter).getItem(position);
-                mSelectedDrawable = item.icon;
-                mPreview.setImageDrawable(mSelectedDrawable);
             }
         }, (adapter, v, position) -> {
             if (adapter instanceof IconAdapter) {
@@ -136,11 +132,34 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
             }
         });
 
-        if (mSystemPage != null) {
-            mSystemPage.loadIconPackIcons(iconPacks);
+        if (mCustomShapePage instanceof SystemPage) {
+            ((SystemPage) mCustomShapePage).loadIconPackIcons(iconPacks);
         }
 
         return view;
+    }
+
+    public void addIconPackPage(@NonNull LayoutInflater inflater, ViewGroup container, String packName, String packPackageName) {
+        View view = inflater.inflate(R.layout.dialog_icon_select_page, container, false);
+        IconPackPage page = new IconPackPage(packName, packPackageName, view);
+        PageAdapter adapter = (PageAdapter) mViewPager.getAdapter();
+        adapter.addPage(page);
+    }
+
+    public SystemPage addSystemPage(LayoutInflater inflater, ViewPager container, ComponentName cn, UserHandleCompat userHandle, String pageName) {
+        View view = inflater.inflate(R.layout.dialog_custom_shape_icon_select_page, container, false);
+        SystemPage page = new SystemPage(pageName, view, cn, userHandle);
+        PageAdapter adapter = (PageAdapter) mViewPager.getAdapter();
+        adapter.addPage(page);
+        return page;
+    }
+
+    public StaticEntryPage addStaticEntryPage(LayoutInflater inflater, ViewPager container, StaticEntry staticEntry, String pageName) {
+        View view = inflater.inflate(R.layout.dialog_custom_shape_icon_select_page, container, false);
+        StaticEntryPage page = new StaticEntryPage(pageName, view, staticEntry);
+        PageAdapter adapter = (PageAdapter) mViewPager.getAdapter();
+        adapter.addPage(page);
+        return page;
     }
 
     private ListPopup getIconPackMenu(IconData iconData) {
@@ -160,11 +179,13 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
                         stringId = ((LinearAdapter.Item) a.getItem(pos)).stringId;
                     }
                     if (stringId == R.string.choose_icon_menu_add2) {
-                        mSystemPage.addIcon(iconData.drawableInfo.getDrawableName(), iconData.getIcon());
-                        // set the first page (mSystemPage) as current
+                        if (mCustomShapePage != null)
+                            mCustomShapePage.addIcon(iconData.drawableInfo.getDrawableName(), iconData.getIcon());
+                        // set the first page as current
                         mViewPager.setCurrentItem(0);
                     } else if (stringId == R.string.choose_icon_menu_add) {
-                        mSystemPage.addIcon(iconData.drawableInfo.getDrawableName(), iconData.getIcon());
+                        if (mCustomShapePage != null)
+                            mCustomShapePage.addIcon(iconData.drawableInfo.getDrawableName(), iconData.getIcon());
                     }
                 });
     }

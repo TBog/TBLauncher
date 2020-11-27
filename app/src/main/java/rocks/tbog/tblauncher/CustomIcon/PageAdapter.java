@@ -1,8 +1,6 @@
 package rocks.tbog.tblauncher.CustomIcon;
 
-import android.content.ComponentName;
 import android.content.Context;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -13,31 +11,12 @@ import androidx.viewpager.widget.ViewPager;
 
 import java.util.ArrayList;
 
-import rocks.tbog.tblauncher.R;
-import rocks.tbog.tblauncher.entry.StaticEntry;
-import rocks.tbog.tblauncher.utils.UserHandleCompat;
-
 class PageAdapter extends androidx.viewpager.widget.PagerAdapter implements ViewPager.OnPageChangeListener {
 
     private ArrayList<Page> pageList = new ArrayList<>(0);
     private int mScrollState = ViewPager.SCROLL_STATE_IDLE;
 
-    public void addIconPackPage(@NonNull LayoutInflater inflater, ViewGroup container, String packName, String packPackageName) {
-        View view = inflater.inflate(R.layout.dialog_icon_select_page, container, false);
-        IconPackPage page = new IconPackPage(packName, packPackageName, view);
-        pageList.add(page);
-    }
-
-    public SystemPage addSystemPage(LayoutInflater inflater, ViewPager container, ComponentName cn, UserHandleCompat userHandle, String pageName) {
-        View view = inflater.inflate(R.layout.dialog_system_icon_select_page, container, false);
-        SystemPage page = new SystemPage(pageName, view, cn, userHandle);
-        pageList.add(page);
-        return page;
-    }
-
-    public void addStaticEntryPage(LayoutInflater inflater, ViewPager container, StaticEntry staticEntry, String pageName) {
-        View view = inflater.inflate(R.layout.dialog_static_icon_select_page, container, false);
-        StaticEntryPage page = new StaticEntryPage(pageName, view, staticEntry);
+    void addPage(Page page) {
         pageList.add(page);
     }
 

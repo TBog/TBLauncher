@@ -97,13 +97,17 @@ public class DrawableUtils {
         return bitmap;
     }
 
+    public static float getScaleToFit(int shape) {
+        return 1.f / (1.f + 2.f * getMarginToFit(shape));
+    }
+
     public static Drawable applyIconMaskShape(Context ctx, Drawable icon, int shape) {
         return applyIconMaskShape(ctx, icon, shape, 1.f, Color.TRANSPARENT);
     }
 
     public static Drawable applyIconMaskShape(Context ctx, Drawable icon, int shape, boolean fitInside) {
         int color = fitInside ? Color.WHITE : Color.TRANSPARENT;
-        float scale = fitInside ? (1.f / (1.f + 2.f * getMarginToFit(shape))) : 1.f;
+        float scale = fitInside ? getScaleToFit(shape) : 1.f;
         return applyIconMaskShape(ctx, icon, shape, scale, color);
     }
 
