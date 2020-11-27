@@ -306,7 +306,7 @@ public class IconsHandler {
         if (mIconPack != null && mIconPack.hasMask())
             return mIconPack.applyBackgroundAndMask(ctx, drawable, false);
         // if pack has no mask, make it a circle
-        int size = ctx.getResources().getDimensionPixelSize(R.dimen.icon_height);
+        int size = ctx.getResources().getDimensionPixelSize(R.dimen.icon_size);
         Bitmap b = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888);
         Canvas c = new Canvas(b);
         Path path = new Path();

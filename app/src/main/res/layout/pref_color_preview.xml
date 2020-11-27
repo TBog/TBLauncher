@@ -2,7 +2,7 @@
 <ImageView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/prefColorPreview"
-    android:layout_width="@dimen/pref_preview_width"
-    android:layout_height="@dimen/pref_preview_height"
+    android:layout_width="@dimen/color_preview_size"
+    android:layout_height="@dimen/color_preview_size"
     android:importantForAccessibility="no" />
 

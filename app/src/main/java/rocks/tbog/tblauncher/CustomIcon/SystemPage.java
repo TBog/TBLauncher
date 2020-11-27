@@ -148,7 +148,7 @@ public class SystemPage extends PageAdapter.Page {
             });
         }
 
-        int colorPreviewSize = UISizes.getResultIconSize(context) / 2;
+        int colorPreviewSize = context.getResources().getDimensionPixelSize(R.dimen.color_preview_size);
 
         // shape background color chooser
         {

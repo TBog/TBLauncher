@@ -11,7 +11,7 @@
     tools:theme="@style/SettingsDialogTheme">
 
     <View
-        android:layout_width="@dimen/icon_width"
+        android:layout_width="@dimen/icon_size"
         android:layout_height="0dp"
         android:layout_marginStart="@dimen/icon_margin_left"
         android:layout_marginEnd="@dimen/icon_margin_right" />

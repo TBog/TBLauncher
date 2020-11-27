@@ -188,7 +188,7 @@ public class DrawableUtils {
             // Shrink icon fit inside the shape
             int iconSize = icon.getIntrinsicHeight();
             if (iconSize <= 0)
-                iconSize = 2 * ctx.getResources().getDimensionPixelSize(R.dimen.icon_height);
+                iconSize = 2 * ctx.getResources().getDimensionPixelSize(R.dimen.icon_size);
             int iconOffset = (int) (iconSize * (1.f - scale) * .5f + .5f);
             if (iconOffset >= iconSize / 2)
                 iconOffset = iconSize / 2 - 1;
@@ -204,7 +204,7 @@ public class DrawableUtils {
             setIconShape(outputCanvas, outputPaint, shape);
             icon.draw(outputCanvas);
         } else {
-            int iconSize = ctx.getResources().getDimensionPixelSize(R.dimen.icon_height);
+            int iconSize = ctx.getResources().getDimensionPixelSize(R.dimen.icon_size);
 
             outputBitmap = Bitmap.createBitmap(iconSize, iconSize, Bitmap.Config.ARGB_8888);
             outputCanvas = new Canvas(outputBitmap);

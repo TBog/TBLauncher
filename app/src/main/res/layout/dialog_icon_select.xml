@@ -60,8 +60,8 @@
 
         <ImageView
             android:id="@+id/preview"
-            android:layout_width="@dimen/icon_width"
-            android:layout_height="@dimen/icon_height"
+            android:layout_width="@dimen/icon_size"
+            android:layout_height="@dimen/icon_size"
             android:layout_marginStart="@dimen/icon_margin_left"
             android:layout_marginTop="@dimen/icon_margin_top"
             android:layout_marginEnd="@dimen/icon_margin_right"

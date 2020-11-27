@@ -13,8 +13,8 @@
 
     <ImageView
         android:id="@android:id/icon"
-        android:layout_width="@dimen/icon_width"
-        android:layout_height="@dimen/icon_height"
+        android:layout_width="@dimen/icon_size"
+        android:layout_height="@dimen/icon_size"
         android:layout_marginStart="@dimen/icon_margin_left"
         android:layout_marginTop="@dimen/icon_margin_top"
         android:layout_marginEnd="@dimen/icon_margin_right"
@@ -61,8 +61,8 @@
 
     <ImageView
         android:id="@android:id/button1"
-        android:layout_width="@dimen/icon_width"
-        android:layout_height="@dimen/icon_height"
+        android:layout_width="@dimen/icon_size"
+        android:layout_height="@dimen/icon_size"
         android:layout_gravity="center"
         android:background="?attr/appSelectableItemBackground"
         android:contentDescription="@string/cd_remove_tag"
@@ -71,8 +71,8 @@
 
     <ImageView
         android:id="@android:id/button2"
-        android:layout_width="@dimen/icon_width"
-        android:layout_height="@dimen/icon_height"
+        android:layout_width="@dimen/icon_size"
+        android:layout_height="@dimen/icon_size"
         android:layout_gravity="center"
         android:background="?attr/appSelectableItemBackground"
         android:contentDescription="@string/cd_rename_tag"
@@ -81,8 +81,8 @@
 
     <ImageView
         android:id="@android:id/button3"
-        android:layout_width="@dimen/icon_width"
-        android:layout_height="@dimen/icon_height"
+        android:layout_width="@dimen/icon_size"
+        android:layout_height="@dimen/icon_size"
         android:layout_gravity="center"
         android:background="?attr/appSelectableItemBackground"
         android:contentDescription="@string/cd_icon_tag"

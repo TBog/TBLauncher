@@ -5,5 +5,5 @@
         android:width="1dp"
         android:color="@color/colorAccent" />
     <solid android:color="#7f000000" />
-    <corners android:radius="@dimen/icon_height" />
+    <corners android:radius="@dimen/icon_size" />
 </shape>

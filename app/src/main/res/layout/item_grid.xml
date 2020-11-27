@@ -11,8 +11,8 @@
 
     <ImageView
         android:id="@android:id/icon"
-        android:layout_width="@dimen/icon_width"
-        android:layout_height="@dimen/icon_height"
+        android:layout_width="@dimen/icon_size"
+        android:layout_height="@dimen/icon_size"
         android:layout_gravity="top|center_horizontal"
         android:importantForAccessibility="no"
         android:scaleType="fitCenter"
