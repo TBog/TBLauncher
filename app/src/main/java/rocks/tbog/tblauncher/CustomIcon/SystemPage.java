@@ -125,7 +125,7 @@ public class SystemPage extends CustomShapePage {
     }
 
     private static void addQuickOption(@StringRes int textId, Drawable shapedDrawable, Drawable drawable, ShapedIconAdapter adapter) {
-        if (!(drawable instanceof BitmapDrawable))
+        if (!(shapedDrawable instanceof BitmapDrawable))
             return;
 
         ShapedIconInfo iconInfo = new ShapedIconInfo(shapedDrawable, drawable);
