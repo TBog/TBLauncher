@@ -409,10 +409,6 @@ public final class AppEntry extends EntryWithTags {
         Context context = v.getContext();
         // If AppResult, find the icon
         View potentialIcon = v.findViewById(android.R.id.icon);
-        if (potentialIcon == null) {
-            // If favorite, find the icon
-            potentialIcon = v.findViewById(R.id.favorite);
-        }
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 LauncherApps launcher = (LauncherApps) context.getSystemService(Context.LAUNCHER_APPS_SERVICE);

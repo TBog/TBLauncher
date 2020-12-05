@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="icon_size">32dp</dimen>
-    <dimen name="subicon_size">12dp</dimen>
     <dimen name="color_preview_size">16dp</dimen>
 
     <dimen name="icon_margin_left">0dp</dimen>
@@ -19,11 +18,6 @@
     <dimen name="result_title_size">14sp</dimen>
     <dimen name="result_small_size">12sp</dimen>
 
-    <dimen name="color_swatch_large">64dip</dimen>
-    <dimen name="color_swatch_small">48dip</dimen>
-    <dimen name="color_swatch_margins_large">8dip</dimen>
-    <dimen name="color_swatch_margins_small">4dip</dimen>
-
     <dimen name="bar_height">13dp</dimen>
     <dimen name="large_bar_height">22dp</dimen>
     <dimen name="large_quick_list_bar_height">75dp</dimen>
@@ -33,10 +27,6 @@
 
     <dimen name="launcher_button_width">45dp</dimen>
     <dimen name="launcher_button_padding">10dp</dimen>
-
-    <dimen name="favorite_padding">5dp</dimen>
-    <dimen name="favorite_height">58dp</dimen>
-    <dimen name="large_favorite_height">68dp</dimen>
 
     <dimen name="popup_title">12sp</dimen>
     <dimen name="popup_padding_horizontal">22dp</dimen>
@@ -48,7 +38,6 @@
     <dimen name="app_grid_vertical_padding">5dp</dimen>
     <dimen name="app_grid_horizontal_padding">2dp</dimen>
 
-    <dimen name="edit_tag_size">12sp</dimen>
     <dimen name="edit_tag_padding">6sp</dimen>
     <dimen name="separator_thickness">3dp</dimen>
 

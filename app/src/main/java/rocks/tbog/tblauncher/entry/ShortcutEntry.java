@@ -209,10 +209,6 @@ public final class ShortcutEntry extends EntryWithTags {
 
     public static void doShortcutLaunch(@NonNull Context context, @NonNull View view, @NonNull String shortcutData) {
         View potentialIcon = view.findViewById(android.R.id.icon);
-        if (potentialIcon == null) {
-            // If favorite, find the icon
-            potentialIcon = view.findViewById(R.id.favorite);
-        }
         Bundle startActivityOptions = Utilities.makeStartActivityOptions(potentialIcon);
 
         // Non-oreo shortcuts
@@ -239,11 +235,6 @@ public final class ShortcutEntry extends EntryWithTags {
         }
 
         View potentialIcon = v.findViewById(android.R.id.icon);
-        if (potentialIcon == null) {
-            // If favorite, find the icon
-            potentialIcon = v.findViewById(R.id.favorite);
-        }
-
         Bundle startActivityOptions = Utilities.makeStartActivityOptions(potentialIcon);
         Rect sourceBounds = Utilities.getOnScreenRect(potentialIcon);
 

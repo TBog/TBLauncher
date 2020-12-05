@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="icon_size">48dp</dimen>
-    <dimen name="subicon_size">22dp</dimen>
     <dimen name="color_preview_size">24dp</dimen>
 
     <dimen name="result_margin_horizontal">10dp</dimen>

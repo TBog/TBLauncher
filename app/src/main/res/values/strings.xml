@@ -5,9 +5,6 @@
     <string name="ui_item_visit">Visit “%1$s”</string>
     <string name="copy_confirmation">Copied `%s` to clipboard</string>
 
-    <string name="dummy_button">Dummy Button</string>
-    <string name="dummy_content">DUMMY\nCONTENT</string>
-
     <string name="removed_item">Removed %s</string>
 
     <string name="unable_to_initialize_shortcuts">Unable to initialize shortcuts. Is TinyBit your default launcher?</string>
@@ -32,8 +29,6 @@
     <string name="menu_app_uninstall">Uninstall</string>
     <string name="menu_exclude_history">from history</string>
     <string name="menu_exclude_kiss">from TinyBit</string>
-    <string name="excluded_app_history_added">App excluded from history. Reset through the TinyBit settings</string>
-    <string name="excluded_app_list_added">App excluded from TinyBit. Reset through the TinyBit settings</string>
     <string name="application_not_found">Whoops… unable to launch that app.</string>
     <string name="change_wallpaper">Change wallpaper</string>
     <string name="menu_widget_title">Widget menu</string>
@@ -48,18 +43,12 @@
     <string name="rate_the_app">Rate the app</string>
     <string name="user_interface_summary">Themes, transparency and colors</string>
     <string name="title_ui">User interface</string>
-    <string name="theme_name">Theme</string>
-    <string name="misc">Misc</string>
     <string name="notification_bar_section">Notification bar</string>
     <string name="color">Color</string>
     <string name="alpha">Opacity</string>
     <string name="gradient">Gradient</string>
     <string name="black_notification_icons">Dark icons</string>
-    <string name="transparent_search_bar">Transparent search bar</string>
-    <string name="transparent_favorites_bar">Transparent favorites bar</string>
-    <string name="large_search_bar">Bigger search bar</string>
     <string name="round_corners">Rounded corners</string>
-    <string name="swap_kiss_button_with_menu">TinyBit button on the right</string>
 
     <!-- Content Description -->
     <string name="cd_main_menu">Menu</string>
@@ -99,20 +88,9 @@
     <string name="default_icon">default icon</string>
     <string name="default_static_icon">%s default icon</string>
     <string name="custom_icon_application">application</string>
-    <string name="custom_icon_application_with_pack">application with pack</string>
-    <string name="custom_icon_application_adaptive">application adaptive</string>
-    <string name="custom_icon_application_adaptive_fill">application adaptive fill</string>
-    <string name="custom_icon_application_shaped">%s application shape</string>
     <string name="custom_icon_activity">activity</string>
     <string name="custom_icon_activity_adaptive_no_background">activity custom background</string>
-    <string name="custom_icon_activity_with_pack">activity with pack</string>
-    <string name="custom_icon_activity_adaptive">activity adaptive</string>
-    <string name="custom_icon_activity_adaptive_fill">activity adaptive fill</string>
-    <string name="custom_icon_activity_shaped">%s activity shape</string>
     <string name="custom_icon_badged">badged</string>
-    <string name="custom_icon_badged_with_pack">badged with pack</string>
-    <string name="custom_icon_badged_adaptive">badged adaptive</string>
-    <string name="custom_icon_badged_adaptive_fill">badged adaptive fill</string>
     <string name="custom_icon_preview">Selection\npreview</string>
     <string name="custom_name_set_default">Default name</string>
     <string name="custom_name_rename">Rename</string>
@@ -169,9 +147,7 @@
     <string name="cache_half_apps">Small cache size</string>
     <string name="cache_half_apps_summary">Make LRU cache size half the number of apps installed</string>
     <string name="icon_pack_section">Icon pack</string>
-    <string name="icon_pack_list">Installed icon packs</string>
     <string name="icon_pack_content_list">Icons from\n%s</string>
-    <string name="icon_pack_quick_list">System icon variations</string>
 
     <string name="title_wallpaper">Wallpaper interactions</string>
     <string name="lwp_touch">Send touch events to wallpaper</string>
@@ -192,7 +168,6 @@
     <string name="cfg_widget_resize_switch">Switch resize</string>
     <string name="cfg_widget_resize_exit">Exit resize</string>
     <string name="cfg_widget_move_resize">Move &amp; Resize</string>
-    <string name="cfg_widget_move_resize_switch">Switch Move &amp; Resize</string>
     <string name="cfg_widget_move_resize_exit">Exit Move &amp; Resize</string>
     <string name="cfg_widget_remove">Remove</string>
     <string name="cfg_widget_screen_left">Move to <br />\n<b>left</b> screen</string>

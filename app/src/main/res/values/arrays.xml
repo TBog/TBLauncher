@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
-    <string-array name="themesEntries">
-        <item>Transparent theme</item>
-    </string-array>
-    <string-array name="themesValues" translatable="false">
-        <item>transparent</item>
-    </string-array>
 
     <string-array name="adaptiveEntries">
         <item>None</item>
