@@ -73,8 +73,16 @@ public class SystemPage extends CustomShapePage {
             }
             if (drawable != null) {
                 if (checkDuplicateDrawable(dSet, drawable)) {
-                    Drawable shapedDrawable = DrawableUtils.applyIconMaskShape(context, drawable, mShape, mScale, mBackground);
-                    addQuickOption(R.string.custom_icon_activity, shapedDrawable, drawable, adapter);
+                    {
+                        Drawable shapedDrawable = DrawableUtils.applyIconMaskShape(context, drawable, mShape, mScale, mBackground);
+                        addQuickOption(R.string.custom_icon_activity, shapedDrawable, drawable, adapter);
+                    }
+                    if (DrawableUtils.isAdaptiveIconDrawable(drawable))
+                    {
+                        Drawable noBackground = DrawableUtils.applyAdaptiveIconBackgroundShape(context, drawable, DrawableUtils.SHAPE_SQUARE, true);
+                        Drawable shapedDrawable = DrawableUtils.applyIconMaskShape(context, noBackground, mShape, mScale, mBackground);
+                        addQuickOption(R.string.custom_icon_activity_adaptive_no_background, shapedDrawable, noBackground, adapter);
+                    }
                 }
             }
         }

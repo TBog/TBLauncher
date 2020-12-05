@@ -106,8 +106,11 @@ public class DrawableUtils {
     }
 
     public static Drawable applyIconMaskShape(Context ctx, Drawable icon, int shape, boolean fitInside) {
-        int color = fitInside ? Color.WHITE : Color.TRANSPARENT;
-        float scale = fitInside ? getScaleToFit(shape) : 1.f;
+        if (!fitInside || isAdaptiveIconDrawable(icon))
+            return applyIconMaskShape(ctx, icon, shape);
+
+        final int color = Color.WHITE;
+        final float scale = getScaleToFit(shape);
         return applyIconMaskShape(ctx, icon, shape, scale, color);
     }
 
@@ -155,6 +158,51 @@ public class DrawableUtils {
         return (shape == SHAPE_NONE || shape == SHAPE_SQUARE) ? iconSize : (2 * iconSize);
     }
 
+    @SuppressLint("NewApi")
+    public static Drawable applyAdaptiveIconBackgroundShape(Context ctx, Drawable icon, int shape, boolean onlyForeground) {
+        if (!isAdaptiveIconDrawable(icon))
+            return null;
+        AdaptiveIconDrawable adaptiveIcon = (AdaptiveIconDrawable) icon;
+
+        int layerSize = Math.round(TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 108f, ctx.getResources().getDisplayMetrics()));
+        int iconSize = Math.round(layerSize / (1 + 2 * AdaptiveIconDrawable.getExtraInsetFraction()));
+        int layerOffset = (layerSize - iconSize) / 2;
+
+        // Create a bitmap of the icon to use it as the shader of the outputBitmap
+        Bitmap iconBitmap = Bitmap.createBitmap(iconSize, iconSize, Bitmap.Config.ARGB_8888);
+        Canvas iconCanvas = new Canvas(iconBitmap);
+
+        if (!onlyForeground) {
+            Drawable bgDrawable = adaptiveIcon.getBackground();
+            if (bgDrawable != null) {
+                // Stretch adaptive layers because they are 108dp and the icon size is 48dp
+                bgDrawable.setBounds(-layerOffset, -layerOffset, iconSize + layerOffset, iconSize + layerOffset);
+                bgDrawable.draw(iconCanvas);
+            }
+        }
+
+        Drawable fgDrawable = adaptiveIcon.getForeground();
+        if (fgDrawable != null) {
+            fgDrawable.setBounds(-layerOffset, -layerOffset, iconSize + layerOffset, iconSize + layerOffset);
+            fgDrawable.draw(iconCanvas);
+        }
+
+        Bitmap outputBitmap;
+        Canvas outputCanvas;
+        final Paint outputPaint = PAINT;
+        outputPaint.reset();
+        outputPaint.setFlags(Paint.ANTI_ALIAS_FLAG);
+
+        outputBitmap = Bitmap.createBitmap(iconSize, iconSize, Bitmap.Config.ARGB_8888);
+        outputCanvas = new Canvas(outputBitmap);
+
+        outputPaint.setShader(new BitmapShader(iconBitmap, TileMode.CLAMP, TileMode.CLAMP));
+        cropIconShape(outputCanvas, outputPaint, shape);
+        outputPaint.setShader(null);
+
+        return new BitmapDrawable(ctx.getResources(), outputBitmap);
+    }
+
     /**
      * Handle adaptive icons for compatible devices
      */
@@ -191,6 +239,8 @@ public class DrawableUtils {
 
                 Drawable fgDrawable = adaptiveIcon.getForeground();
                 if (fgDrawable != null) {
+                    int iconOffset = (int) (layerSize * (scale - 1.f) * .5f + .5f);
+                    layerOffset += iconOffset;
                     fgDrawable.setBounds(-layerOffset, -layerOffset, iconSize + layerOffset, iconSize + layerOffset);
                     fgDrawable.draw(iconCanvas);
                 }
@@ -200,7 +250,7 @@ public class DrawableUtils {
             outputCanvas = new Canvas(outputBitmap);
 
             outputPaint.setShader(new BitmapShader(iconBitmap, TileMode.CLAMP, TileMode.CLAMP));
-            setIconShape(outputCanvas, outputPaint, shape);
+            cropIconShape(outputCanvas, outputPaint, shape);
             outputPaint.setShader(null);
         }
         // If icon is not adaptive, put it in a white canvas to make it have a unified shape
@@ -220,7 +270,7 @@ public class DrawableUtils {
             int bottomRightCorner = iconSize - iconOffset;
             icon.setBounds(iconOffset, iconOffset, bottomRightCorner, bottomRightCorner);
 
-            setIconShape(outputCanvas, outputPaint, shape);
+            cropIconShape(outputCanvas, outputPaint, shape);
             icon.draw(outputCanvas);
         } else {
             int iconSize = getIconSize(ctx, shape);
@@ -229,7 +279,7 @@ public class DrawableUtils {
             outputCanvas = new Canvas(outputBitmap);
             outputPaint.setColor(0xFF000000);
 
-            setIconShape(outputCanvas, outputPaint, shape);
+            cropIconShape(outputCanvas, outputPaint, shape);
         }
         return new BitmapDrawable(ctx.getResources(), outputBitmap);
     }
@@ -239,7 +289,7 @@ public class DrawableUtils {
      *
      * @param shape type of shape: DrawableUtils.SHAPE_*
      */
-    private static void setIconShape(Canvas canvas, Paint paint, int shape) {
+    private static void cropIconShape(Canvas canvas, Paint paint, int shape) {
         final float iconSize = canvas.getHeight();
         final Path path = SHAPE_PATH;
         path.rewind();
