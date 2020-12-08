@@ -214,7 +214,7 @@ public final class ShortcutEntry extends EntryWithTags {
     }
 
     public static void doShortcutLaunch(@NonNull Context context, @NonNull View view, @NonNull String shortcutData) {
-        View potentialIcon = view.findViewById(android.R.id.icon);
+        View potentialIcon = view.findViewById(android.R.id.icon1);
         Bundle startActivityOptions = Utilities.makeStartActivityOptions(potentialIcon);
 
         // Non-oreo shortcuts
