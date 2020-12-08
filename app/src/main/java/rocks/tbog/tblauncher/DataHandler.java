@@ -615,7 +615,7 @@ public class DataHandler extends BroadcastReceiver
         }
 
         // Remove all shortcuts from favorites for given package name
-        List<ShortcutRecord> shortcutsList = DBHelper.getShortcuts(context, packageName);
+        List<ShortcutRecord> shortcutsList = DBHelper.getShortcutsNoIcons(context, packageName);
         for (ShortcutRecord shortcut : shortcutsList) {
             String id = ShortcutEntry.generateShortcutId(shortcut.dbId, shortcut.displayName);
             EntryItem entry = getPojo(id);
@@ -974,6 +974,13 @@ public class DataHandler extends BroadcastReceiver
 
     public Bitmap getCustomStaticEntryIcon(StaticEntry staticEntry) {
         byte[] bytes = DBHelper.getCustomFavIcon(context, staticEntry.id);
+        if (bytes == null)
+            return null;
+        return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
+    }
+
+    public Bitmap getCustomShortcutIcon(ShortcutEntry shortcutEntry) {
+        byte[] bytes = DBHelper.getCustomFavIcon(context, shortcutEntry.id);
         if (bytes == null)
             return null;
         return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);

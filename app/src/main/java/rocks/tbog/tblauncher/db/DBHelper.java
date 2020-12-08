@@ -32,6 +32,7 @@ public class DBHelper {
     private static final String[] TABLE_FAVORITES_CUSTOM_ICON = new String[]{"custom_icon"};
     private static final String[] TABLE_COLUMNS_FAVORITES = new String[]{"record", "position", "custom_flags", "name"};//, "custom_icon"};
     private static final String[] TABLE_COLUMNS_SHORTCUTS = new String[]{"_id", "name", "package", "info_data", "icon_png", "custom_flags"};
+    private static final String[] TABLE_COLUMNS_SHORTCUTS_NO_ICON = new String[]{"_id", "name", "package", "info_data", "custom_flags"};
 
     private DBHelper() {
     }
@@ -344,12 +345,12 @@ public class DBHelper {
      * Useful when we remove an app and need to also remove the shortcuts for it.
      */
     @NonNull
-    public static List<ShortcutRecord> getShortcuts(@NonNull Context context, @NonNull String packageName) {
+    public static List<ShortcutRecord> getShortcutsNoIcons(@NonNull Context context, @NonNull String packageName) {
         SQLiteDatabase db = getDatabase(context);
 
         ArrayList<ShortcutRecord> records;
         try (Cursor cursor = db.query("shortcuts",
-                TABLE_COLUMNS_SHORTCUTS,
+                TABLE_COLUMNS_SHORTCUTS_NO_ICON,
                 "package = ?", new String[]{packageName},
                 null, null, null)) {
 
@@ -361,8 +362,7 @@ public class DBHelper {
                 entry.displayName = cursor.getString(1);
                 entry.packageName = cursor.getString(2);
                 entry.infoData = cursor.getString(3);
-                entry.iconPng = cursor.getBlob(4);
-                entry.flags = cursor.getInt(5);
+                entry.flags = cursor.getInt(4);
 
                 records.add(entry);
             }
@@ -380,7 +380,7 @@ public class DBHelper {
 
         ArrayList<ShortcutRecord> records;
         try (Cursor cursor = db.query("shortcuts",
-                new String[]{"_id", "name", "package", "info_data", "custom_flags"},
+                TABLE_COLUMNS_SHORTCUTS_NO_ICON,
                 null, null, null, null, null)) {
 
             records = new ArrayList<>(cursor.getCount());

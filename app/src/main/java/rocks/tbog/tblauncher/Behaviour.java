@@ -41,9 +41,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 import rocks.tbog.tblauncher.CustomIcon.IconSelectDialog;
+import rocks.tbog.tblauncher.dataprovider.FavProvider;
 import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.EntryWithTags;
+import rocks.tbog.tblauncher.entry.ShortcutEntry;
 import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.result.ResultAdapter;
 import rocks.tbog.tblauncher.searcher.ISearchActivity;
@@ -73,6 +75,8 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
     public static final int LAUNCH_DELAY = 100;
     private static final String TAG = Behaviour.class.getSimpleName();
+
+    static final String DIALOG_CUSTOM_ICON = "custom_icon_dialog";
 
     private TBLauncherActivity mTBLauncherActivity = null;
     private DialogFragment<?> mFragmentDialog = null;
@@ -779,7 +783,52 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             refreshSearchRecords();
             TBApplication.quickList(mTBLauncherActivity).onFavoritesChanged();
         });
-        dialog.show(mTBLauncherActivity.getSupportFragmentManager(), "custom_icon_dialog");
+        dialog.show(mTBLauncherActivity.getSupportFragmentManager(), DIALOG_CUSTOM_ICON);
+    }
+
+    public void launchCustomIconDialog(ShortcutEntry shortcutEntry) {
+        {
+            DataHandler dh = TBApplication.dataHandler(mTBLauncherActivity);
+            FavProvider favProvider = dh.getFavProvider();
+            if (favProvider != null) {
+                EntryItem item = favProvider.findById(shortcutEntry.id);
+                if (item == null)
+                    dh.addToFavorites(shortcutEntry);
+            }
+        }
+        IconSelectDialog dialog = new IconSelectDialog();
+        openFragmentDialog(dialog);
+
+        // set args
+        {
+            Bundle args = new Bundle();
+            args.putString("packageName", shortcutEntry.packageName);
+            args.putString("shortcutData", shortcutEntry.shortcutData);
+            dialog.setArguments(args);
+        }
+
+        dialog.setOnConfirmListener(drawable -> {
+            if (drawable == null)
+                TBApplication.iconsHandler(mTBLauncherActivity).restoreDefaultIcon(shortcutEntry);
+            else {
+                final TBApplication app = TBApplication.getApplication(mTBLauncherActivity);
+                final DataHandler dh = app.getDataHandler();
+                EntryItem favItem = null;
+                // if the shortcut is not in the favorites, add it before changing the icon
+                {
+                    FavProvider favProvider = dh.getFavProvider();
+                    if (favProvider != null)
+                        favItem = favProvider.findById(shortcutEntry.id);
+                    if (favItem == null)
+                        dh.addToFavorites(shortcutEntry);
+                }
+                app.iconsHandler().changeIcon(shortcutEntry, drawable);
+            }
+            // force a result refresh to update the icon in the view
+            refreshSearchRecords();
+            TBApplication.quickList(mTBLauncherActivity).onFavoritesChanged();
+        });
+        dialog.show(mTBLauncherActivity.getSupportFragmentManager(), DIALOG_CUSTOM_ICON);
     }
 
     public void launchCustomIconDialog(StaticEntry staticEntry) {
@@ -810,7 +859,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             refreshSearchRecords();
             TBApplication.quickList(mTBLauncherActivity).onFavoritesChanged();
         });
-        dialog.show(mTBLauncherActivity.getSupportFragmentManager(), "custom_icon_dialog");
+        dialog.show(mTBLauncherActivity.getSupportFragmentManager(), DIALOG_CUSTOM_ICON);
     }
 
 //    public void launchCustomIconDialog(TagEntry tagEntry) {
@@ -841,7 +890,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 //            refreshSearchRecords();
 //            TBApplication.quickList(mTBLauncherActivity).onFavoritesChanged();
 //        });
-//        dialog.show(mTBLauncherActivity.getSupportFragmentManager(), "custom_icon_dialog");
+//        dialog.show(mTBLauncherActivity.getSupportFragmentManager(), DIALOG_CUSTOM_ICON);
 //    }
 
     public void launchEditTagsDialog(EntryWithTags entry) {

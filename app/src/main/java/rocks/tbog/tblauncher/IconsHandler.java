@@ -29,6 +29,7 @@ import java.util.List;
 
 import rocks.tbog.tblauncher.db.AppRecord;
 import rocks.tbog.tblauncher.entry.AppEntry;
+import rocks.tbog.tblauncher.entry.ShortcutEntry;
 import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.icons.IconPack;
 import rocks.tbog.tblauncher.icons.IconPackXML;
@@ -255,6 +256,15 @@ public class IconsHandler {
         return null;
     }
 
+    public Drawable getCustomIcon(ShortcutEntry shortcutEntry) {
+        Bitmap bitmap = TBApplication.dataHandler(ctx).getCustomShortcutIcon(shortcutEntry);
+        if (bitmap != null)
+            return new BitmapDrawable(ctx.getResources(), bitmap);
+
+        Log.e(TAG, "Unable to get custom icon for " + shortcutEntry.id);
+        return null;
+    }
+
     public Drawable getCustomIcon(String componentName, long customIcon) {
         Bitmap bitmap = TBApplication.dataHandler(ctx).getCustomAppIcon(componentName);
         if (bitmap != null)
@@ -264,8 +274,16 @@ public class IconsHandler {
         return null;
     }
 
+    private static Bitmap getIconBitmap(Context ctx, Drawable drawable) {
+        if (drawable instanceof TextDrawable) {
+            int size = UISizes.getResultIconSize(ctx);
+            return DrawableUtils.drawableToBitmap(drawable, size, size);
+        }
+        return Utilities.drawableToBitmap(drawable);
+    }
+
     public void changeIcon(AppEntry appEntry, Drawable drawable) {
-        Bitmap bitmap = Utilities.drawableToBitmap(drawable);
+        Bitmap bitmap = getIconBitmap(ctx, drawable);
         TBApplication app = TBApplication.getApplication(ctx);
         AppRecord appRecord = app.getDataHandler().setCustomAppIcon(appEntry.getUserComponentName(), bitmap);
         //storeDrawable(customIconFileName(appRecord.componentName, appRecord.dbId), drawable);
@@ -273,13 +291,16 @@ public class IconsHandler {
         app.drawableCache().cacheDrawable(appEntry.id, drawable);
     }
 
+    public void changeIcon(ShortcutEntry shortcutEntry, Drawable drawable) {
+        Bitmap bitmap = getIconBitmap(ctx, drawable);
+        TBApplication app = TBApplication.getApplication(ctx);
+        app.getDataHandler().setCustomStaticEntryIcon(shortcutEntry.id, bitmap);
+        shortcutEntry.setCustomIcon();
+        app.drawableCache().cacheDrawable(shortcutEntry.id, drawable);
+    }
+
     public void changeIcon(StaticEntry staticEntry, Drawable drawable) {
-        Bitmap bitmap;
-        if (drawable instanceof TextDrawable) {
-            int size = UISizes.getResultIconSize(ctx);
-            bitmap = DrawableUtils.drawableToBitmap(drawable, size, size);
-        } else
-            bitmap = Utilities.drawableToBitmap(drawable);
+        Bitmap bitmap = getIconBitmap(ctx, drawable);
         TBApplication app = TBApplication.getApplication(ctx);
         app.getDataHandler().setCustomStaticEntryIcon(staticEntry.id, bitmap);
         staticEntry.setCustomIcon();
@@ -291,6 +312,13 @@ public class IconsHandler {
         AppRecord appRecord = app.getDataHandler().removeCustomAppIcon(appEntry.getUserComponentName());
         appEntry.clearCustomIcon();
         app.drawableCache().cacheDrawable(appEntry.id, null);
+    }
+
+    public void restoreDefaultIcon(ShortcutEntry shortcutEntry) {
+        TBApplication app = TBApplication.getApplication(ctx);
+        app.getDataHandler().removeCustomStaticEntryIcon(shortcutEntry.id);
+        shortcutEntry.clearCustomIcon();
+        app.drawableCache().cacheDrawable(shortcutEntry.id, null);
     }
 
     public void restoreDefaultIcon(StaticEntry staticEntry) {

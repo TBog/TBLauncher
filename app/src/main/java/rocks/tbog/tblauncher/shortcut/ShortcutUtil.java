@@ -9,6 +9,7 @@ import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Process;
@@ -18,6 +19,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import androidx.preference.PreferenceManager;
 
@@ -175,6 +177,16 @@ public class ShortcutUtil {
         // see: https://stackoverflow.com/questions/38753798/android-webp-encoding-in-api-v18-and-above-bitmap-compressbitmap-compressforma
         icon.compress(Bitmap.CompressFormat.PNG, 100, outputStream);
         return outputStream.toByteArray();
+    }
+
+    @Nullable
+    public static Bitmap getInitialIcon(@NonNull Context context, long dbId) {
+        byte[] iconBlob = DBHelper.getShortcutIcon(context, dbId);
+
+        if (iconBlob != null)
+            return BitmapFactory.decodeByteArray(iconBlob, 0, iconBlob.length);
+
+        return null;
     }
 
     /**

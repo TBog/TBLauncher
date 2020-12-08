@@ -18,11 +18,14 @@ import androidx.viewpager.widget.ViewPager;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 
 import rocks.tbog.tblauncher.IconsHandler;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
+import rocks.tbog.tblauncher.db.DBHelper;
+import rocks.tbog.tblauncher.db.ShortcutRecord;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.icons.IconPack;
@@ -83,6 +86,22 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
                     String pageName = context.getString(R.string.tab_static_icons);
                     mCustomShapePage = addStaticEntryPage(inflater, mViewPager, staticEntry, pageName);
                 }
+            } else if (args.containsKey("shortcutData")) {
+                String packageName = args.getString("packageName", "");
+                String shortcutData = args.getString("shortcutData", "");
+                ShortcutRecord shortcutRecord = null;
+                List<ShortcutRecord> shortcutRecordList = DBHelper.getShortcutsNoIcons(context, packageName);
+                for (ShortcutRecord rec : shortcutRecordList)
+                    if (shortcutData.equals(rec.infoData)) {
+                        shortcutRecord = rec;
+                        break;
+                    }
+                if (shortcutRecord == null) {
+                    dismiss();
+                } else {
+                    mCustomShapePage = addShortcutPage(inflater, mViewPager, shortcutRecord, shortcutRecord.displayName);
+                }
+
             }
         }
 
@@ -157,6 +176,14 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
     public StaticEntryPage addStaticEntryPage(LayoutInflater inflater, ViewPager container, StaticEntry staticEntry, String pageName) {
         View view = inflater.inflate(R.layout.dialog_custom_shape_icon_select_page, container, false);
         StaticEntryPage page = new StaticEntryPage(pageName, view, staticEntry);
+        PageAdapter adapter = (PageAdapter) mViewPager.getAdapter();
+        adapter.addPage(page);
+        return page;
+    }
+
+    public ShortcutPage addShortcutPage(LayoutInflater inflater, ViewPager container, ShortcutRecord shortcutRecord, String pageName) {
+        View view = inflater.inflate(R.layout.dialog_custom_shape_icon_select_page, container, false);
+        ShortcutPage page = new ShortcutPage(pageName, view, shortcutRecord);
         PageAdapter adapter = (PageAdapter) mViewPager.getAdapter();
         adapter.addPage(page);
         return page;

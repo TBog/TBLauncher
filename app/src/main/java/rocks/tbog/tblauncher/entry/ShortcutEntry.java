@@ -39,6 +39,7 @@ import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.db.DBHelper;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
+import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.UIColors;
@@ -58,6 +59,8 @@ public final class ShortcutEntry extends EntryWithTags {
     public final String shortcutData;
     @Nullable
     public final ShortcutInfo mShortcutInfo;
+
+    protected boolean customIcon;
 
     public ShortcutEntry(@NonNull String id, long dbId, @NonNull String packageName, @NonNull String shortcutData) {
         super(id);
@@ -99,13 +102,16 @@ public final class ShortcutEntry extends EntryWithTags {
     }
 
     public Drawable getIcon(@NonNull Context context) {
-        byte[] iconBlob = DBHelper.getShortcutIcon(context, this.dbId);
-
-        if (iconBlob == null) {
-            return null;
+        if (customIcon) {
+            IconsHandler iconsHandler = TBApplication.getApplication(context).iconsHandler();
+            Drawable drawable = iconsHandler.getCustomIcon(this);
+            if (drawable != null)
+                return drawable;
+            else
+                iconsHandler.restoreDefaultIcon(this);
         }
 
-        Bitmap bitmap = BitmapFactory.decodeByteArray(iconBlob, 0, iconBlob.length);
+        Bitmap bitmap = ShortcutUtil.getInitialIcon(context, dbId);
         if (bitmap == null)
             return null;
 
@@ -263,7 +269,7 @@ public final class ShortcutEntry extends EntryWithTags {
         else
             adapter.add(new LinearAdapter.Item(context, R.string.menu_tags_edit));
         adapter.add(new LinearAdapter.Item(context, R.string.menu_shortcut_rename));
-        //adapter.add(new LinearAdapter.Item(context, R.string.menu_custom_icon));
+        adapter.add(new LinearAdapter.Item(context, R.string.menu_custom_icon));
 
         if (Utilities.checkFlag(flags, FLAG_POPUP_MENU_QUICK_LIST)) {
             adapter.add(new LinearAdapter.ItemTitle(context, R.string.menu_popup_title_settings));
@@ -288,6 +294,9 @@ public final class ShortcutEntry extends EntryWithTags {
                 return true;
             case R.string.menu_shortcut_rename:
                 launchRenameDialog(ctx);
+                return true;
+            case R.string.menu_custom_icon:
+                TBApplication.behaviour(ctx).launchCustomIconDialog(this);
                 return true;
         }
         return super.popupMenuClickHandler(view, item, stringId, parentView);
@@ -389,6 +398,14 @@ public final class ShortcutEntry extends EntryWithTags {
                 icon1.setImageDrawable(appDrawable);
             }
         }
+    }
+
+    public void setCustomIcon() {
+        customIcon = true;
+    }
+
+    public void clearCustomIcon() {
+        customIcon = false;
     }
 
     public static class AsyncSetEntryIcon extends ResultViewHelper.AsyncSetEntryDrawable {

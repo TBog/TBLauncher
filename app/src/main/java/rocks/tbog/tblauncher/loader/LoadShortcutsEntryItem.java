@@ -17,6 +17,7 @@ import java.util.List;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.TagsHandler;
 import rocks.tbog.tblauncher.db.DBHelper;
+import rocks.tbog.tblauncher.db.FavRecord;
 import rocks.tbog.tblauncher.db.ShortcutRecord;
 import rocks.tbog.tblauncher.entry.ShortcutEntry;
 
@@ -48,6 +49,14 @@ public class LoadShortcutsEntryItem extends LoadEntryItem<ShortcutEntry> {
             return new ArrayList<>();
         }
 
+        final HashMap<String, FavRecord> favorites;
+        {
+            ArrayList<FavRecord> favList = DBHelper.getFavorites(ctx);
+            favorites = new HashMap<>();
+            for (FavRecord fav : favList)
+                favorites.put(fav.record, fav);
+        }
+
         List<ShortcutRecord> records = DBHelper.getShortcutsNoIcons(ctx);
         ArrayList<ShortcutEntry> pojos = new ArrayList<>(records.size());
 
@@ -58,12 +67,16 @@ public class LoadShortcutsEntryItem extends LoadEntryItem<ShortcutEntry> {
                 oreoMap.put(shortcutRecord.infoData, shortcutRecord);
                 continue;
             }
-            String id = ShortcutEntry.generateShortcutId(shortcutRecord.dbId, shortcutRecord.infoData);
 
-            ShortcutEntry pojo = new ShortcutEntry(id, shortcutRecord.dbId, shortcutRecord.packageName, shortcutRecord.infoData);
+            final String id = ShortcutEntry.generateShortcutId(shortcutRecord.dbId, shortcutRecord.infoData);
+            final ShortcutEntry pojo = new ShortcutEntry(id, shortcutRecord.dbId, shortcutRecord.packageName, shortcutRecord.infoData);
 
             pojo.setName(shortcutRecord.displayName);
             pojo.setTags(tagsHandler.getTags(pojo.id));
+
+            FavRecord favRecord = favorites.get(pojo.id);
+            if (favRecord != null && favRecord.hasCustomIcon())
+                pojo.setCustomIcon();
 
             pojos.add(pojo);
         }
@@ -91,6 +104,10 @@ public class LoadShortcutsEntryItem extends LoadEntryItem<ShortcutEntry> {
                 ShortcutEntry pojo = new ShortcutEntry(dbId, shortcutInfo);
                 pojo.setName(name);
                 pojo.setTags(tagsHandler.getTags(pojo.id));
+
+                FavRecord favRecord = favorites.get(pojo.id);
+                if (favRecord != null && favRecord.hasCustomIcon())
+                    pojo.setCustomIcon();
 
                 pojos.add(pojo);
             }
