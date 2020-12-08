@@ -116,7 +116,9 @@ public class Utilities {
         }.executeOnExecutor(ResultViewHelper.EXECUTOR_LOAD_ICON);
     }
 
-    public static void setIntentSourceBounds(@NonNull Intent intent, @NonNull View v) {
+    public static void setIntentSourceBounds(@NonNull Intent intent, @Nullable View v) {
+        if (v == null)
+            return;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR2) {
             v.getLocationOnScreen(ON_SCREEN_POS);
             ON_SCREEN_RECT.set(ON_SCREEN_POS[0], ON_SCREEN_POS[1], ON_SCREEN_POS[0] + v.getWidth(), ON_SCREEN_POS[1] + v.getHeight());

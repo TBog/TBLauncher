@@ -25,7 +25,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import net.mm2d.color.chooser.DialogView;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
@@ -57,7 +56,7 @@ class CustomShapePage extends PageAdapter.Page {
         final Context ctx = view.getContext();
         mShape = TBApplication.iconsHandler(ctx).getSystemIconPack().getAdaptiveShape();
         mLetters = UIColors.getContactActionColor(ctx);
-        mBackground = (UIColors.luminance(UIColors.getResultListBackground(ctx)) > .666) ? Color.BLACK : Color.WHITE;
+        mBackground = UIColors.getIconBackground(ctx);
         if (mShape == DrawableUtils.SHAPE_NONE)
             mShape = DrawableUtils.SHAPE_SQUARE;
     }
@@ -188,13 +187,13 @@ class CustomShapePage extends PageAdapter.Page {
         mShapedIconAdapter.addItem(iconInfo);
     }
 
-    private void addTextIcon(@NonNull TextDrawable icon) {
+    private void addTextIcon(CharSequence name, @NonNull TextDrawable icon) {
         final Context ctx = pageView.getContext();
         final ShapedIconAdapter adapter = mShapedIconAdapter;
 
         icon.setTextColor(mLetters);
         Drawable shapedIcon = DrawableUtils.applyIconMaskShape(ctx, icon, mShape, mScale, mBackground);
-        adapter.addItem(new LetterIconInfo(shapedIcon));
+        adapter.addItem(new LetterIconInfo(name, shapedIcon, icon));
     }
 
     private void generateTextIcons(@Nullable CharSequence text) {
@@ -208,26 +207,40 @@ class CustomShapePage extends PageAdapter.Page {
         }
         adapter.notifyDataSetChanged();
 
+        final StringBuilder name = new StringBuilder();
         final int length = Utilities.codePointsLength(text);
+        int pos = 0;
         if (length >= 1) {
+            name.appendCodePoint(Character.codePointAt(text, pos));
             TextDrawable icon = new CodePointDrawable(text);
-            addTextIcon(icon);
+            addTextIcon(name.toString(), icon);
         }
+        // two characters
         if (length >= 2) {
+            pos = Utilities.getNextCodePointIndex(text, pos);
+            name.appendCodePoint(Character.codePointAt(text, pos));
             TextDrawable icon = TwoCodePointDrawable.fromText(text, false);
-            addTextIcon(icon);
+            addTextIcon(name.toString(), icon);
         }
         if (length >= 2) {
             TextDrawable icon = TwoCodePointDrawable.fromText(text, true);
-            addTextIcon(icon);
+            addTextIcon(name.toString(), icon);
         }
+        // three characters
         if (length >= 3) {
+            pos = Utilities.getNextCodePointIndex(text, pos);
+            name.appendCodePoint(Character.codePointAt(text, pos));
             TextDrawable icon = FourCodePointDrawable.fromText(text, true);
-            addTextIcon(icon);
+            addTextIcon(name.toString(), icon);
+        }
+        // four characters
+        if (length >= 4) {
+            pos = Utilities.getNextCodePointIndex(text, pos);
+            name.appendCodePoint(Character.codePointAt(text, pos));
         }
         if (length >= 3) {
             TextDrawable icon = FourCodePointDrawable.fromText(text, false);
-            addTextIcon(icon);
+            addTextIcon(name.toString(), icon);
         }
     }
 
@@ -250,25 +263,18 @@ class CustomShapePage extends PageAdapter.Page {
     }
 
     private void reshapeIcons(Context context) {
-        generateTextIcons(null);
+        //generateTextIcons(null);
         for (ListIterator<ShapedIconInfo> iterator = mShapedIconAdapter.getList().listIterator(); iterator.hasNext(); ) {
             ShapedIconInfo iconInfo = iterator.next();
             if (iconInfo.textId == R.string.icon_pack_loading)
                 continue;
             if (iconInfo.textId == R.string.default_icon)
                 continue;
-            ShapedIconInfo newInfo;
-            Drawable drawable = DrawableUtils.applyIconMaskShape(context, iconInfo.originalDrawable, mShape, mScale, mBackground);
-            if (iconInfo instanceof NamedIconInfo) {
-                newInfo = new NamedIconInfo(((NamedIconInfo) iconInfo).name, drawable, iconInfo.originalDrawable);
-            } else {
-                newInfo = new ShapedIconInfo(drawable, iconInfo.originalDrawable);
-                newInfo.textId = iconInfo.textId;
-            }
+            ShapedIconInfo newInfo = iconInfo.reshape(context, mShape, mScale, mBackground);
             iterator.set(newInfo);
         }
         mShapedIconAdapter.notifyDataSetChanged();
-        generateTextIcons(mLettersView.getText());
+        //generateTextIcons(mLettersView.getText());
     }
 
     interface OnColorChanged {
@@ -302,8 +308,14 @@ class CustomShapePage extends PageAdapter.Page {
 
     static class LetterIconInfo extends NamedIconInfo {
 
-        LetterIconInfo(Drawable icon) {
-            super("", icon, icon);
+        LetterIconInfo(CharSequence name, Drawable icon, Drawable text) {
+            super(name, icon, text);
+        }
+
+        @Override
+        ShapedIconInfo reshape(Context context, int shape, float scale, int background) {
+            Drawable drawable = DrawableUtils.applyIconMaskShape(context, originalDrawable, shape, scale, background);
+            return new LetterIconInfo(name, drawable, originalDrawable);
         }
     }
 
@@ -327,6 +339,12 @@ class CustomShapePage extends PageAdapter.Page {
             this.name = name;
         }
 
+        @Override
+        ShapedIconInfo reshape(Context context, int shape, float scale, int background) {
+            Drawable drawable = DrawableUtils.applyIconMaskShape(context, originalDrawable, shape, scale, background);
+            return new NamedIconInfo(name, drawable, originalDrawable);
+        }
+
         @Nullable
         @Override
         CharSequence getText() {
@@ -343,6 +361,13 @@ class CustomShapePage extends PageAdapter.Page {
         ShapedIconInfo(Drawable icon, Drawable origin) {
             iconDrawable = icon;
             originalDrawable = origin;
+        }
+
+        ShapedIconInfo reshape(Context context, int shape, float scale, int background) {
+            Drawable drawable = DrawableUtils.applyIconMaskShape(context, originalDrawable, shape, scale, background);
+            ShapedIconInfo shapedIconInfo = new ShapedIconInfo(drawable, originalDrawable);
+            shapedIconInfo.textId = textId;
+            return shapedIconInfo;
         }
 
         Drawable getIcon() {

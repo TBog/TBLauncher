@@ -323,6 +323,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 String key = preference.getKey();
                 Log.d(TAG, "onDisplayPreferenceDialog " + key);
                 switch (key) {
+                    case "icon-background":
                     case "notification-bar-color":
                     case "search-bar-color":
                     case "result-list-color":
@@ -460,6 +461,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     }
                 }
                 break;
+            case "icon-background":
+                TBApplication.drawableCache(context).clearCache();
+                // fallthrough
             case "quick-list-color":
                 // static entities will change color based on luminance
                 // fallthrough

@@ -23,6 +23,7 @@ public final class UIColors {
     private static int CACHED_COLOR_SEARCH_TEXT = 0;
     private static int CACHED_COLOR_SEARCH_ICON = 0;
     private static Integer CACHED_BACKGROUND_RESULT_LIST = null;
+    private static Integer CACHED_BACKGROUND_ICON = null;
 
     private UIColors() {
     }
@@ -36,6 +37,7 @@ public final class UIColors {
         CACHED_COLOR_SEARCH_TEXT = 0;
         CACHED_COLOR_SEARCH_ICON = 0;
         CACHED_BACKGROUND_RESULT_LIST = null;
+        CACHED_BACKGROUND_ICON = null;
     }
 
     public static int getDefaultColor(Context context) {
@@ -172,5 +174,14 @@ public final class UIColors {
             CACHED_BACKGROUND_RESULT_LIST = setAlpha(color, alpha);
         }
         return CACHED_BACKGROUND_RESULT_LIST;
+    }
+
+    public static int getIconBackground(Context context) {
+        if (CACHED_BACKGROUND_ICON == null) {
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+            int color = UIColors.getColor(pref, "icon-background");
+            CACHED_BACKGROUND_ICON = setAlpha(color, 0xFF);
+        }
+        return CACHED_BACKGROUND_ICON;
     }
 }

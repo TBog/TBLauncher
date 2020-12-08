@@ -2,7 +2,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
 
     <string-array name="adaptiveEntries">
-        <item>None</item>
+        <item>None / Default</item>
         <item>Circle</item>
         <item>Square</item>
         <item>Squircle</item>

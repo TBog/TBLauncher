@@ -156,16 +156,11 @@ public class IconsHandler {
             return null;
 
         // if the icon pack has a mask, use that instead of the adaptive shape
-        if (mIconPack != null && mIconPack.hasMask())
+        if (mIconPack != null && mIconPack.hasMask() && !mForceShape)
             return mIconPack.applyBackgroundAndMask(ctx, systemIcon, false);
 
-        // use adaptive shape
-        if (DrawableUtils.isAdaptiveIconDrawable(systemIcon) || mForceAdaptive)
-            return mSystemPack.applyBackgroundAndMask(ctx, systemIcon, true);
-        else if (mForceShape)
-            return mSystemPack.applyBackgroundAndMask(ctx, systemIcon, false);
-        else
-            return systemIcon;
+        boolean fitInside = mForceAdaptive || !mForceShape;
+        return mSystemPack.applyBackgroundAndMask(ctx, systemIcon, fitInside);
     }
 
     /**
@@ -198,13 +193,8 @@ public class IconsHandler {
         if (mShortcutBadgePackMask && mIconPack != null && mIconPack.hasMask())
             return mIconPack.applyBackgroundAndMask(ctx, systemIcon, false);
 
-        // use adaptive shape
-        if (DrawableUtils.isAdaptiveIconDrawable(systemIcon) || mForceAdaptive)
-            return mSystemPack.applyBackgroundAndMask(ctx, systemIcon, true);
-        else if (mForceShape)
-            return mSystemPack.applyBackgroundAndMask(ctx, systemIcon, false);
-        else
-            return systemIcon;
+        boolean fitInside = mForceAdaptive || !mForceShape;
+        return mSystemPack.applyBackgroundAndMask(ctx, systemIcon, fitInside);
     }
 
     /**
@@ -349,7 +339,7 @@ public class IconsHandler {
     public Drawable applyShortcutMask(@NonNull Context ctx, Bitmap bitmap) {
         Drawable drawable = new BitmapDrawable(ctx.getResources(), bitmap);
         if (!mShortcutPackMask)
-            return DrawableUtils.applyIconMaskShape(ctx, drawable, mShortcutsShape, false);
+            return DrawableUtils.applyIconMaskShape(ctx, drawable, mShortcutsShape, true);
         if (mIconPack != null && mIconPack.hasMask())
             return mIconPack.applyBackgroundAndMask(ctx, drawable, false);
         return drawable;

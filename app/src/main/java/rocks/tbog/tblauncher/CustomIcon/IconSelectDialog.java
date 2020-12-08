@@ -2,6 +2,8 @@ package rocks.tbog.tblauncher.CustomIcon;
 
 import android.content.ComponentName;
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -27,8 +29,10 @@ import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.db.DBHelper;
 import rocks.tbog.tblauncher.db.ShortcutRecord;
 import rocks.tbog.tblauncher.entry.EntryItem;
+import rocks.tbog.tblauncher.entry.ShortcutEntry;
 import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.icons.IconPack;
+import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
 import rocks.tbog.tblauncher.ui.DialogFragment;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
@@ -226,6 +230,8 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
             customIconApp(args);
         else if (args.containsKey("entryId"))
             customIconStaticEntry(args);
+        else if (args.containsKey("shortcutData"))
+            customIconShortcut(args);
 
         // OK button
         {
@@ -279,6 +285,32 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
 
         // Preview
         Utilities.setIconAsync(mPreview, staticEntry::getIconDrawable);
+    }
+
+    private void customIconShortcut(Bundle args) {
+        Context context = requireContext();
+
+        String packageName = args.getString("packageName", "");
+        String shortcutData = args.getString("shortcutData", "");
+
+        ShortcutRecord shortcutRecord = null;
+        List<ShortcutRecord> shortcutRecordList = DBHelper.getShortcutsNoIcons(context, packageName);
+        for (ShortcutRecord rec : shortcutRecordList)
+            if (shortcutData.equals(rec.infoData)) {
+                shortcutRecord = rec;
+                break;
+            }
+
+        String entryId = ShortcutEntry.generateShortcutId(shortcutRecord.dbId, shortcutRecord.infoData);
+        EntryItem entryItem = TBApplication.dataHandler(context).getPojo(entryId);
+        if (!(entryItem instanceof ShortcutEntry)) {
+            dismiss();
+            return;
+        }
+        ShortcutEntry shortcutEntry = (ShortcutEntry) entryItem;
+
+        // Preview
+        Utilities.setIconAsync(mPreview, shortcutEntry::getIcon);
     }
 
     @Override

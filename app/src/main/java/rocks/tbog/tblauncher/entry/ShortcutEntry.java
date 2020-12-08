@@ -10,7 +10,6 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutInfo;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -37,7 +36,6 @@ import java.util.Locale;
 import rocks.tbog.tblauncher.IconsHandler;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
-import rocks.tbog.tblauncher.db.DBHelper;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
@@ -372,7 +370,7 @@ public final class ShortcutEntry extends EntryWithTags {
             }
             if (appDrawable == null) {
                 appDrawable = packageManager.getApplicationIcon(packageName);
-                iconsHandler.getIconPack().applyBackgroundAndMask(context, appDrawable, false);
+                iconsHandler.getIconPack().applyBackgroundAndMask(context, appDrawable, true);
             }
         } catch (PackageManager.NameNotFoundException | URISyntaxException e) {
             Log.e("Shortcut", "get app shortcut icon", e);

@@ -25,6 +25,13 @@
             android:key="adaptive-shape"
             android:title="@string/adaptive_shape_name" />
 
+        <rocks.tbog.tblauncher.preference.CustomDialogPreference
+            android:defaultValue="@integer/default_icon_background"
+            android:key="icon-background"
+            android:dependency="adaptive-shape"
+            android:title="@string/icon_background"
+            android:widgetLayout="@layout/pref_color_preview"/>
+
         <SwitchPreference
             android:defaultValue="true"
             android:disableDependentsState="true"

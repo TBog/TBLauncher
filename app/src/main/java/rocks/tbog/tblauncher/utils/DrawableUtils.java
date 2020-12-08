@@ -109,7 +109,7 @@ public class DrawableUtils {
         if (!fitInside || isAdaptiveIconDrawable(icon))
             return applyIconMaskShape(ctx, icon, shape);
 
-        final int color = Color.WHITE;
+        final int color = UIColors.getIconBackground(ctx);
         final float scale = getScaleToFit(shape);
         return applyIconMaskShape(ctx, icon, shape, scale, color);
     }

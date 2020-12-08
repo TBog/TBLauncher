@@ -284,9 +284,9 @@
 
     <string name="adaptive_shape_name">Icon shape</string>
     <string name="force_adaptive">Set icon background</string>
-    <string name="force_adaptive_summary">Reduce icon scale and place on a white background</string>
-    <string name="force_shape">Crop to shape</string>
-    <string name="force_shape_summary">Crop system icon to shape</string>
+    <string name="force_adaptive_summary">Reduce icon scale and place on a shaped background</string>
+    <string name="force_shape">Force shape</string>
+    <string name="force_shape_summary">Use custom shaped background for all</string>
     <string name="contact_pack_mask">Contacts</string>
     <string name="contact_pack_mask_summary">Use icon pack shape for contacts</string>
     <string name="contacts_shape_name">Contacts shape</string>
@@ -304,6 +304,7 @@
     <string name="choose_icon">Choose icon</string>
     <string name="choose_icon_menu_add">Add as alternative</string>
     <string name="choose_icon_menu_add2">Add alternative and show</string>
+    <string name="icon_background">Icon background</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">%d entry</item>
