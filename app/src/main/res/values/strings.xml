@@ -29,7 +29,8 @@
     <string name="menu_app_uninstall">Uninstall</string>
     <string name="menu_exclude_history">from history</string>
     <string name="menu_exclude_kiss">from TinyBit</string>
-    <string name="application_not_found">Whoops… unable to launch that app.</string>
+    <string name="application_not_found">Whoops… unable to launch that app</string>
+    <string name="entry_not_found">`%s` not found</string>
     <string name="change_wallpaper">Change wallpaper</string>
     <string name="menu_widget_title">Widget menu</string>
     <string name="menu_widget_add">Add Widget…</string>

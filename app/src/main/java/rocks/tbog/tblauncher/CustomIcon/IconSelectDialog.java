@@ -2,8 +2,6 @@ package rocks.tbog.tblauncher.CustomIcon;
 
 import android.content.ComponentName;
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -13,6 +11,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -33,7 +32,6 @@ import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.ShortcutEntry;
 import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.icons.IconPack;
-import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
 import rocks.tbog.tblauncher.ui.DialogFragment;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
@@ -88,6 +86,7 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
                 EntryItem entryItem = TBApplication.dataHandler(context).getPojo(entryId);
                 if (!(entryItem instanceof StaticEntry)) {
                     dismiss();
+                    Toast.makeText(Utilities.getActivity(context), context.getString(R.string.entry_not_found, entryId), Toast.LENGTH_LONG).show();
                 } else {
                     StaticEntry staticEntry = (StaticEntry) entryItem;
                     String pageName = context.getString(R.string.tab_static_icons);
@@ -105,6 +104,8 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
                     }
                 if (shortcutRecord == null) {
                     dismiss();
+                    String shortcutId = args.getString("shortcutId", "");
+                    Toast.makeText(Utilities.getActivity(context), context.getString(R.string.entry_not_found, shortcutId), Toast.LENGTH_LONG).show();
                 } else {
                     mCustomShapePage = addShortcutPage(inflater, mViewPager, shortcutRecord, shortcutRecord.displayName);
                 }
@@ -262,6 +263,8 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
         long customIcon = args.getLong("customIcon", 0);
         if (name.isEmpty()) {
             dismiss();
+            String entryName = args.getString("entryName", "");
+            Toast.makeText(Utilities.getActivity(context), context.getString(R.string.entry_not_found, entryName), Toast.LENGTH_LONG).show();
             return;
         }
 
@@ -285,6 +288,7 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
         EntryItem entryItem = TBApplication.dataHandler(context).getPojo(entryId);
         if (!(entryItem instanceof StaticEntry)) {
             dismiss();
+            Toast.makeText(Utilities.getActivity(context), context.getString(R.string.entry_not_found, entryId), Toast.LENGTH_LONG).show();
             return;
         }
         StaticEntry staticEntry = (StaticEntry) entryItem;
@@ -299,8 +303,9 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
         String shortcutId = args.getString("shortcutId", "");
 
         EntryItem entryItem = TBApplication.dataHandler(context).getPojo(shortcutId);
-        if (!(entryItem instanceof ShortcutEntry)) {
+        if ((entryItem instanceof ShortcutEntry)) {
             dismiss();
+            Toast.makeText(Utilities.getActivity(context), context.getString(R.string.entry_not_found, shortcutId), Toast.LENGTH_LONG).show();
             return;
         }
         ShortcutEntry shortcutEntry = (ShortcutEntry) entryItem;
