@@ -787,15 +787,6 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     public void launchCustomIconDialog(ShortcutEntry shortcutEntry) {
-        {
-            DataHandler dh = TBApplication.dataHandler(mTBLauncherActivity);
-            FavProvider favProvider = dh.getFavProvider();
-            if (favProvider != null) {
-                EntryItem item = favProvider.findById(shortcutEntry.id);
-                if (item == null)
-                    dh.addToFavorites(shortcutEntry);
-            }
-        }
         IconSelectDialog dialog = new IconSelectDialog();
         openFragmentDialog(dialog);
 
@@ -804,6 +795,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             Bundle args = new Bundle();
             args.putString("packageName", shortcutEntry.packageName);
             args.putString("shortcutData", shortcutEntry.shortcutData);
+            args.putString("shortcutId", shortcutEntry.id);
             dialog.setArguments(args);
         }
 

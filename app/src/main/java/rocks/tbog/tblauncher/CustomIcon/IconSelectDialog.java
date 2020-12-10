@@ -90,7 +90,7 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
                     String pageName = context.getString(R.string.tab_static_icons);
                     mCustomShapePage = addStaticEntryPage(inflater, mViewPager, staticEntry, pageName);
                 }
-            } else if (args.containsKey("shortcutData")) {
+            } else if (args.containsKey("shortcutId")) {
                 String packageName = args.getString("packageName", "");
                 String shortcutData = args.getString("shortcutData", "");
                 ShortcutRecord shortcutRecord = null;
@@ -230,7 +230,7 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
             customIconApp(args);
         else if (args.containsKey("entryId"))
             customIconStaticEntry(args);
-        else if (args.containsKey("shortcutData"))
+        else if (args.containsKey("shortcutId"))
             customIconShortcut(args);
 
         // OK button
@@ -290,19 +290,9 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
     private void customIconShortcut(Bundle args) {
         Context context = requireContext();
 
-        String packageName = args.getString("packageName", "");
-        String shortcutData = args.getString("shortcutData", "");
+        String shortcutId = args.getString("shortcutId", "");
 
-        ShortcutRecord shortcutRecord = null;
-        List<ShortcutRecord> shortcutRecordList = DBHelper.getShortcutsNoIcons(context, packageName);
-        for (ShortcutRecord rec : shortcutRecordList)
-            if (shortcutData.equals(rec.infoData)) {
-                shortcutRecord = rec;
-                break;
-            }
-
-        String entryId = ShortcutEntry.generateShortcutId(shortcutRecord.dbId, shortcutRecord.infoData);
-        EntryItem entryItem = TBApplication.dataHandler(context).getPojo(entryId);
+        EntryItem entryItem = TBApplication.dataHandler(context).getPojo(shortcutId);
         if (!(entryItem instanceof ShortcutEntry)) {
             dismiss();
             return;

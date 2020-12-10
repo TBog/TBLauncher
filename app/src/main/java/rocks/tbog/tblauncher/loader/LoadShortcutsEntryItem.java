@@ -68,7 +68,7 @@ public class LoadShortcutsEntryItem extends LoadEntryItem<ShortcutEntry> {
                 continue;
             }
 
-            final String id = ShortcutEntry.generateShortcutId(shortcutRecord.dbId, shortcutRecord.infoData);
+            final String id = ShortcutEntry.generateShortcutId(shortcutRecord);
             final ShortcutEntry pojo = new ShortcutEntry(id, shortcutRecord.dbId, shortcutRecord.packageName, shortcutRecord.infoData);
 
             pojo.setName(shortcutRecord.displayName);

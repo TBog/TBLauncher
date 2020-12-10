@@ -617,7 +617,7 @@ public class DataHandler extends BroadcastReceiver
         // Remove all shortcuts from favorites for given package name
         List<ShortcutRecord> shortcutsList = DBHelper.getShortcutsNoIcons(context, packageName);
         for (ShortcutRecord shortcut : shortcutsList) {
-            String id = ShortcutEntry.generateShortcutId(shortcut.dbId, shortcut.displayName);
+            String id = ShortcutEntry.generateShortcutId(shortcut);
             EntryItem entry = getPojo(id);
             if (entry != null)
                 removeFromFavorites(entry);

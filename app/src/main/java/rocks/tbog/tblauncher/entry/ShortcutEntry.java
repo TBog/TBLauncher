@@ -36,6 +36,7 @@ import java.util.Locale;
 import rocks.tbog.tblauncher.IconsHandler;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
+import rocks.tbog.tblauncher.db.ShortcutRecord;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
@@ -80,10 +81,10 @@ public final class ShortcutEntry extends EntryWithTags {
     }
 
     /**
-     * @return shortcut id generated from shortcut name
+     * @return shortcut id generated from ShortcutRecord
      */
-    public static String generateShortcutId(long dbId, String shortcutName) {
-        return SCHEME + dbId + "/" + shortcutName.toLowerCase(Locale.ROOT);
+    public static String generateShortcutId(@NonNull ShortcutRecord rec) {
+        return SCHEME + rec.dbId + "/" + rec.packageName.toLowerCase(Locale.ROOT);
     }
 
     /**
