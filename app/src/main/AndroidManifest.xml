@@ -63,6 +63,7 @@
             android:resizeableActivity="true"
             android:screenOrientation="user"
             android:stateNotNeeded="true"
+            android:taskAffinity=".TBLauncherActivity"
             android:theme="@style/AppThemeTransparent"
             android:windowSoftInputMode="stateAlwaysHidden|adjustResize"
             tools:ignore="UnusedAttribute">
@@ -76,13 +77,21 @@
         </activity>
         <activity
             android:name=".SettingsActivity"
+            android:allowTaskReparenting="true"
             android:label="@string/menu_popup_launcher_settings"
+            android:launchMode="singleTop"
             android:parentActivityName=".TBLauncherActivity"
             android:screenOrientation="user"
+            android:taskAffinity=".SettingsActivity"
             android:theme="@style/SettingTheme">
+            <!-- Parent activity meta-data to support API level 4+ -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
                 android:value=".TBLauncherActivity" />
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.PREFERENCE" />
+            </intent-filter>
         </activity>
 
         <activity
@@ -93,6 +102,7 @@
             android:launchMode="singleInstance"
             android:noHistory="true"
             android:screenOrientation="user"
+            android:taskAffinity=".TBLauncherActivity"
             android:theme="@style/TitleDialogTheme"
             tools:ignore="NewApi">
             <intent-filter>
