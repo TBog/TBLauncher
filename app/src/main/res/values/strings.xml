@@ -91,7 +91,9 @@
     <string name="custom_icon_activity">activity</string>
     <string name="custom_icon_activity_adaptive_no_background">activity custom background</string>
     <string name="custom_icon_badged">badged</string>
-    <string name="custom_icon_preview">Selection\npreview</string>
+    <string name="default_icon_preview_label">Default\nicon</string>
+    <string name="current_icon_preview_label">Current\nicon</string>
+    <string name="custom_icon_preview_label">Selected\nicon</string>
     <string name="custom_name_set_default">Default name</string>
     <string name="custom_name_rename">Rename</string>
     <string name="hint_new_tag">add tag</string>

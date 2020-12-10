@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/root_layout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -41,6 +42,7 @@
             android:textAllCaps="false" />
 
         <TextView
+            android:id="@+id/previewLabel"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="@dimen/icon_margin_left"
@@ -49,14 +51,17 @@
             android:layout_marginBottom="@dimen/icon_margin_bottom"
             android:layout_weight="1"
             android:gravity="center_vertical|end"
+            android:labelFor="@id/preview"
+            android:lines="2"
             android:shadowColor="?attr/resultShadowColor"
             android:shadowDx="1"
             android:shadowDy="2"
             android:shadowRadius="?attr/textShadowRadius"
-            android:text="@string/custom_icon_preview"
+            android:text="@string/current_icon_preview_label"
             android:textAlignment="textEnd"
             android:textColor="?android:attr/textColorSecondary"
-            android:textSize="@dimen/result_small_size" />
+            android:textSize="@dimen/result_small_size"
+            tools:text="Current\n icon" />
 
         <ImageView
             android:id="@+id/preview"

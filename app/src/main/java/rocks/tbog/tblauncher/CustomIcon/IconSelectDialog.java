@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -44,6 +45,7 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
     private ImageView mPreview;
     private ViewPager mViewPager;
     private CustomShapePage mCustomShapePage = null;
+    private TextView mPreviewLabel;
 
     @Override
     protected int layoutRes() {
@@ -62,6 +64,7 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
             view.setClipToOutline(true);
         }
 
+        mPreviewLabel = view.findViewById(R.id.previewLabel);
         mPreview = view.findViewById(R.id.preview);
         mViewPager = view.findViewById(R.id.viewPager);
 
@@ -148,6 +151,9 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
                 mSelectedDrawable = item.getIcon();
                 mPreview.setImageDrawable(item.getPreview());
             }
+            @StringRes
+            int label = mSelectedDrawable == null ? R.string.default_icon_preview_label : R.string.custom_icon_preview_label;
+            mPreviewLabel.setText(label);
         }, (adapter, v, position) -> {
             if (adapter instanceof IconAdapter) {
                 IconData item = ((IconAdapter) adapter).getItem(position);
