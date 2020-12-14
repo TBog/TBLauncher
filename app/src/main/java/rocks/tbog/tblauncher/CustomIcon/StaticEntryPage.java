@@ -24,11 +24,19 @@ public class StaticEntryPage extends CustomShapePage {
     void setupView(@NonNull Context context, @Nullable OnItemClickListener iconClickListener, @Nullable OnItemClickListener iconLongClickListener) {
         super.setupView(context, iconClickListener, iconLongClickListener);
 
+        final Drawable originalDrawable;
         // default icon
         {
             Drawable drawable = mStaticEntry.getDefaultDrawable(context);
+            originalDrawable = drawable;
             ShapedIconInfo iconInfo = new DefaultIconInfo(context.getString(R.string.default_static_icon, mStaticEntry.getName()), drawable);
-            iconInfo.textId = R.string.default_icon;
+            mShapedIconAdapter.addItem(iconInfo);
+        }
+
+        // customizable default icon
+        {
+            Drawable shapedDrawable = DrawableUtils.applyIconMaskShape(context, originalDrawable, mShape, mScale, mBackground);
+            ShapedIconInfo iconInfo = new NamedIconInfo(mStaticEntry.getName(), shapedDrawable, originalDrawable);
             mShapedIconAdapter.addItem(iconInfo);
         }
 
@@ -42,6 +50,7 @@ public class StaticEntryPage extends CustomShapePage {
         DefaultIconInfo(@NonNull String name, Drawable icon) {
             super(icon);
             this.name = name;
+            textId = R.string.default_icon;
         }
 
         @Nullable
