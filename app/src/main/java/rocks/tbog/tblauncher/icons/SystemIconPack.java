@@ -51,27 +51,41 @@ public class SystemIconPack implements IconPack<Void> {
     @Override
     public Drawable getComponentDrawable(@NonNull Context ctx, @NonNull ComponentName componentName, @NonNull UserHandleCompat userHandle) {
         Drawable drawable = null;
-        try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                LauncherApps launcher = (LauncherApps) ctx.getSystemService(Context.LAUNCHER_APPS_SERVICE);
-                assert launcher != null;
-                List<LauncherActivityInfo> icons = launcher.getActivityList(componentName.getPackageName(), userHandle.getRealHandle());
-                for (LauncherActivityInfo info : icons) {
-                    if (info.getComponentName().equals(componentName)) {
-                        drawable = info.getBadgedIcon(0);
-                        break;
-                    }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            LauncherApps launcher = (LauncherApps) ctx.getSystemService(Context.LAUNCHER_APPS_SERVICE);
+            assert launcher != null;
+            List<LauncherActivityInfo> icons = launcher.getActivityList(componentName.getPackageName(), userHandle.getRealHandle());
+            for (LauncherActivityInfo info : icons) {
+                if (info.getComponentName().equals(componentName)) {
+                    drawable = info.getBadgedIcon(0);
+                    break;
                 }
-
-                // This should never happen, let's just return the first icon
-                if (drawable == null)
-                    drawable = icons.get(0).getBadgedIcon(0);
-            } else {
-                drawable = ctx.getPackageManager().getActivityIcon(componentName);
             }
-        } catch (PackageManager.NameNotFoundException | IndexOutOfBoundsException e) {
-            Log.e(TAG, "Unable to find component " + componentName.toString(), e);
+
+            // This should never happen, let's just return the first icon
+            if (drawable == null && !icons.isEmpty())
+                drawable = icons.get(0).getBadgedIcon(0);
         }
+
+        if (drawable == null) {
+            try {
+                drawable = ctx.getPackageManager().getActivityIcon(componentName);
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.e(TAG, "Unable to find activity icon " + componentName.toString(), e);
+            }
+        }
+
+        if (drawable == null) {
+            try {
+                drawable = ctx.getPackageManager().getApplicationIcon(componentName.getPackageName());
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.e(TAG, "Unable to find app icon " + componentName.toString(), e);
+            }
+        }
+
+        if (drawable == null)
+            Log.e(TAG, "Unable to find component drawable " + componentName.toString());
+
         return drawable;
     }
 

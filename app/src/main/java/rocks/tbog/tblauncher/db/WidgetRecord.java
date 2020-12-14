@@ -95,6 +95,9 @@ public class WidgetRecord {
                                 }
                             }
                             break;
+                        case "widget":  // reading from DB
+                        case "properties": // importing from backup
+                            break;
                         default:
                             Log.d(TAG, "ignored " + xpp.getName());
                     }
