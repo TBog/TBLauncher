@@ -161,11 +161,11 @@ public class ShortcutsProvider extends Provider<ShortcutEntry> {
             // Package install/uninstall events for the main
             // profile are still handled using PackageAddedRemovedHandler itself
 
-            final LauncherApps launcher = (LauncherApps) this.getSystemService(Context.LAUNCHER_APPS_SERVICE);
-            assert launcher != null;
-
-            appsCallback = new AppsCallback(this);
-            launcher.registerCallback(appsCallback);
+//            final LauncherApps launcher = (LauncherApps) this.getSystemService(Context.LAUNCHER_APPS_SERVICE);
+//            assert launcher != null;
+//
+//            appsCallback = new AppsCallback(this);
+//            launcher.registerCallback(appsCallback);
 
             // Try to clean up app-related data when profile is removed
             IntentFilter filter = new IntentFilter();

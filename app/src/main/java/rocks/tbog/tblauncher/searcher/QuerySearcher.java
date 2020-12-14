@@ -23,7 +23,7 @@ import rocks.tbog.tblauncher.utils.MapCompat;
  */
 public class QuerySearcher extends Searcher {
     private final String trimmedQuery;
-    private HashMap<String, Integer> knownIds;
+    private final HashMap<String, Integer> knownIds = new HashMap<>();
     /**
      * Store user preferences
      */
@@ -79,7 +79,7 @@ public class QuerySearcher extends Searcher {
 
         // Have we ever made the same query and selected something ?
         List<ValuedHistoryRecord> lastIdsForQuery = DBHelper.getPreviousResultsForQuery(context, trimmedQuery);
-        knownIds = new HashMap<>();
+        knownIds.clear();
         for (ValuedHistoryRecord id : lastIdsForQuery) {
             knownIds.put(id.record, (int) id.value);
         }
