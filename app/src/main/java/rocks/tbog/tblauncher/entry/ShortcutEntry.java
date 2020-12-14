@@ -341,41 +341,56 @@ public final class ShortcutEntry extends EntryWithTags {
     public static Drawable getAppDrawable(@NonNull Context context, @NonNull String shortcutData, @NonNull String packageName, @Nullable ShortcutInfo shortcutInfo, boolean isBadge) {
         Drawable appDrawable = null;
         final PackageManager packageManager = context.getPackageManager();
-        try {
-            List<ResolveInfo> activities = null;
-            if (shortcutInfo == null) {
+        List<ResolveInfo> activities = null;
+        if (shortcutInfo == null) {
+            try {
                 Intent intent = Intent.parseUri(shortcutData, 0);
                 activities = packageManager.queryIntentActivities(intent, 0);
+            } catch (URISyntaxException e) {
+                Log.e("Shortcut", "parse `" + shortcutData + "`", e);
             }
-            IconsHandler iconsHandler = TBApplication.iconsHandler(context);
-            if (activities != null && !activities.isEmpty()) {
-                ResolveInfo mainPackage = activities.get(0);
-                String packName = mainPackage.activityInfo.applicationInfo.packageName;
-                String actName = mainPackage.activityInfo.name;
-                ComponentName className = new ComponentName(packName, actName);
-                appDrawable = isBadge
-                        ? iconsHandler.getDrawableBadgeForPackage(className, UserHandleCompat.CURRENT_USER)
-                        : iconsHandler.getDrawableIconForPackage(className, UserHandleCompat.CURRENT_USER);
-            } else {
-                // Can't make sense of the intent URI (Oreo shortcut, or a shortcut from an activity that was removed from an installed app)
-                // Retrieve app icon
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
-                    if (shortcutInfo != null) {
-                        UserHandleCompat user = new UserHandleCompat(context, shortcutInfo.getUserHandle());
-                        ComponentName componentName = shortcutInfo.getActivity();
-                        appDrawable = isBadge
-                                ? iconsHandler.getDrawableBadgeForPackage(componentName, user)
-                                : iconsHandler.getDrawableIconForPackage(componentName, user);
-                    }
-                }
-            }
-            if (appDrawable == null) {
-                appDrawable = packageManager.getApplicationIcon(packageName);
-                iconsHandler.getIconPack().applyBackgroundAndMask(context, appDrawable, true);
-            }
-        } catch (PackageManager.NameNotFoundException | URISyntaxException e) {
-            Log.e("Shortcut", "get app shortcut icon", e);
         }
+
+        final IconsHandler iconsHandler = TBApplication.iconsHandler(context);
+        if (activities != null && !activities.isEmpty()) {
+            ResolveInfo mainPackage = activities.get(0);
+            String packName = mainPackage.activityInfo.applicationInfo.packageName;
+            String actName = mainPackage.activityInfo.name;
+            ComponentName className = new ComponentName(packName, actName);
+            appDrawable = isBadge
+                    ? iconsHandler.getDrawableBadgeForPackage(className, UserHandleCompat.CURRENT_USER)
+                    : iconsHandler.getDrawableIconForPackage(className, UserHandleCompat.CURRENT_USER);
+        }
+
+        if (appDrawable == null && shortcutInfo != null) {
+            // Can't make sense of the intent URI (Oreo shortcut, or a shortcut from an activity that was removed from an installed app)
+            // Retrieve app icon
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+                UserHandleCompat user = new UserHandleCompat(context, shortcutInfo.getUserHandle());
+                ComponentName componentName = shortcutInfo.getActivity();
+                appDrawable = isBadge
+                        ? iconsHandler.getDrawableBadgeForPackage(componentName, user)
+                        : iconsHandler.getDrawableIconForPackage(componentName, user);
+                if (appDrawable == null)
+                    try {
+                        appDrawable = packageManager.getActivityIcon(componentName);
+                    } catch (PackageManager.NameNotFoundException e) {
+                        Log.e(TAG, "Unable to find activity icon " + componentName.toString(), e);
+                    }
+
+            }
+        }
+
+        if (appDrawable == null) {
+            try {
+                appDrawable = packageManager.getApplicationIcon(packageName);
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.e(TAG, "get app shortcut icon", e);
+                return null;
+            }
+            appDrawable = iconsHandler.getIconPack().applyBackgroundAndMask(context, appDrawable, true);
+        }
+
         return appDrawable;
     }
 
