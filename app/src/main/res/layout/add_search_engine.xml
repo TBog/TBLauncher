@@ -14,7 +14,7 @@
         android:layout_marginBottom="10dp"
         android:background="@drawable/popup_background"
         android:orientation="vertical"
-        android:padding="10dp">
+        android:padding="5dp">
 
         <TextView
             android:layout_width="wrap_content"
@@ -38,7 +38,7 @@
         android:layout_marginBottom="10dp"
         android:background="@drawable/popup_background"
         android:orientation="vertical"
-        android:padding="10dp">
+        android:padding="5dp">
 
         <TextView
             android:layout_width="wrap_content"

@@ -41,6 +41,7 @@ import rocks.tbog.tblauncher.preference.ChooseColorDialog;
 import rocks.tbog.tblauncher.preference.ConfirmDialog;
 import rocks.tbog.tblauncher.preference.CustomDialogPreference;
 import rocks.tbog.tblauncher.preference.EditSearchEnginesPreferenceDialog;
+import rocks.tbog.tblauncher.preference.EditSearchHintPreferenceDialog;
 import rocks.tbog.tblauncher.preference.QuickListPreferenceDialog;
 import rocks.tbog.tblauncher.preference.SliderDialog;
 import rocks.tbog.tblauncher.ui.PleaseWaitDialog;
@@ -368,6 +369,11 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "edit-search-engines":
                     case "add-search-engine":
                         dialogFragment = EditSearchEnginesPreferenceDialog.newInstance(key);
+                        break;
+                    case "reset-search-hint":
+                    case "edit-search-hint":
+                    case "add-search-hint":
+                        dialogFragment = EditSearchHintPreferenceDialog.newInstance(key);
                         break;
                     default:
                         throw new RuntimeException("CustomDialogPreference \"" + key + "\" has no dialog defined");
