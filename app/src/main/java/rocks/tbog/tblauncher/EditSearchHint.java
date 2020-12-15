@@ -49,12 +49,12 @@ public class EditSearchHint {
             }
         }
 
-        for (SearchHintInfo searchEngineInfo : mAdapter.getItems()) {
-            if (searchEngineInfo.action == SearchHintInfo.Action.DELETE)
+        for (SearchHintInfo hintInfo : mAdapter.getItems()) {
+            if (hintInfo.action == SearchHintInfo.Action.DELETE)
                 continue;
-            availableHints.add(searchEngineInfo.text);
-            if (searchEngineInfo.selected)
-                selectedHints.add(searchEngineInfo.text);
+            availableHints.add(hintInfo.text);
+            if (hintInfo.selected)
+                selectedHints.add(hintInfo.text);
         }
 
         prefs.edit()
@@ -82,17 +82,17 @@ public class EditSearchHint {
             } else {
                 Context ctx = listView.getContext();
                 ArrayAdapter<ListPopup.Item> adapter = new ArrayAdapter<>(ctx, android.R.layout.simple_list_item_1);
-                adapter.add(new ListPopup.Item(ctx, R.string.search_engine_rename));
-                adapter.add(new ListPopup.Item(ctx, R.string.search_engine_delete));
+                adapter.add(new ListPopup.Item(ctx, R.string.menu_action_rename));
+                adapter.add(new ListPopup.Item(ctx, R.string.menu_action_delete));
                 ListPopup.create(ctx, adapter)
                         .setOnItemClickListener((popupAdapter, popupItemView, popupPosition) -> {
                             Object object = popupAdapter.getItem(popupPosition);
                             if (!(object instanceof ListPopup.Item))
                                 return;
                             ListPopup.Item item = (ListPopup.Item) object;
-                            if (item.stringId == R.string.search_engine_rename) {
+                            if (item.stringId == R.string.menu_action_rename) {
                                 launchRenameDialog(ctx, info);
-                            } else if (item.stringId == R.string.search_engine_delete) {
+                            } else if (item.stringId == R.string.menu_action_delete) {
                                 info.action = SearchHintInfo.Action.DELETE;
                                 mAdapter.notifyDataSetChanged();
                             }
@@ -111,9 +111,9 @@ public class EditSearchHint {
 
     private void launchRenameDialog(@NonNull Context ctx, @NonNull SearchHintInfo info) {
         DialogBuilder.withContext(ctx, R.style.NoTitleDialogTheme)
-                .setTitle(R.string.title_rename_search_engine)
+                .setTitle(R.string.title_rename_search_hint)
                 .setView(R.layout.dialog_rename)
-                .setPositiveButton(R.string.custom_name_rename, (dialog, which) -> {
+                .setPositiveButton(R.string.menu_action_rename, (dialog, which) -> {
                     EditText input = ((AlertDialog) dialog).findViewById(R.id.rename);
                     if (input == null)
                         return;
