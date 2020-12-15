@@ -213,7 +213,7 @@
     <string name="enable_url">Web url</string>
     <string name="enable_calculator">Calculator</string>
     <string name="edit_search_engines">Edit search engines</string>
-    <string name="edit_search_engines_summary">Toggle and select search providers</string>
+    <string name="edit_search_engines_summary">Toggle and edit search providers</string>
     <string name="reset_search_engines">Reset search engines</string>
     <string name="reset_search_engines_summary">Restore default search engines</string>
     <string name="add_search_engine">Add search engine</string>
@@ -224,7 +224,8 @@
     <string name="search_engine_set_default">Make default</string>
     <string name="hint_add_search_engine_url">https://search.engine/query=%s</string>
     <string name="label_search_engine_name">Search provider name</string>
-    <string name="label_search_engine_url">Url to execute, %s will be replaced by your query</string>
+    <string name="label_search_engine_url">Url to execute</string>
+    <string name="search_engine_url_help">%s will be replaced by your query</string>
     <string name="selected_pack">%s\n[current pack]</string>
     <string name="tab_app_icons">%s\n[app icons]</string>
     <string name="tab_static_icons">Default icon</string>
