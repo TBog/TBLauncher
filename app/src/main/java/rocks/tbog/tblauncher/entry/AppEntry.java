@@ -445,7 +445,7 @@ public final class AppEntry extends EntryWithTags {
             builder.setView(View.inflate(context, R.layout.dialog_rename, null));
         }
 
-        builder.setPositiveButton(R.string.custom_name_rename, (dialog, which) -> {
+        builder.setPositiveButton(R.string.menu_action_rename, (dialog, which) -> {
             EditText input = ((AlertDialog) dialog).findViewById(R.id.rename);
 
             // Set new name

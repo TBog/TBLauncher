@@ -76,11 +76,13 @@
 
     <string name="menu_app_rename">Rename app</string>
     <string name="menu_action_rename">Rename</string>
+    <string name="menu_action_delete">Delete</string>
     <string name="menu_shortcut_rename">Rename shortcut</string>
     <string name="menu_custom_icon">Change icon</string>
     <string name="title_app_rename">Choose a custom name for this application</string>
     <string name="title_rename_tag">Choose a different name for this tag</string>
     <string name="title_rename_search_engine">Choose a different name for this search engine</string>
+    <string name="title_rename_search_hint">Choose a different name for this search hint</string>
     <string name="title_edit_url_search_engine">Choose a different url for this search engine</string>
     <string name="title_shortcut_rename">Choose a custom name for this shortcut</string>
     <string name="app_rename_confirmation">App name is now %s</string>
@@ -96,7 +98,6 @@
     <string name="current_icon_preview_label">Current\nicon</string>
     <string name="custom_icon_preview_label">Selected\nicon</string>
     <string name="custom_name_set_default">Default name</string>
-    <string name="custom_name_rename">Rename</string>
     <string name="hint_new_tag">add tag</string>
     <string name="title_features">Features</string>
     <string name="features_summary">Toggle and customize app features</string>
@@ -225,8 +226,6 @@
     <string name="reset_search_hint_summary">Restore default search hints</string>
     <string name="add_search_hint">Add search hint</string>
 
-    <string name="search_engine_rename">Rename</string>
-    <string name="search_engine_delete">Delete</string>
     <string name="search_engine_edit_url">Edit url</string>
     <string name="confirm_edit_url_search_engine">Save</string>
     <string name="search_engine_set_default">Make default</string>

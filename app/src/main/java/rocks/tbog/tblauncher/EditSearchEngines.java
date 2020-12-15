@@ -100,9 +100,9 @@ public class EditSearchEngines {
                 ListPopup popup = ListPopup.create(ctx, adapter);
                 if (!info.name.equals(defaultProviderName) && info.selected)
                     adapter.add(new ListPopup.Item(ctx, R.string.search_engine_set_default));
-                adapter.add(new ListPopup.Item(ctx, R.string.search_engine_rename));
+                adapter.add(new ListPopup.Item(ctx, R.string.menu_action_rename));
                 adapter.add(new ListPopup.Item(ctx, R.string.search_engine_edit_url));
-                adapter.add(new ListPopup.Item(ctx, R.string.search_engine_delete));
+                adapter.add(new ListPopup.Item(ctx, R.string.menu_action_delete));
                 popup.setOnItemClickListener((popupAdapter, popupItemView, popupPosition) -> {
                     Object object = popupAdapter.getItem(popupPosition);
                     if (!(object instanceof ListPopup.Item))
@@ -112,13 +112,13 @@ public class EditSearchEngines {
                         case R.string.search_engine_set_default:
                             defaultProviderName = info.name;
                             break;
-                        case R.string.search_engine_rename:
+                        case R.string.menu_action_rename:
                             launchRenameDialog(ctx, info);
                             break;
                         case R.string.search_engine_edit_url:
                             launchEditUrlDialog(ctx, info);
                             break;
-                        case R.string.search_engine_delete: {
+                        case R.string.menu_action_delete: {
                             info.action = SearchEngineInfo.Action.DELETE;
                             mAdapter.notifyDataSetChanged();
                         }
@@ -148,7 +148,7 @@ public class EditSearchEngines {
             builder.setView(View.inflate(context, R.layout.dialog_rename, null));
         }
 
-        builder.setPositiveButton(R.string.custom_name_rename, (dialog, which) -> {
+        builder.setPositiveButton(R.string.menu_action_rename, (dialog, which) -> {
             EditText input = ((AlertDialog) dialog).findViewById(R.id.rename);
             if (input == null)
                 return;
