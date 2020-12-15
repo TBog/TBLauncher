@@ -295,7 +295,7 @@ public class EditSearchEngines {
     }
 
     public static class TagViewHolder extends ViewHolderAdapter.ViewHolder<SearchEngineInfo> {
-        TextView text1View;
+        private final TextView text1View;
 
         public TagViewHolder(View itemView) {
             super(itemView);

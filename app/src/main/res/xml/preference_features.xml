@@ -43,6 +43,47 @@
 
     </androidx.preference.PreferenceCategory>
 
+    <!-- Search bar -->
+    <PreferenceCategory
+        android:key="search-bar-section"
+        android:title="@string/search_bar_section">
+
+        <rocks.tbog.tblauncher.preference.CustomDialogPreference
+            android:defaultValue="@integer/default_bar_size"
+            android:dialogLayout="@layout/pref_alpha"
+            android:key="search-bar-size"
+            android:title="@string/search_bar_size" />
+
+        <rocks.tbog.tblauncher.preference.CustomDialogPreference
+            android:dialogLayout="@layout/edit_search_engines"
+            android:key="edit-search-hint"
+            android:summary="@string/edit_search_hint_summary"
+            android:title="@string/edit_search_hint" />
+
+        <rocks.tbog.tblauncher.preference.CustomDialogPreference
+            android:dialogLayout="@layout/add_search_hint"
+            android:key="add-search-hint"
+            android:title="@string/add_search_hint" />
+
+        <rocks.tbog.tblauncher.preference.CustomDialogPreference
+            android:dialogLayout="@layout/edit_search_engines"
+            android:key="reset-search-hint"
+            android:summary="@string/reset_search_hint_summary"
+            android:title="@string/reset_search_hint" />
+
+        <!-- This is here just to set the default value, not visible for user -->
+        <MultiSelectListPreference
+            android:defaultValue="@array/defaultSearchHints"
+            android:key="selected-search-hints"
+            app:isPreferenceVisible="false" />
+
+        <!-- This is here just to set the default value, not visible for user -->
+        <MultiSelectListPreference
+            android:defaultValue="@array/defaultSearchHints"
+            android:key="available-search-hints"
+            app:isPreferenceVisible="false" />
+
+    </PreferenceCategory>
     <!-- Icons -->
     <androidx.preference.PreferenceCategory
         android:key="icons-section"

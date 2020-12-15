@@ -38,7 +38,10 @@ import androidx.preference.PreferenceManager;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Random;
+import java.util.Set;
 
 import rocks.tbog.tblauncher.CustomIcon.IconSelectDialog;
 import rocks.tbog.tblauncher.dataprovider.FavProvider;
@@ -136,8 +139,21 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         mLauncherButton.setOnClickListener((v) -> TBApplication.dataHandler(v.getContext()).reloadProviders());
     }
 
+    private void setSearchHint() {
+        CharSequence hint = "";
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
+        Set<String> selectedHints = prefs.getStringSet("selected-search-hints", null);
+        if (selectedHints != null && !selectedHints.isEmpty()) {
+            ArrayList<String> hints = new ArrayList<>(selectedHints);
+            Collections.sort(hints);
+            hint = hints.get(new Random().nextInt(hints.size()));
+        }
+        mSearchEditText.setHint(hint);
+    }
+
     private void initLauncherSearchEditText(EditText searchEditText) {
         mSearchEditText = searchEditText;
+        setSearchHint();
 
         searchEditText.addTextChangedListener(new TextWatcher() {
             public void afterTextChanged(Editable s) {
@@ -344,6 +360,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     private void showSearchBar() {
+        setSearchHint();
         SystemUiVisibility.clearFullscreen(mDecorView);
 
         hideWidgets();

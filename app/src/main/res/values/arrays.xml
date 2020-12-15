@@ -46,6 +46,10 @@
         <item>YouTube|https://www.youtube.com/results?search_query=%s</item>
     </string-array>
 
+    <array name="defaultSearchHints">
+        <item>@string/hint_ui_search</item>
+    </array>
+
     <string-array name="gestureEntries">
         <item>Do nothing</item>
         <item>Show notifications panel</item>

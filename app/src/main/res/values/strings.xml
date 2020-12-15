@@ -212,11 +212,19 @@
     <string name="enable_search">Search engine</string>
     <string name="enable_url">Web url</string>
     <string name="enable_calculator">Calculator</string>
+
     <string name="edit_search_engines">Edit search engines</string>
     <string name="edit_search_engines_summary">Toggle and edit search providers</string>
     <string name="reset_search_engines">Reset search engines</string>
     <string name="reset_search_engines_summary">Restore default search engines</string>
     <string name="add_search_engine">Add search engine</string>
+
+    <string name="edit_search_hint">Edit search hint</string>
+    <string name="edit_search_hint_summary">Toggle and edit search hints</string>
+    <string name="reset_search_hint">Reset search hint</string>
+    <string name="reset_search_hint_summary">Restore default search hints</string>
+    <string name="add_search_hint">Add search hint</string>
+
     <string name="search_engine_rename">Rename</string>
     <string name="search_engine_delete">Delete</string>
     <string name="search_engine_edit_url">Edit url</string>
@@ -309,6 +317,7 @@
     <string name="choose_icon_menu_add">Add as alternative</string>
     <string name="choose_icon_menu_add2">Add alternative and show</string>
     <string name="icon_background">Icon background</string>
+    <string name="label_search_hint">Search hint</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">%d entry</item>
