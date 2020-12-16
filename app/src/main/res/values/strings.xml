@@ -137,7 +137,7 @@
     <string name="action_show_favorites">Favorites</string>
     <string name="quick_list_content">Customize content</string>
     <string name="quick_list_content_summary">Change order and add entries</string>
-    <string name="edit_quick_list_preview">Preview <em>(touch to remove from quick list)</em></string>
+    <string name="edit_quick_list_preview">Preview <em>(long touch to start drag&amp;drop, touch to remove)</em></string>
     <string name="edit_quick_list_tab_filters">Filters</string>
     <string name="edit_quick_list_tab_actions">Actions</string>
     <string name="edit_quick_list_tab_favorites">Favorites</string>
