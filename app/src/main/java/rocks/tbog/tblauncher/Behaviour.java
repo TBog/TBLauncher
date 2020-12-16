@@ -637,17 +637,6 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         mResultList.post(() -> mResultList.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL));
     }
 
-    public void runTagSearch(@NonNull String tagName) {
-        if (mSearchEditText == null)
-            return;
-        if (TBApplication.state().isResultListVisible() && mSearchEditText.getText().length() == 0) {
-            mSearchEditText.setText("");
-        } else {
-            mSearchEditText.setText("");
-            updateSearchRecords(false, new TagSearcher(this, tagName));
-        }
-    }
-
     public void runSearcher(@NonNull String query, Class<? extends Searcher> searcherClass) {
         if (mSearchEditText == null)
             return;
