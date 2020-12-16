@@ -1,8 +1,11 @@
 package rocks.tbog.tblauncher;
 
+import android.content.ClipData;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
+import android.util.Log;
+import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -37,6 +40,7 @@ import rocks.tbog.tblauncher.result.ResultHelper;
 
 public class EditQuickList {
 
+    private static final String TAG = "EQL";
     private final ArrayList<EntryItem> mQuickList = new ArrayList<>();
     private LinearLayout mQuickListContainer;
     ViewPager mViewPager;
@@ -176,6 +180,123 @@ public class EditQuickList {
         }
     }
 
+    private final View.OnLongClickListener mPreviewStartDrag = v -> {
+        final DragAndDropInfo dragDropInfo = new DragAndDropInfo(mQuickList);
+        int idx = ((ViewGroup) v.getParent()).indexOfChild(v);
+        dragDropInfo.location = idx;
+        dragDropInfo.draggedEntry = mQuickList.get(idx);
+        dragDropInfo.draggedView = v;
+        ClipData clipData = ClipData.newPlainText(Integer.toString(idx), dragDropInfo.draggedEntry.id);
+        View.DragShadowBuilder shadow = new View.DragShadowBuilder(v);
+        v.setVisibility(View.INVISIBLE);
+        return v.startDrag(clipData, shadow, dragDropInfo, 0);
+    };
+
+    protected static void repositionItems(ViewGroup quickList, int resetUntilIdx, int moveRightUntilIdx, int moveLeftUntilIdx) {
+        int idx = 0;
+        for (; idx < resetUntilIdx; idx += 1) {
+            View child = quickList.getChildAt(idx);
+            child.animate().translationX(0f);
+            //Log.d(TAG, "child #" + idx + " reset pos");
+        }
+        for (; idx < moveRightUntilIdx; idx += 1) {
+            View child = quickList.getChildAt(idx);
+            child.animate().translationX(child.getWidth());
+            //Log.d(TAG, "child #" + idx + " move right");
+        }
+        for (; idx < moveLeftUntilIdx; idx += 1) {
+            View child = quickList.getChildAt(idx);
+            child.animate().translationX(-child.getWidth());
+            //Log.d(TAG, "child #" + idx + " move left");
+        }
+        final int childCount = quickList.getChildCount();
+        for (; idx < childCount; idx += 1) {
+            View child = quickList.getChildAt(idx);
+            child.animate().translationX(0f);
+            //Log.d(TAG, "child #" + idx + " reset pos");
+        }
+    }
+
+    private final View.OnDragListener mPreviewDragListener = (v, event) -> {
+        final DragAndDropInfo dragDropInfo;
+        final ViewGroup quickList;
+
+        Object local = event.getLocalState();
+        if (!(local instanceof DragAndDropInfo)) {
+            Log.d(TAG, "drag outside activity?");
+            return true;
+        }
+        if (!(v instanceof ViewGroup)) {
+            Log.d(TAG, "only QuickList should listen");
+            return true;
+        }
+
+        dragDropInfo = (DragAndDropInfo) local;
+        quickList = (ViewGroup) v;
+
+        switch (event.getAction()) {
+            case DragEvent.ACTION_DRAG_STARTED:
+            case DragEvent.ACTION_DRAG_ENTERED:
+            case DragEvent.ACTION_DROP:
+                return true;
+            case DragEvent.ACTION_DRAG_LOCATION: {
+                final float x = event.getX();
+                // find new location index
+                int location = 0;
+                final int childCount = quickList.getChildCount();
+                for (int idx = 0; idx < childCount; idx += 1) {
+                    View child = quickList.getChildAt(idx);
+                    int left = child.getLeft();
+                    //Log.d(TAG, "child #" + idx + " left = " + left);
+                    if (left > x)
+                        break;
+                    location = idx;
+                }
+
+                // check if we already processed this location
+                if (dragDropInfo.location == location)
+                    return true;
+
+                final int emptyLocation = quickList.indexOfChild(dragDropInfo.draggedView);
+                if (location < emptyLocation) {
+                    repositionItems(quickList, location, emptyLocation, 0);
+                } else {
+                    repositionItems(quickList, emptyLocation + 1, 0, location + 1);
+                }
+
+                dragDropInfo.location = location;
+//                Log.d(TAG, "location = " + location);
+                return true;
+            }
+            case DragEvent.ACTION_DRAG_EXITED:
+                // if dragging outside, reset locations
+                dragDropInfo.location = quickList.indexOfChild(dragDropInfo.draggedView);
+                repositionItems(quickList, dragDropInfo.location, 0, 0);
+                return true;
+            case DragEvent.ACTION_DRAG_ENDED:
+            default: {
+                //Log.d(TAG, "drag ended");
+                final int childCount = quickList.getChildCount();
+                for (int idx = 0; idx < childCount; idx += 1) {
+                    View child = quickList.getChildAt(idx);
+                    child.animate().cancel();
+                    child.setTranslationX(0f);
+                }
+                int initialLocation = quickList.indexOfChild(dragDropInfo.draggedView);
+                // check event.getResult() if dropping outside should matter
+                if (initialLocation != dragDropInfo.location) {
+                    quickList.removeViewAt(initialLocation);
+                    quickList.addView(dragDropInfo.draggedView, dragDropInfo.location);
+                    dragDropInfo.list.remove(dragDropInfo.draggedEntry);
+                    dragDropInfo.list.add(dragDropInfo.location, dragDropInfo.draggedEntry);
+                }
+                dragDropInfo.draggedView.setVisibility(View.VISIBLE);
+                return false;
+            }
+        }
+    };
+
+
     private void populateList() {
         Context context = mQuickListContainer.getContext();
 
@@ -194,7 +315,11 @@ public class EditQuickList {
                     mQuickList.remove(idx);
                 }
             });
+
+            view.setOnLongClickListener(mPreviewStartDrag);
+            //view.setOnDragListener(mPreviewDragListener);
         }
+        mQuickListContainer.setOnDragListener(mPreviewDragListener);
         mQuickListContainer.requestLayout();
     }
 
@@ -227,7 +352,7 @@ public class EditQuickList {
         }
     }
 
-    static class EntryAdapter extends BaseAdapter {
+    private static class EntryAdapter extends BaseAdapter {
         private final List<EntryItem> mItems;
         private EntryAdapter.OnItemClickListener mOnItemClickListener = null;
 
@@ -293,6 +418,17 @@ public class EditQuickList {
             });
 
             return view;
+        }
+    }
+
+    private static class DragAndDropInfo {
+        private final ArrayList<EntryItem> list;
+        private View draggedView;
+        private EntryItem draggedEntry;
+        private int location;
+
+        private DragAndDropInfo(ArrayList<EntryItem> quickList) {
+            list = quickList;
         }
     }
 }
