@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 
 import rocks.tbog.tblauncher.BuildConfig;
 import rocks.tbog.tblauncher.TBApplication;
+import rocks.tbog.tblauncher.searcher.TagSearcher;
 import rocks.tbog.tblauncher.ui.CodePointDrawable;
 
 public class TagEntry extends StaticEntry {
@@ -23,7 +24,7 @@ public class TagEntry extends StaticEntry {
     @Override
     public void doLaunch(@NonNull View v) {
         Context ctx = v.getContext();
-        TBApplication.behaviour(ctx).runTagSearch(getName());
+        TBApplication.behaviour(ctx).runSearcher(getName(), TagSearcher.class);
     }
 
     @Override
