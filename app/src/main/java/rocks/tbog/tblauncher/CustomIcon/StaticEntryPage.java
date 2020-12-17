@@ -21,7 +21,7 @@ public class StaticEntryPage extends CustomShapePage {
     }
 
     @Override
-    void setupView(@NonNull Context context, @Nullable OnItemClickListener iconClickListener, @Nullable OnItemClickListener iconLongClickListener) {
+    public void setupView(@NonNull Context context, @Nullable OnItemClickListener iconClickListener, @Nullable OnItemClickListener iconLongClickListener) {
         super.setupView(context, iconClickListener, iconLongClickListener);
 
         final Drawable originalDrawable;

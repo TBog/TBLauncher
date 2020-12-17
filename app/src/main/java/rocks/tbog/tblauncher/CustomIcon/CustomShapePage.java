@@ -62,7 +62,7 @@ class CustomShapePage extends PageAdapter.Page {
     }
 
     @Override
-    void setupView(@NonNull Context context, @Nullable OnItemClickListener iconClickListener, @Nullable OnItemClickListener iconLongClickListener) {
+    public void setupView(@NonNull Context context, @Nullable OnItemClickListener iconClickListener, @Nullable OnItemClickListener iconLongClickListener) {
         mLettersView = pageView.findViewById(R.id.letters);
         mLettersView.addTextChangedListener(new TextWatcher() {
             @Override

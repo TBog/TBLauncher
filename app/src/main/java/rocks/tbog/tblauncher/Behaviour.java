@@ -749,7 +749,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         return TBApplication.isDefaultLauncher(mTBLauncherActivity);
     }
 
-    boolean onKeyboardClosed() {
+    private boolean onKeyboardClosed() {
         if (mTBLauncherActivity.dismissPopup())
             return true;
         //mHider.fixScroll();

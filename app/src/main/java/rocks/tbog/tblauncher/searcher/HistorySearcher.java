@@ -17,7 +17,7 @@ import rocks.tbog.tblauncher.entry.EntryItem;
 
 public class HistorySearcher extends Searcher {
 
-    DBHelper.HistoryMode mHistoryMode;
+    private final DBHelper.HistoryMode mHistoryMode;
 
     public HistorySearcher(ISearchActivity activity, @NonNull String query) {
         super(activity, query);

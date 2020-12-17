@@ -23,7 +23,6 @@ import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.entry.EntryItem;
@@ -36,7 +35,7 @@ import rocks.tbog.tblauncher.utils.Utilities;
 
 public final class ResultViewHelper {
 
-    public final static Executor EXECUTOR_LOAD_ICON = AsyncTask.SERIAL_EXECUTOR;
+    public static final Executor EXECUTOR_LOAD_ICON = AsyncTask.SERIAL_EXECUTOR;
     private static final String TAG = "RVH";
 
     private ResultViewHelper() {

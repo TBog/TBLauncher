@@ -62,7 +62,7 @@ public class WidgetManager {
     /**
      * Registers the AppWidgetHost to listen for updates to any widgets this app has.
      */
-    boolean start(Context context) {
+    protected boolean start(Context context) {
         Context ctx = context.getApplicationContext();
         mAppWidgetManager = AppWidgetManager.getInstance(ctx);
         try {
@@ -77,7 +77,7 @@ public class WidgetManager {
         return true;
     }
 
-    void stop() {
+    protected void stop() {
         mAppWidgetHost.stopListening();
         mAppWidgetHost = null;
     }
@@ -978,7 +978,7 @@ public class WidgetManager {
     }
 
     static class WidgetOptionItem extends LinearAdapter.Item {
-        enum Action {
+        private enum Action {
             MOVE, MOVE_SWITCH,
             RESIZE, RESIZE_SWITCH,
             MOVE_RESIZE, MOVE_RESIZE_SWITCH,
@@ -988,7 +988,7 @@ public class WidgetManager {
             MOVE_BELOW, MOVE_ABOVE,
         }
 
-        final Action mAction;
+        private final Action mAction;
 
         public WidgetOptionItem(Context ctx, @StringRes int stringId, Action action) {
             super(ctx, stringId);

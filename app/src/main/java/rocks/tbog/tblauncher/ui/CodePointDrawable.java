@@ -2,7 +2,7 @@ package rocks.tbog.tblauncher.ui;
 
 public class CodePointDrawable extends TextDrawable {
 
-    final int mCodePoint;
+    private final int mCodePoint;
 
     public CodePointDrawable(int codePoint) {
         super();

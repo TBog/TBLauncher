@@ -469,14 +469,14 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 break;
             case "icon-background":
                 TBApplication.drawableCache(context).clearCache();
-                // fallthrough
+                // fall-through
             case "quick-list-color":
                 // static entities will change color based on luminance
-                // fallthrough
+                // fall-through
             case "quick-list-toggle-color":
                 // toggle animation is also caching the color
                 TBApplication.quickList(context).onFavoritesChanged();
-                // fallthrough
+                // fall-through
             case "result-list-color":
             case "result-list-alpha":
             case "result-highlight-color":

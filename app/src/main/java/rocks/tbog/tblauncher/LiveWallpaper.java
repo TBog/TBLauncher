@@ -231,7 +231,7 @@ public class LiveWallpaper {
                         eventConsumed = onFling(view, xMove, yMove, xVel, yVel);
                     }
                 }
-                //fallthrough
+                // fall-through
             }
             case MotionEvent.ACTION_CANCEL:
                 view.removeCallbacks(mLongClickRunnable);

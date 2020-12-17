@@ -241,10 +241,10 @@ public class EditSearchHint {
         @NonNull
         private final String hint;
         private String text;
-        private  boolean selected;
+        private boolean selected;
         private SearchHintInfo.Action action = SearchHintInfo.Action.NONE;
 
-        enum Action {NONE, DELETE, RENAME}
+        private enum Action {NONE, DELETE, RENAME}
 
         public SearchHintInfo(@NonNull String hintText) {
             hint = hintText;

@@ -77,7 +77,7 @@ class PageAdapter extends androidx.viewpager.widget.PagerAdapter implements View
             pageView = view;
         }
 
-        abstract void setupView(@NonNull Context context, @Nullable OnItemClickListener iconClickListener, @Nullable OnItemClickListener iconLongClickListener);
+        public abstract void setupView(@NonNull Context context, @Nullable OnItemClickListener iconClickListener, @Nullable OnItemClickListener iconLongClickListener);
 
         void loadData() {
             bDataLoaded = true;

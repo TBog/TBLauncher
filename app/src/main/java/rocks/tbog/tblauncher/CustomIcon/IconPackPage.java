@@ -50,7 +50,7 @@ class IconPackPage extends PageAdapter.Page {
     }
 
     @Override
-    void setupView(@NotNull Context context, @Nullable OnItemClickListener iconClickListener, @Nullable OnItemClickListener iconLongClickListener) {
+    public void setupView(@NotNull Context context, @Nullable OnItemClickListener iconClickListener, @Nullable OnItemClickListener iconLongClickListener) {
         mIconLoadingBar = pageView.findViewById(R.id.iconLoadingBar);
 
         Drawable packIcon = null;

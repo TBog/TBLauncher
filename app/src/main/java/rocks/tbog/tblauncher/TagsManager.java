@@ -130,6 +130,7 @@ public class TagsManager {
             String newName = input.getText().toString().trim();
             boolean isValid = true;
             for (TagInfo tagInfo : mTagList) {
+                // check if it's the same object, not the content of TagInfo
                 if (tagInfo == info)
                     continue;
                 if (tagInfo.tagName.equals(newName) || tagInfo.name.equals(newName)) {

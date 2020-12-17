@@ -21,12 +21,12 @@ import java.util.ArrayList;
  */
 
 public class LoadingDrawable extends SquareDrawable implements Animatable, ValueAnimator.AnimatorUpdateListener {
+    private static final float SHAPE_SIZE_PERCENT = 0.22f;
+    //private static final float CORNER_SMOOTHING_PERCENT = 0.05f;
+
     private final ArrayList<Shape> mShapeList = new ArrayList<>(0);
     private final Path mShapePath;
     private ValueAnimator mShapeListAnimator = null;
-
-    final static private float SHAPE_SIZE_PERCENT = 0.22f;
-    final static private float CORNER_SMOOTHING_PERCENT = 0.05f;
 
     public LoadingDrawable() {
         super();
@@ -125,9 +125,9 @@ public class LoadingDrawable extends SquareDrawable implements Animatable, Value
     }
 
     private static class Shape {
-        final Rect mRect;
-        final Matrix mat = new Matrix();
-        final float[] mPoints = new float[8];
+        private final Rect mRect;
+        private final Matrix mat = new Matrix();
+        private final float[] mPoints = new float[8];
 
         Shape(int width, int height, int posX, int posY) {
             mRect = new Rect(0, 0, width, height);
