@@ -180,17 +180,19 @@ public class EditQuickList {
         }
     }
 
-    private final View.OnLongClickListener mPreviewStartDrag = v -> {
-        final DragAndDropInfo dragDropInfo = new DragAndDropInfo(mQuickList);
+    private static boolean previewStartDrag(View v, ArrayList<EntryItem> quickList) {
+        final DragAndDropInfo dragDropInfo = new DragAndDropInfo(quickList);
         int idx = ((ViewGroup) v.getParent()).indexOfChild(v);
         dragDropInfo.location = idx;
-        dragDropInfo.draggedEntry = mQuickList.get(idx);
+        dragDropInfo.draggedEntry = quickList.get(idx);
         dragDropInfo.draggedView = v;
         ClipData clipData = ClipData.newPlainText(Integer.toString(idx), dragDropInfo.draggedEntry.id);
         View.DragShadowBuilder shadow = new View.DragShadowBuilder(v);
         v.setVisibility(View.INVISIBLE);
         return v.startDrag(clipData, shadow, dragDropInfo, 0);
-    };
+    }
+
+    ;
 
     protected static void repositionItems(ViewGroup quickList, int resetUntilIdx, int moveRightUntilIdx, int moveLeftUntilIdx) {
         int idx = 0;
@@ -217,7 +219,7 @@ public class EditQuickList {
         }
     }
 
-    private final View.OnDragListener mPreviewDragListener = (v, event) -> {
+    private static boolean previewDragListener(View v, DragEvent event) {
         final DragAndDropInfo dragDropInfo;
         final ViewGroup quickList;
 
@@ -294,8 +296,7 @@ public class EditQuickList {
                 return false;
             }
         }
-    };
-
+    }
 
     private void populateList() {
         Context context = mQuickListContainer.getContext();
@@ -316,10 +317,9 @@ public class EditQuickList {
                 }
             });
 
-            view.setOnLongClickListener(mPreviewStartDrag);
-            //view.setOnDragListener(mPreviewDragListener);
+            view.setOnLongClickListener(v -> previewStartDrag(v, mQuickList));
         }
-        mQuickListContainer.setOnDragListener(mPreviewDragListener);
+        mQuickListContainer.setOnDragListener(EditQuickList::previewDragListener);
         mQuickListContainer.requestLayout();
     }
 
