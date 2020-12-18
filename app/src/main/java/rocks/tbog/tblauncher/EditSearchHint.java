@@ -43,10 +43,8 @@ public class EditSearchHint {
 
         if (mAddHint != null) {
             String name = mAddHint.getText().toString().trim();
-            if (!name.isEmpty()) {
-                availableHints.add(name);
-                selectedHints.add(name);
-            }
+            availableHints.add(name);
+            selectedHints.add(name);
         }
 
         for (SearchHintInfo hintInfo : mAdapter.getItems()) {
@@ -241,7 +239,7 @@ public class EditSearchHint {
         @NonNull
         private final String hint;
         private String text;
-        private  boolean selected;
+        private boolean selected;
         private SearchHintInfo.Action action = SearchHintInfo.Action.NONE;
 
         enum Action {NONE, DELETE, RENAME}

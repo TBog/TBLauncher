@@ -395,6 +395,7 @@ public class XmlImport {
         void parsePreferences(@NonNull XmlPullParser xpp, int eventType) throws IOException, XmlPullParserException {
             String prefName = null;
             Object prefValue = null;
+            boolean addTextToValueSet = false;
             boolean bPrefListFinished = false;
             while (eventType != XmlPullParser.END_DOCUMENT) {
                 switch (eventType) {
@@ -444,6 +445,7 @@ public class XmlImport {
                                         case "set":
                                             // we get Strings from the XML parser, no need to keep Objects
                                             prefValue = new ArraySet<String>();
+                                            addTextToValueSet = false;
                                             break;
                                         default:
                                             Log.d(TAG, "ignored attribute " + xpp.getAttributeValue(attrIdx) + " from tag " + xpp.getName());
@@ -461,7 +463,9 @@ public class XmlImport {
                                 }
                                 break;
                             case "item":
-                                if (!(prefValue instanceof ArraySet))
+                                if (prefValue instanceof ArraySet)
+                                    addTextToValueSet = true;
+                                else
                                     Log.d(TAG, "expected Set, found " + prefValue);
                                 break;
                             default:
@@ -480,10 +484,13 @@ public class XmlImport {
                             case XTN_PREF_LIST:
                                 bPrefListFinished = true;
                                 break;
+                            case "item":
+                                addTextToValueSet = false;
+                                break;
                         }
                         break;
                     case XmlPullParser.TEXT:
-                        if (prefValue instanceof ArraySet) {
+                        if (addTextToValueSet) {
                             //noinspection unchecked
                             ArraySet<String> set = (ArraySet<String>) prefValue;
                             set.add(xpp.getText());
