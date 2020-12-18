@@ -26,11 +26,11 @@ class EntryAdapter extends BaseAdapter {
         mItems = objects;
     }
 
-    void setOnItemClickListener(OnItemClickListener listener) {
+    public void setOnItemClickListener(OnItemClickListener listener) {
         mOnItemClickListener = listener;
     }
 
-    void addAll(Collection<EntryItem> newElements) {
+    public void addAll(Collection<EntryItem> newElements) {
         mItems.addAll(newElements);
         notifyDataSetChanged();
     }

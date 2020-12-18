@@ -48,6 +48,9 @@ public class EditSearchHintPreferenceDialog extends PreferenceDialogFragmentComp
                 mEditor.loadData(context, PreferenceManager.getDefaultSharedPreferences(context));
                 mEditor.bindAddView(view);
                 break;
+            default:
+                dismiss();
+                break;
         }
     }
 

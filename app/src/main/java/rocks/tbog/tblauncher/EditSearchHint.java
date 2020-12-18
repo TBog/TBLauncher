@@ -120,7 +120,7 @@ public class EditSearchHint {
                     String newName = input.getText().toString().trim();
                     boolean isValid = true;
                     for (SearchHintInfo hintInfo : mAdapter.getItems()) {
-                        if (hintInfo == info)
+                        if (info.equals(hintInfo))
                             continue;
                         if (hintInfo.hint.equals(newName) || hintInfo.text.equals(newName)) {
                             isValid = false;
@@ -237,12 +237,12 @@ public class EditSearchHint {
         }
     }
 
-    static class SearchHintInfo {
+    private static class SearchHintInfo {
         @NonNull
-        final String hint;
-        String text;
-        public boolean selected;
-        SearchHintInfo.Action action = SearchHintInfo.Action.NONE;
+        private final String hint;
+        private String text;
+        private  boolean selected;
+        private SearchHintInfo.Action action = SearchHintInfo.Action.NONE;
 
         enum Action {NONE, DELETE, RENAME}
 
