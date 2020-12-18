@@ -7,7 +7,7 @@ import android.view.ViewParent;
 
 import androidx.preference.PreferenceDialogFragmentCompat;
 
-import rocks.tbog.tblauncher.EditQuickList;
+import rocks.tbog.tblauncher.quicklist.EditQuickList;
 
 public class QuickListPreferenceDialog extends PreferenceDialogFragmentCompat {
 

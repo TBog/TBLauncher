@@ -1,4 +1,4 @@
-package rocks.tbog.tblauncher.ui;
+package rocks.tbog.tblauncher.quicklist;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;
@@ -9,8 +9,8 @@ import android.view.Window;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
-import rocks.tbog.tblauncher.EditQuickList;
 import rocks.tbog.tblauncher.R;
+import rocks.tbog.tblauncher.ui.DialogFragment;
 
 public class EditQuickListDialog extends DialogFragment<Void> {
 

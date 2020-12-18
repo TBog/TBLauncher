@@ -1,15 +1,13 @@
-package rocks.tbog.tblauncher;
+package rocks.tbog.tblauncher.quicklist;
 
 import android.content.ClipData;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.os.AsyncTask;
 import android.util.Log;
 import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.LinearLayout;
 
@@ -23,11 +21,14 @@ import com.google.android.material.tabs.TabLayout;
 import net.mm2d.color.chooser.ViewPagerAdapter;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
 import kotlin.Pair;
+import rocks.tbog.tblauncher.CustomizeUI;
+import rocks.tbog.tblauncher.DataHandler;
+import rocks.tbog.tblauncher.R;
+import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.dataprovider.ActionProvider;
 import rocks.tbog.tblauncher.dataprovider.FilterProvider;
 import rocks.tbog.tblauncher.dataprovider.QuickListProvider;
@@ -36,7 +37,6 @@ import rocks.tbog.tblauncher.db.FavRecord;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.entry.TagEntry;
-import rocks.tbog.tblauncher.result.ResultHelper;
 
 public class EditQuickList {
 
@@ -180,7 +180,14 @@ public class EditQuickList {
         }
     }
 
-    private static boolean previewStartDrag(View v, ArrayList<EntryItem> quickList) {
+    /**
+     * Start drag and drop action.
+     *
+     * @param v         The view we are dragging
+     * @param quickList The list we intend to reorder
+     * @return if the startDrag method completes successfully
+     */
+    private static boolean previewStartDrag(@NonNull View v, @NonNull ArrayList<EntryItem> quickList) {
         final DragAndDropInfo dragDropInfo = new DragAndDropInfo(quickList);
         int idx = ((ViewGroup) v.getParent()).indexOfChild(v);
         dragDropInfo.location = idx;
@@ -192,9 +199,7 @@ public class EditQuickList {
         return v.startDrag(clipData, shadow, dragDropInfo, 0);
     }
 
-    ;
-
-    protected static void repositionItems(ViewGroup quickList, int resetUntilIdx, int moveRightUntilIdx, int moveLeftUntilIdx) {
+    protected static void repositionViews(@NonNull ViewGroup quickList, int resetUntilIdx, int moveRightUntilIdx, int moveLeftUntilIdx) {
         int idx = 0;
         for (; idx < resetUntilIdx; idx += 1) {
             View child = quickList.getChildAt(idx);
@@ -219,7 +224,7 @@ public class EditQuickList {
         }
     }
 
-    private static boolean previewDragListener(View v, DragEvent event) {
+    private static boolean previewDragListener(@Nullable View v, @NonNull DragEvent event) {
         final DragAndDropInfo dragDropInfo;
         final ViewGroup quickList;
 
@@ -261,9 +266,9 @@ public class EditQuickList {
 
                 final int emptyLocation = quickList.indexOfChild(dragDropInfo.draggedView);
                 if (location < emptyLocation) {
-                    repositionItems(quickList, location, emptyLocation, 0);
+                    repositionViews(quickList, location, emptyLocation, 0);
                 } else {
-                    repositionItems(quickList, emptyLocation + 1, 0, location + 1);
+                    repositionViews(quickList, emptyLocation + 1, 0, location + 1);
                 }
 
                 dragDropInfo.location = location;
@@ -273,7 +278,7 @@ public class EditQuickList {
             case DragEvent.ACTION_DRAG_EXITED:
                 // if dragging outside, reset locations
                 dragDropInfo.location = quickList.indexOfChild(dragDropInfo.draggedView);
-                repositionItems(quickList, dragDropInfo.location, 0, 0);
+                repositionViews(quickList, dragDropInfo.location, 0, 0);
                 return true;
             case DragEvent.ACTION_DRAG_ENDED:
             default: {
@@ -321,114 +326,5 @@ public class EditQuickList {
         }
         mQuickListContainer.setOnDragListener(EditQuickList::previewDragListener);
         mQuickListContainer.requestLayout();
-    }
-
-    static class LoadDataForAdapter extends AsyncTask<Void, Void, ArrayList<EntryItem>> {
-        private final EntryAdapter adapter;
-        private final LoadInBackground task;
-
-        interface LoadInBackground {
-            ArrayList<EntryItem> loadInBackground();
-        }
-
-        public LoadDataForAdapter(EntryAdapter adapter, LoadInBackground loadInBackground) {
-            super();
-            this.adapter = adapter;
-            task = loadInBackground;
-        }
-
-        @Override
-        protected ArrayList<EntryItem> doInBackground(Void... voids) {
-            ArrayList<EntryItem> data = task.loadInBackground();
-            data.trimToSize();
-            return data;
-        }
-
-        @Override
-        protected void onPostExecute(ArrayList<EntryItem> data) {
-            if (data == null)
-                return;
-            adapter.addAll(data);
-        }
-    }
-
-    private static class EntryAdapter extends BaseAdapter {
-        private final List<EntryItem> mItems;
-        private EntryAdapter.OnItemClickListener mOnItemClickListener = null;
-
-        public interface OnItemClickListener {
-            void onItemClick(EntryAdapter adapter, View view, int position);
-        }
-
-        EntryAdapter(@NonNull List<EntryItem> objects) {
-            mItems = objects;
-        }
-
-        void setOnItemClickListener(EntryAdapter.OnItemClickListener listener) {
-            mOnItemClickListener = listener;
-        }
-
-        void addAll(Collection<EntryItem> newElements) {
-            mItems.addAll(newElements);
-            notifyDataSetChanged();
-        }
-
-        @Override
-        public int getViewTypeCount() {
-            return ResultHelper.getItemViewTypeCount();
-        }
-
-        @Override
-        public int getItemViewType(int position) {
-            return ResultHelper.getItemViewType(mItems.get(position));
-        }
-
-        @Override
-        public EntryItem getItem(int position) {
-            return mItems.get(position);
-        }
-
-        @Override
-        public int getCount() {
-            return mItems.size();
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return getItem(position).hashCode();
-        }
-
-        @NonNull
-        @Override
-        public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-            int drawFlags = EntryItem.FLAG_DRAW_GRID | EntryItem.FLAG_DRAW_NAME | EntryItem.FLAG_DRAW_ICON | EntryItem.FLAG_DRAW_ICON_BADGE;
-            final View view;
-            EntryItem content = getItem(position);
-            if (convertView == null) {
-                view = LayoutInflater.from(parent.getContext()).inflate(content.getResultLayout(drawFlags), parent, false);
-            } else {
-                view = convertView;
-            }
-
-            content.displayResult(view, drawFlags);
-
-            view.setOnClickListener(v -> {
-                if (mOnItemClickListener != null)
-                    mOnItemClickListener.onItemClick(EntryAdapter.this, v, position);
-            });
-
-            return view;
-        }
-    }
-
-    private static class DragAndDropInfo {
-        private final ArrayList<EntryItem> list;
-        private View draggedView;
-        private EntryItem draggedEntry;
-        private int location;
-
-        private DragAndDropInfo(ArrayList<EntryItem> quickList) {
-            list = quickList;
-        }
     }
 }
