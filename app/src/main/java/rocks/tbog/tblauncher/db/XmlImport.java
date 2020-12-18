@@ -10,6 +10,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.collection.ArraySet;
 import androidx.preference.PreferenceManager;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -21,7 +22,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -441,10 +441,14 @@ public class XmlImport {
                                                 prefValue = 0;
                                             }
                                             break;
+                                        case "set":
+                                            // we get Strings from the XML parser, no need to keep Objects
+                                            prefValue = new ArraySet<String>();
+                                            break;
+                                        default:
+                                            Log.d(TAG, "ignored attribute " + xpp.getAttributeValue(attrIdx) + " from tag " + xpp.getName());
                                     }
                                 }
-                                if (prefName != null && prefValue != null)
-                                    mPreferences.put(prefName, prefValue);
                                 break;
                             case XTN_UI_LIST:
                             case XTN_PREF_LIST:
@@ -456,6 +460,10 @@ public class XmlImport {
                                     }
                                 }
                                 break;
+                            case "item":
+                                if (!(prefValue instanceof ArraySet))
+                                    Log.d(TAG, "expected Set, found " + prefValue);
+                                break;
                             default:
                                 Log.d(TAG, "ignored " + xpp.getName());
                         }
@@ -463,6 +471,8 @@ public class XmlImport {
                     case XmlPullParser.END_TAG:
                         switch (xpp.getName()) {
                             case XTN_PREF_LIST_ITEM:
+                                if (prefName != null && prefValue != null)
+                                    mPreferences.put(prefName, prefValue);
                                 prefName = null;
                                 prefValue = null;
                                 break;
@@ -473,7 +483,11 @@ public class XmlImport {
                         }
                         break;
                     case XmlPullParser.TEXT:
-                        if (prefName != null)
+                        if (prefValue instanceof ArraySet) {
+                            //noinspection unchecked
+                            ArraySet<String> set = (ArraySet<String>) prefValue;
+                            set.add(xpp.getText());
+                        } else if (prefName != null)
                             Log.d(TAG, "preference `" + prefName + "` has text `" + xpp.getText() + "`");
                         break;
                 }
@@ -754,24 +768,24 @@ public class XmlImport {
         private void saveTags(@NonNull Context context, Method method) {
             if (!bTagListLoaded)
                 return;
-            HashMap<String, HashSet<String>> tags = new HashMap<>();
+            HashMap<String, ArraySet<String>> tags = new HashMap<>();
             if (method == Method.OVERWRITE || method == Method.APPEND) {
                 // load from DB first
                 Map<String, List<String>> tagsDB = DBHelper.loadTags(context);
                 for (Map.Entry<String, List<String>> entry : tagsDB.entrySet()) {
-                    HashSet<String> tagSet = tags.get(entry.getKey());
+                    ArraySet<String> tagSet = tags.get(entry.getKey());
                     if (tagSet == null)
-                        tags.put(entry.getKey(), tagSet = new HashSet<>(entry.getValue().size()));
+                        tags.put(entry.getKey(), tagSet = new ArraySet<>(entry.getValue().size()));
                     tagSet.addAll(entry.getValue());
                 }
             }
             for (Map.Entry<String, List<String>> entry : mTags.entrySet()) {
-                HashSet<String> tagSet = null;
+                ArraySet<String> tagSet = null;
                 if (method == Method.APPEND) {
                     tagSet = tags.get(entry.getKey());
                 }
                 if (tagSet == null)
-                    tags.put(entry.getKey(), tagSet = new HashSet<>(entry.getValue().size()));
+                    tags.put(entry.getKey(), tagSet = new ArraySet<>(entry.getValue().size()));
 
                 tagSet.addAll(entry.getValue());
             }
@@ -880,6 +894,11 @@ public class XmlImport {
                     editor.putInt(entry.getKey(), (Integer) value);
                 else if (value instanceof Boolean)
                     editor.putBoolean(entry.getKey(), (Boolean) value);
+                else if (value instanceof ArraySet) {
+                    //noinspection unchecked
+                    ArraySet<String> set = (ArraySet<String>) value;
+                    editor.putStringSet(entry.getKey(), set);
+                }
             }
 
             editor.commit();

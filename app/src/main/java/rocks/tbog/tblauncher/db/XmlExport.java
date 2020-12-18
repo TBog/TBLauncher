@@ -14,6 +14,7 @@ import androidx.preference.PreferenceGroup;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -208,6 +209,10 @@ public class XmlExport {
         recursiveWritePreferences(sx, rootPref, prefMap);
 
         sx.endTag("preferences");
+
+        for (Map.Entry<String, ?> entry : prefMap.entrySet()) {
+            Log.w(TAG, "not saved pref `" + entry.getKey() + "` with value " + entry.getValue());
+        }
     }
 
     public static void widgetsXml(@NonNull Context context, @NonNull Writer writer) throws IOException {
@@ -342,7 +347,28 @@ public class XmlExport {
                     .attribute("key", key)
                     .attribute("bool", ((Boolean) value).toString())
                     .endTag("preference");
-        else {
+        else if (value instanceof Set) {
+            Set<?> set = (Set<?>) value;
+            // find contained object type
+            String type = "object";
+            {
+                Iterator<?> iterator = set.iterator();
+                if (iterator.hasNext()) {
+                    Object item = iterator.next();
+                    if (item instanceof String)
+                        type = "string";
+                }
+            }
+            sx.startTag("preference")
+                    .attribute("key", key)
+                    .attribute("set", type);
+            for (Object item : set) {
+                sx.startTag("item")
+                        .content(item.toString())
+                        .endTag("item");
+            }
+            sx.endTag("preference");
+        } else {
             Log.d(TAG, "skipped pref `" + key + "` with value " + value);
         }
     }

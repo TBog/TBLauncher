@@ -71,13 +71,13 @@
             android:summary="@string/reset_search_hint_summary"
             android:title="@string/reset_search_hint" />
 
-        <!-- This is here just to set the default value, not visible for user -->
+        <!-- This is here just to set the default value and be saved in backup, not visible for user -->
         <MultiSelectListPreference
             android:defaultValue="@array/defaultSearchHints"
             android:key="selected-search-hints"
             app:isPreferenceVisible="false" />
 
-        <!-- This is here just to set the default value, not visible for user -->
+        <!-- This is here just to set the default value and be saved in backup, not visible for user -->
         <MultiSelectListPreference
             android:defaultValue="@array/defaultSearchHints"
             android:key="available-search-hints"
@@ -296,6 +296,24 @@
             android:defaultValue="true"
             android:key="enable-calculator"
             android:title="@string/enable_calculator" />
+
+        <!-- This is here just to set the default value and be saved in backup, not visible for user -->
+        <MultiSelectListPreference
+            android:defaultValue="@array/defaultSearchHints"
+            android:key="available-search-providers"
+            app:isPreferenceVisible="false" />
+
+        <!-- This is here just to set the default value and be saved in backup, not visible for user -->
+        <MultiSelectListPreference
+            android:defaultValue="@array/defaultSearchHints"
+            android:key="selected-search-provider-names"
+            app:isPreferenceVisible="false" />
+
+        <!-- This is here just to set the default value and be saved in backup, not visible for user -->
+        <Preference
+            android:defaultValue="@array/defaultSearchHints"
+            android:key="default-search-provider"
+            app:isPreferenceVisible="false" />
 
     </androidx.preference.PreferenceCategory>
 
