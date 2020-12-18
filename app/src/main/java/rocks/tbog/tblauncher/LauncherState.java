@@ -1,7 +1,7 @@
 package rocks.tbog.tblauncher;
 
 public class LauncherState {
-    enum AnimatedVisibility {
+    public enum AnimatedVisibility {
         HIDDEN,
         ANIM_TO_HIDDEN,
         ANIM_TO_VISIBLE,

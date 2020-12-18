@@ -14,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 
 import rocks.tbog.tblauncher.icons.IconPackCache;
+import rocks.tbog.tblauncher.quicklist.QuickList;
 import rocks.tbog.tblauncher.searcher.Searcher;
 
 public class TBApplication extends Application {
