@@ -38,7 +38,6 @@ import androidx.preference.PreferenceManager;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -139,15 +138,16 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     private void setSearchHint() {
-        CharSequence hint = "";
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getContext());
-        Set<String> selectedHints = prefs.getStringSet("selected-search-hints", null);
+        Set<String> selectedHints = mPref.getStringSet("selected-search-hints", null);
         if (selectedHints != null && !selectedHints.isEmpty()) {
-            ArrayList<String> hints = new ArrayList<>(selectedHints);
-            Collections.sort(hints);
-            hint = hints.get(new Random().nextInt(hints.size()));
+            int random = new Random().nextInt(selectedHints.size());
+            for (String selectedHint : selectedHints) {
+                if (--random < 0) {
+                    mSearchEditText.setHint(selectedHint);
+                    break;
+                }
+            }
         }
-        mSearchEditText.setHint(hint);
     }
 
     private void initLauncherSearchEditText(EditText searchEditText) {
