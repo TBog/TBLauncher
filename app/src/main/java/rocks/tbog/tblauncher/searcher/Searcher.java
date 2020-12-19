@@ -16,7 +16,7 @@ import java.util.PriorityQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import rocks.tbog.tblauncher.PrefCache;
+import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.utils.Utilities;

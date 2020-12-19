@@ -46,6 +46,7 @@ import rocks.tbog.tblauncher.preference.QuickListPreferenceDialog;
 import rocks.tbog.tblauncher.preference.SliderDialog;
 import rocks.tbog.tblauncher.ui.PleaseWaitDialog;
 import rocks.tbog.tblauncher.utils.FileUtils;
+import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.SystemUiVisibility;
 import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.UISizes;

@@ -1,9 +1,11 @@
-package rocks.tbog.tblauncher;
+package rocks.tbog.tblauncher.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
 
 import androidx.preference.PreferenceManager;
+
+import rocks.tbog.tblauncher.R;
 
 public class PrefCache {
 

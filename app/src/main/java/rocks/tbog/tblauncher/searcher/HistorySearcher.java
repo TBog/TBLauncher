@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Set;
 
 import rocks.tbog.tblauncher.DataHandler;
-import rocks.tbog.tblauncher.PrefCache;
+import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.db.DBHelper;
 import rocks.tbog.tblauncher.db.FavRecord;
