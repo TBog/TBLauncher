@@ -21,6 +21,9 @@
     <uses-permission android:name="android.permission.REQUEST_DELETE_PACKAGES" />
     <!-- Ability to open the notification bar -->
     <uses-permission android:name="android.permission.EXPAND_STATUS_BAR" />
+    <uses-permission
+        android:name="android.permission.QUERY_ALL_PACKAGES"
+        tools:ignore="QueryAllPackagesPermission" />
 
     <uses-feature
         android:name="android.hardware.telephony"
@@ -95,7 +98,7 @@
         </activity>
 
         <activity
-            android:name="PinShortcutConfirm"
+            android:name=".PinShortcutConfirm"
             android:allowTaskReparenting="true"
             android:excludeFromRecents="true"
             android:exported="false"
