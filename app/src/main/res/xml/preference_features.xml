@@ -84,6 +84,26 @@
             app:isPreferenceVisible="false" />
 
     </PreferenceCategory>
+
+    <!-- Result list -->
+    <PreferenceCategory
+        android:key="result-list-section"
+        android:title="@string/result_list_section">
+
+        <rocks.tbog.tblauncher.preference.CustomDialogPreference
+            android:defaultValue="@integer/default_result_searcher_cap"
+            android:dialogLayout="@layout/pref_size"
+            android:key="result-search-cap"
+            android:title="@string/result_search_cap"
+            android:widgetLayout="@layout/pref_size_preview" />
+
+        <rocks.tbog.tblauncher.preference.CustomDialogPreference
+            android:dialogLayout="@layout/pref_confirm"
+            android:key="unlimited-search-cap"
+            android:title="@string/unlimited_search_cap" />
+
+    </PreferenceCategory>
+
     <!-- Icons -->
     <androidx.preference.PreferenceCategory
         android:key="icons-section"

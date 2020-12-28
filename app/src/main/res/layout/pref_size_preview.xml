@@ -6,4 +6,4 @@
     android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:gravity="center"
-    tools:text="14dp" />
+    tools:text="&lt;14&gt;" />

@@ -5,8 +5,10 @@ import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Looper;
+import android.util.Log;
 import android.view.View;
 import android.widget.TextView;
 
@@ -21,9 +23,12 @@ import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.db.XmlExport;
 import rocks.tbog.tblauncher.utils.FileUtils;
+import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public class ConfirmDialog extends PreferenceDialogFragmentCompat {
+
+    private static final String TAG = "Dialog";
 
     public static ConfirmDialog newInstance(String key) {
         ConfirmDialog fragment = new ConfirmDialog();
@@ -70,6 +75,14 @@ public class ConfirmDialog extends PreferenceDialogFragmentCompat {
             case "export-backup":
                 FileUtils.sendSettingsFile(requireActivity(), "backup");
                 break;
+            case "unlimited-search-cap": {
+                SharedPreferences pref = preference.getPreferenceManager().getSharedPreferences();
+                pref.edit().putInt("result-search-cap", 0).apply();
+                PrefCache.resetCache();
+                break;
+            }
+            default:
+                Log.w(TAG, "Unexpected key `" + key + "`");
         }
     }
 
