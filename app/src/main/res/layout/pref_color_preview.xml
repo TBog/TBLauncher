@@ -4,5 +4,8 @@
     android:id="@+id/prefColorPreview"
     android:layout_width="@dimen/color_preview_size"
     android:layout_height="@dimen/color_preview_size"
-    android:importantForAccessibility="no" />
+    android:importantForAccessibility="no"
+    android:src="@drawable/color_preview"
+    tools:tint="@color/colorPrimary"
+    tools:tintMode="multiply" />
 

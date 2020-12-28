@@ -94,16 +94,16 @@
             android:defaultValue="@integer/default_result_history_size"
             android:dialogLayout="@layout/pref_size"
             android:key="result-history-size"
-            android:title="@string/result_history_size"
             android:summary="@string/result_history_size_summary"
+            android:title="@string/result_history_size"
             android:widgetLayout="@layout/pref_size_preview" />
 
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
             android:defaultValue="@integer/default_result_history_adaptive"
             android:dialogLayout="@layout/pref_size"
             android:key="result-history-adaptive"
-            android:title="@string/result_history_adaptive"
             android:summary="@string/result_history_adaptive_summary"
+            android:title="@string/result_history_adaptive"
             android:widgetLayout="@layout/pref_size_preview" />
 
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
@@ -116,6 +116,7 @@
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
             android:dialogLayout="@layout/pref_confirm"
             android:key="unlimited-search-cap"
+            android:summary="@string/unlimited_search_cap_summary"
             android:title="@string/unlimited_search_cap" />
 
     </PreferenceCategory>

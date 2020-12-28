@@ -2,7 +2,7 @@ package rocks.tbog.tblauncher.preference;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.drawable.ColorDrawable;
+import android.graphics.PorterDuff;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
@@ -91,10 +91,10 @@ public class CustomDialogPreference extends androidx.preference.DialogPreference
         {
             View view = holder.findViewById(R.id.prefColorPreview);
             if (view instanceof ImageView) {
-                ColorDrawable color = null;
+                int color = 0xFFffffff;
                 if (value instanceof Integer)
-                    color = new ColorDrawable((int) value | 0xFF000000);
-                ((ImageView) view).setImageDrawable(color);
+                    color = (int) value | 0xFF000000;
+                ((ImageView) view).setColorFilter(color, PorterDuff.Mode.MULTIPLY);
             }
         }
         {
