@@ -1,5 +1,6 @@
 package rocks.tbog.tblauncher.searcher;
 
+import android.app.Activity;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
@@ -11,6 +12,7 @@ import java.util.PriorityQueue;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.EntryWithTags;
+import rocks.tbog.tblauncher.utils.Utilities;
 
 public class TagSearcher extends Searcher {
     final EntryWithTags.TagDetails tagDetails;
@@ -22,7 +24,7 @@ public class TagSearcher extends Searcher {
     }
 
     @Override
-    PriorityQueue<EntryItem> getPojoProcessor(ISearchActivity activity) {
+    protected PriorityQueue<EntryItem> getPojoProcessor(ISearchActivity activity) {
         return new PriorityQueue<>(INITIAL_CAPACITY, EntryItem.NAME_COMPARATOR);
     }
 
@@ -32,7 +34,8 @@ public class TagSearcher extends Searcher {
         if (isCancelled())
             return false;
 
-        ISearchActivity activity = activityWeakReference.get();
+        ISearchActivity searchActivity = activityWeakReference.get();
+        Activity activity = searchActivity != null ? Utilities.getActivity(searchActivity.getContext()) : null;
         if (activity == null)
             return false;
 
@@ -41,7 +44,10 @@ public class TagSearcher extends Searcher {
                 if (((EntryWithTags) entryItem).getTags().contains(tagDetails)) {
                     if (!foundIdSet.contains(entryItem.id)) {
                         foundIdSet.add(entryItem.id);
-                        this.processedPojos.add(entryItem);
+
+                        processedPojos.add(entryItem);
+                        if (processedPojos.size() > maxResults)
+                            processedPojos.poll();
                     }
                 }
             }

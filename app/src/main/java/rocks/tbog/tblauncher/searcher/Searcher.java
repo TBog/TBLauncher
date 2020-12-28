@@ -2,6 +2,7 @@ package rocks.tbog.tblauncher.searcher;
 
 
 import android.app.Activity;
+import android.content.Context;
 import android.os.AsyncTask;
 import android.util.Log;
 
@@ -16,17 +17,18 @@ import java.util.PriorityQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.entry.EntryItem;
+import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public abstract class Searcher extends AsyncTask<Void, EntryItem, Void> {
     // define a different thread than the default AsyncTask thread or else we will block everything else that uses AsyncTask while we search
     public static final ExecutorService SEARCH_THREAD = Executors.newSingleThreadExecutor();
-    static final int INITIAL_CAPACITY = 50;
-    final WeakReference<ISearchActivity> activityWeakReference;
+    protected static final int INITIAL_CAPACITY = 50;
+    protected final WeakReference<ISearchActivity> activityWeakReference;
     protected final PriorityQueue<EntryItem> processedPojos;
+    protected final int maxResults;
     private final boolean tagsEnabled;
     private long start;
     /**
@@ -37,12 +39,13 @@ public abstract class Searcher extends AsyncTask<Void, EntryItem, Void> {
     @NonNull
     protected final String query;
 
-    Searcher(ISearchActivity activity, @NonNull String query) {
+    public Searcher(ISearchActivity activity, @NonNull String query) {
         super();
         this.query = query;
-        this.activityWeakReference = new WeakReference<>(activity);
-        this.processedPojos = getPojoProcessor(activity);
-        this.tagsEnabled = PrefCache.getFuzzySearchTags(activity.getContext());
+        activityWeakReference = new WeakReference<>(activity);
+        processedPojos = getPojoProcessor(activity);
+        tagsEnabled = PrefCache.getFuzzySearchTags(activity.getContext());
+        maxResults = getMaxResultCount(activity.getContext());
     }
 
     @NonNull
@@ -50,8 +53,12 @@ public abstract class Searcher extends AsyncTask<Void, EntryItem, Void> {
         return query;
     }
 
-    PriorityQueue<EntryItem> getPojoProcessor(ISearchActivity activity) {
+    protected PriorityQueue<EntryItem> getPojoProcessor(ISearchActivity activity) {
         return new PriorityQueue<>(INITIAL_CAPACITY, EntryItem.RELEVANCE_COMPARATOR);
+    }
+
+    protected int getMaxResultCount(Context context) {
+        return PrefCache.getResultSearcherCap(context);
     }
 
     /**
@@ -67,10 +74,9 @@ public abstract class Searcher extends AsyncTask<Void, EntryItem, Void> {
         if (activity == null)
             return false;
 
-        Collections.addAll(this.processedPojos, pojos);
-//        int maxResults = getMaxResultCount();
-//        while (this.processedPojos.size() > maxResults)
-//            this.processedPojos.poll();
+        Collections.addAll(processedPojos, pojos);
+        while (processedPojos.size() > maxResults)
+            processedPojos.poll();
 
         return true;
     }
@@ -84,7 +90,7 @@ public abstract class Searcher extends AsyncTask<Void, EntryItem, Void> {
         displayActivityLoader();
     }
 
-    void displayActivityLoader() {
+    private void displayActivityLoader() {
         ISearchActivity activity = activityWeakReference.get();
         if (activity == null)
             return;

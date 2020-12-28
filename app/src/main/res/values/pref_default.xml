@@ -15,4 +15,5 @@
     <integer name="default_size_icon" translatable="false">48</integer>                 <!-- dp -->
     <integer name="default_result_history_size" translatable="false">32</integer>       <!-- count -->
     <integer name="default_result_history_adaptive" translatable="false">36</integer>   <!-- adaptive hours -->
+    <integer name="default_result_searcher_cap" translatable="false">0</integer>        <!-- 0->infinite results -->
 </resources>

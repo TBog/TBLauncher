@@ -350,6 +350,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "result-icon-size":
                     case "result-history-size":
                     case "result-history-adaptive":
+                    case "result-search-cap":
                         dialogFragment = SliderDialog.newInstance(key);
                         break;
                     case "exit-app":
@@ -361,6 +362,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "export-widgets":
                     case "export-history":
                     case "export-backup":
+                    case "unlimited-search-cap":
                         dialogFragment = ConfirmDialog.newInstance(key);
                         break;
                     case "quick-list-content":
