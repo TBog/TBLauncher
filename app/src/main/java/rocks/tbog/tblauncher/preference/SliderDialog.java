@@ -86,12 +86,14 @@ public class SliderDialog extends PreferenceDialogFragmentCompat {
                 mSliderOffset = 1;
                 seekBar.setMax(1000 - mSliderOffset);
         }
-        seekBar.setProgress((Integer) preference.getValue() - mSliderOffset);
+
+        int seekBarProgress = (Integer) preference.getValue() - mSliderOffset;
+        seekBar.setProgress(seekBarProgress);
 
         // update display value
         mTextView2 = root.findViewById(android.R.id.text2);
         {
-            int progress = seekBar.getProgress();
+            int progress = seekBarProgress;
             progress += mSliderOffset;
             mTextView2.setText(mTextView2.getResources().getString(R.string.value, progress));
         }
