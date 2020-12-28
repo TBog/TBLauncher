@@ -78,7 +78,6 @@ public class ConfirmDialog extends PreferenceDialogFragmentCompat {
             case "unlimited-search-cap": {
                 SharedPreferences pref = preference.getPreferenceManager().getSharedPreferences();
                 pref.edit().putInt("result-search-cap", 0).apply();
-                PrefCache.resetCache();
                 break;
             }
             default:

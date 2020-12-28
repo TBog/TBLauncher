@@ -498,6 +498,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case "result-history-size":
             case "result-history-adaptive":
             case "fuzzy-search-tags":
+            case "result-search-cap":
                 PrefCache.resetCache();
                 break;
             case "adaptive-shape":
