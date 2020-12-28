@@ -43,19 +43,6 @@ public class SliderDialog extends PreferenceDialogFragmentCompat {
         CustomDialogPreference preference = (CustomDialogPreference) getPreference();
         final String key = preference.getKey();
 
-//        Map<String, Object> map = (Map<String, Object>) preference.getSharedPreferences().getAll();
-//        for (Map.Entry<String, Object> entry : map.entrySet()) {
-//            String value;
-//            if (entry.getValue() instanceof Integer)
-//                value = Integer.toString((Integer) entry.getValue());
-//            else if (entry.getValue() instanceof String)
-//                value = (String) entry.getValue();
-//            else
-//                value = entry.getValue().toString();
-//
-//            Log.d("Pref", "pref[ `" + entry.getKey() + "` ]= `" + value + "`");
-//        }
-
         // initialize value
         preference.setValue(preference.getSharedPreferences().getInt(key, 255));
 
