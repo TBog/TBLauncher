@@ -12,6 +12,7 @@ import androidx.annotation.Nullable;
 import androidx.preference.PreferenceViewHolder;
 
 import rocks.tbog.tblauncher.R;
+import rocks.tbog.tblauncher.utils.PrefCache;
 
 public class CustomDialogPreference extends androidx.preference.DialogPreference {
 
@@ -92,7 +93,7 @@ public class CustomDialogPreference extends androidx.preference.DialogPreference
             if (view instanceof ImageView) {
                 ColorDrawable color = null;
                 if (value instanceof Integer)
-                    color = new ColorDrawable((int)value | 0xFF000000);
+                    color = new ColorDrawable((int) value | 0xFF000000);
                 ((ImageView) view).setImageDrawable(color);
             }
         }
@@ -109,9 +110,11 @@ public class CustomDialogPreference extends androidx.preference.DialogPreference
             View view = holder.findViewById(R.id.prefSizePreview);
             if (view instanceof TextView) {
                 int size = -1;
-                if (value instanceof Integer)
+                if ("result-search-cap".equals(getKey()))
+                    size = PrefCache.getResultSearcherCap(getContext());
+                else if (value instanceof Integer)
                     size = (int) value;
-                ((TextView) view).setText( view.getResources().getString(R.string.size, size) );
+                ((TextView) view).setText(view.getResources().getString(R.string.size, size));
             }
         }
     }
