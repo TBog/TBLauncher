@@ -13,6 +13,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.Spannable;
 import android.text.SpannableString;
+import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.View;
@@ -77,12 +78,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     .commit();
         }
 
-        getSupportFragmentManager().addOnBackStackChangedListener(() -> {
-            if (getSupportFragmentManager().getBackStackEntryCount() == 0) {
-                setTitle(R.string.menu_popup_launcher_settings);
-            }
-        });
-
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
@@ -90,8 +85,27 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     }
 
     @Override
+    protected void onTitleChanged(CharSequence title, int color) {
+        super.onTitleChanged(title, color);
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            if (color != 0 && !(title instanceof Spannable)) {
+                SpannableString ss = new SpannableString(title);
+                ss.setSpan(new ForegroundColorSpan(color), 0, title.length(), Spanned.SPAN_INCLUSIVE_EXCLUSIVE);
+                actionBar.setTitle(ss);
+            } else {
+                actionBar.setTitle(title);
+            }
+        }
+    }
+
+    @Override
     public boolean onSupportNavigateUp() {
         if (getSupportFragmentManager().popBackStackImmediate()) {
+            final int count = getSupportFragmentManager().getBackStackEntryCount();
+            if (count == 0) {
+                setTitle(R.string.menu_popup_launcher_settings);
+            }
             return true;
         }
         return super.onSupportNavigateUp();
@@ -116,7 +130,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
     @Override
     public boolean onPreferenceStartScreen(PreferenceFragmentCompat caller, PreferenceScreen preferenceScreen) {
-        String key = preferenceScreen.getKey();
+        final String key = preferenceScreen.getKey();
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         SettingsFragment fragment = new SettingsFragment();
         Bundle args = new Bundle();
@@ -125,6 +139,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         ft.replace(R.id.settings_container, fragment, key);
         ft.addToBackStack(key);
         ft.commit();
+
+        setTitle(preferenceScreen.getTitle());
         return true;
     }
 
@@ -291,23 +307,25 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             int alpha = UIColors.getAlpha(sharedPreferences, "notification-bar-alpha");
             SettingsActivity activity = (SettingsActivity) getActivity();
             UIColors.setStatusBarColor(activity, UIColors.setAlpha(color, alpha));
+            int actionBarTextColor = activity.getTitleColor();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 View view = getView();
                 if (view != null) {
                     if (sharedPreferences.getBoolean("black-notification-icons", false)) {
                         SystemUiVisibility.setLightStatusBar(view);
-                        setActionBarTextColor(getActivity(), 0xFF000000);
+                        actionBarTextColor = 0xFF000000;
                     } else {
                         SystemUiVisibility.clearLightStatusBar(view);
-                        setActionBarTextColor(activity, 0xFFffffff);
+                        actionBarTextColor = 0xFFffffff;
                     }
                 }
             } else {
                 if (UIColors.luminance(color) > .5)
-                    setActionBarTextColor(activity, 0xFF000000);
+                    actionBarTextColor = 0xFF000000;
                 else
-                    setActionBarTextColor(activity, 0xFFffffff);
+                    actionBarTextColor = 0xFFffffff;
             }
+            setActionBarTextColor(activity, actionBarTextColor);
         }
 
         @Override
@@ -415,6 +433,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         CharSequence title = actionBar != null ? actionBar.getTitle() : null;
         if (title == null)
             return;
+        activity.setTitleColor(color);
 
         Drawable arrow = ContextCompat.getDrawable(activity, R.drawable.ic_arrow_back);
         if (arrow != null) {
