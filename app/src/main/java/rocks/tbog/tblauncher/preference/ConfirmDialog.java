@@ -23,7 +23,6 @@ import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.db.XmlExport;
 import rocks.tbog.tblauncher.utils.FileUtils;
-import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public class ConfirmDialog extends PreferenceDialogFragmentCompat {
