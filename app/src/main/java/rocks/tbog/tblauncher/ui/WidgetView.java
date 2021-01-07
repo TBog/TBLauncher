@@ -69,20 +69,25 @@ public class WidgetView extends AppWidgetHostView {
 
             @Override
             public boolean onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY) {
-                Log.d(TAG, "onScroll mSendCancel = true");
-                mSendCancel = true;
-                return true;
+                //Log.d(TAG, "onScroll mSendCancel = true");
+                //mSendCancel = true;
+                //TBApplication.liveWallpaper(context).scroll(e1, e2);
+                //return true;
+
+                return false;
             }
 
             @Override
             public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-                Log.d(TAG, "onFling mSendCancel = true" +
-                        String.format("\r\nvelocity( %.2f, %.2f )", velocityX, velocityY) +
-                        String.format("\r\ndown pos ( %.2f, %.2f )", e1.getX(), e1.getY()) +
-                        String.format("\r\n up  pos ( %.2f, %.2f )", e2.getX(), e2.getY())
-                        );
-                mSendCancel = true;
-                return true;
+//                Log.d(TAG, "onFling mSendCancel = true" +
+//                        String.format("\r\nvelocity( %.2f, %.2f )", velocityX, velocityY) +
+//                        String.format("\r\ndown pos ( %.2f, %.2f )", e1.getX(), e1.getY()) +
+//                        String.format("\r\n up  pos ( %.2f, %.2f )", e2.getX(), e2.getY())
+//                        );
+//                mSendCancel = true;
+//                return true;
+
+                return false;
             }
         };
         gestureDetector = new GestureDetectorCompat(context, onGestureListener);
@@ -169,8 +174,7 @@ public class WidgetView extends AppWidgetHostView {
             Log.d(TAG, "mIntercepted = " + false);
             mIntercepted = false;
             handled = true;
-        }
-        else {
+        } else {
             // if no child view handled this event, send cancel to gestureDetector
             MotionEvent cancel = MotionEvent.obtainNoHistory(event);
             cancel.setAction(MotionEvent.ACTION_CANCEL);

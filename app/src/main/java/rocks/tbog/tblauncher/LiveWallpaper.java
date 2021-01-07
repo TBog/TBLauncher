@@ -48,7 +48,7 @@ public class LiveWallpaper {
     private boolean wpReturnCenter = true;
     private boolean wpStickToSides = false;
 
-    private Runnable mLongClickRunnable = () -> {
+    private final Runnable mLongClickRunnable = () -> {
         if (!TBApplication.state().isWidgetScreenVisible())
             return;
         View view = mTBLauncherActivity.findViewById(R.id.root_layout);
@@ -65,6 +65,19 @@ public class LiveWallpaper {
 
     public PointF getWallpaperOffset() {
         return mWallpaperOffset;
+    }
+
+    public void scroll(MotionEvent e1, MotionEvent e2) {
+        if (!isPreferenceWPDragAnimate())
+            return;
+        cacheWindowSize();
+        mFirstTouchPos.set(e1.getRawX(), e1.getRawY());
+        mLastTouchPos.set(e2.getRawX(), e2.getRawY());
+        float xMove = (mFirstTouchPos.x - mLastTouchPos.x) / mWindowSize.x;
+        float yMove = (mFirstTouchPos.y - mLastTouchPos.y) / mWindowSize.y;
+        float offsetX = mFirstTouchOffset.x + xMove * 1.01f;
+        float offsetY = mFirstTouchOffset.y + yMove * 1.01f;
+        updateWallpaperOffset(offsetX, offsetY);
     }
 
     public void onCreateActivity(TBLauncherActivity mainActivity) {
@@ -100,7 +113,7 @@ public class LiveWallpaper {
         root.setOnTouchListener(this::onRootTouch);
     }
 
-    static boolean onClick(View view) {
+    private static boolean onClick(View view) {
         return TBApplication.behaviour(view.getContext()).onClick();
     }
 
@@ -127,7 +140,7 @@ public class LiveWallpaper {
         }
     }
 
-    void onLongClick(View view) {
+    private void onLongClick(View view) {
         view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
         Context ctx = view.getContext();
         ListPopup menu = TBApplication.widgetManager(ctx).getConfigPopup(mTBLauncherActivity);
@@ -135,6 +148,21 @@ public class LiveWallpaper {
         int x = (int) (mLastTouchPos.x + .5f);
         int y = (int) (mLastTouchPos.y + .5f);
         menu.showAtLocation(view, Gravity.START | Gravity.TOP, x, y);
+    }
+
+    private void cacheWindowSize() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+            WindowMetrics windowMetrics = mTBLauncherActivity.getWindowManager().getCurrentWindowMetrics();
+            //Insets insets = windowMetrics.getWindowInsets().getInsetsIgnoringVisibility(WindowInsets.Type.systemBars());
+            Rect windowBound = windowMetrics.getBounds();
+            int width = windowBound.width();// - insets.left - insets.right;
+            int height = windowBound.height();// - insets.top - insets.bottom;
+            mWindowSize.set(width, height);
+        } else {
+            mTBLauncherActivity.getWindowManager()
+                    .getDefaultDisplay()
+                    .getSize(mWindowSize);
+        }
     }
 
     boolean onRootTouch(View view, MotionEvent event) {
@@ -152,18 +180,7 @@ public class LiveWallpaper {
                 mFirstTouchPos.set(event.getRawX(), event.getRawY());
                 mLastTouchPos.set(mFirstTouchPos);
                 mFirstTouchOffset.set(mWallpaperOffset);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-                    WindowMetrics windowMetrics = mTBLauncherActivity.getWindowManager().getCurrentWindowMetrics();
-                    //Insets insets = windowMetrics.getWindowInsets().getInsetsIgnoringVisibility(WindowInsets.Type.systemBars());
-                    Rect windowBound = windowMetrics.getBounds();
-                    int width = windowBound.width();// - insets.left - insets.right;
-                    int height = windowBound.height();// - insets.top - insets.bottom;
-                    mWindowSize.set(width, height);
-                } else {
-                    mTBLauncherActivity.getWindowManager()
-                            .getDefaultDisplay()
-                            .getSize(mWindowSize);
-                }
+                cacheWindowSize();
                 if (isPreferenceWPDragAnimate()) {
                     mContentView.clearAnimation();
                 }
