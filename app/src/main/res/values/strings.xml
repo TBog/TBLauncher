@@ -149,7 +149,7 @@
     <string name="screen_off_cache_clear_summary">Empty cache when screen turns off</string>
     <string name="memory_section">Memory</string>
     <string name="cache_half_apps">Small cache size</string>
-    <string name="cache_half_apps_summary">Make URL cache size half the number of apps installed</string>
+    <string name="cache_half_apps_summary">Make LRU cache size half the number of apps installed</string>
     <string name="icon_pack_section">Icon pack</string>
     <string name="icon_pack_content_list">Icons from\n%s</string>
 
