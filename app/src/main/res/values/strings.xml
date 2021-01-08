@@ -239,9 +239,9 @@
     <string name="icon_pack_loading">Loading from icon packs…</string>
     <string name="gesture_section">Gestures</string>
     <string name="gesture_fling_down_left">Fling from |<b>←</b>|, <b>↓</b></string>
-    <string name="gesture_fling_down_left_summary">Start from on the <b>→</b> side of the screen and fling <b>↓</b></string>
+    <string name="gesture_fling_down_left_summary">Start from the <b>←</b> side of the screen and fling <b>↓</b></string>
     <string name="gesture_fling_down_right">Fling from |<b>→</b>|, <b>↓</b></string>
-    <string name="gesture_fling_down_right_summary">Start from on the <b>→</b> side of the screen and fling <b>↓</b></string>
+    <string name="gesture_fling_down_right_summary">Start from the <b>→</b> side of the screen and fling <b>↓</b></string>
     <string name="gesture_fling_up">Fling ↑</string>
     <string name="gesture_fling_left">Fling ←</string>
     <string name="gesture_fling_right">Fling →</string>
@@ -284,7 +284,7 @@
     <string name="add_widget_failed">Could not add widget</string>
     <string name="widget_placeholder_remove">Really remove the placeholder?</string>
     <string name="choose_file_activity_not_found">Please install a file manager.</string>
-    <string name="result_history_size">History max count</string>
+    <string name="result_history_size">History size</string>
     <string name="result_history_size_summary">Maximum number of items when showing history</string>
     <string name="action_show_history_recency">Recent history</string>
     <string name="action_show_history_frequency">Most accessed</string>
