@@ -1,4 +1,4 @@
-package rocks.tbog.tblauncher.CustomIcon;
+package rocks.tbog.tblauncher.customicon;
 
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
@@ -13,8 +13,8 @@ import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.utils.ViewHolderAdapter;
 
 public class IconViewHolder extends ViewHolderAdapter.ViewHolder<IconData> {
-    ImageView icon;
-    AsyncLoad loader = null;
+    private final ImageView icon;
+    private AsyncLoad loader = null;
 
     public IconViewHolder(View view) {
         super(view);
@@ -30,7 +30,7 @@ public class IconViewHolder extends ViewHolderAdapter.ViewHolder<IconData> {
     }
 
     static class AsyncLoad extends AsyncTask<IconData, Void, Drawable> {
-        WeakReference<IconViewHolder> holder;
+        private final WeakReference<IconViewHolder> holder;
 
         protected AsyncLoad(IconViewHolder holder) {
             super();

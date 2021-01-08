@@ -1,4 +1,4 @@
-package rocks.tbog.tblauncher.CustomIcon;
+package rocks.tbog.tblauncher.customicon;
 
 import androidx.annotation.NonNull;
 
