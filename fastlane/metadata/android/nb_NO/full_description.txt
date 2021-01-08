@@ -1,0 +1,23 @@
+Dette er oppstarteren brukt og utviklet av
+██████████████████████▀█
+█─▄─▄─█▄─▄─▀█─▄▄─█─▄▄▄▄█
+███─████─▄─▀█─██─█─██▄─█
+▀▀▄▄▄▀▀▄▄▄▄▀▀▄▄▄▄▀▄▄▄▄▄▀
+
+Hvorfor utvikle nytt:
+🔹Ren hovedskjerm for å sette pris på skjermbildet
+🔸Rask tilgang til programmer med søk
+🔹Støtte for ikonpakker
+🔸Mulighet til å tilpasse farger og oppførsel
+
+Nye funksjoner:
+⦾ Oppdater programliste når endringer oppdages
+⦿ Tilpassbare ikonformer
+⦾ Hurtiglagre ikoner for rask visning
+⦿ Etiketter for bedre organisering av programmer
+⦾ Hurtigliste over elementer for å filtrere resultater
+⦿ Forhåndsvisning av foretrukket farge
+⦾ Snarveier til programmer, kontakter, osv.
+
+Kildekode https://github.com/TBog/TBLauncher
+Opprinnelig idé og kode fra https://f-droid.org/en/packages/fr.neamar.kiss/

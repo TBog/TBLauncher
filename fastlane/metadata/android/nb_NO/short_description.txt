@@ -1,0 +1,1 @@
+Lite minnebruk, støtte for ikonpakker, farger, og tilpassbar oppførsel
