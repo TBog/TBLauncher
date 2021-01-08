@@ -20,11 +20,27 @@
         <item name="android:layout_gravity">center_horizontal</item>
         <item name="android:background">?android:attr/listDivider</item>
     </style>
-    
+
     <style name="palette_cell">
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">48dp</item>
         <item name="android:layout_weight">1</item>
+    </style>
+
+    <style name="ItemGrid">
+        <item name="android:background">@color/colorPrimaryDark</item>
+        <item name="android:clipToPadding">false</item>
+        <item name="android:drawSelectorOnTop">false</item>
+        <item name="android:columnWidth">@dimen/custom_icon_column_width</item>
+        <item name="android:gravity">center</item>
+        <item name="android:horizontalSpacing">1dp</item>
+        <item name="android:verticalSpacing">@dimen/app_grid_vertical_spacing</item>
+        <item name="android:numColumns">auto_fit</item>
+        <item name="android:paddingTop">@dimen/app_grid_vertical_padding</item>
+        <item name="android:paddingBottom">@dimen/app_grid_vertical_padding</item>
+        <item name="android:paddingLeft">@dimen/app_grid_horizontal_padding</item>
+        <item name="android:paddingRight">@dimen/app_grid_horizontal_padding</item>
+        <item name="android:stretchMode">spacingWidth</item>
     </style>
 
 </resources>

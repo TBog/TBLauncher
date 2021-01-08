@@ -16,19 +16,10 @@
 
     <GridView
         android:id="@+id/iconGrid"
+        style="@style/ItemGrid"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:background="@color/colorPrimaryDark"
-        android:clipToPadding="false"
-        android:columnWidth="@dimen/custom_icon_column_width"
-        android:gravity="center"
-        android:horizontalSpacing="1dp"
-        android:numColumns="auto_fit"
-        android:paddingHorizontal="@dimen/app_grid_horizontal_padding"
-        android:paddingVertical="@dimen/app_grid_vertical_padding"
-        android:stretchMode="spacingWidth"
-        android:verticalSpacing="1dp"
         tools:itemCount="10"
         tools:listitem="@layout/item_grid" />
 
@@ -40,19 +31,10 @@
 
     <GridView
         android:id="@+id/shapeGrid"
+        style="@style/ItemGrid"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:background="@color/colorPrimaryDark"
-        android:clipToPadding="false"
-        android:columnWidth="@dimen/custom_icon_column_width"
-        android:gravity="center"
-        android:horizontalSpacing="1dp"
-        android:numColumns="auto_fit"
-        android:paddingHorizontal="@dimen/app_grid_horizontal_padding"
-        android:paddingVertical="@dimen/app_grid_vertical_padding"
-        android:stretchMode="spacingWidth"
-        android:verticalSpacing="1dp"
         tools:itemCount="20"
         tools:listitem="@layout/item_grid" />
 

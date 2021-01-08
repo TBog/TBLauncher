@@ -3,7 +3,6 @@ package rocks.tbog.tblauncher.entry;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.text.Spannable;

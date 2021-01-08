@@ -320,6 +320,7 @@
     <string name="result_search_cap">Maximum search results</string>
     <string name="unlimited_search_cap">Unlimited search results</string>
     <string name="unlimited_search_cap_summary">Set highest possible limit</string>
+    <string name="result_ripple_color">Touch color</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>

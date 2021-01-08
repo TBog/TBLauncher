@@ -3,7 +3,7 @@ package rocks.tbog.tblauncher.CustomIcon;
 import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
+import android.widget.Adapter;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -69,7 +69,7 @@ class PageAdapter extends androidx.viewpager.widget.PagerAdapter implements View
         boolean bDataLoaded = false;
 
         public interface OnItemClickListener {
-            void onItemClick(BaseAdapter adapter, View view, int position);
+            void onItemClick(Adapter adapter, View view, int position);
         }
 
         Page(CharSequence name, View view) {
