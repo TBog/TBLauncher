@@ -82,32 +82,39 @@ class CustomShapePage extends PageAdapter.Page {
         // shapes list
         {
             GridView shapeGridView = pageView.findViewById(R.id.shapeGrid);
-            mShapesAdapter = new ShapedIconAdapter((adapter, view, position) -> {
+            mShapesAdapter = new ShapedIconAdapter();
+            shapeGridView.setAdapter(mShapesAdapter);
+            shapeGridView.setOnItemClickListener((parent, view, position, id) -> {
                 Activity activity = Utilities.getActivity(view);
                 if (activity == null)
                     return;
 
-                Object objItem = adapter.getItem(position);
-                if (objItem instanceof NamedIconInfo) {
-                    CharSequence name = ((NamedIconInfo) objItem).name;
-                    for (int shape : DrawableUtils.SHAPE_LIST) {
-                        if (name.equals(DrawableUtils.shapeName(activity, shape))) {
-                            mShape = shape;
-                            break;
-                        }
+                Object objItem = parent.getAdapter().getItem(position);
+                if (!(objItem instanceof NamedIconInfo) || ((NamedIconInfo) objItem).getPreview() == null)
+                    return;
+                CharSequence name = ((NamedIconInfo) objItem).name;
+                for (int shape : DrawableUtils.SHAPE_LIST) {
+                    if (name.equals(DrawableUtils.shapeName(activity, shape))) {
+                        mShape = shape;
+                        break;
                     }
                 }
                 reshapeIcons(activity);
             });
-            shapeGridView.setAdapter(mShapesAdapter);
             TBApplication.ui(context).setResultListPref(shapeGridView);
         }
 
         // icons we are customizing
         {
             GridView gridView = pageView.findViewById(R.id.iconGrid);
-            mShapedIconAdapter = new ShapedIconAdapter(iconClickListener);
+            mShapedIconAdapter = new ShapedIconAdapter();
             gridView.setAdapter(mShapedIconAdapter);
+            if (iconClickListener != null)
+                gridView.setOnItemClickListener((parent, view, position, id) -> {
+                    Object item = parent.getAdapter().getItem(position);
+                    if (item instanceof ShapedIconInfo && ((ShapedIconInfo) item).getPreview() != null)
+                        iconClickListener.onItemClick(parent.getAdapter(), view, position);
+                });
             TBApplication.ui(context).setResultListPref(gridView);
         }
 
@@ -412,7 +419,6 @@ class CustomShapePage extends PageAdapter.Page {
 
         @Override
         protected void setContent(ShapedIconInfo content, int position, @NonNull ViewHolderAdapter<ShapedIconInfo, ? extends ViewHolderAdapter.ViewHolder<ShapedIconInfo>> adapter) {
-            ShapedIconAdapter shapedIconAdapter = (ShapedIconAdapter) adapter;
             // set icon
             Drawable preview = content.getPreview();
             icon.setImageDrawable(preview);
@@ -426,20 +432,12 @@ class CustomShapePage extends PageAdapter.Page {
                 text1.setText(text);
             else
                 text1.setText(content.textId);
-
-            // setOnClickListener when we have an icon
-            if (shapedIconAdapter.mIconClickListener != null && content.getPreview() != null)
-                root.setOnClickListener(v -> shapedIconAdapter.mIconClickListener.onItemClick(adapter, v, position));
         }
     }
 
     static class ShapedIconAdapter extends ViewHolderListAdapter<ShapedIconInfo, ShapedIconVH> {
-        @Nullable
-        private final OnItemClickListener mIconClickListener;
-
-        protected ShapedIconAdapter(@Nullable OnItemClickListener iconClickListener) {
+        protected ShapedIconAdapter() {
             super(ShapedIconVH.class, R.layout.item_grid, new ArrayList<>());
-            mIconClickListener = iconClickListener;
         }
 
         List<ShapedIconInfo> getList() {
@@ -449,11 +447,6 @@ class CustomShapePage extends PageAdapter.Page {
         void removeItem(ShapedIconInfo item) {
             mList.remove(item);
             notifyDataSetChanged();
-        }
-
-        @Override
-        public ShapedIconInfo getItem(int position) {
-            return mList.get(position);
         }
     }
 }

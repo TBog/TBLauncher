@@ -32,6 +32,7 @@ import androidx.annotation.WorkerThread;
 import androidx.core.content.res.ResourcesCompat;
 
 import java.lang.ref.WeakReference;
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.concurrent.Executor;
 
@@ -263,6 +264,26 @@ public class Utilities {
                     expand = statusbarManager.getMethod("expand");
                 }
                 expand.invoke(statusBarService);
+            } catch (Exception ignored) {
+            }
+        }
+    }
+
+    public static void setVerticalScrollbarThumbDrawable(View scrollView, Drawable drawable) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            scrollView.setVerticalScrollbarThumbDrawable(drawable);
+        } else {
+            try {
+                //noinspection JavaReflectionMemberAccess
+                Field mScrollCacheField = View.class.getDeclaredField("mScrollCache");
+                mScrollCacheField.setAccessible(true);
+                Object mScrollCache = mScrollCacheField.get(scrollView);
+                Field scrollBarField = mScrollCache.getClass().getDeclaredField("scrollBar");
+                scrollBarField.setAccessible(true);
+                Object scrollBar = scrollBarField.get(mScrollCache);
+                Method method = scrollBar.getClass().getDeclaredMethod("setVerticalThumbDrawable", Drawable.class);
+                method.setAccessible(true);
+                method.invoke(scrollBar, drawable);
             } catch (Exception ignored) {
             }
         }

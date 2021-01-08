@@ -11,7 +11,6 @@ import android.widget.BaseAdapter;
 import android.widget.GridView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 
@@ -35,14 +34,6 @@ class IconPackPage extends PageAdapter.Page {
     private GridView mGridView;
     private TextView mSearch;
     private IconPackXML mIconPack = null;
-
-    private void displayToast(View v, CharSequence message) {
-        if (v == null)
-            return;
-        Toast toast = Toast.makeText(pageView.getContext(), message, Toast.LENGTH_SHORT);
-        Utilities.positionToast(toast, v, 0, 0);
-        toast.show();
-    }
 
     IconPackPage(CharSequence name, String packPackageName, View view) {
         super(name, view);
@@ -71,14 +62,16 @@ class IconPackPage extends PageAdapter.Page {
         mGridView = pageView.findViewById(R.id.iconGrid);
         IconAdapter iconAdapter = new IconAdapter(iconDataList);
         mGridView.setAdapter(iconAdapter);
-        if (iconClickListener != null)
-            iconAdapter.setOnItemClickListener(iconClickListener::onItemClick);
-        if (iconLongClickListener != null)
-            iconAdapter.setOnItemLongClickListener(iconLongClickListener::onItemClick);
-//        iconAdapter.setOnItemLongClickListener(((adapter, v, position) -> {
-//            String drawableName = adapter.getItem(position).drawableInfo.getDrawableName();
-//            displayToast(v, drawableName);
-//        }));
+        if (iconClickListener != null) {
+            mGridView.setOnItemClickListener((parent, view, position, id) -> iconClickListener.onItemClick(parent.getAdapter(), view, position));
+        }
+        if (iconLongClickListener != null) {
+            mGridView.setOnItemLongClickListener((parent, view, position, id) -> {
+                iconLongClickListener.onItemClick(parent.getAdapter(), view, position);
+                return true;
+            });
+        }
+        TBApplication.ui(context).setResultListPref(mGridView);
 
         // set page search bar
         mSearch = pageView.findViewById(R.id.search);

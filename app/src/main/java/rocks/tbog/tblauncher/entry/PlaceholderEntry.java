@@ -2,7 +2,6 @@ package rocks.tbog.tblauncher.entry;
 
 import android.content.Context;
 import android.graphics.drawable.Animatable;
-import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
 import android.view.View;
 
@@ -11,7 +10,6 @@ import androidx.annotation.NonNull;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
-import rocks.tbog.tblauncher.utils.DrawableUtils;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public class PlaceholderEntry extends StaticEntry {

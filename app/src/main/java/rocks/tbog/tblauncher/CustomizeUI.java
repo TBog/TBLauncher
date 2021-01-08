@@ -2,15 +2,20 @@ package rocks.tbog.tblauncher;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.PaintDrawable;
+import android.graphics.drawable.RippleDrawable;
+import android.graphics.drawable.StateListDrawable;
 import android.os.Build;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AbsListView;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 
@@ -21,6 +26,7 @@ import rocks.tbog.tblauncher.ui.CutoutFactory;
 import rocks.tbog.tblauncher.ui.SearchEditText;
 import rocks.tbog.tblauncher.utils.SystemUiVisibility;
 import rocks.tbog.tblauncher.utils.UIColors;
+import rocks.tbog.tblauncher.utils.UISizes;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public class CustomizeUI {
@@ -165,6 +171,42 @@ public class CustomizeUI {
             drawable = new ColorDrawable(background);
         }
         resultLayout.setBackground(drawable);
+
+        if (resultLayout instanceof AbsListView) {
+            setListViewSelectorPref((AbsListView) resultLayout, true);
+            setListViewScrollbarPref(resultLayout);
+        } else {
+            View list = resultLayout.findViewById(R.id.resultList);
+            if (list instanceof AbsListView) {
+                setListViewSelectorPref((AbsListView) list, false);
+                setListViewScrollbarPref(list);
+            }
+        }
+    }
+
+    public void setListViewSelectorPref(AbsListView listView, boolean borderless) {
+        int touchColor = UIColors.getResultListRipple(listView.getContext());
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            Drawable mask = borderless ? null : new ColorDrawable(Color.WHITE);
+            Drawable content = borderless ? null : listView.getBackground();
+            RippleDrawable rippleDrawable = new RippleDrawable(ColorStateList.valueOf(touchColor), content, mask);
+            listView.setSelector(rippleDrawable);
+        } else {
+            StateListDrawable stateListDrawable = new StateListDrawable();
+            stateListDrawable.addState(new int[]{android.R.attr.state_pressed}, new ColorDrawable(touchColor));
+            stateListDrawable.addState(new int[]{android.R.attr.state_focused}, new ColorDrawable(touchColor));
+            stateListDrawable.addState(new int[]{}, new ColorDrawable(Color.TRANSPARENT));
+            listView.setSelector(stateListDrawable);
+        }
+    }
+
+    public void setListViewScrollbarPref(View listView) {
+        int color = UIColors.getResultListRipple(listView.getContext());
+        GradientDrawable drawable = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, new int[]{color & 0xffffff, color, color});
+        drawable.setCornerRadius(UISizes.dp2px(listView.getContext(), 3));
+        drawable.setSize(UISizes.dp2px(listView.getContext(), 4), drawable.getIntrinsicHeight());
+
+        Utilities.setVerticalScrollbarThumbDrawable(listView, drawable);
     }
 
     public Context getContext() {

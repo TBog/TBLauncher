@@ -23,6 +23,7 @@ public final class UIColors {
     private static int CACHED_COLOR_SEARCH_TEXT = 0;
     private static int CACHED_COLOR_SEARCH_ICON = 0;
     private static Integer CACHED_BACKGROUND_RESULT_LIST = null;
+    private static Integer CACHED_RIPPLE_RESULT_LIST = null;
     private static Integer CACHED_BACKGROUND_ICON = null;
 
     private UIColors() {
@@ -37,6 +38,7 @@ public final class UIColors {
         CACHED_COLOR_SEARCH_TEXT = 0;
         CACHED_COLOR_SEARCH_ICON = 0;
         CACHED_BACKGROUND_RESULT_LIST = null;
+        CACHED_RIPPLE_RESULT_LIST = null;
         CACHED_BACKGROUND_ICON = null;
     }
 
@@ -174,6 +176,16 @@ public final class UIColors {
             CACHED_BACKGROUND_RESULT_LIST = setAlpha(color, alpha);
         }
         return CACHED_BACKGROUND_RESULT_LIST;
+    }
+
+    public static int getResultListRipple(Context context) {
+        if (CACHED_RIPPLE_RESULT_LIST == null) {
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+            int color = UIColors.getColor(pref, "result-ripple-color");
+            int alpha = 0xFF;
+            CACHED_RIPPLE_RESULT_LIST = setAlpha(color, alpha);
+        }
+        return CACHED_RIPPLE_RESULT_LIST;
     }
 
     public static int getIconBackground(Context context) {

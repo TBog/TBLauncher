@@ -347,6 +347,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "notification-bar-color":
                     case "search-bar-color":
                     case "result-list-color":
+                    case "result-ripple-color":
                     case "result-highlight-color":
                     case "result-text-color":
                     case "result-text2-color":
@@ -500,6 +501,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 TBApplication.quickList(context).onFavoritesChanged();
                 // fallthrough
             case "result-list-color":
+            case "result-ripple-color":
             case "result-list-alpha":
             case "result-highlight-color":
             case "result-text-color":

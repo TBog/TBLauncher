@@ -16,18 +16,9 @@ import rocks.tbog.tblauncher.result.ResultHelper;
 
 class EntryAdapter extends BaseAdapter {
     private final List<EntryItem> mItems;
-    private OnItemClickListener mOnItemClickListener = null;
-
-    public interface OnItemClickListener {
-        void onItemClick(EntryAdapter adapter, View view, int position);
-    }
 
     EntryAdapter(@NonNull List<EntryItem> objects) {
         mItems = objects;
-    }
-
-    public void setOnItemClickListener(OnItemClickListener listener) {
-        mOnItemClickListener = listener;
     }
 
     public void addAll(Collection<EntryItem> newElements) {
@@ -73,11 +64,6 @@ class EntryAdapter extends BaseAdapter {
         }
 
         content.displayResult(view, drawFlags);
-
-        view.setOnClickListener(v -> {
-            if (mOnItemClickListener != null)
-                mOnItemClickListener.onItemClick(EntryAdapter.this, v, position);
-        });
 
         return view;
     }

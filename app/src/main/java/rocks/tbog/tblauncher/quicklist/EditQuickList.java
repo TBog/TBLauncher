@@ -8,6 +8,7 @@ import android.view.DragEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.LinearLayout;
 
@@ -45,9 +46,12 @@ public class EditQuickList {
     private LinearLayout mQuickListContainer;
     ViewPager mViewPager;
     private SharedPreferences mPref;
-    private final EntryAdapter.OnItemClickListener mAddToQuickList = (adapter, view, pos) -> {
-        mQuickList.add(adapter.getItem(pos));
-        populateList();
+    private final AdapterView.OnItemClickListener mAddToQuickList = (parent, view, pos, id) -> {
+        Object item = parent.getAdapter().getItem(pos);
+        if (item instanceof EntryItem) {
+            mQuickList.add((EntryItem) item);
+            populateList();
+        }
     };
 
     public void applyChanges(@NonNull Context context) {
@@ -93,7 +97,7 @@ public class EditQuickList {
                     }
                     return data;
                 }).execute();
-                adapter.setOnItemClickListener(mAddToQuickList);
+                gridView.setOnItemClickListener(mAddToQuickList);
             }
 
             // actions
@@ -113,7 +117,7 @@ public class EditQuickList {
                     }
                     return data;
                 }).execute();
-                adapter.setOnItemClickListener(mAddToQuickList);
+                gridView.setOnItemClickListener(mAddToQuickList);
             }
 
             // tags
@@ -140,8 +144,9 @@ public class EditQuickList {
                     }
                     return data;
                 }).execute();
-                adapter.setOnItemClickListener(mAddToQuickList);
+                gridView.setOnItemClickListener(mAddToQuickList);
             }
+
 
             // favorites
             {
@@ -164,19 +169,19 @@ public class EditQuickList {
                     }
                     return data;
                 }).execute();
-                adapter.setOnItemClickListener(mAddToQuickList);
+                gridView.setOnItemClickListener(mAddToQuickList);
             }
             pages.trimToSize();
             mViewPager.setAdapter(new ViewPagerAdapter(pages));
+
+            CustomizeUI customizeUI = TBApplication.ui(context);
+            for (Pair<String, View> page : pages) {
+                customizeUI.setResultListPref(page.getSecond());
+            }
         }
         {
             TabLayout tabLayout = mViewPager.findViewById(R.id.tabLayout);
             tabLayout.setupWithViewPager(mViewPager);
-        }
-
-        {
-            CustomizeUI customizeUI = TBApplication.ui(context);
-            customizeUI.setResultListPref(mViewPager);
         }
     }
 
