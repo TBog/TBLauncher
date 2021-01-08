@@ -1,2 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="menu_hide">Skjul</string>
+    <string name="stub_application">Programnavn</string>
+    <string name="menu_remove_history">Fjern fra historikk</string>
+    <string name="title_wallpaper">Interaksjon med bakgrunner</string>
+    <string name="shortcuts_no_host_permission">Dette er ikke din hovedoppstarter lenger, og har ikke tilgang til snarveiene dine.</string>
+    <string name="black_notification_icons">Mørke ikoner</string>
+    <string name="menu_widget_remove">Fjern miniprogram …</string>
+    <string name="menu_widget_add">Legg til miniprogram …</string>
+    <string name="menu_exclude_kiss">fra TinyBit</string>
+    <string name="menu_tags_edit">Rediger etiketter</string>
+    <string name="cant_pin_shortcut">Kunne ikke legge til snarvei. Er TinyBit din forvalgte oppstarter\?</string>
+    <string name="unable_to_initialize_shortcuts">Kunne ikke sette igang snarveier. Er TinyBit din forvalgte oppstarter\?</string>
+    <string name="app_name">TinyBit-oppstarter</string>
+    <string name="ui_item_search">Søk på %1$s etter «%2$s»</string>
+    <string name="ui_item_visit">Besøk «%1$s»</string>
+    <string name="copy_confirmation">Kopierte «%s» utklippstavlen</string>
+    <string name="wp_animate_sides_desc">Bakgrunnen vil feste seg til venstre eller høyre etter rulling</string>
+    <string name="wp_animate_sides">Fest bakgrunn til siden</string>
+    <string name="wp_animate_center_desc">Bakgrunnen vil returnere til senter etter rulling</string>
+    <string name="wp_animate_center">Sentrer bakgrunn</string>
+    <string name="wp_drag_animate_desc">Dra ← → for å rulle bakgrunnsbilde</string>
+    <string name="wp_drag_animate">Rull bakgrunnsbilde</string>
+    <string name="lwp_drag_desc">Send flerfoldige pekehendelser</string>
+    <string name="lwp_drag">Emuler dragingshendelse for bakgrunnsbilde</string>
+    <string name="lwp_touch">Send pekehendelser til bakgrunnsbilde</string>
+    <string name="icons_pack_default_name">Systemikoner</string>
+    <string name="title_ui">Brukergrensesnitt</string>
+    <string name="user_interface_summary">Drakter, gjennomsiktighet og farger</string>
+    <string name="rate_the_app">Vurder programmet</string>
+    <string name="application_not_found">Oida… klarte ikke starte det programmet.</string>
+    <string name="menu_exclude_history">fra historikk</string>
+    <string name="menu_app_uninstall">Avinstaller</string>
+    <string name="menu_app_store">Vis i butikk</string>
+    <string name="menu_app_details">Programinfo</string>
+    <string name="menu_exclude">Utelukk program …</string>
+    <string name="permission_denied">Tilgang nektet</string>
+    <string name="menu_favorites_remove">Fjern favoritt</string>
+    <string name="menu_favorites_add">Legg til i favoritter</string>
+    <string name="toast_favorites_removed">%s ble fjernet fra favoritter</string>
+    <string name="toast_favorites_added">%s ble lagt til i favoritter</string>
+    <string name="removed_item">Fjernet</string>
+</resources>
