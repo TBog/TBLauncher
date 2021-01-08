@@ -1,4 +1,4 @@
-package rocks.tbog.tblauncher.CustomIcon;
+package rocks.tbog.tblauncher.customicon;
 
 import android.content.Context;
 import android.graphics.Bitmap;

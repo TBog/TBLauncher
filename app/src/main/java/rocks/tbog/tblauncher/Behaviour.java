@@ -42,7 +42,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
-import rocks.tbog.tblauncher.CustomIcon.IconSelectDialog;
+import rocks.tbog.tblauncher.customicon.IconSelectDialog;
 import rocks.tbog.tblauncher.dataprovider.FavProvider;
 import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
