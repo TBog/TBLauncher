@@ -186,17 +186,26 @@ public class CustomizeUI {
 
     public void setListViewSelectorPref(AbsListView listView, boolean borderless) {
         int touchColor = UIColors.getResultListRipple(listView.getContext());
+        Drawable selector = getSelectorDrawable(listView, touchColor, borderless);
+        listView.setSelector(selector);
+    }
+
+    public Drawable getSelectorDrawable(View view, int color, boolean borderless) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Drawable mask = borderless ? null : new ColorDrawable(Color.WHITE);
-            Drawable content = borderless ? null : listView.getBackground();
-            RippleDrawable rippleDrawable = new RippleDrawable(ColorStateList.valueOf(touchColor), content, mask);
-            listView.setSelector(rippleDrawable);
+            Drawable content = borderless ? null : view.getBackground();
+            return new RippleDrawable(ColorStateList.valueOf(color), content, mask);
         } else {
+            ColorDrawable stateColor = new ColorDrawable(color);
+
             StateListDrawable stateListDrawable = new StateListDrawable();
-            stateListDrawable.addState(new int[]{android.R.attr.state_pressed}, new ColorDrawable(touchColor));
-            stateListDrawable.addState(new int[]{android.R.attr.state_focused}, new ColorDrawable(touchColor));
+            stateListDrawable.addState(new int[]{android.R.attr.state_selected}, stateColor);
+            stateListDrawable.addState(new int[]{android.R.attr.state_focused}, stateColor);
+            stateListDrawable.addState(new int[]{android.R.attr.state_pressed}, stateColor);
             stateListDrawable.addState(new int[]{}, new ColorDrawable(Color.TRANSPARENT));
-            listView.setSelector(stateListDrawable);
+            stateListDrawable.setEnterFadeDuration(300);
+            stateListDrawable.setExitFadeDuration(100);
+            return stateListDrawable;
         }
     }
 

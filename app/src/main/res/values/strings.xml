@@ -321,6 +321,10 @@
     <string name="unlimited_search_cap">Unlimited search results</string>
     <string name="unlimited_search_cap_summary">Set highest possible limit</string>
     <string name="result_ripple_color">Touch color</string>
+    <string name="quick_list_ripple_color">Touch color</string>
+    <string name="reset_preferences">Reset preferences</string>
+    <string name="reset_preferences_confirm">Really discard preferences?</string>
+    <string name="reset_preferences_description">All settings will be reset to the default value.</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>

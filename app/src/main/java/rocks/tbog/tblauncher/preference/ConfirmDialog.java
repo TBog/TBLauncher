@@ -38,6 +38,7 @@ public class ConfirmDialog extends PreferenceDialogFragmentCompat {
         return fragment;
     }
 
+    @SuppressLint("ApplySharedPref")
     @Override
     public void onDialogClosed(boolean positiveResult) {
         if (!positiveResult)
@@ -46,6 +47,11 @@ public class ConfirmDialog extends PreferenceDialogFragmentCompat {
         final String key = preference.getKey();
 
         switch (key) {
+            case "reset-preferences":
+                preference.getPreferenceManager().getSharedPreferences().edit().clear().commit();
+                PreferenceManager.setDefaultValues(requireContext(), R.xml.preferences, true);
+                PreferenceManager.setDefaultValues(requireContext(), R.xml.preference_features, true);
+                break;
             case "exit-app":
                 //getActivity().finishAffinity();
                 System.exit(0);
@@ -91,6 +97,10 @@ public class ConfirmDialog extends PreferenceDialogFragmentCompat {
         final String key = preference.getKey();
 
         switch (key) {
+            case "reset-preferences":
+                ((TextView) view.findViewById(android.R.id.text1)).setText(R.string.reset_preferences_confirm);
+                ((TextView) view.findViewById(android.R.id.text2)).setText(R.string.reset_preferences_description);
+                break;
             case "exit-app":
                 ((TextView) view.findViewById(android.R.id.text1)).setText(R.string.exit_the_app_confirm);
                 ((TextView) view.findViewById(android.R.id.text2)).setText(R.string.exit_the_app_description);

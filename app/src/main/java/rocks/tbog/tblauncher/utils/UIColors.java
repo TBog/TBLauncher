@@ -19,11 +19,12 @@ public final class UIColors {
     private static int CACHED_COLOR_RESULT_TEXT = 0;
     private static int CACHED_COLOR_RESULT_TEXT2 = 0;
     private static int CACHED_COLOR_QL_TOGGLE = 0;
+    private static int CACHED_RIPPLE_QL = 0;
     private static int CACHED_COLOR_CONTACT_ACTION = 0;
     private static int CACHED_COLOR_SEARCH_TEXT = 0;
     private static int CACHED_COLOR_SEARCH_ICON = 0;
     private static Integer CACHED_BACKGROUND_RESULT_LIST = null;
-    private static Integer CACHED_RIPPLE_RESULT_LIST = null;
+    private static int CACHED_RIPPLE_RESULT_LIST = 0;
     private static Integer CACHED_BACKGROUND_ICON = null;
 
     private UIColors() {
@@ -34,11 +35,12 @@ public final class UIColors {
         CACHED_COLOR_RESULT_TEXT = 0;
         CACHED_COLOR_RESULT_TEXT2 = 0;
         CACHED_COLOR_QL_TOGGLE = 0;
+        CACHED_RIPPLE_QL = 0;
         CACHED_COLOR_CONTACT_ACTION = 0;
         CACHED_COLOR_SEARCH_TEXT = 0;
         CACHED_COLOR_SEARCH_ICON = 0;
         CACHED_BACKGROUND_RESULT_LIST = null;
-        CACHED_RIPPLE_RESULT_LIST = null;
+        CACHED_RIPPLE_RESULT_LIST = 0;
         CACHED_BACKGROUND_ICON = null;
     }
 
@@ -125,13 +127,21 @@ public final class UIColors {
         return CACHED_COLOR_RESULT_TEXT2;
     }
 
-    public static int getQuickListToggleColor(Context context) {
+    public static int getQuickListToggleColor(SharedPreferences pref) {
         if (CACHED_COLOR_QL_TOGGLE == 0) {
-            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
             int highlightColor = getColor(pref, "quick-list-toggle-color");
             CACHED_COLOR_QL_TOGGLE = setAlpha(highlightColor, 0xFF);
         }
         return CACHED_COLOR_QL_TOGGLE;
+    }
+
+    public static int getQuickListRipple(SharedPreferences pref) {
+        if (CACHED_RIPPLE_QL == 0) {
+            int color = UIColors.getColor(pref, "quick-list-ripple-color");
+            int alpha = 0xFF;
+            CACHED_RIPPLE_QL = setAlpha(color, alpha);
+        }
+        return CACHED_RIPPLE_QL;
     }
 
     public static int getContactActionColor(Context context) {
@@ -179,7 +189,7 @@ public final class UIColors {
     }
 
     public static int getResultListRipple(Context context) {
-        if (CACHED_RIPPLE_RESULT_LIST == null) {
+        if (CACHED_RIPPLE_RESULT_LIST == 0) {
             SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
             int color = UIColors.getColor(pref, "result-ripple-color");
             int alpha = 0xFF;
