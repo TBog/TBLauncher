@@ -40,5 +40,5 @@
     <string name="menu_favorites_add">Legg til i favoritter</string>
     <string name="toast_favorites_removed">%s ble fjernet fra favoritter</string>
     <string name="toast_favorites_added">%s ble lagt til i favoritter</string>
-    <string name="removed_item">Fjernet</string>
+    <string name="removed_item">Fjernet %s</string>
 </resources>
