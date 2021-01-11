@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <string name="adaptive_shape_name">Adaptive icon shape</string>
     <string name="force_adaptive">Force adaptive icons</string>
     <string name="force_adaptive_summary">For non-adaptive icons, reduce scale and place on a shaped background</string>
