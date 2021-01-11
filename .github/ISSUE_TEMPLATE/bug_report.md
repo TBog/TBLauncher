@@ -14,7 +14,7 @@ assignees: ''
 <!-- Add any context about the problem here. -->
 
 ## Steps to Reproduce ##
-<!-- It is important to let developer know how to replicate the problem without re-reading the description-->
+<!-- It is important to let developer know how to replicate the problem without re-reading the description -->
 To reproduce the behavior:
 1. Go to '...'
 2. Click on '....'
@@ -24,12 +24,13 @@ To reproduce the behavior:
 ## Expected behavior ##
 <!-- A clear and concise description of what you expected to happen. If you think it would help, provide a modified screenshot. -->
 
-## Screenshots ##
+### Screenshots ###
 <!-- If applicable, add screenshots to help explain your problem.
 It would be best if you could show what was expected or highlight the problem. -->
 
 ## Device info ##
 <!-- please complete the following information -->
-  - Device: <!-- e.g. Samsung S10+ --> 
-  - OS: <!-- e.g. Android 10 -->
-  - TinyBit Launcher version: <!-- e.g. v4.5 -->
+
+  * Device: <!-- e.g. Samsung S10+ -->
+  * OS: <!-- e.g. Android 10 -->
+  * TinyBit Launcher version: <!-- e.g. v4.5 -->
