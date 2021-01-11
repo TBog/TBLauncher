@@ -2,5 +2,4 @@
 <resources>
     <item name="tag_filterName" type="id" />
     <item name="tag_actionId" type="id" />
-    <item name="tag_anim" type="id" />
 </resources>

@@ -2,12 +2,10 @@ package rocks.tbog.tblauncher.quicklist;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.animation.ArgbEvaluator;
-import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
-import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.PaintDrawable;
 import android.os.Build;
 import android.view.LayoutInflater;
@@ -32,6 +30,7 @@ import rocks.tbog.tblauncher.dataprovider.IProvider;
 import rocks.tbog.tblauncher.dataprovider.Provider;
 import rocks.tbog.tblauncher.dataprovider.QuickListProvider;
 import rocks.tbog.tblauncher.entry.EntryItem;
+import rocks.tbog.tblauncher.entry.FilterEntry;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.UIColors;
 
@@ -109,16 +108,7 @@ public class QuickList {
             view.setOnLongClickListener(v -> {
                 ListPopup menu = entry.getPopupMenu(v, EntryItem.FLAG_POPUP_MENU_QUICK_LIST);
 
-//                LinearAdapter adapter = menu.getAdapter() instanceof LinearAdapter ? (LinearAdapter) menu.getAdapter() : null;
-//                if (adapter != null) {
-//                    Context ctx = v.getContext();
-//                    adapter.add(new LinearAdapter.ItemTitle(ctx, R.string.menu_popup_title_settings));
-//                    adapter.add(new LinearAdapter.Item(ctx, R.string.menu_popup_quick_list_customize));
-//
-//                    //menu.setOnItemClickListener(entry::);
-//                }
-
-                // check if menu contains elements and if yes show it
+                // show menu only if it contains elements
                 if (!menu.getAdapter().isEmpty()) {
                     TBApplication.behaviour(v.getContext()).registerPopup(menu);
                     menu.show(v);
@@ -127,6 +117,13 @@ public class QuickList {
 
                 return false;
             });
+            final int color;
+            if (entry instanceof FilterEntry)
+                color = UIColors.getQuickListToggleColor(prefs);
+            else
+                color = UIColors.getQuickListRipple(prefs);
+            Drawable selector = TBApplication.ui(getContext()).getSelectorDrawable(view, color, true);
+            view.setBackground(selector);
         }
         //mQuickList.setVisibility(mQuickList.getChildCount() == 0 ? View.GONE : View.VISIBLE);
         mQuickList.requestLayout();
@@ -216,24 +213,8 @@ public class QuickList {
     }
 
     private void animToggleOn(View v) {
-        if (v.getTag(R.id.tag_anim) instanceof ValueAnimator) {
-            ValueAnimator colorAnim = (ValueAnimator) v.getTag(R.id.tag_anim);
-            colorAnim.start();
-        } else {
-            int colorTo = UIColors.getQuickListToggleColor(v.getContext());
-            int colorFrom = v.getBackground() instanceof ColorDrawable ? ((ColorDrawable) v.getBackground()).getColor() : (colorTo & 0x00FFFFFF);
-            ValueAnimator colorAnim = ValueAnimator.ofObject(new ArgbEvaluator(), colorFrom, colorTo);
-            colorAnim.addUpdateListener(animator -> v.setBackgroundColor((int) animator.getAnimatedValue()));
-//            colorAnim.addListener(new AnimatorListenerAdapter() {
-//                @Override
-//                public void onAnimationEnd(Animator animation, boolean isReverse) {
-//                    if (isReverse)
-//                        mLastFilter = null;
-//                }
-//            });
-            colorAnim.start();
-            v.setTag(R.id.tag_anim, colorAnim);
-        }
+        v.setSelected(true);
+        v.setHovered(true);
     }
 
     private void animToggleOff() {
@@ -243,12 +224,8 @@ public class QuickList {
         for (int i = 0; i < n; i += 1) {
             View view = mQuickList.getChildAt(i);
             if (mLastSelection == null || mLastSelection == view.getTag(R.id.tag_filterName)) {
-                if (view.getTag(R.id.tag_anim) instanceof ValueAnimator) {
-                    ValueAnimator colorAnim = (ValueAnimator) view.getTag(R.id.tag_anim);
-                    colorAnim.reverse();
-                } else {
-                    view.setBackgroundColor(UIColors.getQuickListToggleColor(mQuickList.getContext()) & 0x00FFFFFF);
-                }
+                view.setSelected(false);
+                view.setHovered(false);
             }
         }
     }

@@ -294,6 +294,12 @@
                 android:widgetLayout="@layout/pref_color_preview" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@integer/default_color_highlight"
+                android:key="quick-list-ripple-color"
+                android:title="@string/quick_list_ripple_color"
+                android:widgetLayout="@layout/pref_color_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@integer/default_bar_size"
                 android:dialogLayout="@layout/pref_alpha"
                 android:key="quick-list-size"
@@ -324,6 +330,11 @@
         android:key="backup-holder"
         android:summary="@string/backup_summary"
         android:title="@string/title_backup">
+
+        <rocks.tbog.tblauncher.preference.CustomDialogPreference
+            android:dialogLayout="@layout/pref_confirm"
+            android:key="reset-preferences"
+            android:title="@string/reset_preferences" />
 
         <!-- Export -->
         <PreferenceCategory

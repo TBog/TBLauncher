@@ -356,6 +356,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "search-bar-icon-color":
                     case "quick-list-toggle-color":
                     case "quick-list-color":
+                    case "quick-list-ripple-color":
                         dialogFragment = ChooseColorDialog.newInstance(key);
                         break;
                     case "notification-bar-alpha":
@@ -372,6 +373,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "result-search-cap":
                         dialogFragment = SliderDialog.newInstance(key);
                         break;
+                    case "reset-preferences":
                     case "exit-app":
                     case "reset-default-launcher":
                     case "export-tags":
@@ -494,6 +496,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 TBApplication.drawableCache(context).clearCache();
                 // fallthrough
             case "quick-list-color":
+            case "quick-list-ripple-color":
                 // static entities will change color based on luminance
                 // fallthrough
             case "quick-list-toggle-color":
