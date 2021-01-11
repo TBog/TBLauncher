@@ -42,6 +42,12 @@ Motives for developing ~~a new~~ my own launcher:
      alt="Get it on Github"
      height="80">](https://github.com/TBog/TBLauncher/releases)
 
+### Translation
+
+[<img src="https://hosted.weblate.org/widgets/tblauncher/-/multi-auto.svg"
+      alt="Translation status" />](https://hosted.weblate.org/engage/tblauncher/)
+
 <footer>
-  <p>The initial idea and code came from <a href="https://github.com/Neamar/KISS" style="display: inline">KISS</a></p>
+      <hr>
+      <p>The initial idea and code came from <a href="https://github.com/Neamar/KISS" style="display: inline">KISS</a></p>
 </footer>
