@@ -45,12 +45,9 @@ public class ListPopup extends PopupWindow {
         }
 
         Drawable background = TBApplication.ui(context).getPopupBackgroundDrawable();
-        if (background != null) {
-            root.setBackground(background);
-            int padding = UISizes.dp2px(context, 1);
-            root.setPadding(padding, padding, padding, padding);
-        } else
-            root.setBackgroundResource(R.drawable.popup_background);
+        root.setBackground(background);
+        int padding = UISizes.dp2px(context, 1);
+        root.setPadding(padding, padding, padding, padding);
 
         popup.setAdapter(adapter);
         return popup;

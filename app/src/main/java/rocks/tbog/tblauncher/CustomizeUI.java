@@ -21,6 +21,7 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import androidx.annotation.IdRes;
+import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 
 import rocks.tbog.tblauncher.ui.CutoutFactory;
@@ -223,6 +224,7 @@ public class CustomizeUI {
         return mTBLauncherActivity;
     }
 
+    @NonNull
     public Drawable getPopupBackgroundDrawable() {
         Context ctx = getContext();
         int border = UISizes.dp2px(ctx, 1);

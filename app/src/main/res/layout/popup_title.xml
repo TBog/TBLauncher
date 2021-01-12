@@ -17,6 +17,7 @@
         tools:text="@string/popup_title_hist_fav" />
 
     <include
+        android:id="@+id/title_divider"
         layout="@layout/popup_divider"
         android:layout_width="match_parent"
         android:layout_height="@dimen/separator_thickness"

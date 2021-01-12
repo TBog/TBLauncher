@@ -100,7 +100,7 @@
     </style>
 
     <style name="ListPopupItem">
-        <item name="android:background">?android:attr/listChoiceBackgroundIndicator</item>
+<!--        <item name="android:background">?android:attr/listChoiceBackgroundIndicator</item>-->
         <item name="android:textSize">@dimen/result_small_size</item>
         <item name="android:textColor">@color/secondary_text_color_selector</item>
         <item name="android:paddingStart">?android:attr/listPreferredItemPaddingStart</item>
