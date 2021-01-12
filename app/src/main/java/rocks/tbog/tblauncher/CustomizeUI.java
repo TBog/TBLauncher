@@ -8,7 +8,6 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.InsetDrawable;
 import android.graphics.drawable.PaintDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.graphics.drawable.StateListDrawable;
@@ -213,6 +212,11 @@ public class CustomizeUI {
 
     public void setListViewScrollbarPref(View listView) {
         int color = UIColors.getResultListRipple(listView.getContext());
+        setListViewScrollbarPref(listView, color);
+    }
+
+    public void setListViewScrollbarPref(View listView, int color) {
+
         GradientDrawable drawable = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, new int[]{color & 0xffffff, color, color});
         drawable.setCornerRadius(UISizes.dp2px(listView.getContext(), 3));
         drawable.setSize(UISizes.dp2px(listView.getContext(), 4), drawable.getIntrinsicHeight());

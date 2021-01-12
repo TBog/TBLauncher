@@ -40,14 +40,19 @@ public class ListPopup extends PopupWindow {
         ContextThemeWrapper ctx = new ContextThemeWrapper(context, R.style.ListPopupTheme);
         ListPopup popup = new ListPopup(ctx);
         View root = popup.getContentView().getRootView();
+        CustomizeUI customizeUI = TBApplication.ui(context);
+
+        Drawable background = customizeUI.getPopupBackgroundDrawable();
+        root.setBackground(background);
+        int padding = UISizes.dp2px(context, 1);
+        root.setPadding(padding, padding, padding, padding);
+        ((ViewGroup) root).setClipToPadding(true);
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             root.setClipToOutline(true);
         }
 
-        Drawable background = TBApplication.ui(context).getPopupBackgroundDrawable();
-        root.setBackground(background);
-        int padding = UISizes.dp2px(context, 1);
-        root.setPadding(padding, padding, padding, padding);
+        customizeUI.setListViewScrollbarPref(popup.getContentView(), UIColors.getPopupRipple(ctx));
 
         popup.setAdapter(adapter);
         return popup;
@@ -55,10 +60,11 @@ public class ListPopup extends PopupWindow {
 
     private ListPopup(@NonNull Context context) {
         super(context, null, android.R.attr.popupMenuStyle);
+        ScrollView scrollView = new ScrollView(context);
         LinearLayout layout = new LinearLayout(context);
         layout.setOrientation(LinearLayout.VERTICAL);
-        ScrollView scrollView = new ScrollView(context);
         scrollView.addView(layout);
+
         setContentView(scrollView);
         setWidth(LinearLayout.LayoutParams.WRAP_CONTENT);
         setHeight(LinearLayout.LayoutParams.WRAP_CONTENT);
