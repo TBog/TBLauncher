@@ -338,6 +338,21 @@ public class Utilities {
         return null;
     }
 
+    public static String getSystemProperty(String property, String defaultValue) {
+        try {
+            @SuppressWarnings("rawtypes") @SuppressLint("PrivateApi")
+            Class clazz = Class.forName("android.os.SystemProperties");
+            @SuppressWarnings("unchecked")
+            Method getter = clazz.getDeclaredMethod("get", String.class);
+            String value = (String) getter.invoke(null, property);
+            if (value != null && !value.isEmpty()) {
+                return value;
+            }
+        } catch (Exception ignored) {
+        }
+        return defaultValue;
+    }
+
 
     public interface GetDrawable {
         @Nullable

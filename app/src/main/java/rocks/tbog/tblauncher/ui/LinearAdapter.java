@@ -147,6 +147,7 @@ public class LinearAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         MenuItem item = getItem(position);
         convertView = LayoutInflater.from(parent.getContext()).inflate(item.getLayoutResource(), parent, false);
+
         if (item instanceof ItemDivider) {
             return convertView;
         }

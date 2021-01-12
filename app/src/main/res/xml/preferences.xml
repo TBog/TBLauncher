@@ -307,6 +307,42 @@
 
         </PreferenceCategory>
 
+        <!-- Popup -->
+        <PreferenceCategory
+            android:key="popup-section"
+            android:title="@string/popup_section">
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:key="popup-border-argb"
+                android:title="@string/popup_border_argb"
+                android:widgetLayout="@layout/pref_color_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@integer/default_popup_background"
+                android:key="popup-background-argb"
+                android:title="@string/popup_background_argb"
+                android:widgetLayout="@layout/pref_color_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@integer/default_color_highlight"
+                android:key="popup-ripple-color"
+                android:title="@string/popup_ripple_color"
+                android:widgetLayout="@layout/pref_color_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@integer/default_color_text"
+                android:key="popup-text-color"
+                android:title="@string/popup_text_color"
+                android:widgetLayout="@layout/pref_color_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@integer/default_color_text2"
+                android:key="popup-title-color"
+                android:title="@string/popup_title_color"
+                android:widgetLayout="@layout/pref_color_preview" />
+
+        </PreferenceCategory>
+
         <!--        <PreferenceCategory android:title="@string/misc">-->
         <!--            <SwitchPreference-->
         <!--                android:defaultValue="false"-->

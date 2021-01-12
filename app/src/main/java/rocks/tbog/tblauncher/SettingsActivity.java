@@ -357,6 +357,10 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "quick-list-toggle-color":
                     case "quick-list-color":
                     case "quick-list-ripple-color":
+                    case "popup-background-argb":
+                    case "popup-border-argb":
+                    case "popup-ripple-color":
+                    case "popup-text-color":
                         dialogFragment = ChooseColorDialog.newInstance(key);
                         break;
                     case "notification-bar-alpha":
@@ -512,6 +516,10 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case "contact-action-color":
             case "search-bar-text-color":
             case "search-bar-icon-color":
+            case "popup-background-argb":
+            case "popup-border-argb":
+            case "popup-ripple-color":
+            case "popup-text-color":
                 UIColors.resetCache();
                 break;
             case "result-text-size":

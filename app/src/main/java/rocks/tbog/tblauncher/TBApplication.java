@@ -204,6 +204,10 @@ public class TBApplication extends Application {
         return mBehaviour;
     }
 
+    public CustomizeUI ui() {
+        return mCustomizeUI;
+    }
+
     @NonNull
     public TagsHandler tagsHandler() {
         if (tagsHandler == null)

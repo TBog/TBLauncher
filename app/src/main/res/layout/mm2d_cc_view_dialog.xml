@@ -18,7 +18,8 @@
     <net.mm2d.color.chooser.SwipeDisabledViewPager
         android:id="@+id/view_pager"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         app:maxHeight="@dimen/mm2d_cc_panel_height"
         />
 

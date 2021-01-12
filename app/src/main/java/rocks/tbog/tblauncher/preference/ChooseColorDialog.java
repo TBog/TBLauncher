@@ -14,6 +14,7 @@ import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.utils.UIColors;
 
 public class ChooseColorDialog extends PreferenceDialogFragmentCompat {
+    private DialogView mChooseView = null;
 
     public static ChooseColorDialog newInstance(String key) {
         final ChooseColorDialog fragment = new ChooseColorDialog();
@@ -33,6 +34,9 @@ public class ChooseColorDialog extends PreferenceDialogFragmentCompat {
         if (!(dialogPreference instanceof CustomDialogPreference))
             return;
         CustomDialogPreference preference = (CustomDialogPreference) dialogPreference;
+        if (mChooseView != null) {
+            preference.setValue(mChooseView.getColor());
+        }
 
         preference.persistValueIfAllowed();
     }
@@ -53,7 +57,7 @@ public class ChooseColorDialog extends PreferenceDialogFragmentCompat {
     @Override
     protected View onCreateDialogView(Context context) {
         ContextThemeWrapper themeWrapper = new ContextThemeWrapper(context, R.style.SettingsDialogTheme);
-        DialogView dialogView = new DialogView(themeWrapper);
+        mChooseView = new DialogView(themeWrapper);
 
         Object selectedColor = null;
         {
@@ -67,9 +71,9 @@ public class ChooseColorDialog extends PreferenceDialogFragmentCompat {
             selectedColor = UIColors.COLOR_DEFAULT;
         }
 
-        dialogView.init((int) selectedColor, this);
-        dialogView.setWithAlpha(false);
-        dialogView.addObserver(color -> {
+        mChooseView.init((int) selectedColor, this);
+        mChooseView.setWithAlpha(getPreference().getKey().endsWith("-argb"));
+        mChooseView.addObserver(color -> {
             DialogPreference dialogPreference = getPreference();
             if (!(dialogPreference instanceof CustomDialogPreference))
                 return;
@@ -77,6 +81,6 @@ public class ChooseColorDialog extends PreferenceDialogFragmentCompat {
             preference.setValue(color);
         }, this);
 
-        return dialogView;
+        return mChooseView;
     }
 }

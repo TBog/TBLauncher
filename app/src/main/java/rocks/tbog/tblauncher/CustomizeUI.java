@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.InsetDrawable;
 import android.graphics.drawable.PaintDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.graphics.drawable.StateListDrawable;
@@ -220,5 +221,19 @@ public class CustomizeUI {
 
     public Context getContext() {
         return mTBLauncherActivity;
+    }
+
+    public Drawable getPopupBackgroundDrawable() {
+        Context ctx = getContext();
+        int border = UISizes.dp2px(ctx, 1);
+        int r = ctx.getResources().getDimensionPixelSize(R.dimen.popup_corner_radius);
+        float[] corners = new float[]{r, r, r, r, r, r, r, r};
+
+        GradientDrawable gradient = new GradientDrawable();
+        gradient.setCornerRadii(corners);
+        gradient.setStroke(border, UIColors.getPopupBorderColor(ctx));
+        gradient.setColor(UIColors.getPopupBackgroundColor(ctx));
+
+        return gradient;
     }
 }

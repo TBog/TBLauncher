@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
 
     <style name="BaseThemeLight" parent="Theme.AppCompat.Light.NoActionBar">
         <item name="appSelectableItemBackground">?android:attr/selectableItemBackground</item>
@@ -100,8 +100,16 @@
     </style>
 
     <style name="ListPopupItem">
+        <item name="android:background">?android:attr/listChoiceBackgroundIndicator</item>
         <item name="android:textSize">@dimen/result_small_size</item>
         <item name="android:textColor">@color/secondary_text_color_selector</item>
+        <item name="android:paddingStart">?android:attr/listPreferredItemPaddingStart</item>
+        <item name="android:paddingEnd">?android:attr/listPreferredItemPaddingEnd</item>
+        <item name="android:paddingLeft">?android:attr/listPreferredItemPaddingLeft</item>
+        <item name="android:paddingRight">?android:attr/listPreferredItemPaddingRight</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">?android:attr/listPreferredItemHeightSmall</item>
     </style>
 
     <style name="ListPopupTheme" parent="Widget.AppCompat.ListPopupWindow">
