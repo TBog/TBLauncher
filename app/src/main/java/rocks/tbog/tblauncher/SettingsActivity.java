@@ -415,6 +415,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "popup-border-argb":
                     case "popup-ripple-color":
                     case "popup-text-color":
+                    case "popup-title-color":
                         dialogFragment = ChooseColorDialog.newInstance(key);
                         break;
                     case "notification-bar-alpha":
@@ -585,6 +586,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case "popup-border-argb":
             case "popup-ripple-color":
             case "popup-text-color":
+            case "popup-title-color":
                 UIColors.resetCache();
                 break;
             case "result-text-size":
