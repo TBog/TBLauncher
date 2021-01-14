@@ -2,18 +2,15 @@ package rocks.tbog.tblauncher.preference;
 
 import android.content.Context;
 import android.os.Bundle;
-import android.view.ContextThemeWrapper;
 import android.view.View;
 
 import androidx.preference.DialogPreference;
-import androidx.preference.PreferenceDialogFragmentCompat;
 
 import net.mm2d.color.chooser.DialogView;
 
-import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.utils.UIColors;
 
-public class ChooseColorDialog extends PreferenceDialogFragmentCompat {
+public class ChooseColorDialog extends BasePreferenceDialog {
     private DialogView mChooseView = null;
 
     public static ChooseColorDialog newInstance(String key) {
@@ -56,8 +53,7 @@ public class ChooseColorDialog extends PreferenceDialogFragmentCompat {
 
     @Override
     protected View onCreateDialogView(Context context) {
-        ContextThemeWrapper themeWrapper = new ContextThemeWrapper(context, R.style.SettingsDialogTheme);
-        mChooseView = new DialogView(themeWrapper);
+        mChooseView = new DialogView(context);
 
         Object selectedColor = null;
         {

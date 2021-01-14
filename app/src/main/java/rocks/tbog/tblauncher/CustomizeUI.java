@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -21,6 +22,7 @@ import android.widget.LinearLayout;
 
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.preference.PreferenceManager;
 
 import rocks.tbog.tblauncher.ui.CutoutFactory;
@@ -241,5 +243,20 @@ public class CustomizeUI {
         gradient.setColor(UIColors.getPopupBackgroundColor(ctx));
 
         return gradient;
+    }
+
+    public Drawable getDialogButtonBarBackgroundDrawable(@Nullable Resources.Theme theme) {
+        if (theme == null)
+            theme = getContext().getTheme();
+
+        TypedValue typedValue = new TypedValue();
+        if (theme.resolveAttribute(android.R.attr.buttonBarStyle, typedValue, true)) {
+            TypedArray a = theme.obtainStyledAttributes(typedValue.resourceId, new int[]{android.R.attr.background});
+            Drawable background = a.getDrawable(0);
+            a.recycle();
+            return background;
+        }
+
+        return null;
     }
 }

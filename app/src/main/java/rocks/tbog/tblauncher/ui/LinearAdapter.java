@@ -158,7 +158,7 @@ public class LinearAdapter extends BaseAdapter {
             Context ctx = divider.getContext();
             int color = UIColors.getPopupBorderColor(ctx);
             int background = UIColors.getPopupBackgroundColor(ctx);
-            int separator = UIColors.luminance(background) > .5 ? R.drawable.list_separator_dark : R.drawable.list_separator_light;
+            int separator = UIColors.isColorLight(background) ? R.drawable.list_separator_dark : R.drawable.list_separator_light;
             Drawable drawable = ContextCompat.getDrawable(ctx, separator);
             if (drawable == null)
                 drawable = divider.getBackground();

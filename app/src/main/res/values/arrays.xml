@@ -1,6 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
 
+    <string-array name="settingsThemeEntries">
+        <item>Black</item>
+        <item>White</item>
+        <item>Dark</item>
+    </string-array>
+
+    <string-array name="settingsThemeValues" translatable="false">
+        <item>AMOLED</item>
+        <item>white</item>
+        <item>dark</item>
+    </string-array>
+
     <string-array name="adaptiveEntries">
         <item>None / Default</item>
         <item>Circle</item>

@@ -43,4 +43,32 @@
         <item name="android:stretchMode">spacingWidth</item>
     </style>
 
+    <style name="DialogPreferenceStyle" parent="Preference.DialogPreference.Material">
+        <item name="iconSpaceReserved">false</item>
+    </style>
+
+    <style name="SwitchPreferenceStyle" parent="Preference.SwitchPreference.Material">
+        <item name="iconSpaceReserved">false</item>
+    </style>
+
+    <style name="ScreenPreferenceStyle" parent="Preference.PreferenceScreen.Material">
+        <item name="iconSpaceReserved">false</item>
+    </style>
+
+    <style name="PreferenceStyle" parent="Preference.Material">
+        <item name="iconSpaceReserved">false</item>
+    </style>
+
+    <style name="CategoryTitleTextAppearance" parent="TextAppearance.AppCompat.Body2">
+        <item name="android:textSize">@dimen/abc_text_size_title_material</item>
+    </style>
+
+    <style name="CategoryPreferenceStyle" parent="Preference.Category.Material">
+        <item name="iconSpaceReserved">true</item>
+    </style>
+
+    <style name="FragmentPreferenceStyle" parent="PreferenceFragment.Material">
+        <item name="android:divider">@drawable/list_separator_dark</item>
+    </style>
+
 </resources>

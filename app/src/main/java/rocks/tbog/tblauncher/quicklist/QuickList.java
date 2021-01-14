@@ -79,7 +79,7 @@ public class QuickList {
             drawFlags |= EntryItem.FLAG_DRAW_ICON;
         if (prefs.getBoolean("quick-list-show-badge", true))
             drawFlags |= EntryItem.FLAG_DRAW_ICON_BADGE;
-        if (UIColors.luminance(UIColors.getColor(prefs, "quick-list-color")) > .666) {
+        if (UIColors.isColorLight(UIColors.getColor(prefs, "quick-list-color"))) {
             drawFlags |= EntryItem.FLAG_DRAW_WHITE_BG;
             //drawFlags |= EntryItem.FLAG_DRAW_NO_CACHE; // no need, we already have it
         }

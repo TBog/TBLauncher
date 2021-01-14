@@ -10,7 +10,7 @@ import androidx.preference.PreferenceDialogFragmentCompat;
 
 import rocks.tbog.tblauncher.R;
 
-public class SliderDialog extends PreferenceDialogFragmentCompat {
+public class SliderDialog extends BasePreferenceDialog {
 
     protected TextView mTextView2;
     protected int mSliderOffset = 0;
@@ -47,8 +47,10 @@ public class SliderDialog extends PreferenceDialogFragmentCompat {
         preference.setValue(preference.getSharedPreferences().getInt(key, 255));
 
         SeekBar seekBar = root.findViewById(R.id.seekBar); // seekBar default minimum is set to 0
-        if (key.endsWith("-alpha"))
+        if (key.endsWith("-alpha")) {
             seekBar.setMax(255);
+            ((TextView) root.findViewById(android.R.id.text1)).setText(R.string.title_select_alpha);
+        }
 
         switch (key) {
             case "search-bar-size":

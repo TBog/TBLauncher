@@ -5,7 +5,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:theme="@style/SettingsDialogTheme"
-    tools:background="@drawable/dialog_background">
+    tools:background="@drawable/dialog_background_dark">
 
     <ListView
         android:id="@android:id/list"

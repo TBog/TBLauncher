@@ -3,6 +3,7 @@ package rocks.tbog.tblauncher.customicon;
 import android.app.Activity;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.ColorDrawable;
@@ -21,6 +22,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.preference.PreferenceManager;
 
 import net.mm2d.color.chooser.DialogView;
 
@@ -293,7 +295,18 @@ class CustomShapePage extends PageAdapter.Page {
         if (!(activity instanceof AppCompatActivity))
             return;
 
-        ContextThemeWrapper themeWrapper = new ContextThemeWrapper(context, R.style.SettingsDialogTheme);
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+        String theme = sharedPreferences.getString("settings-theme", null);
+        Context themeWrapper = context;
+        if (theme != null) {
+            if (theme.equals("AMOLED"))
+                themeWrapper = new ContextThemeWrapper(context, R.style.SettingsTheme);
+            else if (theme.equals("white"))
+                themeWrapper = new ContextThemeWrapper(context, R.style.SettingsTheme_WhiteBg);
+            else
+                themeWrapper = new ContextThemeWrapper(context, R.style.SettingsTheme_DarkBg);
+        }
+
         DialogView dialogView = new DialogView(themeWrapper);
 
         dialogView.init(selectedColor, (AppCompatActivity) activity);
@@ -306,7 +319,7 @@ class CustomShapePage extends PageAdapter.Page {
             dialog.dismiss();
         };
 
-        final AlertDialog.Builder builder = new AlertDialog.Builder(context)
+        final AlertDialog.Builder builder = new AlertDialog.Builder(themeWrapper)
                 .setPositiveButton(android.R.string.ok, buttonListener)
                 .setNegativeButton(android.R.string.cancel, buttonListener);
         builder.setView(dialogView);

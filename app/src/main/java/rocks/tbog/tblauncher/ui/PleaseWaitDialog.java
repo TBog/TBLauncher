@@ -60,7 +60,7 @@ public class PleaseWaitDialog extends DialogFragment<Void> {
             return root;
         Window window = requireDialog().getWindow();
         if (window != null)
-            window.setBackgroundDrawableResource(R.drawable.dialog_background);
+            window.setBackgroundDrawableResource(R.drawable.dialog_background_dark);
         Context context = inflater.getContext();
         // add progress indicator
         {

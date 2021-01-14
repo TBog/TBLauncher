@@ -4,12 +4,11 @@ import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
 
-import androidx.preference.PreferenceDialogFragmentCompat;
 import androidx.preference.PreferenceManager;
 
 import rocks.tbog.tblauncher.EditSearchEngines;
 
-public class EditSearchEnginesPreferenceDialog extends PreferenceDialogFragmentCompat {
+public class EditSearchEnginesPreferenceDialog extends BasePreferenceDialog {
 
     private final EditSearchEngines mEditor = new EditSearchEngines();
 

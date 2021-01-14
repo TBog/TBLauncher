@@ -30,7 +30,7 @@
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
             android:defaultValue="@integer/default_bar_size"
             android:dependency="quick-list-enabled"
-            android:dialogLayout="@layout/pref_alpha"
+            android:dialogLayout="@layout/pref_slider"
             android:key="quick-list-size"
             android:title="@string/quick_list_size" />
 
@@ -50,7 +50,7 @@
 
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
             android:defaultValue="@integer/default_bar_size"
-            android:dialogLayout="@layout/pref_alpha"
+            android:dialogLayout="@layout/pref_slider"
             android:key="search-bar-size"
             android:title="@string/search_bar_size" />
 
@@ -92,7 +92,7 @@
 
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
             android:defaultValue="@integer/default_result_history_size"
-            android:dialogLayout="@layout/pref_size"
+            android:dialogLayout="@layout/pref_slider"
             android:key="result-history-size"
             android:summary="@string/result_history_size_summary"
             android:title="@string/result_history_size"
@@ -100,7 +100,7 @@
 
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
             android:defaultValue="@integer/default_result_history_adaptive"
-            android:dialogLayout="@layout/pref_size"
+            android:dialogLayout="@layout/pref_slider"
             android:key="result-history-adaptive"
             android:summary="@string/result_history_adaptive_summary"
             android:title="@string/result_history_adaptive"
@@ -108,7 +108,7 @@
 
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
             android:defaultValue="@integer/default_result_searcher_cap"
-            android:dialogLayout="@layout/pref_size"
+            android:dialogLayout="@layout/pref_slider"
             android:key="result-search-cap"
             android:title="@string/result_search_cap"
             android:widgetLayout="@layout/pref_size_preview" />
@@ -336,19 +336,17 @@
 
         <!-- This is here just to set the default value and be saved in backup, not visible for user -->
         <MultiSelectListPreference
-            android:defaultValue="@array/defaultSearchHints"
+            android:defaultValue="@array/defaultSearchProviders"
             android:key="available-search-providers"
             app:isPreferenceVisible="false" />
 
         <!-- This is here just to set the default value and be saved in backup, not visible for user -->
         <MultiSelectListPreference
-            android:defaultValue="@array/defaultSearchHints"
             android:key="selected-search-provider-names"
             app:isPreferenceVisible="false" />
 
         <!-- This is here just to set the default value and be saved in backup, not visible for user -->
         <Preference
-            android:defaultValue="@array/defaultSearchHints"
             android:key="default-search-provider"
             app:isPreferenceVisible="false" />
 
