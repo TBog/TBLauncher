@@ -78,7 +78,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             if (theme.equals("AMOLED"))
                 setTheme(mTheme = R.style.SettingsTheme);
             else if (theme.equals("white"))
-                setTheme(mTheme = R.style.SettingsTheme_WhiteBg);
+                setTheme(mTheme = R.style.SettingsTheme_White);
             else
                 setTheme(mTheme = R.style.SettingsTheme_DarkBg);
         }

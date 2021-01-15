@@ -58,7 +58,7 @@
         <item name="android:background">@drawable/button_bar_background</item>
     </style>
 
-    <style name="GradientButtonBar.WhiteBg">
+    <style name="GradientButtonBar.White">
         <item name="android:background">@drawable/button_bar_background_light</item>
     </style>
 
@@ -67,7 +67,7 @@
         <item name="android:textColor">@color/button_bar_text_color_selector</item>
     </style>
 
-    <style name="GradientBorderlessButton.WhiteBg">
+    <style name="GradientBorderlessButton.White">
         <item name="colorControlHighlight">@android:color/black</item>
         <item name="android:textColor">@android:color/black</item>
     </style>
@@ -145,7 +145,7 @@
         <item name="android:textColor">@color/colorAccent</item>
     </style>
 
-    <style name="SettingsDialogTitle.WhiteBg">
+    <style name="SettingsDialogTitle.White">
         <item name="android:textColor">@android:color/black</item>
         <item name="android:background">@drawable/window_title_background_light</item>
     </style>
@@ -159,14 +159,14 @@
         <item name="android:windowTitleStyle">@style/SettingsDialogTitle</item>
     </style>
 
-    <style name="SettingsDialogTheme.WhiteBg">
+    <style name="SettingsDialogTheme.White">
         <item name="android:windowBackground">@drawable/dialog_background_light</item>
         <item name="android:textColor">@color/settings_primary_selector_lightbg</item>
         <item name="android:textColorPrimary">@color/settings_primary_selector_lightbg</item>
         <item name="android:textColorSecondary">@color/settings_secondary_selector_lightbg</item>
         <item name="android:textColorTertiary">@color/settings_tertiary_selector_lightbg</item>
         <item name="android:listDivider">@drawable/list_separator_dark</item>
-        <item name="android:windowTitleStyle">@style/SettingsDialogTitle.WhiteBg</item>
+        <item name="android:windowTitleStyle">@style/SettingsDialogTitle.White</item>
 
         <item name="textColorAlertDialogListItem">@color/primary_text_selector_lightbg</item>
 
@@ -174,11 +174,11 @@
         <item name="colorPrimaryDark">@android:color/black</item>
         <item name="colorControlNormal">@android:color/black</item>
 
-        <item name="android:buttonBarStyle">@style/GradientButtonBar.WhiteBg</item>
-        <item name="android:buttonBarButtonStyle">@style/GradientBorderlessButton.WhiteBg</item>
-        <item name="android:borderlessButtonStyle">@style/GradientBorderlessButton.WhiteBg</item>
-        <item name="buttonBarNegativeButtonStyle">@style/GradientBorderlessButton.WhiteBg</item>
-        <item name="buttonBarPositiveButtonStyle">@style/GradientBorderlessButton.WhiteBg</item>
+        <item name="android:buttonBarStyle">@style/GradientButtonBar.White</item>
+        <item name="android:buttonBarButtonStyle">@style/GradientBorderlessButton.White</item>
+        <item name="android:borderlessButtonStyle">@style/GradientBorderlessButton.White</item>
+        <item name="buttonBarNegativeButtonStyle">@style/GradientBorderlessButton.White</item>
+        <item name="buttonBarPositiveButtonStyle">@style/GradientBorderlessButton.White</item>
     </style>
 
     <style name="PreferenceTheme" parent="PreferenceThemeOverlay">
@@ -195,7 +195,7 @@
         <item name="android:textColor">@color/settings_primary_selector_darkbg</item>
     </style>
 
-    <style name="OptionsTextAppearance.WhiteBg">
+    <style name="OptionsTextAppearance.White">
         <item name="android:textColor">@color/settings_primary_selector_lightbg</item>
     </style>
 
@@ -210,10 +210,10 @@
         <item name="android:itemTextAppearance">@style/OptionsTextAppearance</item>
     </style>
 
-    <style name="SettingsTheme.WhiteBg">
+    <style name="SettingsTheme.White">
         <item name="android:windowBackground">@android:color/white</item>
-        <item name="alertDialogTheme">@style/SettingsDialogTheme.WhiteBg</item>
-        <item name="dialogTheme">@style/SettingsDialogTheme.WhiteBg</item>
+        <item name="alertDialogTheme">@style/SettingsDialogTheme.White</item>
+        <item name="dialogTheme">@style/SettingsDialogTheme.White</item>
         <item name="android:textColor">@color/settings_primary_selector_lightbg</item>
         <item name="android:textColorPrimary">@color/settings_primary_selector_lightbg</item>
         <item name="android:textColorSecondary">@color/settings_secondary_selector_lightbg</item>
@@ -226,7 +226,7 @@
         <item name="colorControlNormal">@android:color/black</item>
         <item name="colorAccent">@android:color/black</item>
         <item name="android:itemBackground">@android:color/white</item>
-        <item name="android:itemTextAppearance">@style/OptionsTextAppearance.WhiteBg</item>
+        <item name="android:itemTextAppearance">@style/OptionsTextAppearance.White</item>
     </style>
 
     <style name="SettingsTheme.DarkBg">

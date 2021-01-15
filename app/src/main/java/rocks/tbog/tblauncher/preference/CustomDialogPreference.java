@@ -2,7 +2,7 @@ package rocks.tbog.tblauncher.preference;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
@@ -97,19 +97,12 @@ public class CustomDialogPreference extends androidx.preference.DialogPreference
                 if (value instanceof Integer)
                     color = (int) value | 0xFF000000;
 
-                float luminance = UIColors.luminance(color);
-                int borderColor = UIColors.modulateColorLightness(color, 2.f * (1.f - luminance));
-
                 Context ctx = getContext();
-                float radius = ctx.getResources().getDimension(R.dimen.mm2d_cc_sample_radius);
+                float radius = ctx.getResources().getDimension(R.dimen.color_preview_radius);
                 int border = UISizes.dp2px(ctx, 1);
-                GradientDrawable drawable = new GradientDrawable();
-                drawable.setCornerRadius(radius);
-                drawable.setStroke(border, borderColor);
-                drawable.setColor(color);
+                Drawable drawable = UIColors.getPreviewDrawable(color, border, radius);
                 ((ImageView) view).setImageDrawable(drawable);
                 view.setPadding(border, border, border, border);
-                //((ImageView) view).setColorFilter(color, PorterDuff.Mode.MULTIPLY);
             }
         }
         {

@@ -5,6 +5,8 @@ import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
 import android.util.TypedValue;
 import android.view.Window;
@@ -333,5 +335,17 @@ public final class UIColors {
             CACHED_COLOR_POPUP_TITLE = setAlpha(color, 0xFF);
         }
         return CACHED_COLOR_POPUP_TITLE;
+    }
+
+    public static Drawable getPreviewDrawable(int color, int border, float radius) {
+        float luminance = UIColors.luminance(color);
+        int borderColor = UIColors.modulateColorLightness(color, 2.f * (1.f - luminance));
+
+        GradientDrawable drawable = new GradientDrawable();
+        drawable.setCornerRadius(radius);
+        drawable.setStroke(border, borderColor);
+        drawable.setColor(color);
+
+        return drawable;
     }
 }

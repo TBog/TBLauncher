@@ -40,6 +40,7 @@ import rocks.tbog.tblauncher.ui.TextDrawable;
 import rocks.tbog.tblauncher.ui.TwoCodePointDrawable;
 import rocks.tbog.tblauncher.utils.DrawableUtils;
 import rocks.tbog.tblauncher.utils.UIColors;
+import rocks.tbog.tblauncher.utils.UISizes;
 import rocks.tbog.tblauncher.utils.Utilities;
 import rocks.tbog.tblauncher.utils.ViewHolderAdapter;
 import rocks.tbog.tblauncher.utils.ViewHolderListAdapter;
@@ -143,14 +144,18 @@ class CustomShapePage extends PageAdapter.Page {
             });
         }
 
-        int colorPreviewSize = context.getResources().getDimensionPixelSize(R.dimen.color_preview_size);
+        final float colorPreviewRadius = context.getResources().getDimension(R.dimen.color_preview_radius);
+        final int colorPreviewBorder = UISizes.dp2px(context, 1);
+        final int colorPreviewSize = context.getResources().getDimensionPixelSize(R.dimen.color_preview_size);
 
         // shape background color chooser
         {
             TextView colorView = pageView.findViewById(R.id.backgroundColor);
-            ColorDrawable colorDrawable = new ColorDrawable(mBackground);
-            colorDrawable.setBounds(0, 0, colorPreviewSize, colorPreviewSize);
-            colorView.setCompoundDrawables(null, null, colorDrawable, null);
+            {
+                Drawable drawable = UIColors.getPreviewDrawable(mBackground, colorPreviewBorder, colorPreviewRadius);
+                drawable.setBounds(0, 0, colorPreviewSize, colorPreviewSize);
+                colorView.setCompoundDrawables(null, null, drawable, null);
+            }
             colorView.setOnClickListener(v -> {
                 Context ctx = v.getContext();
                 launchCustomColorDialog(ctx, mBackground, color -> {
@@ -158,8 +163,9 @@ class CustomShapePage extends PageAdapter.Page {
                     Activity activity = Utilities.getActivity(v);
                     if (activity == null)
                         return;
-                    colorDrawable.setColor(mBackground);
-                    colorView.setCompoundDrawables(null, null, colorDrawable, null);
+                    Drawable drawable = UIColors.getPreviewDrawable(mBackground, colorPreviewBorder, colorPreviewRadius);
+                    drawable.setBounds(0, 0, colorPreviewSize, colorPreviewSize);
+                    colorView.setCompoundDrawables(null, null, drawable, null);
                     generateShapes(activity);
                     reshapeIcons(activity);
                 });
@@ -169,9 +175,11 @@ class CustomShapePage extends PageAdapter.Page {
         // letter color chooser
         {
             TextView colorView = pageView.findViewById(R.id.lettersColor);
-            ColorDrawable colorDrawable = new ColorDrawable(mLetters);
-            colorDrawable.setBounds(0, 0, colorPreviewSize, colorPreviewSize);
-            colorView.setCompoundDrawables(null, null, colorDrawable, null);
+            {
+                Drawable drawable = UIColors.getPreviewDrawable(mLetters, colorPreviewBorder, colorPreviewRadius);
+                drawable.setBounds(0, 0, colorPreviewSize, colorPreviewSize);
+                colorView.setCompoundDrawables(null, null, drawable, null);
+            }
             colorView.setOnClickListener(v -> {
                 Context ctx = v.getContext();
                 launchCustomColorDialog(ctx, mLetters, color -> {
@@ -179,8 +187,9 @@ class CustomShapePage extends PageAdapter.Page {
                     Activity activity = Utilities.getActivity(v);
                     if (activity == null)
                         return;
-                    colorDrawable.setColor(mLetters);
-                    colorView.setCompoundDrawables(null, null, colorDrawable, null);
+                    Drawable drawable = UIColors.getPreviewDrawable(mLetters, colorPreviewBorder, colorPreviewRadius);
+                    drawable.setBounds(0, 0, colorPreviewSize, colorPreviewSize);
+                    colorView.setCompoundDrawables(null, null, drawable, null);
                     generateTextIcons(mLettersView.getText());
                 });
             });
@@ -302,7 +311,7 @@ class CustomShapePage extends PageAdapter.Page {
             if (theme.equals("AMOLED"))
                 themeWrapper = new ContextThemeWrapper(context, R.style.SettingsTheme);
             else if (theme.equals("white"))
-                themeWrapper = new ContextThemeWrapper(context, R.style.SettingsTheme_WhiteBg);
+                themeWrapper = new ContextThemeWrapper(context, R.style.SettingsTheme_White);
             else
                 themeWrapper = new ContextThemeWrapper(context, R.style.SettingsTheme_DarkBg);
         }
