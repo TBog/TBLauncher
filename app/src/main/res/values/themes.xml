@@ -172,6 +172,7 @@
 
         <item name="colorPrimary">@color/primary_text_selector_lightbg</item>
         <item name="colorPrimaryDark">@android:color/black</item>
+        <item name="colorControlHighlight">@android:color/black</item>
         <item name="colorControlNormal">@android:color/black</item>
 
         <item name="android:buttonBarStyle">@style/GradientButtonBar.White</item>
