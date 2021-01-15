@@ -139,6 +139,9 @@ public class CustomizeUI {
             Utilities.setColorFilterMultiply(mLauncherButton, searchIconColor);
             Utilities.setColorFilterMultiply(mMenuButton, searchIconColor);
             Utilities.setColorFilterMultiply(mClearButton, searchIconColor);
+            mLauncherButton.setBackground(getSelectorDrawable(mLauncherButton, UIColors.getResultListRipple(getContext()), true));
+            mMenuButton.setBackground(getSelectorDrawable(mMenuButton, UIColors.getResultListRipple(getContext()), true));
+            mClearButton.setBackground(getSelectorDrawable(mClearButton, UIColors.getResultListRipple(getContext()), true));
         }
 
         // background color
