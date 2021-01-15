@@ -7,7 +7,7 @@
 
     <color name="undefined">#DC143C</color>
     <color name="black_overlay">#66000000</color>
-    <color name="white_overlay">#99ffffff</color>
+    <color name="white_overlay">#DDffffff</color>
 
     <color name="kiss_divider_light">#e0e0e0</color>
     <color name="kiss_divider_dark">#434343</color>

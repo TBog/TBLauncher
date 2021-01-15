@@ -31,6 +31,7 @@
         <item name="android:windowShowWallpaper">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:textColor">@color/primary_text_selector_darkbg</item>
+        <item name="android:textColorPrimary">@color/primary_text_selector_darkbg</item>
         <item name="android:textColorSecondary">@color/secondary_text_selector_darkbg</item>
         <item name="android:textColorTertiary">@color/tertiary_text_color_selector</item>
 
@@ -57,9 +58,18 @@
         <item name="android:background">@drawable/button_bar_background</item>
     </style>
 
+    <style name="GradientButtonBar.WhiteBg">
+        <item name="android:background">@drawable/button_bar_background_light</item>
+    </style>
+
     <style name="GradientBorderlessButton">
-        <item name="android:background">@null</item>
+        <item name="android:background">?android:attr/selectableItemBackgroundBorderless</item>
         <item name="android:textColor">@color/button_bar_text_color_selector</item>
+    </style>
+
+    <style name="GradientBorderlessButton.WhiteBg">
+        <item name="colorControlHighlight">@android:color/black</item>
+        <item name="android:textColor">@android:color/black</item>
     </style>
 
     <style name="TitleDialogTheme" parent="Theme.AppCompat.Dialog.Alert">
@@ -135,6 +145,11 @@
         <item name="android:textColor">@color/colorAccent</item>
     </style>
 
+    <style name="SettingsDialogTitle.WhiteBg">
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:background">@drawable/window_title_background_light</item>
+    </style>
+
     <style name="SettingsDialogTheme" parent="NoTitleDialogTheme">
         <item name="android:textColor">@color/primary_text_selector_darkbg</item>
         <item name="android:textColorPrimary">@color/primary_text_selector_darkbg</item>
@@ -146,16 +161,24 @@
 
     <style name="SettingsDialogTheme.WhiteBg">
         <item name="android:windowBackground">@drawable/dialog_background_light</item>
-        <item name="android:textColor">@color/primary_text_selector_lightbg</item>
-        <item name="android:textColorPrimary">@color/secondary_text_selector_lightbg</item>
-        <item name="android:textColorSecondary">@color/tertiary_text_color_selector</item>
-        <item name="android:textColorTertiary">@color/tertiary_text_color_selector</item>
+        <item name="android:textColor">@color/settings_primary_selector_lightbg</item>
+        <item name="android:textColorPrimary">@color/settings_primary_selector_lightbg</item>
+        <item name="android:textColorSecondary">@color/settings_secondary_selector_lightbg</item>
+        <item name="android:textColorTertiary">@color/settings_tertiary_selector_lightbg</item>
         <item name="android:listDivider">@drawable/list_separator_dark</item>
+        <item name="android:windowTitleStyle">@style/SettingsDialogTitle.WhiteBg</item>
 
         <item name="textColorAlertDialogListItem">@color/primary_text_selector_lightbg</item>
 
         <item name="colorPrimary">@color/primary_text_selector_lightbg</item>
         <item name="colorPrimaryDark">@android:color/black</item>
+        <item name="colorControlNormal">@android:color/black</item>
+
+        <item name="android:buttonBarStyle">@style/GradientButtonBar.WhiteBg</item>
+        <item name="android:buttonBarButtonStyle">@style/GradientBorderlessButton.WhiteBg</item>
+        <item name="android:borderlessButtonStyle">@style/GradientBorderlessButton.WhiteBg</item>
+        <item name="buttonBarNegativeButtonStyle">@style/GradientBorderlessButton.WhiteBg</item>
+        <item name="buttonBarPositiveButtonStyle">@style/GradientBorderlessButton.WhiteBg</item>
     </style>
 
     <style name="PreferenceTheme" parent="PreferenceThemeOverlay">
@@ -183,9 +206,6 @@
         <item name="alertDialogTheme">@style/SettingsDialogTheme</item>
         <item name="preferenceTheme">@style/PreferenceTheme</item>
         <item name="android:textColor">@color/settings_primary_selector_darkbg</item>
-        <item name="android:textColorPrimary">@color/settings_primary_selector_darkbg</item>
-        <item name="android:textColorSecondary">@color/settings_secondary_selector_darkbg</item>
-        <item name="android:textColorTertiary">@color/settings_tertiary_selector_darkbg</item>
         <item name="android:itemBackground">@android:color/black</item>
         <item name="android:itemTextAppearance">@style/OptionsTextAppearance</item>
     </style>
@@ -198,9 +218,12 @@
         <item name="android:textColorPrimary">@color/settings_primary_selector_lightbg</item>
         <item name="android:textColorSecondary">@color/settings_secondary_selector_lightbg</item>
         <item name="android:textColorTertiary">@color/settings_tertiary_selector_lightbg</item>
-        <item name="tabIndicatorColor">@color/colorAccent</item>
+        <item name="tabIndicatorColor">@android:color/black</item>
         <item name="tabBackground">@drawable/tab_background_light</item>
         <item name="tabSelectedTextColor">@color/settings_primary_selector_lightbg</item>
+        <item name="colorPrimary">@android:color/black</item>
+        <item name="colorControlHighlight">@android:color/black</item>
+        <item name="colorControlNormal">@android:color/black</item>
         <item name="colorAccent">@android:color/black</item>
         <item name="android:itemBackground">@android:color/white</item>
         <item name="android:itemTextAppearance">@style/OptionsTextAppearance.WhiteBg</item>
