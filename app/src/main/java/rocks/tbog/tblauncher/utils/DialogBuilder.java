@@ -170,4 +170,15 @@ public class DialogBuilder {
             afterInflate.onShow(dialog);
         return dialog;
     }
+
+    /**
+     * Creates an {@link AlertDialog} with the arguments supplied to this
+     * builder.
+     * <p>
+     * Calling this method does not display the dialog. The afterInflate
+     * callback is not called if you call show on the AlertDialog.
+     */
+    public AlertDialog create() {
+        return builder.create();
+    }
 }

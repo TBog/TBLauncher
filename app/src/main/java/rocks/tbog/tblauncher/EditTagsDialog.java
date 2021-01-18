@@ -55,12 +55,14 @@ public class EditTagsDialog extends DialogFragment<Set<String>> {
         // make a layout for the entry we are changing
         Bundle args = getArguments() != null ? getArguments() : new Bundle();
         String entryId = args.getString("entryId", "");
-        EntryItem entry = TBApplication.getApplication(context).getDataHandler().getPojo(entryId);
+        TBApplication app = TBApplication.getApplication(context);
+        EntryItem entry = app.getDataHandler().getPojo(entryId);
         if (entry != null) {
             int drawFlags = EntryItem.FLAG_DRAW_LIST | EntryItem.FLAG_DRAW_NAME | EntryItem.FLAG_DRAW_ICON;
             View entryView = inflater.inflate(entry.getResultLayout(drawFlags), root, false);
             entryView.setId(R.id.preview);
             root.addView(entryView, 0);
+            app.ui().setResultListPref(entryView);
         }
 
         return root;
@@ -70,7 +72,7 @@ public class EditTagsDialog extends DialogFragment<Set<String>> {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        Context context = requireContext();
+        Context context = view.getContext();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             view.setClipToOutline(true);

@@ -1,9 +1,12 @@
 package rocks.tbog.tblauncher.ui;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
-import android.os.Build;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.TypedValue;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,6 +16,7 @@ import android.view.WindowManager;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.preference.PreferenceManager;
 
 import rocks.tbog.tblauncher.R;
 
@@ -54,19 +58,47 @@ public abstract class DialogFragment<Output> extends androidx.fragment.app.Dialo
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setStyle(DialogFragment.STYLE_NO_FRAME, R.style.NoTitleDialogTheme);
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext());
+        String theme = sharedPreferences.getString("settings-theme", null);
+        int style = R.style.NoTitleDialogTheme;
+        if (theme != null) {
+            if (theme.equals("AMOLED")) {
+                style = R.style.SettingsTheme;
+            } else if (theme.equals("white")) {
+                style = R.style.SettingsTheme_White;
+            } else {
+                style = R.style.SettingsTheme_DarkBg;
+            }
+        }
+        setStyle(DialogFragment.STYLE_NO_FRAME, style);
     }
 
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
+        Context ctx = requireContext();
+        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(ctx);
+        String theme = sharedPreferences.getString("settings-theme", null);
+        if (theme != null) {
+            Context themeWrapper;
+            if (theme.equals("AMOLED")) {
+                themeWrapper = new ContextThemeWrapper(ctx, R.style.SettingsTheme);
+            } else if (theme.equals("white")) {
+                themeWrapper = new ContextThemeWrapper(ctx, R.style.SettingsTheme_White);
+            } else {
+                themeWrapper = new ContextThemeWrapper(ctx, R.style.SettingsTheme_DarkBg);
+            }
+            TypedValue outValue = new TypedValue();
+            themeWrapper.getTheme().resolveAttribute(R.attr.alertDialogTheme, outValue, true);
+            int dialogStyle = outValue.resourceId;
+            return new Dialog(themeWrapper, dialogStyle);
+        }
         return super.onCreateDialog(savedInstanceState);
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View root = inflater.inflate(layoutRes(), container, false);
         Dialog dialog = requireDialog();
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 
@@ -77,7 +109,6 @@ public abstract class DialogFragment<Output> extends androidx.fragment.app.Dialo
         }
         dialog.setCanceledOnTouchOutside(true);
 
-        return root;
+        return inflater.inflate(layoutRes(), container, false);
     }
-
 }

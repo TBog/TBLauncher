@@ -164,6 +164,7 @@
     <style name="SettingsDialogTheme.White">
         <item name="android:windowBackground">@drawable/dialog_background_light</item>
         <item name="android:textColor">@color/settings_primary_selector_lightbg</item>
+        <item name="android:textColorHint">@color/settings_primary_selector_lightbg</item>
         <item name="android:textColorPrimary">@color/settings_primary_selector_lightbg</item>
         <item name="android:textColorSecondary">@color/settings_secondary_selector_lightbg</item>
         <item name="android:textColorTertiary">@color/settings_tertiary_selector_lightbg</item>
@@ -216,7 +217,6 @@
     <style name="SettingsTheme.White">
         <item name="android:windowBackground">@android:color/white</item>
         <item name="alertDialogTheme">@style/SettingsDialogTheme.White</item>
-        <item name="dialogTheme">@style/SettingsDialogTheme.White</item>
         <item name="android:textColor">@color/settings_primary_selector_lightbg</item>
         <item name="android:textColorPrimary">@color/settings_primary_selector_lightbg</item>
         <item name="android:textColorSecondary">@color/settings_secondary_selector_lightbg</item>
