@@ -262,6 +262,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
                 removePreference("black-notification-icons");
             }
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                removePreference("pin-auto-confirm");
+            }
             ActionBar actionBar = ((SettingsActivity) requireActivity()).getSupportActionBar();
             if (actionBar != null) {
                 // we can change the theme from the options menu

@@ -7,7 +7,7 @@
     android:layout_height="wrap_content"
     android:layout_gravity="center"
     android:orientation="vertical"
-    android:theme="@style/NoTitleDialogTheme">
+    tools:theme="@style/NoTitleDialogTheme">
 
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/viewPager"
@@ -17,9 +17,9 @@
 
         <com.google.android.material.tabs.TabLayout
             android:id="@+id/tabLayout"
-            android:layout_width="match_parent"
+            style="?android:attr/windowTitleStyle"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/window_title_background"
             app:tabMode="scrollable"
             app:tabTextAppearance="@android:style/TextAppearance.Widget.TabWidget" />
 

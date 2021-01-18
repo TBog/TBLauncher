@@ -26,9 +26,6 @@ public class TagsManagerDialog extends DialogFragment<Void> {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = super.onCreateView(inflater, container, savedInstanceState);
         assert root != null;
-        Window window = requireDialog().getWindow();
-        if (window != null)
-            window.setBackgroundDrawableResource(R.drawable.dialog_background_dark);
         root.findViewById(R.id.ok_cancel_button_bar).setVisibility(View.VISIBLE);
         return root;
     }

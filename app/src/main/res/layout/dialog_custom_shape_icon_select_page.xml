@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:paddingHorizontal="@dimen/dialog_padding_horizontal"
     android:paddingVertical="@dimen/dialog_padding_vertical"
-    android:theme="@style/NoTitleDialogTheme">
+    tools:theme="@style/NoTitleDialogTheme">
 
     <TextView
         android:layout_width="match_parent"

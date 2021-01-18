@@ -6,7 +6,7 @@
     android:orientation="vertical"
     android:paddingHorizontal="@dimen/dialog_padding_horizontal"
     android:paddingVertical="@dimen/dialog_padding_vertical"
-    android:theme="@style/NoTitleDialogTheme">
+    tools:theme="@style/NoTitleDialogTheme">
 
     <TextView
         android:id="@android:id/text1"
@@ -31,10 +31,10 @@
     <GridView
         android:id="@+id/iconGrid"
         style="@style/ItemGrid"
-        android:columnWidth="@dimen/icon_size"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
+        android:columnWidth="@dimen/icon_size"
         tools:itemCount="20"
         tools:listitem="@layout/custom_icon_item" />
 
