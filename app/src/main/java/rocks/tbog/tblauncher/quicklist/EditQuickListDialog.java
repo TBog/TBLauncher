@@ -25,9 +25,6 @@ public class EditQuickListDialog extends DialogFragment<Void> {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View root = super.onCreateView(inflater, container, savedInstanceState);
-        Window window = requireDialog().getWindow();
-        if (window != null)
-            window.setBackgroundDrawableResource(R.drawable.dialog_background_dark);
         // add button bar, just like the preferences dialog
         return inflater.inflate(R.layout.ok_cancel_button_bar, (ViewGroup) root, true);
     }

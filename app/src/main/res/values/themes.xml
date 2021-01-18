@@ -178,6 +178,10 @@
         <item name="colorControlHighlight">@android:color/black</item>
         <item name="colorControlNormal">@android:color/black</item>
 
+<!--        <item name="tabIndicatorColor">@android:color/black</item>-->
+<!--        <item name="tabBackground">@drawable/tab_background_light</item>-->
+<!--        <item name="tabSelectedTextColor">@android:color/black</item>-->
+
         <item name="android:buttonBarStyle">@style/GradientButtonBar.White</item>
         <item name="android:buttonBarButtonStyle">@style/GradientBorderlessButton.White</item>
         <item name="android:borderlessButtonStyle">@style/GradientBorderlessButton.White</item>
@@ -221,9 +225,12 @@
         <item name="android:textColorPrimary">@color/settings_primary_selector_lightbg</item>
         <item name="android:textColorSecondary">@color/settings_secondary_selector_lightbg</item>
         <item name="android:textColorTertiary">@color/settings_tertiary_selector_lightbg</item>
+
         <item name="tabIndicatorColor">@android:color/black</item>
         <item name="tabBackground">@drawable/tab_background_light</item>
+        <item name="tabGravity">center</item>
         <item name="tabSelectedTextColor">@color/settings_primary_selector_lightbg</item>
+
         <item name="colorPrimary">@android:color/black</item>
         <item name="colorControlHighlight">@android:color/black</item>
         <item name="colorControlNormal">@android:color/black</item>
