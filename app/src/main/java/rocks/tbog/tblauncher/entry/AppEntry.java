@@ -2,6 +2,7 @@ package rocks.tbog.tblauncher.entry;
 
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.Dialog;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
@@ -17,9 +18,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
-import android.view.ContextThemeWrapper;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -28,7 +27,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.StringRes;
 import androidx.annotation.WorkerThread;
-import androidx.appcompat.app.AlertDialog;
 
 import java.util.List;
 
@@ -41,6 +39,7 @@ import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
+import rocks.tbog.tblauncher.utils.DialogHelper;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
 
@@ -435,68 +434,38 @@ public final class AppEntry extends EntryWithTags {
     }
 
     private void launchRenameDialog(@NonNull Context ctx) {
-        ContextThemeWrapper context = new ContextThemeWrapper(ctx, R.style.NoTitleDialogTheme);
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle(context.getResources().getString(R.string.title_app_rename));
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            builder.setView(R.layout.dialog_rename);
-        } else {
-            builder.setView(View.inflate(context, R.layout.dialog_rename, null));
-        }
-
-        builder.setPositiveButton(R.string.menu_action_rename, (dialog, which) -> {
-            EditText input = ((AlertDialog) dialog).findViewById(R.id.rename);
-
+        DialogHelper.makeRenameDialog(ctx, getName(), (dialog, name) -> {
             // Set new name
-            String newName = input.getText().toString().trim();
-            setName(newName);
-            TBApplication.getApplication(context).getDataHandler().renameApp(getUserComponentName(), newName);
+            setName(name);
+            Context context = dialog.getContext();
+            TBApplication.getApplication(context).getDataHandler().renameApp(getUserComponentName(), name);
 
             // Show toast message
             String msg = context.getResources().getString(R.string.app_rename_confirmation, getName());
             Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
+        })
+                .setTitle(R.string.title_app_rename)
+                .setNeutralButton(R.string.custom_name_set_default, (dialog, which) -> {
+                    Context context = ((Dialog) dialog).getContext();
+                    String name = null;
+                    PackageManager pm = context.getPackageManager();
+                    try {
+                        ApplicationInfo applicationInfo = pm.getApplicationInfo(getPackageName(), 0);
+                        name = applicationInfo.loadLabel(pm).toString();
+                    } catch (PackageManager.NameNotFoundException ignored) {
+                    }
+                    if (name != null) {
+                        setName(name);
+                        TBApplication.getApplication(context).getDataHandler().removeRenameApp(getUserComponentName(), name);
 
-            // We'll need to reset the list view to its previous transcript mode,
-            // but it has to happen *after* the keyboard is hidden, otherwise scroll will be reset
-            // Let's wait for half a second, that's ugly but we don't have any other option :(
-//            final Handler handler = new Handler();
-//            handler.postDelayed(() -> parent.updateTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL), 500);
+                        // Show toast message
+                        String msg = context.getString(R.string.app_rename_confirmation, getName());
+                        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
+                    }
 
-            dialog.dismiss();
-        });
-        builder.setNeutralButton(R.string.custom_name_set_default, (dialog, which) -> {
-            String name = null;
-            PackageManager pm = context.getPackageManager();
-            try {
-                ApplicationInfo applicationInfo = pm.getApplicationInfo(getPackageName(), 0);
-                name = applicationInfo.loadLabel(pm).toString();
-            } catch (PackageManager.NameNotFoundException ignored) {
-            }
-            if (name != null) {
-                setName(name);
-                TBApplication.getApplication(context).getDataHandler().removeRenameApp(getUserComponentName(), name);
-
-                // Show toast message
-                String msg = context.getResources().getString(R.string.app_rename_confirmation, getName());
-                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
-            }
-
-            dialog.dismiss();
-        });
-        builder.setNegativeButton(android.R.string.cancel, (dialog, which) -> {
-            dialog.cancel();
-//            final Handler handler = new Handler();
-//            handler.postDelayed(() -> parent.updateTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL), 500);
-        });
-
-        //parent.updateTranscriptMode(AbsListView.TRANSCRIPT_MODE_DISABLED);
-        AlertDialog dialog = builder.create();
-        dialog.show();
-        // call after dialog got inflated (show call)
-        TextView nameView = dialog.findViewById(R.id.rename);
-        nameView.setText(getName());
-        nameView.requestFocus();
+                    dialog.dismiss();
+                })
+                .show();
     }
 
     /**

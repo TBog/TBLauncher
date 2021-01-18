@@ -2,6 +2,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
     <style name="BaseThemeLight" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="alertDialogTheme">@style/NoTitleDialogTheme</item>
         <item name="appSelectableItemBackground">?android:attr/selectableItemBackground</item>
         <item name="android:actionMenuTextColor">@color/undefined</item>
         <item name="android:windowTranslucentStatus">true</item>
@@ -116,6 +117,7 @@
     </style>
 
     <style name="ListPopupTitle">
+        <item name="alertDialogTheme">?attr/alertDialogTheme</item>
         <item name="android:textSize">@dimen/popup_title</item>
         <item name="android:textColor">@color/primary_text_selector_darkbg</item>
     </style>

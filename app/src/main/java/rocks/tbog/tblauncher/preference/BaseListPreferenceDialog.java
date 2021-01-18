@@ -5,6 +5,8 @@ import android.os.Bundle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.preference.ListPreferenceDialogFragmentCompat;
 
+import rocks.tbog.tblauncher.utils.DialogBuilder;
+
 public class BaseListPreferenceDialog extends ListPreferenceDialogFragmentCompat {
 
     public static BaseListPreferenceDialog newInstance(String key) {
@@ -18,12 +20,12 @@ public class BaseListPreferenceDialog extends ListPreferenceDialogFragmentCompat
     @Override
     protected void onPrepareDialogBuilder(AlertDialog.Builder builder) {
         super.onPrepareDialogBuilder(builder);
-        DialogHelper.setCustomTitle(builder, getPreference().getDialogTitle());
+        DialogBuilder.setCustomTitle(builder, getPreference().getDialogTitle());
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        DialogHelper.setButtonBarBackground(getDialog());
+        DialogBuilder.setButtonBarBackground(getDialog());
     }
 }

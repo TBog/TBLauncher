@@ -1,6 +1,5 @@
 package rocks.tbog.tblauncher;
 
-import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Paint;
@@ -14,7 +13,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.collection.ArraySet;
 import androidx.preference.PreferenceManager;
 
@@ -25,7 +23,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import rocks.tbog.tblauncher.ui.ListPopup;
-import rocks.tbog.tblauncher.utils.DialogBuilder;
+import rocks.tbog.tblauncher.utils.DialogHelper;
 import rocks.tbog.tblauncher.utils.ViewHolderAdapter;
 import rocks.tbog.tblauncher.utils.ViewHolderListAdapter;
 
@@ -108,45 +106,28 @@ public class EditSearchHint {
     }
 
     private void launchRenameDialog(@NonNull Context ctx, @NonNull SearchHintInfo info) {
-        DialogBuilder.withContext(ctx, R.style.NoTitleDialogTheme)
+        DialogHelper.makeRenameDialog(ctx, info.text, (dialog, newName) -> {
+            boolean isValid = true;
+            for (SearchHintInfo hintInfo : mAdapter.getItems()) {
+                if (info.equals(hintInfo))
+                    continue;
+                if (hintInfo.hint.equals(newName) || hintInfo.text.equals(newName)) {
+                    isValid = false;
+                    break;
+                }
+            }
+            if (!isValid) {
+                Toast.makeText(ctx, ctx.getString(R.string.invalid_rename_search_engine, newName), Toast.LENGTH_LONG).show();
+                return;
+            }
+
+            // Set new name
+            info.text = newName;
+            info.action = info.hint.equals(info.text) ? SearchHintInfo.Action.NONE : SearchHintInfo.Action.RENAME;
+
+            mAdapter.notifyDataSetChanged();
+        })
                 .setTitle(R.string.title_rename_search_hint)
-                .setView(R.layout.dialog_rename)
-                .setPositiveButton(R.string.menu_action_rename, (dialog, which) -> {
-                    EditText input = ((AlertDialog) dialog).findViewById(R.id.rename);
-                    if (input == null)
-                        return;
-                    String newName = input.getText().toString().trim();
-                    boolean isValid = true;
-                    for (SearchHintInfo hintInfo : mAdapter.getItems()) {
-                        if (info.equals(hintInfo))
-                            continue;
-                        if (hintInfo.hint.equals(newName) || hintInfo.text.equals(newName)) {
-                            isValid = false;
-                            break;
-                        }
-                    }
-                    if (!isValid) {
-                        Toast.makeText(ctx, ctx.getString(R.string.invalid_rename_search_engine, newName), Toast.LENGTH_LONG).show();
-                        return;
-                    }
-
-                    // Set new name
-                    info.text = newName;
-                    info.action = info.hint.equals(info.text) ? SearchHintInfo.Action.NONE : SearchHintInfo.Action.RENAME;
-
-                    mAdapter.notifyDataSetChanged();
-
-                    dialog.dismiss();
-                })
-                .setNegativeButton(android.R.string.cancel, (dialog, which) -> dialog.cancel())
-                .afterInflate(dialog -> {
-                    @SuppressLint("CutPasteId")
-                    TextView nameView = ((AlertDialog) dialog).findViewById(R.id.rename);
-                    if (nameView != null) {
-                        nameView.setText(info.text);
-                        nameView.requestFocus();
-                    }
-                })
                 .show();
     }
 

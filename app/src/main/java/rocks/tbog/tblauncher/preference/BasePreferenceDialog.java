@@ -1,15 +1,13 @@
 package rocks.tbog.tblauncher.preference;
 
-import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 
-import androidx.annotation.IdRes;
 import androidx.appcompat.app.AlertDialog;
 import androidx.preference.PreferenceDialogFragmentCompat;
 
-import rocks.tbog.tblauncher.TBApplication;
+import rocks.tbog.tblauncher.utils.DialogBuilder;
 
 public abstract class BasePreferenceDialog extends PreferenceDialogFragmentCompat {
     private View mDialogView = null;
@@ -23,7 +21,7 @@ public abstract class BasePreferenceDialog extends PreferenceDialogFragmentCompa
     @Override
     protected void onPrepareDialogBuilder(AlertDialog.Builder builder) {
         super.onPrepareDialogBuilder(builder);
-        DialogHelper.setCustomTitle(builder, getPreference().getDialogTitle());
+        DialogBuilder.setCustomTitle(builder, getPreference().getDialogTitle());
     }
 
     @Override
@@ -45,6 +43,6 @@ public abstract class BasePreferenceDialog extends PreferenceDialogFragmentCompa
             parent = parent.getParent();
         }
 
-        DialogHelper.setButtonBarBackground(getDialog());
+        DialogBuilder.setButtonBarBackground(getDialog());
     }
 }

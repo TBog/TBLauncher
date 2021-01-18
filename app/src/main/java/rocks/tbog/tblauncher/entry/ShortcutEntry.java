@@ -15,9 +15,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.ContextThemeWrapper;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -26,7 +24,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.WorkerThread;
-import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 
 import java.net.URISyntaxException;
@@ -41,6 +38,7 @@ import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
+import rocks.tbog.tblauncher.utils.DialogHelper;
 import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
@@ -302,39 +300,17 @@ public final class ShortcutEntry extends EntryWithTags {
     }
 
     private void launchRenameDialog(@NonNull Context ctx) {
-        ContextThemeWrapper context = new ContextThemeWrapper(ctx, R.style.NoTitleDialogTheme);
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle(context.getResources().getString(R.string.title_shortcut_rename));
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            builder.setView(R.layout.dialog_rename);
-        } else {
-            builder.setView(View.inflate(context, R.layout.dialog_rename, null));
-        }
-
-        builder.setPositiveButton(R.string.menu_action_rename, (dialog, which) -> {
-            EditText input = ((AlertDialog) dialog).findViewById(R.id.rename);
-
-            // Set new name
-            String newName = input.getText().toString().trim();
+        DialogHelper.makeRenameDialog(ctx, getName(), (dialog, newName) -> {
+            Context context = dialog.getContext();
             setName(newName);
             TBApplication.getApplication(context).getDataHandler().renameShortcut(this, newName);
 
             // Show toast message
-            String msg = context.getResources().getString(R.string.shortcut_rename_confirmation, getName());
+            String msg = context.getString(R.string.shortcut_rename_confirmation, getName());
             Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
-
-            dialog.dismiss();
-        });
-        builder.setNegativeButton(android.R.string.cancel, (dialog, which) -> {
-            dialog.cancel();
-        });
-
-        //parent.updateTranscriptMode(AbsListView.TRANSCRIPT_MODE_DISABLED);
-        AlertDialog dialog = builder.create();
-        dialog.show();
-        // call after dialog got inflated (show call)
-        ((TextView) dialog.findViewById(R.id.rename)).setText(getName());
+        })
+                .setTitle(R.string.title_shortcut_rename)
+                .show();
     }
 
     @WorkerThread
