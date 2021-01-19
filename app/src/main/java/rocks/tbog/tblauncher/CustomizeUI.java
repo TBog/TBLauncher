@@ -237,11 +237,10 @@ public class CustomizeUI {
     public Drawable getPopupBackgroundDrawable() {
         Context ctx = getContext();
         int border = UISizes.dp2px(ctx, 1);
-        int r = ctx.getResources().getDimensionPixelSize(R.dimen.popup_corner_radius);
-        float[] corners = new float[]{r, r, r, r, r, r, r, r};
+        int radius = ctx.getResources().getDimensionPixelSize(R.dimen.popup_corner_radius);
 
         GradientDrawable gradient = new GradientDrawable();
-        gradient.setCornerRadii(corners);
+        gradient.setCornerRadius(radius);
         gradient.setStroke(border, UIColors.getPopupBorderColor(ctx));
         gradient.setColor(UIColors.getPopupBackgroundColor(ctx));
 
