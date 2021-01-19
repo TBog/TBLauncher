@@ -1,27 +1,24 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    style="@style/ListPopupTitle">
+    android:layout_height="?android:attr/listPreferredItemHeightSmall"
+    android:gravity="center"
+    android:orientation="vertical">
 
     <TextView
         android:id="@android:id/text1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_gravity="top|center_horizontal"
+        android:layout_gravity="center"
         android:layout_marginStart="?android:attr/listPreferredItemPaddingLeft"
         android:layout_marginEnd="?android:attr/listPreferredItemPaddingRight"
-        android:gravity="center_horizontal"
+        android:gravity="center"
         android:textAppearance="@style/ListPopupTitle"
-        tools:text="@string/popup_title_hist_fav" />
+        tools:text="Pref title gravity" />
 
     <include
         android:id="@+id/title_divider"
-        layout="@layout/popup_divider"
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/separator_thickness"
-        android:layout_gravity="bottom|center_horizontal"
-        android:gravity="center_horizontal" />
+        layout="@layout/popup_divider" />
 
-</FrameLayout>
+</LinearLayout>

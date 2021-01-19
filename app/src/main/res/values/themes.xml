@@ -25,9 +25,9 @@
 
         <item name="colorControlHighlight">@color/colorAccent</item>
 
-        <item name="android:listPreferredItemHeight">54dp</item> <!-- 64dp -->
-        <item name="android:listPreferredItemHeightSmall">40dp</item> <!-- 48dp -->
-        <item name="android:listPreferredItemHeightLarge">67dp</item> <!-- 80dp -->
+        <item name="android:listPreferredItemHeight">40sp</item> <!-- 64dp -->
+        <item name="android:listPreferredItemHeightSmall">20sp</item> <!-- 48dp -->
+        <item name="android:listPreferredItemHeightLarge">64sp</item> <!-- 80dp -->
 
         <item name="android:windowShowWallpaper">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
@@ -126,7 +126,6 @@
     </style>
 
     <style name="ListPopupTitle">
-        <item name="alertDialogTheme">?attr/alertDialogTheme</item>
         <item name="android:textSize">@dimen/popup_title</item>
         <item name="android:textColor">@color/primary_text_selector_darkbg</item>
     </style>
@@ -141,10 +140,11 @@
         <item name="android:paddingRight">?android:attr/listPreferredItemPaddingRight</item>
         <item name="android:gravity">center_vertical</item>
         <item name="android:layout_width">match_parent</item>
-        <item name="android:layout_height">?android:attr/listPreferredItemHeightSmall</item>
+        <item name="android:layout_height">?android:attr/listPreferredItemHeight</item>
     </style>
 
     <style name="ListPopupTheme" parent="Widget.AppCompat.ListPopupWindow">
+        <item name="alertDialogTheme">?attr/alertDialogTheme</item>
         <item name="android:colorBackground">@android:color/transparent</item>
         <item name="android:listDivider">@drawable/list_separator_light</item>
         <item name="android:listPreferredItemPaddingLeft">@dimen/popup_padding_horizontal</item>
