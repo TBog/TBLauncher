@@ -6,10 +6,10 @@
         android:top="2dp">
         <shape>
             <gradient
-                android:angle="90"
-                android:centerColor="#A8ffffff"
-                android:endColor="#FFffffff"
-                android:startColor="#00ffffff"
+                android:angle="270"
+                android:centerColor="@color/DeepBlues_gradient_center"
+                android:endColor="@color/DeepBlues_gradient_finish"
+                android:startColor="@color/DeepBlues_gradient_start"
                 android:type="linear" />
             <corners
                 android:topLeftRadius="@dimen/result_corner_radius"

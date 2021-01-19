@@ -19,4 +19,9 @@
         android:title="@string/settings_dark"
         app:showAsAction="never" />
 
+    <item
+        android:id="@+id/settingsDeepBlues"
+        android:title="@string/settings_deep_blues"
+        app:showAsAction="never" />
+
 </menu>

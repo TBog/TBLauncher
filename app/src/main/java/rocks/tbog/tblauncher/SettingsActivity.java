@@ -79,6 +79,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 setTheme(mTheme = R.style.SettingsTheme);
             else if (theme.equals("white"))
                 setTheme(mTheme = R.style.SettingsTheme_White);
+            else if (theme.equals("DeepBlues"))
+                setTheme(mTheme = R.style.SettingsTheme_DeepBlues);
             else
                 setTheme(mTheme = R.style.SettingsTheme_DarkBg);
         }
@@ -120,6 +122,10 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             return true;
         } else if (itemId == R.id.settingsWhite) {
             sharedPreferences.edit().putString("settings-theme", "white").apply();
+            restart();
+            return true;
+        } else if (itemId == R.id.settingsDeepBlues) {
+            sharedPreferences.edit().putString("settings-theme", "DeepBlues").apply();
             restart();
             return true;
         } else if (itemId == R.id.settingsDark) {

@@ -16,4 +16,18 @@
     <color name="mm2d_cc_sample_shadow">#1a000000</color>
     <color name="mm2d_cc_checker_light">#FFFFFF</color>
     <color name="mm2d_cc_checker_dark">#808080</color>
+
+    <color name="DeepBlues_1">#0C0032</color>
+    <color name="DeepBlues_2">#190061</color>
+    <color name="DeepBlues_3">#240090</color>
+    <color name="DeepBlues_4">#3500D3</color>
+    <color name="DeepBlues_5">#282828</color>
+    <color name="DeepBlues_gradient_start">#FF0c0032</color>
+    <color name="DeepBlues_gradient_center">#A80c0032</color>
+    <color name="DeepBlues_gradient_finish">#00282828</color>
+    <color name="DeepBlues_window">#DD282828</color>
+    <color name="DeepBlues_selector_primary_disable">#7Fffffff</color>
+    <color name="DeepBlues_selector_primary">#FFffffff</color>
+    <color name="DeepBlues_selector_secondary_disable">#2Fffffff</color>
+    <color name="DeepBlues_selector_secondary">#6Fffffff</color>
 </resources>

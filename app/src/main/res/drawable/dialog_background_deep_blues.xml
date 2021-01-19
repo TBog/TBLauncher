@@ -9,7 +9,7 @@
             <solid android:color="@android:color/transparent" />
             <stroke
                 android:width="2dp"
-                android:color="@android:color/black" />
+                android:color="@color/DeepBlues_4" />
             <corners android:radius="@dimen/result_corner_radius" />
         </shape>
     </item>
@@ -19,7 +19,7 @@
         android:right="5dp"
         android:top="5dp">
         <shape>
-            <solid android:color="@color/white_overlay" />
+            <solid android:color="@color/DeepBlues_window" />
             <corners android:radius="@dimen/result_corner_radius" />
             <padding
                 android:bottom="3dp"

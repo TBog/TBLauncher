@@ -63,14 +63,23 @@
         <item name="android:background">@drawable/button_bar_background_light</item>
     </style>
 
+    <style name="GradientButtonBar.DeepBlues">
+        <item name="android:background">@drawable/button_bar_background_deep_blues</item>
+    </style>
+
     <style name="GradientBorderlessButton">
         <item name="android:background">?android:attr/selectableItemBackgroundBorderless</item>
-        <item name="android:textColor">@color/button_bar_text_color_selector</item>
+        <item name="android:textColor">@color/colorAccent</item>
     </style>
 
     <style name="GradientBorderlessButton.White">
         <item name="colorControlHighlight">@android:color/black</item>
         <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="GradientBorderlessButton.DeepBlues">
+        <item name="colorControlHighlight">@color/DeepBlues_4</item>
+        <item name="android:textColor">@color/DeepBlues_4</item>
     </style>
 
     <style name="TitleDialogTheme" parent="Theme.AppCompat.Dialog.Alert">
@@ -152,6 +161,11 @@
         <item name="android:background">@drawable/window_title_background_light</item>
     </style>
 
+    <style name="SettingsDialogTitle.DeepBlues">
+        <item name="android:textColor">@color/DeepBlues_4</item>
+        <item name="android:background">@drawable/window_title_background_deep_blues</item>
+    </style>
+
     <style name="SettingsDialogTheme" parent="NoTitleDialogTheme">
         <item name="android:textColor">@color/primary_text_selector_darkbg</item>
         <item name="android:textColorPrimary">@color/primary_text_selector_darkbg</item>
@@ -178,15 +192,34 @@
         <item name="colorControlHighlight">@android:color/black</item>
         <item name="colorControlNormal">@android:color/black</item>
 
-<!--        <item name="tabIndicatorColor">@android:color/black</item>-->
-<!--        <item name="tabBackground">@drawable/tab_background_light</item>-->
-<!--        <item name="tabSelectedTextColor">@android:color/black</item>-->
-
         <item name="android:buttonBarStyle">@style/GradientButtonBar.White</item>
         <item name="android:buttonBarButtonStyle">@style/GradientBorderlessButton.White</item>
         <item name="android:borderlessButtonStyle">@style/GradientBorderlessButton.White</item>
         <item name="buttonBarNegativeButtonStyle">@style/GradientBorderlessButton.White</item>
         <item name="buttonBarPositiveButtonStyle">@style/GradientBorderlessButton.White</item>
+    </style>
+
+    <style name="SettingsDialogTheme.DeepBlues">
+        <item name="android:windowBackground">@drawable/dialog_background_deep_blues</item>
+        <item name="android:textColor">@color/settings_primary_selector_deep_blues</item>
+        <item name="android:textColorHint">@color/settings_primary_selector_deep_blues</item>
+        <item name="android:textColorPrimary">@color/settings_primary_selector_deep_blues</item>
+        <item name="android:textColorSecondary">@color/settings_secondary_selector_deep_blues</item>
+        <item name="android:listDivider">@drawable/list_separator_deep_blues</item>
+        <item name="android:windowTitleStyle">@style/SettingsDialogTitle.DeepBlues</item>
+
+        <item name="textColorAlertDialogListItem">@color/settings_primary_selector_deep_blues</item>
+
+        <item name="colorPrimary">@color/DeepBlues_selector_primary</item>
+        <item name="colorPrimaryDark">@color/DeepBlues_2</item>
+        <item name="colorControlHighlight">@color/DeepBlues_selector_primary</item>
+        <item name="colorControlNormal">@color/DeepBlues_3</item>
+
+        <item name="android:buttonBarStyle">@style/GradientButtonBar.DeepBlues</item>
+        <item name="android:buttonBarButtonStyle">@style/GradientBorderlessButton.DeepBlues</item>
+        <item name="android:borderlessButtonStyle">@style/GradientBorderlessButton.DeepBlues</item>
+        <item name="buttonBarNegativeButtonStyle">@style/GradientBorderlessButton.DeepBlues</item>
+        <item name="buttonBarPositiveButtonStyle">@style/GradientBorderlessButton.DeepBlues</item>
     </style>
 
     <style name="PreferenceTheme" parent="PreferenceThemeOverlay">
@@ -207,6 +240,10 @@
         <item name="android:textColor">@color/settings_primary_selector_lightbg</item>
     </style>
 
+    <style name="OptionsTextAppearance.DeepBlues">
+        <item name="android:textColor">@color/settings_primary_selector_deep_blues</item>
+    </style>
+
     <style name="SettingsTheme" parent="AppThemeTransparent">
         <item name="windowActionBar">true</item>
         <item name="windowNoTitle">false</item>
@@ -218,6 +255,9 @@
         <item name="android:itemTextAppearance">@style/OptionsTextAppearance</item>
     </style>
 
+    <!--
+        White monochrome
+    -->
     <style name="SettingsTheme.White">
         <item name="android:windowBackground">@android:color/white</item>
         <item name="alertDialogTheme">@style/SettingsDialogTheme.White</item>
@@ -239,6 +279,32 @@
         <item name="android:itemTextAppearance">@style/OptionsTextAppearance.White</item>
     </style>
 
+    <!--
+        DeepBlues
+    -->
+    <style name="SettingsTheme.DeepBlues">
+        <item name="android:windowBackground">@color/DeepBlues_1</item>
+        <item name="alertDialogTheme">@style/SettingsDialogTheme.DeepBlues</item>
+        <item name="android:textColor">@color/settings_primary_selector_deep_blues</item>
+        <item name="android:textColorPrimary">@color/settings_primary_selector_deep_blues</item>
+        <item name="android:textColorSecondary">@color/settings_secondary_selector_deep_blues</item>
+
+        <item name="tabIndicatorColor">@color/DeepBlues_4</item>
+        <item name="tabBackground">@drawable/tab_background_deep_blues</item>
+        <item name="tabGravity">center</item>
+        <item name="tabSelectedTextColor">@color/settings_primary_selector_deep_blues</item>
+
+        <item name="colorPrimary">@color/DeepBlues_selector_primary</item>
+        <item name="colorControlHighlight">@color/DeepBlues_3</item>
+        <item name="colorControlNormal">@color/DeepBlues_selector_primary</item>
+        <item name="colorAccent">@color/DeepBlues_4</item>
+        <item name="android:itemBackground">@color/DeepBlues_1</item>
+        <item name="android:itemTextAppearance">@style/OptionsTextAppearance.DeepBlues</item>
+    </style>
+
+    <!--
+        Dark
+    -->
     <style name="SettingsTheme.DarkBg">
         <item name="android:windowBackground">@color/darkBackground</item>
         <item name="android:itemBackground">@color/darkBackground</item>

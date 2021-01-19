@@ -2,15 +2,17 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
 
     <string-array name="settingsThemeEntries">
-        <item>Black</item>
-        <item>White</item>
-        <item>Dark</item>
+        <item>@string/settings_amoled</item>
+        <item>@string/settings_white</item>
+        <item>@string/settings_dark</item>
+        <item>@string/settings_deep_blues</item>
     </string-array>
 
     <string-array name="settingsThemeValues" translatable="false">
         <item>AMOLED</item>
         <item>white</item>
         <item>dark</item>
+        <item>DeepBlues</item>
     </string-array>
 
     <string-array name="adaptiveEntries">
