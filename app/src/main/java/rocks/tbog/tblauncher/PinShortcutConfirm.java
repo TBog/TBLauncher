@@ -158,7 +158,7 @@ public class PinShortcutConfirm extends Activity implements OnClickListener {
 
             @Override
             protected void onPostExecute(Drawable drawable) {
-                ImageView icon1 = weakImage.get();
+                ImageView icon1 = (ImageView) weakView.get();
                 super.onPostExecute(drawable);
                 int drawFlags = EntryItem.FLAG_DRAW_ICON | EntryItem.FLAG_DRAW_ICON_BADGE;
                 ShortcutEntry.setIcons(drawFlags, icon1, drawable, appDrawable);

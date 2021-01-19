@@ -3,13 +3,11 @@ package rocks.tbog.tblauncher.customicon;
 import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
 import android.os.Bundle;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,12 +33,12 @@ import rocks.tbog.tblauncher.icons.IconPack;
 import rocks.tbog.tblauncher.ui.DialogFragment;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
+import rocks.tbog.tblauncher.utils.UISizes;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public class IconSelectDialog extends DialogFragment<Drawable> {
     private Drawable mSelectedDrawable = null;
-    private ImageView mPreview;
     private ViewPager mViewPager;
     private CustomShapePage mCustomShapePage = null;
     private TextView mPreviewLabel;
@@ -58,13 +56,10 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
             return null;
         Context context = requireContext();
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            view.setClipToOutline(true);
-        }
-
         mPreviewLabel = view.findViewById(R.id.previewLabel);
-        mPreview = view.findViewById(R.id.preview);
         mViewPager = view.findViewById(R.id.viewPager);
+
+        TBApplication.ui(context).setResultListPref(mPreviewLabel);
 
         PageAdapter pageAdapter = new PageAdapter();
         mViewPager.setAdapter(pageAdapter);
@@ -145,16 +140,12 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
         pageAdapter.setupPageView(context, (adapter, v, position) -> {
             if (adapter instanceof IconAdapter) {
                 IconData item = ((IconAdapter) adapter).getItem(position);
-                mSelectedDrawable = item.getIcon();
-                mPreview.setImageDrawable(mSelectedDrawable);
+                Drawable icon = item.getIcon();
+                setSelectedDrawable(icon, icon);
             } else if (adapter instanceof CustomShapePage.ShapedIconAdapter) {
                 CustomShapePage.ShapedIconInfo item = ((CustomShapePage.ShapedIconAdapter) adapter).getItem(position);
-                mSelectedDrawable = item.getIcon();
-                mPreview.setImageDrawable(item.getPreview());
+                setSelectedDrawable(item.getIcon(), item.getPreview());
             }
-            @StringRes
-            int label = mSelectedDrawable == null ? R.string.default_icon_preview_label : R.string.custom_icon_preview_label;
-            mPreviewLabel.setText(label);
         }, (adapter, v, position) -> {
             if (adapter instanceof IconAdapter) {
                 IconData item = ((IconAdapter) adapter).getItem(position);
@@ -167,6 +158,17 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
         }
 
         return view;
+    }
+
+    private void setSelectedDrawable(Drawable selected, Drawable preview) {
+        mSelectedDrawable = selected;
+        @StringRes
+        int label = mSelectedDrawable == null ? R.string.default_icon_preview_label : R.string.custom_icon_preview_label;
+        mPreviewLabel.setText(label);
+        int size = UISizes.getResultIconSize(mPreviewLabel.getContext());
+        Drawable icon = preview.mutate();
+        icon.setBounds(0, 0, size, size);
+        mPreviewLabel.setCompoundDrawables(null, null, icon, null);
     }
 
     public void addIconPackPage(@NonNull LayoutInflater inflater, ViewGroup container, String packName, String packPackageName) {
@@ -273,11 +275,25 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
         UserHandleCompat userHandle = UserHandleCompat.fromComponentName(context, name);
 
         // Preview
-        Utilities.setIconAsync(mPreview, ctx -> {
+        initPreviewIcon(mPreviewLabel, ctx -> {
             Drawable drawable = customIcon != 0 ? iconsHandler.getCustomIcon(name, customIcon) : null;
             if (drawable == null)
                 drawable = iconsHandler.getDrawableIconForPackage(cn, userHandle);
             return drawable;
+        });
+    }
+
+    private static void initPreviewIcon(TextView preview, Utilities.GetDrawable asyncGet) {
+        Utilities.setViewAsync(preview, asyncGet, (view, drawable) -> {
+            Context ctx = view.getContext();
+            int size = UISizes.getResultIconSize(ctx);
+            Drawable icon = drawable.mutate();
+            icon.setBounds(0, 0, size, size);
+            ((TextView) view).setCompoundDrawables(null, null, icon, null);
+            int radius = (int) (.5f + .5f * TBApplication.ui(ctx).getResultListRadius());
+            int paddingTop = view.getPaddingTop();
+            int paddingBottom = view.getPaddingBottom();
+            view.setPadding(radius, paddingTop, radius, paddingBottom);
         });
     }
 
@@ -294,7 +310,7 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
         StaticEntry staticEntry = (StaticEntry) entryItem;
 
         // Preview
-        Utilities.setIconAsync(mPreview, staticEntry::getIconDrawable);
+        initPreviewIcon(mPreviewLabel, staticEntry::getIconDrawable);
     }
 
     private void customIconShortcut(Bundle args) {
@@ -303,7 +319,7 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
         String shortcutId = args.getString("shortcutId", "");
 
         EntryItem entryItem = TBApplication.dataHandler(context).getPojo(shortcutId);
-        if ((entryItem instanceof ShortcutEntry)) {
+        if (!(entryItem instanceof ShortcutEntry)) {
             dismiss();
             Toast.makeText(Utilities.getActivity(context), context.getString(R.string.entry_not_found, shortcutId), Toast.LENGTH_LONG).show();
             return;
@@ -311,31 +327,16 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
         ShortcutEntry shortcutEntry = (ShortcutEntry) entryItem;
 
         // Preview
-        Utilities.setIconAsync(mPreview, shortcutEntry::getIcon);
+        initPreviewIcon(mPreviewLabel, shortcutEntry::getIcon);
     }
 
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-//        IconsHandler iconsHandler = TBApplication.getApplication(requireContext()).getIconsHandler();
-//        IconPackXML iconPack = iconsHandler.getCustomIconPack();
-//        String packageName = iconPack != null ? iconPack.getPackPackageName() : null;
 
         PageAdapter adapter = (PageAdapter) mViewPager.getAdapter();
         if (adapter != null) {
             int selectedPage = mViewPager.getCurrentItem();
-//            if (packageName != null) {
-//                int idx = 0;
-//                for (PageAdapter.Page page : adapter.getPageIterable()) {
-//                    if (page instanceof IconPackPage)
-//                        if (packageName.equals(((IconPackPage) page).packageName)) {
-//                            selectedPage = idx;
-//                            break;
-//                        }
-//                    idx += 1;
-//                }
-//            }
-//            mViewPager.setCurrentItem(selectedPage);
             // allow the adapter to load as needed
             mViewPager.addOnPageChangeListener(adapter);
             // make sure we load the selected page

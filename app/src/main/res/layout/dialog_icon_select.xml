@@ -9,21 +9,33 @@
     android:orientation="vertical"
     tools:theme="@style/NoTitleDialogTheme">
 
-    <androidx.viewpager.widget.ViewPager
-        android:id="@+id/viewPager"
+    <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1">
 
-        <com.google.android.material.tabs.TabLayout
-            android:id="@+id/tabLayout"
+        <View
             style="?android:attr/windowTitleStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            app:tabMode="scrollable"
-            app:tabTextAppearance="@android:style/TextAppearance.Widget.TabWidget" />
+            android:layout_width="match_parent"
+            android:layout_height="48dp" />
 
-    </androidx.viewpager.widget.ViewPager>
+        <androidx.viewpager.widget.ViewPager
+            android:id="@+id/viewPager"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:paddingHorizontal="@dimen/dialog_padding_horizontal"
+            android:paddingTop="@dimen/dialog_padding_vertical">
+
+            <com.google.android.material.tabs.TabLayout
+                android:id="@+id/tabLayout"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:tabMode="scrollable"
+                app:tabTextAppearance="@android:style/TextAppearance.Widget.TabWidget" />
+
+        </androidx.viewpager.widget.ViewPager>
+
+    </FrameLayout>
 
     <LinearLayout
         style="?android:attr/buttonBarStyle"
@@ -45,14 +57,13 @@
             android:id="@+id/previewLabel"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="@dimen/icon_margin_left"
-            android:layout_marginTop="@dimen/icon_margin_top"
-            android:layout_marginEnd="@dimen/icon_margin_right"
-            android:layout_marginBottom="@dimen/icon_margin_bottom"
+            android:layout_marginVertical="2dp"
             android:layout_weight="1"
+            android:drawablePadding="@dimen/icon_margin_right"
             android:gravity="center_vertical|end"
             android:labelFor="@id/preview"
             android:lines="2"
+            android:paddingVertical="@dimen/icon_margin_vertical"
             android:shadowColor="?attr/resultShadowColor"
             android:shadowDx="1"
             android:shadowDy="2"
@@ -61,18 +72,8 @@
             android:textAlignment="textEnd"
             android:textColor="?android:attr/textColorSecondary"
             android:textSize="@dimen/result_small_size"
+            tools:drawableRight="@drawable/ic_android"
             tools:text="Current\n icon" />
-
-        <ImageView
-            android:id="@+id/preview"
-            android:layout_width="@dimen/icon_size"
-            android:layout_height="@dimen/icon_size"
-            android:layout_marginStart="@dimen/icon_margin_left"
-            android:layout_marginTop="@dimen/icon_margin_top"
-            android:layout_marginEnd="@dimen/icon_margin_right"
-            android:layout_marginBottom="@dimen/icon_margin_bottom"
-            android:contentDescription="@string/cd_icon_preview"
-            android:src="@drawable/ic_android" />
 
         <Button
             android:id="@android:id/button1"

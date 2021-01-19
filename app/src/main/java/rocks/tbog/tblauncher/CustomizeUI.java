@@ -168,7 +168,7 @@ public class CustomizeUI {
         if (mPref.getBoolean("result-list-rounded", true)) {
             drawable = new GradientDrawable();  // can't use PaintDrawable when alpha < 255, ugly big darker borders
             ((GradientDrawable) drawable).setColor(background);
-            ((GradientDrawable) drawable).setCornerRadius(resultLayout.getResources().getDimension(R.dimen.result_corner_radius));
+            ((GradientDrawable) drawable).setCornerRadius(getResultListRadius());
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 // clip list content to rounded corners
                 resultLayout.setClipToOutline(true);
@@ -188,6 +188,13 @@ public class CustomizeUI {
                 setListViewScrollbarPref(list);
             }
         }
+    }
+
+    public float getResultListRadius() {
+        if (mPref.getBoolean("result-list-rounded", true)) {
+            return getContext().getResources().getDimension(R.dimen.result_corner_radius);
+        }
+        return 0f;
     }
 
     public void setListViewSelectorPref(AbsListView listView, boolean borderless) {

@@ -3,6 +3,7 @@ package rocks.tbog.tblauncher.ui;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.os.Build;
 import android.os.Bundle;
 import android.util.TypedValue;
 import android.view.LayoutInflater;
@@ -85,6 +86,12 @@ public abstract class DialogFragment<Output> extends androidx.fragment.app.Dialo
         }
         dialog.setCanceledOnTouchOutside(true);
 
-        return inflater.inflate(layoutRes(), container, false);
+        View view = inflater.inflate(layoutRes(), container, false);
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            view.setClipToOutline(true);
+        }
+
+        return view;
     }
 }

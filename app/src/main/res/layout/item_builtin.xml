@@ -13,10 +13,9 @@
         android:layout_width="@dimen/icon_size"
         android:layout_height="@dimen/icon_size"
         android:layout_gravity="start|center_vertical"
+        android:layout_marginVertical="@dimen/icon_margin_vertical"
         android:layout_marginStart="@dimen/icon_margin_left"
-        android:layout_marginTop="@dimen/icon_margin_top"
         android:layout_marginEnd="@dimen/icon_margin_right"
-        android:layout_marginBottom="@dimen/icon_margin_bottom"
         android:importantForAccessibility="no"
         android:scaleType="fitCenter"
         android:src="@drawable/ic_android" />
