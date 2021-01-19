@@ -131,7 +131,6 @@
     </style>
 
     <style name="ListPopupItem">
-        <!--        <item name="android:background">?android:attr/listChoiceBackgroundIndicator</item>-->
         <item name="android:textSize">@dimen/result_small_size</item>
         <item name="android:textColor">@color/secondary_text_selector_darkbg</item>
         <item name="android:paddingStart">?android:attr/listPreferredItemPaddingStart</item>
@@ -144,7 +143,6 @@
     </style>
 
     <style name="ListPopupTheme" parent="Widget.AppCompat.ListPopupWindow">
-        <item name="alertDialogTheme">?attr/alertDialogTheme</item>
         <item name="android:colorBackground">@android:color/transparent</item>
         <item name="android:listDivider">@drawable/list_separator_light</item>
         <item name="android:listPreferredItemPaddingLeft">@dimen/popup_padding_horizontal</item>

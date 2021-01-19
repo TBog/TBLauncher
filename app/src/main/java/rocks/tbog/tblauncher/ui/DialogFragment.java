@@ -3,10 +3,8 @@ package rocks.tbog.tblauncher.ui;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.TypedValue;
-import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -16,9 +14,9 @@ import android.view.WindowManager;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.preference.PreferenceManager;
 
 import rocks.tbog.tblauncher.R;
+import rocks.tbog.tblauncher.utils.UITheme;
 
 public abstract class DialogFragment<Output> extends androidx.fragment.app.DialogFragment {
     private OnDismissListener<Output> mOnDismissListener = null;
@@ -58,42 +56,20 @@ public abstract class DialogFragment<Output> extends androidx.fragment.app.Dialo
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext());
-        String theme = sharedPreferences.getString("settings-theme", null);
-        int style = R.style.NoTitleDialogTheme;
-        if (theme != null) {
-            if (theme.equals("AMOLED")) {
-                style = R.style.SettingsTheme;
-            } else if (theme.equals("white")) {
-                style = R.style.SettingsTheme_White;
-            } else {
-                style = R.style.SettingsTheme_DarkBg;
-            }
-        }
+        int style = UITheme.getDialogTheme(requireContext());
+        if (style == UITheme.ID_NULL)
+            style = R.style.NoTitleDialogTheme;
         setStyle(DialogFragment.STYLE_NO_FRAME, style);
     }
 
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        Context ctx = requireContext();
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(ctx);
-        String theme = sharedPreferences.getString("settings-theme", null);
-        if (theme != null) {
-            Context themeWrapper;
-            if (theme.equals("AMOLED")) {
-                themeWrapper = new ContextThemeWrapper(ctx, R.style.SettingsTheme);
-            } else if (theme.equals("white")) {
-                themeWrapper = new ContextThemeWrapper(ctx, R.style.SettingsTheme_White);
-            } else {
-                themeWrapper = new ContextThemeWrapper(ctx, R.style.SettingsTheme_DarkBg);
-            }
-            TypedValue outValue = new TypedValue();
-            themeWrapper.getTheme().resolveAttribute(R.attr.alertDialogTheme, outValue, true);
-            int dialogStyle = outValue.resourceId;
-            return new Dialog(themeWrapper, dialogStyle);
-        }
-        return super.onCreateDialog(savedInstanceState);
+        Context themeWrapper = UITheme.getDialogThemedContext(requireContext());
+        TypedValue outValue = new TypedValue();
+        themeWrapper.getTheme().resolveAttribute(R.attr.alertDialogTheme, outValue, true);
+        int dialogStyle = outValue.resourceId;
+        return new Dialog(themeWrapper, dialogStyle);
     }
 
     @Nullable

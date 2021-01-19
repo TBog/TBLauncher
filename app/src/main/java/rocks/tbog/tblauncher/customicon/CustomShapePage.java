@@ -42,6 +42,7 @@ import rocks.tbog.tblauncher.utils.DialogBuilder;
 import rocks.tbog.tblauncher.utils.DrawableUtils;
 import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.UISizes;
+import rocks.tbog.tblauncher.utils.UITheme;
 import rocks.tbog.tblauncher.utils.Utilities;
 import rocks.tbog.tblauncher.utils.ViewHolderAdapter;
 import rocks.tbog.tblauncher.utils.ViewHolderListAdapter;
@@ -305,18 +306,7 @@ class CustomShapePage extends PageAdapter.Page {
         if (!(activity instanceof AppCompatActivity))
             return;
 
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-        String theme = sharedPreferences.getString("settings-theme", null);
-        Context themeWrapper = context;
-        if (theme != null) {
-            if (theme.equals("AMOLED"))
-                themeWrapper = new ContextThemeWrapper(context, R.style.SettingsTheme);
-            else if (theme.equals("white"))
-                themeWrapper = new ContextThemeWrapper(context, R.style.SettingsTheme_White);
-            else
-                themeWrapper = new ContextThemeWrapper(context, R.style.SettingsTheme_DarkBg);
-        }
-
+        Context themeWrapper = UITheme.getDialogThemedContext(context);
         DialogView dialogView = new DialogView(themeWrapper);
 
         dialogView.init(selectedColor, (AppCompatActivity) activity);

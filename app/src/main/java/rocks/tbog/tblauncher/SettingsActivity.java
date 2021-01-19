@@ -24,7 +24,6 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.StyleRes;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
@@ -57,6 +56,7 @@ import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.SystemUiVisibility;
 import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.UISizes;
+import rocks.tbog.tblauncher.utils.UITheme;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public class SettingsActivity extends AppCompatActivity implements PreferenceFragmentCompat.OnPreferenceStartScreenCallback/*, PreferenceFragmentCompat.OnPreferenceStartFragmentCallback*/ {
@@ -65,25 +65,13 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     private static final int FILE_SELECT_XML_SET = 63;
     private static final int FILE_SELECT_XML_OVERWRITE = 62;
     private static final int FILE_SELECT_XML_APPEND = 61;
-    @StyleRes
-    int mTheme = 0;//Resources.ID_NULL;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        int theme = UITheme.getSettingsTheme(this);
+        if (theme != UITheme.ID_NULL)
+            setTheme(theme);
         super.onCreate(savedInstanceState);
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        String theme = sharedPreferences.getString("settings-theme", null);
-        mTheme = 0;
-        if (theme != null) {
-            if (theme.equals("AMOLED"))
-                setTheme(mTheme = R.style.SettingsTheme);
-            else if (theme.equals("white"))
-                setTheme(mTheme = R.style.SettingsTheme_White);
-            else if (theme.equals("DeepBlues"))
-                setTheme(mTheme = R.style.SettingsTheme_DeepBlues);
-            else
-                setTheme(mTheme = R.style.SettingsTheme_DarkBg);
-        }
         setContentView(R.layout.activity_settings);
 
         if (savedInstanceState == null) {
@@ -476,10 +464,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
             // If it was one of our custom Preferences, show its dialog
             if (dialogFragment != null) {
-                @StyleRes
-                int theme = getActivityTheme();
-                if (theme != 0)
-                    dialogFragment.setStyle(DialogFragment.STYLE_NORMAL, theme);
                 dialogFragment.setTargetFragment(this, 0);
                 final FragmentManager fm = this.getParentFragmentManager();
                 dialogFragment.show(fm, DIALOG_FRAGMENT_TAG);
@@ -488,14 +472,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             else {
                 super.onDisplayPreferenceDialog(preference);
             }
-        }
-
-        @StyleRes
-        private int getActivityTheme() {
-            Activity activity = getActivity();
-            if (activity instanceof SettingsActivity)
-                return ((SettingsActivity) activity).mTheme;
-            return 0;
         }
 
         @Override
