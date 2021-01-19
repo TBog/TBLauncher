@@ -1,5 +1,6 @@
 package rocks.tbog.tblauncher;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -17,7 +18,6 @@ import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.view.Menu;
-import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
@@ -95,31 +95,30 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        MenuInflater inflater = getMenuInflater();
-        inflater.inflate(R.menu.settings_menu, menu);
+        String[] themeNames = getResources().getStringArray(R.array.settingsThemeEntries);
+        for (String name : themeNames)
+            menu.add(name);
         return true;
     }
 
+    @SuppressLint("ApplySharedPref")
     @Override
     public boolean onOptionsItemSelected(@NonNull MenuItem item) {
-        SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-        int itemId = item.getItemId();
-        if (itemId == R.id.settingsAmoled) {
-            sharedPreferences.edit().putString("settings-theme", "AMOLED").apply();
-            restart();
-            return true;
-        } else if (itemId == R.id.settingsWhite) {
-            sharedPreferences.edit().putString("settings-theme", "white").apply();
-            restart();
-            return true;
-        } else if (itemId == R.id.settingsDeepBlues) {
-            sharedPreferences.edit().putString("settings-theme", "DeepBlues").apply();
-            restart();
-            return true;
-        } else if (itemId == R.id.settingsDark) {
-            sharedPreferences.edit().putString("settings-theme", "dark").apply();
-            restart();
-            return true;
+        if (item.getTitle() != null) {
+            String itemName = item.getTitle().toString();
+
+            String[] themeNames = getResources().getStringArray(R.array.settingsThemeEntries);
+            String[] themeValues = getResources().getStringArray(R.array.settingsThemeValues);
+
+            for (int themeIdx = 0; themeIdx < themeNames.length; themeIdx++) {
+                String name = themeNames[themeIdx];
+                if (itemName.equals(name)) {
+                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+                    sharedPreferences.edit().putString("settings-theme", themeValues[themeIdx]).commit();
+                    restart();
+                    return true;
+                }
+            }
         }
         return super.onOptionsItemSelected(item);
     }
