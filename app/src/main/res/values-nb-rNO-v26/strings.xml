@@ -1,8 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <string name="force_shape_summary">Bruk adaptiv maske på ikoner som ikke er adaptive</string>
-    <string name="force_shape">Kraft adaptiv form</string>
-    <string name="force_adaptive_summary">For ikkeadaptive ikoner, reduser skalaen og plasser den på en formet bakgrunn</string>
-    <string name="force_adaptive">Tving adaptive ikoner</string>
-    <string name="adaptive_shape_name">Adaptiv ikonform</string>
-</resources>
