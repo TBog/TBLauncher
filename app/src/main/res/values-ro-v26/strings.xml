@@ -1,2 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="force_shape">Forțează forma adaptativă</string>
+    <string name="force_shape_summary">Utilizați masca adaptivă pe pictogramele neadaptative</string>
+    <string name="force_adaptive_summary">Pentru pictogramele non-adaptive, reduceți scalarea și așezați-le pe un fundal alb</string>
+    <string name="force_adaptive">Forțează pictogramele adaptive</string>
+    <string name="adaptive_shape_name">Forma pictogramei adaptive</string>
+</resources>
