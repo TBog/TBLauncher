@@ -254,8 +254,11 @@ public class CustomizeUI {
         return gradient;
     }
 
-    public Drawable getDialogButtonBarBackgroundDrawable(@Nullable Resources.Theme theme) {
-        if (theme == null)
+    public Drawable getDialogButtonBarBackgroundDrawable(@Nullable Resources.Theme customTheme) {
+        final Resources.Theme theme;
+        if (customTheme != null)
+            theme = customTheme;
+        else
             theme = getContext().getTheme();
 
         TypedValue typedValue = new TypedValue();

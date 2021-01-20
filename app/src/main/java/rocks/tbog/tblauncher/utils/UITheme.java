@@ -26,6 +26,8 @@ public class UITheme {
             switch (theme) {
                 case "white":
                     return R.style.SettingsTheme_White;
+                case "black":
+                    return R.style.SettingsTheme_Black;
                 case "dark":
                     return R.style.SettingsTheme_DarkBg;
                 case "DeepBlues":

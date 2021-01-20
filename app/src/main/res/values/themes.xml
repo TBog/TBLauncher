@@ -34,7 +34,7 @@
         <item name="android:textColor">@color/primary_text_selector_darkbg</item>
         <item name="android:textColorPrimary">@color/primary_text_selector_darkbg</item>
         <item name="android:textColorSecondary">@color/secondary_text_selector_darkbg</item>
-        <item name="android:textColorTertiary">@color/tertiary_text_color_selector</item>
+        <item name="android:textColorTertiary">@color/undefined</item>
 
         <item name="searchBackgroundOutline">@android:color/transparent</item>
     </style>
@@ -82,6 +82,11 @@
         <item name="android:textColor">@color/DeepBlues_4</item>
     </style>
 
+    <style name="GradientBorderlessButton.Black">
+        <item name="colorControlHighlight">@color/Black_accent</item>
+        <item name="android:textColor">@color/Black_selector_primary</item>
+    </style>
+
     <style name="TitleDialogTheme" parent="Theme.AppCompat.Dialog.Alert">
         <item name="android:windowNoTitle">false</item>
         <item name="android:colorBackground">#000</item>
@@ -97,7 +102,7 @@
         <item name="android:textColor">@color/primary_text_selector_darkbg</item>
         <item name="android:textColorPrimary">@color/primary_text_selector_darkbg</item>
         <item name="android:textColorSecondary">@color/secondary_text_selector_darkbg</item>
-        <item name="android:textColorTertiary">@color/tertiary_text_color_selector</item>
+        <item name="android:textColorTertiary">@color/undefined</item>
         <item name="android:listDivider">@drawable/list_separator_light</item>
 
         <item name="resultColor">@android:color/white</item>
@@ -164,11 +169,14 @@
         <item name="android:background">@drawable/window_title_background_deep_blues</item>
     </style>
 
+    <style name="SettingsDialogTitle.Black">
+        <item name="android:textColor">@color/Black_accent</item>
+    </style>
+
     <style name="SettingsDialogTheme" parent="NoTitleDialogTheme">
         <item name="android:textColor">@color/primary_text_selector_darkbg</item>
         <item name="android:textColorPrimary">@color/primary_text_selector_darkbg</item>
         <item name="android:textColorSecondary">@color/secondary_text_selector_darkbg</item>
-        <item name="android:textColorTertiary">@color/tertiary_text_color_selector</item>
         <item name="android:listDivider">@drawable/list_separator_light</item>
         <item name="android:windowTitleStyle">@style/SettingsDialogTitle</item>
     </style>
@@ -179,7 +187,6 @@
         <item name="android:textColorHint">@color/settings_primary_selector_lightbg</item>
         <item name="android:textColorPrimary">@color/settings_primary_selector_lightbg</item>
         <item name="android:textColorSecondary">@color/settings_secondary_selector_lightbg</item>
-        <item name="android:textColorTertiary">@color/settings_tertiary_selector_lightbg</item>
         <item name="android:listDivider">@drawable/list_separator_dark</item>
         <item name="android:windowTitleStyle">@style/SettingsDialogTitle.White</item>
 
@@ -195,6 +202,29 @@
         <item name="android:borderlessButtonStyle">@style/GradientBorderlessButton.White</item>
         <item name="buttonBarNegativeButtonStyle">@style/GradientBorderlessButton.White</item>
         <item name="buttonBarPositiveButtonStyle">@style/GradientBorderlessButton.White</item>
+    </style>
+
+    <style name="SettingsDialogTheme.Black">
+        <item name="android:windowBackground">@drawable/dialog_background_black</item>
+        <item name="android:textColor">@color/settings_primary_selector_black</item>
+        <item name="android:textColorHint">@color/settings_primary_selector_black</item>
+        <item name="android:textColorPrimary">@color/settings_primary_selector_black</item>
+        <item name="android:textColorSecondary">@color/settings_secondary_selector_black</item>
+        <item name="android:listDivider">@drawable/list_separator_dark</item>
+        <item name="android:windowTitleStyle">@style/SettingsDialogTitle.Black</item>
+
+        <item name="textColorAlertDialogListItem">@color/settings_primary_selector_black</item>
+
+        <item name="colorPrimary">@color/Black_selector_primary_disable</item>
+        <item name="colorPrimaryDark">@color/Black_selector_primary</item>
+        <item name="colorControlHighlight">@color/Black_selector_primary</item>
+        <item name="colorControlNormal">@color/Black_selector_primary_disable</item>
+
+        <item name="android:buttonBarStyle">@style/GradientButtonBar</item>
+        <item name="android:buttonBarButtonStyle">@style/GradientBorderlessButton.Black</item>
+        <item name="android:borderlessButtonStyle">@style/GradientBorderlessButton.Black</item>
+        <item name="buttonBarNegativeButtonStyle">@style/GradientBorderlessButton.Black</item>
+        <item name="buttonBarPositiveButtonStyle">@style/GradientBorderlessButton.Black</item>
     </style>
 
     <style name="SettingsDialogTheme.DeepBlues">
@@ -230,15 +260,27 @@
         <item name="preferenceCategoryTitleTextAppearance">@style/CategoryTitleTextAppearance</item>
     </style>
 
-    <style name="OptionsTextAppearance" parent="TextAppearance.AppCompat">
+    <style name="OptionsMenu" parent="ThemeOverlay.AppCompat.ActionBar">
+        <item name="android:colorBackground">@color/black_overlay</item>
+        <item name="android:itemBackground">@drawable/dialog_background_dark</item>
         <item name="android:textColor">@color/settings_primary_selector_darkbg</item>
     </style>
 
-    <style name="OptionsTextAppearance.White">
+    <style name="OptionsMenu.White">
+        <item name="android:colorBackground">@color/white_overlay</item>
+        <item name="android:itemBackground">@null</item>
         <item name="android:textColor">@color/settings_primary_selector_lightbg</item>
     </style>
 
-    <style name="OptionsTextAppearance.DeepBlues">
+    <style name="OptionsMenu.Black">
+        <item name="android:itemBackground">@drawable/dialog_background_black</item>
+        <item name="android:textColor">@color/settings_primary_selector_black</item>
+        <item name="android:textAlignment">center</item>
+    </style>
+
+    <style name="OptionsMenu.DeepBlues">
+        <item name="android:colorBackground">@color/DeepBlues_1</item>
+        <item name="android:itemBackground">@null</item>
         <item name="android:textColor">@color/settings_primary_selector_deep_blues</item>
     </style>
 
@@ -249,8 +291,13 @@
         <item name="alertDialogTheme">@style/SettingsDialogTheme</item>
         <item name="preferenceTheme">@style/PreferenceTheme</item>
         <item name="android:textColor">@color/settings_primary_selector_darkbg</item>
-        <item name="android:itemBackground">@android:color/black</item>
-        <item name="android:itemTextAppearance">@style/OptionsTextAppearance</item>
+
+        <item name="tabGravity">center</item>
+
+        <item name="popupTheme">@style/OptionsMenu</item>
+        <item name="android:listPreferredItemHeight">64dp</item>
+        <item name="android:listPreferredItemHeightSmall">48dp</item>
+        <item name="android:listPreferredItemHeightLarge">80dp</item>
     </style>
 
     <!--
@@ -262,19 +309,37 @@
         <item name="android:textColor">@color/settings_primary_selector_lightbg</item>
         <item name="android:textColorPrimary">@color/settings_primary_selector_lightbg</item>
         <item name="android:textColorSecondary">@color/settings_secondary_selector_lightbg</item>
-        <item name="android:textColorTertiary">@color/settings_tertiary_selector_lightbg</item>
 
         <item name="tabIndicatorColor">@android:color/black</item>
         <item name="tabBackground">@drawable/tab_background_light</item>
-        <item name="tabGravity">center</item>
         <item name="tabSelectedTextColor">@color/settings_primary_selector_lightbg</item>
 
         <item name="colorPrimary">@android:color/black</item>
         <item name="colorControlHighlight">@android:color/black</item>
         <item name="colorControlNormal">@android:color/black</item>
         <item name="colorAccent">@android:color/black</item>
-        <item name="android:itemBackground">@android:color/white</item>
-        <item name="android:itemTextAppearance">@style/OptionsTextAppearance.White</item>
+        <item name="popupTheme">@style/OptionsMenu.White</item>
+    </style>
+
+    <!--
+        Black monochrome
+    -->
+    <style name="SettingsTheme.Black">
+        <item name="android:windowBackground">@android:color/black</item>
+        <item name="alertDialogTheme">@style/SettingsDialogTheme.Black</item>
+        <item name="android:textColor">@color/settings_primary_selector_black</item>
+        <item name="android:textColorPrimary">@color/settings_primary_selector_black</item>
+        <item name="android:textColorSecondary">@color/settings_secondary_selector_black</item>
+
+        <item name="tabIndicatorColor">@color/Black_selector_primary_disable</item>
+        <item name="tabBackground">@drawable/tab_background_black</item>
+        <item name="tabSelectedTextColor">@color/settings_primary_selector_black</item>
+
+        <item name="colorPrimary">@color/Black_selector_primary</item>
+        <item name="colorControlHighlight">@color/Black_accent</item>
+        <item name="colorControlNormal">@color/Black_selector_primary</item>
+        <item name="colorAccent">@color/Black_accent</item>
+        <item name="popupTheme">@style/OptionsMenu.Black</item>
     </style>
 
     <!--
@@ -289,15 +354,13 @@
 
         <item name="tabIndicatorColor">@color/DeepBlues_4</item>
         <item name="tabBackground">@drawable/tab_background_deep_blues</item>
-        <item name="tabGravity">center</item>
         <item name="tabSelectedTextColor">@color/settings_primary_selector_deep_blues</item>
 
         <item name="colorPrimary">@color/DeepBlues_selector_primary</item>
         <item name="colorControlHighlight">@color/DeepBlues_3</item>
         <item name="colorControlNormal">@color/DeepBlues_selector_primary</item>
         <item name="colorAccent">@color/DeepBlues_4</item>
-        <item name="android:itemBackground">@color/DeepBlues_1</item>
-        <item name="android:itemTextAppearance">@style/OptionsTextAppearance.DeepBlues</item>
+        <item name="popupTheme">@style/OptionsMenu.DeepBlues</item>
     </style>
 
     <!--
@@ -306,5 +369,6 @@
     <style name="SettingsTheme.DarkBg">
         <item name="android:windowBackground">@color/darkBackground</item>
         <item name="android:itemBackground">@color/darkBackground</item>
+        <item name="popupTheme">@style/OptionsMenu.Black</item>
     </style>
 </resources>
