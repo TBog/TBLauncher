@@ -28,7 +28,7 @@
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
             android:defaultValue="@integer/default_icon_background"
             android:dependency="adaptive-shape"
-            android:key="icon-background"
+            android:key="icon-background-argb"
             android:title="@string/icon_background"
             android:widgetLayout="@layout/pref_color_preview" />
 

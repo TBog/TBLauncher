@@ -283,8 +283,7 @@ public final class UIColors {
     public static int getIconBackground(Context context) {
         if (CACHED_BACKGROUND_ICON == null) {
             SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
-            int color = UIColors.getColor(pref, "icon-background");
-            CACHED_BACKGROUND_ICON = setAlpha(color, 0xFF);
+            CACHED_BACKGROUND_ICON = UIColors.getColor(pref, "icon-background-argb");
         }
         return CACHED_BACKGROUND_ICON;
     }
