@@ -1,33 +1,32 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:parentTag="android.widget.LinearLayout"
-    >
+    tools:parentTag="android.widget.LinearLayout">
 
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tab_layout"
         android:layout_width="@dimen/mm2d_cc_dialog_width"
         android:layout_height="wrap_content"
-        />
+        android:layout_marginHorizontal="@dimen/dialog_padding_horizontal"
+        android:layout_marginVertical="@dimen/dialog_padding_vertical" />
 
     <net.mm2d.color.chooser.SwipeDisabledViewPager
         android:id="@+id/view_pager"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_marginHorizontal="@dimen/dialog_padding_horizontal"
+        android:layout_marginVertical="@dimen/dialog_padding_vertical"
         android:layout_weight="1"
-        app:maxHeight="@dimen/mm2d_cc_panel_height"
-        />
+        app:maxHeight="@dimen/mm2d_cc_panel_height" />
 
     <net.mm2d.color.chooser.ControlView
         android:id="@+id/control_view"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="@dimen/mm2d_cc_panel_margin"
-        />
+        android:layout_marginTop="@dimen/mm2d_cc_panel_margin" />
 </merge>

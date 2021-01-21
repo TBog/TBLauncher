@@ -67,6 +67,10 @@
         <item name="android:background">@drawable/button_bar_background_deep_blues</item>
     </style>
 
+    <style name="GradientButtonBar.Black">
+        <item name="android:background">@null</item>
+    </style>
+
     <style name="GradientBorderlessButton">
         <item name="android:background">?android:attr/selectableItemBackgroundBorderless</item>
         <item name="android:textColor">@color/colorAccent</item>
@@ -92,7 +96,7 @@
         <item name="android:colorBackground">#000</item>
         <item name="android:windowFrame">@null</item>
         <item name="android:windowTitleStyle">@style/GradientWindowTitle</item>
-        <item name="android:windowBackground">@drawable/dialog_background_dark</item>
+        <item name="android:windowBackground">@drawable/dialog_background</item>
         <item name="android:windowIsFloating">true</item>
         <item name="android:windowContentOverlay">@null</item>
         <item name="android:windowSoftInputMode">stateUnspecified|adjustPan</item>
@@ -170,6 +174,7 @@
     </style>
 
     <style name="SettingsDialogTitle.Black">
+        <item name="android:background">@null</item>
         <item name="android:textColor">@color/Black_accent</item>
     </style>
 
@@ -220,7 +225,7 @@
         <item name="colorControlHighlight">@color/Black_selector_primary</item>
         <item name="colorControlNormal">@color/Black_selector_primary_disable</item>
 
-        <item name="android:buttonBarStyle">@style/GradientButtonBar</item>
+        <item name="android:buttonBarStyle">@style/GradientButtonBar.Black</item>
         <item name="android:buttonBarButtonStyle">@style/GradientBorderlessButton.Black</item>
         <item name="android:borderlessButtonStyle">@style/GradientBorderlessButton.Black</item>
         <item name="buttonBarNegativeButtonStyle">@style/GradientBorderlessButton.Black</item>
@@ -284,6 +289,9 @@
         <item name="android:textColor">@color/settings_primary_selector_deep_blues</item>
     </style>
 
+    <!--
+        Settings
+    -->
     <style name="SettingsTheme" parent="AppThemeTransparent">
         <item name="windowActionBar">true</item>
         <item name="windowNoTitle">false</item>
@@ -301,7 +309,7 @@
     </style>
 
     <!--
-        White monochrome
+        Settings - White monochrome
     -->
     <style name="SettingsTheme.White">
         <item name="android:windowBackground">@android:color/white</item>
@@ -322,7 +330,7 @@
     </style>
 
     <!--
-        Black monochrome
+        Settings - Black monochrome
     -->
     <style name="SettingsTheme.Black">
         <item name="android:windowBackground">@android:color/black</item>
@@ -343,7 +351,7 @@
     </style>
 
     <!--
-        DeepBlues
+        Settings - DeepBlues
     -->
     <style name="SettingsTheme.DeepBlues">
         <item name="android:windowBackground">@color/DeepBlues_1</item>
@@ -364,7 +372,7 @@
     </style>
 
     <!--
-        Dark
+        Settings - Dark
     -->
     <style name="SettingsTheme.DarkBg">
         <item name="android:windowBackground">@color/darkBackground</item>

@@ -9,8 +9,7 @@
             <solid android:color="@android:color/transparent" />
             <stroke
                 android:width="2dp"
-                android:color="@android:color/black" />
-            <corners android:radius="@dimen/result_corner_radius" />
+                android:color="@color/colorAccent" />
             <padding
                 android:bottom="1dp"
                 android:left="1dp"
@@ -24,8 +23,7 @@
         android:right="@dimen/dialog_margin_horizontal"
         android:top="@dimen/dialog_margin_vertical">
         <shape>
-            <solid android:color="@color/white_overlay" />
-            <corners android:radius="@dimen/result_corner_radius" />
+            <solid android:color="@color/black_overlay" />
             <padding
                 android:bottom="3dp"
                 android:left="3dp"

@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3CB371</color>
-    <color name="colorPrimaryDark">#006400</color>
-    <color name="colorAccent">#ADFF2F</color>
-    <color name="darkBackground">#242424</color>
+    <color name="colorPrimary">#FFB000</color>
+    <color name="colorPrimaryDark">#007f00</color>
+    <color name="colorAccent">#33ff00</color>
 
     <color name="undefined">#DC143C</color>
     <color name="black_overlay">#66000000</color>
     <color name="white_overlay">#DDffffff</color>
+    <color name="darkBackground">#242424</color>
 
     <color name="kiss_divider_light">#e0e0e0</color>
     <color name="kiss_divider_dark">#434343</color>
