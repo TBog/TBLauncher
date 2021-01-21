@@ -3,31 +3,35 @@ package rocks.tbog.tblauncher.ui;
 import android.content.Context;
 import android.database.DataSetObserver;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.PopupWindow;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
-import androidx.appcompat.widget.ListPopupWindow;
 
+import rocks.tbog.tblauncher.CustomizeUI;
 import rocks.tbog.tblauncher.R;
+import rocks.tbog.tblauncher.TBApplication;
+import rocks.tbog.tblauncher.utils.UIColors;
+import rocks.tbog.tblauncher.utils.UISizes;
 
 public class ListPopup extends PopupWindow {
-    private final View.OnClickListener mClickListener;
-    private final View.OnLongClickListener mLongClickListener;
     private final Rect mTempRect = new Rect();
     private final int[] mTempLocation = new int[2];
-    private OnItemLongClickListener mItemLongClickListener;
-    private OnItemClickListener mItemClickListener;
-    private DataSetObserver mObserver;
-    private ListAdapter mAdapter;
+    private OnItemLongClickListener mItemLongClickListener = null;
+    private OnItemClickListener mItemClickListener = null;
+    private DataSetObserver mObserver = null;
+    private ListAdapter mAdapter = null;
     private boolean dismissOnClick = true;
     private float dimAmount = .7f;
     private boolean mIsModal = false; // send all touch events to this window
@@ -36,40 +40,34 @@ public class ListPopup extends PopupWindow {
         ContextThemeWrapper ctx = new ContextThemeWrapper(context, R.style.ListPopupTheme);
         ListPopup popup = new ListPopup(ctx);
         View root = popup.getContentView().getRootView();
+        CustomizeUI customizeUI = TBApplication.ui(context);
+
+        Drawable background = customizeUI.getPopupBackgroundDrawable();
+        root.setBackground(background);
+        int padding = UISizes.dp2px(context, 1);
+        root.setPadding(padding, padding, padding, padding);
+        ((ViewGroup) root).setClipToPadding(true);
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             root.setClipToOutline(true);
         }
-        root.setBackgroundResource(R.drawable.popup_background);
+
+        customizeUI.setListViewScrollbarPref(popup.getContentView(), UIColors.getPopupRipple(ctx));
+
         popup.setAdapter(adapter);
         return popup;
     }
 
     private ListPopup(@NonNull Context context) {
         super(context, null, android.R.attr.popupMenuStyle);
+        ScrollView scrollView = new ScrollView(context);
         LinearLayout layout = new LinearLayout(context);
         layout.setOrientation(LinearLayout.VERTICAL);
-        ScrollView scrollView = new ScrollView(context);
         scrollView.addView(layout);
+
         setContentView(scrollView);
         setWidth(LinearLayout.LayoutParams.WRAP_CONTENT);
         setHeight(LinearLayout.LayoutParams.WRAP_CONTENT);
-        mItemClickListener = null;
-        mClickListener = v -> {
-            if (mItemClickListener != null) {
-                LinearLayout layout1 = getLinearLayout();
-                int position = layout1.indexOfChild(v);
-                mItemClickListener.onItemClick(mAdapter, v, position);
-            }
-            if (dismissOnClick)
-                dismiss();
-        };
-        mLongClickListener = v -> {
-            if (mItemLongClickListener == null)
-                return false;
-            LinearLayout layout12 = getLinearLayout();
-            int position = layout12.indexOfChild(v);
-            return mItemLongClickListener.onItemLongClick(mAdapter, v, position);
-        };
     }
 
     public ListPopup setOnItemClickListener(OnItemClickListener onItemClickListener) {
@@ -136,21 +134,73 @@ public class ListPopup extends PopupWindow {
 
     private void updateItems() {
         LinearLayout layout = getLinearLayout();
+        Context ctx = layout.getContext();
+//        TBApplication app = TBApplication.getApplication(ctx);
+//        CustomizeUI ui = app.ui();
+        CustomizeUI ui = TBApplication.ui(ctx);
+        int selectorColor = UIColors.getPopupRipple(ctx);
+        int textColor = UIColors.getPopupTextColor(ctx);
+        int titleColor = UIColors.getPopupTitleColor(ctx);
         layout.removeAllViews();
         int adapterCount = mAdapter.getCount();
         for (int i = 0; i < adapterCount; i += 1) {
             View view = mAdapter.getView(i, null, layout);
+
+            // apply selector background
+            view.setBackground(ui.getSelectorDrawable(view, selectorColor, false));
+            setTextColorRecursive(view, mAdapter.isEnabled(i) ? textColor : titleColor);
+
             layout.addView(view);
             if (mAdapter.isEnabled(i)) {
-                view.setOnClickListener(mClickListener);
+                view.setOnClickListener(this::onItemClicked);
                 if (mItemLongClickListener == null) {
                     view.setLongClickable(false);
                 } else {
-                    view.setOnLongClickListener(mLongClickListener);
+                    view.setOnLongClickListener(this::onItemLongClicked);
                 }
             }
         }
         layout.forceLayout();
+    }
+
+    /**
+     * Set the text color of the first TextView
+     *
+     * @param view  TextView to set color of or GroupView to search
+     * @param color text color
+     * @return if color applied
+     */
+    private static boolean setTextColorRecursive(View view, int color) {
+        if (view instanceof TextView) {
+            ((TextView) view).setTextColor(color);
+            return true;
+        } else if (view instanceof ViewGroup) {
+            int childCount = ((ViewGroup) view).getChildCount();
+            for (int childIdx = 0; childIdx < childCount; childIdx += 1) {
+                View child = ((ViewGroup) view).getChildAt(childIdx);
+                if (setTextColorRecursive(child, color))
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    private void onItemClicked(View view) {
+        if (mItemClickListener != null) {
+            LinearLayout layout1 = getLinearLayout();
+            int position = layout1.indexOfChild(view);
+            mItemClickListener.onItemClick(mAdapter, view, position);
+        }
+        if (dismissOnClick)
+            dismiss();
+    }
+
+    private boolean onItemLongClicked(View view) {
+        if (mItemLongClickListener == null)
+            return false;
+        LinearLayout layout12 = getLinearLayout();
+        int position = layout12.indexOfChild(view);
+        return mItemLongClickListener.onItemLongClick(mAdapter, view, position);
     }
 
     private void beforeShow() {

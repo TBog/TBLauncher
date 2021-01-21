@@ -1,12 +1,10 @@
 package rocks.tbog.tblauncher.entry;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
-import android.view.ContextThemeWrapper;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -14,7 +12,6 @@ import android.widget.Toast;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
-import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.drawable.DrawableCompat;
 
@@ -27,6 +24,7 @@ import rocks.tbog.tblauncher.dataprovider.FilterProvider;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
+import rocks.tbog.tblauncher.utils.DialogHelper;
 import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.Utilities;
 
@@ -73,69 +71,52 @@ public abstract class StaticEntry extends EntryItem {
         return super.popupMenuClickHandler(view, item, stringId, parentView);
     }
 
-    private void launchRenameDialog(@NonNull Context ctx) {
-        ContextThemeWrapper context = new ContextThemeWrapper(ctx, R.style.NoTitleDialogTheme);
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle(context.getResources().getString(R.string.title_app_rename));
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            builder.setView(R.layout.dialog_rename);
-        } else {
-            builder.setView(View.inflate(context, R.layout.dialog_rename, null));
-        }
-
-        builder.setPositiveButton(R.string.menu_action_rename, (dialog, which) -> {
-            EditText input = ((AlertDialog) dialog).findViewById(R.id.rename);
+    private void launchRenameDialog(@NonNull Context c) {
+        DialogHelper.makeRenameDialog(c, getName(), (dialog, newName) -> {
+            Context ctx = dialog.getContext();
 
             // Set new name
-            String newName = input.getText().toString().trim();
             setName(newName);
             TBApplication.getApplication(ctx).getDataHandler().renameStaticEntry(id, newName);
 
             // Show toast message
-            String msg = ctx.getResources().getString(R.string.app_rename_confirmation, getName());
+            String msg = ctx.getString(R.string.app_rename_confirmation, getName());
             Toast.makeText(ctx, msg, Toast.LENGTH_SHORT).show();
+        })
+                .setTitle(R.string.title_static_rename)
+                .setNeutralButton(R.string.custom_name_set_default, (dlg, which) -> {
+                    Dialog dialog = (Dialog) dlg;
+                    Context ctx = dialog.getContext();
+                    DataHandler dataHandler = TBApplication.dataHandler(ctx);
+                    dataHandler.renameStaticEntry(id, null);
 
-            dialog.dismiss();
-        });
-        builder.setNeutralButton(R.string.custom_name_set_default, (dialog, which) -> {
-            DataHandler dataHandler = TBApplication.dataHandler(ctx);
-            dataHandler.renameStaticEntry(id, null);
+                    String name = null;
 
-            String name = null;
+                    //TODO: get the original name by recreating the StaticProvider
+                    {
+                        ActionProvider actionProvider = dataHandler.getActionProvider();
+                        if (actionProvider != null && actionProvider.mayFindById(id))
+                            name = new ActionProvider(ctx).findById(id).getName();
+                    }
+                    {
+                        FilterProvider filterProvider = dataHandler.getFilterProvider();
+                        if (filterProvider != null && filterProvider.mayFindById(id))
+                            name = new FilterProvider(ctx).findById(id).getName();
+                    }
+                    if (name != null) {
+                        setName(name);
 
-            //TODO: get the original name by recreating the StaticProvider
-            {
-                ActionProvider actionProvider = dataHandler.getActionProvider();
-                if (actionProvider != null && actionProvider.mayFindById(id))
-                    name = new ActionProvider(ctx).findById(id).getName();
-            }
-            {
-                FilterProvider filterProvider = dataHandler.getFilterProvider();
-                if (filterProvider != null && filterProvider.mayFindById(id))
-                    name = new FilterProvider(ctx).findById(id).getName();
-            }
-            if (name != null) {
-                setName(name);
+                        // Show toast message
+                        String msg = ctx.getString(R.string.app_rename_confirmation, getName());
+                        Toast.makeText(ctx, msg, Toast.LENGTH_SHORT).show();
+                    } else {
+                        // can't find the default name. Reload providers and hope to get the name
+                        dataHandler.reloadProviders();
+                    }
 
-                // Show toast message
-                String msg = ctx.getResources().getString(R.string.app_rename_confirmation, getName());
-                Toast.makeText(ctx, msg, Toast.LENGTH_SHORT).show();
-            } else {
-                // can't find the default name. Reload providers and hope to get the name
-                dataHandler.reloadProviders();
-            }
-
-            dialog.dismiss();
-        });
-        builder.setNegativeButton(android.R.string.cancel, (dialog, which) -> {
-            dialog.cancel();
-        });
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
-        // call after dialog got inflated (show call)
-        ((TextView) dialog.findViewById(R.id.rename)).setText(getName());
+                    dialog.dismiss();
+                })
+                .show();
     }
 
     @Override

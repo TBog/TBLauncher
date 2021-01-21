@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -20,6 +21,8 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import androidx.annotation.IdRes;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.preference.PreferenceManager;
 
 import rocks.tbog.tblauncher.ui.CutoutFactory;
@@ -136,6 +139,9 @@ public class CustomizeUI {
             Utilities.setColorFilterMultiply(mLauncherButton, searchIconColor);
             Utilities.setColorFilterMultiply(mMenuButton, searchIconColor);
             Utilities.setColorFilterMultiply(mClearButton, searchIconColor);
+            mLauncherButton.setBackground(getSelectorDrawable(mLauncherButton, UIColors.getResultListRipple(getContext()), true));
+            mMenuButton.setBackground(getSelectorDrawable(mMenuButton, UIColors.getResultListRipple(getContext()), true));
+            mClearButton.setBackground(getSelectorDrawable(mClearButton, UIColors.getResultListRipple(getContext()), true));
         }
 
         // background color
@@ -162,7 +168,7 @@ public class CustomizeUI {
         if (mPref.getBoolean("result-list-rounded", true)) {
             drawable = new GradientDrawable();  // can't use PaintDrawable when alpha < 255, ugly big darker borders
             ((GradientDrawable) drawable).setColor(background);
-            ((GradientDrawable) drawable).setCornerRadius(resultLayout.getResources().getDimension(R.dimen.result_corner_radius));
+            ((GradientDrawable) drawable).setCornerRadius(getResultListRadius());
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 // clip list content to rounded corners
                 resultLayout.setClipToOutline(true);
@@ -182,6 +188,13 @@ public class CustomizeUI {
                 setListViewScrollbarPref(list);
             }
         }
+    }
+
+    public float getResultListRadius() {
+        if (mPref.getBoolean("result-list-rounded", true)) {
+            return getContext().getResources().getDimension(R.dimen.result_corner_radius);
+        }
+        return 0f;
     }
 
     public void setListViewSelectorPref(AbsListView listView, boolean borderless) {
@@ -211,6 +224,11 @@ public class CustomizeUI {
 
     public void setListViewScrollbarPref(View listView) {
         int color = UIColors.getResultListRipple(listView.getContext());
+        setListViewScrollbarPref(listView, color);
+    }
+
+    public void setListViewScrollbarPref(View listView, int color) {
+
         GradientDrawable drawable = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, new int[]{color & 0xffffff, color, color});
         drawable.setCornerRadius(UISizes.dp2px(listView.getContext(), 3));
         drawable.setSize(UISizes.dp2px(listView.getContext(), 4), drawable.getIntrinsicHeight());
@@ -220,5 +238,37 @@ public class CustomizeUI {
 
     public Context getContext() {
         return mTBLauncherActivity;
+    }
+
+    @NonNull
+    public Drawable getPopupBackgroundDrawable() {
+        Context ctx = getContext();
+        int border = UISizes.dp2px(ctx, 1);
+        int radius = ctx.getResources().getDimensionPixelSize(R.dimen.popup_corner_radius);
+
+        GradientDrawable gradient = new GradientDrawable();
+        gradient.setCornerRadius(radius);
+        gradient.setStroke(border, UIColors.getPopupBorderColor(ctx));
+        gradient.setColor(UIColors.getPopupBackgroundColor(ctx));
+
+        return gradient;
+    }
+
+    public Drawable getDialogButtonBarBackgroundDrawable(@Nullable Resources.Theme customTheme) {
+        final Resources.Theme theme;
+        if (customTheme != null)
+            theme = customTheme;
+        else
+            theme = getContext().getTheme();
+
+        TypedValue typedValue = new TypedValue();
+        if (theme.resolveAttribute(android.R.attr.buttonBarStyle, typedValue, true)) {
+            TypedArray a = theme.obtainStyledAttributes(typedValue.resourceId, new int[]{android.R.attr.background});
+            Drawable background = a.getDrawable(0);
+            a.recycle();
+            return background;
+        }
+
+        return null;
     }
 }

@@ -27,10 +27,10 @@
 
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
             android:defaultValue="@integer/default_icon_background"
-            android:key="icon-background"
             android:dependency="adaptive-shape"
+            android:key="icon-background"
             android:title="@string/icon_background"
-            android:widgetLayout="@layout/pref_color_preview"/>
+            android:widgetLayout="@layout/pref_color_preview" />
 
         <SwitchPreference
             android:defaultValue="true"
@@ -110,7 +110,7 @@
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@integer/default_notification_bar_opacity"
-                android:dialogLayout="@layout/pref_alpha"
+                android:dialogLayout="@layout/pref_slider"
                 android:key="notification-bar-alpha"
                 android:title="@string/alpha"
                 android:widgetLayout="@layout/pref_alpha_preview" />
@@ -140,7 +140,7 @@
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@integer/default_search_bar_opacity"
-                android:dialogLayout="@layout/pref_alpha"
+                android:dialogLayout="@layout/pref_slider"
                 android:key="search-bar-alpha"
                 android:title="@string/alpha"
                 android:widgetLayout="@layout/pref_alpha_preview" />
@@ -171,7 +171,7 @@
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@integer/default_bar_size"
-                android:dialogLayout="@layout/pref_alpha"
+                android:dialogLayout="@layout/pref_slider"
                 android:key="search-bar-size"
                 android:title="@string/search_bar_size" />
 
@@ -190,7 +190,7 @@
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@integer/default_result_list_opacity"
-                android:dialogLayout="@layout/pref_alpha"
+                android:dialogLayout="@layout/pref_slider"
                 android:key="result-list-alpha"
                 android:title="@string/result_list_alpha"
                 android:widgetLayout="@layout/pref_alpha_preview" />
@@ -220,7 +220,7 @@
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@integer/default_size_text"
-                android:dialogLayout="@layout/pref_size"
+                android:dialogLayout="@layout/pref_slider"
                 android:key="result-text-size"
                 android:title="@string/result_text_size"
                 android:widgetLayout="@layout/pref_size_preview" />
@@ -233,7 +233,7 @@
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@integer/default_size_text2"
-                android:dialogLayout="@layout/pref_size"
+                android:dialogLayout="@layout/pref_slider"
                 android:key="result-text2-size"
                 android:title="@string/result_text2_size"
                 android:widgetLayout="@layout/pref_size_preview" />
@@ -246,25 +246,25 @@
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@integer/default_size_icon"
-                android:dialogLayout="@layout/pref_size"
+                android:dialogLayout="@layout/pref_slider"
                 android:key="result-icon-size"
                 android:title="@string/result_icon_size"
                 android:widgetLayout="@layout/pref_size_preview" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@integer/default_result_history_size"
-                android:dialogLayout="@layout/pref_size"
+                android:dialogLayout="@layout/pref_slider"
                 android:key="result-history-size"
-                android:title="@string/result_history_size"
                 android:summary="@string/result_history_size_summary"
+                android:title="@string/result_history_size"
                 android:widgetLayout="@layout/pref_size_preview" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@integer/default_result_history_adaptive"
-                android:dialogLayout="@layout/pref_size"
+                android:dialogLayout="@layout/pref_slider"
                 android:key="result-history-adaptive"
-                android:title="@string/result_history_adaptive"
                 android:summary="@string/result_history_adaptive_summary"
+                android:title="@string/result_history_adaptive"
                 android:widgetLayout="@layout/pref_size_preview" />
 
         </PreferenceCategory>
@@ -282,7 +282,7 @@
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@integer/default_quick_list_opacity"
-                android:dialogLayout="@layout/pref_alpha"
+                android:dialogLayout="@layout/pref_slider"
                 android:key="quick-list-alpha"
                 android:title="@string/quick_list_alpha"
                 android:widgetLayout="@layout/pref_alpha_preview" />
@@ -301,9 +301,45 @@
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@integer/default_bar_size"
-                android:dialogLayout="@layout/pref_alpha"
+                android:dialogLayout="@layout/pref_slider"
                 android:key="quick-list-size"
                 android:title="@string/quick_list_size" />
+
+        </PreferenceCategory>
+
+        <!-- Popup -->
+        <PreferenceCategory
+            android:key="popup-section"
+            android:title="@string/popup_section">
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:key="popup-border-argb"
+                android:title="@string/popup_border_argb"
+                android:widgetLayout="@layout/pref_color_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@integer/default_popup_background"
+                android:key="popup-background-argb"
+                android:title="@string/popup_background_argb"
+                android:widgetLayout="@layout/pref_color_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@integer/default_color_highlight"
+                android:key="popup-ripple-color"
+                android:title="@string/popup_ripple_color"
+                android:widgetLayout="@layout/pref_color_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@integer/default_color_text"
+                android:key="popup-text-color"
+                android:title="@string/popup_text_color"
+                android:widgetLayout="@layout/pref_color_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@integer/default_color_text2"
+                android:key="popup-title-color"
+                android:title="@string/popup_title_color"
+                android:widgetLayout="@layout/pref_color_preview" />
 
         </PreferenceCategory>
 
@@ -430,6 +466,11 @@
 
     <!--    </PreferenceScreen>-->
 
+    <ListPreference
+        android:entries="@array/settingsThemeEntries"
+        android:entryValues="@array/settingsThemeValues"
+        android:key="settings-theme"
+        android:title="@string/settings_theme" />
 
     <rocks.tbog.tblauncher.preference.CustomDialogPreference
         android:dialogLayout="@layout/pref_confirm"

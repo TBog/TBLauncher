@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?><!-- fake the dialog margin with padding -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:bottom="@dimen/dialog_margin_vertical"
+        android:left="@dimen/dialog_margin_horizontal"
+        android:right="@dimen/dialog_margin_horizontal"
+        android:top="@dimen/dialog_margin_vertical">
+        <shape>
+            <solid android:color="@android:color/transparent" />
+            <stroke
+                android:width="2dp"
+                android:color="@android:color/black" />
+            <corners android:radius="@dimen/result_corner_radius" />
+            <padding
+                android:bottom="1dp"
+                android:left="1dp"
+                android:right="1dp"
+                android:top="1dp" />
+        </shape>
+    </item>
+    <item
+        android:bottom="@dimen/dialog_margin_vertical"
+        android:left="@dimen/dialog_margin_horizontal"
+        android:right="@dimen/dialog_margin_horizontal"
+        android:top="@dimen/dialog_margin_vertical">
+        <shape>
+            <solid android:color="@color/white_overlay" />
+            <corners android:radius="@dimen/result_corner_radius" />
+            <padding
+                android:bottom="3dp"
+                android:left="3dp"
+                android:right="3dp"
+                android:top="3dp" />
+        </shape>
+    </item>
+</layer-list>

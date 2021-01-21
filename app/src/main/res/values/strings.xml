@@ -325,6 +325,19 @@
     <string name="reset_preferences">Reset preferences</string>
     <string name="reset_preferences_confirm">Really discard preferences?</string>
     <string name="reset_preferences_description">All settings will be reset to the default value.</string>
+    <string name="popup_section">Popup</string>
+    <string name="popup_ripple_color">Touch color</string>
+    <string name="popup_background_argb">Background color</string>
+    <string name="popup_border_argb">Border color</string>
+    <string name="popup_text_color">Text color</string>
+    <string name="popup_title_color">Title color</string>
+    <string name="settings_theme">Settings theme</string>
+    <string name="settings_8bit">8bit</string>
+    <string name="settings_white">White</string>
+    <string name="settings_black">Black</string>
+    <string name="settings_dark">Dark</string>
+    <string name="settings_deep_blues">DeepBlues</string>
+    <string name="title_static_rename">Choose a custom name</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>

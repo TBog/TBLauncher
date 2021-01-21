@@ -1,5 +1,6 @@
 package rocks.tbog.tblauncher;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
@@ -16,9 +17,12 @@ import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
@@ -38,6 +42,7 @@ import androidx.preference.SwitchPreference;
 import java.io.File;
 
 import rocks.tbog.tblauncher.db.XmlImport;
+import rocks.tbog.tblauncher.preference.BaseListPreferenceDialog;
 import rocks.tbog.tblauncher.preference.ChooseColorDialog;
 import rocks.tbog.tblauncher.preference.ConfirmDialog;
 import rocks.tbog.tblauncher.preference.CustomDialogPreference;
@@ -51,6 +56,7 @@ import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.SystemUiVisibility;
 import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.UISizes;
+import rocks.tbog.tblauncher.utils.UITheme;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public class SettingsActivity extends AppCompatActivity implements PreferenceFragmentCompat.OnPreferenceStartScreenCallback/*, PreferenceFragmentCompat.OnPreferenceStartFragmentCallback*/ {
@@ -62,6 +68,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
+        int theme = UITheme.getSettingsTheme(this);
+        if (theme != UITheme.ID_NULL)
+            setTheme(theme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
 
@@ -82,6 +91,42 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        String[] themeNames = getResources().getStringArray(R.array.settingsThemeEntries);
+        for (String name : themeNames)
+            menu.add(name);
+        return true;
+    }
+
+    @SuppressLint("ApplySharedPref")
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        if (item.getTitle() != null) {
+            String itemName = item.getTitle().toString();
+
+            String[] themeNames = getResources().getStringArray(R.array.settingsThemeEntries);
+            String[] themeValues = getResources().getStringArray(R.array.settingsThemeValues);
+
+            for (int themeIdx = 0; themeIdx < themeNames.length; themeIdx++) {
+                String name = themeNames[themeIdx];
+                if (itemName.equals(name)) {
+                    SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+                    sharedPreferences.edit().putString("settings-theme", themeValues[themeIdx]).commit();
+                    restart();
+                    return true;
+                }
+            }
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void restart() {
+        finish();
+        startActivity(new Intent(this, getClass()));
+        overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
 
     @Override
@@ -210,6 +255,14 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
                 removePreference("black-notification-icons");
             }
+            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
+                removePreference("pin-auto-confirm");
+            }
+            ActionBar actionBar = ((SettingsActivity) requireActivity()).getSupportActionBar();
+            if (actionBar != null) {
+                // we can change the theme from the options menu
+                removePreference("settings-theme");
+            }
 
             final Activity activity = requireActivity();
             // import settings
@@ -305,7 +358,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
             int color = UIColors.getColor(sharedPreferences, "notification-bar-color");
             int alpha = UIColors.getAlpha(sharedPreferences, "notification-bar-alpha");
-            SettingsActivity activity = (SettingsActivity) getActivity();
+            SettingsActivity activity = (SettingsActivity) requireActivity();
             UIColors.setStatusBarColor(activity, UIColors.setAlpha(color, alpha));
             int actionBarTextColor = activity.getTitleColor();
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -320,10 +373,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     }
                 }
             } else {
-                if (UIColors.luminance(color) > .5)
-                    actionBarTextColor = 0xFF000000;
-                else
-                    actionBarTextColor = 0xFFffffff;
+                actionBarTextColor = UIColors.isColorLight(color) ? 0xFF000000 : 0xFFffffff;
             }
             setActionBarTextColor(activity, actionBarTextColor);
         }
@@ -357,6 +407,11 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "quick-list-toggle-color":
                     case "quick-list-color":
                     case "quick-list-ripple-color":
+                    case "popup-background-argb":
+                    case "popup-border-argb":
+                    case "popup-ripple-color":
+                    case "popup-text-color":
+                    case "popup-title-color":
                         dialogFragment = ChooseColorDialog.newInstance(key);
                         break;
                     case "notification-bar-alpha":
@@ -402,6 +457,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     default:
                         throw new RuntimeException("CustomDialogPreference \"" + key + "\" has no dialog defined");
                 }
+            } else if (preference instanceof ListPreference) {
+                dialogFragment = BaseListPreferenceDialog.newInstance(preference.getKey());
             }
 
             // If it was one of our custom Preferences, show its dialog
@@ -469,10 +526,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 if (activity instanceof SettingsActivity) {
                     UIColors.setStatusBarColor((SettingsActivity) activity, UIColors.setAlpha(color, alpha));
                     if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-                        if (UIColors.luminance(color) > .5)
-                            setActionBarTextColor(activity, 0xFF000000);
-                        else
-                            setActionBarTextColor(activity, 0xFFffffff);
+                        setActionBarTextColor(activity, UIColors.isColorLight(color) ? 0xFF000000 : 0xFFffffff);
                     }
                 }
                 break;
@@ -512,6 +566,11 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case "contact-action-color":
             case "search-bar-text-color":
             case "search-bar-icon-color":
+            case "popup-background-argb":
+            case "popup-border-argb":
+            case "popup-ripple-color":
+            case "popup-text-color":
+            case "popup-title-color":
                 UIColors.resetCache();
                 break;
             case "result-text-size":

@@ -86,7 +86,7 @@
             android:parentActivityName=".TBLauncherActivity"
             android:screenOrientation="user"
             android:taskAffinity=".SettingsActivity"
-            android:theme="@style/SettingTheme">
+            android:theme="@style/SettingsTheme">
             <!-- Parent activity meta-data to support API level 4+ -->
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"

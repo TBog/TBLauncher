@@ -15,7 +15,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 import androidx.appcompat.app.AlertDialog;
-import androidx.preference.PreferenceDialogFragmentCompat;
 import androidx.preference.PreferenceGroup;
 import androidx.preference.PreferenceManager;
 
@@ -25,7 +24,7 @@ import rocks.tbog.tblauncher.db.XmlExport;
 import rocks.tbog.tblauncher.utils.FileUtils;
 import rocks.tbog.tblauncher.utils.Utilities;
 
-public class ConfirmDialog extends PreferenceDialogFragmentCompat {
+public class ConfirmDialog extends BasePreferenceDialog {
 
     private static final String TAG = "Dialog";
 

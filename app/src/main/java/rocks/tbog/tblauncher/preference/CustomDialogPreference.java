@@ -2,7 +2,7 @@ package rocks.tbog.tblauncher.preference;
 
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.View;
 import android.widget.ImageView;
@@ -13,6 +13,8 @@ import androidx.preference.PreferenceViewHolder;
 
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.utils.PrefCache;
+import rocks.tbog.tblauncher.utils.UIColors;
+import rocks.tbog.tblauncher.utils.UISizes;
 
 public class CustomDialogPreference extends androidx.preference.DialogPreference {
 
@@ -94,7 +96,13 @@ public class CustomDialogPreference extends androidx.preference.DialogPreference
                 int color = 0xFFffffff;
                 if (value instanceof Integer)
                     color = (int) value | 0xFF000000;
-                ((ImageView) view).setColorFilter(color, PorterDuff.Mode.MULTIPLY);
+
+                Context ctx = getContext();
+                float radius = ctx.getResources().getDimension(R.dimen.color_preview_radius);
+                int border = UISizes.dp2px(ctx, 1);
+                Drawable drawable = UIColors.getPreviewDrawable(color, border, radius);
+                ((ImageView) view).setImageDrawable(drawable);
+                view.setPadding(border, border, border, border);
             }
         }
         {

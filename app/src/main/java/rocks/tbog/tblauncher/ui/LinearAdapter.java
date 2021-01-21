@@ -2,6 +2,8 @@ package rocks.tbog.tblauncher.ui;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -11,10 +13,12 @@ import android.widget.TextView;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
+import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
 
 import rocks.tbog.tblauncher.R;
+import rocks.tbog.tblauncher.utils.UIColors;
 
 /**
  * Adapter used to inflate views in a LinearLayout
@@ -147,6 +151,22 @@ public class LinearAdapter extends BaseAdapter {
     public View getView(int position, View convertView, ViewGroup parent) {
         MenuItem item = getItem(position);
         convertView = LayoutInflater.from(parent.getContext()).inflate(item.getLayoutResource(), parent, false);
+
+        // set color of the divider
+        View divider = convertView.findViewById(R.id.title_divider);
+        if (divider != null) {
+            Context ctx = divider.getContext();
+            int color = UIColors.getPopupBorderColor(ctx);
+            int background = UIColors.getPopupBackgroundColor(ctx);
+            int separator = UIColors.isColorLight(background) ? R.drawable.list_separator_dark : R.drawable.list_separator_light;
+            Drawable drawable = ContextCompat.getDrawable(ctx, separator);
+            if (drawable == null)
+                drawable = divider.getBackground();
+            if (drawable != null) {
+                drawable.setColorFilter(color, PorterDuff.Mode.MULTIPLY);
+                divider.setBackground(drawable);
+            }
+        }
         if (item instanceof ItemDivider) {
             return convertView;
         }

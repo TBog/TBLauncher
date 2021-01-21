@@ -15,10 +15,9 @@
         android:id="@android:id/icon"
         android:layout_width="@dimen/icon_size"
         android:layout_height="@dimen/icon_size"
+        android:layout_marginVertical="@dimen/icon_margin_vertical"
         android:layout_marginStart="@dimen/icon_margin_left"
-        android:layout_marginTop="@dimen/icon_margin_top"
         android:layout_marginEnd="@dimen/icon_margin_right"
-        android:layout_marginBottom="@dimen/icon_margin_bottom"
         android:importantForAccessibility="no"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
@@ -56,11 +55,11 @@
         android:importantForAccessibility="no"
         android:src="@drawable/notification_dot"
         android:visibility="gone"
-        tools:visibility="visible"
         app:layout_constraintBottom_toBottomOf="@android:id/icon"
         app:layout_constraintLeft_toLeftOf="@android:id/icon"
         app:layout_constraintRight_toRightOf="@android:id/icon"
-        app:layout_constraintTop_toTopOf="@android:id/icon" />
+        app:layout_constraintTop_toTopOf="@android:id/icon"
+        tools:visibility="visible" />
 
     <TextView
         android:id="@+id/item_app_name"

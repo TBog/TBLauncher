@@ -5,17 +5,13 @@ import android.content.Context;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
-import android.os.Build;
-import android.view.ContextThemeWrapper;
 import android.view.View;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -30,6 +26,7 @@ import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.entry.TagEntry;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.ui.CodePointDrawable;
+import rocks.tbog.tblauncher.utils.DialogHelper;
 import rocks.tbog.tblauncher.utils.DrawableUtils;
 import rocks.tbog.tblauncher.utils.Utilities;
 import rocks.tbog.tblauncher.utils.ViewHolderAdapter;
@@ -113,21 +110,7 @@ public class TagsManager {
     }
 
     private void launchRenameDialog(Context ctx, TagInfo info) {
-        ContextThemeWrapper context = new ContextThemeWrapper(ctx, R.style.NoTitleDialogTheme);
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle(context.getResources().getString(R.string.title_rename_tag));
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            builder.setView(R.layout.dialog_rename);
-        } else {
-            builder.setView(View.inflate(context, R.layout.dialog_rename, null));
-        }
-
-        builder.setPositiveButton(R.string.menu_action_rename, (dialog, which) -> {
-            EditText input = ((AlertDialog) dialog).findViewById(R.id.rename);
-            if (input == null)
-                return;
-            String newName = input.getText().toString().trim();
+        DialogHelper.makeRenameDialog(ctx, info.name, (dialog, newName) -> {
             boolean isValid = true;
             for (TagInfo tagInfo : mTagList) {
                 if (tagInfo == info)
@@ -147,19 +130,9 @@ public class TagsManager {
             info.action = info.tagName.equals(info.name) ? TagInfo.Action.NONE : TagInfo.Action.RENAME;
 
             mAdapter.notifyDataSetChanged();
-
-            dialog.dismiss();
-        });
-        builder.setNegativeButton(android.R.string.cancel, (dialog, which) -> {
-            dialog.cancel();
-        });
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
-        // call after dialog got inflated (show call)
-        TextView nameView = dialog.findViewById(R.id.rename);
-        nameView.setText(info.name);
-        nameView.requestFocus();
+        })
+                .setTitle(R.string.title_rename_tag)
+                .show();
     }
 
     private void launchCustomTagIconDialog(Context ctx, TagInfo info) {

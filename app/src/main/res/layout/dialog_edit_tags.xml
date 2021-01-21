@@ -5,10 +5,8 @@
     android:layout_height="match_parent"
     android:layout_margin="0dp"
     android:orientation="vertical"
-    android:paddingHorizontal="@dimen/result_margin_horizontal"
-    android:paddingVertical="@dimen/result_margin_vertical"
-    android:theme="@style/TitleDialogTheme"
-    tools:background="@drawable/dialog_background">
+    tools:background="@drawable/dialog_background_dark"
+    tools:theme="@style/TitleDialogTheme">
 
     <!-- Code will inflate a preview of the entry here -->
     <!--    <include-->
@@ -22,6 +20,8 @@
         android:id="@+id/grid"
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_marginHorizontal="@dimen/result_margin_horizontal"
+        android:layout_marginVertical="@dimen/result_margin_vertical"
         android:layout_weight="1"
         android:clipToPadding="false"
         android:gravity="center"
@@ -35,7 +35,9 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:gravity="center">
+        android:gravity="center"
+        android:paddingHorizontal="@dimen/result_margin_horizontal"
+        android:paddingVertical="@dimen/result_margin_vertical">
 
         <AutoCompleteTextView
             android:id="@+id/newTag"
@@ -59,8 +61,6 @@
             android:src="@android:drawable/ic_input_add" />
 
     </LinearLayout>
-
-    <View style="@style/SeparatorHorizontal" />
 
     <!-- Alert dialog style buttons along the bottom. -->
     <include layout="@layout/ok_cancel_button_bar" />

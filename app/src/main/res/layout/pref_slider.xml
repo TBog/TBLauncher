@@ -1,27 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="fill_parent"
     android:layout_height="fill_parent"
     android:orientation="vertical"
     android:paddingHorizontal="@dimen/dialog_padding_horizontal"
-    android:paddingVertical="@dimen/dialog_padding_vertical"
-    android:theme="@style/SettingsDialogTheme">
+    android:paddingVertical="@dimen/dialog_padding_vertical">
 
     <TextView
         android:id="@android:id/text1"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/title_select_alpha" />
+        android:text="@string/title_select_size"
+        android:textColor="?android:attr/textColorPrimary" />
 
     <SeekBar
         android:id="@+id/seekBar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:paddingVertical="10dp" />
 
     <TextView
         android:id="@android:id/text2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/value" />
+        android:text="@string/value"
+        android:textColor="?android:attr/textColorPrimary" />
 </LinearLayout>

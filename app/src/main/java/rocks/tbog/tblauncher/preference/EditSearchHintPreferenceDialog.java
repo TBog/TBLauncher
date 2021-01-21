@@ -4,12 +4,11 @@ import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
 
-import androidx.preference.PreferenceDialogFragmentCompat;
 import androidx.preference.PreferenceManager;
 
 import rocks.tbog.tblauncher.EditSearchHint;
 
-public class EditSearchHintPreferenceDialog extends PreferenceDialogFragmentCompat {
+public class EditSearchHintPreferenceDialog extends BasePreferenceDialog {
 
     private final EditSearchHint mEditor = new EditSearchHint();
 

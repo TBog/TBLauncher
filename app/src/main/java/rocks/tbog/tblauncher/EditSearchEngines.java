@@ -29,6 +29,7 @@ import java.util.Set;
 
 import rocks.tbog.tblauncher.dataprovider.SearchProvider;
 import rocks.tbog.tblauncher.ui.ListPopup;
+import rocks.tbog.tblauncher.utils.DialogHelper;
 import rocks.tbog.tblauncher.utils.ViewHolderAdapter;
 import rocks.tbog.tblauncher.utils.ViewHolderListAdapter;
 
@@ -138,21 +139,8 @@ public class EditSearchEngines {
     }
 
     private void launchRenameDialog(Context ctx, SearchEngineInfo info) {
-        ContextThemeWrapper context = new ContextThemeWrapper(ctx, R.style.NoTitleDialogTheme);
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle(context.getResources().getString(R.string.title_rename_search_engine));
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            builder.setView(R.layout.dialog_rename);
-        } else {
-            builder.setView(View.inflate(context, R.layout.dialog_rename, null));
-        }
-
-        builder.setPositiveButton(R.string.menu_action_rename, (dialog, which) -> {
-            EditText input = ((AlertDialog) dialog).findViewById(R.id.rename);
-            if (input == null)
-                return;
-            String newName = SearchProvider.sanitizeProviderName(input.getText().toString()).trim();
+        DialogHelper.makeRenameDialog(ctx, info.name, (dialog, name) -> {
+            String newName = SearchProvider.sanitizeProviderName(name).trim();
             boolean isValid = !newName.isEmpty();
             for (SearchEngineInfo searchEngineInfo : mSearchEngineList) {
                 if (searchEngineInfo == info)
@@ -174,20 +162,9 @@ public class EditSearchEngines {
             info.action = SearchProvider.getProviderName(info.provider).equals(info.name) ? SearchEngineInfo.Action.NONE : SearchEngineInfo.Action.RENAME;
 
             mAdapter.notifyDataSetChanged();
-
-            dialog.dismiss();
-        });
-        builder.setNegativeButton(android.R.string.cancel, (dialog, which) -> {
-            dialog.cancel();
-        });
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
-        // call after dialog got inflated (show call)
-        TextView nameView = dialog.findViewById(R.id.rename);
-        assert nameView != null;
-        nameView.setText(info.name);
-        nameView.requestFocus();
+        })
+                .setTitle(R.string.title_rename_search_engine)
+                .show();
     }
 
     private void launchEditUrlDialog(Context ctx, SearchEngineInfo info) {

@@ -77,6 +77,10 @@ public class EditQuickList {
 
         mViewPager = view.findViewById(R.id.viewPager);
         {
+            TabLayout tabLayout = mViewPager.findViewById(R.id.tabLayout);
+            tabLayout.setupWithViewPager(mViewPager);
+        }
+        {
             ArrayList<Pair<String, View>> pages = new ArrayList<>();
             LayoutInflater inflater = LayoutInflater.from(context);
 
@@ -147,7 +151,6 @@ public class EditQuickList {
                 gridView.setOnItemClickListener(mAddToQuickList);
             }
 
-
             // favorites
             {
                 GridView gridView = (GridView) inflater.inflate(R.layout.quick_list_editor_page, mViewPager, false);
@@ -171,6 +174,7 @@ public class EditQuickList {
                 }).execute();
                 gridView.setOnItemClickListener(mAddToQuickList);
             }
+
             pages.trimToSize();
             mViewPager.setAdapter(new ViewPagerAdapter(pages));
 
@@ -178,10 +182,6 @@ public class EditQuickList {
             for (Pair<String, View> page : pages) {
                 customizeUI.setResultListPref(page.getSecond());
             }
-        }
-        {
-            TabLayout tabLayout = mViewPager.findViewById(R.id.tabLayout);
-            tabLayout.setupWithViewPager(mViewPager);
         }
     }
 

@@ -2,11 +2,11 @@
 <resources>
     <dimen name="icon_size">32dp</dimen>
     <dimen name="color_preview_size">16dp</dimen>
+    <dimen name="color_preview_radius">5dp</dimen>
 
     <dimen name="icon_margin_left">0dp</dimen>
     <dimen name="icon_margin_right">10dp</dimen>
-    <dimen name="icon_margin_top">5dp</dimen>
-    <dimen name="icon_margin_bottom">5dp</dimen>
+    <dimen name="icon_margin_vertical">5dp</dimen>
 
     <dimen name="result_margin_horizontal">5dp</dimen>
     <dimen name="result_margin_vertical">2dp</dimen>
@@ -65,6 +65,9 @@
     <dimen name="mm2d_cc_checker_size">6dp</dimen>
     <dimen name="mm2d_cc_page_margin">16dp</dimen>
     <dimen name="mm2d_cc_hsv_margin">4dp</dimen>
+
+    <dimen name="dialog_margin_horizontal">5dp</dimen>
+    <dimen name="dialog_margin_vertical">4dp</dimen>
     <dimen name="dialog_padding_horizontal">10dp</dimen>
     <dimen name="dialog_padding_vertical">10dp</dimen>
 

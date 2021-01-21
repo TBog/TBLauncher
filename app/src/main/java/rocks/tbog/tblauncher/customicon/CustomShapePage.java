@@ -9,7 +9,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.text.Editable;
 import android.text.TextWatcher;
-import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.widget.GridView;
 import android.widget.ImageView;
@@ -36,8 +35,11 @@ import rocks.tbog.tblauncher.ui.CodePointDrawable;
 import rocks.tbog.tblauncher.ui.FourCodePointDrawable;
 import rocks.tbog.tblauncher.ui.TextDrawable;
 import rocks.tbog.tblauncher.ui.TwoCodePointDrawable;
+import rocks.tbog.tblauncher.utils.DialogBuilder;
 import rocks.tbog.tblauncher.utils.DrawableUtils;
 import rocks.tbog.tblauncher.utils.UIColors;
+import rocks.tbog.tblauncher.utils.UISizes;
+import rocks.tbog.tblauncher.utils.UITheme;
 import rocks.tbog.tblauncher.utils.Utilities;
 import rocks.tbog.tblauncher.utils.ViewHolderAdapter;
 import rocks.tbog.tblauncher.utils.ViewHolderListAdapter;
@@ -141,14 +143,18 @@ class CustomShapePage extends PageAdapter.Page {
             });
         }
 
-        int colorPreviewSize = context.getResources().getDimensionPixelSize(R.dimen.color_preview_size);
+        final float colorPreviewRadius = context.getResources().getDimension(R.dimen.color_preview_radius);
+        final int colorPreviewBorder = UISizes.dp2px(context, 1);
+        final int colorPreviewSize = context.getResources().getDimensionPixelSize(R.dimen.color_preview_size);
 
         // shape background color chooser
         {
             TextView colorView = pageView.findViewById(R.id.backgroundColor);
-            ColorDrawable colorDrawable = new ColorDrawable(mBackground);
-            colorDrawable.setBounds(0, 0, colorPreviewSize, colorPreviewSize);
-            colorView.setCompoundDrawables(null, null, colorDrawable, null);
+            {
+                Drawable drawable = UIColors.getPreviewDrawable(mBackground, colorPreviewBorder, colorPreviewRadius);
+                drawable.setBounds(0, 0, colorPreviewSize, colorPreviewSize);
+                colorView.setCompoundDrawables(null, null, drawable, null);
+            }
             colorView.setOnClickListener(v -> {
                 Context ctx = v.getContext();
                 launchCustomColorDialog(ctx, mBackground, color -> {
@@ -156,8 +162,9 @@ class CustomShapePage extends PageAdapter.Page {
                     Activity activity = Utilities.getActivity(v);
                     if (activity == null)
                         return;
-                    colorDrawable.setColor(mBackground);
-                    colorView.setCompoundDrawables(null, null, colorDrawable, null);
+                    Drawable drawable = UIColors.getPreviewDrawable(mBackground, colorPreviewBorder, colorPreviewRadius);
+                    drawable.setBounds(0, 0, colorPreviewSize, colorPreviewSize);
+                    colorView.setCompoundDrawables(null, null, drawable, null);
                     generateShapes(activity);
                     reshapeIcons(activity);
                 });
@@ -167,9 +174,11 @@ class CustomShapePage extends PageAdapter.Page {
         // letter color chooser
         {
             TextView colorView = pageView.findViewById(R.id.lettersColor);
-            ColorDrawable colorDrawable = new ColorDrawable(mLetters);
-            colorDrawable.setBounds(0, 0, colorPreviewSize, colorPreviewSize);
-            colorView.setCompoundDrawables(null, null, colorDrawable, null);
+            {
+                Drawable drawable = UIColors.getPreviewDrawable(mLetters, colorPreviewBorder, colorPreviewRadius);
+                drawable.setBounds(0, 0, colorPreviewSize, colorPreviewSize);
+                colorView.setCompoundDrawables(null, null, drawable, null);
+            }
             colorView.setOnClickListener(v -> {
                 Context ctx = v.getContext();
                 launchCustomColorDialog(ctx, mLetters, color -> {
@@ -177,8 +186,9 @@ class CustomShapePage extends PageAdapter.Page {
                     Activity activity = Utilities.getActivity(v);
                     if (activity == null)
                         return;
-                    colorDrawable.setColor(mLetters);
-                    colorView.setCompoundDrawables(null, null, colorDrawable, null);
+                    Drawable drawable = UIColors.getPreviewDrawable(mLetters, colorPreviewBorder, colorPreviewRadius);
+                    drawable.setBounds(0, 0, colorPreviewSize, colorPreviewSize);
+                    colorView.setCompoundDrawables(null, null, drawable, null);
                     generateTextIcons(mLettersView.getText());
                 });
             });
@@ -293,7 +303,7 @@ class CustomShapePage extends PageAdapter.Page {
         if (!(activity instanceof AppCompatActivity))
             return;
 
-        ContextThemeWrapper themeWrapper = new ContextThemeWrapper(context, R.style.SettingsDialogTheme);
+        Context themeWrapper = UITheme.getDialogThemedContext(context);
         DialogView dialogView = new DialogView(themeWrapper);
 
         dialogView.init(selectedColor, (AppCompatActivity) activity);
@@ -306,11 +316,11 @@ class CustomShapePage extends PageAdapter.Page {
             dialog.dismiss();
         };
 
-        final AlertDialog.Builder builder = new AlertDialog.Builder(context)
+        final AlertDialog.Builder builder = new AlertDialog.Builder(themeWrapper)
                 .setPositiveButton(android.R.string.ok, buttonListener)
                 .setNegativeButton(android.R.string.cancel, buttonListener);
         builder.setView(dialogView);
-        builder.show();
+        DialogBuilder.setButtonBarBackground(builder.show());
     }
 
     static class LetterIconInfo extends NamedIconInfo {

@@ -1,9 +1,11 @@
 package rocks.tbog.tblauncher.ui;
 
 import android.app.Dialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -15,6 +17,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import rocks.tbog.tblauncher.R;
+import rocks.tbog.tblauncher.utils.UITheme;
 
 public abstract class DialogFragment<Output> extends androidx.fragment.app.DialogFragment {
     private OnDismissListener<Output> mOnDismissListener = null;
@@ -54,19 +57,25 @@ public abstract class DialogFragment<Output> extends androidx.fragment.app.Dialo
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setStyle(DialogFragment.STYLE_NO_FRAME, R.style.NoTitleDialogTheme);
+        int style = UITheme.getDialogTheme(requireContext());
+        if (style == UITheme.ID_NULL)
+            style = R.style.NoTitleDialogTheme;
+        setStyle(DialogFragment.STYLE_NO_FRAME, style);
     }
 
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        return super.onCreateDialog(savedInstanceState);
+        Context themeWrapper = UITheme.getDialogThemedContext(requireContext());
+        TypedValue outValue = new TypedValue();
+        themeWrapper.getTheme().resolveAttribute(R.attr.alertDialogTheme, outValue, true);
+        int dialogStyle = outValue.resourceId;
+        return new Dialog(themeWrapper, dialogStyle);
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View root = inflater.inflate(layoutRes(), container, false);
         Dialog dialog = requireDialog();
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 
@@ -77,7 +86,12 @@ public abstract class DialogFragment<Output> extends androidx.fragment.app.Dialo
         }
         dialog.setCanceledOnTouchOutside(true);
 
-        return root;
-    }
+        View view = inflater.inflate(layoutRes(), container, false);
 
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            view.setClipToOutline(true);
+        }
+
+        return view;
+    }
 }

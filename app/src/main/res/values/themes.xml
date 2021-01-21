@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
 
     <style name="BaseThemeLight" parent="Theme.AppCompat.Light.NoActionBar">
+        <item name="alertDialogTheme">@style/NoTitleDialogTheme</item>
         <item name="appSelectableItemBackground">?android:attr/selectableItemBackground</item>
         <item name="android:actionMenuTextColor">@color/undefined</item>
         <item name="android:windowTranslucentStatus">true</item>
@@ -21,17 +22,19 @@
         <item name="listBackgroundColor">@color/black_overlay</item>
         <item name="dividerDrawable">@null</item>
         <item name="textShadowRadius">3</item>
+
         <item name="colorControlHighlight">@color/colorAccent</item>
 
-        <item name="android:listPreferredItemHeight">54dp</item> <!-- 64dp -->
-        <item name="android:listPreferredItemHeightSmall">40dp</item> <!-- 48dp -->
-        <item name="android:listPreferredItemHeightLarge">67dp</item> <!-- 80dp -->
+        <item name="android:listPreferredItemHeight">40sp</item> <!-- 64dp -->
+        <item name="android:listPreferredItemHeightSmall">20sp</item> <!-- 48dp -->
+        <item name="android:listPreferredItemHeightLarge">64sp</item> <!-- 80dp -->
 
         <item name="android:windowShowWallpaper">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:textColor">@color/primary_text_color_selector</item>
-        <item name="android:textColorSecondary">@color/secondary_text_color_selector</item>
-        <item name="android:textColorTertiary">@color/tertiary_text_color_selector</item>
+        <item name="android:textColor">@color/primary_text_selector_darkbg</item>
+        <item name="android:textColorPrimary">@color/primary_text_selector_darkbg</item>
+        <item name="android:textColorSecondary">@color/secondary_text_selector_darkbg</item>
+        <item name="android:textColorTertiary">@color/undefined</item>
 
         <item name="searchBackgroundOutline">@android:color/transparent</item>
     </style>
@@ -40,9 +43,12 @@
         <item name="android:scrollHorizontally">true</item>
         <item name="android:layout_marginTop">0dp</item>
         <item name="android:layout_marginStart">0dp</item>
+        <item name="android:layout_marginLeft">0dp</item>
         <item name="android:layout_marginEnd">0dp</item>
-        <item name="android:paddingStart">@dimen/result_margin_horizontal</item>
-        <item name="android:paddingEnd">@dimen/result_margin_horizontal</item>
+        <item name="android:layout_marginRight">0dp</item>
+        <item name="android:paddingStart">?attr/dialogPreferredPadding</item>
+        <item name="android:paddingEnd">?attr/dialogPreferredPadding</item>
+        <item name="android:paddingTop">@dimen/abc_dialog_padding_top_material</item>
         <item name="android:background">@drawable/window_title_background</item>
         <item name="android:textAppearance">?android:attr/textAppearanceMedium</item>
         <item name="android:textColor">@color/colorAccent</item>
@@ -53,12 +59,39 @@
         <item name="android:background">@drawable/button_bar_background</item>
     </style>
 
-    <style name="GradientBorderlessButton">
-        <item name="android:background">@null</item>
-        <item name="android:textColor">@color/button_bar_text_color_selector</item>
+    <style name="GradientButtonBar.White">
+        <item name="android:background">@drawable/button_bar_background_light</item>
     </style>
 
-    <style name="TitleDialogTheme" parent="Theme.AppCompat.Dialog">
+    <style name="GradientButtonBar.DeepBlues">
+        <item name="android:background">@drawable/button_bar_background_deep_blues</item>
+    </style>
+
+    <style name="GradientButtonBar.Black">
+        <item name="android:background">@null</item>
+    </style>
+
+    <style name="GradientBorderlessButton">
+        <item name="android:background">?android:attr/selectableItemBackgroundBorderless</item>
+        <item name="android:textColor">@color/colorAccent</item>
+    </style>
+
+    <style name="GradientBorderlessButton.White">
+        <item name="colorControlHighlight">@android:color/black</item>
+        <item name="android:textColor">@android:color/black</item>
+    </style>
+
+    <style name="GradientBorderlessButton.DeepBlues">
+        <item name="colorControlHighlight">@color/DeepBlues_4</item>
+        <item name="android:textColor">@color/DeepBlues_4</item>
+    </style>
+
+    <style name="GradientBorderlessButton.Black">
+        <item name="colorControlHighlight">@color/Black_accent</item>
+        <item name="android:textColor">@color/Black_selector_primary</item>
+    </style>
+
+    <style name="TitleDialogTheme" parent="Theme.AppCompat.Dialog.Alert">
         <item name="android:windowNoTitle">false</item>
         <item name="android:colorBackground">#000</item>
         <item name="android:windowFrame">@null</item>
@@ -70,10 +103,10 @@
         <item name="windowActionBar">false</item>
         <item name="windowActionModeOverlay">true</item>
 
-        <item name="android:textColor">@color/primary_text_color_selector</item>
-        <item name="android:textColorPrimary">@color/primary_text_color_selector</item>
-        <item name="android:textColorSecondary">@color/secondary_text_color_selector</item>
-        <item name="android:textColorTertiary">@color/tertiary_text_color_selector</item>
+        <item name="android:textColor">@color/primary_text_selector_darkbg</item>
+        <item name="android:textColorPrimary">@color/primary_text_selector_darkbg</item>
+        <item name="android:textColorSecondary">@color/secondary_text_selector_darkbg</item>
+        <item name="android:textColorTertiary">@color/undefined</item>
         <item name="android:listDivider">@drawable/list_separator_light</item>
 
         <item name="resultColor">@android:color/white</item>
@@ -84,10 +117,17 @@
         <item name="listBackgroundColor">@color/black_overlay</item>
         <item name="dividerDrawable">@null</item>
         <item name="textShadowRadius">3</item>
+
         <item name="colorControlHighlight">@color/colorAccent</item>
+        <item name="colorControlActivated">?android:attr/textColor</item>
+        <item name="colorControlNormal">?android:attr/textColorSecondary</item>
+        <item name="android:textColorPrimaryDisableOnly">#f00</item>
 
         <item name="android:buttonBarStyle">@style/GradientButtonBar</item>
         <item name="android:buttonBarButtonStyle">@style/GradientBorderlessButton</item>
+        <item name="android:borderlessButtonStyle">@style/GradientBorderlessButton</item>
+        <item name="buttonBarNegativeButtonStyle">@style/GradientBorderlessButton</item>
+        <item name="buttonBarPositiveButtonStyle">@style/GradientBorderlessButton</item>
     </style>
 
     <style name="NoTitleDialogTheme" parent="TitleDialogTheme">
@@ -96,12 +136,19 @@
 
     <style name="ListPopupTitle">
         <item name="android:textSize">@dimen/popup_title</item>
-        <item name="android:textColor">@color/primary_text_color_selector</item>
+        <item name="android:textColor">@color/primary_text_selector_darkbg</item>
     </style>
 
     <style name="ListPopupItem">
         <item name="android:textSize">@dimen/result_small_size</item>
-        <item name="android:textColor">@color/secondary_text_color_selector</item>
+        <item name="android:textColor">@color/secondary_text_selector_darkbg</item>
+        <item name="android:paddingStart">?android:attr/listPreferredItemPaddingStart</item>
+        <item name="android:paddingEnd">?android:attr/listPreferredItemPaddingEnd</item>
+        <item name="android:paddingLeft">?android:attr/listPreferredItemPaddingLeft</item>
+        <item name="android:paddingRight">?android:attr/listPreferredItemPaddingRight</item>
+        <item name="android:gravity">center_vertical</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">?android:attr/listPreferredItemHeight</item>
     </style>
 
     <style name="ListPopupTheme" parent="Widget.AppCompat.ListPopupWindow">
@@ -112,46 +159,100 @@
     </style>
 
     <style name="SettingsDialogTitle" parent="GradientWindowTitle">
-        <item name="android:background">@null</item>
         <item name="android:textAppearance">?android:attr/textAppearanceLarge</item>
         <item name="android:textColor">@color/colorAccent</item>
     </style>
 
+    <style name="SettingsDialogTitle.White">
+        <item name="android:textColor">@android:color/black</item>
+        <item name="android:background">@drawable/window_title_background_light</item>
+    </style>
+
+    <style name="SettingsDialogTitle.DeepBlues">
+        <item name="android:textColor">@color/DeepBlues_4</item>
+        <item name="android:background">@drawable/window_title_background_deep_blues</item>
+    </style>
+
+    <style name="SettingsDialogTitle.Black">
+        <item name="android:background">@null</item>
+        <item name="android:textColor">@color/Black_accent</item>
+    </style>
+
     <style name="SettingsDialogTheme" parent="NoTitleDialogTheme">
-        <item name="android:textColor">@color/primary_text_color_selector</item>
-        <item name="android:textColorPrimary">@color/primary_text_color_selector</item>
-        <item name="android:textColorSecondary">@color/secondary_text_color_selector</item>
-        <item name="android:textColorTertiary">@color/tertiary_text_color_selector</item>
+        <item name="android:textColor">@color/primary_text_selector_darkbg</item>
+        <item name="android:textColorPrimary">@color/primary_text_selector_darkbg</item>
+        <item name="android:textColorSecondary">@color/secondary_text_selector_darkbg</item>
         <item name="android:listDivider">@drawable/list_separator_light</item>
         <item name="android:windowTitleStyle">@style/SettingsDialogTitle</item>
     </style>
 
-    <style name="SwitchPreferenceStyle" parent="Preference.SwitchPreference.Material">
-        <item name="iconSpaceReserved">false</item>
+    <style name="SettingsDialogTheme.White">
+        <item name="android:windowBackground">@drawable/dialog_background_light</item>
+        <item name="android:textColor">@color/settings_primary_selector_lightbg</item>
+        <item name="android:textColorHint">@color/settings_primary_selector_lightbg</item>
+        <item name="android:textColorPrimary">@color/settings_primary_selector_lightbg</item>
+        <item name="android:textColorSecondary">@color/settings_secondary_selector_lightbg</item>
+        <item name="android:listDivider">@drawable/list_separator_dark</item>
+        <item name="android:windowTitleStyle">@style/SettingsDialogTitle.White</item>
+
+        <item name="textColorAlertDialogListItem">@color/primary_text_selector_lightbg</item>
+
+        <item name="colorPrimary">@color/primary_text_selector_lightbg</item>
+        <item name="colorPrimaryDark">@android:color/black</item>
+        <item name="colorControlHighlight">@android:color/black</item>
+        <item name="colorControlNormal">@android:color/black</item>
+
+        <item name="android:buttonBarStyle">@style/GradientButtonBar.White</item>
+        <item name="android:buttonBarButtonStyle">@style/GradientBorderlessButton.White</item>
+        <item name="android:borderlessButtonStyle">@style/GradientBorderlessButton.White</item>
+        <item name="buttonBarNegativeButtonStyle">@style/GradientBorderlessButton.White</item>
+        <item name="buttonBarPositiveButtonStyle">@style/GradientBorderlessButton.White</item>
     </style>
 
-    <style name="DialogPreferenceStyle" parent="Preference.DialogPreference.Material">
-        <item name="iconSpaceReserved">false</item>
+    <style name="SettingsDialogTheme.Black">
+        <item name="android:windowBackground">@drawable/dialog_background_black</item>
+        <item name="android:textColor">@color/settings_primary_selector_black</item>
+        <item name="android:textColorHint">@color/settings_primary_selector_black</item>
+        <item name="android:textColorPrimary">@color/settings_primary_selector_black</item>
+        <item name="android:textColorSecondary">@color/settings_secondary_selector_black</item>
+        <item name="android:listDivider">@drawable/list_separator_dark</item>
+        <item name="android:windowTitleStyle">@style/SettingsDialogTitle.Black</item>
+
+        <item name="textColorAlertDialogListItem">@color/settings_primary_selector_black</item>
+
+        <item name="colorPrimary">@color/Black_selector_primary_disable</item>
+        <item name="colorPrimaryDark">@color/Black_selector_primary</item>
+        <item name="colorControlHighlight">@color/Black_selector_primary</item>
+        <item name="colorControlNormal">@color/Black_selector_primary_disable</item>
+
+        <item name="android:buttonBarStyle">@style/GradientButtonBar.Black</item>
+        <item name="android:buttonBarButtonStyle">@style/GradientBorderlessButton.Black</item>
+        <item name="android:borderlessButtonStyle">@style/GradientBorderlessButton.Black</item>
+        <item name="buttonBarNegativeButtonStyle">@style/GradientBorderlessButton.Black</item>
+        <item name="buttonBarPositiveButtonStyle">@style/GradientBorderlessButton.Black</item>
     </style>
 
-    <style name="ScreenPreferenceStyle" parent="Preference.PreferenceScreen.Material">
-        <item name="iconSpaceReserved">false</item>
-    </style>
+    <style name="SettingsDialogTheme.DeepBlues">
+        <item name="android:windowBackground">@drawable/dialog_background_deep_blues</item>
+        <item name="android:textColor">@color/settings_primary_selector_deep_blues</item>
+        <item name="android:textColorHint">@color/settings_primary_selector_deep_blues</item>
+        <item name="android:textColorPrimary">@color/settings_primary_selector_deep_blues</item>
+        <item name="android:textColorSecondary">@color/settings_secondary_selector_deep_blues</item>
+        <item name="android:listDivider">@drawable/list_separator_deep_blues</item>
+        <item name="android:windowTitleStyle">@style/SettingsDialogTitle.DeepBlues</item>
 
-    <style name="PreferenceStyle" parent="Preference.Material">
-        <item name="iconSpaceReserved">false</item>
-    </style>
+        <item name="textColorAlertDialogListItem">@color/settings_primary_selector_deep_blues</item>
 
-    <style name="CategoryTitleTextAppearance" parent="TextAppearance.AppCompat.Body2">
-        <item name="android:textSize">@dimen/abc_text_size_title_material</item>
-    </style>
+        <item name="colorPrimary">@color/DeepBlues_selector_primary</item>
+        <item name="colorPrimaryDark">@color/DeepBlues_2</item>
+        <item name="colorControlHighlight">@color/DeepBlues_selector_primary</item>
+        <item name="colorControlNormal">@color/DeepBlues_3</item>
 
-    <style name="CategoryPreferenceStyle" parent="Preference.Category.Material">
-        <item name="iconSpaceReserved">true</item>
-    </style>
-
-    <style name="FragmentPreferenceStyle" parent="PreferenceFragment.Material">
-        <item name="android:divider">@drawable/list_separator_dark</item>
+        <item name="android:buttonBarStyle">@style/GradientButtonBar.DeepBlues</item>
+        <item name="android:buttonBarButtonStyle">@style/GradientBorderlessButton.DeepBlues</item>
+        <item name="android:borderlessButtonStyle">@style/GradientBorderlessButton.DeepBlues</item>
+        <item name="buttonBarNegativeButtonStyle">@style/GradientBorderlessButton.DeepBlues</item>
+        <item name="buttonBarPositiveButtonStyle">@style/GradientBorderlessButton.DeepBlues</item>
     </style>
 
     <style name="PreferenceTheme" parent="PreferenceThemeOverlay">
@@ -164,18 +265,118 @@
         <item name="preferenceCategoryTitleTextAppearance">@style/CategoryTitleTextAppearance</item>
     </style>
 
-    <style name="SettingTheme" parent="AppThemeTransparent">
+    <style name="OptionsMenu" parent="ThemeOverlay.AppCompat.ActionBar">
+        <item name="android:colorBackground">@color/black_overlay</item>
+        <item name="android:itemBackground">@drawable/dialog_background_dark</item>
+        <item name="android:textColor">@color/settings_primary_selector_darkbg</item>
+    </style>
+
+    <style name="OptionsMenu.White">
+        <item name="android:colorBackground">@color/white_overlay</item>
+        <item name="android:itemBackground">@null</item>
+        <item name="android:textColor">@color/settings_primary_selector_lightbg</item>
+    </style>
+
+    <style name="OptionsMenu.Black">
+        <item name="android:itemBackground">@drawable/dialog_background_black</item>
+        <item name="android:textColor">@color/settings_primary_selector_black</item>
+        <item name="android:textAlignment">center</item>
+    </style>
+
+    <style name="OptionsMenu.DeepBlues">
+        <item name="android:colorBackground">@color/DeepBlues_1</item>
+        <item name="android:itemBackground">@null</item>
+        <item name="android:textColor">@color/settings_primary_selector_deep_blues</item>
+    </style>
+
+    <!--
+        Settings
+    -->
+    <style name="SettingsTheme" parent="AppThemeTransparent">
         <item name="windowActionBar">true</item>
         <item name="windowNoTitle">false</item>
-        <item name="android:windowBackground">@color/settingsBackground</item>
+        <item name="android:windowBackground">@android:color/black</item>
         <item name="alertDialogTheme">@style/SettingsDialogTheme</item>
         <item name="preferenceTheme">@style/PreferenceTheme</item>
-        <item name="android:textColor">@color/primary_text_color_selector_black</item>
-        <item name="android:textColorPrimary">@color/primary_text_color_selector_black</item>
-        <item name="android:textColorSecondary">@color/secondary_text_color_selector_black</item>
-        <item name="android:textColorTertiary">@color/tertiary_text_color_selector_black</item>
-        <item name="colorPrimary">#ffd700</item>
-        <item name="colorPrimaryDark">#000</item>
-        <item name="colorAccent">@color/colorPrimaryDark</item>
+        <item name="android:textColor">@color/settings_primary_selector_darkbg</item>
+
+        <item name="tabGravity">center</item>
+
+        <item name="popupTheme">@style/OptionsMenu</item>
+        <item name="android:listPreferredItemHeight">64dp</item>
+        <item name="android:listPreferredItemHeightSmall">48dp</item>
+        <item name="android:listPreferredItemHeightLarge">80dp</item>
+    </style>
+
+    <!--
+        Settings - White monochrome
+    -->
+    <style name="SettingsTheme.White">
+        <item name="android:windowBackground">@android:color/white</item>
+        <item name="alertDialogTheme">@style/SettingsDialogTheme.White</item>
+        <item name="android:textColor">@color/settings_primary_selector_lightbg</item>
+        <item name="android:textColorPrimary">@color/settings_primary_selector_lightbg</item>
+        <item name="android:textColorSecondary">@color/settings_secondary_selector_lightbg</item>
+
+        <item name="tabIndicatorColor">@android:color/black</item>
+        <item name="tabBackground">@drawable/tab_background_light</item>
+        <item name="tabSelectedTextColor">@color/settings_primary_selector_lightbg</item>
+
+        <item name="colorPrimary">@android:color/black</item>
+        <item name="colorControlHighlight">@android:color/black</item>
+        <item name="colorControlNormal">@android:color/black</item>
+        <item name="colorAccent">@android:color/black</item>
+        <item name="popupTheme">@style/OptionsMenu.White</item>
+    </style>
+
+    <!--
+        Settings - Black monochrome
+    -->
+    <style name="SettingsTheme.Black">
+        <item name="android:windowBackground">@android:color/black</item>
+        <item name="alertDialogTheme">@style/SettingsDialogTheme.Black</item>
+        <item name="android:textColor">@color/settings_primary_selector_black</item>
+        <item name="android:textColorPrimary">@color/settings_primary_selector_black</item>
+        <item name="android:textColorSecondary">@color/settings_secondary_selector_black</item>
+
+        <item name="tabIndicatorColor">@color/Black_selector_primary_disable</item>
+        <item name="tabBackground">@drawable/tab_background_black</item>
+        <item name="tabSelectedTextColor">@color/settings_primary_selector_black</item>
+
+        <item name="colorPrimary">@color/Black_selector_primary</item>
+        <item name="colorControlHighlight">@color/Black_accent</item>
+        <item name="colorControlNormal">@color/Black_selector_primary</item>
+        <item name="colorAccent">@color/Black_accent</item>
+        <item name="popupTheme">@style/OptionsMenu.Black</item>
+    </style>
+
+    <!--
+        Settings - DeepBlues
+    -->
+    <style name="SettingsTheme.DeepBlues">
+        <item name="android:windowBackground">@color/DeepBlues_1</item>
+        <item name="alertDialogTheme">@style/SettingsDialogTheme.DeepBlues</item>
+        <item name="android:textColor">@color/settings_primary_selector_deep_blues</item>
+        <item name="android:textColorPrimary">@color/settings_primary_selector_deep_blues</item>
+        <item name="android:textColorSecondary">@color/settings_secondary_selector_deep_blues</item>
+
+        <item name="tabIndicatorColor">@color/DeepBlues_4</item>
+        <item name="tabBackground">@drawable/tab_background_deep_blues</item>
+        <item name="tabSelectedTextColor">@color/settings_primary_selector_deep_blues</item>
+
+        <item name="colorPrimary">@color/DeepBlues_selector_primary</item>
+        <item name="colorControlHighlight">@color/DeepBlues_3</item>
+        <item name="colorControlNormal">@color/DeepBlues_selector_primary</item>
+        <item name="colorAccent">@color/DeepBlues_4</item>
+        <item name="popupTheme">@style/OptionsMenu.DeepBlues</item>
+    </style>
+
+    <!--
+        Settings - Dark
+    -->
+    <style name="SettingsTheme.DarkBg">
+        <item name="android:windowBackground">@color/darkBackground</item>
+        <item name="android:itemBackground">@color/darkBackground</item>
+        <item name="popupTheme">@style/OptionsMenu.Black</item>
     </style>
 </resources>

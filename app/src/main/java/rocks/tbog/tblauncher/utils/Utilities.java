@@ -28,6 +28,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.UiThread;
 import androidx.annotation.WorkerThread;
 import androidx.core.content.res.ResourcesCompat;
 
@@ -113,6 +114,20 @@ public class Utilities {
             @Override
             protected Drawable getDrawable(Context context) {
                 return callback.getDrawable(context);
+            }
+        }.executeOnExecutor(ResultViewHelper.EXECUTOR_LOAD_ICON);
+    }
+
+    public static void setViewAsync(@NonNull View image, @NonNull GetDrawable cbGet, @NonNull SetDrawable cbSet) {
+        new Utilities.AsyncViewSet(image) {
+            @Override
+            protected Drawable getDrawable(Context context) {
+                return cbGet.getDrawable(context);
+            }
+
+            @Override
+            protected void setDrawable(@NonNull View view, @NonNull Drawable drawable) {
+                cbSet.setDrawable(view, drawable);
             }
         }.executeOnExecutor(ResultViewHelper.EXECUTOR_LOAD_ICON);
     }
@@ -338,30 +353,62 @@ public class Utilities {
         return null;
     }
 
+    public static String getSystemProperty(String property, String defaultValue) {
+        try {
+            @SuppressWarnings("rawtypes") @SuppressLint("PrivateApi")
+            Class clazz = Class.forName("android.os.SystemProperties");
+            @SuppressWarnings("unchecked")
+            Method getter = clazz.getDeclaredMethod("get", String.class);
+            String value = (String) getter.invoke(null, property);
+            if (value != null && !value.isEmpty()) {
+                return value;
+            }
+        } catch (Exception ignored) {
+        }
+        return defaultValue;
+    }
+
+    /**
+     * @param resName
+     * @param c
+     * @return
+     */
+    public static int getResId(String resName, Class<?> c) {
+        try {
+            Field idField = c.getDeclaredField(resName);
+            return idField.getInt(idField);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return -1;
+        }
+    }
 
     public interface GetDrawable {
         @Nullable
         Drawable getDrawable(@NonNull Context context);
     }
 
-    public static abstract class AsyncSetDrawable extends AsyncTask<Void, Void, Drawable> {
-        protected final WeakReference<ImageView> weakImage;
+    public interface SetDrawable {
+        void setDrawable(@NonNull View view, @NonNull Drawable drawable);
+    }
 
-        protected AsyncSetDrawable(@NonNull ImageView image) {
+    public static abstract class AsyncViewSet extends AsyncTask<Void, Void, Drawable> {
+        protected final WeakReference<View> weakView;
+
+        protected AsyncViewSet(View view) {
             super();
-            if (image.getTag() instanceof ResultViewHelper.AsyncSetEntryDrawable)
-                ((ResultViewHelper.AsyncSetEntryDrawable) image.getTag()).cancel(true);
-            image.setTag(this);
-            image.setImageResource(android.R.color.transparent);
-            this.weakImage = new WeakReference<>(image);
+            this.weakView = new WeakReference<>(view);
+            if (view.getTag() instanceof AsyncViewSet)
+                ((AsyncViewSet) view.getTag()).cancel(true);
+            view.setTag(this);
         }
 
         @Override
         protected Drawable doInBackground(Void... voids) {
-            ImageView image = weakImage.get();
+            View image = weakView.get();
             Activity act = Utilities.getActivity(image);
             if (isCancelled() || act == null || image.getTag() != this) {
-                weakImage.clear();
+                weakView.clear();
                 return null;
             }
 
@@ -372,16 +419,31 @@ public class Utilities {
         @WorkerThread
         protected abstract Drawable getDrawable(Context context);
 
+        @UiThread
+        protected abstract void setDrawable(@NonNull View view, @NonNull Drawable drawable);
+
         @Override
         protected void onPostExecute(Drawable drawable) {
-            ImageView image = weakImage.get();
-            Activity act = Utilities.getActivity(image);
+            View view = weakView.get();
+            Activity act = Utilities.getActivity(view);
             if (act == null || drawable == null) {
-                weakImage.clear();
+                weakView.clear();
                 return;
             }
-            image.setImageDrawable(drawable);
-            image.setTag(null);
+            setDrawable(view, drawable);
+            view.setTag(null);
+        }
+    }
+
+    public static abstract class AsyncSetDrawable extends AsyncViewSet {
+        protected AsyncSetDrawable(@NonNull ImageView image) {
+            super(image);
+            image.setImageResource(android.R.color.transparent);
+        }
+
+        @Override
+        protected void setDrawable(@NonNull View image, @NonNull Drawable drawable) {
+            ((ImageView) image).setImageDrawable(drawable);
         }
     }
 

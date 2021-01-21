@@ -1,12 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    style="@style/ListPopupItem"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
-    android:paddingVertical="@dimen/widget_preview_padding_vertical"
-    android:paddingStart="?android:attr/listPreferredItemPaddingStart"
-    android:paddingEnd="?android:attr/listPreferredItemPaddingEnd"
-    android:theme="@style/ListPopupItem">
+    android:paddingVertical="@dimen/widget_preview_padding_vertical">
 
     <ImageView
         android:id="@android:id/icon"
@@ -20,9 +18,9 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:paddingStart="?android:attr/listPreferredItemPaddingStart"
-        android:minLines="1"
         android:maxLines="3"
+        android:minLines="1"
+        android:paddingStart="?android:attr/listPreferredItemPaddingStart"
         tools:ignore="RtlSymmetry"
         tools:text="Placeholder \n Widget \n name" />
 </LinearLayout>
