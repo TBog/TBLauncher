@@ -369,8 +369,8 @@ public final class UIColors {
         int contrast = CACHED_CONTRAST_BRIGHTNESS_ICON.first;
         int brightness = CACHED_CONTRAST_BRIGHTNESS_ICON.second;
         ColorMatrix cm = new ColorMatrix();
-        ColorFilterGenerator.adjustContrast(cm, contrast);
-        ColorFilterGenerator.adjustBrightness(cm, brightness);
+        ColorFilterHelper.adjustContrast(cm, contrast);
+        ColorFilterHelper.adjustBrightness(cm, brightness);
 
         return new ColorMatrixColorFilter(cm);
     }

@@ -8,7 +8,7 @@ import android.graphics.ColorMatrixColorFilter;
  * http://groups.google.com/group/android-developers/browse_thread/thread/9e215c83c3819953
  * http://gskinner.com/blog/archives/2007/12/colormatrix_cla.html
  */
-public class ColorFilterGenerator {
+public class ColorFilterHelper {
 
     private static final float[] DELTA_INDEX = {
             0f, 0.01f, 0.02f, 0.04f, 0.05f, 0.06f, 0.07f, 0.08f, 0.1f, 0.11f,
@@ -28,8 +28,8 @@ public class ColorFilterGenerator {
      * @param cm     color matrix to alter
      * @param amount of hue
      */
-    public static void adjustHue(ColorMatrix cm, float amount) {
-        float value = clampValue(amount, 180f);
+    public static void adjustHue(ColorMatrix cm, int amount) {
+        float value = clampValue(amount, 180);
         value = value / 180f * (float) Math.PI;
         if (value == 0f) {
             return;
@@ -50,13 +50,13 @@ public class ColorFilterGenerator {
         cm.postConcat(new ColorMatrix(mat));
     }
 
-    public static void adjustBrightness(ColorMatrix cm, float amount) {
-        float value = clampValue(amount, 100f);
-        if (value == 0f) {
+    public static void adjustBrightness(ColorMatrix cm, int amount) {
+        int value = clampValue(amount, 100);
+        if (value == 0) {
             return;
         }
         // convert from -100..100 to -255..255
-        value *= 2.55f;
+        value = value * 255 / 100;
         float[] mat = new float[]
                 {
                         1, 0, 0, 0, value,
@@ -68,21 +68,13 @@ public class ColorFilterGenerator {
         cm.postConcat(new ColorMatrix(mat));
     }
 
-    public static void adjustContrast(ColorMatrix cm, float amount) {
-        float value = clampValue(amount, 100f);
+    public static void adjustContrast(ColorMatrix cm, int amount) {
+        int value = clampValue(amount, 100);
         float x;
-        if (value < 0f) {
+        if (value < 0) {
             x = 127.5f + value / 100f * 127.5f;
         } else {
-            int idx = (int) (.5f + value);
-            if (idx == 0) {
-                x = DELTA_INDEX[idx] * (1f - value) + DELTA_INDEX[idx + 1] * value;
-            } else {
-                float p = value - idx;
-                // use linear interpolation for more granularity.
-                x = DELTA_INDEX[idx - 1] * p + DELTA_INDEX[idx] * (1f - p);
-            }
-            x = 127.5f + x * 127.5f;
+            x = 127.5f + DELTA_INDEX[value] * 127.5f;
         }
 
         float c = x / 127.5f;
@@ -97,13 +89,13 @@ public class ColorFilterGenerator {
         cm.postConcat(new ColorMatrix(mat));
     }
 
-    public static void adjustSaturation(ColorMatrix cm, float amount) {
-        float value = clampValue(amount, 100f);
+    public static void adjustSaturation(ColorMatrix cm, int amount) {
+        int value = clampValue(amount, 100);
         if (value == 0f) {
             return;
         }
 
-        float x = 1 + ((value > 0) ? 3 * value / 100 : value / 100);
+        float x = 1 + ((value > 0) ? 3f * value / 100f : value / 100f);
         float lumR = 0.3086f;
         float lumG = 0.6094f;
         float lumB = 0.0820f;
@@ -120,7 +112,7 @@ public class ColorFilterGenerator {
     }
 
     // make sure values are within the specified range, hue has a limit of 180, others are 100:
-    private static float clampValue(float val, float limit) {
+    private static int clampValue(int val, int limit) {
         return Math.min(limit, Math.max(-limit, val));
     }
 
