@@ -12,6 +12,7 @@ import android.content.pm.LauncherActivityInfo;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
+import android.graphics.ColorFilter;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -151,6 +152,8 @@ public final class AppEntry extends EntryWithTags {
     }
 
     private void displayGridResult(@NonNull View view, int drawFlags) {
+        final Context context = view.getContext();
+
         TextView nameView = view.findViewById(android.R.id.text1);
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_NAME))
             ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, nameView);
@@ -162,10 +165,14 @@ public final class AppEntry extends EntryWithTags {
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
             appIcon.setVisibility(View.VISIBLE);
             ResultViewHelper.setIconAsync(drawFlags, this, appIcon, AsyncSetEntryIcon.class);
+
+            ColorFilter colorFilter = ResultViewHelper.getColorFilter(context, drawFlags);
+            appIcon.setColorFilter(colorFilter);
             if (bottomRightIcon != null) {
                 if (isHiddenByUser()) {
                     bottomRightIcon.setVisibility(View.VISIBLE);
                     bottomRightIcon.setImageResource(R.drawable.ic_eye_crossed);
+                    bottomRightIcon.setColorFilter(colorFilter);
                 } else {
                     bottomRightIcon.setVisibility(View.GONE);
                 }
@@ -202,7 +209,11 @@ public final class AppEntry extends EntryWithTags {
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
             appIcon.setVisibility(View.VISIBLE);
             ResultViewHelper.setIconAsync(drawFlags, this, appIcon, AsyncSetEntryIcon.class);
+
+            ColorFilter colorFilter = ResultViewHelper.getColorFilter(context, drawFlags);
+            appIcon.setColorFilter(colorFilter);
             if (isHiddenByUser()) {
+                bottomRightIcon.setColorFilter(colorFilter);
                 bottomRightIcon.setVisibility(View.VISIBLE);
                 bottomRightIcon.setImageResource(R.drawable.ic_eye_crossed);
             } else {

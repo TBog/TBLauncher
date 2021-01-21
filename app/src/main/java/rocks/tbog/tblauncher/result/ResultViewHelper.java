@@ -2,6 +2,7 @@ package rocks.tbog.tblauncher.result;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.ColorFilter;
 import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.text.Spannable;
@@ -166,6 +167,15 @@ public final class ResultViewHelper {
 
         tagsView.setTextColor(UIColors.getResultText2Color(ctx));
         tagsView.setTextSize(TypedValue.COMPLEX_UNIT_PX, UISizes.getResultText2Size(ctx));
+    }
+
+    public static ColorFilter getColorFilter(@NonNull Context context, int drawFlags) {
+        final ColorFilter colorFilter;
+        if (Utilities.checkFlag(drawFlags, EntryItem.FLAG_DRAW_QUICK_LIST))
+            colorFilter = UIColors.colorFilterQuickIcon(context);
+        else
+            colorFilter = UIColors.colorFilter(context);
+        return colorFilter;
     }
 
     public static abstract class AsyncSetEntryDrawable extends AsyncTask<Void, Void, Drawable> {

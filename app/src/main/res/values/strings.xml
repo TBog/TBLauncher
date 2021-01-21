@@ -338,6 +338,8 @@
     <string name="settings_dark">Dark</string>
     <string name="settings_deep_blues">DeepBlues</string>
     <string name="title_static_rename">Choose a custom name</string>
+    <string name="icon_contrast">Contrast</string>
+    <string name="icon_brightness">Brightness</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>

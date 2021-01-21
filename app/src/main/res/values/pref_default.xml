@@ -6,6 +6,8 @@
     <integer name="default_result_list_opacity" translatable="false">193</integer>      <!-- 75% -->
     <integer name="default_quick_list_opacity" translatable="false">193</integer>       <!-- 75% -->
     <integer name="default_icon_background" translatable="false">0xffffff</integer>     <!-- white -->
+    <integer name="default_icon_contrast" translatable="false">0</integer>
+    <integer name="default_icon_brightness" translatable="false">0</integer>
     <integer name="default_popup_background" translatable="false">0x8f000000</integer>
     <integer name="default_color" translatable="false">0x3caf50</integer>
     <integer name="default_color_highlight" translatable="false">0xADFF2F</integer>

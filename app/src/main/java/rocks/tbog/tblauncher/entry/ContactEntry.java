@@ -3,6 +3,7 @@ package rocks.tbog.tblauncher.entry;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.graphics.ColorFilter;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -110,20 +111,22 @@ public final class ContactEntry extends EntryItem {
     }
 
     private void displayGridResult(@NonNull View view, int drawFlags) {
+        final Context context = view.getContext();
         // Contact name
         TextView nameView = view.findViewById(android.R.id.text1);
-        nameView.setTextColor(UIColors.getResultTextColor(view.getContext()));
+        nameView.setTextColor(UIColors.getResultTextColor(context));
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_NAME))
             ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, nameView);
         else
             nameView.setVisibility(View.GONE);
-
 
         // Contact photo
         ImageView contactIcon = view.findViewById(android.R.id.icon);
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
             contactIcon.setVisibility(View.VISIBLE);
             ResultViewHelper.setIconAsync(drawFlags, this, contactIcon, AsyncSetEntryIcon.class);
+            ColorFilter colorFilter = ResultViewHelper.getColorFilter(context, drawFlags);
+            contactIcon.setColorFilter(colorFilter);
         } else {
             contactIcon.setImageDrawable(null);
             contactIcon.setVisibility(View.GONE);
@@ -133,7 +136,7 @@ public final class ContactEntry extends EntryItem {
     }
 
     private void displayListResult(@NonNull View view, int drawFlags) {
-        Context context = view.getContext();
+        final Context context = view.getContext();
         // Contact name
         TextView contactName = view.findViewById(R.id.item_contact_name);
         contactName.setTextColor(UIColors.getResultTextColor(context));
@@ -159,6 +162,8 @@ public final class ContactEntry extends EntryItem {
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
             contactIcon.setVisibility(View.VISIBLE);
             ResultViewHelper.setIconAsync(drawFlags, this, contactIcon, AsyncSetEntryIcon.class);
+            ColorFilter colorFilter = ResultViewHelper.getColorFilter(context, drawFlags);
+            contactIcon.setColorFilter(colorFilter);
         } else {
             contactIcon.setImageDrawable(null);
             contactIcon.setVisibility(View.GONE);

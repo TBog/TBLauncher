@@ -426,6 +426,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "result-history-size":
                     case "result-history-adaptive":
                     case "result-search-cap":
+                    case "icon-contrast":
+                    case "icon-brightness":
                         dialogFragment = SliderDialog.newInstance(key);
                         break;
                     case "reset-preferences":
@@ -571,6 +573,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case "popup-ripple-color":
             case "popup-text-color":
             case "popup-title-color":
+            case "icon-contrast":
+            case "icon-brightness":
                 UIColors.resetCache();
                 break;
             case "result-text-size":

@@ -32,6 +32,20 @@
             android:title="@string/icon_background"
             android:widgetLayout="@layout/pref_color_preview" />
 
+        <rocks.tbog.tblauncher.preference.CustomDialogPreference
+            android:defaultValue="@integer/default_icon_contrast"
+            android:dialogLayout="@layout/pref_slider"
+            android:key="icon-contrast"
+            android:title="@string/icon_contrast"
+            android:widgetLayout="@layout/pref_alpha_preview" />
+
+        <rocks.tbog.tblauncher.preference.CustomDialogPreference
+            android:defaultValue="@integer/default_icon_brightness"
+            android:dialogLayout="@layout/pref_slider"
+            android:key="icon-brightness"
+            android:title="@string/icon_brightness"
+            android:widgetLayout="@layout/pref_alpha_preview" />
+
         <SwitchPreference
             android:defaultValue="true"
             android:disableDependentsState="true"

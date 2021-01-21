@@ -4,10 +4,14 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.ColorFilter;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.os.Build;
+import android.util.Pair;
 import android.util.TypedValue;
 import android.view.Window;
 import android.view.WindowManager;
@@ -15,6 +19,7 @@ import android.view.WindowManager;
 import androidx.annotation.AttrRes;
 import androidx.annotation.ColorInt;
 import androidx.annotation.FloatRange;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.ColorUtils;
@@ -39,6 +44,7 @@ public final class UIColors {
     private static int CACHED_RIPPLE_POPUP = 0;
     private static int CACHED_COLOR_POPUP_TEXT = 0;
     private static int CACHED_COLOR_POPUP_TITLE = 0;
+    private static Pair<Integer, Integer> CACHED_CONTRAST_BRIGHTNESS_ICON = null;
 
     private UIColors() {
     }
@@ -61,6 +67,7 @@ public final class UIColors {
         CACHED_RIPPLE_POPUP = 0;
         CACHED_COLOR_POPUP_TEXT = 0;
         CACHED_COLOR_POPUP_TITLE = 0;
+        CACHED_CONTRAST_BRIGHTNESS_ICON = null;
     }
 
     public static int getDefaultColor(Context context) {
@@ -346,5 +353,25 @@ public final class UIColors {
         drawable.setColor(color);
 
         return drawable;
+    }
+
+    public static ColorFilter colorFilterQuickIcon(@NonNull Context context) {
+        return colorFilter(context);
+    }
+
+    public static ColorFilter colorFilter(@NonNull Context context) {
+        if (CACHED_CONTRAST_BRIGHTNESS_ICON == null) {
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+            int contrast = pref.getInt("icon-contrast", 0);
+            int brightness = pref.getInt("icon-brightness", 0);
+            CACHED_CONTRAST_BRIGHTNESS_ICON = new Pair<>(contrast, brightness);
+        }
+        int contrast = CACHED_CONTRAST_BRIGHTNESS_ICON.first;
+        int brightness = CACHED_CONTRAST_BRIGHTNESS_ICON.second;
+        ColorMatrix cm = new ColorMatrix();
+        ColorFilterGenerator.adjustContrast(cm, contrast);
+        ColorFilterGenerator.adjustBrightness(cm, brightness);
+
+        return new ColorMatrixColorFilter(cm);
     }
 }
