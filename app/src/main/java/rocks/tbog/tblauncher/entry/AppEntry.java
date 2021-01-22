@@ -152,8 +152,6 @@ public final class AppEntry extends EntryWithTags {
     }
 
     private void displayGridResult(@NonNull View view, int drawFlags) {
-        final Context context = view.getContext();
-
         TextView nameView = view.findViewById(android.R.id.text1);
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_NAME))
             ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, nameView);
@@ -163,11 +161,10 @@ public final class AppEntry extends EntryWithTags {
         ImageView appIcon = view.findViewById(android.R.id.icon);
         ImageView bottomRightIcon = view.findViewById(android.R.id.icon2);
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
+            ColorFilter colorFilter = ResultViewHelper.setIconColorFilter(appIcon, drawFlags);
             appIcon.setVisibility(View.VISIBLE);
             ResultViewHelper.setIconAsync(drawFlags, this, appIcon, AsyncSetEntryIcon.class);
 
-            ColorFilter colorFilter = ResultViewHelper.getColorFilter(context, drawFlags);
-            appIcon.setColorFilter(colorFilter);
             if (bottomRightIcon != null) {
                 if (isHiddenByUser()) {
                     bottomRightIcon.setVisibility(View.VISIBLE);
@@ -207,11 +204,10 @@ public final class AppEntry extends EntryWithTags {
         ImageView appIcon = view.findViewById(android.R.id.icon);
         ImageView bottomRightIcon = view.findViewById(android.R.id.icon2);
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
+            ColorFilter colorFilter = ResultViewHelper.setIconColorFilter(appIcon, drawFlags);
             appIcon.setVisibility(View.VISIBLE);
             ResultViewHelper.setIconAsync(drawFlags, this, appIcon, AsyncSetEntryIcon.class);
 
-            ColorFilter colorFilter = ResultViewHelper.getColorFilter(context, drawFlags);
-            appIcon.setColorFilter(colorFilter);
             if (isHiddenByUser()) {
                 bottomRightIcon.setColorFilter(colorFilter);
                 bottomRightIcon.setVisibility(View.VISIBLE);

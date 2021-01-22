@@ -169,12 +169,18 @@ public final class ResultViewHelper {
         tagsView.setTextSize(TypedValue.COMPLEX_UNIT_PX, UISizes.getResultText2Size(ctx));
     }
 
-    public static ColorFilter getColorFilter(@NonNull Context context, int drawFlags) {
+    private static ColorFilter getColorFilter(@NonNull Context context, int drawFlags) {
         final ColorFilter colorFilter;
         if (Utilities.checkFlag(drawFlags, EntryItem.FLAG_DRAW_QUICK_LIST))
             colorFilter = UIColors.colorFilterQuickIcon(context);
         else
             colorFilter = UIColors.colorFilter(context);
+        return colorFilter;
+    }
+
+    public static ColorFilter setIconColorFilter(@NonNull ImageView appIcon, int drawFlags) {
+        ColorFilter colorFilter = getColorFilter(appIcon.getContext(), drawFlags);
+        appIcon.setColorFilter(colorFilter);
         return colorFilter;
     }
 

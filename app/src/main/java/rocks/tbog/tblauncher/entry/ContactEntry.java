@@ -3,7 +3,6 @@ package rocks.tbog.tblauncher.entry;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.ColorFilter;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -123,10 +122,9 @@ public final class ContactEntry extends EntryItem {
         // Contact photo
         ImageView contactIcon = view.findViewById(android.R.id.icon);
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
+            ResultViewHelper.setIconColorFilter(contactIcon, drawFlags);
             contactIcon.setVisibility(View.VISIBLE);
             ResultViewHelper.setIconAsync(drawFlags, this, contactIcon, AsyncSetEntryIcon.class);
-            ColorFilter colorFilter = ResultViewHelper.getColorFilter(context, drawFlags);
-            contactIcon.setColorFilter(colorFilter);
         } else {
             contactIcon.setImageDrawable(null);
             contactIcon.setVisibility(View.GONE);
@@ -160,10 +158,9 @@ public final class ContactEntry extends EntryItem {
         ImageView contactIcon = view.findViewById(android.R.id.icon);
 
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
+            ResultViewHelper.setIconColorFilter(contactIcon, drawFlags);
             contactIcon.setVisibility(View.VISIBLE);
             ResultViewHelper.setIconAsync(drawFlags, this, contactIcon, AsyncSetEntryIcon.class);
-            ColorFilter colorFilter = ResultViewHelper.getColorFilter(context, drawFlags);
-            contactIcon.setColorFilter(colorFilter);
         } else {
             contactIcon.setImageDrawable(null);
             contactIcon.setVisibility(View.GONE);

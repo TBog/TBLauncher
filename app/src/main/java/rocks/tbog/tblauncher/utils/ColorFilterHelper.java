@@ -7,6 +7,7 @@ import android.graphics.ColorMatrixColorFilter;
 /**
  * http://groups.google.com/group/android-developers/browse_thread/thread/9e215c83c3819953
  * http://gskinner.com/blog/archives/2007/12/colormatrix_cla.html
+ * https://medium.com/mobile-app-development-publication/android-image-color-change-with-colormatrix-e927d7fb6eb4
  */
 public class ColorFilterHelper {
 
@@ -30,23 +31,22 @@ public class ColorFilterHelper {
      */
     public static void adjustHue(ColorMatrix cm, int amount) {
         float value = clampValue(amount, 180);
-        value = value / 180f * (float) Math.PI;
         if (value == 0f) {
             return;
         }
 
-        float cosVal = (float) Math.cos(value);
-        float sinVal = (float) Math.sin(value);
-        float lumR = 0.213f;
-        float lumG = 0.715f;
-        float lumB = 0.072f;
-        float[] mat = new float[]
-                {
-                        lumR + cosVal * (1 - lumR) + sinVal * (-lumR), lumG + cosVal * (-lumG) + sinVal * (-lumG), lumB + cosVal * (-lumB) + sinVal * (1 - lumB), 0, 0,
-                        lumR + cosVal * (-lumR) + sinVal * (0.143f), lumG + cosVal * (1 - lumG) + sinVal * (0.140f), lumB + cosVal * (-lumB) + sinVal * (-0.283f), 0, 0,
-                        lumR + cosVal * (-lumR) + sinVal * (-(1 - lumR)), lumG + cosVal * (-lumG) + sinVal * (lumG), lumB + cosVal * (1 - lumB) + sinVal * (lumB), 0, 0,
-                        0f, 0f, 0f, 1f, 0f,
-                        0f, 0f, 0f, 0f, 1f};
+        double rad = Math.toRadians(value);
+        float cosVal = (float) Math.cos(rad);
+        float sinVal = (float) Math.sin(rad);
+        float R = 0.2125f;
+        float G = 0.7154f;
+        float B = 0.0721f;
+        float[] mat = new float[]{
+                R + cosVal * (1 - R) + sinVal * (-R), G + cosVal * (-G) + sinVal * (-G), B + cosVal * (-B) + sinVal * (1 - B), 0, 0,
+                R + cosVal * (-R) + sinVal * (0.143f), G + cosVal * (1 - G) + sinVal * (0.140f), B + cosVal * (-B) + sinVal * (-0.283f), 0, 0,
+                R + cosVal * (-R) + sinVal * (-(1 - R)), G + cosVal * (-G) + sinVal * (G), B + cosVal * (1 - B) + sinVal * (B), 0, 0,
+                0f, 0f, 0f, 1f, 0f,
+                0f, 0f, 0f, 0f, 1f};
         cm.postConcat(new ColorMatrix(mat));
     }
 
@@ -57,14 +57,13 @@ public class ColorFilterHelper {
         }
         // convert from -100..100 to -255..255
         value = value * 255 / 100;
-        float[] mat = new float[]
-                {
-                        1, 0, 0, 0, value,
-                        0, 1, 0, 0, value,
-                        0, 0, 1, 0, value,
-                        0, 0, 0, 1, 0,
-                        0, 0, 0, 0, 1
-                };
+        float[] mat = new float[]{
+                1, 0, 0, 0, value,
+                0, 1, 0, 0, value,
+                0, 0, 1, 0, value,
+                0, 0, 0, 1, 0,
+                0, 0, 0, 0, 1
+        };
         cm.postConcat(new ColorMatrix(mat));
     }
 
@@ -91,24 +90,43 @@ public class ColorFilterHelper {
 
     public static void adjustSaturation(ColorMatrix cm, int amount) {
         int value = clampValue(amount, 100);
-        if (value == 0f) {
+        if (value == 0) {
             return;
         }
 
-        float x = 1 + ((value > 0) ? 3f * value / 100f : value / 100f);
-        float lumR = 0.3086f;
-        float lumG = 0.6094f;
-        float lumB = 0.0820f;
-
-        float[] mat = new float[]
-                {
-                        lumR * (1 - x) + x, lumG * (1 - x), lumB * (1 - x), 0, 0,
-                        lumR * (1 - x), lumG * (1 - x) + x, lumB * (1 - x), 0, 0,
-                        lumR * (1 - x), lumG * (1 - x), lumB * (1 - x) + x, 0, 0,
-                        0, 0, 0, 1, 0,
-                        0, 0, 0, 0, 1
-                };
+        final float x = 1f + ((value > 0) ? 3f * value / 100f : value / 100f);
+        final float inv = 1f - x;
+        final float R = 0.3086f * inv;
+        final float G = 0.6094f * inv;
+        final float B = 0.0820f * inv;
+        float[] mat = new float[]{
+                R + x, G, B, 0, 0,
+                R, G + x, B, 0, 0,
+                R, G, B + x, 0, 0,
+                0, 0, 0, 1, 0,
+                0, 0, 0, 0, 1
+        };
         cm.postConcat(new ColorMatrix(mat));
+    }
+
+    public static void adjustScale(ColorMatrix cm, int r, int g, int b, int a) {
+        final float R = getChannelScale(r);
+        final float G = getChannelScale(g);
+        final float B = getChannelScale(b);
+        final float A = getChannelScale(a);
+        float[] mat = new float[]{
+                R, 0, 0, 0, -255f * (R - 1f) * .5f,
+                0, G, 0, 0, -255f * (G - 1f) * .5f,
+                0, 0, B, 0, -255f * (B - 1f) * .5f,
+                0, 0, 0, A, -255f * (A - 1f) * .5f,
+                0, 0, 0, 0, 1
+        };
+        cm.postConcat(new ColorMatrix(mat));
+    }
+
+    private static float getChannelScale(int scale) {
+        float s = clampValue(scale, 200);
+        return s / 100f + 1f;
     }
 
     // make sure values are within the specified range, hue has a limit of 180, others are 100:

@@ -74,8 +74,20 @@ public class SliderDialog extends BasePreferenceDialog {
                 mSliderOffset = 1;
                 seekBar.setMax(1000 - mSliderOffset);
                 break;
+            case "icon-hue":
+                mSliderOffset = -180;
+                seekBar.setMax(180 - mSliderOffset);
+                break;
+            case "icon-scale-red":
+            case "icon-scale-green":
+            case "icon-scale-blue":
+            case "icon-scale-alpha":
+                mSliderOffset = -200;
+                seekBar.setMax(200 - mSliderOffset);
+                break;
             case "icon-contrast":
             case "icon-brightness":
+            case "icon-saturation":
                 mSliderOffset = -100;
                 seekBar.setMax(100 - mSliderOffset);
                 break;

@@ -426,10 +426,17 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "result-history-size":
                     case "result-history-adaptive":
                     case "result-search-cap":
+                    case "icon-scale-red":
+                    case "icon-scale-green":
+                    case "icon-scale-blue":
+                    case "icon-scale-alpha":
+                    case "icon-hue":
                     case "icon-contrast":
                     case "icon-brightness":
+                    case "icon-saturation":
                         dialogFragment = SliderDialog.newInstance(key);
                         break;
+                    case "reset-matrix":
                     case "reset-preferences":
                     case "exit-app":
                     case "reset-default-launcher":
@@ -548,6 +555,14 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     }
                 }
                 break;
+            case "icon-scale-red":
+            case "icon-scale-green":
+            case "icon-scale-blue":
+            case "icon-scale-alpha":
+            case "icon-hue":
+            case "icon-contrast":
+            case "icon-brightness":
+            case "icon-saturation":
             case "icon-background-argb":
                 TBApplication.drawableCache(context).clearCache();
                 // fallthrough
@@ -573,8 +588,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case "popup-ripple-color":
             case "popup-text-color":
             case "popup-title-color":
-            case "icon-contrast":
-            case "icon-brightness":
                 UIColors.resetCache();
                 break;
             case "result-text-size":

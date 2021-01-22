@@ -91,13 +91,15 @@ public class CustomDialogPreference extends androidx.preference.DialogPreference
         final String key = getKey();
         Object value = getSharedPreferences().getAll().get(key);
 
-        if ("icon-contrast".equals(key) || "icon-brightness".equals(key)) {
-            View view = holder.findViewById(R.id.prefAlphaPreview);
+        {
+            View view = holder.findViewById(R.id.prefAmountPreview);
             if (view instanceof TextView) {
                 String text = null;
                 if (value instanceof Integer) {
                     Integer amount = ((Integer) value);
-                    text = amount > 0 ? ("+" + amount + "%") : (amount + "%");
+                    text = amount > 0 ? ("+" + amount) : amount.toString();
+                    if (key.contains("-scale"))
+                        text += "%";
                 }
                 ((TextView) view).setText(text);
                 return;
@@ -138,7 +140,6 @@ public class CustomDialogPreference extends androidx.preference.DialogPreference
                 else if (value instanceof Integer)
                     size = (int) value;
                 ((TextView) view).setText(view.getResources().getString(R.string.size, size));
-                return;
             }
         }
     }
