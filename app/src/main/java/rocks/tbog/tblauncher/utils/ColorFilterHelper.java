@@ -25,16 +25,10 @@ public class ColorFilterHelper {
             10.f
     };
 
-    /**
-     * @param cm     color matrix to alter
-     * @param amount of hue
-     */
-    public static void adjustHue(ColorMatrix cm, int amount) {
-        float value = clampValue(amount, 180);
-        if (value == 0f) {
-            return;
-        }
-
+    public static boolean adjustHue(ColorMatrix cm, int amount) {
+        if (amount == 0)
+            return false;
+        int value = clampValue(amount, 180);
         double rad = Math.toRadians(value);
         float cosVal = (float) Math.cos(rad);
         float sinVal = (float) Math.sin(rad);
@@ -48,13 +42,14 @@ public class ColorFilterHelper {
                 0f, 0f, 0f, 1f, 0f,
                 0f, 0f, 0f, 0f, 1f};
         cm.postConcat(new ColorMatrix(mat));
+        return true;
     }
 
-    public static void adjustBrightness(ColorMatrix cm, int amount) {
+    public static boolean adjustBrightness(ColorMatrix cm, int amount) {
+        if (amount == 0)
+            return false;
         int value = clampValue(amount, 100);
-        if (value == 0) {
-            return;
-        }
+
         // convert from -100..100 to -255..255
         value = value * 255 / 100;
         float[] mat = new float[]{
@@ -65,9 +60,12 @@ public class ColorFilterHelper {
                 0, 0, 0, 0, 1
         };
         cm.postConcat(new ColorMatrix(mat));
+        return true;
     }
 
-    public static void adjustContrast(ColorMatrix cm, int amount) {
+    public static boolean adjustContrast(ColorMatrix cm, int amount) {
+        if (amount == 0)
+            return false;
         int value = clampValue(amount, 100);
         float x;
         if (value < 0) {
@@ -86,14 +84,13 @@ public class ColorFilterHelper {
                 0, 0, 0, 0, 1
         };
         cm.postConcat(new ColorMatrix(mat));
+        return true;
     }
 
-    public static void adjustSaturation(ColorMatrix cm, int amount) {
+    public static boolean adjustSaturation(ColorMatrix cm, int amount) {
+        if (amount == 0)
+            return false;
         int value = clampValue(amount, 100);
-        if (value == 0) {
-            return;
-        }
-
         final float x = 1f + ((value > 0) ? 3f * value / 100f : value / 100f);
         final float inv = 1f - x;
         final float R = 0.3086f * inv;
@@ -107,9 +104,12 @@ public class ColorFilterHelper {
                 0, 0, 0, 0, 1
         };
         cm.postConcat(new ColorMatrix(mat));
+        return true;
     }
 
-    public static void adjustScale(ColorMatrix cm, int r, int g, int b, int a) {
+    public static boolean adjustScale(ColorMatrix cm, int r, int g, int b, int a) {
+        if (r == 0 && g == 0 && b == 0 && a == 0)
+            return false;
         final float R = getChannelScale(r);
         final float G = getChannelScale(g);
         final float B = getChannelScale(b);
@@ -122,6 +122,7 @@ public class ColorFilterHelper {
                 0, 0, 0, 0, 1
         };
         cm.postConcat(new ColorMatrix(mat));
+        return true;
     }
 
     private static float getChannelScale(int scale) {

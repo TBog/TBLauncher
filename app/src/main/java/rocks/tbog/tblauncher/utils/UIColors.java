@@ -19,6 +19,7 @@ import androidx.annotation.AttrRes;
 import androidx.annotation.ColorInt;
 import androidx.annotation.FloatRange;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.ColorUtils;
@@ -46,7 +47,7 @@ public final class UIColors {
     private static int CACHED_COLOR_POPUP_TEXT = 0;
     private static int CACHED_COLOR_POPUP_TITLE = 0;
     private static boolean CACHED_MAT_ICON = false;
-    private static final ColorMatrix CONTRAST_BRIGHTNESS_MAT = new ColorMatrix();
+    private static ColorMatrix COLOR_MATRIX_ICON = null;
 
     private UIColors() {
     }
@@ -361,8 +362,8 @@ public final class UIColors {
         return colorFilter(context);
     }
 
+    @Nullable
     public static ColorFilter colorFilter(@NonNull Context context) {
-        final ColorMatrix cm = CONTRAST_BRIGHTNESS_MAT;
         if (!CACHED_MAT_ICON) {
             SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
             Resources resources = context.getResources();
@@ -374,14 +375,16 @@ public final class UIColors {
             int scaleG = pref.getInt("icon-scale-green", resources.getInteger(R.integer.default_icon_scale));
             int scaleB = pref.getInt("icon-scale-blue", resources.getInteger(R.integer.default_icon_scale));
             int scaleA = pref.getInt("icon-scale-alpha", resources.getInteger(R.integer.default_icon_scale));
-            cm.reset();
-            ColorFilterHelper.adjustScale(cm, scaleR, scaleG, scaleB, scaleA);
-            ColorFilterHelper.adjustHue(cm, hue);
-            ColorFilterHelper.adjustContrast(cm, contrast);
-            ColorFilterHelper.adjustBrightness(cm, brightness);
-            ColorFilterHelper.adjustSaturation(cm, saturation);
+            final ColorMatrix cm = new ColorMatrix();
+            boolean modified;
+            modified = ColorFilterHelper.adjustScale(cm, scaleR, scaleG, scaleB, scaleA);
+            modified = ColorFilterHelper.adjustHue(cm, hue) || modified;
+            modified = ColorFilterHelper.adjustContrast(cm, contrast) || modified;
+            modified = ColorFilterHelper.adjustBrightness(cm, brightness) || modified;
+            modified = ColorFilterHelper.adjustSaturation(cm, saturation) || modified;
             CACHED_MAT_ICON = true;
+            COLOR_MATRIX_ICON = modified ? cm : null;
         }
-        return new ColorMatrixColorFilter(cm);
+        return COLOR_MATRIX_ICON == null ? null : new ColorMatrixColorFilter(COLOR_MATRIX_ICON);
     }
 }
