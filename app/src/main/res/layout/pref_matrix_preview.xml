@@ -3,6 +3,9 @@
     android:id="@+id/grid"
     style="@style/ItemGrid"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:clickable="false"
+    android:focusable="false"
+    android:minHeight="@dimen/icon_size">
 
 </GridView>

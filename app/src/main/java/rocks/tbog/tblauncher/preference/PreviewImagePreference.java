@@ -1,5 +1,6 @@
 package rocks.tbog.tblauncher.preference;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Context;
 import android.util.AttributeSet;
@@ -40,6 +41,7 @@ public class PreviewImagePreference extends androidx.preference.DialogPreference
         super(context);
     }
 
+    @SuppressLint("ClickableViewAccessibility")
     @Override
     public void onBindViewHolder(PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
@@ -48,6 +50,9 @@ public class PreviewImagePreference extends androidx.preference.DialogPreference
         if (!(view instanceof GridView))
             return;
         GridView gridView = (GridView) view;
+        // disable touch
+        gridView.setOnTouchListener((v, event) -> true);
+        Utilities.setVerticalScrollbarThumbDrawable(gridView, null);
         Context ctx = gridView.getContext();
 
         int background = UIColors.getResultListBackground(getSharedPreferences());

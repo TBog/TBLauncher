@@ -42,6 +42,9 @@
                 android:key="reset-matrix"
                 android:title="@string/reset_matrix" />
 
+            <rocks.tbog.tblauncher.preference.PreviewImagePreference
+                android:widgetLayout="@layout/pref_matrix_preview"/>
+
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@integer/default_icon_scale"
                 android:dialogLayout="@layout/pref_slider"
@@ -97,9 +100,6 @@
                 android:key="icon-saturation"
                 android:title="@string/icon_saturation"
                 android:widgetLayout="@layout/pref_amount_preview" />
-
-            <rocks.tbog.tblauncher.preference.PreviewImagePreference
-                android:widgetLayout="@layout/pref_matrix_preview"/>
 
         </PreferenceScreen>
 
