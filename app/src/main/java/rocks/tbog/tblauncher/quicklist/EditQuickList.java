@@ -38,6 +38,8 @@ import rocks.tbog.tblauncher.db.FavRecord;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.entry.TagEntry;
+import rocks.tbog.tblauncher.result.EntryAdapter;
+import rocks.tbog.tblauncher.result.LoadDataForAdapter;
 
 public class EditQuickList {
 

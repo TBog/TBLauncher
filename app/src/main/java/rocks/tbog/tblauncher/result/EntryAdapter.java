@@ -1,4 +1,4 @@
-package rocks.tbog.tblauncher.quicklist;
+package rocks.tbog.tblauncher.result;
 
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,13 +12,19 @@ import java.util.Collection;
 import java.util.List;
 
 import rocks.tbog.tblauncher.entry.EntryItem;
-import rocks.tbog.tblauncher.result.ResultHelper;
 
-class EntryAdapter extends BaseAdapter {
+public class EntryAdapter extends BaseAdapter {
     private final List<EntryItem> mItems;
+    private final int mDrawFlags;
 
-    EntryAdapter(@NonNull List<EntryItem> objects) {
+    public EntryAdapter(@NonNull List<EntryItem> objects) {
         mItems = objects;
+        mDrawFlags = EntryItem.FLAG_DRAW_GRID | EntryItem.FLAG_DRAW_NAME | EntryItem.FLAG_DRAW_ICON | EntryItem.FLAG_DRAW_ICON_BADGE;
+    }
+
+    public EntryAdapter(@NonNull List<EntryItem> objects, int drawFlags) {
+        mItems = objects;
+        mDrawFlags = drawFlags;
     }
 
     public void addAll(Collection<EntryItem> newElements) {
@@ -54,16 +60,15 @@ class EntryAdapter extends BaseAdapter {
     @NonNull
     @Override
     public View getView(int position, @Nullable View convertView, @NonNull ViewGroup parent) {
-        int drawFlags = EntryItem.FLAG_DRAW_GRID | EntryItem.FLAG_DRAW_NAME | EntryItem.FLAG_DRAW_ICON | EntryItem.FLAG_DRAW_ICON_BADGE;
         final View view;
         EntryItem content = getItem(position);
         if (convertView == null) {
-            view = LayoutInflater.from(parent.getContext()).inflate(content.getResultLayout(drawFlags), parent, false);
+            view = LayoutInflater.from(parent.getContext()).inflate(content.getResultLayout(mDrawFlags), parent, false);
         } else {
             view = convertView;
         }
 
-        content.displayResult(view, drawFlags);
+        content.displayResult(view, mDrawFlags);
 
         return view;
     }

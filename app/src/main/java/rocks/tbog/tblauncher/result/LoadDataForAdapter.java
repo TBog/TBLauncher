@@ -1,4 +1,4 @@
-package rocks.tbog.tblauncher.quicklist;
+package rocks.tbog.tblauncher.result;
 
 import android.os.AsyncTask;
 
@@ -6,7 +6,7 @@ import java.util.ArrayList;
 
 import rocks.tbog.tblauncher.entry.EntryItem;
 
-class LoadDataForAdapter extends AsyncTask<Void, Void, ArrayList<EntryItem>> {
+public class LoadDataForAdapter extends AsyncTask<Void, Void, ArrayList<EntryItem>> {
     private final EntryAdapter adapter;
     private final LoadInBackground task;
 

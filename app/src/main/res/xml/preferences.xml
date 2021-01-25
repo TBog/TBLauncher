@@ -98,6 +98,9 @@
                 android:title="@string/icon_saturation"
                 android:widgetLayout="@layout/pref_amount_preview" />
 
+            <rocks.tbog.tblauncher.preference.PreviewImagePreference
+                android:widgetLayout="@layout/pref_matrix_preview"/>
+
         </PreferenceScreen>
 
         <SwitchPreference
