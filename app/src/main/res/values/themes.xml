@@ -106,6 +106,7 @@
         <item name="android:textColor">@color/primary_text_selector_darkbg</item>
         <item name="android:textColorPrimary">@color/primary_text_selector_darkbg</item>
         <item name="android:textColorSecondary">@color/secondary_text_selector_darkbg</item>
+        <item name="android:textColorHint">?android:attr/textColorSecondary</item>
         <item name="android:textColorTertiary">@color/undefined</item>
         <item name="android:listDivider">@drawable/list_separator_light</item>
 
@@ -189,7 +190,6 @@
     <style name="SettingsDialogTheme.White">
         <item name="android:windowBackground">@drawable/dialog_background_light</item>
         <item name="android:textColor">@color/settings_primary_selector_lightbg</item>
-        <item name="android:textColorHint">@color/settings_primary_selector_lightbg</item>
         <item name="android:textColorPrimary">@color/settings_primary_selector_lightbg</item>
         <item name="android:textColorSecondary">@color/settings_secondary_selector_lightbg</item>
         <item name="android:listDivider">@drawable/list_separator_dark</item>
@@ -212,7 +212,6 @@
     <style name="SettingsDialogTheme.Black">
         <item name="android:windowBackground">@drawable/dialog_background_black</item>
         <item name="android:textColor">@color/settings_primary_selector_black</item>
-        <item name="android:textColorHint">@color/settings_primary_selector_black</item>
         <item name="android:textColorPrimary">@color/settings_primary_selector_black</item>
         <item name="android:textColorSecondary">@color/settings_secondary_selector_black</item>
         <item name="android:listDivider">@drawable/list_separator_dark</item>
@@ -235,7 +234,6 @@
     <style name="SettingsDialogTheme.DeepBlues">
         <item name="android:windowBackground">@drawable/dialog_background_deep_blues</item>
         <item name="android:textColor">@color/settings_primary_selector_deep_blues</item>
-        <item name="android:textColorHint">@color/settings_primary_selector_deep_blues</item>
         <item name="android:textColorPrimary">@color/settings_primary_selector_deep_blues</item>
         <item name="android:textColorSecondary">@color/settings_secondary_selector_deep_blues</item>
         <item name="android:listDivider">@drawable/list_separator_deep_blues</item>
@@ -299,6 +297,7 @@
         <item name="alertDialogTheme">@style/SettingsDialogTheme</item>
         <item name="preferenceTheme">@style/PreferenceTheme</item>
         <item name="android:textColor">@color/settings_primary_selector_darkbg</item>
+        <item name="android:textColorHint">?android:attr/textColorSecondary</item>
 
         <item name="tabGravity">center</item>
 
