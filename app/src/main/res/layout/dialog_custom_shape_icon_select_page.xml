@@ -5,8 +5,99 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:paddingHorizontal="@dimen/dialog_padding_horizontal"
-    android:paddingVertical="@dimen/dialog_padding_vertical"
-    tools:theme="@style/NoTitleDialogTheme">
+    android:paddingVertical="@dimen/dialog_padding_vertical">
+
+    <TextView
+        android:id="@+id/backgroundColor"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="1dp"
+        android:background="?attr/selectableItemBackground"
+        android:focusable="true"
+        android:gravity="start|center_vertical"
+        android:text="@string/choose_background_color"
+        android:textAlignment="gravity"
+        tools:drawableEnd="@color/colorPrimary" />
+
+    <TextView
+        android:id="@+id/lettersToggle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackground"
+        android:focusable="true"
+        android:text="@string/letters_toggle"
+        tools:drawableEnd="@android:drawable/arrow_up_float" />
+
+    <LinearLayout
+        android:id="@+id/lettersGroup"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginVertical="1dp"
+        android:background="?android:attr/windowBackground"
+        android:orientation="vertical"
+        android:paddingHorizontal="@dimen/dialog_padding_horizontal"
+        android:paddingVertical="@dimen/dialog_padding_vertical"
+        tools:ignore="RtlSymmetry">
+
+        <EditText
+            android:id="@+id/letters"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autofillHints="application,text"
+            android:textAppearance="?android:attr/textAppearance"
+            android:hint="@string/static_icon_letters_label"
+            android:inputType="textAutoCorrect" />
+
+        <TextView
+            android:id="@+id/lettersColor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="?attr/selectableItemBackground"
+            android:focusable="true"
+            android:gravity="start|center_vertical"
+            android:text="@string/choose_letter_color"
+            android:textAlignment="gravity"
+            android:paddingHorizontal="5dp"
+            tools:drawableEnd="@color/colorPrimary" />
+
+    </LinearLayout>
+
+    <TextView
+        android:id="@+id/scaleBarToggle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackground"
+        android:focusable="true"
+        android:labelFor="@+id/scaleBar"
+        android:text="@string/choose_icon_scale"
+        tools:drawableEnd="@android:drawable/arrow_up_float" />
+
+    <SeekBar
+        android:id="@+id/scaleBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:max="200"
+        android:paddingVertical="10dp"
+        android:progress="100" />
+
+    <TextView
+        android:id="@+id/shapeGridToggle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/selectableItemBackground"
+        android:focusable="true"
+        android:labelFor="@id/shapeGrid"
+        android:text="@string/choose_icon_shape"
+        tools:drawableEnd="@android:drawable/arrow_up_float" />
+
+    <GridView
+        android:id="@+id/shapeGrid"
+        style="@style/ItemGrid"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        tools:itemCount="20"
+        tools:listitem="@layout/item_grid" />
 
     <TextView
         android:layout_width="match_parent"
@@ -22,66 +113,5 @@
         android:layout_weight="1"
         tools:itemCount="10"
         tools:listitem="@layout/item_grid" />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:labelFor="@id/shapeGrid"
-        android:text="@string/choose_icon_shape" />
-
-    <GridView
-        android:id="@+id/shapeGrid"
-        style="@style/ItemGrid"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        tools:itemCount="20"
-        tools:listitem="@layout/item_grid" />
-
-    <EditText
-        android:id="@+id/letters"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:autofillHints="application,text"
-        android:hint="@string/static_icon_letters_label"
-        android:inputType="textAutoCorrect" />
-
-    <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:labelFor="@+id/scaleBar"
-        android:text="@string/choose_icon_scale" />
-
-    <SeekBar
-        android:id="@+id/scaleBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:max="200"
-        android:paddingVertical="10dp"
-        android:progress="100" />
-
-    <TextView
-        android:id="@+id/backgroundColor"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginVertical="1dp"
-        android:background="?android:attr/listChoiceBackgroundIndicator"
-        android:focusable="true"
-        android:gravity="start|center_vertical"
-        android:text="@string/choose_background_color"
-        android:textAlignment="gravity"
-        tools:drawableEnd="@color/colorPrimary" />
-
-    <TextView
-        android:id="@+id/lettersColor"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginVertical="1dp"
-        android:background="?android:attr/listChoiceBackgroundIndicator"
-        android:focusable="true"
-        android:gravity="start|center_vertical"
-        android:text="@string/choose_letter_color"
-        android:textAlignment="gravity"
-        tools:drawableEnd="@color/colorPrimary" />
 
 </LinearLayout>

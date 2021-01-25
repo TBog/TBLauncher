@@ -338,6 +338,7 @@
     <string name="settings_dark">Dark</string>
     <string name="settings_deep_blues">DeepBlues</string>
     <string name="title_static_rename">Choose a custom name</string>
+    <string name="letters_toggle">Letter icons</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>

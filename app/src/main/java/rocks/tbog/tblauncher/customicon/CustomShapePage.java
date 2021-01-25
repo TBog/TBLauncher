@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
@@ -80,6 +81,13 @@ class CustomShapePage extends PageAdapter.Page {
             public void afterTextChanged(Editable s) {
             }
         });
+
+        // shape list toggle
+        setupToggle(R.id.shapeGridToggle, R.id.shapeGrid);
+        // scale bar toggle
+        setupToggle(R.id.scaleBarToggle, R.id.scaleBar);
+        // letters toggle
+        setupToggle(R.id.lettersToggle, R.id.lettersGroup);
 
         // shapes list
         {
@@ -196,6 +204,28 @@ class CustomShapePage extends PageAdapter.Page {
 
         generateShapes(context);
     }
+
+
+    private void setupToggle(@IdRes int toggleTextView, @IdRes int viewToToggle) {
+        TextView textView = pageView.findViewById(toggleTextView);
+        textView.setOnClickListener(v -> {
+            View view = pageView.findViewById(viewToToggle);
+            if ("hide".equals(v.getTag())) {
+                view.setVisibility(View.GONE);
+                ((TextView) v).setCompoundDrawablesWithIntrinsicBounds(0, 0, android.R.drawable.arrow_down_float, 0);
+                v.setTag("show");
+            } else {
+                view.setVisibility(View.VISIBLE);
+                ((TextView) v).setCompoundDrawablesWithIntrinsicBounds(0, 0, android.R.drawable.arrow_up_float, 0);
+                v.setTag("hide");
+            }
+        });
+        if (textView.getTag() == null) {
+            textView.setTag("hide");
+            textView.performClick();
+        }
+    }
+
 
     public void addIcon(@NonNull String name, @NonNull Drawable drawable) {
         Context context = pageView.getContext();
