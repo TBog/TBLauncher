@@ -161,12 +161,13 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
     }
 
     private void setSelectedDrawable(Drawable selected, Drawable preview) {
+        Context context = mViewPager.getContext();
         mSelectedDrawable = selected;
         @StringRes
         int label = mSelectedDrawable == null ? R.string.default_icon_preview_label : R.string.custom_icon_preview_label;
         mPreviewLabel.setText(label);
-        int size = UISizes.getResultIconSize(mPreviewLabel.getContext());
-        Drawable icon = preview.mutate();
+        int size = UISizes.getResultIconSize(context);
+        Drawable icon = preview.getConstantState().newDrawable(context.getResources());
         icon.setBounds(0, 0, size, size);
         mPreviewLabel.setCompoundDrawables(null, null, icon, null);
     }
@@ -203,7 +204,7 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
     }
 
     private ListPopup getIconPackMenu(IconData iconData) {
-        final Context ctx = getContext();
+        final Context ctx = requireContext();
         LinearAdapter adapter = new LinearAdapter();
 
         adapter.add(new LinearAdapter.ItemTitle(iconData.drawableInfo.getDrawableName()));
