@@ -20,6 +20,7 @@ import androidx.preference.PreferenceManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 
 import rocks.tbog.tblauncher.LauncherState;
@@ -29,6 +30,7 @@ import rocks.tbog.tblauncher.TBLauncherActivity;
 import rocks.tbog.tblauncher.dataprovider.IProvider;
 import rocks.tbog.tblauncher.dataprovider.Provider;
 import rocks.tbog.tblauncher.dataprovider.QuickListProvider;
+import rocks.tbog.tblauncher.entry.ActionEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.FilterEntry;
 import rocks.tbog.tblauncher.ui.ListPopup;
@@ -149,14 +151,29 @@ public class QuickList {
                 List<? extends EntryItem> list;
                 list = provider != null ? provider.getPojos() : null;
                 if (list != null) {
-                    // copy list in order to sort it
+                    // copy list in order to change it
                     list = new ArrayList<>(list);
+
+                    // remove actions and filters from the result list
+                    for (Iterator<? extends EntryItem> iterator = list.iterator(); iterator.hasNext(); ) {
+                        EntryItem entry = iterator.next();
+                        if (entry instanceof ActionEntry)
+                            iterator.remove();
+                        if (entry instanceof FilterEntry)
+                            iterator.remove();
+                    }
+
+                    // sort if we have a comparator
                     if (comparator != null) {
                         //TODO: do we need this on another thread?
                         Collections.sort(list, comparator);
                     }
+
+                    // show result list
                     app.behaviour().clearSearch();
                     app.behaviour().updateAdapter(list, false);
+
+                    // update toggle information
                     mLastSelection = actionId;
                     bActionOn = true;
                 }
