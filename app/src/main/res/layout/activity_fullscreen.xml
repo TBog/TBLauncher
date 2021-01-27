@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/root_layout"
     android:layout_width="match_parent"
@@ -17,7 +18,7 @@
         android:contentDescription="@null"
         android:src="@drawable/notification_bar_background" />
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:clipToPadding="false"
@@ -36,10 +37,11 @@
             android:id="@+id/widgetContainer"
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_weight="1"
             android:gravity="center"
             android:orientation="vertical"
             android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@id/quickList"
+            app:layout_constraintTop_toTopOf="parent"
             tools:background="@drawable/popup_background"
             tools:visibility="visible" />
         <!--            <ImageView-->
@@ -53,15 +55,20 @@
         <LinearLayout
             android:id="@+id/quickList"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/bar_height"
+            android:layout_height="@dimen/large_bar_height"
             android:background="@null"
             android:gravity="center"
             android:measureWithLargestChild="true"
-            android:orientation="horizontal" />
+            android:orientation="horizontal"
+            android:visibility="gone"
+            app:layout_constraintBottom_toTopOf="@id/searchBarContainer"
+            tools:background="@drawable/tab_background_light"
+            tools:backgroundTint="@color/colorAccent"
+            tools:visibility="visible" />
 
         <include layout="@layout/search_bar" />
 
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!--    <ImageView-->
     <!--        android:id="@+id/keyboardBackground"-->

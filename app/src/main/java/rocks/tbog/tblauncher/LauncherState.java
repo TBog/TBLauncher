@@ -1,11 +1,19 @@
 package rocks.tbog.tblauncher;
 
+import androidx.annotation.NonNull;
+
 public class LauncherState {
     public enum AnimatedVisibility {
         HIDDEN,
         ANIM_TO_HIDDEN,
         ANIM_TO_VISIBLE,
         VISIBLE,
+    }
+
+    public enum Desktop {
+        DESKTOP_SEARCH,
+        DESKTOP_WIDGET,
+        DESKTOP_EMPTY,
     }
 
     private AnimatedVisibility quickList = AnimatedVisibility.HIDDEN;
@@ -15,6 +23,8 @@ public class LauncherState {
     private AnimatedVisibility widgetScreen = AnimatedVisibility.HIDDEN;
     private AnimatedVisibility clearScreen = AnimatedVisibility.HIDDEN;
     private AnimatedVisibility keyboard = AnimatedVisibility.HIDDEN;
+
+    private Desktop desktop = Desktop.DESKTOP_EMPTY;
 
     private static boolean isVisible(AnimatedVisibility state) {
         return state == AnimatedVisibility.ANIM_TO_VISIBLE ||
@@ -49,27 +59,36 @@ public class LauncherState {
         return isVisible(keyboard);
     }
 
-    public void setNotificationBar(AnimatedVisibility state) {
+    @NonNull
+    public Desktop getDesktop() {
+        return desktop;
+    }
+
+    public void setNotificationBar(@NonNull AnimatedVisibility state) {
         notificationBar = state;
     }
 
-    public void setSearchBar(AnimatedVisibility state) {
+    public void setSearchBar(@NonNull AnimatedVisibility state) {
         searchBar = state;
     }
 
-    public void setResultList(AnimatedVisibility state) {
+    public void setResultList(@NonNull AnimatedVisibility state) {
         resultList = state;
     }
 
-    public void setQuickList(AnimatedVisibility state) {
+    public void setQuickList(@NonNull AnimatedVisibility state) {
         quickList = state;
     }
 
-    public void setWidgetScreen(AnimatedVisibility state) {
+    public void setWidgetScreen(@NonNull AnimatedVisibility state) {
         widgetScreen = state;
     }
 
-    public void setKeyboard(AnimatedVisibility state) {
+    public void setKeyboard(@NonNull AnimatedVisibility state) {
         keyboard = state;
+    }
+
+    public void setDesktop(@NonNull Desktop mode) {
+        desktop = mode;
     }
 }

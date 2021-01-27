@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/resultLayout"
     android:layout_width="match_parent"
@@ -9,8 +10,13 @@
     android:layout_weight="1"
     android:background="?attr/listBackgroundColor"
     android:elevation="2dp"
+    android:visibility="gone"
+    app:layout_constraintBottom_toTopOf="@id/quickList"
+    app:layout_constraintTop_toTopOf="parent"
     tools:ignore="UnusedAttribute"
-    tools:showIn="@layout/activity_fullscreen">
+    tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout"
+    tools:showIn="@layout/activity_fullscreen"
+    tools:visibility="visible">
 
     <rocks.tbog.tblauncher.ui.AnimatedListView
         android:id="@+id/resultList"

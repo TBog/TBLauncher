@@ -18,14 +18,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.preference.PreferenceManager;
 
-import rocks.tbog.tblauncher.ui.CutoutFactory;
 import rocks.tbog.tblauncher.ui.SearchEditText;
 import rocks.tbog.tblauncher.utils.SystemUiVisibility;
 import rocks.tbog.tblauncher.utils.UIColors;
@@ -74,7 +72,7 @@ public class CustomizeUI {
         boolean gradient = mPref.getBoolean("notification-bar-gradient", true);
 
         if (gradient) {
-            int size = CutoutFactory.StatusBarCutout.getStatusBarHeight(mTBLauncherActivity);
+            int size = UISizes.getStatusBarSize(getContext());
             ViewGroup.LayoutParams params = mNotificationBackground.getLayoutParams();
             if (params != null) {
                 params.height = size;
@@ -110,7 +108,7 @@ public class CustomizeUI {
             int smallSize = resources.getDimensionPixelSize(R.dimen.bar_height);
             int largeSize = resources.getDimensionPixelSize(R.dimen.large_bar_height);
             ViewGroup.LayoutParams params = mSearchBarContainer.getLayoutParams();
-            if (params instanceof LinearLayout.LayoutParams) {
+            if (params instanceof ViewGroup.MarginLayoutParams) {
                 params.height = smallSize + (largeSize - smallSize) * percent / 100;
                 mSearchBarContainer.setLayoutParams(params);
             } else {
@@ -153,7 +151,7 @@ public class CustomizeUI {
         } else if (mPref.getBoolean("search-bar-rounded", true)) {
             PaintDrawable drawable = new PaintDrawable();
             drawable.getPaint().setColor(UIColors.setAlpha(color, alpha));
-            LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) mSearchBarContainer.getLayoutParams();
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) mSearchBarContainer.getLayoutParams();
             drawable.setCornerRadius(resources.getDimension(R.dimen.bar_corner_radius));
             mSearchBarContainer.setBackground(drawable);
             int margin = (int) (params.height * .25f);

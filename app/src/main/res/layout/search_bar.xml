@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:showIn="@layout/activity_fullscreen">
 
     <LinearLayout
         android:id="@+id/searchBarContainer"
@@ -12,8 +13,11 @@
         android:clipChildren="false"
         android:gravity="center"
         android:orientation="horizontal"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
         tools:background="@drawable/search_bar_background"
-        tools:backgroundTint="@color/colorAccent">
+        tools:backgroundTint="@color/colorAccent"
+        tools:visibility="visible">
 
         <ImageView
             android:id="@+id/launcherButton"

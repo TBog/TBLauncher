@@ -7,12 +7,14 @@ import android.util.TypedValue;
 import androidx.preference.PreferenceManager;
 
 import rocks.tbog.tblauncher.R;
+import rocks.tbog.tblauncher.ui.CutoutFactory;
 
 public final class UISizes {
     // cached sizes are in pixels so we don't need to convert after each get*
     private static int CACHED_SIZE_RESULT_TEXT = 0;
     private static int CACHED_SIZE_RESULT_TEXT2 = 0;
     private static int CACHED_SIZE_RESULT_ICON = 0;
+    private static int CACHED_SIZE_STATUS_BAR = 0;
 
     private UISizes() {
     }
@@ -21,6 +23,7 @@ public final class UISizes {
         CACHED_SIZE_RESULT_TEXT = 0;
         CACHED_SIZE_RESULT_TEXT2 = 0;
         CACHED_SIZE_RESULT_ICON = 0;
+        CACHED_SIZE_STATUS_BAR = 0;
     }
 
     public static int sp2px(Context context, int size) {
@@ -61,5 +64,12 @@ public final class UISizes {
             CACHED_SIZE_RESULT_ICON = dp2px(context, size);
         }
         return CACHED_SIZE_RESULT_ICON;
+    }
+
+    public static int getStatusBarSize(Context context) {
+        if (CACHED_SIZE_STATUS_BAR == 0) {
+            CACHED_SIZE_STATUS_BAR = CutoutFactory.StatusBarCutout.getStatusBarHeight(context);
+        }
+        return CACHED_SIZE_STATUS_BAR;
     }
 }
