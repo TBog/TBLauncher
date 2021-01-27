@@ -50,4 +50,14 @@ Motives for developing ~~a new~~ my own launcher:
 <footer>
       <hr>
       <p>The initial idea and code came from <a href="https://github.com/Neamar/KISS" style="display: inline">KISS</a></p>
+      <p>Some SVG icons came from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> and were made by
+            <ul>
+                  <li><a href="https://www.freepik.com" title="Freepik">Freepik</a></li>
+                  <li><a href="https://www.flaticon.com/authors/swifticons" title="Swifticons">Swifticons</a></li>
+                  <li><a href="https://www.flaticon.com/authors/eucalyp" title="Eucalyp">Eucalyp</a></li>
+                  <li><a href="https://www.flaticon.com/authors/monkik" title="monkik">monkik</a></li>
+                  <li><a href="https://www.flaticon.com/authors/prettycons" title="prettycons">prettycons</a></li>
+            </ul>
+      </p>
+      <p>The SVG files were first optimized with <a href="https://github.com/jakearchibald/svgomg/">SVGOMG!</a> then imported with Android Studio</p>
 </footer>
