@@ -73,6 +73,9 @@
         <item>Show search bar</item>
         <item>Show widget screen</item>
         <item>Toggle between search and widget</item>
+        <item>Reload providers</item>
+        <item>@string/action_show_apps</item>
+        <item>@string/action_show_apps_reversed</item>
     </string-array>
     <array name="gestureValues" translatable="false">
         <item>none</item>
@@ -81,6 +84,9 @@
         <item>showSearchBar</item>
         <item>showWidgets</item>
         <item>toggleSearchAndWidget</item>
+        <item>reloadProviders</item>
+        <item>showAllAppsAZ</item>
+        <item>showAllAppsZA</item>
     </array>
 
     <array name="material_colors">

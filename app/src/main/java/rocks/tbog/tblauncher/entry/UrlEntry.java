@@ -76,7 +76,7 @@ public final class UrlEntry extends SearchEntry {
             if (icon != null) {
                 appIcon.setImageDrawable(icon);
             } else {
-                appIcon.setImageResource(R.drawable.ic_search);
+                appIcon.setImageResource(R.drawable.ic_search_bar);
             }
         } else {
             appIcon.setImageDrawable(null);

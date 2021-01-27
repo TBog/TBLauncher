@@ -16,7 +16,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import rocks.tbog.tblauncher.utils.DrawableUtils;
+import rocks.tbog.tblauncher.drawable.DrawableUtils;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 
 public class SystemIconPack implements IconPack<Void> {

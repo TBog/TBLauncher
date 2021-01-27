@@ -7,6 +7,7 @@
 
     <!-- Quick List -->
     <androidx.preference.PreferenceCategory
+        android:icon="@drawable/ic_quick"
         android:key="quick-list-section"
         android:title="@string/quick_list_section">
 
@@ -45,6 +46,7 @@
 
     <!-- Search bar -->
     <PreferenceCategory
+        android:icon="@drawable/ic_search_bar"
         android:key="search-bar-section"
         android:title="@string/search_bar_section">
 
@@ -87,6 +89,7 @@
 
     <!-- Result list -->
     <PreferenceCategory
+        android:icon="@drawable/ic_list"
         android:key="result-list-section"
         android:title="@string/result_list_section">
 
@@ -147,6 +150,7 @@
 
     <!-- Shortcut -->
     <androidx.preference.PreferenceCategory
+        android:icon="@drawable/ic_shortcuts"
         android:key="shortcut-section"
         android:title="@string/shortcut_section">
 
@@ -165,6 +169,7 @@
 
     <!-- Tags -->
     <androidx.preference.PreferenceCategory
+        android:icon="@drawable/ic_tags"
         android:key="tags-section"
         android:title="@string/tags_section">
 
@@ -184,6 +189,7 @@
 
     <!-- Wallpaper / LWP - LiveWallpaper -->
     <PreferenceCategory
+        android:icon="@drawable/ic_wallpaper"
         android:key="wallpaper-holder"
         android:title="@string/title_wallpaper">
         <SwitchPreference
@@ -224,8 +230,15 @@
 
     <!-- Gestures -->
     <PreferenceCategory
+        android:icon="@drawable/ic_gesture"
         android:key="gesture-section"
         android:title="@string/gesture_section">
+        <ListPreference
+            android:defaultValue="showAllAppsZA"
+            android:entries="@array/gestureEntries"
+            android:entryValues="@array/gestureValues"
+            android:key="gesture-launcher-button"
+            android:title="@string/gesture_launcher_button" />
         <ListPreference
             android:defaultValue="toggleSearchAndWidget"
             android:entries="@array/gestureEntries"
@@ -268,6 +281,7 @@
 
     <!-- Memory -->
     <androidx.preference.PreferenceCategory
+        android:icon="@drawable/ic_memory"
         android:key="memory-section"
         android:title="@string/memory_section">
 
@@ -354,6 +368,7 @@
 
     <!-- Debug -->
     <androidx.preference.PreferenceCategory
+        android:icon="@drawable/ic_bug"
         android:key="debug-section"
         android:title="@string/debug_section"
         app:initialExpandedChildrenCount="0">

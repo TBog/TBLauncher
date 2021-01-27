@@ -32,12 +32,12 @@ import java.util.Objects;
 
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
-import rocks.tbog.tblauncher.ui.CodePointDrawable;
-import rocks.tbog.tblauncher.ui.FourCodePointDrawable;
-import rocks.tbog.tblauncher.ui.TextDrawable;
-import rocks.tbog.tblauncher.ui.TwoCodePointDrawable;
+import rocks.tbog.tblauncher.drawable.CodePointDrawable;
+import rocks.tbog.tblauncher.drawable.FourCodePointDrawable;
+import rocks.tbog.tblauncher.drawable.TextDrawable;
+import rocks.tbog.tblauncher.drawable.TwoCodePointDrawable;
 import rocks.tbog.tblauncher.utils.DialogBuilder;
-import rocks.tbog.tblauncher.utils.DrawableUtils;
+import rocks.tbog.tblauncher.drawable.DrawableUtils;
 import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.UISizes;
 import rocks.tbog.tblauncher.utils.UITheme;

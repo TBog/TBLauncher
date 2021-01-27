@@ -9,6 +9,7 @@
     tools:showIn="@layout/activity_settings">
 
     <PreferenceScreen
+        android:icon="@drawable/ic_phone_ui"
         android:key="ui-holder"
         android:summary="@string/user_interface_summary"
         android:title="@string/title_ui">
@@ -129,6 +130,7 @@
 
         <!-- Search bar -->
         <PreferenceCategory
+            android:icon="@drawable/ic_search_bar"
             android:key="search-bar-section"
             android:title="@string/search_bar_section">
 
@@ -179,6 +181,7 @@
 
         <!-- Result list -->
         <PreferenceCategory
+            android:icon="@drawable/ic_list"
             android:key="result-list-section"
             android:title="@string/result_list_section">
 
@@ -271,6 +274,7 @@
 
         <!-- Quick list -->
         <PreferenceCategory
+            android:icon="@drawable/ic_quick"
             android:key="quick-list-section"
             android:title="@string/quick_list_section">
 
@@ -309,6 +313,7 @@
 
         <!-- Popup -->
         <PreferenceCategory
+            android:icon="@drawable/ic_popup"
             android:key="popup-section"
             android:title="@string/popup_section">
 
@@ -354,6 +359,7 @@
     <!-- We hold everything from features in a different xml because we have some interface settings there and we
     can't have the same keys used in an xml file -->
     <PreferenceScreen
+        android:icon="@drawable/ic_features"
         android:key="feature-holder"
         android:summary="@string/features_summary"
         android:title="@string/title_features">
@@ -363,6 +369,7 @@
     </PreferenceScreen>
 
     <PreferenceScreen
+        android:icon="@drawable/ic_backup"
         android:key="backup-holder"
         android:summary="@string/backup_summary"
         android:title="@string/title_backup">

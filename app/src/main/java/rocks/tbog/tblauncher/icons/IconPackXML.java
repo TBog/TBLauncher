@@ -34,7 +34,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
 
-import rocks.tbog.tblauncher.utils.DrawableUtils;
+import rocks.tbog.tblauncher.drawable.DrawableUtils;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
 

@@ -13,7 +13,7 @@ import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.db.ShortcutRecord;
 import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
-import rocks.tbog.tblauncher.utils.DrawableUtils;
+import rocks.tbog.tblauncher.drawable.DrawableUtils;
 
 public class ShortcutPage extends CustomShapePage {
     private final ShortcutRecord mShortcutRecord;

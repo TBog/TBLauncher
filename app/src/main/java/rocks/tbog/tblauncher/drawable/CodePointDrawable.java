@@ -1,4 +1,4 @@
-package rocks.tbog.tblauncher.ui;
+package rocks.tbog.tblauncher.drawable;
 
 public class CodePointDrawable extends TextDrawable {
 

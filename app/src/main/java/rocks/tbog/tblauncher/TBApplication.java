@@ -208,6 +208,10 @@ public class TBApplication extends Application {
         return mCustomizeUI;
     }
 
+    public QuickList quickList() {
+        return mQuickList;
+    }
+
     @NonNull
     public TagsHandler tagsHandler() {
         if (tagsHandler == null)

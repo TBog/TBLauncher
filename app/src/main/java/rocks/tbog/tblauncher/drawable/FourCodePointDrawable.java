@@ -1,4 +1,4 @@
-package rocks.tbog.tblauncher.ui;
+package rocks.tbog.tblauncher.drawable;
 
 import androidx.annotation.NonNull;
 

@@ -1,4 +1,4 @@
-package rocks.tbog.tblauncher.utils;
+package rocks.tbog.tblauncher.drawable;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
@@ -27,6 +27,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import rocks.tbog.tblauncher.R;
+import rocks.tbog.tblauncher.utils.UIColors;
 
 public class DrawableUtils {
 

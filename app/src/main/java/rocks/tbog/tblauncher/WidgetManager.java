@@ -41,7 +41,7 @@ import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.ui.WidgetLayout;
 import rocks.tbog.tblauncher.ui.WidgetView;
 import rocks.tbog.tblauncher.utils.DebugInfo;
-import rocks.tbog.tblauncher.utils.DrawableUtils;
+import rocks.tbog.tblauncher.drawable.DrawableUtils;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public class WidgetManager {

@@ -44,6 +44,7 @@ import java.util.Set;
 
 import rocks.tbog.tblauncher.customicon.IconSelectDialog;
 import rocks.tbog.tblauncher.dataprovider.FavProvider;
+import rocks.tbog.tblauncher.entry.ActionEntry;
 import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.EntryWithTags;
@@ -60,7 +61,7 @@ import rocks.tbog.tblauncher.ui.DialogFragment;
 import rocks.tbog.tblauncher.ui.KeyboardScrollHider;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
-import rocks.tbog.tblauncher.ui.LoadingDrawable;
+import rocks.tbog.tblauncher.drawable.LoadingDrawable;
 import rocks.tbog.tblauncher.ui.TagsManagerDialog;
 import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.SystemUiVisibility;
@@ -135,7 +136,8 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         // while interacting with the UI.
         //mLauncherButton.setOnTouchListener(mDelayHideTouchListener);
 
-        mLauncherButton.setOnClickListener((v) -> TBApplication.dataHandler(v.getContext()).reloadProviders());
+        //mLauncherButton.setOnClickListener((v) -> TBApplication.dataHandler(v.getContext()).reloadProviders());
+        mLauncherButton.setOnClickListener((v) -> executeAction(mPref.getString("gesture-launcher-button", null)));
     }
 
     private void setSearchHint() {
@@ -1040,6 +1042,25 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             case "toggleSearchAndWidget":
                 toggleSearchBar();
                 return true;
+            case "reloadProviders":
+                TBApplication.dataHandler(getContext()).reloadProviders();
+                return true;
+            case "showAllAppsAZ": {
+                EntryItem item = TBApplication.dataHandler(getContext()).getPojo(ActionEntry.SCHEME + "show/apps/byName");
+                if (item instanceof ActionEntry) {
+                    item.doLaunch(mLauncherButton);
+                    return true;
+                }
+            }
+            break;
+            case "showAllAppsZA": {
+                EntryItem item = TBApplication.dataHandler(getContext()).getPojo(ActionEntry.SCHEME + "show/apps/byNameReversed");
+                if (item instanceof ActionEntry) {
+                    item.doLaunch(mLauncherButton);
+                    return true;
+                }
+            }
+            break;
         }
         return false;
     }

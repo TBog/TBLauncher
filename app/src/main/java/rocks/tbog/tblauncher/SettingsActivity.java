@@ -5,6 +5,7 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -35,6 +36,7 @@ import androidx.fragment.app.FragmentTransaction;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
+import androidx.preference.PreferenceGroup;
 import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceScreen;
 import androidx.preference.SwitchPreference;
@@ -42,6 +44,7 @@ import androidx.preference.SwitchPreference;
 import java.io.File;
 
 import rocks.tbog.tblauncher.db.XmlImport;
+import rocks.tbog.tblauncher.drawable.SizeWrappedDrawable;
 import rocks.tbog.tblauncher.preference.BaseListPreferenceDialog;
 import rocks.tbog.tblauncher.preference.ChooseColorDialog;
 import rocks.tbog.tblauncher.preference.ConfirmDialog;
@@ -287,7 +290,11 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     });
             }
 
-            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext());
+            final Context context = requireContext();
+
+            tintPreferenceIcons(getPreferenceScreen(), UIColors.getThemeColor(context, R.attr.colorAccent));
+
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 
             // quick-list
             {
@@ -320,6 +327,25 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 iconsPackLoad.run();
             }
 
+        }
+
+        private void tintPreferenceIcons(Preference preference, int color) {
+            Drawable icon = preference.getIcon();
+            if (icon != null) {
+                // workaround to set drawable size
+                {
+                    int size = UISizes.getResultIconSize(preference.getContext());
+                    icon = new SizeWrappedDrawable(icon, size);
+                }
+                icon.setColorFilter(color, PorterDuff.Mode.MULTIPLY);
+                preference.setIcon(icon);
+            }
+            if (preference instanceof PreferenceGroup) {
+                PreferenceGroup group = ((PreferenceGroup) preference);
+                for (int i = 0; i < group.getPreferenceCount(); i++) {
+                    tintPreferenceIcons(group.getPreference(i), color);
+                }
+            }
         }
 
         private void removePreference(String key) {

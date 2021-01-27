@@ -259,6 +259,7 @@ public class Utilities {
                 } else {
                     expand = statusbarManager.getMethod("expand");
                 }
+                expand.setAccessible(true);
                 expand.invoke(statusBarService);
             } catch (Exception ignored) {
             }
@@ -267,6 +268,7 @@ public class Utilities {
 
     @SuppressLint("ObsoleteSdkInt")
     public static void expandSettingsPanel(Activity activity) {
+        boolean expandCalled = false;
         @SuppressLint("WrongConstant")
         Object statusBarService = activity.getSystemService("statusbar");
         if (statusBarService != null) {
@@ -275,12 +277,16 @@ public class Utilities {
                 Method expand;
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
                     expand = statusbarManager.getMethod("expandSettingsPanel");
-                } else {
-                    expand = statusbarManager.getMethod("expand");
+                    expand.setAccessible(true);
+                    expand.invoke(statusBarService);
+                    expandCalled = true;
                 }
-                expand.invoke(statusBarService);
             } catch (Exception ignored) {
             }
+        }
+        if (!expandCalled) {
+            Intent settings = new Intent(android.provider.Settings.ACTION_SETTINGS);
+            activity.startActivity(settings);
         }
     }
 

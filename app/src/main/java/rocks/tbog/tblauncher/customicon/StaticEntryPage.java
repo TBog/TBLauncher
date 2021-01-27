@@ -9,7 +9,7 @@ import androidx.annotation.Nullable;
 
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.entry.StaticEntry;
-import rocks.tbog.tblauncher.utils.DrawableUtils;
+import rocks.tbog.tblauncher.drawable.DrawableUtils;
 
 public class StaticEntryPage extends CustomShapePage {
     private final StaticEntry mStaticEntry;

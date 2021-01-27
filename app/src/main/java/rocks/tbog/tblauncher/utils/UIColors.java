@@ -68,7 +68,7 @@ public final class UIColors {
     }
 
     @ColorInt
-    private static int getThemeColor(Context context, @AttrRes int idRes) {
+    public static int getThemeColor(Context context, @AttrRes int idRes) {
         TypedValue typedValue = new TypedValue();
         Resources.Theme theme = context.getTheme();
         theme.resolveAttribute(idRes, typedValue, true);

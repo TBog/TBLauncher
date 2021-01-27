@@ -10,6 +10,7 @@ import android.graphics.drawable.PaintDrawable;
 import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.LinearLayout;
@@ -322,10 +323,10 @@ public class QuickList {
         // size
         int percent = pref.getInt("quick-list-size", 0);
 
-        if (!(quickList.getLayoutParams() instanceof LinearLayout.LayoutParams))
+        if (!(quickList.getLayoutParams() instanceof ViewGroup.MarginLayoutParams))
             throw new IllegalStateException("mSearchBarContainer has the wrong layout params");
 
-        LinearLayout.LayoutParams params = (LinearLayout.LayoutParams) quickList.getLayoutParams();
+        ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) quickList.getLayoutParams();
         // set layout height
         {
             int smallSize = resources.getDimensionPixelSize(R.dimen.bar_height);

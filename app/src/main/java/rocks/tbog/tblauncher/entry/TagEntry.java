@@ -9,7 +9,7 @@ import androidx.annotation.NonNull;
 import rocks.tbog.tblauncher.BuildConfig;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.searcher.TagSearcher;
-import rocks.tbog.tblauncher.ui.CodePointDrawable;
+import rocks.tbog.tblauncher.drawable.CodePointDrawable;
 
 public class TagEntry extends StaticEntry {
     public static final String SCHEME = "tag://";

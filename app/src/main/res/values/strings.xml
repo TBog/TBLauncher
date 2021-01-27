@@ -237,7 +237,7 @@
     <string name="tab_app_icons">%s\n[app icons]</string>
     <string name="tab_static_icons">Default icon</string>
     <string name="icon_pack_loading">Loading from icon packs…</string>
-    <string name="gesture_section">Gestures</string>
+    <string name="gesture_section">Gestures and buttons</string>
     <string name="gesture_fling_down_left">Fling from |<b>←</b>|, <b>↓</b></string>
     <string name="gesture_fling_down_left_summary">Start from the <b>←</b> side of the screen and fling <b>↓</b></string>
     <string name="gesture_fling_down_right">Fling from |<b>→</b>|, <b>↓</b></string>
@@ -245,7 +245,7 @@
     <string name="gesture_fling_up">Fling ↑</string>
     <string name="gesture_fling_left">Fling ←</string>
     <string name="gesture_fling_right">Fling →</string>
-    <string name="gesture_click">Tap</string>
+    <string name="gesture_click">Tap empty screen</string>
     <string name="static_icon_letters_label">Letters to use for generating icons</string>
     <string name="backup_summary">Save, backup, export and import settings</string>
     <string name="title_backup">Backup</string>
@@ -339,6 +339,7 @@
     <string name="settings_deep_blues">DeepBlues</string>
     <string name="title_static_rename">Choose a custom name</string>
     <string name="letters_toggle">Letter icons</string>
+    <string name="gesture_launcher_button">Launcher button</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>
