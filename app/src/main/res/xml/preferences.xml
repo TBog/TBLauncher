@@ -246,7 +246,8 @@
                 android:defaultValue="@integer/default_bar_size"
                 android:dialogLayout="@layout/pref_slider"
                 android:key="search-bar-size"
-                android:title="@string/search_bar_size" />
+                android:title="@string/search_bar_size"
+                android:widgetLayout="@layout/pref_size_preview" />
 
         </PreferenceCategory>
 
