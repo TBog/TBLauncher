@@ -354,6 +354,19 @@
     <string name="icon_scale_alpha">Scale transparency</string>
     <string name="reset_matrix">Set default values</string>
     <string name="popup_corner_radius">Corner radius</string>
+    <string name="behaviour_section">Behaviour</string>
+    <string name="behaviour_link_keyboard_search_bar">Link keyboard to search bar visibility</string>
+    <string name="behaviour_widget_after_launch">Widget mode after launch</string>
+    <string name="behaviour_clear_search_after_launch">Clear search bar after launch</string>
+    <string name="dm_empty_quick_list">Show quick list</string>
+    <string name="dm_search_quick_list">Show quick list</string>
+    <string name="dm_widget_quick_list">Show quick list</string>
+    <string name="dm_empty_fullscreen">Fullscreen</string>
+    <string name="dm_search_fullscreen">Fullscreen</string>
+    <string name="dm_widget_fullscreen">Fullscreen</string>
+    <string name="title_desktop_mode_empty">Desktop mode &#171;Empty&#187;</string>
+    <string name="title_desktop_mode_search">Desktop mode &#171;Search&#187;</string>
+    <string name="title_desktop_mode_widget">Desktop mode &#171;Widget&#187;</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>

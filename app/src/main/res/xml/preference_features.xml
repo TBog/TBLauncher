@@ -279,6 +279,80 @@
             android:title="@string/gesture_fling_right" />
     </PreferenceCategory>
 
+    <!-- Behaviour -->
+    <androidx.preference.PreferenceCategory
+        android:icon="@drawable/ic_behaviour"
+        android:key="behaviour-section"
+        android:title="@string/behaviour_section">
+
+        <androidx.preference.SwitchPreference
+            android:defaultValue="true"
+            android:key="behaviour-link-keyboard-search-bar"
+            android:title="@string/behaviour_link_keyboard_search_bar" />
+
+        <androidx.preference.SwitchPreference
+            android:defaultValue="true"
+            android:key="behaviour-widget-after-launch"
+            android:title="@string/behaviour_widget_after_launch" />
+
+        <androidx.preference.SwitchPreference
+            android:defaultValue="true"
+            android:key="behaviour-clear-search-after-launch"
+            android:title="@string/behaviour_clear_search_after_launch" />
+
+        <!-- ‹Empty› desktop mode -->
+        <PreferenceScreen
+            android:key="desktop-mode-empty-holder"
+            android:title="@string/title_desktop_mode_empty">
+
+            <androidx.preference.SwitchPreference
+                android:defaultValue="false"
+                android:key="dm-empty-quick-list"
+                android:title="@string/dm_empty_quick_list" />
+
+            <androidx.preference.SwitchPreference
+                android:defaultValue="true"
+                android:key="dm-empty-fullscreen"
+                android:title="@string/dm_empty_fullscreen" />
+
+        </PreferenceScreen>
+
+        <!-- ‹Search› desktop mode -->
+        <PreferenceScreen
+            android:key="desktop-mode-search-holder"
+            android:title="@string/title_desktop_mode_search">
+
+            <androidx.preference.SwitchPreference
+                android:defaultValue="true"
+                android:key="dm-search-quick-list"
+                android:title="@string/dm_search_quick_list" />
+
+            <androidx.preference.SwitchPreference
+                android:defaultValue="false"
+                android:key="dm-search-fullscreen"
+                android:title="@string/dm_search_fullscreen" />
+
+        </PreferenceScreen>
+
+        <!-- ‹Widget› desktop mode -->
+        <PreferenceScreen
+            android:key="desktop-mode-widget-holder"
+            android:title="@string/title_desktop_mode_widget">
+
+            <androidx.preference.SwitchPreference
+                android:defaultValue="false"
+                android:key="dm-widget-quick-list"
+                android:title="@string/dm_widget_quick_list" />
+
+            <androidx.preference.SwitchPreference
+                android:defaultValue="false"
+                android:key="dm-widget-fullscreen"
+                android:title="@string/dm_widget_fullscreen" />
+
+        </PreferenceScreen>
+
+    </androidx.preference.PreferenceCategory>
+
     <!-- Memory -->
     <androidx.preference.PreferenceCategory
         android:icon="@drawable/ic_memory"

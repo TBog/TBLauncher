@@ -60,4 +60,11 @@ public class SystemUiVisibility {
         flags = setFlags(flags, SHOW_SYSTEM_BARS);
         view.setSystemUiVisibility(flags);
     }
+
+    public static boolean isFullscreenSet(View view) {
+        int currentFlags = view.getSystemUiVisibility();
+        int flags = clearFlags(currentFlags, SHOW_SYSTEM_BARS);
+        flags = setFlags(flags, REMOVE_STATUS_AND_NAVIGATION);
+        return currentFlags == flags;
+    }
 }

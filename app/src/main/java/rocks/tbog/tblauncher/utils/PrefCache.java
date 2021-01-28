@@ -41,12 +41,16 @@ public class PrefCache {
         return RESULT_HISTORY_ADAPTIVE;
     }
 
-    public static boolean showWidgetScreenAfterLaunch(Context context) {
-        return true;
+    public static boolean showWidgetScreenAfterLaunch(SharedPreferences pref) {
+        return pref.getBoolean("behaviour-widget-after-launch", true);
     }
 
-    public static boolean clearSearchAfterLaunch(Context context) {
-        return true;
+    public static boolean clearSearchAfterLaunch(SharedPreferences pref) {
+        return pref.getBoolean("behaviour-clear-search-after-launch", true);
+    }
+
+    public static boolean linkKeyboardAndSearchBar(SharedPreferences pref) {
+        return pref.getBoolean("behaviour-link-keyboard-search-bar", true);
     }
 
     public static boolean getFuzzySearchTags(Context context) {
@@ -67,4 +71,29 @@ public class PrefCache {
         }
         return RESULT_SEARCHER_CAP;
     }
+
+    public static boolean modeEmptyQuickListVisible(SharedPreferences mPref) {
+        return mPref.getBoolean("dm-empty-quick-list", false);
+    }
+
+    public static boolean modeEmptyFullscreen(SharedPreferences mPref) {
+        return mPref.getBoolean("dm-empty-fullscreen", true);
+    }
+
+    public static boolean modeSearchQuickListVisible(SharedPreferences mPref) {
+        return mPref.getBoolean("dm-search-quick-list", true);
+    }
+
+    public static boolean modeSearchFullscreen(SharedPreferences mPref) {
+        return mPref.getBoolean("dm-search-fullscreen", false);
+    }
+
+    public static boolean modeWidgetQuickListVisible(SharedPreferences mPref) {
+        return mPref.getBoolean("dm-widget-quick-list", false);
+    }
+
+    public static boolean modeWidgetFullscreen(SharedPreferences mPref) {
+        return mPref.getBoolean("dm-widget-fullscreen", false);
+    }
+
 }
