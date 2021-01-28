@@ -12,6 +12,7 @@ import android.content.pm.LauncherActivityInfo;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutInfo;
+import android.graphics.ColorFilter;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -160,12 +161,15 @@ public final class AppEntry extends EntryWithTags {
         ImageView appIcon = view.findViewById(android.R.id.icon);
         ImageView bottomRightIcon = view.findViewById(android.R.id.icon2);
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
+            ColorFilter colorFilter = ResultViewHelper.setIconColorFilter(appIcon, drawFlags);
             appIcon.setVisibility(View.VISIBLE);
             ResultViewHelper.setIconAsync(drawFlags, this, appIcon, AsyncSetEntryIcon.class);
+
             if (bottomRightIcon != null) {
                 if (isHiddenByUser()) {
                     bottomRightIcon.setVisibility(View.VISIBLE);
                     bottomRightIcon.setImageResource(R.drawable.ic_eye_crossed);
+                    bottomRightIcon.setColorFilter(colorFilter);
                 } else {
                     bottomRightIcon.setVisibility(View.GONE);
                 }
@@ -200,9 +204,12 @@ public final class AppEntry extends EntryWithTags {
         ImageView appIcon = view.findViewById(android.R.id.icon);
         ImageView bottomRightIcon = view.findViewById(android.R.id.icon2);
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
+            ColorFilter colorFilter = ResultViewHelper.setIconColorFilter(appIcon, drawFlags);
             appIcon.setVisibility(View.VISIBLE);
             ResultViewHelper.setIconAsync(drawFlags, this, appIcon, AsyncSetEntryIcon.class);
+
             if (isHiddenByUser()) {
+                bottomRightIcon.setColorFilter(colorFilter);
                 bottomRightIcon.setVisibility(View.VISIBLE);
                 bottomRightIcon.setImageResource(R.drawable.ic_eye_crossed);
             } else {

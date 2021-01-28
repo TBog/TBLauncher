@@ -46,6 +46,22 @@ public class ConfirmDialog extends BasePreferenceDialog {
         final String key = preference.getKey();
 
         switch (key) {
+            case "reset-matrix":
+                preference
+                        .getPreferenceManager()
+                        .getSharedPreferences()
+                        .edit()
+                        .remove("icon-scale-red")
+                        .remove("icon-scale-green")
+                        .remove("icon-scale-blue")
+                        .remove("icon-scale-alpha")
+                        .remove("icon-hue")
+                        .remove("icon-contrast")
+                        .remove("icon-brightness")
+                        .remove("icon-saturation")
+                        .commit();
+                PreferenceManager.setDefaultValues(requireContext(), R.xml.preferences, true);
+                break;
             case "reset-preferences":
                 preference.getPreferenceManager().getSharedPreferences().edit().clear().commit();
                 PreferenceManager.setDefaultValues(requireContext(), R.xml.preferences, true);
@@ -96,6 +112,10 @@ public class ConfirmDialog extends BasePreferenceDialog {
         final String key = preference.getKey();
 
         switch (key) {
+            case "reset-matrix":
+                ((TextView) view.findViewById(android.R.id.text1)).setText(R.string.reset_matrix_confirm);
+                ((TextView) view.findViewById(android.R.id.text2)).setText(R.string.reset_matrix_description);
+                break;
             case "reset-preferences":
                 ((TextView) view.findViewById(android.R.id.text1)).setText(R.string.reset_preferences_confirm);
                 ((TextView) view.findViewById(android.R.id.text2)).setText(R.string.reset_preferences_description);

@@ -6,7 +6,6 @@ import android.widget.SeekBar;
 import android.widget.TextView;
 
 import androidx.preference.DialogPreference;
-import androidx.preference.PreferenceDialogFragmentCompat;
 
 import rocks.tbog.tblauncher.R;
 
@@ -74,6 +73,24 @@ public class SliderDialog extends BasePreferenceDialog {
             case "result-search-cap":
                 mSliderOffset = 1;
                 seekBar.setMax(1000 - mSliderOffset);
+                break;
+            case "icon-hue":
+                mSliderOffset = -180;
+                seekBar.setMax(180 - mSliderOffset);
+                break;
+            case "icon-scale-red":
+            case "icon-scale-green":
+            case "icon-scale-blue":
+            case "icon-scale-alpha":
+                mSliderOffset = -200;
+                seekBar.setMax(200 - mSliderOffset);
+                break;
+            case "icon-contrast":
+            case "icon-brightness":
+            case "icon-saturation":
+                mSliderOffset = -100;
+                seekBar.setMax(100 - mSliderOffset);
+                break;
         }
 
         int seekBarProgress = (Integer) preference.getValue() - mSliderOffset;

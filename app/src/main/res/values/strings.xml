@@ -324,7 +324,9 @@
     <string name="quick_list_ripple_color">Touch color</string>
     <string name="reset_preferences">Reset preferences</string>
     <string name="reset_preferences_confirm">Really discard preferences?</string>
-    <string name="reset_preferences_description">All settings will be reset to the default value.</string>
+    <string name="reset_preferences_description">All settings will be reset to the default value</string>
+    <string name="reset_matrix_confirm">Set default values?</string>
+    <string name="reset_matrix_description">All icon settings on this screen will be reset to the default, neutral values</string>
     <string name="popup_section">Popup</string>
     <string name="popup_ripple_color">Touch color</string>
     <string name="popup_background_argb">Background color</string>
@@ -340,6 +342,17 @@
     <string name="title_static_rename">Choose a custom name</string>
     <string name="letters_toggle">Letter icons</string>
     <string name="gesture_launcher_button">Launcher button</string>
+    <string name="icon_contrast">Contrast</string>
+    <string name="icon_brightness">Brightness</string>
+    <string name="icon_hue">Hue</string>
+    <string name="icon_saturation">Saturation</string>
+    <string name="matrix_summary">Brightness, contrast, hue, saturation</string>
+    <string name="title_matrix">Modulate icon color</string>
+    <string name="icon_scale_red">Scale red</string>
+    <string name="icon_scale_green">Scale green</string>
+    <string name="icon_scale_blue">Scale blue</string>
+    <string name="icon_scale_alpha">Scale transparency</string>
+    <string name="reset_matrix">Set default values</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>

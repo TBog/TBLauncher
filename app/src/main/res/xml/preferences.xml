@@ -29,9 +29,80 @@
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
             android:defaultValue="@integer/default_icon_background"
             android:dependency="adaptive-shape"
-            android:key="icon-background"
+            android:key="icon-background-argb"
             android:title="@string/icon_background"
             android:widgetLayout="@layout/pref_color_preview" />
+
+        <PreferenceScreen
+            android:key="icon-matrix-holder"
+            android:summary="@string/matrix_summary"
+            android:title="@string/title_matrix">
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:dialogLayout="@layout/pref_confirm"
+                android:key="reset-matrix"
+                android:title="@string/reset_matrix" />
+
+            <rocks.tbog.tblauncher.preference.PreviewImagePreference
+                android:widgetLayout="@layout/pref_matrix_preview"/>
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@integer/default_icon_scale"
+                android:dialogLayout="@layout/pref_slider"
+                android:key="icon-scale-red"
+                android:title="@string/icon_scale_red"
+                android:widgetLayout="@layout/pref_amount_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@integer/default_icon_scale"
+                android:dialogLayout="@layout/pref_slider"
+                android:key="icon-scale-green"
+                android:title="@string/icon_scale_green"
+                android:widgetLayout="@layout/pref_amount_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@integer/default_icon_scale"
+                android:dialogLayout="@layout/pref_slider"
+                android:key="icon-scale-blue"
+                android:title="@string/icon_scale_blue"
+                android:widgetLayout="@layout/pref_amount_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@integer/default_icon_scale"
+                android:dialogLayout="@layout/pref_slider"
+                android:key="icon-scale-alpha"
+                android:title="@string/icon_scale_alpha"
+                android:widgetLayout="@layout/pref_amount_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@integer/default_icon_hue"
+                android:dialogLayout="@layout/pref_slider"
+                android:key="icon-hue"
+                android:title="@string/icon_hue"
+                android:widgetLayout="@layout/pref_amount_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@integer/default_icon_contrast"
+                android:dialogLayout="@layout/pref_slider"
+                android:key="icon-contrast"
+                android:title="@string/icon_contrast"
+                android:widgetLayout="@layout/pref_amount_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@integer/default_icon_brightness"
+                android:dialogLayout="@layout/pref_slider"
+                android:key="icon-brightness"
+                android:title="@string/icon_brightness"
+                android:widgetLayout="@layout/pref_amount_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@integer/default_icon_saturation"
+                android:dialogLayout="@layout/pref_slider"
+                android:key="icon-saturation"
+                android:title="@string/icon_saturation"
+                android:widgetLayout="@layout/pref_amount_preview" />
+
+        </PreferenceScreen>
 
         <SwitchPreference
             android:defaultValue="true"

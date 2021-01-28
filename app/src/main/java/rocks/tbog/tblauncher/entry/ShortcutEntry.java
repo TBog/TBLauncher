@@ -10,6 +10,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ShortcutInfo;
 import android.graphics.Bitmap;
+import android.graphics.ColorFilter;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
@@ -136,9 +137,11 @@ public final class ShortcutEntry extends EntryWithTags {
     }
 
     private void displayGridResult(@NonNull View view, int drawFlags) {
+        final Context context = view.getContext();
+
         drawFlags |= FLAG_RELOAD;
         TextView nameView = view.findViewById(android.R.id.text1);
-        nameView.setTextColor(UIColors.getResultTextColor(view.getContext()));
+        nameView.setTextColor(UIColors.getResultTextColor(context));
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_NAME))
             ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, nameView);
         else
@@ -149,6 +152,8 @@ public final class ShortcutEntry extends EntryWithTags {
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
             icon1.setVisibility(View.VISIBLE);
             icon2.setVisibility(View.VISIBLE);
+            ColorFilter colorFilter = ResultViewHelper.setIconColorFilter(icon1, drawFlags);
+            icon2.setColorFilter(colorFilter);
             ResultViewHelper.setIconAsync(drawFlags, this, icon1, AsyncSetEntryIcon.class);
         } else {
             icon1.setImageDrawable(null);
@@ -165,12 +170,12 @@ public final class ShortcutEntry extends EntryWithTags {
         Context context = view.getContext();
 
         TextView shortcutName = view.findViewById(R.id.item_app_name);
-        shortcutName.setTextColor(UIColors.getResultTextColor(view.getContext()));
+        shortcutName.setTextColor(UIColors.getResultTextColor(context));
 
         ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, shortcutName);
 
         TextView tagsView = view.findViewById(R.id.item_app_tag);
-        tagsView.setTextColor(UIColors.getResultText2Color(view.getContext()));
+        tagsView.setTextColor(UIColors.getResultText2Color(context));
 
         // Hide tags view if tags are empty
         if (getTags().isEmpty()) {
@@ -189,6 +194,8 @@ public final class ShortcutEntry extends EntryWithTags {
             shortcutIcon.setVisibility(View.VISIBLE);
             appIcon.setVisibility(View.VISIBLE);
             ResultViewHelper.setIconAsync(drawFlags, this, shortcutIcon, AsyncSetEntryIcon.class);
+            ColorFilter colorFilter = ResultViewHelper.setIconColorFilter(shortcutIcon, drawFlags);
+            appIcon.setColorFilter(colorFilter);
         } else {
             shortcutIcon.setImageDrawable(null);
             appIcon.setImageDrawable(null);

@@ -65,6 +65,7 @@ public final class CalculatorEntry extends SearchEntry {
 
         ImageView appIcon = view.findViewById(android.R.id.icon);
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
+            ResultViewHelper.setIconColorFilter(appIcon, drawFlags);
             appIcon.setVisibility(View.VISIBLE);
             appIcon.setImageResource(R.drawable.ic_functions);
         } else {

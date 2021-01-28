@@ -4,6 +4,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.graphics.ColorFilter;
+import android.graphics.ColorMatrix;
+import android.graphics.ColorMatrixColorFilter;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
@@ -15,10 +18,14 @@ import android.view.WindowManager;
 import androidx.annotation.AttrRes;
 import androidx.annotation.ColorInt;
 import androidx.annotation.FloatRange;
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.graphics.ColorUtils;
 import androidx.preference.PreferenceManager;
+
+import rocks.tbog.tblauncher.R;
 
 public final class UIColors {
     public static final int COLOR_DEFAULT = 0xFF3cb371;
@@ -39,6 +46,8 @@ public final class UIColors {
     private static int CACHED_RIPPLE_POPUP = 0;
     private static int CACHED_COLOR_POPUP_TEXT = 0;
     private static int CACHED_COLOR_POPUP_TITLE = 0;
+    private static boolean CACHED_MAT_ICON = false;
+    private static ColorMatrix COLOR_MATRIX_ICON = null;
 
     private UIColors() {
     }
@@ -61,6 +70,7 @@ public final class UIColors {
         CACHED_RIPPLE_POPUP = 0;
         CACHED_COLOR_POPUP_TEXT = 0;
         CACHED_COLOR_POPUP_TITLE = 0;
+        CACHED_MAT_ICON = false;
     }
 
     public static int getDefaultColor(Context context) {
@@ -283,8 +293,7 @@ public final class UIColors {
     public static int getIconBackground(Context context) {
         if (CACHED_BACKGROUND_ICON == null) {
             SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
-            int color = UIColors.getColor(pref, "icon-background");
-            CACHED_BACKGROUND_ICON = setAlpha(color, 0xFF);
+            CACHED_BACKGROUND_ICON = UIColors.getColor(pref, "icon-background-argb");
         }
         return CACHED_BACKGROUND_ICON;
     }
@@ -347,5 +356,35 @@ public final class UIColors {
         drawable.setColor(color);
 
         return drawable;
+    }
+
+    public static ColorFilter colorFilterQuickIcon(@NonNull Context context) {
+        return colorFilter(context);
+    }
+
+    @Nullable
+    public static ColorFilter colorFilter(@NonNull Context context) {
+        if (!CACHED_MAT_ICON) {
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+            Resources resources = context.getResources();
+            int hue = pref.getInt("icon-hue", resources.getInteger(R.integer.default_icon_hue));
+            int contrast = pref.getInt("icon-contrast", resources.getInteger(R.integer.default_icon_contrast));
+            int brightness = pref.getInt("icon-brightness", resources.getInteger(R.integer.default_icon_brightness));
+            int saturation = pref.getInt("icon-saturation", resources.getInteger(R.integer.default_icon_saturation));
+            int scaleR = pref.getInt("icon-scale-red", resources.getInteger(R.integer.default_icon_scale));
+            int scaleG = pref.getInt("icon-scale-green", resources.getInteger(R.integer.default_icon_scale));
+            int scaleB = pref.getInt("icon-scale-blue", resources.getInteger(R.integer.default_icon_scale));
+            int scaleA = pref.getInt("icon-scale-alpha", resources.getInteger(R.integer.default_icon_scale));
+            final ColorMatrix cm = new ColorMatrix();
+            boolean modified;
+            modified = ColorFilterHelper.adjustScale(cm, scaleR, scaleG, scaleB, scaleA);
+            modified = ColorFilterHelper.adjustHue(cm, hue) || modified;
+            modified = ColorFilterHelper.adjustContrast(cm, contrast) || modified;
+            modified = ColorFilterHelper.adjustBrightness(cm, brightness) || modified;
+            modified = ColorFilterHelper.adjustSaturation(cm, saturation) || modified;
+            CACHED_MAT_ICON = true;
+            COLOR_MATRIX_ICON = modified ? cm : null;
+        }
+        return COLOR_MATRIX_ICON == null ? null : new ColorMatrixColorFilter(COLOR_MATRIX_ICON);
     }
 }

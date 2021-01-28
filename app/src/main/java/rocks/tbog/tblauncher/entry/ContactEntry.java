@@ -110,18 +110,19 @@ public final class ContactEntry extends EntryItem {
     }
 
     private void displayGridResult(@NonNull View view, int drawFlags) {
+        final Context context = view.getContext();
         // Contact name
         TextView nameView = view.findViewById(android.R.id.text1);
-        nameView.setTextColor(UIColors.getResultTextColor(view.getContext()));
+        nameView.setTextColor(UIColors.getResultTextColor(context));
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_NAME))
             ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, nameView);
         else
             nameView.setVisibility(View.GONE);
 
-
         // Contact photo
         ImageView contactIcon = view.findViewById(android.R.id.icon);
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
+            ResultViewHelper.setIconColorFilter(contactIcon, drawFlags);
             contactIcon.setVisibility(View.VISIBLE);
             ResultViewHelper.setIconAsync(drawFlags, this, contactIcon, AsyncSetEntryIcon.class);
         } else {
@@ -133,7 +134,7 @@ public final class ContactEntry extends EntryItem {
     }
 
     private void displayListResult(@NonNull View view, int drawFlags) {
-        Context context = view.getContext();
+        final Context context = view.getContext();
         // Contact name
         TextView contactName = view.findViewById(R.id.item_contact_name);
         contactName.setTextColor(UIColors.getResultTextColor(context));
@@ -157,6 +158,7 @@ public final class ContactEntry extends EntryItem {
         ImageView contactIcon = view.findViewById(android.R.id.icon);
 
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
+            ResultViewHelper.setIconColorFilter(contactIcon, drawFlags);
             contactIcon.setVisibility(View.VISIBLE);
             ResultViewHelper.setIconAsync(drawFlags, this, contactIcon, AsyncSetEntryIcon.class);
         } else {
