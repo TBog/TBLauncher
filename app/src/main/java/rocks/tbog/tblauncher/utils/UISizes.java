@@ -15,6 +15,7 @@ public final class UISizes {
     private static int CACHED_SIZE_RESULT_TEXT2 = 0;
     private static int CACHED_SIZE_RESULT_ICON = 0;
     private static int CACHED_SIZE_STATUS_BAR = 0;
+    private static int CACHED_RADIUS_POPUP_CORNER = -1;
 
     private UISizes() {
     }
@@ -24,6 +25,7 @@ public final class UISizes {
         CACHED_SIZE_RESULT_TEXT2 = 0;
         CACHED_SIZE_RESULT_ICON = 0;
         CACHED_SIZE_STATUS_BAR = 0;
+        CACHED_RADIUS_POPUP_CORNER = -1;
     }
 
     public static int sp2px(Context context, int size) {
@@ -32,6 +34,8 @@ public final class UISizes {
     }
 
     public static int dp2px(Context context, int size) {
+        if (size == 0)
+            return 0;
         float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, size, context.getResources().getDisplayMetrics());
         return Math.max(1, (int) (px + .5f));
     }
@@ -61,7 +65,7 @@ public final class UISizes {
             SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
             final int defaultSize = context.getResources().getInteger(R.integer.default_size_icon);
             final int size = pref.getInt("result-icon-size", defaultSize);
-            CACHED_SIZE_RESULT_ICON = dp2px(context, size);
+            CACHED_SIZE_RESULT_ICON = dp2px(context, Math.max(1, size));
         }
         return CACHED_SIZE_RESULT_ICON;
     }
@@ -71,5 +75,15 @@ public final class UISizes {
             CACHED_SIZE_STATUS_BAR = CutoutFactory.StatusBarCutout.getStatusBarHeight(context);
         }
         return CACHED_SIZE_STATUS_BAR;
+    }
+
+    public static int getPopupCornerRadius(Context context) {
+        if (CACHED_RADIUS_POPUP_CORNER == -1) {
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+            final int defaultSize = context.getResources().getInteger(R.integer.default_corner_radius);
+            final int size = pref.getInt("popup-corner-radius", defaultSize);
+            CACHED_RADIUS_POPUP_CORNER = dp2px(context, size);
+        }
+        return CACHED_RADIUS_POPUP_CORNER;
     }
 }

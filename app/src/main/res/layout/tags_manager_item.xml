@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/relativeLayout"
     android:layout_width="match_parent"
@@ -66,7 +67,7 @@
         android:background="?attr/appSelectableItemBackground"
         android:contentDescription="@string/cd_remove_tag"
         android:scaleType="center"
-        android:src="@drawable/ic_remove_tag" />
+        app:srcCompat="@drawable/ic_remove_tag" />
 
     <ImageView
         android:id="@android:id/button2"
@@ -76,7 +77,7 @@
         android:background="?attr/appSelectableItemBackground"
         android:contentDescription="@string/cd_rename_tag"
         android:scaleType="center"
-        android:src="@drawable/ic_edit" />
+        app:srcCompat="@drawable/ic_edit" />
 
     <ImageView
         android:id="@android:id/button3"
@@ -86,6 +87,6 @@
         android:background="?attr/appSelectableItemBackground"
         android:contentDescription="@string/cd_icon_tag"
         android:scaleType="center"
-        android:src="@drawable/ic_icon" />
+        app:srcCompat="@drawable/ic_icon" />
 
 </LinearLayout>

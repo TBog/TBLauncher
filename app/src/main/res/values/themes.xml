@@ -72,7 +72,7 @@
     </style>
 
     <style name="GradientBorderlessButton">
-        <item name="android:background">?android:attr/selectableItemBackgroundBorderless</item>
+        <item name="android:background">?attr/selectableItemBackgroundBorderless</item>
         <item name="android:textColor">@color/colorAccent</item>
     </style>
 

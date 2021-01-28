@@ -353,6 +353,7 @@
     <string name="icon_scale_blue">Scale blue</string>
     <string name="icon_scale_alpha">Scale transparency</string>
     <string name="reset_matrix">Set default values</string>
+    <string name="popup_corner_radius">Corner radius</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>

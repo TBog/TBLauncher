@@ -38,7 +38,7 @@ public class ResultHelper {
      * @param view    {@link View} that was touched
      * @param pojo the {@link EntryItem} that the user is launching
      */
-    static void launch(@NonNull View view, @NonNull EntryItem pojo) {
+    public static void launch(@NonNull View view, @NonNull EntryItem pojo) {
         TBApplication.behaviour(view.getContext()).beforeLaunchOccurred();
 
         Log.i("log", "Launching " + pojo.id);

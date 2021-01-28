@@ -378,7 +378,8 @@
                 android:defaultValue="@integer/default_bar_size"
                 android:dialogLayout="@layout/pref_slider"
                 android:key="quick-list-size"
-                android:title="@string/quick_list_size" />
+                android:title="@string/quick_list_size"
+                android:widgetLayout="@layout/pref_size_preview" />
 
         </PreferenceCategory>
 
@@ -387,6 +388,13 @@
             android:icon="@drawable/ic_popup"
             android:key="popup-section"
             android:title="@string/popup_section">
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@integer/default_corner_radius"
+                android:dialogLayout="@layout/pref_slider"
+                android:key="popup-corner-radius"
+                android:title="@string/popup_corner_radius"
+                android:widgetLayout="@layout/pref_size_preview" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:key="popup-border-argb"

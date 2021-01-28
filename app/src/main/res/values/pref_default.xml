@@ -22,4 +22,5 @@
     <integer name="default_result_history_size" translatable="false">32</integer>       <!-- count -->
     <integer name="default_result_history_adaptive" translatable="false">36</integer>   <!-- adaptive hours -->
     <integer name="default_result_searcher_cap" translatable="false">0</integer>        <!-- 0->infinite results -->
+    <integer name="default_corner_radius" translatable="false">11</integer>             <!-- 11dp -->
 </resources>

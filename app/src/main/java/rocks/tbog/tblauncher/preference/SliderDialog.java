@@ -58,6 +58,9 @@ public class SliderDialog extends BasePreferenceDialog {
             case "quick-list-size":
                 ((TextView) root.findViewById(android.R.id.text1)).setText(R.string.quick_list_size);
                 break;
+            case "popup-corner-radius":
+                ((TextView) root.findViewById(android.R.id.text1)).setText(R.string.popup_corner_radius);
+                break;
         }
 
         // because we can't set minimum below API 26 we make our own

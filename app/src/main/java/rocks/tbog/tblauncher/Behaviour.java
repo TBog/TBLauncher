@@ -52,6 +52,7 @@ import rocks.tbog.tblauncher.entry.ShortcutEntry;
 import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.quicklist.EditQuickListDialog;
 import rocks.tbog.tblauncher.result.ResultAdapter;
+import rocks.tbog.tblauncher.result.ResultHelper;
 import rocks.tbog.tblauncher.searcher.ISearchActivity;
 import rocks.tbog.tblauncher.searcher.QuerySearcher;
 import rocks.tbog.tblauncher.searcher.Searcher;
@@ -158,6 +159,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         mSearchEditText = searchEditText;
         setSearchHint();
 
+        searchEditText.setTextIsSelectable(false);
         searchEditText.addTextChangedListener(new TextWatcher() {
             public void afterTextChanged(Editable s) {
                 // Auto left-trim text.
@@ -1111,6 +1113,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             case "showAllAppsAZ": {
                 EntryItem item = TBApplication.dataHandler(getContext()).getPojo(ActionEntry.SCHEME + "show/apps/byName");
                 if (item instanceof ActionEntry) {
+                    beforeLaunchOccurred();
                     item.doLaunch(mLauncherButton);
                     return true;
                 }
@@ -1119,6 +1122,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             case "showAllAppsZA": {
                 EntryItem item = TBApplication.dataHandler(getContext()).getPojo(ActionEntry.SCHEME + "show/apps/byNameReversed");
                 if (item instanceof ActionEntry) {
+                    beforeLaunchOccurred();
                     item.doLaunch(mLauncherButton);
                     return true;
                 }

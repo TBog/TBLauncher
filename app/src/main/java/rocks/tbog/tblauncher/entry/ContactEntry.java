@@ -13,7 +13,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
-import androidx.core.content.ContextCompat;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.preference.PreferenceManager;
 
 import java.io.FileNotFoundException;
@@ -242,7 +242,7 @@ public final class ContactEntry extends EntryItem {
                 } catch (FileNotFoundException ignored) {
                 }
             if (drawable == null) {
-                drawable = ContextCompat.getDrawable(ctx, R.drawable.ic_contact_placeholder);
+                drawable = AppCompatResources.getDrawable(ctx, R.drawable.ic_contact_placeholder);
                 if (drawable == null)
                     drawable = new ColorDrawable(UIColors.getDefaultColor(ctx));
             }

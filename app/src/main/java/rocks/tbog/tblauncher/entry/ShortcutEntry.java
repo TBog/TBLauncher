@@ -25,7 +25,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.WorkerThread;
-import androidx.core.content.ContextCompat;
+import androidx.appcompat.content.res.AppCompatResources;
 
 import java.net.URISyntaxException;
 import java.util.List;
@@ -417,7 +417,7 @@ public final class ShortcutEntry extends EntryWithTags {
             ShortcutEntry shortcutEntry = (ShortcutEntry) entryItem;
             Drawable icon = shortcutEntry.getIcon(context);
             if (icon == null) {
-                subIcon = ContextCompat.getDrawable(context, R.drawable.ic_send);
+                subIcon = AppCompatResources.getDrawable(context, R.drawable.ic_send);
                 return getAppDrawable(context, shortcutEntry.shortcutData, shortcutEntry.packageName, shortcutEntry.mShortcutInfo, false);
             } else {
                 subIcon = getAppDrawable(context, shortcutEntry.shortcutData, shortcutEntry.packageName, shortcutEntry.mShortcutInfo, true);

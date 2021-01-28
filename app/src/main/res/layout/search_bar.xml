@@ -32,7 +32,7 @@
             android:paddingLeft="@dimen/launcher_button_padding"
             android:paddingRight="@dimen/launcher_button_padding"
             android:scaleType="fitCenter"
-            android:src="@drawable/launcher_white"
+            app:srcCompat="@drawable/launcher_white"
             app:tint="?attr/searchColor" />
 
         <rocks.tbog.tblauncher.ui.SearchEditText
@@ -72,9 +72,9 @@
                 android:focusable="true"
                 android:paddingLeft="@dimen/launcher_button_padding"
                 android:paddingRight="@dimen/launcher_button_padding"
-                android:scaleType="centerCrop"
-                android:src="@drawable/ic_dots"
-                android:textAlignment="center" />
+                android:scaleType="fitCenter"
+                android:textAlignment="center"
+                app:srcCompat="@drawable/ic_dots" />
 
             <ImageView
                 android:id="@+id/clearButton"
@@ -86,10 +86,10 @@
                 android:focusable="true"
                 android:paddingLeft="@dimen/launcher_button_padding"
                 android:paddingRight="@dimen/launcher_button_padding"
-                android:scaleType="centerCrop"
-                android:src="@drawable/ic_clear"
+                android:scaleType="fitCenter"
                 android:textAlignment="center"
-                android:visibility="invisible" />
+                android:visibility="invisible"
+                app:srcCompat="@drawable/ic_clear" />
 
         </FrameLayout>
     </LinearLayout>

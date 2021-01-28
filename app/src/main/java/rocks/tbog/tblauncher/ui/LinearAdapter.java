@@ -13,7 +13,7 @@ import android.widget.TextView;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
-import androidx.core.content.ContextCompat;
+import androidx.appcompat.content.res.AppCompatResources;
 
 import java.util.ArrayList;
 
@@ -159,7 +159,7 @@ public class LinearAdapter extends BaseAdapter {
             int color = UIColors.getPopupBorderColor(ctx);
             int background = UIColors.getPopupBackgroundColor(ctx);
             int separator = UIColors.isColorLight(background) ? R.drawable.list_separator_dark : R.drawable.list_separator_light;
-            Drawable drawable = ContextCompat.getDrawable(ctx, separator);
+            Drawable drawable = AppCompatResources.getDrawable(ctx, separator);
             if (drawable == null)
                 drawable = divider.getBackground();
             if (drawable != null) {

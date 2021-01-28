@@ -17,10 +17,10 @@
         android:layout_marginStart="@dimen/icon_margin_left"
         android:layout_marginEnd="@dimen/icon_margin_right"
         android:importantForAccessibility="no"
-        android:src="@drawable/ic_contact_placeholder"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_contact_placeholder" />
 
     <TextView
         android:id="@+id/item_contact_name"
@@ -87,10 +87,10 @@
         android:layout_height="@dimen/icon_size"
         android:background="?attr/appSelectableItemBackground"
         android:contentDescription="@string/cd_item_contact_message"
-        android:src="@drawable/ic_message"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/item_contact_action_phone"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_message" />
 
     <ImageButton
         android:id="@+id/item_contact_action_phone"
@@ -98,9 +98,9 @@
         android:layout_height="@dimen/icon_size"
         android:background="?attr/appSelectableItemBackground"
         android:contentDescription="@string/cd_item_contact_call"
-        android:src="@drawable/ic_phone"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_phone" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

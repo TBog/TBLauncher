@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
@@ -14,7 +15,7 @@
         android:layout_gravity="top|left"
         android:importantForAccessibility="no"
         android:rotation="90"
-        android:src="@drawable/ic_handle_resize_bl"
+        app:srcCompat="@drawable/ic_handle_resize_bl"
         tools:ignore="RtlHardcoded" />
 
     <ImageView
@@ -24,7 +25,7 @@
         android:layout_gravity="top|right"
         android:importantForAccessibility="no"
         android:rotation="180"
-        android:src="@drawable/ic_handle_resize_bl"
+        app:srcCompat="@drawable/ic_handle_resize_bl"
         tools:ignore="RtlHardcoded" />
 
     <ImageView
@@ -34,7 +35,7 @@
         android:layout_gravity="bottom|right"
         android:importantForAccessibility="no"
         android:rotation="-90"
-        android:src="@drawable/ic_handle_resize_bl"
+        app:srcCompat="@drawable/ic_handle_resize_bl"
         tools:ignore="RtlHardcoded" />
 
     <ImageView
@@ -43,7 +44,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|left"
         android:importantForAccessibility="no"
-        android:src="@drawable/ic_handle_resize_bl"
+        app:srcCompat="@drawable/ic_handle_resize_bl"
         tools:ignore="RtlHardcoded" />
 
     <ImageView
@@ -52,7 +53,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="left|center_vertical"
         android:importantForAccessibility="no"
-        android:src="@drawable/ic_handle_resize_l"
+        app:srcCompat="@drawable/ic_handle_resize_l"
         tools:ignore="RtlHardcoded" />
 
     <ImageView
@@ -62,7 +63,7 @@
         android:layout_gravity="top|center_horizontal"
         android:importantForAccessibility="no"
         android:rotation="90"
-        android:src="@drawable/ic_handle_resize_l"
+        app:srcCompat="@drawable/ic_handle_resize_l"
         tools:ignore="RtlHardcoded" />
 
     <ImageView
@@ -72,7 +73,7 @@
         android:layout_gravity="right|center_vertical"
         android:importantForAccessibility="no"
         android:rotation="180"
-        android:src="@drawable/ic_handle_resize_l"
+        app:srcCompat="@drawable/ic_handle_resize_l"
         tools:ignore="RtlHardcoded" />
 
     <ImageView
@@ -82,7 +83,7 @@
         android:layout_gravity="bottom|center_horizontal"
         android:importantForAccessibility="no"
         android:rotation="-90"
-        android:src="@drawable/ic_handle_resize_l"
+        app:srcCompat="@drawable/ic_handle_resize_l"
         tools:ignore="RtlHardcoded" />
 
 </FrameLayout>

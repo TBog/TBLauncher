@@ -12,7 +12,7 @@ import android.widget.Toast;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
-import androidx.core.content.ContextCompat;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.graphics.drawable.DrawableCompat;
 
 import rocks.tbog.tblauncher.DataHandler;
@@ -170,7 +170,7 @@ public abstract class StaticEntry extends EntryItem {
     }
 
     public Drawable getDefaultDrawable(Context context) {
-        return ContextCompat.getDrawable(context, iconResource);
+        return AppCompatResources.getDrawable(context, iconResource);
     }
 
     public static class AsyncSetEntryIcon extends ResultViewHelper.AsyncSetEntryDrawable {

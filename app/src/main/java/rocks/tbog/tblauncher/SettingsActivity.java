@@ -27,7 +27,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
@@ -460,6 +460,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "icon-contrast":
                     case "icon-brightness":
                     case "icon-saturation":
+                    case "popup-corner-radius":
                         dialogFragment = SliderDialog.newInstance(key);
                         break;
                     case "reset-matrix":
@@ -530,7 +531,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             return;
         activity.setTitleColor(color);
 
-        Drawable arrow = ContextCompat.getDrawable(activity, R.drawable.ic_arrow_back);
+        Drawable arrow = AppCompatResources.getDrawable(activity, R.drawable.ic_arrow_back);
         if (arrow != null) {
             arrow = DrawableCompat.wrap(arrow);
             DrawableCompat.setTint(arrow, color);
@@ -619,6 +620,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case "result-text-size":
             case "result-text2-size":
             case "result-icon-size":
+            case "popup-corner-radius":
                 UISizes.resetCache();
                 break;
             case "result-history-size":
