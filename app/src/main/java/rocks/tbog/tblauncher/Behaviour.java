@@ -496,6 +496,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     private void showSearchBar() {
         setSearchHint();
 
+        mSearchBarContainer.animate().cancel();
         mSearchBarContainer.setVisibility(View.VISIBLE);
         mSearchBarContainer.animate()
                 .setStartDelay(0)
@@ -534,7 +535,8 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         clearAdapter();
 
         //TODO: animate mResultLayout to fill the space freed by mSearchBarContainer
-        if (animate)
+        if (animate) {
+            mSearchBarContainer.animate().cancel();
             mSearchBarContainer.animate()
                     .setStartDelay(startDelay)
                     .alpha(0f)
@@ -554,7 +556,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                         }
                     })
                     .start();
-        else {
+        } else {
             mSearchBarContainer.animate().cancel();
             TBApplication.state().setSearchBar(LauncherState.AnimatedVisibility.HIDDEN);
             mSearchBarContainer.setAlpha(0f);
