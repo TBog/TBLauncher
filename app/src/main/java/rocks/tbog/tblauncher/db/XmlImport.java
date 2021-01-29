@@ -796,7 +796,7 @@ public class XmlImport {
 
                 tagSet.addAll(entry.getValue());
             }
-            DBHelper.setTags(context, tags);
+            DBHelper.setTagsMap(context, tags);
 
             TBApplication.tagsHandler(context).loadFromDB();
         }

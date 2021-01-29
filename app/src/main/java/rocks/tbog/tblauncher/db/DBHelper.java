@@ -507,7 +507,7 @@ public class DBHelper {
      * @param context android context
      * @param tagsMap map with tag names as key and a list of ids as value
      */
-    public static void setTags(Context context, Map<String, ? extends Collection<String>> tagsMap) {
+    public static void setTagsMap(Context context, Map<String, ? extends Collection<String>> tagsMap) {
         SQLiteDatabase db = getDatabase(context);
         db.beginTransaction();
         try {
@@ -519,6 +519,31 @@ public class DBHelper {
                 values.put("tag", entry.getKey());
                 for (String record : entry.getValue()) {
                     values.put("record", record);
+                    db.insert("tags", null, values);
+                }
+            }
+
+            db.setTransactionSuccessful();
+        } finally {
+            db.endTransaction();
+        }
+    }
+
+    /**
+     * Add all tags from the provided map values
+     *
+     * @param context android context
+     * @param tags map with record names as key and a list of tags as value
+     */
+    public static void addTags(Context context, Map<String, ? extends Collection<String>> tags) {
+        SQLiteDatabase db = getDatabase(context);
+        db.beginTransaction();
+        try {
+            ContentValues values = new ContentValues(2);
+            for (Map.Entry<String, ? extends Collection<String>> entry : tags.entrySet()) {
+                values.put("record", entry.getKey());
+                for (String tag : entry.getValue()) {
+                    values.put("tag", tag);
                     db.insert("tags", null, values);
                 }
             }

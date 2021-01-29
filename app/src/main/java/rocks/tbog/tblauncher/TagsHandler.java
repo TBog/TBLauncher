@@ -49,7 +49,8 @@ public class TagsHandler {
             mTagsCache.putAll(tags);
             if (mTagsCache.isEmpty()) {
                 addDefaultAliases();
-                //DBHelper.setTags(getContext(), mTagsCache);
+                mTagsCache.put(".", Collections.singletonList(""));
+                DBHelper.addTags(getContext(), mTagsCache);
             }
         });
     }
