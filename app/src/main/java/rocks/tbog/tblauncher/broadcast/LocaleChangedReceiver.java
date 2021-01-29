@@ -19,9 +19,8 @@ public class LocaleChangedReceiver extends BroadcastReceiver {
 
         try {
             // If new locale, then reset tags to load the correct aliases
-            TBApplication.tagsHandler(ctx).loadFromDB();
-        }
-        catch(IllegalStateException e) {
+            TBApplication.tagsHandler(ctx).loadFromDB(true);
+        } catch (IllegalStateException e) {
             // Since Android 8.1, we're not allowed to create a new service
             // when the app is not running
             e.printStackTrace();

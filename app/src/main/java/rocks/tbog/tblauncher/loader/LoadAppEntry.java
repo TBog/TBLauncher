@@ -56,7 +56,6 @@ public class LoadAppEntry extends LoadEntryItem<AppEntry> {
     public static class SystemAppLoader {
         private HashMap<String, AppRecord> dbApps = null;
         private ArrayList<AppRecord> pendingChanges = null;
-        private TagsHandler tagsHandler;
         @Nullable
         private final Context ctx;
 
@@ -73,7 +72,6 @@ public class LoadAppEntry extends LoadEntryItem<AppEntry> {
             }
 
             DataHandler dataHandler = TBApplication.getApplication(ctx).getDataHandler();
-            tagsHandler = TBApplication.tagsHandler(ctx);
 
             dbApps = dataHandler.getCachedApps();
             pendingChanges = new ArrayList<>(0);
@@ -135,6 +133,12 @@ public class LoadAppEntry extends LoadEntryItem<AppEntry> {
             pendingChanges = null;
             dbApps = null;
 
+            TagsHandler tagsHandler = TBApplication.tagsHandler(ctx);
+            tagsHandler.runWhenLoaded(()->{
+                for (AppEntry app : apps)
+                    app.setTags(tagsHandler.getTags(app.id));
+            });
+
             return apps;
         }
 
@@ -167,7 +171,6 @@ public class LoadAppEntry extends LoadEntryItem<AppEntry> {
             if (rec.hasCustomIcon())
                 app.setCustomIcon(rec.dbId);
             app.setHiddenByUser(rec.isHidden());
-            app.setTags(tagsHandler.getTags(app.id));
 
             return app;
         }

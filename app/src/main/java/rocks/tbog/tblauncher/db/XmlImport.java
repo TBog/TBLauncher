@@ -798,7 +798,7 @@ public class XmlImport {
             }
             DBHelper.setTagsMap(context, tags);
 
-            TBApplication.tagsHandler(context).loadFromDB();
+            TBApplication.tagsHandler(context).loadFromDB(true);
         }
 
         private void saveFavorites(Context context, Method method) {

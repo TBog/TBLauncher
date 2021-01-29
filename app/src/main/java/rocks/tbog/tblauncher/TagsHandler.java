@@ -11,6 +11,7 @@ import android.os.Build;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -32,27 +33,56 @@ public class TagsHandler {
     private final TBApplication mApplication;
     // HashMap with EntryItem id as key and an ArrayList of tags for each
     private final HashMap<String, List<String>> mTagsCache = new HashMap<>();
+    private boolean mIsLoaded = false;
+    private final ArrayDeque<Runnable> mAfterLoadedTasks = new ArrayDeque<>(2);
 
     TagsHandler(TBApplication application) {
         mApplication = application;
-        loadFromDB();
+        loadFromDB(false);
     }
 
-    public void loadFromDB() {
+    public void loadFromDB(boolean wait) {
+        synchronized (this) {
+            mIsLoaded = false;
+        }
         final HashMap<String, List<String>> tags = new HashMap<>();
-        Utilities.runAsync((t) -> {
+        final Runnable load = () -> {
             Map<String, List<String>> dbTags = DBHelper.loadTags(getContext());
             tags.clear();
             tags.putAll(dbTags);
-        }, (t) -> {
-            mTagsCache.clear();
-            mTagsCache.putAll(tags);
-            if (mTagsCache.isEmpty()) {
+        };
+        final Runnable apply = () -> {
+            if (tags.isEmpty()) {
+                mTagsCache.clear();
                 addDefaultAliases();
                 mTagsCache.put(".", Collections.singletonList(""));
                 DBHelper.addTags(getContext(), mTagsCache);
+                tags.putAll(mTagsCache);
             }
-        });
+            synchronized (TagsHandler.this) {
+                mTagsCache.clear();
+                mTagsCache.putAll(tags);
+                mIsLoaded = true;
+                // run and remove tasks
+                Runnable task;
+                while (null != (task = mAfterLoadedTasks.poll()))
+                    task.run();
+            }
+        };
+        if (wait) {
+            load.run();
+            apply.run();
+        } else
+            Utilities.runAsync((t) -> load.run(), (t) -> apply.run());
+    }
+
+    public void runWhenLoaded(@NonNull Runnable task) {
+        synchronized (this) {
+            if (mIsLoaded)
+                task.run();
+            else
+                mAfterLoadedTasks.add(task);
+        }
     }
 
     private Context getContext() {
