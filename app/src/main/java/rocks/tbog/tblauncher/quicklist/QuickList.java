@@ -312,7 +312,8 @@ public class QuickList {
         }
     }
 
-    public void onResume(SharedPreferences pref) {
+    public void onResume() {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getContext());
         mIsEnabled = pref.getBoolean("quick-list-enabled", true);
         mAlwaysVisible = pref.getBoolean("quick-list-always-visible", true);
         applyUiPref(pref, mQuickList);

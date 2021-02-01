@@ -2,7 +2,6 @@ package rocks.tbog.tblauncher;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
-import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -34,6 +33,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.ActionBar;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.preference.PreferenceManager;
 
 import java.lang.reflect.Constructor;
@@ -132,17 +132,82 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     };
     private SharedPreferences mPref;
 
-    private void initResultLayout(ViewGroup resultLayout) {
-        mResultLayout = resultLayout;
+    private void initResultLayout() {
         mResultAdapter = new ResultAdapter(new ArrayList<>());
-        mResultList = resultLayout.findViewById(R.id.resultList);
+        mResultList = mResultLayout.findViewById(R.id.resultList);
         mResultList.setAdapter(mResultAdapter);
         mResultList.setOnItemClickListener((parent, view, position, id) -> mResultAdapter.onClick(position, view));
         mResultList.setOnItemLongClickListener((parent, view, position, id) -> mResultAdapter.onLongClick(position, view));
     }
 
-    private void initLauncherButton(ImageView launcherButton) {
-        mLauncherButton = launcherButton;
+    private void initSearchBarContainer() {
+        if (PrefCache.searchBarAtBottom(mPref))
+            moveSearchBarAtBottom();
+        else
+            moveSearchBarAtTop();
+    }
+
+    private void moveSearchBarAtBottom() {
+        // move search bar
+        ViewGroup.LayoutParams layoutParams = mSearchBarContainer.getLayoutParams();
+        if (layoutParams instanceof ConstraintLayout.LayoutParams) {
+            ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) layoutParams;
+            params.topToBottom = ConstraintLayout.LayoutParams.UNSET;
+            params.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID;
+            mSearchBarContainer.setLayoutParams(params);
+        }
+
+        // update quick list constraints
+        ViewGroup quickList = findViewById(R.id.quickList);
+        layoutParams = quickList.getLayoutParams();
+        if (layoutParams instanceof ConstraintLayout.LayoutParams) {
+            ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) layoutParams;
+            params.bottomToTop = mSearchBarContainer.getId();
+            params.bottomToBottom = ConstraintLayout.LayoutParams.UNSET;
+            quickList.setLayoutParams(params);
+        }
+
+        // update result list constraints
+        layoutParams = mResultLayout.getLayoutParams();
+        if (layoutParams instanceof ConstraintLayout.LayoutParams) {
+            ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) layoutParams;
+            params.topToBottom = ConstraintLayout.LayoutParams.UNSET;
+            params.topToTop = ConstraintLayout.LayoutParams.PARENT_ID;
+            mResultLayout.setLayoutParams(params);
+        }
+    }
+
+    private void moveSearchBarAtTop() {
+        // move search bar
+        ViewGroup.LayoutParams layoutParams = mSearchBarContainer.getLayoutParams();
+        if (layoutParams instanceof ConstraintLayout.LayoutParams) {
+            ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) layoutParams;
+            params.topToBottom = mNotificationBackground.getId();
+            params.bottomToBottom = ConstraintLayout.LayoutParams.UNSET;
+            mSearchBarContainer.setLayoutParams(params);
+        }
+
+        // update quick list constraints
+        ViewGroup quickList = findViewById(R.id.quickList);
+        layoutParams = quickList.getLayoutParams();
+        if (layoutParams instanceof ConstraintLayout.LayoutParams) {
+            ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) layoutParams;
+            params.bottomToTop = ConstraintLayout.LayoutParams.UNSET;
+            params.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID;
+            quickList.setLayoutParams(params);
+        }
+
+        // update result list constraints
+        layoutParams = mResultLayout.getLayoutParams();
+        if (layoutParams instanceof ConstraintLayout.LayoutParams) {
+            ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) layoutParams;
+            params.topToBottom = mSearchBarContainer.getId();
+            params.topToTop = ConstraintLayout.LayoutParams.UNSET;
+            mResultLayout.setLayoutParams(params);
+        }
+    }
+
+    private void initLauncherButton() {
         //mLoaderSpinner = loaderBar;
         mLauncherButton.setImageDrawable(new LoadingDrawable());
 
@@ -168,12 +233,11 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         }
     }
 
-    private void initLauncherSearchEditText(EditText searchEditText) {
-        mSearchEditText = searchEditText;
+    private void initLauncherSearchEditText() {
         setSearchHint();
 
-        searchEditText.setTextIsSelectable(false);
-        searchEditText.addTextChangedListener(new TextWatcher() {
+        mSearchEditText.setTextIsSelectable(false);
+        mSearchEditText.addTextChangedListener(new TextWatcher() {
             public void afterTextChanged(Editable s) {
                 // Auto left-trim text.
                 if (s.length() > 0 && s.charAt(0) == ' ')
@@ -194,7 +258,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         });
 
         // On validate, launch first record
-        searchEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
+        mSearchEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
             @Override
             public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
                 // if keyboard closed
@@ -214,20 +278,24 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         mTBLauncherActivity = tbLauncherActivity;
         mPref = PreferenceManager.getDefaultSharedPreferences(tbLauncherActivity);
 
-        mSearchBarContainer = findViewById(R.id.searchBarContainer);
+        mNotificationBackground = findViewById(R.id.notificationBackground);
+        mResultLayout = findViewById(R.id.resultLayout);
         mWidgetContainer = findViewById(R.id.widgetContainer);
+        mSearchBarContainer = findViewById(R.id.searchBarContainer);
+        mLauncherButton = findViewById(R.id.launcherButton);
+        mSearchEditText = findViewById(R.id.launcherSearch);
         mClearButton = findViewById(R.id.clearButton);
         mMenuButton = findViewById(R.id.menuButton);
-        mNotificationBackground = findViewById(R.id.notificationBackground);
 
         mDecorView = mTBLauncherActivity.getWindow().getDecorView();
 
         // Set up the user interaction to manually show or hide the system UI.
         //findViewById(R.id.root_layout).setOnClickListener(view -> toggleSearchBar());
 
-        initResultLayout(findViewById(R.id.resultLayout));
-        initLauncherButton(findViewById(R.id.launcherButton));
-        initLauncherSearchEditText(findViewById(R.id.launcherSearch));
+        initResultLayout();
+        initSearchBarContainer();
+        initLauncherButton();
+        initLauncherSearchEditText();
 
         // menu button / 3 dot button actions
         mMenuButton.setOnClickListener(v -> {

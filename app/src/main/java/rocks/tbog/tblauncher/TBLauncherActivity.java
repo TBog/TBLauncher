@@ -177,8 +177,8 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
             return;
         }
 
-        TBApplication.ui(this).onResume();
         TBApplication.behaviour(this).onResume();
+        TBApplication.quickList(this).onResume();
     }
 
     @Override

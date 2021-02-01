@@ -28,6 +28,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
+import androidx.collection.ArraySet;
 import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.fragment.app.DialogFragment;
 import androidx.fragment.app.Fragment;
@@ -42,6 +43,7 @@ import androidx.preference.PreferenceScreen;
 import androidx.preference.SwitchPreference;
 
 import java.io.File;
+import java.util.Arrays;
 
 import rocks.tbog.tblauncher.db.XmlImport;
 import rocks.tbog.tblauncher.drawable.SizeWrappedDrawable;
@@ -64,7 +66,12 @@ import rocks.tbog.tblauncher.utils.Utilities;
 
 public class SettingsActivity extends AppCompatActivity implements PreferenceFragmentCompat.OnPreferenceStartScreenCallback/*, PreferenceFragmentCompat.OnPreferenceStartFragmentCallback*/ {
 
-    private final static String PREF_THAT_REQUIRE_LAYOUT_UPDATE = "result-list-rounded search-bar-rounded search-bar-gradient";
+    private final static ArraySet<String> PREF_THAT_REQUIRE_LAYOUT_UPDATE = new ArraySet<>(Arrays.asList(
+            "result-list-color", "result-list-alpha", "result-ripple-color", "result-list-rounded",
+            "notification-bar-color", "notification-bar-alpha", "notification-bar-gradient", "black-notification-icons",
+            "search-bar-size", "search-bar-rounded", "search-bar-gradient", "search-bar-at-bottom",
+            "search-bar-color", "search-bar-alpha", "search-bar-text-color", "search-bar-icon-color"
+    ));
     private static final int FILE_SELECT_XML_SET = 63;
     private static final int FILE_SELECT_XML_OVERWRITE = 62;
     private static final int FILE_SELECT_XML_APPEND = 61;

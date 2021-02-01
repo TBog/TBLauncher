@@ -73,6 +73,11 @@
             android:summary="@string/reset_search_hint_summary"
             android:title="@string/reset_search_hint" />
 
+        <androidx.preference.SwitchPreference
+            android:defaultValue="true"
+            android:key="search-bar-at-bottom"
+            android:title="@string/search_bar_at_bottom" />
+
         <!-- This is here just to set the default value and be saved in backup, not visible for user -->
         <MultiSelectListPreference
             android:defaultValue="@array/defaultSearchHints"

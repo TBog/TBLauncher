@@ -39,7 +39,7 @@ public class CustomizeUI {
     private ImageView mLauncherButton;
     private ImageView mMenuButton;
     private ImageView mClearButton;
-    private View mResultLayout;
+    //private View mResultLayout;
 
     @SuppressWarnings("TypeParameterUnusedInFormals")
     private <T extends View> T findViewById(@IdRes int id) {
@@ -56,14 +56,11 @@ public class CustomizeUI {
         mLauncherButton = mSearchBarContainer.findViewById(R.id.launcherButton);
         mMenuButton = mSearchBarContainer.findViewById(R.id.menuButton);
         mClearButton = mSearchBarContainer.findViewById(R.id.clearButton);
-        mResultLayout = findViewById(R.id.resultLayout);
-    }
+        //mResultLayout = findViewById(R.id.resultLayout);
 
-    public void onResume() {
         setNotificationBarColor();
         setSearchBarPref();
-        setResultListPref(mResultLayout);
-        TBApplication.quickList(getContext()).onResume(mPref);
+        setResultListPref(findViewById(R.id.resultLayout));
     }
 
     private void setNotificationBarColor() {

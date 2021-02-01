@@ -96,4 +96,7 @@ public class PrefCache {
         return mPref.getBoolean("dm-widget-fullscreen", false);
     }
 
+    public static boolean searchBarAtBottom(SharedPreferences mPref) {
+        return mPref.getBoolean("search-bar-at-bottom", true);
+    }
 }

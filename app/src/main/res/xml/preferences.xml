@@ -249,6 +249,11 @@
                 android:title="@string/search_bar_size"
                 android:widgetLayout="@layout/pref_size_preview" />
 
+            <androidx.preference.SwitchPreference
+                android:defaultValue="true"
+                android:key="search-bar-at-bottom"
+                android:title="@string/search_bar_at_bottom" />
+
         </PreferenceCategory>
 
         <!-- Result list -->
