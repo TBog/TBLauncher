@@ -6,6 +6,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@null"
+    android:fitsSystemWindows="false"
     tools:context=".TBLauncherActivity">
 
     <!-- Views in this Layout are drawn under the status bar and nav bar

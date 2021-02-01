@@ -250,7 +250,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
         @Override
         public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
-            if ("feature-holder".equals(rootKey))
+            if (rootKey != null && rootKey.startsWith("feature-"))
                 setPreferencesFromResource(R.xml.preference_features, rootKey);
             else
                 setPreferencesFromResource(R.xml.preferences, rootKey);

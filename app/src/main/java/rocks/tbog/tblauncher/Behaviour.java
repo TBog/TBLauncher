@@ -19,6 +19,7 @@ import android.util.Log;
 import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
@@ -98,10 +99,22 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     private View mNotificationBackground;
 
     private final Runnable mHidePart2Runnable = new Runnable() {
-        @SuppressLint("InlinedApi")
         @Override
         public void run() {
+            TBApplication.state().setNotificationBar(LauncherState.AnimatedVisibility.ANIM_TO_HIDDEN);
+            if (TBApplication.state().isKeyboardVisible()) {
+                // if keyboard is visible, the notification bar is also visible
+                return;
+            }
+
+
+            // Delayed hide UI elements
+            ActionBar actionBar = mTBLauncherActivity != null ? mTBLauncherActivity.getSupportActionBar() : null;
+            if (actionBar != null) {
+                actionBar.hide();
+            }
             SystemUiVisibility.setFullscreen(mDecorView);
+            mTBLauncherActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         }
     };
 
@@ -113,7 +126,8 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             if (actionBar != null) {
                 actionBar.show();
             }
-//            mSearchBarContainer.setVisibility(View.VISIBLE);
+            SystemUiVisibility.clearFullscreen(mDecorView);
+            mTBLauncherActivity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         }
     };
     private SharedPreferences mPref;
@@ -138,7 +152,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         //mLauncherButton.setOnTouchListener(mDelayHideTouchListener);
 
         //mLauncherButton.setOnClickListener((v) -> TBApplication.dataHandler(v.getContext()).reloadProviders());
-        mLauncherButton.setOnClickListener((v) -> executeAction(mPref.getString("gesture-launcher-button", null)));
+        mLauncherButton.setOnClickListener((v) -> executeAction(mPref.getString("button-launcher", null)));
     }
 
     private void setSearchHint() {
@@ -237,11 +251,9 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         });
 
         // clear button actions
-        mClearButton.setOnClickListener(v -> {
-            clearSearch();
-        });
+        mClearButton.setOnClickListener(v -> clearSearch());
         mClearButton.setOnLongClickListener(v -> {
-            mSearchEditText.setText("");
+            clearSearch();
 
             Context ctx = v.getContext();
             ListPopup menu = getMenuPopup(ctx);
@@ -352,7 +364,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     public void showDesktop(@NonNull LauncherState.Desktop mode) {
         // get current mode
         LauncherState.Desktop currentMode = TBApplication.state().getDesktop();
-
+        Log.d(TAG, "desktop changed " + currentMode + " -> " + mode);
         if (currentMode == mode) {
             // no change, maybe refresh?
             return;
@@ -360,10 +372,10 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 
         // hide current mode
         switch (currentMode) {
-            case DESKTOP_SEARCH:
+            case SEARCH:
                 hideSearchBar();
                 break;
-            case DESKTOP_WIDGET:
+            case WIDGET:
                 hideWidgets();
                 break;
         }
@@ -371,7 +383,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         // show next mode
         TBApplication.state().setDesktop(mode);
         switch (mode) {
-            case DESKTOP_EMPTY:
+            case EMPTY:
                 // hide/show the QuickList
                 if (PrefCache.modeEmptyQuickListVisible(mPref))
                     TBApplication.quickList(getContext()).showQuickList();
@@ -383,7 +395,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                 else
                     disableFullscreen();
                 break;
-            case DESKTOP_SEARCH:
+            case SEARCH:
                 // show the SearchBar
                 showSearchBar();
                 // hide/show the QuickList
@@ -397,7 +409,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                 else
                     disableFullscreen();
                 break;
-            case DESKTOP_WIDGET:
+            case WIDGET:
                 // show widgets
                 showWidgets();
                 // hide/show the QuickList
@@ -424,12 +436,12 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 
         // Schedule a runnable to remove the status and navigation bar after a delay
         mDecorView.removeCallbacks(mShowPart2Runnable);
-        //mHideHandler.post(mHidePart2Runnable);
         mDecorView.postDelayed(mHidePart2Runnable, startDelay);
 
         // hide notification background
         final int statusHeight = UISizes.getStatusBarSize(getContext());
-        if (animate)
+        mNotificationBackground.animate().cancel();
+        if (animate) {
             mNotificationBackground.animate()
                     .translationY(-statusHeight)
                     .setStartDelay(startDelay)
@@ -447,8 +459,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                         }
                     })
                     .start();
-        else {
-            mNotificationBackground.animate().cancel();
+        } else {
             TBApplication.state().setNotificationBar(LauncherState.AnimatedVisibility.HIDDEN);
             mNotificationBackground.setTranslationY(-statusHeight);
         }
@@ -468,7 +479,8 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         final int statusHeight = UISizes.getStatusBarSize(getContext());
         if (!TBApplication.state().isNotificationBarVisible())
             mNotificationBackground.setTranslationY(-statusHeight);
-        if (animate)
+        mNotificationBackground.animate().cancel();
+        if (animate) {
             mNotificationBackground.animate()
                     .translationY(0f)
                     .setStartDelay(0)
@@ -486,8 +498,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                         }
                     })
                     .start();
-        else {
-            mNotificationBackground.animate().cancel();
+        } else {
             TBApplication.state().setNotificationBar(LauncherState.AnimatedVisibility.VISIBLE);
             mNotificationBackground.setTranslationY(0f);
         }
@@ -535,8 +546,8 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         clearAdapter();
 
         //TODO: animate mResultLayout to fill the space freed by mSearchBarContainer
+        mSearchBarContainer.animate().cancel();
         if (animate) {
-            mSearchBarContainer.animate().cancel();
             mSearchBarContainer.animate()
                     .setStartDelay(startDelay)
                     .alpha(0f)
@@ -557,7 +568,6 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                     })
                     .start();
         } else {
-            mSearchBarContainer.animate().cancel();
             TBApplication.state().setSearchBar(LauncherState.AnimatedVisibility.HIDDEN);
             mSearchBarContainer.setAlpha(0f);
             mSearchBarContainer.setTranslationY(mSearchBarContainer.getHeight() * 2f);
@@ -786,7 +796,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             }
             if (PrefCache.showWidgetScreenAfterLaunch(mPref)) {
                 // show widgets when we return to the launcher
-                hideSearchBar(0, true);
+                showDesktop(LauncherState.Desktop.WIDGET);
             }
         }, UI_ANIMATION_DELAY);
     }
@@ -821,7 +831,10 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             return true;
         //mHider.fixScroll();
         mSearchEditText.setText("");
-        hideSearchBar(0, true);
+        LauncherState state = TBApplication.state();
+        state.setKeyboard(LauncherState.AnimatedVisibility.HIDDEN);
+        if (!state.isNotificationBarVisible())
+            enableFullscreen(0);
         return false;
     }
 
@@ -1029,21 +1042,27 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             }
         }
 
+//        if (TBApplication.state().getDesktop() == LauncherState.Desktop.SEARCH) {
+//            // can't show keyboard if we don't have focus, wait for onWindowFocusChanged
+//            mSearchEditText.requestFocus();
+//            mSearchEditText.postDelayed(this::showKeyboard, UI_ANIMATION_DURATION);
+//        }
+
 //        TBApplication app = TBApplication.getApplication(getContext());
 //        app.getDataHandler().checkServices();
 //        LauncherState state = TBApplication.state();
 //        switch (state.getDesktop()) {
-//            case DESKTOP_WIDGET:
+//            case WIDGET:
 //                if (state.isSearchBarVisible())
 //                    hideSearchBar(0, false);
 //                break;
-//            case DESKTOP_SEARCH:
+//            case SEARCH:
 //                // can't show keyboard if we don't have focus, wait for onWindowFocusChanged
 //                mSearchEditText.requestFocus();
 //                mSearchEditText.postDelayed(this::showKeyboard, UI_ANIMATION_DURATION);
 //                showSearchBar();
 //                break;
-//            case DESKTOP_EMPTY:
+//            case EMPTY:
 //            default:
 //                if (state.isSearchBarVisible())
 //                    hideSearchBar(0, false);
@@ -1055,6 +1074,8 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     public void onNewIntent() {
         LauncherState state = TBApplication.state();
         Log.i(TAG, "onNewIntent desktop=" + state.getDesktop());
+
+        executeAction(mPref.getString("button-home", null));
 //        if (mSearchEditText.getText().length() > 0) {
 //            mSearchEditText.setText("");
 //            hideKeyboard();
@@ -1078,8 +1099,8 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     public void onWindowFocusChanged(boolean hasFocus) {
         Log.i(TAG, "onWindowFocusChanged " + hasFocus);
         LauncherState state = TBApplication.state();
-        if (hasFocus && state.isSearchBarVisible()) {
-            if (!state.isKeyboardVisible() && !state.isResultListVisible()) {
+        if (hasFocus && state.getDesktop() == LauncherState.Desktop.SEARCH) {
+            if (state.isSearchBarVisible() && PrefCache.linkKeyboardAndSearchBar(mPref)) {
                 mSearchEditText.requestFocus();
                 // UI_ANIMATION_DURATION should be the exact time the full-screen animation ends
                 mSearchEditText.postDelayed(this::showKeyboard, UI_ANIMATION_DURATION);
@@ -1089,9 +1110,8 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                 mResultLayout.setVisibility(View.VISIBLE);
             }
         } else {
-            if (state.isWidgetScreenVisible()) {
+            if (state.getDesktop() == LauncherState.Desktop.WIDGET) {
                 hideKeyboard();
-                hideSearchBar(0, false);
             }
         }
     }
@@ -1107,16 +1127,32 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                 Utilities.expandSettingsPanel(mTBLauncherActivity);
                 return true;
             case "showSearchBar":
-                showDesktop(LauncherState.Desktop.DESKTOP_SEARCH);
+                showDesktop(LauncherState.Desktop.SEARCH);
                 return true;
             case "showWidgets":
-                showDesktop(LauncherState.Desktop.DESKTOP_WIDGET);
+                showDesktop(LauncherState.Desktop.WIDGET);
+                return true;
+            case "showEmpty":
+                showDesktop(LauncherState.Desktop.EMPTY);
                 return true;
             case "toggleSearchAndWidget":
-                if (TBApplication.state().getDesktop() == LauncherState.Desktop.DESKTOP_SEARCH)
-                    showDesktop(LauncherState.Desktop.DESKTOP_WIDGET);
+                if (TBApplication.state().getDesktop() == LauncherState.Desktop.SEARCH)
+                    showDesktop(LauncherState.Desktop.WIDGET);
                 else
-                    showDesktop(LauncherState.Desktop.DESKTOP_SEARCH);
+                    showDesktop(LauncherState.Desktop.SEARCH);
+                return true;
+            case "toggleSearchWidgetEmpty":
+                switch (TBApplication.state().getDesktop()) {
+                    case SEARCH:
+                        showDesktop(LauncherState.Desktop.WIDGET);
+                        break;
+                    case WIDGET:
+                        showDesktop(LauncherState.Desktop.EMPTY);
+                        break;
+                    default:
+                        showDesktop(LauncherState.Desktop.SEARCH);
+                        break;
+                }
                 return true;
             case "reloadProviders":
                 TBApplication.dataHandler(getContext()).reloadProviders();

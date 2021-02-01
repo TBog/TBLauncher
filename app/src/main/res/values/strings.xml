@@ -237,7 +237,7 @@
     <string name="tab_app_icons">%s\n[app icons]</string>
     <string name="tab_static_icons">Default icon</string>
     <string name="icon_pack_loading">Loading from icon packs…</string>
-    <string name="gesture_section">Gestures and buttons</string>
+    <string name="gesture_section">Gestures</string>
     <string name="gesture_fling_down_left">Fling from |<b>←</b>|, <b>↓</b></string>
     <string name="gesture_fling_down_left_summary">Start from the <b>←</b> side of the screen and fling <b>↓</b></string>
     <string name="gesture_fling_down_right">Fling from |<b>→</b>|, <b>↓</b></string>
@@ -341,7 +341,8 @@
     <string name="settings_deep_blues">DeepBlues</string>
     <string name="title_static_rename">Choose a custom name</string>
     <string name="letters_toggle">Letter icons</string>
-    <string name="gesture_launcher_button">Launcher button</string>
+    <string name="button_launcher">Launcher button</string>
+    <string name="button_home">Home button</string>
     <string name="icon_contrast">Contrast</string>
     <string name="icon_brightness">Brightness</string>
     <string name="icon_hue">Hue</string>

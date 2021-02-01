@@ -11,9 +11,9 @@ public class LauncherState {
     }
 
     public enum Desktop {
-        DESKTOP_SEARCH,
-        DESKTOP_WIDGET,
-        DESKTOP_EMPTY,
+        SEARCH,
+        WIDGET,
+        EMPTY,
     }
 
     private AnimatedVisibility quickList = AnimatedVisibility.HIDDEN;
@@ -24,7 +24,7 @@ public class LauncherState {
     private AnimatedVisibility clearScreen = AnimatedVisibility.HIDDEN;
     private AnimatedVisibility keyboard = AnimatedVisibility.HIDDEN;
 
-    private Desktop desktop = Desktop.DESKTOP_EMPTY;
+    private Desktop desktop = Desktop.EMPTY;
 
     private static boolean isVisible(AnimatedVisibility state) {
         return state == AnimatedVisibility.ANIM_TO_VISIBLE ||

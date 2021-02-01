@@ -234,12 +234,6 @@
         android:key="gesture-section"
         android:title="@string/gesture_section">
         <ListPreference
-            android:defaultValue="showAllAppsZA"
-            android:entries="@array/gestureEntries"
-            android:entryValues="@array/gestureValues"
-            android:key="gesture-launcher-button"
-            android:title="@string/gesture_launcher_button" />
-        <ListPreference
             android:defaultValue="toggleSearchAndWidget"
             android:entries="@array/gestureEntries"
             android:entryValues="@array/gestureValues"
@@ -285,6 +279,20 @@
         android:key="behaviour-section"
         android:title="@string/behaviour_section">
 
+        <ListPreference
+            android:defaultValue="showAllAppsZA"
+            android:entries="@array/gestureEntries"
+            android:entryValues="@array/gestureValues"
+            android:key="button-launcher"
+            android:title="@string/button_launcher" />
+
+        <ListPreference
+            android:defaultValue="showSearchBar"
+            android:entries="@array/gestureEntries"
+            android:entryValues="@array/gestureValues"
+            android:key="button-home"
+            android:title="@string/button_home" />
+
         <androidx.preference.SwitchPreference
             android:defaultValue="true"
             android:key="behaviour-link-keyboard-search-bar"
@@ -302,7 +310,7 @@
 
         <!-- ‹Empty› desktop mode -->
         <PreferenceScreen
-            android:key="desktop-mode-empty-holder"
+            android:key="feature-desktop-mode-empty-holder"
             android:title="@string/title_desktop_mode_empty">
 
             <androidx.preference.SwitchPreference
@@ -319,7 +327,7 @@
 
         <!-- ‹Search› desktop mode -->
         <PreferenceScreen
-            android:key="desktop-mode-search-holder"
+            android:key="feature-desktop-mode-search-holder"
             android:title="@string/title_desktop_mode_search">
 
             <androidx.preference.SwitchPreference
@@ -336,7 +344,7 @@
 
         <!-- ‹Widget› desktop mode -->
         <PreferenceScreen
-            android:key="desktop-mode-widget-holder"
+            android:key="feature-desktop-mode-widget-holder"
             android:title="@string/title_desktop_mode_widget">
 
             <androidx.preference.SwitchPreference
