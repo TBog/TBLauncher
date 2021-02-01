@@ -25,6 +25,7 @@ import androidx.annotation.Nullable;
 import androidx.preference.PreferenceManager;
 
 import rocks.tbog.tblauncher.ui.SearchEditText;
+import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.SystemUiVisibility;
 import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.UISizes;
@@ -143,8 +144,16 @@ public class CustomizeUI {
         int color = UIColors.getColor(mPref, "search-bar-color");
         int alpha = UIColors.getAlpha(mPref, "search-bar-alpha");
         if (mPref.getBoolean("search-bar-gradient", true)) {
-            mSearchBarContainer.setBackgroundResource(R.drawable.search_bar_background);
-            Utilities.setColorFilterMultiply(mSearchBarContainer.getBackground(), UIColors.setAlpha(color, alpha));
+            final GradientDrawable.Orientation orientation;
+            if (PrefCache.searchBarAtBottom(mPref))
+                orientation = GradientDrawable.Orientation.TOP_BOTTOM;
+            else
+                orientation = GradientDrawable.Orientation.BOTTOM_TOP;
+            int c1 = UIColors.setAlpha(color, 0);
+            int c2 = UIColors.setAlpha(color, alpha * 3 / 4);
+            int c3 = UIColors.setAlpha(color, alpha);
+            GradientDrawable drawable = new GradientDrawable(orientation, new int[]{c1, c2, c3});
+            mSearchBarContainer.setBackground(drawable);
         } else if (mPref.getBoolean("search-bar-rounded", true)) {
             PaintDrawable drawable = new PaintDrawable();
             drawable.getPaint().setColor(UIColors.setAlpha(color, alpha));

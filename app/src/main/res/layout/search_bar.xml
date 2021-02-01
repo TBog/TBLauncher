@@ -15,8 +15,7 @@
         android:orientation="horizontal"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="parent"
-        tools:background="@drawable/search_bar_background"
-        tools:backgroundTint="@color/colorAccent"
+        tools:background="@color/colorPrimaryDark"
         tools:visibility="visible">
 
         <ImageView
