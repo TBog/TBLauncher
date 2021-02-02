@@ -725,8 +725,6 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     public void clearAdapter() {
         mResultAdapter.clear();
         TBApplication.quickList(getContext()).adapterCleared();
-        if (!TBApplication.state().isSearchBarVisible())
-            return;
         TBApplication.state().setResultList(LauncherState.AnimatedVisibility.HIDDEN);
         mResultLayout.setVisibility(View.INVISIBLE);
         updateClearButton();
@@ -869,6 +867,9 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                 // We selected an item on the list, now we can cleanup the filter:
                 if (mSearchEditText.getText().length() > 0) {
                     mSearchEditText.setText("");
+                } else if (TBApplication.state().isResultListVisible())
+                {
+                    clearAdapter();
                 }
             }
             if (PrefCache.showWidgetScreenAfterLaunch(mPref)) {
