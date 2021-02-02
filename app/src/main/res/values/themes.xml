@@ -93,7 +93,7 @@
 
     <style name="TitleDialogTheme" parent="Theme.AppCompat.Dialog.Alert">
         <item name="android:windowNoTitle">false</item>
-        <item name="android:colorBackground">#000</item>
+        <item name="android:colorBackground">@android:color/transparent</item>
         <item name="android:windowFrame">@null</item>
         <item name="android:windowTitleStyle">@style/GradientWindowTitle</item>
         <item name="android:windowBackground">@drawable/dialog_background</item>
@@ -119,10 +119,10 @@
         <item name="dividerDrawable">@null</item>
         <item name="textShadowRadius">3</item>
 
-        <item name="colorControlHighlight">@color/colorAccent</item>
-        <item name="colorControlActivated">?android:attr/textColor</item>
         <item name="colorControlNormal">?android:attr/textColorSecondary</item>
-        <item name="android:textColorPrimaryDisableOnly">#f00</item>
+        <item name="colorControlHighlight">@color/colorAccent</item>
+        <item name="colorControlActivated">@color/colorAccent</item>
+        <item name="android:textColorPrimaryDisableOnly">@color/undefined</item>
 
         <item name="android:buttonBarStyle">@style/GradientButtonBar</item>
         <item name="android:buttonBarButtonStyle">@style/GradientBorderlessButton</item>
@@ -185,6 +185,8 @@
         <item name="android:textColorSecondary">@color/secondary_text_selector_darkbg</item>
         <item name="android:listDivider">@drawable/list_separator_light</item>
         <item name="android:windowTitleStyle">@style/SettingsDialogTitle</item>
+
+        <item name="android:textColorHighlight">?android:attr/textColorSecondary</item>
     </style>
 
     <style name="SettingsDialogTheme.White">
@@ -199,8 +201,9 @@
 
         <item name="colorPrimary">@color/primary_text_selector_lightbg</item>
         <item name="colorPrimaryDark">@android:color/black</item>
-        <item name="colorControlHighlight">@android:color/black</item>
         <item name="colorControlNormal">@android:color/black</item>
+        <item name="colorControlHighlight">@android:color/black</item>
+        <item name="colorControlActivated">@color/settings_secondary_selector_lightbg</item>
 
         <item name="android:buttonBarStyle">@style/GradientButtonBar.White</item>
         <item name="android:buttonBarButtonStyle">@style/GradientBorderlessButton.White</item>
@@ -221,8 +224,9 @@
 
         <item name="colorPrimary">@color/Black_selector_primary_disable</item>
         <item name="colorPrimaryDark">@color/Black_selector_primary</item>
-        <item name="colorControlHighlight">@color/Black_selector_primary</item>
         <item name="colorControlNormal">@color/Black_selector_primary_disable</item>
+        <item name="colorControlHighlight">@color/Black_selector_primary</item>
+        <item name="colorControlActivated">@color/Black_accent</item>
 
         <item name="android:buttonBarStyle">@style/GradientButtonBar.Black</item>
         <item name="android:buttonBarButtonStyle">@style/GradientBorderlessButton.Black</item>
@@ -243,8 +247,9 @@
 
         <item name="colorPrimary">@color/DeepBlues_selector_primary</item>
         <item name="colorPrimaryDark">@color/DeepBlues_2</item>
-        <item name="colorControlHighlight">@color/DeepBlues_selector_primary</item>
         <item name="colorControlNormal">@color/DeepBlues_3</item>
+        <item name="colorControlHighlight">@color/DeepBlues_selector_primary</item>
+        <item name="colorControlActivated">@color/DeepBlues_4</item>
 
         <item name="android:buttonBarStyle">@style/GradientButtonBar.DeepBlues</item>
         <item name="android:buttonBarButtonStyle">@style/GradientBorderlessButton.DeepBlues</item>

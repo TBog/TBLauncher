@@ -263,6 +263,10 @@ public final class UIColors {
         return CACHED_COLOR_SEARCH_ICON;
     }
 
+    public static int getSearchRippleColor(Context context) {
+        return getResultListRipple(context);
+    }
+
     public static int getResultListBackground(Context context) {
         if (CACHED_BACKGROUND_RESULT_LIST == null) {
             SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);

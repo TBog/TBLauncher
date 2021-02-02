@@ -57,7 +57,6 @@ public class CustomizeUI {
         mLauncherButton = mSearchBarContainer.findViewById(R.id.launcherButton);
         mMenuButton = mSearchBarContainer.findViewById(R.id.menuButton);
         mClearButton = mSearchBarContainer.findViewById(R.id.clearButton);
-        //mResultLayout = findViewById(R.id.resultLayout);
 
         setNotificationBarColor();
         setSearchBarPref();
@@ -123,11 +122,22 @@ public class CustomizeUI {
 
         // text color
         {
-            int searchTextColor = UIColors.getSearchTextColor(mSearchBar.getContext());
+            Context ctx = mSearchBar.getContext();
+            int searchTextColor = UIColors.getSearchTextColor(ctx);
+            int searchHighlightColor = UIColors.getSearchRippleColor(ctx);
             int searchHintColor = UIColors.setAlpha(searchTextColor, 0xBB);
             mSearchBar.setTextColor(searchTextColor);
+            mSearchBar.setHighlightColor(searchHighlightColor);
             mSearchBar.setHintTextColor(searchHintColor);
+            Utilities.setTextCursorColor(mSearchBar, 0xFFffd700);
+            Utilities.setTextSelectHandleColor(mSearchBar, searchHighlightColor);
         }
+
+//        {
+//            ShapeDrawable drawable = new ShapeDrawable(new RectShape());
+//            drawable.setIntrinsicWidth(UISizes.dp2px(mSearchBar.getContext(), 1));
+//            Utilities.setTextCursorDrawable(mSearchBar, drawable);
+//        }
 
         // icon color
         {

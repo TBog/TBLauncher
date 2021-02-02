@@ -15,21 +15,28 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.ShapeDrawable;
+import android.graphics.drawable.shapes.RectShape;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Base64;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 import androidx.annotation.WorkerThread;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.content.res.ResourcesCompat;
 
 import java.lang.ref.WeakReference;
@@ -45,6 +52,7 @@ public class Utilities {
     final static Executor EXECUTOR_RUN_ASYNC = AsyncTask.THREAD_POOL_EXECUTOR;
     private final static int[] ON_SCREEN_POS = new int[2];
     private final static Rect ON_SCREEN_RECT = new Rect();
+    private static final String TAG = "TBUtil";
 
     // https://stackoverflow.com/questions/3035692/how-to-convert-a-drawable-to-a-bitmap
     @NonNull
@@ -308,6 +316,206 @@ public class Utilities {
             } catch (Exception ignored) {
             }
         }
+    }
+
+    public static boolean classContainsDeclaredField(@NonNull Class<?> objectClass, @NonNull String fieldName) {
+        for (Field field : objectClass.getDeclaredFields()) {
+            if (field.getName().equals(fieldName)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public static void setTextCursorDrawable(TextView editText, Drawable drawable) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            editText.setTextCursorDrawable(drawable);
+        } else {
+            if (classContainsDeclaredField(TextView.class, "mCursorDrawableRes")) {
+                try {
+                    Field fmCursorDrawableRes = TextView.class.getDeclaredField("mCursorDrawableRes");
+                    fmCursorDrawableRes.setAccessible(true);
+                    fmCursorDrawableRes.setInt(editText, 0);
+                } catch (Throwable t) {
+                    Log.w(TAG, "set TextView mCursorDrawableRes", t);
+                }
+            }
+            if (classContainsDeclaredField(TextView.class, "mCursorDrawable")) {
+                try {
+                    Field fmCursorDrawable = TextView.class.getDeclaredField("mCursorDrawable");
+                    fmCursorDrawable.setAccessible(true);
+                    fmCursorDrawable.set(editText, drawable);
+                } catch (Throwable t) {
+                    Log.w(TAG, "set TextView mCursorDrawable", t);
+                }
+            }
+            //https://github.com/aosp-mirror/platform_frameworks_base/blob/c46c4a6765196bcabf3ea89771a1f9067b22baad/core/java/android/widget/TextView.java#L4587
+            if (classContainsDeclaredField(TextView.class, "mEditor")) {
+                Object mEditor = null;
+                try {
+                    Field fmEditor = TextView.class.getDeclaredField("mEditor");
+                    fmEditor.setAccessible(true);
+                    mEditor = fmEditor.get(editText);
+                } catch (Throwable t) {
+                    Log.w(TAG, "get TextView mEditor", t);
+                }
+                if (mEditor != null
+                        && classContainsDeclaredField(mEditor.getClass(), "mCursorCount")
+                        && classContainsDeclaredField(mEditor.getClass(), "mCursorDrawable")) {
+                    try {
+                        Field fmCursorDrawable = mEditor.getClass().getDeclaredField("mCursorDrawable");
+                        fmCursorDrawable.setAccessible(true);
+                        fmCursorDrawable.set(mEditor, new Drawable[]{drawable, drawable});
+                    } catch (Throwable t) {
+                        Log.w(TAG, "set Editor mCursorDrawable[2]", t);
+                    }
+                }
+            }
+        }
+    }
+
+    @Nullable
+    private static Drawable getDrawableFromTextView(@NonNull TextView view, @NonNull String fieldName, @NonNull String editorField) {
+        Context ctx = view.getContext();
+        Drawable drawable = null;
+        try {
+            Field f_res = TextView.class.getDeclaredField(fieldName + "Res");
+            f_res.setAccessible(true);
+            int res = f_res.getInt(view);
+            if (res != Resources.ID_NULL)
+                drawable = AppCompatResources.getDrawable(ctx, res);
+        } catch (Throwable t) {
+            Log.w(TAG, "get `" + fieldName + "` from " + TextView.class, t);
+        }
+        if (drawable != null)
+            return drawable;
+
+        if (classContainsDeclaredField(TextView.class, fieldName)) {
+            try {
+                Field f_drawable = TextView.class.getDeclaredField(fieldName);
+                f_drawable.setAccessible(true);
+                drawable = (Drawable) f_drawable.get(view);
+            } catch (Throwable t) {
+                Log.w(TAG, "get `" + fieldName + "` from " + TextView.class, t);
+            }
+        }
+        if (drawable != null)
+            return drawable;
+
+        Object editor = null;
+        try {
+            Field f_editor = TextView.class.getDeclaredField("mEditor");
+            f_editor.setAccessible(true);
+            editor = f_editor.get(view);
+        } catch (Throwable t) {
+            Log.w(TAG, "get Editor from " + view.getClass(), t);
+        }
+        if (editor != null) {
+            try {
+                Field f_handle = editor.getClass().getDeclaredField(editorField);
+                f_handle.setAccessible(true);
+                if (f_handle.getType().isArray()) {
+                    Object drawables = f_handle.get(editor);
+                    drawable = ((Drawable[]) drawables)[0];
+                } else {
+                    drawable = (Drawable) f_handle.get(editor);
+                }
+            } catch (Throwable t) {
+                Log.w(TAG, "get `" + editorField + "` from " + editor.getClass(), t);
+            }
+        }
+
+        return drawable;
+    }
+
+    public static void setTextCursorColor(@NonNull TextView editText, @ColorInt int color) {
+        Context ctx = editText.getContext();
+        Drawable drawable = getDrawableFromTextView(editText, "mCursorDrawable", "mCursorDrawable");
+        if (drawable == null) {
+            drawable = new ShapeDrawable(new RectShape());
+            ((ShapeDrawable) drawable).setIntrinsicWidth(UISizes.dp2px(ctx, 2));
+            ((ShapeDrawable) drawable).getPaint().setColor(color);
+        }
+        drawable.setColorFilter(color, PorterDuff.Mode.SRC_IN);
+        setTextCursorDrawable(editText, drawable);
+    }
+
+    private static void setTextSelectHandle(@NonNull TextView editText, @NonNull String fieldName, @NonNull String editorField, Drawable drawable) {
+        String fieldNameRes = fieldName + "Res";
+        if (classContainsDeclaredField(TextView.class, fieldNameRes)) {
+            try {
+                Field f_handleRes = TextView.class.getDeclaredField(fieldNameRes);
+                f_handleRes.setAccessible(true);
+                f_handleRes.setInt(editText, 0);
+            } catch (Throwable t) {
+                Log.w(TAG, "set `" + fieldNameRes + "` from " + editText.getClass(), t);
+            }
+        }
+        if (classContainsDeclaredField(TextView.class, fieldName)) {
+            try {
+                Field f_handle = TextView.class.getDeclaredField(fieldName);
+                f_handle.setAccessible(true);
+                f_handle.set(editText, drawable);
+            } catch (Throwable t) {
+                Log.w(TAG, "set `" + fieldName + "` from " + editText.getClass(), t);
+            }
+        }
+        if (!classContainsDeclaredField(TextView.class, "mEditor"))
+            return;
+        Object editor = null;
+        try {
+            Field f_editor = TextView.class.getDeclaredField("mEditor");
+            f_editor.setAccessible(true);
+            editor = f_editor.get(editText);
+        } catch (Throwable t) {
+            Log.w(TAG, "get Editor from " + editText.getClass(), t);
+        }
+        if (editor == null)
+            return;
+        try {
+            Field f_handle = editor.getClass().getDeclaredField(editorField);
+            f_handle.setAccessible(true);
+            f_handle.set(editor, drawable);
+        } catch (Throwable t) {
+            Log.w(TAG, "set `" + editorField + "` from " + editor.getClass(), t);
+        }
+    }
+
+    public static void setTextSelectHandle(@NonNull TextView editText, Drawable left, Drawable right, Drawable center) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            editText.setTextSelectHandle(center);
+            editText.setTextSelectHandleLeft(left);
+            editText.setTextSelectHandleRight(right);
+        } else {
+            setTextSelectHandle(editText, "mTextSelectHandleLeft", "mSelectHandleLeft", left);
+            setTextSelectHandle(editText, "mTextSelectHandleRight", "mSelectHandleRight", right);
+            setTextSelectHandle(editText, "mTextSelectHandle", "mSelectHandleCenter", center);
+        }
+    }
+
+    public static void setTextSelectHandleColor(@NonNull TextView editText, @ColorInt int color) {
+        Drawable drawableLeft;
+        Drawable drawableRight;
+        Drawable drawableCenter;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            drawableLeft = editText.getTextSelectHandleLeft();
+            drawableRight = editText.getTextSelectHandleRight();
+            drawableCenter = editText.getTextSelectHandle();
+        } else {
+            drawableLeft = getDrawableFromTextView(editText, "mTextSelectHandleLeft", "mSelectHandleLeft");
+            drawableRight = getDrawableFromTextView(editText, "mTextSelectHandleRight", "mSelectHandleRight");
+            drawableCenter = getDrawableFromTextView(editText, "mTextSelectHandle", "mSelectHandleCenter");
+        }
+        if (drawableLeft == null)
+            drawableLeft = new ColorDrawable(color);
+        if (drawableRight == null)
+            drawableRight = new ColorDrawable(color);
+        if (drawableCenter == null)
+            drawableCenter = new ColorDrawable(color);
+        drawableLeft.setColorFilter(color, PorterDuff.Mode.SRC_IN);
+        drawableRight.setColorFilter(color, PorterDuff.Mode.SRC_IN);
+        drawableCenter.setColorFilter(color, PorterDuff.Mode.SRC_IN);
+        setTextSelectHandle(editText, drawableLeft, drawableRight, drawableCenter);
     }
 
     public static int getNextCodePointIndex(CharSequence s, int startPosition) {
