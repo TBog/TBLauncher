@@ -433,7 +433,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         // get current mode
         LauncherState.Desktop currentMode = TBApplication.state().getDesktop();
         Log.d(TAG, "desktop changed " + currentMode + " -> " + mode);
-        if (currentMode == mode) {
+        if (currentMode.equals(mode)) {
             // no change, maybe refresh?
             return;
         }
@@ -446,23 +446,14 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             case WIDGET:
                 hideWidgets();
                 break;
+            case EMPTY:
+            default:
+                break;
         }
 
         // show next mode
         TBApplication.state().setDesktop(mode);
         switch (mode) {
-            case EMPTY:
-                // hide/show the QuickList
-                if (PrefCache.modeEmptyQuickListVisible(mPref))
-                    TBApplication.quickList(getContext()).showQuickList();
-                else
-                    TBApplication.quickList(getContext()).hideQuickList(false);
-                // enable/disable fullscreen (status and navigation bar)
-                if (PrefCache.modeEmptyFullscreen(mPref))
-                    enableFullscreen(UI_ANIMATION_DELAY);
-                else
-                    disableFullscreen();
-                break;
             case SEARCH:
                 // show the SearchBar
                 showSearchBar();
@@ -487,6 +478,19 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                     TBApplication.quickList(getContext()).hideQuickList(false);
                 // enable/disable fullscreen (status and navigation bar)
                 if (PrefCache.modeWidgetFullscreen(mPref))
+                    enableFullscreen(UI_ANIMATION_DELAY);
+                else
+                    disableFullscreen();
+                break;
+            case EMPTY:
+            default:
+                // hide/show the QuickList
+                if (PrefCache.modeEmptyQuickListVisible(mPref))
+                    TBApplication.quickList(getContext()).showQuickList();
+                else
+                    TBApplication.quickList(getContext()).hideQuickList(false);
+                // enable/disable fullscreen (status and navigation bar)
+                if (PrefCache.modeEmptyFullscreen(mPref))
                     enableFullscreen(UI_ANIMATION_DELAY);
                 else
                     disableFullscreen();

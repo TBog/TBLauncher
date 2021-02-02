@@ -374,36 +374,8 @@ public class Utilities {
         }
     }
 
-    @Nullable
-    private static Drawable getDrawableFromTextView(@NonNull TextView view, @NonNull String fieldName, @NonNull String editorField) {
-        Context ctx = view.getContext();
+    private static Drawable getDrawableFromTextViewEditor(@NonNull TextView view, @NonNull String editorField) {
         Drawable drawable = null;
-        String resFieldName = fieldName + "Res";
-        if (classContainsDeclaredField(TextView.class, resFieldName)) {
-            try {
-                Field f_res = TextView.class.getDeclaredField(resFieldName);
-                f_res.setAccessible(true);
-                int res = f_res.getInt(view);
-                if (res != Resources.ID_NULL)
-                    drawable = AppCompatResources.getDrawable(ctx, res);
-            } catch (Throwable t) {
-                Log.w(TAG, "get `" + resFieldName + "` from " + TextView.class, t);
-            }
-            if (drawable != null)
-                return drawable;
-        }
-        if (classContainsDeclaredField(TextView.class, fieldName)) {
-            try {
-                Field f_drawable = TextView.class.getDeclaredField(fieldName);
-                f_drawable.setAccessible(true);
-                drawable = (Drawable) f_drawable.get(view);
-            } catch (Throwable t) {
-                Log.w(TAG, "get `" + fieldName + "` from " + TextView.class, t);
-            }
-        }
-        if (drawable != null)
-            return drawable;
-
         Object editor = null;
         try {
             Field f_editor = TextView.class.getDeclaredField("mEditor");
@@ -426,8 +398,40 @@ public class Utilities {
                 Log.w(TAG, "get `" + editorField + "` from " + editor.getClass(), t);
             }
         }
-
         return drawable;
+    }
+
+    @Nullable
+    private static Drawable getDrawableFromTextView(@NonNull TextView view, @NonNull String fieldName, @NonNull String editorField) {
+        Context ctx = view.getContext();
+        String resFieldName = fieldName + "Res";
+        if (classContainsDeclaredField(TextView.class, resFieldName)) {
+            try {
+                Field f_res = TextView.class.getDeclaredField(resFieldName);
+                f_res.setAccessible(true);
+                int res = f_res.getInt(view);
+                if (res != Resources.ID_NULL) {
+                    Drawable drawable = AppCompatResources.getDrawable(ctx, res);
+                    if (drawable != null)
+                        return drawable;
+                }
+            } catch (Throwable t) {
+                Log.w(TAG, "get `" + resFieldName + "` from " + TextView.class, t);
+            }
+        }
+        if (classContainsDeclaredField(TextView.class, fieldName)) {
+            try {
+                Field f_drawable = TextView.class.getDeclaredField(fieldName);
+                f_drawable.setAccessible(true);
+                Drawable drawable = (Drawable) f_drawable.get(view);
+                if (drawable != null)
+                    return drawable;
+            } catch (Throwable t) {
+                Log.w(TAG, "get `" + fieldName + "` from " + TextView.class, t);
+            }
+        }
+
+        return getDrawableFromTextViewEditor(view, editorField);
     }
 
     public static void setTextCursorColor(@NonNull TextView editText, @ColorInt int color) {
