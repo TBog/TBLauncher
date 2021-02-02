@@ -327,26 +327,34 @@ public class Utilities {
         return false;
     }
 
-    public static void setTextCursorDrawable(TextView editText, Drawable drawable) {
+    public static void setTextCursorDrawable(@NonNull TextView editText, Drawable drawable) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             editText.setTextCursorDrawable(drawable);
         } else {
-            if (classContainsDeclaredField(TextView.class, "mCursorDrawableRes")) {
-                try {
-                    Field fmCursorDrawableRes = TextView.class.getDeclaredField("mCursorDrawableRes");
-                    fmCursorDrawableRes.setAccessible(true);
-                    fmCursorDrawableRes.setInt(editText, 0);
-                } catch (Throwable t) {
-                    Log.w(TAG, "set TextView mCursorDrawableRes", t);
-                }
-            }
+            boolean setResToNull = false;
             if (classContainsDeclaredField(TextView.class, "mCursorDrawable")) {
                 try {
                     Field fmCursorDrawable = TextView.class.getDeclaredField("mCursorDrawable");
                     fmCursorDrawable.setAccessible(true);
                     fmCursorDrawable.set(editText, drawable);
+                    setResToNull = true;
                 } catch (Throwable t) {
                     Log.w(TAG, "set TextView mCursorDrawable", t);
+                }
+            }
+            if (classContainsDeclaredField(TextView.class, "mCursorDrawableRes")) {
+                try {
+                    Field fmCursorDrawableRes = TextView.class.getDeclaredField("mCursorDrawableRes");
+                    fmCursorDrawableRes.setAccessible(true);
+                    if (setResToNull)
+                        fmCursorDrawableRes.setInt(editText, 0);
+                    else if (fmCursorDrawableRes.getInt(editText) == 0) {
+                        // this resource will not get used, we just need something != 0
+                        int res = android.R.drawable.divider_horizontal_dark;
+                        fmCursorDrawableRes.setInt(editText, res);
+                    }
+                } catch (Throwable t) {
+                    Log.w(TAG, "set TextView mCursorDrawableRes", t);
                 }
             }
             //https://github.com/aosp-mirror/platform_frameworks_base/blob/c46c4a6765196bcabf3ea89771a1f9067b22baad/core/java/android/widget/TextView.java#L4587
@@ -359,9 +367,9 @@ public class Utilities {
                 } catch (Throwable t) {
                     Log.w(TAG, "get TextView mEditor", t);
                 }
-                if (mEditor != null
-                        && classContainsDeclaredField(mEditor.getClass(), "mCursorCount")
-                        && classContainsDeclaredField(mEditor.getClass(), "mCursorDrawable")) {
+                if (mEditor == null)
+                    return;
+                if (classContainsDeclaredField(mEditor.getClass(), "mCursorDrawable")) {
                     try {
                         Field fmCursorDrawable = mEditor.getClass().getDeclaredField("mCursorDrawable");
                         fmCursorDrawable.setAccessible(true);
