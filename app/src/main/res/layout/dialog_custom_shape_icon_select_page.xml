@@ -10,7 +10,7 @@
     <TextView
         android:id="@+id/backgroundColor"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/color_preview_size"
         android:layout_marginVertical="1dp"
         android:background="?attr/selectableItemBackground"
         android:focusable="true"
@@ -22,9 +22,10 @@
     <TextView
         android:id="@+id/lettersToggle"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/color_preview_size"
         android:background="?attr/selectableItemBackground"
         android:focusable="true"
+        android:gravity="start|center_vertical"
         android:text="@string/letters_toggle"
         tools:drawableEnd="@android:drawable/arrow_up_float" />
 
@@ -39,14 +40,19 @@
         android:paddingVertical="@dimen/dialog_padding_vertical"
         tools:ignore="RtlSymmetry">
 
-        <EditText
-            android:id="@+id/letters"
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:autofillHints="application,text"
-            android:textAppearance="?android:attr/textAppearance"
-            android:hint="@string/static_icon_letters_label"
-            android:inputType="textAutoCorrect" />
+            android:layout_height="wrap_content">
+
+            <EditText
+                android:id="@+id/letters"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:autofillHints="application,text"
+                android:hint="@string/static_icon_letters_label"
+                android:inputType="textAutoCorrect"
+                android:textAppearance="?android:attr/textAppearance" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <TextView
             android:id="@+id/lettersColor"
@@ -55,9 +61,9 @@
             android:background="?attr/selectableItemBackground"
             android:focusable="true"
             android:gravity="start|center_vertical"
+            android:paddingHorizontal="5dp"
             android:text="@string/choose_letter_color"
             android:textAlignment="gravity"
-            android:paddingHorizontal="5dp"
             tools:drawableEnd="@color/colorPrimary" />
 
     </LinearLayout>
@@ -65,9 +71,10 @@
     <TextView
         android:id="@+id/scaleBarToggle"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/color_preview_size"
         android:background="?attr/selectableItemBackground"
         android:focusable="true"
+        android:gravity="start|center_vertical"
         android:labelFor="@+id/scaleBar"
         android:text="@string/choose_icon_scale"
         tools:drawableEnd="@android:drawable/arrow_up_float" />
@@ -83,9 +90,10 @@
     <TextView
         android:id="@+id/shapeGridToggle"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="@dimen/color_preview_size"
         android:background="?attr/selectableItemBackground"
         android:focusable="true"
+        android:gravity="start|center_vertical"
         android:labelFor="@id/shapeGrid"
         android:text="@string/choose_icon_shape"
         tools:drawableEnd="@android:drawable/arrow_up_float" />

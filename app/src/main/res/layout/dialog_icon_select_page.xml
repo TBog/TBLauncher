@@ -38,12 +38,17 @@
         tools:itemCount="20"
         tools:listitem="@layout/custom_icon_item" />
 
-    <EditText
-        android:id="@+id/search"
+    <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:autofillHints="application,text"
-        android:hint="@string/hint_custom_icon"
-        android:inputType="textAutoCorrect" />
+        android:layout_height="wrap_content">
 
+        <EditText
+            android:id="@+id/search"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autofillHints="application,text"
+            android:hint="@string/hint_custom_icon"
+            android:inputType="textAutoCorrect" />
+
+    </com.google.android.material.textfield.TextInputLayout>
 </LinearLayout>

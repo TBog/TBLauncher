@@ -8,29 +8,23 @@
     android:paddingVertical="@dimen/dialog_padding_vertical"
     tools:theme="@style/SettingsTheme.White">
 
-    <LinearLayout
+    <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"
         android:background="?android:attr/windowBackground"
-        android:orientation="vertical"
         android:padding="5dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:labelFor="@android:id/text1"
-            android:text="@string/label_search_engine_name" />
 
         <EditText
             android:id="@android:id/text1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:hint="@string/label_search_engine_name"
             android:importantForAutofill="no"
             android:inputType="textAutoCorrect" />
 
-    </LinearLayout>
+    </com.google.android.material.textfield.TextInputLayout>
 
     <LinearLayout
         android:layout_width="match_parent"

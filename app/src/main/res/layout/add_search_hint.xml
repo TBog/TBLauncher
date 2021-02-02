@@ -7,26 +7,20 @@
     android:paddingVertical="@dimen/dialog_padding_vertical"
     tools:theme="@style/SettingsTheme">
 
-    <LinearLayout
+    <com.google.android.material.textfield.TextInputLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="?android:attr/windowBackground"
-        android:orientation="vertical"
         android:padding="5dp">
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:labelFor="@android:id/text1"
-            android:text="@string/label_search_hint" />
 
         <EditText
             android:id="@android:id/text1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:hint="@string/label_search_hint"
             android:importantForAutofill="no"
             android:inputType="textAutoCorrect" />
 
-    </LinearLayout>
+    </com.google.android.material.textfield.TextInputLayout>
 
 </FrameLayout>
