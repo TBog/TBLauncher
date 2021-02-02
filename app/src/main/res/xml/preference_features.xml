@@ -17,10 +17,11 @@
             android:title="@string/quick_list_enabled" />
 
         <androidx.preference.SwitchPreference
-            android:defaultValue="true"
+            android:defaultValue="false"
             android:dependency="quick-list-enabled"
-            android:key="quick-list-always-visible"
-            android:title="@string/quick_list_always_visible" />
+            android:key="quick-list-only-for-results"
+            android:summary="@string/quick_list_only_for_results_summary"
+            android:title="@string/quick_list_only_for_results" />
 
         <androidx.preference.SwitchPreference
             android:defaultValue="false"
@@ -33,7 +34,8 @@
             android:dependency="quick-list-enabled"
             android:dialogLayout="@layout/pref_slider"
             android:key="quick-list-size"
-            android:title="@string/quick_list_size" />
+            android:title="@string/quick_list_size"
+            android:widgetLayout="@layout/pref_size_preview" />
 
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
             android:dependency="quick-list-enabled"
@@ -54,7 +56,8 @@
             android:defaultValue="@integer/default_bar_size"
             android:dialogLayout="@layout/pref_slider"
             android:key="search-bar-size"
-            android:title="@string/search_bar_size" />
+            android:title="@string/search_bar_size"
+            android:widgetLayout="@layout/pref_size_preview" />
 
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
             android:dialogLayout="@layout/edit_search_engines"

@@ -40,7 +40,7 @@ import rocks.tbog.tblauncher.utils.UIColors;
 public class QuickList {
     private TBLauncherActivity mTBLauncherActivity;
     private boolean mIsEnabled = true;
-    private boolean mAlwaysVisible = true;
+    private boolean mOnlyForResults = false;
     private boolean mListDirty = true;
     private LinearLayout mQuickList;
 
@@ -253,7 +253,7 @@ public class QuickList {
     }
 
     public void showQuickList() {
-        if (mAlwaysVisible)
+        if (!mOnlyForResults)
             show();
     }
 
@@ -315,7 +315,7 @@ public class QuickList {
     public void onResume() {
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getContext());
         mIsEnabled = pref.getBoolean("quick-list-enabled", true);
-        mAlwaysVisible = pref.getBoolean("quick-list-always-visible", true);
+        mOnlyForResults = pref.getBoolean("quick-list-only-for-results", false);
         applyUiPref(pref, mQuickList);
     }
 
@@ -324,7 +324,7 @@ public class QuickList {
         bFilterOn = false;
         bActionOn = false;
         bAdapterEmpty = true;
-        if (!mAlwaysVisible)
+        if (mOnlyForResults)
             hideQuickList(true);
     }
 
