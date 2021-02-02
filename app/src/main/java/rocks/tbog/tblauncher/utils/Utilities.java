@@ -378,18 +378,20 @@ public class Utilities {
     private static Drawable getDrawableFromTextView(@NonNull TextView view, @NonNull String fieldName, @NonNull String editorField) {
         Context ctx = view.getContext();
         Drawable drawable = null;
-        try {
-            Field f_res = TextView.class.getDeclaredField(fieldName + "Res");
-            f_res.setAccessible(true);
-            int res = f_res.getInt(view);
-            if (res != Resources.ID_NULL)
-                drawable = AppCompatResources.getDrawable(ctx, res);
-        } catch (Throwable t) {
-            Log.w(TAG, "get `" + fieldName + "` from " + TextView.class, t);
+        String resFieldName = fieldName + "Res";
+        if (classContainsDeclaredField(TextView.class, resFieldName)) {
+            try {
+                Field f_res = TextView.class.getDeclaredField(resFieldName);
+                f_res.setAccessible(true);
+                int res = f_res.getInt(view);
+                if (res != Resources.ID_NULL)
+                    drawable = AppCompatResources.getDrawable(ctx, res);
+            } catch (Throwable t) {
+                Log.w(TAG, "get `" + resFieldName + "` from " + TextView.class, t);
+            }
+            if (drawable != null)
+                return drawable;
         }
-        if (drawable != null)
-            return drawable;
-
         if (classContainsDeclaredField(TextView.class, fieldName)) {
             try {
                 Field f_drawable = TextView.class.getDeclaredField(fieldName);
@@ -410,7 +412,7 @@ public class Utilities {
         } catch (Throwable t) {
             Log.w(TAG, "get Editor from " + view.getClass(), t);
         }
-        if (editor != null) {
+        if (editor != null && classContainsDeclaredField(editor.getClass(), editorField)) {
             try {
                 Field f_handle = editor.getClass().getDeclaredField(editorField);
                 f_handle.setAccessible(true);

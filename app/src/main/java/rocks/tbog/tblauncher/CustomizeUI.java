@@ -129,7 +129,7 @@ public class CustomizeUI {
             mSearchBar.setTextColor(searchTextColor);
             mSearchBar.setHighlightColor(searchHighlightColor);
             mSearchBar.setHintTextColor(searchHintColor);
-            Utilities.setTextCursorColor(mSearchBar, 0xFFffd700);
+            Utilities.setTextCursorColor(mSearchBar, searchHighlightColor);
             Utilities.setTextSelectHandleColor(mSearchBar, searchHighlightColor);
         }
 
