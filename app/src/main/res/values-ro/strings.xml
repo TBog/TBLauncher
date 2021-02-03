@@ -212,7 +212,6 @@
     <string name="exit_the_app_description">Lansatorul dvs. implicit va fi deschis sau vi se va întreba pe care doriți să îl utilizați.</string>
     <string name="exit_the_app_confirm">Chiar închideți lansatorul\?</string>
     <string name="exit_the_app">Închideți lansatorul</string>
-    <string name="quick_list_always_visible">Vizibil întotdeauna</string>
     <string name="pin_shortcut_icon">Pictogramă de comandă rapidă</string>
     <string name="pin_shortcut_label">Alegeți eticheta de comandă rapidă</string>
     <string name="pin_shortcut_message">Doriți să adăugați această comandă rapidă\?</string>

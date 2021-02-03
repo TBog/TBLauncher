@@ -154,7 +154,6 @@
     <string name="reset_default_launcher">Endre forvalgt oppstarter</string>
     <string name="exit_the_app_confirm">Vil du virkelig lukke oppstarteren\?</string>
     <string name="exit_the_app">Lukk oppstarter</string>
-    <string name="quick_list_always_visible">Alltid synlig</string>
     <string name="pin_shortcut_icon">Snarveisikon</string>
     <string name="pin_shortcut_label">Velg snarveisetikett</string>
     <string name="pin_shortcut_message">Ønsker du å legge til denne snarveien\?</string>
