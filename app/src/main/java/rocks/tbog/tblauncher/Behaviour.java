@@ -12,10 +12,10 @@ import android.content.pm.LauncherApps;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.util.Log;
-import android.view.KeyEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -26,7 +26,6 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.EditText;
 import android.widget.ImageView;
-import android.widget.TextView;
 
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
@@ -244,9 +243,21 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             String lastText = "";
 
             public void afterTextChanged(Editable s) {
-                // Auto left-trim text.
-                if (s.length() > 0 && s.charAt(0) == ' ')
-                    s.delete(0, 1);
+                Log.i(TAG, "afterTextChanged " + s);
+                // left-trim text.
+                final int length = s.length();
+                int spaceEnd = 0;
+                while (spaceEnd < length && s.charAt(spaceEnd) == ' ')
+                    spaceEnd += 1;
+                if (spaceEnd > 0)
+                    s.delete(0, spaceEnd);
+                else {
+                    String text = s.toString();
+                    if (lastText.equals(text))
+                        return;
+                    updateSearchRecords(false, text);
+                    updateClearButton();
+                }
             }
 
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
@@ -254,35 +265,23 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             }
 
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-//                if (isViewingAllApps()) {
-//                    displayKissBar(false, false);
-//                }
-                String text = s.toString();
-                if (lastText.equals(text))
-                    return;
-                updateSearchRecords(false, text);
-                updateClearButton();
+                // do nothing
             }
         });
 
         // On validate, launch first record
-        mSearchEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {
-            @Override
-            public boolean onEditorAction(TextView v, int actionId, KeyEvent event) {
-                // if keyboard closed
-                if (actionId == android.R.id.closeButton)
-                    return onKeyboardClosed();
+        mSearchEditText.setOnEditorActionListener((view, actionId, event) -> {
+            // if keyboard closed
+            if (actionId == android.R.id.closeButton)
+                return onKeyboardClosed();
 
-                // launch most relevant result
-                mResultAdapter.onClick(mResultAdapter.getCount() - 1, v);
-                return true;
-            }
+            // launch most relevant result
+            mResultAdapter.onClick(mResultAdapter.getCount() - 1, view);
+            return true;
         });
     }
 
     public void onCreateActivity(TBLauncherActivity tbLauncherActivity) {
-//        int animationDuration = mTBLauncherActivity.getResources().getInteger(android.R.integer.config_longAnimTime);
-
         mTBLauncherActivity = tbLauncherActivity;
         mPref = PreferenceManager.getDefaultSharedPreferences(tbLauncherActivity);
 
@@ -296,9 +295,6 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         mMenuButton = findViewById(R.id.menuButton);
 
         mDecorView = mTBLauncherActivity.getWindow().getDecorView();
-
-        // Set up the user interaction to manually show or hide the system UI.
-        //findViewById(R.id.root_layout).setOnClickListener(view -> toggleSearchBar());
 
         initResultLayout();
         initSearchBarContainer();
@@ -366,30 +362,22 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                 stringId = ((LinearAdapter.Item) a.getItem(pos)).stringId;
             }
             Context c = mTBLauncherActivity;
-            Intent intent;
-            switch (stringId) {
-                case R.string.menu_popup_tags_manager:
-                    launchTagsManagerDialog();
-                    break;
-                case R.string.menu_popup_launcher_settings:
-                    intent = new Intent(mClearButton.getContext(), SettingsActivity.class);
-                    launchIntent(this, mClearButton, intent);
-                    break;
-                case R.string.change_wallpaper:
-                    intent = new Intent(Intent.ACTION_SET_WALLPAPER);
-                    intent = Intent.createChooser(intent, c.getString(R.string.change_wallpaper));
-                    launchIntent(this, mClearButton, intent);
-                    break;
-                case R.string.menu_widget_add:
-                    TBApplication.widgetManager(c).showSelectWidget(mTBLauncherActivity);
-                    break;
-                case R.string.menu_widget_remove:
-                    TBApplication.widgetManager(c).showRemoveWidgetPopup();
-                    break;
-                case R.string.menu_popup_android_settings:
-                    intent = new Intent(android.provider.Settings.ACTION_SETTINGS);
-                    launchIntent(this, mClearButton, intent);
-                    break;
+            if (stringId == R.string.menu_popup_tags_manager) {
+                launchTagsManagerDialog();
+            } else if (stringId == R.string.menu_popup_launcher_settings) {
+                Intent intent = new Intent(mClearButton.getContext(), SettingsActivity.class);
+                launchIntent(this, mClearButton, intent);
+            } else if (stringId == R.string.change_wallpaper) {
+                Intent intent = new Intent(Intent.ACTION_SET_WALLPAPER);
+                intent = Intent.createChooser(intent, c.getString(R.string.change_wallpaper));
+                launchIntent(this, mClearButton, intent);
+            } else if (stringId == R.string.menu_widget_add) {
+                TBApplication.widgetManager(c).showSelectWidget(mTBLauncherActivity);
+            } else if (stringId == R.string.menu_widget_remove) {
+                TBApplication.widgetManager(c).showRemoveWidgetPopup();
+            } else if (stringId == R.string.menu_popup_android_settings) {
+                Intent intent = new Intent(Settings.ACTION_SETTINGS);
+                launchIntent(this, mClearButton, intent);
             }
         });
 
@@ -415,11 +403,6 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             }
             behaviour.afterLaunchOccurred();
         }, LAUNCH_DELAY);
-    }
-
-    public void onPostCreate() {
-//        hideSearchBar();
-//        updateClearButton();
     }
 
     @SuppressWarnings("TypeParameterUnusedInFormals")

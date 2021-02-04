@@ -140,13 +140,6 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
     }
 
     @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-
-        TBApplication.behaviour(this).onPostCreate();
-    }
-
-    @Override
     protected void onDestroy() {
         Log.d(TAG, "onDestroy()");
         TBApplication.onDestroyActivity(this);
