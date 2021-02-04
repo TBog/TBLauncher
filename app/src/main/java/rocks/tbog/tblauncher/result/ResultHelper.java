@@ -26,6 +26,9 @@ import rocks.tbog.tblauncher.entry.ShortcutEntry;
 import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.utils.Utilities;
 
+import static rocks.tbog.tblauncher.entry.EntryItem.LAUNCHED_FROM_QUICK_LIST;
+import static rocks.tbog.tblauncher.entry.EntryItem.LAUNCHED_FROM_RESULT_LIST;
+
 public class ResultHelper {
     private ResultHelper() {
         // this is a static class
@@ -35,10 +38,24 @@ public class ResultHelper {
      * How to launch a result. Most probably, will fire an intent.
      * This function will record history and then call EntryItem.doLaunch
      *
-     * @param view    {@link View} that was touched
+     * @param view {@link View} that was touched
      * @param pojo the {@link EntryItem} that the user is launching
      */
     public static void launch(@NonNull View view, @NonNull EntryItem pojo) {
+        final int launchedFrom;
+        if (TBApplication.quickList(view.getContext()).isViewInList(view))
+            launchedFrom = LAUNCHED_FROM_QUICK_LIST;
+        else
+            launchedFrom = LAUNCHED_FROM_RESULT_LIST;
+
+        if (pojo instanceof StaticEntry) {
+            Log.i("log", "Launching StaticEntry " + pojo.id);
+
+            recordLaunch(pojo, view.getContext());
+            pojo.doLaunch(view, launchedFrom);
+            return;
+        }
+
         TBApplication.behaviour(view.getContext()).beforeLaunchOccurred();
 
         Log.i("log", "Launching " + pojo.id);
@@ -47,7 +64,7 @@ public class ResultHelper {
 
         // Launch
         view.postDelayed(() -> {
-            pojo.doLaunch(view);
+            pojo.doLaunch(view, launchedFrom);
             TBApplication.behaviour(view.getContext()).afterLaunchOccurred();
         }, Behaviour.LAUNCH_DELAY);
     }

@@ -102,14 +102,19 @@ public class QuickList {
             return;
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mQuickList.getContext());
         int drawFlags = getDrawFlags(prefs);
+        LayoutInflater inflater = LayoutInflater.from(getContext());
         for (EntryItem entry : list) {
-            View view = LayoutInflater.from(getContext()).inflate(entry.getResultLayout(drawFlags), mQuickList, false);
+            View view = inflater.inflate(entry.getResultLayout(drawFlags), mQuickList, false);
             entry.displayResult(view, drawFlags);
             mQuickList.addView(view);
 
-            view.setOnClickListener(entry::doLaunch);
+            view.setOnClickListener(v -> {
+                entry.doLaunch(v, EntryItem.LAUNCHED_FROM_QUICK_LIST);
+                if (TBApplication.state().isResultListVisible())
+                    mLastSelection = entry.id;
+            });
             view.setOnLongClickListener(v -> {
-                ListPopup menu = entry.getPopupMenu(v, EntryItem.FLAG_POPUP_MENU_QUICK_LIST);
+                ListPopup menu = entry.getPopupMenu(v, EntryItem.LAUNCHED_FROM_QUICK_LIST);
 
                 // show menu only if it contains elements
                 if (!menu.getAdapter().isEmpty()) {
@@ -226,7 +231,8 @@ public class QuickList {
     }
 
     public void toggleFilter(View v, @Nullable Provider<? extends EntryItem> provider) {
-        String filterName = provider != null ? provider.getScheme() : "";
+        Object tag_filterName = v.getTag(R.id.tag_filterName);
+        String filterName = (tag_filterName instanceof String) ? (String) tag_filterName : "";
         toggleFilter(v, provider, filterName);
     }
 
@@ -326,6 +332,7 @@ public class QuickList {
         bAdapterEmpty = true;
         if (mOnlyForResults)
             hideQuickList(true);
+        mLastSelection = null;
     }
 
     public void adapterUpdated() {
@@ -373,5 +380,14 @@ public class QuickList {
         int color = UIColors.getColor(pref, "quick-list-color");
         int alpha = UIColors.getAlpha(pref, "quick-list-alpha");
         return UIColors.setAlpha(color, alpha);
+    }
+
+    // ugly: check from where the entry was launched
+    public boolean isViewInList(View view) {
+        return mQuickList.indexOfChild(view) != -1;
+    }
+
+    public boolean isLastSelection(@NonNull String entryId) {
+        return entryId.equals(mLastSelection);
     }
 }

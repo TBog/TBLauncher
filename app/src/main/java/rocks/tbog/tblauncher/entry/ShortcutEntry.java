@@ -207,7 +207,7 @@ public final class ShortcutEntry extends EntryWithTags {
     }
 
     @Override
-    public void doLaunch(@NonNull View view) {
+    public void doLaunch(@NonNull View view, int flags) {
         Context context = view.getContext();
         if (isOreoShortcut()) {
             // Oreo shortcuts
@@ -275,7 +275,7 @@ public final class ShortcutEntry extends EntryWithTags {
         adapter.add(new LinearAdapter.Item(context, R.string.menu_shortcut_rename));
         adapter.add(new LinearAdapter.Item(context, R.string.menu_custom_icon));
 
-        if (Utilities.checkFlag(flags, FLAG_POPUP_MENU_QUICK_LIST)) {
+        if (Utilities.checkFlag(flags, LAUNCHED_FROM_QUICK_LIST)) {
             adapter.add(new LinearAdapter.ItemTitle(context, R.string.menu_popup_title_settings));
             adapter.add(new LinearAdapter.Item(context, R.string.menu_popup_quick_list_customize));
         }

@@ -311,7 +311,7 @@ public final class AppEntry extends EntryWithTags {
 //            adapter.add(new ListPopup.Item(context, R.string.menu_app_hibernate));
 //        }
 
-        if (Utilities.checkFlag(flags, FLAG_POPUP_MENU_QUICK_LIST)) {
+        if (Utilities.checkFlag(flags, LAUNCHED_FROM_QUICK_LIST)) {
             adapter.add(new LinearAdapter.ItemTitle(context, R.string.menu_popup_title_settings));
             adapter.add(new LinearAdapter.Item(context, R.string.menu_popup_quick_list_customize));
         }
@@ -411,7 +411,7 @@ public final class AppEntry extends EntryWithTags {
     }
 
     @Override
-    public void doLaunch(@NonNull View v) {
+    public void doLaunch(@NonNull View v, int flags) {
         Context context = v.getContext();
         // If AppResult, find the icon
         View potentialIcon = v.findViewById(android.R.id.icon);

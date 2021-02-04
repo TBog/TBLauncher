@@ -78,9 +78,10 @@ public abstract class EntryItem {
      */
     public static final int FLAG_RELOAD = 0x0200; // 1 << 9
 
-    // Popup menu flags
-    public static final int FLAG_POPUP_MENU_RESULT_LIST = 0x01;
-    public static final int FLAG_POPUP_MENU_QUICK_LIST = 0x02;
+    // Used when generating Popup menu and calling doLaunch
+    public static final int LAUNCHED_FROM_RESULT_LIST = 0x01;
+    public static final int LAUNCHED_FROM_QUICK_LIST = 0x02;
+    public static final int LAUNCHED_FROM_GESTURE = 0x04;
 
     // Globally unique ID.
     // Usually starts with provider scheme, e.g. "app://" or "contact://" to
@@ -207,7 +208,7 @@ public abstract class EntryItem {
         adapter.add(new LinearAdapter.Item(context, R.string.menu_remove_history));
         adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_add));
         adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_remove));
-        if (Utilities.checkFlag(flags, FLAG_POPUP_MENU_QUICK_LIST)) {
+        if (Utilities.checkFlag(flags, LAUNCHED_FROM_QUICK_LIST)) {
             adapter.add(new LinearAdapter.ItemTitle(context, R.string.menu_popup_title_settings));
             adapter.add(new LinearAdapter.Item(context, R.string.menu_popup_quick_list_customize));
         }
@@ -278,7 +279,7 @@ public abstract class EntryItem {
 
     @NonNull
     public ListPopup getPopupMenu(final View parentView) {
-        return getPopupMenu(parentView, FLAG_POPUP_MENU_RESULT_LIST);
+        return getPopupMenu(parentView, LAUNCHED_FROM_RESULT_LIST);
     }
 
     /**
@@ -318,7 +319,7 @@ public abstract class EntryItem {
         return false;
     }
 
-    public void doLaunch(@NonNull View view) {
+    public void doLaunch(@NonNull View view, int flags) {
         throw new RuntimeException("No launch action defined for " + getClass().getSimpleName());
     }
 }

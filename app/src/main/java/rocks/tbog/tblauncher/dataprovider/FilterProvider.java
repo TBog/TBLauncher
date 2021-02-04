@@ -20,7 +20,7 @@ public class FilterProvider extends StaticProvider<FilterEntry> {
         // apps filter
         {
             String id = FilterEntry.SCHEME + "applications";
-            FilterEntry filter = new FilterEntry(id, R.drawable.ic_apps, AppEntry.SCHEME);
+            FilterEntry filter = new FilterEntry(id, R.drawable.ic_apps);
             filter.setOnClickListener(v -> {
                 Context ctx = v.getContext();
                 AppProvider provider = TBApplication.getApplication(ctx).getDataHandler().getAppProvider();
@@ -32,7 +32,7 @@ public class FilterProvider extends StaticProvider<FilterEntry> {
         // contacts filter
         {
             String id = FilterEntry.SCHEME + "contacts";
-            FilterEntry filter = new FilterEntry(id, R.drawable.ic_contacts, ContactEntry.SCHEME);
+            FilterEntry filter = new FilterEntry(id, R.drawable.ic_contacts);
             filter.setOnClickListener(v -> {
                 Context ctx = v.getContext();
                 ContactsProvider provider = TBApplication.dataHandler(ctx).getContactsProvider();
@@ -44,7 +44,7 @@ public class FilterProvider extends StaticProvider<FilterEntry> {
         // pinned shortcuts filter
         {
             String id = FilterEntry.SCHEME + "shortcuts";
-            FilterEntry filter = new FilterEntry(id, R.drawable.ic_shortcuts, ShortcutEntry.SCHEME);
+            FilterEntry filter = new FilterEntry(id, R.drawable.ic_shortcuts);
             filter.setOnClickListener(v -> {
                 Context ctx = v.getContext();
                 ShortcutsProvider provider = TBApplication.dataHandler(ctx).getShortcutsProvider();

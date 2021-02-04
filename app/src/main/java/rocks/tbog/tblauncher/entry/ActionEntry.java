@@ -15,7 +15,7 @@ public class ActionEntry extends StaticEntry {
     private DoAction action = null;
 
     public interface DoAction {
-        void doAction(View view);
+        void doAction(View view, int flags);
     }
 
     public ActionEntry(@NonNull String id, @DrawableRes int icon) {
@@ -32,12 +32,12 @@ public class ActionEntry extends StaticEntry {
     }
 
     @Override
-    public void doLaunch(@NonNull View view) {
+    public void doLaunch(@NonNull View view, int flags) {
         if (action == null) {
             Toast.makeText(view.getContext(), "`" + id + "` not implemented", Toast.LENGTH_LONG).show();
             return;
         }
-        action.doAction(view);
+        action.doAction(view, flags);
     }
 
     public void setAction(@Nullable DoAction action) {
