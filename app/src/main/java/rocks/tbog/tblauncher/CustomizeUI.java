@@ -95,7 +95,8 @@ public class CustomizeUI {
     }
 
     private void setSearchBarPref() {
-        Resources resources = mSearchBarContainer.getResources();
+        final Context ctx = getContext();
+        final Resources resources = mSearchBarContainer.getResources();
 
         // size
         int percent = mPref.getInt("search-bar-size", 0);
@@ -120,38 +121,37 @@ public class CustomizeUI {
             mSearchBar.setTextSize(TypedValue.COMPLEX_UNIT_PX, smallSize + (largeSize - smallSize) * percent / 100);
         }
 
+        final int searchBarRipple = UIColors.setAlpha(UIColors.getColor(mPref, "search-bar-ripple-color"), 0xFF);
+        final int searchIconColor = UIColors.setAlpha(UIColors.getColor(mPref, "search-bar-icon-color"), 0xFF);
+        final int colorBackground = UIColors.getColor(mPref, "search-bar-color");
+
         // text color
         {
-            Context ctx = mSearchBar.getContext();
+            int searchTextCursor = UIColors.getColor(mPref, "search-bar-cursor-argb");
+            int searchTextHighlight = UIColors.setAlpha(searchTextCursor, 0x7F);
             int searchTextColor = UIColors.getSearchTextColor(ctx);
-            int searchHighlightColor = UIColors.getSearchRippleColor(ctx);
             int searchHintColor = UIColors.setAlpha(searchTextColor, 0xBB);
-            mSearchBar.setTextColor(searchTextColor);
-            mSearchBar.setHighlightColor(searchHighlightColor);
-            mSearchBar.setHintTextColor(searchHintColor);
-            Utilities.setTextCursorColor(mSearchBar, searchHighlightColor);
-            Utilities.setTextSelectHandleColor(mSearchBar, searchHighlightColor);
-        }
 
-//        {
-//            ShapeDrawable drawable = new ShapeDrawable(new RectShape());
-//            drawable.setIntrinsicWidth(UISizes.dp2px(mSearchBar.getContext(), 1));
-//            Utilities.setTextCursorDrawable(mSearchBar, drawable);
-//        }
+            mSearchBar.setTextColor(searchTextColor);
+            mSearchBar.setHintTextColor(searchHintColor);
+            // set color for selection background
+            mSearchBar.setHighlightColor(searchTextHighlight);
+
+            Utilities.setTextCursorColor(mSearchBar, searchTextCursor);
+            Utilities.setTextSelectHandleColor(mSearchBar, searchBarRipple);
+        }
 
         // icon color
         {
-            int searchIconColor = UIColors.getSearchIconColor(mLauncherButton.getContext());
             Utilities.setColorFilterMultiply(mLauncherButton, searchIconColor);
             Utilities.setColorFilterMultiply(mMenuButton, searchIconColor);
             Utilities.setColorFilterMultiply(mClearButton, searchIconColor);
-            mLauncherButton.setBackground(getSelectorDrawable(mLauncherButton, UIColors.getResultListRipple(getContext()), true));
-            mMenuButton.setBackground(getSelectorDrawable(mMenuButton, UIColors.getResultListRipple(getContext()), true));
-            mClearButton.setBackground(getSelectorDrawable(mClearButton, UIColors.getResultListRipple(getContext()), true));
+            mLauncherButton.setBackground(getSelectorDrawable(mLauncherButton, searchBarRipple, true));
+            mMenuButton.setBackground(getSelectorDrawable(mMenuButton, searchBarRipple, true));
+            mClearButton.setBackground(getSelectorDrawable(mClearButton, searchBarRipple, true));
         }
 
         // background color
-        int color = UIColors.getColor(mPref, "search-bar-color");
         int alpha = UIColors.getAlpha(mPref, "search-bar-alpha");
         if (mPref.getBoolean("search-bar-gradient", true)) {
             final GradientDrawable.Orientation orientation;
@@ -159,21 +159,21 @@ public class CustomizeUI {
                 orientation = GradientDrawable.Orientation.TOP_BOTTOM;
             else
                 orientation = GradientDrawable.Orientation.BOTTOM_TOP;
-            int c1 = UIColors.setAlpha(color, 0);
-            int c2 = UIColors.setAlpha(color, alpha * 3 / 4);
-            int c3 = UIColors.setAlpha(color, alpha);
+            int c1 = UIColors.setAlpha(colorBackground, 0);
+            int c2 = UIColors.setAlpha(colorBackground, alpha * 3 / 4);
+            int c3 = UIColors.setAlpha(colorBackground, alpha);
             GradientDrawable drawable = new GradientDrawable(orientation, new int[]{c1, c2, c3});
             mSearchBarContainer.setBackground(drawable);
         } else if (mPref.getBoolean("search-bar-rounded", true)) {
             PaintDrawable drawable = new PaintDrawable();
-            drawable.getPaint().setColor(UIColors.setAlpha(color, alpha));
+            drawable.getPaint().setColor(UIColors.setAlpha(colorBackground, alpha));
             ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) mSearchBarContainer.getLayoutParams();
             drawable.setCornerRadius(resources.getDimension(R.dimen.bar_corner_radius));
             mSearchBarContainer.setBackground(drawable);
             int margin = (int) (params.height * .25f);
             params.setMargins(margin, 0, margin, margin);
         } else
-            mSearchBarContainer.setBackground(new ColorDrawable(UIColors.setAlpha(color, alpha)));
+            mSearchBarContainer.setBackground(new ColorDrawable(UIColors.setAlpha(colorBackground, alpha)));
     }
 
     public void setResultListPref(View resultLayout) {

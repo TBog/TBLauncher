@@ -243,6 +243,18 @@
                 android:widgetLayout="@layout/pref_color_preview" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@integer/default_color_highlight"
+                android:key="search-bar-ripple-color"
+                android:title="@string/search_bar_ripple_color"
+                android:widgetLayout="@layout/pref_color_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@integer/default_color_highlight"
+                android:key="search-bar-cursor-argb"
+                android:title="@string/search_bar_cursor_argb"
+                android:widgetLayout="@layout/pref_color_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@integer/default_bar_size"
                 android:dialogLayout="@layout/pref_slider"
                 android:key="search-bar-size"

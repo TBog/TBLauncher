@@ -37,7 +37,6 @@ public final class UIColors {
     private static int CACHED_RIPPLE_QL = 0;
     private static int CACHED_COLOR_CONTACT_ACTION = 0;
     private static int CACHED_COLOR_SEARCH_TEXT = 0;
-    private static int CACHED_COLOR_SEARCH_ICON = 0;
     private static Integer CACHED_BACKGROUND_RESULT_LIST = null;
     private static int CACHED_RIPPLE_RESULT_LIST = 0;
     private static Integer CACHED_BACKGROUND_ICON = null;
@@ -61,7 +60,6 @@ public final class UIColors {
         CACHED_RIPPLE_QL = 0;
         CACHED_COLOR_CONTACT_ACTION = 0;
         CACHED_COLOR_SEARCH_TEXT = 0;
-        CACHED_COLOR_SEARCH_ICON = 0;
         CACHED_BACKGROUND_RESULT_LIST = null;
         CACHED_RIPPLE_RESULT_LIST = 0;
         CACHED_BACKGROUND_ICON = null;
@@ -252,19 +250,6 @@ public final class UIColors {
             CACHED_COLOR_SEARCH_TEXT = setAlpha(highlightColor, 0xFF);
         }
         return CACHED_COLOR_SEARCH_TEXT;
-    }
-
-    public static int getSearchIconColor(Context context) {
-        if (CACHED_COLOR_SEARCH_ICON == 0) {
-            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
-            int highlightColor = getColor(pref, "search-bar-icon-color");
-            CACHED_COLOR_SEARCH_ICON = setAlpha(highlightColor, 0xFF);
-        }
-        return CACHED_COLOR_SEARCH_ICON;
-    }
-
-    public static int getSearchRippleColor(Context context) {
-        return getResultListRipple(context);
     }
 
     public static int getResultListBackground(Context context) {

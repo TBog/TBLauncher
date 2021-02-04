@@ -70,7 +70,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             "result-list-color", "result-list-alpha", "result-ripple-color", "result-list-rounded",
             "notification-bar-color", "notification-bar-alpha", "notification-bar-gradient", "black-notification-icons",
             "search-bar-size", "search-bar-rounded", "search-bar-gradient", "search-bar-at-bottom",
-            "search-bar-color", "search-bar-alpha", "search-bar-text-color", "search-bar-icon-color"
+            "search-bar-color", "search-bar-alpha", "search-bar-text-color", "search-bar-icon-color",
+            "search-bar-ripple-color", "search-bar-cursor-argb"
     ));
     private static final int FILE_SELECT_XML_SET = 63;
     private static final int FILE_SELECT_XML_OVERWRITE = 62;
@@ -437,6 +438,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "contact-action-color":
                     case "search-bar-text-color":
                     case "search-bar-icon-color":
+                    case "search-bar-ripple-color":
+                    case "search-bar-cursor-argb":
                     case "quick-list-toggle-color":
                     case "quick-list-color":
                     case "quick-list-ripple-color":
@@ -616,7 +619,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case "result-text2-color":
             case "contact-action-color":
             case "search-bar-text-color":
-            case "search-bar-icon-color":
             case "popup-background-argb":
             case "popup-border-argb":
             case "popup-ripple-color":
