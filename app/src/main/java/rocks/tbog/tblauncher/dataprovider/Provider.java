@@ -110,10 +110,10 @@ public abstract class Provider<T extends EntryItem> extends Service implements I
         this.sendBroadcast(i);
     }
 
-//    @NonNull
-//    public String getScheme() {
-//        return pojoScheme;
-//    }
+    @NonNull
+    public String getScheme() {
+        return pojoScheme;
+    }
 
     /**
      * Tells whether or not this provider may be able to find the pojo with

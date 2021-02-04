@@ -858,7 +858,8 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     private void showResultList(boolean animate) {
-        mResultLayout.animate().cancel();
+        if (TBApplication.state().getResultListVisibility() != LauncherState.AnimatedVisibility.ANIM_TO_VISIBLE)
+            mResultLayout.animate().cancel();
         if (mResultLayout.getVisibility() == View.VISIBLE)
             return;
         mResultLayout.setVisibility(View.VISIBLE);
@@ -882,7 +883,8 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     private void hideResultList(boolean animate) {
-        mResultLayout.animate().cancel();
+        if (TBApplication.state().getResultListVisibility() != LauncherState.AnimatedVisibility.ANIM_TO_HIDDEN)
+            mResultLayout.animate().cancel();
         if (mResultLayout.getVisibility() != View.VISIBLE)
             return;
         if (animate) {

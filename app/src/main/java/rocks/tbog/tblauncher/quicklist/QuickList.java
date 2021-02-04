@@ -140,8 +140,11 @@ public class QuickList {
     public void toggleProvider(View v, IProvider<?> provider, @Nullable java.util.Comparator<? super EntryItem> comparator) {
         Context ctx = v.getContext();
         TBApplication app = TBApplication.getApplication(ctx);
-        Object tag_actionId = v.getTag(R.id.tag_actionId);
-        String actionId = tag_actionId instanceof String ? (String) tag_actionId : "";
+        final String actionId;
+        {
+            Object tag_actionId = v.getTag(R.id.tag_actionId);
+            actionId = tag_actionId instanceof String ? (String) tag_actionId : "";
+        }
 
         // toggle off any filter
         if (bFilterOn) {
@@ -193,10 +196,15 @@ public class QuickList {
     public void toggleFilter(View v, IProvider<?> provider, @NonNull String filterName) {
         Context ctx = v.getContext();
         TBApplication app = TBApplication.getApplication(ctx);
+        final String actionId;
+        {
+            Object tag_actionId = v.getTag(R.id.tag_actionId);
+            actionId = tag_actionId instanceof String ? (String) tag_actionId : "";
+        }
 
         // if there is no search we need to filter, just show all matching entries
         if (bAdapterEmpty) {
-            if (bFilterOn && provider != null && filterName.equals(mLastSelection)) {
+            if (bFilterOn && provider != null && actionId.equals(mLastSelection)) {
                 app.behaviour().clearAdapter();
                 bFilterOn = false;
             } else {
@@ -204,7 +212,7 @@ public class QuickList {
                 list = provider != null ? provider.getPojos() : null;
                 if (list != null) {
                     app.behaviour().updateAdapter(list, false);
-                    mLastSelection = filterName;
+                    mLastSelection = actionId;
                     bFilterOn = true;
                 } else {
                     bFilterOn = false;
@@ -213,14 +221,14 @@ public class QuickList {
             // updateAdapter will change `bAdapterEmpty` and we change it back because we want
             // bAdapterEmpty to represent a search we need to filter
             bAdapterEmpty = true;
-        } else if (bFilterOn && (provider == null || filterName.equals(mLastSelection))) {
+        } else if (bFilterOn && (provider == null || actionId.equals(mLastSelection))) {
             animToggleOff();
             bFilterOn = false;
             app.behaviour().filterResults(null);
         } else if (provider != null) {
             animToggleOff();
             bFilterOn = true;
-            mLastSelection = filterName;
+            mLastSelection = actionId;
             app.behaviour().filterResults(filterName);
         }
 
@@ -231,9 +239,9 @@ public class QuickList {
     }
 
     public void toggleFilter(View v, @Nullable Provider<? extends EntryItem> provider) {
-        Object tag_filterName = v.getTag(R.id.tag_filterName);
-        String filterName = (tag_filterName instanceof String) ? (String) tag_filterName : "";
-        toggleFilter(v, provider, filterName);
+        Object tag_filterText = v.getTag(R.id.tag_filterText);
+        String filterText = (tag_filterText instanceof String) ? (String) tag_filterText : "";
+        toggleFilter(v, provider, filterText);
     }
 
     private void animToggleOn(View v) {
@@ -247,7 +255,7 @@ public class QuickList {
         int n = mQuickList.getChildCount();
         for (int i = 0; i < n; i += 1) {
             View view = mQuickList.getChildAt(i);
-            if (mLastSelection == null || mLastSelection == view.getTag(R.id.tag_filterName)) {
+            if (mLastSelection == null || mLastSelection == view.getTag(R.id.tag_filterText)) {
                 view.setSelected(false);
                 view.setHovered(false);
             }

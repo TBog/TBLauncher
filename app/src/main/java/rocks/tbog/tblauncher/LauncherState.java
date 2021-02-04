@@ -91,4 +91,9 @@ public class LauncherState {
     public void setDesktop(@NonNull Desktop mode) {
         desktop = mode;
     }
+
+    @NonNull
+    public AnimatedVisibility getResultListVisibility() {
+        return resultList;
+    }
 }
