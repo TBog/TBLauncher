@@ -889,12 +889,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
      * @return returns true if action handled
      */
     public boolean onBackPressed() {
-        // Empty the search bar
-        // (this will trigger a new event if the search bar was already empty)
-        // (which means pressing back in minimalistic mode with history displayed
-        // will hide history again)
         mSearchEditText.setText("");
-        hideSearchBar();
 
         if (closeFragmentDialog())
             return true;
