@@ -34,6 +34,8 @@ import rocks.tbog.tblauncher.dataprovider.QuickListProvider;
 import rocks.tbog.tblauncher.entry.ActionEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.FilterEntry;
+import rocks.tbog.tblauncher.entry.StaticEntry;
+import rocks.tbog.tblauncher.result.ResultHelper;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.UIColors;
 
@@ -109,9 +111,14 @@ public class QuickList {
             mQuickList.addView(view);
 
             view.setOnClickListener(v -> {
-                entry.doLaunch(v, EntryItem.LAUNCHED_FROM_QUICK_LIST);
-                if (TBApplication.state().isResultListVisible())
-                    mLastSelection = entry.id;
+                if (entry instanceof StaticEntry) {
+                    animToggleOff();
+                    entry.doLaunch(v, EntryItem.LAUNCHED_FROM_QUICK_LIST);
+                    if (TBApplication.state().isResultListVisible())
+                        mLastSelection = entry.id;
+                } else {
+                    ResultHelper.launch(v, entry);
+                }
             });
             view.setOnLongClickListener(v -> {
                 ListPopup menu = entry.getPopupMenu(v, EntryItem.LAUNCHED_FROM_QUICK_LIST);
@@ -255,7 +262,7 @@ public class QuickList {
         int n = mQuickList.getChildCount();
         for (int i = 0; i < n; i += 1) {
             View view = mQuickList.getChildAt(i);
-            if (mLastSelection == null || mLastSelection == view.getTag(R.id.tag_filterText)) {
+            if (mLastSelection == null || mLastSelection == view.getTag(R.id.tag_actionId)) {
                 view.setSelected(false);
                 view.setHovered(false);
             }
