@@ -96,4 +96,8 @@ public class LauncherState {
     public AnimatedVisibility getResultListVisibility() {
         return resultList;
     }
+    @NonNull
+    public AnimatedVisibility getNotificationBarVisibility() {
+        return notificationBar;
+    }
 }

@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <style name="BaseThemeLight" parent="Theme.AppCompat.Light.NoActionBar">
+    <style name="BaseThemeLight" parent="Theme.MaterialComponents.Light.NoActionBar">
         <item name="alertDialogTheme">@style/NoTitleDialogTheme</item>
         <item name="appSelectableItemBackground">?android:attr/selectableItemBackground</item>
         <item name="android:actionMenuTextColor">@color/undefined</item>
@@ -91,7 +91,7 @@
         <item name="android:textColor">@color/Black_selector_primary</item>
     </style>
 
-    <style name="TitleDialogTheme" parent="Theme.AppCompat.Dialog.Alert">
+    <style name="TitleDialogTheme" parent="Theme.MaterialComponents.Dialog.Alert">
         <item name="android:windowNoTitle">false</item>
         <item name="android:colorBackground">@android:color/transparent</item>
         <item name="android:windowFrame">@null</item>
@@ -152,7 +152,7 @@
         <item name="android:layout_height">?android:attr/listPreferredItemHeight</item>
     </style>
 
-    <style name="ListPopupTheme" parent="Widget.AppCompat.ListPopupWindow">
+    <style name="ListPopupTheme" parent="Widget.MaterialComponents.PopupMenu.ListPopupWindow">
         <item name="android:colorBackground">@android:color/transparent</item>
         <item name="android:listDivider">@drawable/list_separator_light</item>
         <item name="android:listPreferredItemPaddingLeft">@dimen/popup_padding_horizontal</item>
@@ -268,7 +268,7 @@
         <item name="preferenceCategoryTitleTextAppearance">@style/CategoryTitleTextAppearance</item>
     </style>
 
-    <style name="OptionsMenu" parent="ThemeOverlay.AppCompat.ActionBar">
+    <style name="OptionsMenu" parent="ThemeOverlay.MaterialComponents.ActionBar">
         <item name="android:colorBackground">@color/black_overlay</item>
         <item name="android:itemBackground">@drawable/dialog_background_dark</item>
         <item name="android:textColor">@color/settings_primary_selector_darkbg</item>
