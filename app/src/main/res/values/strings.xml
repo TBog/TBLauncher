@@ -372,6 +372,7 @@
     <string name="search_bar_at_bottom">Position at bottom</string>
     <string name="search_bar_ripple_color">Touch color</string>
     <string name="search_bar_cursor_argb">Cursor color</string>
+    <string name="back_device_key">Back button</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>

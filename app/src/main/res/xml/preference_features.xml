@@ -331,6 +331,13 @@
                 android:key="dm-empty-fullscreen"
                 android:title="@string/dm_empty_fullscreen" />
 
+            <ListPreference
+                android:defaultValue="showWidgets"
+                android:entries="@array/gestureEntries"
+                android:entryValues="@array/gestureValues"
+                android:key="dm-empty-back"
+                android:title="@string/back_device_key" />
+
         </PreferenceScreen>
 
         <!-- ‹Search› desktop mode -->
@@ -348,6 +355,13 @@
                 android:key="dm-search-fullscreen"
                 android:title="@string/dm_search_fullscreen" />
 
+            <ListPreference
+                android:defaultValue="showEmpty"
+                android:entries="@array/gestureEntries"
+                android:entryValues="@array/gestureValues"
+                android:key="dm-search-back"
+                android:title="@string/back_device_key" />
+
         </PreferenceScreen>
 
         <!-- ‹Widget› desktop mode -->
@@ -364,6 +378,13 @@
                 android:defaultValue="false"
                 android:key="dm-widget-fullscreen"
                 android:title="@string/dm_widget_fullscreen" />
+
+            <ListPreference
+                android:defaultValue="showSearchBar"
+                android:entries="@array/gestureEntries"
+                android:entryValues="@array/gestureValues"
+                android:key="dm-widget-back"
+                android:title="@string/back_device_key" />
 
         </PreferenceScreen>
 

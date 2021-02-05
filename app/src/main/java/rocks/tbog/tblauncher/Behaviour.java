@@ -938,10 +938,23 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
      * @return returns true if action handled
      */
     public boolean onBackPressed() {
-        mSearchEditText.setText("");
-
         if (closeFragmentDialog())
             return true;
+
+        mSearchEditText.setText("");
+
+        switch (TBApplication.state().getDesktop()) {
+            case SEARCH:
+                executeAction(mPref.getString("dm-search-back", null));
+                break;
+            case WIDGET:
+                executeAction(mPref.getString("dm-widget-back", null));
+                break;
+            case EMPTY:
+            default:
+                executeAction(mPref.getString("dm-empty-back", null));
+                break;
+        }
 
         // Calling super.onBackPressed() will quit the launcher, only do this if KISS is not the user's default home.
         // Action not handled (return false) if not the default launcher.
