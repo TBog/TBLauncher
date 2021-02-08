@@ -35,7 +35,9 @@ import rocks.tbog.tblauncher.entry.ActionEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.FilterEntry;
 import rocks.tbog.tblauncher.entry.StaticEntry;
+import rocks.tbog.tblauncher.entry.TagEntry;
 import rocks.tbog.tblauncher.result.ResultHelper;
+import rocks.tbog.tblauncher.searcher.Searcher;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.UIColors;
 
@@ -56,6 +58,7 @@ public class QuickList {
 
     // last filter scheme, used for better toggle behaviour
     private String mLastSelection = null;
+    private String mLastAction = null;
 
     public Context getContext() {
         return mTBLauncherActivity;
@@ -112,10 +115,7 @@ public class QuickList {
 
             view.setOnClickListener(v -> {
                 if (entry instanceof StaticEntry) {
-                    animToggleOff();
                     entry.doLaunch(v, EntryItem.LAUNCHED_FROM_QUICK_LIST);
-                    if (TBApplication.state().isResultListVisible())
-                        mLastSelection = entry.id;
                 } else {
                     ResultHelper.launch(v, entry);
                 }
@@ -142,6 +142,38 @@ public class QuickList {
         }
         //mQuickList.setVisibility(mQuickList.getChildCount() == 0 ? View.GONE : View.VISIBLE);
         mQuickList.requestLayout();
+    }
+
+    public void toggleSearch(@NonNull View v, @NonNull String query, @NonNull Class<? extends Searcher> searcherClass) {
+        Context ctx = v.getContext();
+        TBApplication app = TBApplication.getApplication(ctx);
+        final String actionId;
+        {
+            Object tag_actionId = v.getTag(R.id.tag_actionId);
+            actionId = tag_actionId instanceof String ? (String) tag_actionId : "";
+        }
+
+        // toggle off any filter
+        if (bFilterOn) {
+            animToggleOff();
+            bFilterOn = false;
+            app.behaviour().filterResults(null);
+        }
+
+        // show search content
+        {
+            // if the last action is not the current action, toggle on this action
+            if (!bActionOn || !actionId.equals(mLastSelection)) {
+                app.behaviour().runSearcher(query, searcherClass);
+
+                // update toggle information
+                mLastSelection = actionId;
+                bActionOn = true;
+            } else {
+                // to toggle off the action, set bActionOn to false
+                app.behaviour().clearSearch();
+            }
+        }
     }
 
     public void toggleProvider(View v, IProvider<?> provider, @Nullable java.util.Comparator<? super EntryItem> comparator) {
@@ -186,7 +218,7 @@ public class QuickList {
                     }
 
                     // show result list
-                    app.behaviour().clearSearch();
+                    //app.behaviour().clearSearch();
                     app.behaviour().updateAdapter(list, false);
 
                     // update toggle information
@@ -230,10 +262,17 @@ public class QuickList {
             bAdapterEmpty = true;
         } else if (bFilterOn && (provider == null || actionId.equals(mLastSelection))) {
             animToggleOff();
+            if (mLastAction != null) {
+                bActionOn = true;
+                mLastSelection = mLastAction;
+                mLastAction = null;
+            }
             bFilterOn = false;
             app.behaviour().filterResults(null);
         } else if (provider != null) {
             animToggleOff();
+            if (bActionOn)
+                mLastAction = mLastSelection;
             bFilterOn = true;
             mLastSelection = actionId;
             app.behaviour().filterResults(filterName);
@@ -354,7 +393,9 @@ public class QuickList {
         show();
         animToggleOff();
         bFilterOn = false;
-        bActionOn = false;
+        bActionOn = mLastSelection != null
+                && (mLastSelection.startsWith(ActionEntry.SCHEME)
+                || mLastSelection.startsWith(TagEntry.SCHEME));
         bAdapterEmpty = false;
     }
 

@@ -7,10 +7,10 @@ import android.view.View;
 import androidx.annotation.NonNull;
 
 import rocks.tbog.tblauncher.BuildConfig;
+import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.drawable.CodePointDrawable;
 import rocks.tbog.tblauncher.searcher.TagSearcher;
-import rocks.tbog.tblauncher.utils.Utilities;
 
 public class TagEntry extends StaticEntry {
     public static final String SCHEME = "tag://";
@@ -26,14 +26,13 @@ public class TagEntry extends StaticEntry {
     public void doLaunch(@NonNull View v, int flags) {
         Context ctx = v.getContext();
 
-        if (Utilities.checkFlag(flags, LAUNCHED_FROM_QUICK_LIST)) {
-            if (TBApplication.state().isResultListVisible()) {
-                TBApplication.behaviour(ctx).clearAdapter();
-                return;
-            }
-        }
+        TBApplication.quickList(ctx).toggleSearch(v, getName(), TagSearcher.class);
+    }
 
-        TBApplication.behaviour(ctx).runSearcher(getName(), TagSearcher.class);
+    @Override
+    public void displayResult(@NonNull View view, int drawFlags) {
+        super.displayResult(view, drawFlags);
+        view.setTag(R.id.tag_actionId, id);
     }
 
     @Override

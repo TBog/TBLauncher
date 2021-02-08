@@ -12,7 +12,6 @@ import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.entry.ActionEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.searcher.HistorySearcher;
-import rocks.tbog.tblauncher.utils.Utilities;
 
 public class ActionProvider extends StaticProvider<ActionEntry> {
 
@@ -108,10 +107,7 @@ public class ActionProvider extends StaticProvider<ActionEntry> {
             ActionEntry actionEntry = new ActionEntry(id, R.drawable.ic_history);
             actionEntry.setAction((v, flags) -> {
                 Context ctx = v.getContext();
-                if (shouldToggleClear(id, ctx, flags))
-                    TBApplication.behaviour(ctx).clearAdapter();
-                else
-                    TBApplication.behaviour(ctx).runSearcher("recency", HistorySearcher.class);
+                TBApplication.quickList(ctx).toggleSearch(v, "recency", HistorySearcher.class);
             });
             actionEntry.setName(context.getResources().getString(R.string.action_show_history_recency));
             pojos.add(actionEntry);
@@ -122,10 +118,7 @@ public class ActionProvider extends StaticProvider<ActionEntry> {
             ActionEntry actionEntry = new ActionEntry(id, R.drawable.ic_history);
             actionEntry.setAction((v, flags) -> {
                 Context ctx = v.getContext();
-                if (shouldToggleClear(id, ctx, flags))
-                    TBApplication.behaviour(ctx).clearAdapter();
-                else
-                    TBApplication.behaviour(ctx).runSearcher("frequency", HistorySearcher.class);
+                TBApplication.quickList(ctx).toggleSearch(v, "frequency", HistorySearcher.class);
             });
             actionEntry.setName(context.getResources().getString(R.string.action_show_history_frequency));
             pojos.add(actionEntry);
@@ -138,10 +131,7 @@ public class ActionProvider extends StaticProvider<ActionEntry> {
             ActionEntry actionEntry = new ActionEntry(id, R.drawable.ic_history);
             actionEntry.setAction((v, flags) -> {
                 Context ctx = v.getContext();
-                if (shouldToggleClear(id, ctx, flags))
-                    TBApplication.behaviour(ctx).clearAdapter();
-                else
-                    TBApplication.behaviour(ctx).runSearcher("frecency", HistorySearcher.class);
+                TBApplication.quickList(ctx).toggleSearch(v, "frecency", HistorySearcher.class);
             });
             actionEntry.setName(context.getResources().getString(R.string.action_show_history_frecency));
             pojos.add(actionEntry);
@@ -152,20 +142,11 @@ public class ActionProvider extends StaticProvider<ActionEntry> {
             ActionEntry actionEntry = new ActionEntry(id, R.drawable.ic_history);
             actionEntry.setAction((v, flags) -> {
                 Context ctx = v.getContext();
-                if (shouldToggleClear(id, ctx, flags))
-                    TBApplication.behaviour(ctx).clearAdapter();
-                else
-                    TBApplication.behaviour(ctx).runSearcher("adaptive", HistorySearcher.class);
+                TBApplication.quickList(ctx).toggleSearch(v, "adaptive", HistorySearcher.class);
             });
             actionEntry.setName(context.getResources().getString(R.string.action_show_history_adaptive));
             pojos.add(actionEntry);
         }
-    }
-
-    private static boolean shouldToggleClear(@NonNull String actionId, Context ctx, int flags) {
-        if (Utilities.checkFlag(flags, EntryItem.LAUNCHED_FROM_QUICK_LIST))
-            return TBApplication.quickList(ctx).isLastSelection(actionId);
-        return false;
     }
 
     @Override
