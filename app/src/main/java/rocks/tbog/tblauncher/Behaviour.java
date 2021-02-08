@@ -452,7 +452,8 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                 else
                     TBApplication.quickList(getContext()).hideQuickList(false);
                 // enable/disable fullscreen (status and navigation bar)
-                if (PrefCache.modeSearchFullscreen(mPref))
+                if (!TBApplication.state().isKeyboardVisible()
+                        && PrefCache.modeSearchFullscreen(mPref))
                     enableFullscreen(UI_ANIMATION_DELAY);
                 else
                     disableFullscreen();
@@ -787,7 +788,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         mResultList.post(() -> mResultList.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL));
     }
 
-    public void runSearcher(@NonNull String query, Class<? extends Searcher> searcherClass) {
+    public void runSearcher(@NonNull String query, @NonNull Class<? extends Searcher> searcherClass) {
         if (mSearchEditText == null)
             return;
         /*if (TBApplication.state().isResultListVisible() && mSearchEditText.getText().length() == 0) {

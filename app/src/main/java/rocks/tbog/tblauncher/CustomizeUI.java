@@ -58,9 +58,12 @@ public class CustomizeUI {
         mMenuButton = mSearchBarContainer.findViewById(R.id.menuButton);
         mClearButton = mSearchBarContainer.findViewById(R.id.clearButton);
 
-        setNotificationBarColor();
         setSearchBarPref();
         setResultListPref(findViewById(R.id.resultLayout));
+    }
+
+    public void onPostCreate() {
+        setNotificationBarColor();
     }
 
     private void setNotificationBarColor() {
