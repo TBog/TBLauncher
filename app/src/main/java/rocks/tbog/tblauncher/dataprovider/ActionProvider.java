@@ -12,6 +12,7 @@ import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.entry.ActionEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.searcher.HistorySearcher;
+import rocks.tbog.tblauncher.searcher.TagSearcher;
 
 public class ActionProvider extends StaticProvider<ActionEntry> {
 
@@ -145,6 +146,16 @@ public class ActionProvider extends StaticProvider<ActionEntry> {
                 TBApplication.quickList(ctx).toggleSearch(v, "adaptive", HistorySearcher.class);
             });
             actionEntry.setName(context.getResources().getString(R.string.action_show_history_adaptive));
+            pojos.add(actionEntry);
+        }
+        {
+            String id = ActionEntry.SCHEME + "show/untagged";
+            ActionEntry actionEntry = new ActionEntry(id, R.drawable.ic_tags);
+            actionEntry.setAction((v, flags) -> {
+                Context ctx = v.getContext();
+                TBApplication.quickList(ctx).toggleSearch(v, "", TagSearcher.class);
+            });
+            actionEntry.setName(context.getResources().getString(R.string.action_show_untagged));
             pojos.add(actionEntry);
         }
     }

@@ -216,7 +216,7 @@ public class QuickList {
                     }
 
                     // show result list
-                    //app.behaviour().clearSearch();
+                    app.behaviour().clearSearchText();
                     app.behaviour().updateAdapter(list, false);
 
                     // update toggle information
