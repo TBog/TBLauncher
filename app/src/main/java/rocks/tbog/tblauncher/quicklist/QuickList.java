@@ -205,8 +205,6 @@ public class QuickList {
                     // remove actions and filters from the result list
                     for (Iterator<? extends EntryItem> iterator = list.iterator(); iterator.hasNext(); ) {
                         EntryItem entry = iterator.next();
-                        if (entry instanceof ActionEntry)
-                            iterator.remove();
                         if (entry instanceof FilterEntry)
                             iterator.remove();
                     }

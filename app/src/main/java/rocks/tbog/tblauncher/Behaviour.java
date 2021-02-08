@@ -1308,6 +1308,38 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                 }
             }
             break;
+            case "showHistoryByRecency": {
+                EntryItem item = TBApplication.dataHandler(getContext()).getPojo(ActionEntry.SCHEME + "show/history/recency");
+                if (item instanceof ActionEntry) {
+                    item.doLaunch(mLauncherButton, LAUNCHED_FROM_GESTURE);
+                    return true;
+                }
+            }
+            break;
+            case "showHistoryByFrequency": {
+                EntryItem item = TBApplication.dataHandler(getContext()).getPojo(ActionEntry.SCHEME + "show/history/frequency");
+                if (item instanceof ActionEntry) {
+                    item.doLaunch(mLauncherButton, LAUNCHED_FROM_GESTURE);
+                    return true;
+                }
+            }
+            break;
+            case "showHistoryByFrecency": {
+                EntryItem item = TBApplication.dataHandler(getContext()).getPojo(ActionEntry.SCHEME + "show/history/frecency");
+                if (item instanceof ActionEntry) {
+                    item.doLaunch(mLauncherButton, LAUNCHED_FROM_GESTURE);
+                    return true;
+                }
+            }
+            break;
+            case "showHistoryByAdaptive": {
+                EntryItem item = TBApplication.dataHandler(getContext()).getPojo(ActionEntry.SCHEME + "show/history/adaptive");
+                if (item instanceof ActionEntry) {
+                    item.doLaunch(mLauncherButton, LAUNCHED_FROM_GESTURE);
+                    return true;
+                }
+            }
+            break;
         }
         return false;
     }

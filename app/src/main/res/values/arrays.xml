@@ -78,6 +78,10 @@
         <item>Reload providers</item>
         <item>@string/action_show_apps</item>
         <item>@string/action_show_apps_reversed</item>
+        <item>@string/action_show_history_recency</item>
+        <item>@string/action_show_history_frequency</item>
+        <item>@string/action_show_history_frecency</item>
+        <item>@string/action_show_history_adaptive</item>
     </string-array>
     <array name="gestureValues" translatable="false">
         <item>none</item>
@@ -91,6 +95,10 @@
         <item>reloadProviders</item>
         <item>showAllAppsAZ</item>
         <item>showAllAppsZA</item>
+        <item>showHistoryByRecency</item>
+        <item>showHistoryByFrequency</item>
+        <item>showHistoryByFrecency</item>
+        <item>showHistoryByAdaptive</item>
     </array>
 
     <array name="material_colors">
