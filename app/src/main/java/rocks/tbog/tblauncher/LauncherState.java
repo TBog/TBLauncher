@@ -1,6 +1,7 @@
 package rocks.tbog.tblauncher;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 public class LauncherState {
     public enum AnimatedVisibility {
@@ -24,7 +25,7 @@ public class LauncherState {
     private AnimatedVisibility clearScreen = AnimatedVisibility.HIDDEN;
     private AnimatedVisibility keyboard = AnimatedVisibility.HIDDEN;
 
-    private Desktop desktop = Desktop.EMPTY;
+    private Desktop desktop = null;
 
     private static boolean isVisible(AnimatedVisibility state) {
         return state == AnimatedVisibility.ANIM_TO_VISIBLE ||
@@ -59,7 +60,7 @@ public class LauncherState {
         return isVisible(keyboard);
     }
 
-    @NonNull
+    @Nullable
     public Desktop getDesktop() {
         return desktop;
     }

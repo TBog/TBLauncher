@@ -339,6 +339,10 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         });
     }
 
+    public void onPostCreate() {
+        showDesktop(LauncherState.Desktop.EMPTY);
+    }
+
     private ListPopup getMenuPopup(Context ctx) {
         LinearAdapter adapter = new LinearAdapter();
         ListPopup menu = ListPopup.create(ctx, adapter);
@@ -420,24 +424,27 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 
     public void showDesktop(@NonNull LauncherState.Desktop mode) {
         // get current mode
+        @Nullable
         LauncherState.Desktop currentMode = TBApplication.state().getDesktop();
         Log.d(TAG, "desktop changed " + currentMode + " -> " + mode);
-        if (currentMode.equals(mode)) {
+        if (mode.equals(currentMode)) {
             // no change, maybe refresh?
             return;
         }
 
         // hide current mode
-        switch (currentMode) {
-            case SEARCH:
-                hideSearchBar();
-                break;
-            case WIDGET:
-                hideWidgets();
-                break;
-            case EMPTY:
-            default:
-                break;
+        if (currentMode != null) {
+            switch (currentMode) {
+                case SEARCH:
+                    hideSearchBar();
+                    break;
+                case WIDGET:
+                    hideWidgets();
+                    break;
+                case EMPTY:
+                default:
+                    break;
+            }
         }
 
         // show next mode

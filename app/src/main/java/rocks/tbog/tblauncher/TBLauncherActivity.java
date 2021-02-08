@@ -143,6 +143,7 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
     protected void onPostCreate(@Nullable Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
 
+        TBApplication.behaviour(this).onPostCreate();
         TBApplication.ui(this).onPostCreate();
     }
 
