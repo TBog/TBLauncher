@@ -241,12 +241,11 @@ public class CustomizeUI {
 
     public void setListViewScrollbarPref(View listView) {
         int color = UIColors.getResultListRipple(listView.getContext());
-        setListViewScrollbarPref(listView, color);
+        setListViewScrollbarPref(listView, UIColors.setAlpha(color, 0x7F));
     }
 
     public void setListViewScrollbarPref(View listView, int color) {
-
-        GradientDrawable drawable = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, new int[]{color & 0xffffff, color, color});
+        GradientDrawable drawable = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, new int[]{color, color});
         drawable.setCornerRadius(UISizes.dp2px(listView.getContext(), 3));
         drawable.setSize(UISizes.dp2px(listView.getContext(), 4), drawable.getIntrinsicHeight());
 
