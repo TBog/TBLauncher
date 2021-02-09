@@ -3,6 +3,7 @@ package rocks.tbog.tblauncher.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 
 import rocks.tbog.tblauncher.R;
@@ -86,6 +87,12 @@ public class PrefCache {
 
     public static boolean modeSearchFullscreen(SharedPreferences mPref) {
         return mPref.getBoolean("dm-search-fullscreen", false);
+    }
+
+    @NonNull
+    public static String modeSearchOpenResult(SharedPreferences mPref) {
+        String result = mPref.getString("dm-search-open-result", null);
+        return result == null ? "none" : result;
     }
 
     public static boolean modeWidgetQuickListVisible(SharedPreferences mPref) {

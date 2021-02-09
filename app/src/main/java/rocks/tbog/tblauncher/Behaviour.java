@@ -470,6 +470,24 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                     enableFullscreen(UI_ANIMATION_DELAY);
                 else
                     disableFullscreen();
+                switch (PrefCache.modeSearchOpenResult(mPref)) {
+                    case "resultHistoryByRecency":
+                        executeAction("showHistoryByRecency");
+                        break;
+                    case "resultHistoryByFrequency":
+                        executeAction("showHistoryByFrequency");
+                        break;
+                    case "resultHistoryByFrecency":
+                        executeAction("showHistoryByFrecency");
+                        break;
+                    case "resultHistoryByAdaptive":
+                        executeAction("showHistoryByAdaptive");
+                        break;
+                    case "none":
+                    default:
+                        // do nothing
+                        break;
+                }
                 break;
             case WIDGET:
                 // show widgets

@@ -101,6 +101,21 @@
         <item>showHistoryByAdaptive</item>
     </array>
 
+    <string-array name="resultEntries">
+        <item>Empty</item>
+        <item>@string/action_show_history_recency</item>
+        <item>@string/action_show_history_frequency</item>
+        <item>@string/action_show_history_frecency</item>
+        <item>@string/action_show_history_adaptive</item>
+    </string-array>
+    <array name="resultValues" translatable="false">
+        <item>none</item>
+        <item>resultHistoryByRecency</item>
+        <item>resultHistoryByFrequency</item>
+        <item>resultHistoryByFrecency</item>
+        <item>resultHistoryByAdaptive</item>
+    </array>
+
     <array name="material_colors">
         <item>@array/mm2d_cc_red</item>
         <item>@array/mm2d_cc_pink</item>

@@ -362,6 +362,13 @@
                 android:key="dm-search-back"
                 android:title="@string/back_device_key" />
 
+            <ListPreference
+                android:defaultValue="resultHistoryByRecency"
+                android:entries="@array/resultEntries"
+                android:entryValues="@array/resultValues"
+                android:key="dm-search-open-result"
+                android:title="@string/dm_search_open_result" />
+
         </PreferenceScreen>
 
         <!-- ‹Widget› desktop mode -->

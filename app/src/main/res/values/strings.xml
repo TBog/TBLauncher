@@ -374,6 +374,7 @@
     <string name="search_bar_cursor_argb">Cursor color</string>
     <string name="back_device_key">Back button</string>
     <string name="action_show_untagged">Un-tagged</string>
+    <string name="dm_search_open_result">Initial result list</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>
