@@ -27,6 +27,7 @@ import rocks.tbog.tblauncher.ui.ListPopup;
 
 public class LiveWallpaper {
     private static final int longPressTimeout = ViewConfiguration.getLongPressTimeout();
+    private static final float minMovement = 1.025;
     private static final String TAG = "LWP";
     private TBLauncherActivity mTBLauncherActivity = null;
     private WallpaperManager mWallpaperManager;
@@ -222,7 +223,7 @@ public class LiveWallpaper {
                 float yMove = (mFirstTouchPos.y - mLastTouchPos.y) / mWindowSize.y;
                 if (mVelocityTracker == null) {
                     Log.d(TAG, String.format(Locale.US, "Move=(%.3f, %.3f)", xMove, yMove));
-                    if (Math.abs(xMove) < .01f && Math.abs(yMove) < .01f) {
+                    if (Math.abs(xMove) < minMovement && Math.abs(yMove) < minMovement) {
                         if (event.getEventTime() - event.getDownTime() < longPressTimeout) {
                             eventConsumed = onClick(view);
                         }
@@ -234,10 +235,10 @@ public class LiveWallpaper {
                     float yVel = mVelocityTracker.getYVelocity() / mWindowSize.y;
                     Log.d(TAG, String.format(Locale.US, "Velocity=(%.3f, %.3f) Move=(%.3f, %.3f)", xVel, yVel, xMove, yMove));
                     // if no movement detected
-                    if (Math.abs(xVel) < .01f
-                            && Math.abs(yVel) < .01f
-                            && Math.abs(xMove) < .01f
-                            && Math.abs(yMove) < .01f) {
+                    if (Math.abs(xVel) < minMovement
+                            && Math.abs(yVel) < minMovement
+                            && Math.abs(xMove) < minMovement
+                            && Math.abs(yMove) < minMovement) {
                         if (event.getEventTime() - event.getDownTime() < longPressTimeout)
                             onClick(view);
                         // snap position if needed
