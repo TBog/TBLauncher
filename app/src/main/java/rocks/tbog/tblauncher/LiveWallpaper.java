@@ -27,7 +27,7 @@ import rocks.tbog.tblauncher.ui.ListPopup;
 
 public class LiveWallpaper {
     private static final int longPressTimeout = ViewConfiguration.getLongPressTimeout();
-    private static final float minMovement = 1.025;
+    private static final float minMovement = 1.025f;
     private static final String TAG = "LWP";
     private TBLauncherActivity mTBLauncherActivity = null;
     private WallpaperManager mWallpaperManager;
