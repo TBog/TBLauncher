@@ -25,6 +25,7 @@ import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.Toast;
 
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
@@ -52,6 +53,7 @@ import rocks.tbog.tblauncher.entry.ShortcutEntry;
 import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.quicklist.EditQuickListDialog;
 import rocks.tbog.tblauncher.result.ResultAdapter;
+import rocks.tbog.tblauncher.result.ResultHelper;
 import rocks.tbog.tblauncher.searcher.ISearchActivity;
 import rocks.tbog.tblauncher.searcher.QuerySearcher;
 import rocks.tbog.tblauncher.searcher.Searcher;
@@ -251,7 +253,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         //mLauncherButton.setOnTouchListener(mDelayHideTouchListener);
 
         //mLauncherButton.setOnClickListener((v) -> TBApplication.dataHandler(v.getContext()).reloadProviders());
-        mLauncherButton.setOnClickListener((v) -> executeAction(mPref.getString("button-launcher", null)));
+        mLauncherButton.setOnClickListener((v) -> executeButtonAction("button-launcher"));
     }
 
     private void setSearchHint() {
@@ -470,22 +472,15 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                     enableFullscreen(UI_ANIMATION_DELAY);
                 else
                     disableFullscreen();
-                switch (PrefCache.modeSearchOpenResult(mPref)) {
-                    case "resultHistoryByRecency":
-                        executeAction("showHistoryByRecency");
-                        break;
-                    case "resultHistoryByFrequency":
-                        executeAction("showHistoryByFrequency");
-                        break;
-                    case "resultHistoryByFrecency":
-                        executeAction("showHistoryByFrecency");
-                        break;
-                    case "resultHistoryByAdaptive":
-                        executeAction("showHistoryByAdaptive");
-                        break;
+
+                final String openResult = PrefCache.modeSearchOpenResult(mPref);
+                switch (openResult) {
                     case "none":
-                    default:
                         // do nothing
+                        break;
+                    default:
+                        // try to execute the action
+                        executeAction(openResult, null);
                         break;
                 }
                 break;
@@ -981,14 +976,14 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 
         switch (TBApplication.state().getDesktop()) {
             case SEARCH:
-                executeAction(mPref.getString("dm-search-back", null));
+                executeButtonAction("dm-search-back");
                 break;
             case WIDGET:
-                executeAction(mPref.getString("dm-widget-back", null));
+                executeButtonAction("dm-widget-back");
                 break;
             case EMPTY:
             default:
-                executeAction(mPref.getString("dm-empty-back", null));
+                executeButtonAction("dm-empty-back");
                 break;
         }
 
@@ -1244,7 +1239,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         LauncherState state = TBApplication.state();
         Log.i(TAG, "onNewIntent desktop=" + state.getDesktop());
 
-        executeAction(mPref.getString("button-home", null));
+        executeButtonAction("button-home");
 //        if (mSearchEditText.getText().length() > 0) {
 //            mSearchEditText.setText("");
 //            hideKeyboard();
@@ -1286,7 +1281,43 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         }
     }
 
-    private boolean executeAction(@Nullable String action) {
+    private boolean launchStaticEntry(@NonNull String entryId) {
+        Context ctx = getContext();
+        EntryItem item = TBApplication.dataHandler(ctx).getPojo(entryId);
+        if (item instanceof StaticEntry) {
+            item.doLaunch(mLauncherButton, LAUNCHED_FROM_GESTURE);
+            return true;
+        } else {
+            Toast.makeText(ctx, ctx.getString(R.string.entry_not_found, entryId), Toast.LENGTH_SHORT).show();
+        }
+        return false;
+    }
+
+    private boolean launchActionEntry(@NonNull String action) {
+        return launchStaticEntry(ActionEntry.SCHEME + action);
+    }
+
+    private boolean launchAppEntry(@NonNull String appId) {
+        Context ctx = getContext();
+        EntryItem item = TBApplication.dataHandler(ctx).getPojo(AppEntry.SCHEME + appId);
+        if (item instanceof AppEntry) {
+            ResultHelper.launch(mLauncherButton, item, LAUNCHED_FROM_GESTURE);
+            return true;
+        } else {
+            Toast.makeText(ctx, ctx.getString(R.string.application_not_found, appId), Toast.LENGTH_SHORT).show();
+        }
+        return false;
+    }
+
+    private void executeButtonAction(@Nullable String button) {
+        executeAction(mPref.getString(button, null), button);
+    }
+
+    private boolean executeGestureAction(@Nullable String gesture) {
+        return executeAction(mPref.getString(gesture, null), gesture);
+    }
+
+    private boolean executeAction(@Nullable String action, @Nullable String source) {
         if (action == null)
             return false;
         switch (action) {
@@ -1327,79 +1358,70 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             case "reloadProviders":
                 TBApplication.dataHandler(getContext()).reloadProviders();
                 return true;
-            case "showAllAppsAZ": {
-                EntryItem item = TBApplication.dataHandler(getContext()).getPojo(ActionEntry.SCHEME + "show/apps/byName");
-                if (item instanceof ActionEntry) {
-                    item.doLaunch(mLauncherButton, LAUNCHED_FROM_GESTURE);
-                    return true;
-                }
+            case "showAllAppsAZ":
+                return launchActionEntry("show/apps/byName");
+            case "showAllAppsZA":
+                return launchActionEntry("show/apps/byNameReversed");
+            case "showContactsAZ":
+                return launchActionEntry("show/contacts/byName");
+            case "showContactsZA":
+                return launchActionEntry("show/contacts/byNameReversed");
+            case "showShortcutsAZ":
+                return launchActionEntry("show/shortcuts/byName");
+            case "showShortcutsZA":
+                return launchActionEntry("show/shortcuts/byNameReversed");
+            case "showFavorites":
+                return launchActionEntry("show/favorites/byName");
+            case "showHistoryByRecency":
+                return launchActionEntry("show/history/recency");
+            case "showHistoryByFrequency":
+                return launchActionEntry("show/history/frequency");
+            case "showHistoryByFrecency":
+                return launchActionEntry("show/history/frecency");
+            case "showHistoryByAdaptive":
+                return launchActionEntry("show/history/adaptive");
+            case "showUntagged":
+                return launchActionEntry("show/untagged");
+            case "runApp": {
+                String runApp = mPref.getString(source + "-app-to-run", null);
+                if (runApp != null)
+                    return launchAppEntry(runApp);
+                break;
             }
-            break;
-            case "showAllAppsZA": {
-                EntryItem item = TBApplication.dataHandler(getContext()).getPojo(ActionEntry.SCHEME + "show/apps/byNameReversed");
-                if (item instanceof ActionEntry) {
-                    item.doLaunch(mLauncherButton, LAUNCHED_FROM_GESTURE);
-                    return true;
-                }
+            case "showEntry": {
+                String entryToShow = mPref.getString(source + "-entry-to-show", null);
+                if (entryToShow != null)
+                    return launchStaticEntry(entryToShow);
+                break;
             }
-            break;
-            case "showHistoryByRecency": {
-                EntryItem item = TBApplication.dataHandler(getContext()).getPojo(ActionEntry.SCHEME + "show/history/recency");
-                if (item instanceof ActionEntry) {
-                    item.doLaunch(mLauncherButton, LAUNCHED_FROM_GESTURE);
-                    return true;
-                }
-            }
-            break;
-            case "showHistoryByFrequency": {
-                EntryItem item = TBApplication.dataHandler(getContext()).getPojo(ActionEntry.SCHEME + "show/history/frequency");
-                if (item instanceof ActionEntry) {
-                    item.doLaunch(mLauncherButton, LAUNCHED_FROM_GESTURE);
-                    return true;
-                }
-            }
-            break;
-            case "showHistoryByFrecency": {
-                EntryItem item = TBApplication.dataHandler(getContext()).getPojo(ActionEntry.SCHEME + "show/history/frecency");
-                if (item instanceof ActionEntry) {
-                    item.doLaunch(mLauncherButton, LAUNCHED_FROM_GESTURE);
-                    return true;
-                }
-            }
-            break;
-            case "showHistoryByAdaptive": {
-                EntryItem item = TBApplication.dataHandler(getContext()).getPojo(ActionEntry.SCHEME + "show/history/adaptive");
-                if (item instanceof ActionEntry) {
-                    item.doLaunch(mLauncherButton, LAUNCHED_FROM_GESTURE);
-                    return true;
-                }
-            }
-            break;
+            default:
+                // do nothing
+                break;
         }
         return false;
     }
 
     public boolean onFlingDownLeft() {
-        return executeAction(mPref.getString("gesture-fling-down-left", null));
+        return executeGestureAction("gesture-fling-down-left");
     }
 
     public boolean onFlingDownRight() {
-        return executeAction(mPref.getString("gesture-fling-down-right", null));
+        return executeGestureAction("gesture-fling-down-right");
     }
 
     public boolean onFlingUp() {
-        return executeAction(mPref.getString("gesture-fling-up", null));
+        return executeGestureAction("gesture-fling-up");
     }
 
     public boolean onFlingLeft() {
-        return executeAction(mPref.getString("gesture-fling-left", null));
+        return executeGestureAction("gesture-fling-left");
     }
 
     public boolean onFlingRight() {
-        return executeAction(mPref.getString("gesture-fling-right", null));
+        return executeGestureAction("gesture-fling-right");
     }
 
     public boolean onClick() {
-        return executeAction(mPref.getString("gesture-click", null));
+        return executeGestureAction("gesture-click");
     }
 }

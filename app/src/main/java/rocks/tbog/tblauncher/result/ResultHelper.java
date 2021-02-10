@@ -48,6 +48,18 @@ public class ResultHelper {
         else
             launchedFrom = LAUNCHED_FROM_RESULT_LIST;
 
+        launch(view, pojo, launchedFrom);
+    }
+
+    /**
+     * How to launch a result. Most probably, will fire an intent.
+     * This function will record history and then call EntryItem.doLaunch
+     *
+     * @param view {@link View} that was touched
+     * @param pojo the {@link EntryItem} that the user is launching
+     * @param launchedFrom is the view from QuickList, ResultList, Gesture?
+     */
+    public static void launch(@NonNull View view, @NonNull EntryItem pojo, int launchedFrom) {
         if (pojo instanceof StaticEntry) {
             Log.i("log", "Launching StaticEntry " + pojo.id);
 

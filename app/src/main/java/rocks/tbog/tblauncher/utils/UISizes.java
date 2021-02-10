@@ -2,8 +2,10 @@ package rocks.tbog.tblauncher.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.TypedArray;
 import android.util.TypedValue;
 
+import androidx.annotation.AttrRes;
 import androidx.preference.PreferenceManager;
 
 import rocks.tbog.tblauncher.R;
@@ -85,5 +87,16 @@ public final class UISizes {
             CACHED_RADIUS_POPUP_CORNER = dp2px(context, size);
         }
         return CACHED_RADIUS_POPUP_CORNER;
+    }
+
+    public static int getTextAppearanceTextSize(Context context, @AttrRes int textAppearance) {
+        int size = 0;
+        TypedValue appearance = new TypedValue();
+        if (context.getTheme().resolveAttribute(textAppearance, appearance, true)) {
+            TypedArray ta = context.obtainStyledAttributes(appearance.resourceId, new int[]{android.R.attr.textSize});
+            size = ta.getDimensionPixelSize(0, size);
+            ta.recycle();
+        }
+        return (size == 0) ? sp2px(context, 12) : size;
     }
 }

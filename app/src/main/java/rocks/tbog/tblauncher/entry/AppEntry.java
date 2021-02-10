@@ -436,7 +436,7 @@ public final class AppEntry extends EntryWithTags {
         } catch (ActivityNotFoundException | NullPointerException | SecurityException e) {
             // Application was just removed?
             // (null pointer exception can be thrown on Lollipop+ when app is missing)
-            Toast.makeText(context, R.string.application_not_found, Toast.LENGTH_LONG).show();
+            Toast.makeText(context, context.getString(R.string.application_not_found, componentName.flattenToShortString()), Toast.LENGTH_LONG).show();
         }
     }
 

@@ -29,7 +29,7 @@
     <string name="title_ui">Brukergrensesnitt</string>
     <string name="user_interface_summary">Drakter, gjennomsiktighet og farger</string>
     <string name="rate_the_app">Vurder programmet</string>
-    <string name="application_not_found">Oida … kunne ikke starte det programmet</string>
+    <string name="application_not_found">Oida … kunne ikke starte \"%s\" programmet</string>
     <string name="menu_exclude_history">fra historikk</string>
     <string name="menu_app_uninstall">Avinstaller</string>
     <string name="menu_app_store">Vis i butikk</string>
@@ -208,7 +208,6 @@
     <string name="cd_remove_tag">Fjern etikett</string>
     <string name="cd_undo_remove_tag">Angre fjerning av etikett</string>
     <string name="cd_add_tag">Legg til etikett</string>
-    <string name="cd_icon_preview">Forhåndsvis</string>
     <string name="cd_item_contact_message">Melding</string>
     <string name="cd_show_all_apps">Vis alle programmer</string>
     <string name="cd_main_clear">Tøm søkefelt</string>

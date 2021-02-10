@@ -229,7 +229,7 @@ public final class ShortcutEntry extends EntryWithTags {
             context.startActivity(intent, startActivityOptions);
         } catch (Exception e) {
             // Application was just removed?
-            Toast.makeText(context, R.string.application_not_found, Toast.LENGTH_LONG).show();
+            Toast.makeText(context, context.getString(R.string.entry_not_found, shortcutData), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -258,7 +258,7 @@ public final class ShortcutEntry extends EntryWithTags {
         }
 
         // Application removed? Invalid shortcut? Shortcut to an app on an unmounted SD card?
-        Toast.makeText(context, R.string.application_not_found, Toast.LENGTH_LONG).show();
+        Toast.makeText(context, context.getString(R.string.application_not_found, shortcutInfo), Toast.LENGTH_LONG).show();
     }
 
     @Override
