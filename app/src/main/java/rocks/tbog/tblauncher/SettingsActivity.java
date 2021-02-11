@@ -8,17 +8,15 @@ import android.content.SharedPreferences;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Looper;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
 import android.util.Log;
+import android.util.Pair;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -84,6 +82,22 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             "search-bar-color", "search-bar-alpha", "search-bar-text-color", "search-bar-icon-color",
             "search-bar-ripple-color", "search-bar-cursor-argb"
     ));
+    private final static ArraySet<String> PREF_LISTS_WITH_DEPENDENCY = new ArraySet<>(Arrays.asList(
+            "gesture-click",
+            "gesture-fling-down-left",
+            "gesture-fling-down-right",
+            "gesture-fling-up",
+            "gesture-fling-left",
+            "gesture-fling-right",
+            "button-launcher",
+            "button-home",
+            "dm-empty-back",
+            "dm-search-back",
+            "dm-widget-back"
+    ));
+    private static Pair<CharSequence[], CharSequence[]> AppToRunListContent = null;
+    private static Pair<CharSequence[], CharSequence[]> EntryToShowListContent = null;
+
     private static final int FILE_SELECT_XML_SET = 63;
     private static final int FILE_SELECT_XML_OVERWRITE = 62;
     private static final int FILE_SELECT_XML_APPEND = 61;
@@ -327,43 +341,73 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 }
             }
 
-            {
-                String[] gesturePrefList = new String[]{
-                        "gesture-click",
-                        "gesture-fling-down-left",
-                        "gesture-fling-down-right",
-                        "gesture-fling-up",
-                        "gesture-fling-left",
-                        "gesture-fling-right",
-                        "button-launcher",
-                        "button-home",
-                        "dm-empty-back",
-                        "dm-search-back",
-                        "dm-widget-back",
-                };
-                for (String gesturePref : gesturePrefList)
-                    updateListDependencies(activity, sharedPreferences, gesturePref);
+            if (savedInstanceState == null) {
+                initAppToRunLists(context, sharedPreferences);
+                initEntryToShowLists(context, sharedPreferences);
+            } else {
+                synchronized (SettingsFragment.this) {
+                    if (AppToRunListContent == null)
+                        AppToRunListContent = generateAppToRunListContent(context);
+                    if (EntryToShowListContent == null)
+                        EntryToShowListContent = generateEntryToShowListContent(context);
+                }
+                for (String gesturePref : PREF_LISTS_WITH_DEPENDENCY) {
+                    updateAppToRunList(sharedPreferences, gesturePref);
+                    updateEntryToShowList(sharedPreferences, gesturePref);
+                }
             }
 
             final ListPreference iconsPack = findPreference("icons-pack");
-            if (iconsPack != null)
+            if (iconsPack != null) {
                 iconsPack.setEnabled(false);
 
-            Runnable iconsPackLoad = () -> {
-                if (iconsPack == null)
-                    return;
-                SettingsFragment.this.setListPreferenceIconsPacksData(iconsPack);
-                new Handler(Looper.getMainLooper()).post(() -> iconsPack.setEnabled(true));
-            };
-
-            if (savedInstanceState == null) {
-                // Run asynchronously to open settings fast
-                AsyncTask.execute(iconsPackLoad);
-            } else {
-                // Run synchronously to ensure preferences can be restored from state
-                iconsPackLoad.run();
+                if (savedInstanceState == null) {
+                    // Run asynchronously to open settings fast
+                    Utilities.runAsync(
+                            t -> SettingsFragment.this.setListPreferenceIconsPacksData(iconsPack),
+                            t -> iconsPack.setEnabled(true));
+                } else {
+                    // Run synchronously to ensure preferences can be restored from state
+                    SettingsFragment.this.setListPreferenceIconsPacksData(iconsPack);
+                    iconsPack.setEnabled(true);
+                }
             }
+        }
 
+        private void initAppToRunLists(@NonNull Context context, @NonNull SharedPreferences sharedPreferences) {
+            final Runnable updateLists = () -> {
+                for (String gesturePref : PREF_LISTS_WITH_DEPENDENCY)
+                    updateAppToRunList(sharedPreferences, gesturePref);
+            };
+            if (AppToRunListContent == null) {
+                Utilities.runAsync(t -> {
+                    Pair<CharSequence[], CharSequence[]> content = generateAppToRunListContent(context);
+                    synchronized (SettingsFragment.this) {
+                        if (AppToRunListContent == null)
+                            AppToRunListContent = content;
+                    }
+                }, t -> updateLists.run());
+            } else {
+                updateLists.run();
+            }
+        }
+
+        private void initEntryToShowLists(@NonNull Context context, @NonNull SharedPreferences sharedPreferences) {
+            final Runnable updateLists = () -> {
+                for (String gesturePref : PREF_LISTS_WITH_DEPENDENCY)
+                    updateEntryToShowList(sharedPreferences, gesturePref);
+            };
+            if (EntryToShowListContent == null) {
+                Utilities.runAsync(t -> {
+                    Pair<CharSequence[], CharSequence[]> content = generateEntryToShowListContent(context);
+                    synchronized (SettingsFragment.this) {
+                        if (EntryToShowListContent == null)
+                            EntryToShowListContent = content;
+                    }
+                }, t -> updateLists.run());
+            } else {
+                updateLists.run();
+            }
         }
 
         private void tintPreferenceIcons(Preference preference, int color) {
@@ -548,87 +592,92 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             }
         }
 
-        private void updateListDependencies(@NonNull Context context, @NonNull SharedPreferences sharedPreferences, String key) {
-            {
-                Preference prefAppToRun = findPreference(key + "-app-to-run");
-                if (prefAppToRun instanceof ListPreference) {
-                    List<AppEntry> appEntryList = TBApplication.dataHandler(context).getApplications();
-                    final int appCount = appEntryList.size();
-                    CharSequence[] entries = new CharSequence[appCount];
-                    CharSequence[] entryValues = new CharSequence[appCount];
-                    for (int idx = 0; idx < appCount; idx++) {
-                        AppEntry appEntry = appEntryList.get(idx);
-                        entries[idx] = appEntry.getName();
-                        entryValues[idx] = appEntry.getUserComponentName();
-                    }
-                    ((ListPreference) prefAppToRun).setEntries(entries);
-                    ((ListPreference) prefAppToRun).setEntryValues(entryValues);
-                    prefAppToRun.setVisible("runApp".equals(sharedPreferences.getString(key, null)));
-                } else if (prefAppToRun == null) {
-                    // the ListPreference for selecting an app is missing. Remove the option to run an app.
-                    Preference pref = findPreference(key);
-                    if (pref instanceof ListPreference) {
-                        removeEntryValueFromListPreference("runApp", (ListPreference) pref);
-                    }
-                }
+        private static Pair<CharSequence[], CharSequence[]> generateAppToRunListContent(@NonNull Context context) {
+            List<AppEntry> appEntryList = TBApplication.dataHandler(context).getApplications();
+            final int appCount = appEntryList.size();
+            CharSequence[] entries = new CharSequence[appCount];
+            CharSequence[] entryValues = new CharSequence[appCount];
+            for (int idx = 0; idx < appCount; idx++) {
+                AppEntry appEntry = appEntryList.get(idx);
+                entries[idx] = appEntry.getName();
+                entryValues[idx] = appEntry.getUserComponentName();
             }
-            {
-                Preference prefEntryToShow = findPreference(key + "-entry-to-show");
-                if (prefEntryToShow instanceof ListPreference) {
-                    FavProvider favProvider = TBApplication.dataHandler(context).getFavProvider();
-                    final CharSequence[] entries;
-                    final CharSequence[] entryValues;
-                    if (favProvider == null || favProvider.getPojos().isEmpty()) {
-                        entries = new CharSequence[]{context.getString(R.string.no_favorites)};
-                        entryValues = new CharSequence[]{""};
+            return new Pair<>(entries, entryValues);
+        }
+
+        private static Pair<CharSequence[], CharSequence[]> generateEntryToShowListContent(@NonNull Context context) {
+            FavProvider favProvider = TBApplication.dataHandler(context).getFavProvider();
+            final CharSequence[] entries;
+            final CharSequence[] entryValues;
+            if (favProvider == null || favProvider.getPojos().isEmpty()) {
+                entries = new CharSequence[]{context.getString(R.string.no_favorites)};
+                entryValues = new CharSequence[]{""};
+            } else {
+                int iconSize = UISizes.getTextAppearanceTextSize(context, android.R.attr.textAppearanceMedium);
+                int tintColor = UIColors.getThemeColor(context, R.attr.colorAccent);
+                VectorDrawableCompat iconTag = VectorDrawableCompat.create(context.getResources(), R.drawable.ic_tags, null);
+                iconTag.setTint(tintColor);
+                iconTag.setBounds(0, 0, iconSize, iconSize);
+
+                List<EntryItem> favList = favProvider.getPojos();
+                ArrayList<StaticEntry> entryToShowList = new ArrayList<>(favList.size());
+                for (EntryItem entryItem : favList)
+                    if (entryItem instanceof StaticEntry)
+                        entryToShowList.add((StaticEntry) entryItem);
+                final int size = entryToShowList.size();
+                entries = new CharSequence[size];
+                entryValues = new CharSequence[size];
+                for (int idx = 0; idx < size; idx++) {
+                    StaticEntry entry = entryToShowList.get(idx);
+                    if (entry instanceof TagEntry) {
+                        SpannableString name = new SpannableString("# " + entry.getName());
+                        name.setSpan(new ImageSpan(iconTag), 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+                        entries[idx] = name;
+                    } else if (entry instanceof ActionEntry || entry instanceof FilterEntry) {
+                        Drawable iconAction = entry.getDefaultDrawable(context);
+                        DrawableCompat.setTint(iconAction, tintColor);
+                        iconAction.setBounds(0, 0, iconSize, iconSize);
+
+                        SpannableString name = new SpannableString("# " + entry.getName());
+                        name.setSpan(new ImageSpan(iconAction), 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+                        entries[idx] = name;
                     } else {
-                        int iconSize = UISizes.getTextAppearanceTextSize(context, android.R.attr.textAppearanceMedium);
-                        int tintColor = UIColors.getThemeColor(context, R.attr.colorAccent);
-                        VectorDrawableCompat iconTag = VectorDrawableCompat.create(getResources(), R.drawable.ic_tags, null);
-                        iconTag.setTint(tintColor);
-                        iconTag.setBounds(0, 0, iconSize, iconSize);
-
-                        List<EntryItem> favList = favProvider.getPojos();
-                        ArrayList<StaticEntry> entryToShowList = new ArrayList<>(favList.size());
-                        for (EntryItem entryItem : favList)
-                            if (entryItem instanceof StaticEntry)
-                                entryToShowList.add((StaticEntry) entryItem);
-                        final int size = entryToShowList.size();
-                        entries = new CharSequence[size];
-                        entryValues = new CharSequence[size];
-                        for (int idx = 0; idx < size; idx++) {
-                            StaticEntry entry = entryToShowList.get(idx);
-                            if (entry instanceof TagEntry) {
-                                SpannableString name = new SpannableString("# " + entry.getName());
-                                name.setSpan(new ImageSpan(iconTag), 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-                                entries[idx] = name;
-                            } else if (entry instanceof ActionEntry || entry instanceof FilterEntry) {
-                                Drawable iconAction = entry.getDefaultDrawable(context);
-                                DrawableCompat.setTint(iconAction, tintColor);
-                                iconAction.setBounds(0, 0, iconSize, iconSize);
-
-                                SpannableString name = new SpannableString("# " + entry.getName());
-                                name.setSpan(new ImageSpan(iconAction), 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-                                entries[idx] = name;
-                            } else {
-                                entries[idx] = entry.getName();
-                            }
-                            entryValues[idx] = entry.id;
-                        }
+                        entries[idx] = entry.getName();
                     }
-                    ((ListPreference) prefEntryToShow).setEntries(entries);
-                    ((ListPreference) prefEntryToShow).setEntryValues(entryValues);
-                    prefEntryToShow.setVisible("showEntry".equals(sharedPreferences.getString(key, null)));
-                } else if (prefEntryToShow == null) {
-                    // the ListPreference for selecting an entry is missing. Remove the option to show an entry.
-                    Preference pref = findPreference(key);
-                    if (pref instanceof ListPreference) {
-                        removeEntryValueFromListPreference("showEntry", (ListPreference) pref);
-                    }
+                    entryValues[idx] = entry.id;
                 }
             }
+            return new Pair<>(entries, entryValues);
+        }
+
+        private void updateListPrefDependency(@NonNull String dependOnKey, @Nullable String dependOnValue, @NonNull String enableValue, @NonNull String listKey, @Nullable Pair<CharSequence[], CharSequence[]> listContent) {
+            Preference prefAppToRun = findPreference(listKey);
+            if (prefAppToRun instanceof ListPreference && listContent != null) {
+                CharSequence[] entries = listContent.first;
+                CharSequence[] entryValues = listContent.second;
+                ((ListPreference) prefAppToRun).setEntries(entries);
+                ((ListPreference) prefAppToRun).setEntryValues(entryValues);
+                prefAppToRun.setVisible(enableValue.equals(dependOnValue));
+            } else if (prefAppToRun == null) {
+                // the ListPreference for selecting an app is missing. Remove the option to run an app.
+                Preference pref = findPreference(dependOnKey);
+                if (pref instanceof ListPreference) {
+                    removeEntryValueFromListPreference(enableValue, (ListPreference) pref);
+                }
+            } else {
+                Log.w(TAG, "ListPreference `" + listKey + "` can't be updated");
+                prefAppToRun.setVisible(false);
+            }
+        }
+
+        private void updateAppToRunList(@NonNull SharedPreferences sharedPreferences, String key) {
+            updateListPrefDependency(key, sharedPreferences.getString(key, null), "runApp", key + "-app-to-run", AppToRunListContent);
+        }
+
+        private void updateEntryToShowList(@NonNull SharedPreferences sharedPreferences, String key) {
+            updateListPrefDependency(key, sharedPreferences.getString(key, null), "showEntry", key + "-entry-to-show", EntryToShowListContent);
         }
 
         private static void removeEntryValueFromListPreference(@NonNull String entryValueToRemove, ListPreference listPref) {
@@ -666,7 +715,10 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             if (activity == null)
                 return;
 
-            updateListDependencies(activity, sharedPreferences, key);
+            if (PREF_LISTS_WITH_DEPENDENCY.contains(key)) {
+                updateAppToRunList(sharedPreferences, key);
+                updateEntryToShowList(sharedPreferences, key);
+            }
 
             // rebind and relayout all visible views because I can't find how to rebind only the current view
             getListView().getAdapter().notifyDataSetChanged();
