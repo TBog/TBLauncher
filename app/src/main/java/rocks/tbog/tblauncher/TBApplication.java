@@ -22,7 +22,8 @@ public class TBApplication extends Application {
     /**
      * The state of certain launcher features
      */
-    private static LauncherState mState = new LauncherState();
+    @NonNull
+    private static final LauncherState mState = new LauncherState();
     private DataHandler dataHandler;
     private IconsHandler iconsPackHandler;
     private TagsHandler tagsHandler = null;
@@ -107,6 +108,7 @@ public class TBApplication extends Application {
         return getApplication(context).getDataHandler();
     }
 
+    @NonNull
     public static LauncherState state() {
         return mState;
     }

@@ -474,14 +474,12 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                     disableFullscreen();
 
                 final String openResult = PrefCache.modeSearchOpenResult(mPref);
-                switch (openResult) {
-                    case "none":
-                        // do nothing
-                        break;
-                    default:
-                        // try to execute the action
-                        executeAction(openResult, null);
-                        break;
+                if ("none".equals(openResult)) {
+                    // hide result
+                    hideResultList(false);
+                } else {
+                    // try to execute the action
+                    executeAction(openResult, null);
                 }
                 break;
             case WIDGET:
@@ -1285,6 +1283,11 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         Context ctx = getContext();
         EntryItem item = TBApplication.dataHandler(ctx).getPojo(entryId);
         if (item instanceof StaticEntry) {
+            if (TBApplication.state().getDesktop() != LauncherState.Desktop.SEARCH) {
+                // TODO: showDesktop might show the result list, we may need to prevent this as an optimization
+                showDesktop(LauncherState.Desktop.SEARCH);
+                clearAdapter();
+            }
             item.doLaunch(mLauncherButton, LAUNCHED_FROM_GESTURE);
             return true;
         } else {
@@ -1342,19 +1345,16 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                 else
                     showDesktop(LauncherState.Desktop.SEARCH);
                 return true;
-            case "toggleSearchWidgetEmpty":
-                switch (TBApplication.state().getDesktop()) {
-                    case SEARCH:
-                        showDesktop(LauncherState.Desktop.WIDGET);
-                        break;
-                    case WIDGET:
-                        showDesktop(LauncherState.Desktop.EMPTY);
-                        break;
-                    default:
-                        showDesktop(LauncherState.Desktop.SEARCH);
-                        break;
-                }
+            case "toggleSearchWidgetEmpty": {
+                final LauncherState.Desktop desktop = TBApplication.state().getDesktop();
+                if (desktop == LauncherState.Desktop.SEARCH)
+                    showDesktop(LauncherState.Desktop.WIDGET);
+                else if (desktop == LauncherState.Desktop.WIDGET)
+                    showDesktop(LauncherState.Desktop.EMPTY);
+                else
+                    showDesktop(LauncherState.Desktop.SEARCH);
                 return true;
+            }
             case "reloadProviders":
                 TBApplication.dataHandler(getContext()).reloadProviders();
                 return true;
