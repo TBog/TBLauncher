@@ -377,6 +377,7 @@
     <string name="action_app_to_run">App to run</string>
     <string name="action_entry_to_show">Favorite to show</string>
     <string name="no_favorites">No favorites set</string>
+    <string name="quick_list_animation">Animate show/hide</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>

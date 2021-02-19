@@ -47,6 +47,7 @@ public class QuickList {
     private boolean mOnlyForResults = false;
     private boolean mListDirty = true;
     private LinearLayout mQuickList;
+    private SharedPreferences mSharedPreferences = null;
 
     // bAdapterEmpty is true when no search results are displayed
     private boolean bAdapterEmpty = true;
@@ -66,7 +67,7 @@ public class QuickList {
 
     public void onCreateActivity(TBLauncherActivity tbLauncherActivity) {
         mTBLauncherActivity = tbLauncherActivity;
-
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mTBLauncherActivity);
         mQuickList = mTBLauncherActivity.findViewById(R.id.quickList);
         mListDirty = true;
     }
@@ -105,7 +106,7 @@ public class QuickList {
         List<EntryItem> list = provider != null ? provider.getPojos() : null;
         if (list == null)
             return;
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mQuickList.getContext());
+        final SharedPreferences prefs = mSharedPreferences;
         int drawFlags = getDrawFlags(prefs);
         LayoutInflater inflater = LayoutInflater.from(getContext());
         for (EntryItem entry : list) {
@@ -319,21 +320,27 @@ public class QuickList {
         if (mListDirty)
             populateList();
         if (isQuickListEnabled()) {
-            mQuickList.animate()
-                    .scaleY(1f)
-                    .setInterpolator(new AccelerateDecelerateInterpolator())
-                    .setListener(new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationStart(Animator animation) {
-                            TBApplication.state().setQuickList(LauncherState.AnimatedVisibility.ANIM_TO_VISIBLE);
-                        }
+            final SharedPreferences pref = mSharedPreferences;
+            if (pref.getBoolean("quick-list-animation", true)) {
+                mQuickList.animate()
+                        .scaleY(1f)
+                        .setInterpolator(new AccelerateDecelerateInterpolator())
+                        .setListener(new AnimatorListenerAdapter() {
+                            @Override
+                            public void onAnimationStart(Animator animation) {
+                                TBApplication.state().setQuickList(LauncherState.AnimatedVisibility.ANIM_TO_VISIBLE);
+                            }
 
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            TBApplication.state().setQuickList(LauncherState.AnimatedVisibility.VISIBLE);
-                        }
-                    })
-                    .start();
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                TBApplication.state().setQuickList(LauncherState.AnimatedVisibility.VISIBLE);
+                            }
+                        })
+                        .start();
+            } else {
+                mQuickList.setScaleY(1f);
+                TBApplication.state().setQuickList(LauncherState.AnimatedVisibility.VISIBLE);
+            }
             mQuickList.setVisibility(View.VISIBLE);
         }
     }
@@ -371,7 +378,7 @@ public class QuickList {
     }
 
     public void onResume() {
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getContext());
+        final SharedPreferences pref = mSharedPreferences;
         mIsEnabled = pref.getBoolean("quick-list-enabled", true);
         mOnlyForResults = pref.getBoolean("quick-list-only-for-results", false);
         applyUiPref(pref, mQuickList);

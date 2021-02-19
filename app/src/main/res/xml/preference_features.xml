@@ -29,6 +29,12 @@
             android:key="quick-list-text-visible"
             android:title="@string/quick_list_text_visible" />
 
+        <androidx.preference.SwitchPreference
+            android:defaultValue="true"
+            android:dependency="quick-list-enabled"
+            android:key="quick-list-animation"
+            android:title="@string/quick_list_animation" />
+
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
             android:defaultValue="@integer/default_bar_size"
             android:dependency="quick-list-enabled"

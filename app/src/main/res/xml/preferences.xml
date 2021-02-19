@@ -392,6 +392,11 @@
                 android:title="@string/quick_list_ripple_color"
                 android:widgetLayout="@layout/pref_color_preview" />
 
+            <androidx.preference.SwitchPreference
+                android:defaultValue="true"
+                android:key="quick-list-animation"
+                android:title="@string/quick_list_animation" />
+
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@integer/default_bar_size"
                 android:dialogLayout="@layout/pref_slider"
