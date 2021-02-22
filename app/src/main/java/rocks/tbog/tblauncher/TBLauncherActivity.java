@@ -174,7 +174,10 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
             TBApplication.getApplication(this).requireLayoutUpdate(false);
             Log.i(TAG, "Restarting app after setting changes");
             // Restart current activity to refresh view, since some preferences may require using a new UI
-            this.recreate();
+            //getWindow().getDecorView().post(TBLauncherActivity.this::recreate);
+            finish();
+            startActivity(new Intent(this, getClass()));
+            overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
             return;
         }
 

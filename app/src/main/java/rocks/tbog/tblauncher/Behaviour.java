@@ -348,6 +348,9 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     public void onPostCreate() {
+        String initialDesktop = mPref.getString("initial-desktop", null);
+        if (executeAction(initialDesktop, null))
+            return;
         showDesktop(LauncherState.Desktop.EMPTY);
     }
 
@@ -624,7 +627,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         TBApplication.state().setWidgetScreen(LauncherState.AnimatedVisibility.HIDDEN);
         mWidgetContainer.setVisibility(View.GONE);
 
-        hideResultList(false);
+//        hideResultList(false);
     }
 
     private void hideSearchBar() {
@@ -632,6 +635,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     private void hideSearchBar(int startDelay, boolean animate) {
+        clearSearchText();
         clearAdapter();
 
         final float translationY;
@@ -1263,7 +1267,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         LauncherState state = TBApplication.state();
         if (hasFocus && state.getDesktop() == LauncherState.Desktop.SEARCH) {
             if (state.isSearchBarVisible() && PrefCache.linkKeyboardAndSearchBar(mPref)) {
-                mSearchEditText.requestFocus();
+                mSearchEditText.post(this::showKeyboard);
                 // UI_ANIMATION_DURATION should be the exact time the full-screen animation ends
                 mSearchEditText.postDelayed(this::showKeyboard, UI_ANIMATION_DURATION);
             }

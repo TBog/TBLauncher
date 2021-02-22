@@ -383,6 +383,13 @@
             android:key="behaviour-clear-search-after-launch"
             android:title="@string/behaviour_clear_search_after_launch" />
 
+        <ListPreference
+            android:defaultValue="showSearchBar"
+            android:entries="@array/desktopEntries"
+            android:entryValues="@array/desktopValues"
+            android:key="initial-desktop"
+            android:title="@string/initial_desktop" />
+
         <!-- ‹Empty› desktop mode -->
         <PreferenceScreen
             android:key="feature-desktop-mode-empty-holder"

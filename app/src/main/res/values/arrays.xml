@@ -144,6 +144,17 @@
         <item>showHistoryByAdaptive</item>
     </array>
 
+    <string-array name="desktopEntries">
+        <item>@string/title_desktop_mode_search</item>
+        <item>@string/title_desktop_mode_widget</item>
+        <item>@string/title_desktop_mode_empty</item>
+    </string-array>
+    <array name="desktopValues" translatable="false">
+        <item>showSearchBar</item>
+        <item>showWidgets</item>
+        <item>showEmpty</item>
+    </array>
+
     <array name="material_colors">
         <item>@array/mm2d_cc_red</item>
         <item>@array/mm2d_cc_pink</item>
