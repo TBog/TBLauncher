@@ -70,7 +70,6 @@
         <item>Do nothing</item>
         <item>Show notifications panel</item>
         <item>Show settings panel</item>
-        <item>Show Android settings</item>
         <item>Show &#171;Search&#187; desktop</item>
         <item>Show &#171;Widget&#187; desktop</item>
         <item>Show &#171;Empty&#187; desktop</item>
@@ -95,7 +94,6 @@
         <item>none</item>
         <item>expandNotificationsPanel</item>
         <item>expandSettingsPanel</item>
-        <item>openAndroidSettings</item>
         <item>showSearchBar</item>
         <item>showWidgets</item>
         <item>showEmpty</item>

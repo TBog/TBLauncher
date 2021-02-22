@@ -1335,10 +1335,6 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             case "expandSettingsPanel":
                 Utilities.expandSettingsPanel(mTBLauncherActivity);
                 return true;
-            case "openAndroidSettings":
-                Intent settings = new Intent(android.provider.Settings.ACTION_SETTINGS);
-                mTBLauncherActivity.startActivity(settings);
-                return true;
             case "showSearchBar":
                 showDesktop(LauncherState.Desktop.SEARCH);
                 return true;
