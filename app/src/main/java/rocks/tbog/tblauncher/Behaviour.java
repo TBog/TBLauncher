@@ -78,8 +78,9 @@ import static rocks.tbog.tblauncher.entry.EntryItem.LAUNCHED_FROM_GESTURE;
 public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardHandler {
 
     private static final int UI_ANIMATION_DELAY = 300;
+    // time to wait for the keyboard to show up
+    private static final int KEYBOARD_ANIMATION_DELAY = 100;
     private static final int UI_ANIMATION_DURATION = 200;
-    private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
     public static final int LAUNCH_DELAY = 100;
     private static final String TAG = Behaviour.class.getSimpleName();
 
@@ -482,7 +483,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                     hideResultList(false);
                 } else {
                     // try to execute the action
-                    executeAction(openResult, null);
+                    mLauncherButton.postDelayed(() -> executeAction(openResult, null), KEYBOARD_ANIMATION_DELAY);
                 }
                 break;
             case WIDGET:
