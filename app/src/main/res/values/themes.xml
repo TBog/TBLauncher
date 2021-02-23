@@ -268,28 +268,28 @@
         <item name="preferenceCategoryTitleTextAppearance">@style/CategoryTitleTextAppearance</item>
     </style>
 
-    <style name="OptionsMenu" parent="ThemeOverlay.MaterialComponents.ActionBar">
-        <item name="android:colorBackground">@color/black_overlay</item>
-        <item name="android:itemBackground">@drawable/dialog_background_dark</item>
-        <item name="android:textColor">@color/settings_primary_selector_darkbg</item>
+    <style name="OptionsMenu" parent="Widget.MaterialComponents.PopupMenu.Overflow">
+        <item name="android:popupBackground">@drawable/dialog_background</item>
     </style>
 
     <style name="OptionsMenu.White">
-        <item name="android:colorBackground">@color/white_overlay</item>
-        <item name="android:itemBackground">@null</item>
-        <item name="android:textColor">@color/settings_primary_selector_lightbg</item>
+        <item name="android:popupBackground">@color/white_overlay</item>
     </style>
 
     <style name="OptionsMenu.Black">
-        <item name="android:itemBackground">@drawable/dialog_background_black</item>
-        <item name="android:textColor">@color/settings_primary_selector_black</item>
-        <item name="android:textAlignment">center</item>
+        <item name="android:popupBackground">@drawable/dialog_background_black</item>
+    </style>
+
+    <style name="OptionsMenu.Dark">
+        <item name="android:popupBackground">@drawable/popup_background</item>
     </style>
 
     <style name="OptionsMenu.DeepBlues">
-        <item name="android:colorBackground">@color/DeepBlues_1</item>
-        <item name="android:itemBackground">@null</item>
-        <item name="android:textColor">@color/settings_primary_selector_deep_blues</item>
+        <item name="android:popupBackground">@color/DeepBlues_1</item>
+    </style>
+
+    <style name="OptionsMenuTextAppearance.DeepBlues" parent="TextAppearance.MaterialComponents.Body1">
+        <item name="android:textColor">@color/DeepBlues_4</item>
     </style>
 
     <!--
@@ -306,7 +306,9 @@
 
         <item name="tabGravity">center</item>
 
-        <item name="popupTheme">@style/OptionsMenu</item>
+        <item name="actionOverflowMenuStyle">@style/OptionsMenu</item>
+        <item name="android:itemBackground">@drawable/dialog_background</item>
+
         <item name="android:listPreferredItemHeight">64dp</item>
         <item name="android:listPreferredItemHeightSmall">48dp</item>
         <item name="android:listPreferredItemHeightLarge">80dp</item>
@@ -330,7 +332,8 @@
         <item name="colorControlHighlight">@android:color/black</item>
         <item name="colorControlNormal">@android:color/black</item>
         <item name="colorAccent">@android:color/black</item>
-        <item name="popupTheme">@style/OptionsMenu.White</item>
+        <item name="actionOverflowMenuStyle">@style/OptionsMenu.White</item>
+        <item name="android:itemBackground">@drawable/tab_background_light</item>
     </style>
 
     <!--
@@ -351,7 +354,8 @@
         <item name="colorControlHighlight">@color/Black_accent</item>
         <item name="colorControlNormal">@color/Black_selector_primary</item>
         <item name="colorAccent">@color/Black_accent</item>
-        <item name="popupTheme">@style/OptionsMenu.Black</item>
+        <item name="actionOverflowMenuStyle">@style/OptionsMenu.Black</item>
+        <item name="android:itemBackground">@drawable/dialog_background_black</item>
     </style>
 
     <!--
@@ -372,7 +376,9 @@
         <item name="colorControlHighlight">@color/DeepBlues_3</item>
         <item name="colorControlNormal">@color/DeepBlues_selector_primary</item>
         <item name="colorAccent">@color/DeepBlues_4</item>
-        <item name="popupTheme">@style/OptionsMenu.DeepBlues</item>
+        <item name="actionOverflowMenuStyle">@style/OptionsMenu.DeepBlues</item>
+        <item name="android:itemBackground">@drawable/tab_background_deep_blues</item>
+        <item name="android:itemTextAppearance">@style/OptionsMenuTextAppearance.DeepBlues</item>
     </style>
 
     <!--
@@ -380,7 +386,7 @@
     -->
     <style name="SettingsTheme.DarkBg">
         <item name="android:windowBackground">@color/darkBackground</item>
-        <item name="android:itemBackground">@color/darkBackground</item>
-        <item name="popupTheme">@style/OptionsMenu.Black</item>
+        <item name="actionOverflowMenuStyle">@style/OptionsMenu.Dark</item>
+        <item name="android:itemBackground">@null</item>
     </style>
 </resources>
