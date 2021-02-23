@@ -311,7 +311,7 @@ public final class AppEntry extends EntryWithTags {
 //            adapter.add(new ListPopup.Item(context, R.string.menu_app_hibernate));
 //        }
 
-        if (Utilities.checkFlag(flags, FLAG_POPUP_MENU_QUICK_LIST)) {
+        if (Utilities.checkFlag(flags, LAUNCHED_FROM_QUICK_LIST)) {
             adapter.add(new LinearAdapter.ItemTitle(context, R.string.menu_popup_title_settings));
             adapter.add(new LinearAdapter.Item(context, R.string.menu_popup_quick_list_customize));
         }
@@ -411,7 +411,7 @@ public final class AppEntry extends EntryWithTags {
     }
 
     @Override
-    public void doLaunch(@NonNull View v) {
+    public void doLaunch(@NonNull View v, int flags) {
         Context context = v.getContext();
         // If AppResult, find the icon
         View potentialIcon = v.findViewById(android.R.id.icon);
@@ -436,7 +436,7 @@ public final class AppEntry extends EntryWithTags {
         } catch (ActivityNotFoundException | NullPointerException | SecurityException e) {
             // Application was just removed?
             // (null pointer exception can be thrown on Lollipop+ when app is missing)
-            Toast.makeText(context, R.string.application_not_found, Toast.LENGTH_LONG).show();
+            Toast.makeText(context, context.getString(R.string.application_not_found, componentName.flattenToShortString()), Toast.LENGTH_LONG).show();
         }
     }
 

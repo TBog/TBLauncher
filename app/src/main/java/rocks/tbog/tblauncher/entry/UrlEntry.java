@@ -88,7 +88,7 @@ public final class UrlEntry extends SearchEntry {
     }
 
     @Override
-    public void doLaunch(View v) {
+    public void doLaunch(View v, int flags) {
         Context context = v.getContext();
         Uri uri = Uri.parse(url);
         Intent search = new Intent(Intent.ACTION_VIEW, uri);

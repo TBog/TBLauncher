@@ -78,6 +78,17 @@
         <item>Reload providers</item>
         <item>@string/action_show_apps</item>
         <item>@string/action_show_apps_reversed</item>
+        <item>@string/action_show_contacts</item>
+        <item>@string/action_show_contacts_reversed</item>
+        <item>@string/action_show_shortcuts</item>
+        <item>@string/action_show_shortcuts_reversed</item>
+        <item>@string/action_show_favorites</item>
+        <item>@string/action_show_history_recency</item>
+        <item>@string/action_show_history_frequency</item>
+        <item>@string/action_show_history_frecency</item>
+        <item>@string/action_show_history_adaptive</item>
+        <item>Run app…</item>
+        <item>Show favorite…</item>
     </string-array>
     <array name="gestureValues" translatable="false">
         <item>none</item>
@@ -91,6 +102,57 @@
         <item>reloadProviders</item>
         <item>showAllAppsAZ</item>
         <item>showAllAppsZA</item>
+        <item>showContactsAZ</item>
+        <item>showContactsZA</item>
+        <item>showShortcutsAZ</item>
+        <item>showShortcutsZA</item>
+        <item>showFavorites</item>
+        <item>showHistoryByRecency</item>
+        <item>showHistoryByFrequency</item>
+        <item>showHistoryByFrecency</item>
+        <item>showHistoryByAdaptive</item>
+        <item>runApp</item>
+        <item>showEntry</item>
+    </array>
+
+    <string-array name="resultEntries">
+        <item>Empty</item>
+        <item>@string/action_show_apps</item>
+        <item>@string/action_show_apps_reversed</item>
+        <item>@string/action_show_contacts</item>
+        <item>@string/action_show_contacts_reversed</item>
+        <item>@string/action_show_shortcuts</item>
+        <item>@string/action_show_shortcuts_reversed</item>
+        <item>@string/action_show_favorites</item>
+        <item>@string/action_show_history_recency</item>
+        <item>@string/action_show_history_frequency</item>
+        <item>@string/action_show_history_frecency</item>
+        <item>@string/action_show_history_adaptive</item>
+    </string-array>
+    <array name="resultValues" translatable="false">
+        <item>none</item>
+        <item>showAllAppsAZ</item>
+        <item>showAllAppsZA</item>
+        <item>showContactsAZ</item>
+        <item>showContactsZA</item>
+        <item>showShortcutsAZ</item>
+        <item>showShortcutsZA</item>
+        <item>showFavorites</item>
+        <item>showHistoryByRecency</item>
+        <item>showHistoryByFrequency</item>
+        <item>showHistoryByFrecency</item>
+        <item>showHistoryByAdaptive</item>
+    </array>
+
+    <string-array name="desktopEntries">
+        <item>@string/title_desktop_mode_search</item>
+        <item>@string/title_desktop_mode_widget</item>
+        <item>@string/title_desktop_mode_empty</item>
+    </string-array>
+    <array name="desktopValues" translatable="false">
+        <item>showSearchBar</item>
+        <item>showWidgets</item>
+        <item>showEmpty</item>
     </array>
 
     <array name="material_colors">

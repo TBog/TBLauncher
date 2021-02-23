@@ -386,7 +386,7 @@ public class XmlImport {
                 } catch (IOException e) {
                     if (currentApp != null)
                         Log.e(TAG, "currentApp " + currentApp.componentName + " " + currentApp.displayName);
-                    Log.e(TAG, "app xpp.next", e);
+                    throw new IOException("app xpp.next", e);
                 }
             }
             bAppListLoaded = true;

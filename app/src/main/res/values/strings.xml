@@ -29,7 +29,7 @@
     <string name="menu_app_uninstall">Uninstall</string>
     <string name="menu_exclude_history">from history</string>
     <string name="menu_exclude_kiss">from TinyBit</string>
-    <string name="application_not_found">Whoops… unable to launch that app</string>
+    <string name="application_not_found">Unable to launch \"%s\" app</string>
     <string name="entry_not_found">Could not find \"%s\"</string>
     <string name="change_wallpaper">Change wallpaper</string>
     <string name="menu_widget_title">Widget menu</string>
@@ -57,7 +57,6 @@
     <string name="cd_show_all_apps">Show all apps</string>
     <string name="cd_item_contact_message">Message</string>
     <string name="cd_item_contact_call">Call</string>
-    <string name="cd_icon_preview">Preview</string>
     <string name="cd_add_tag">Add tag</string>
     <string name="cd_undo_remove_tag">Undo remove tag</string>
     <string name="cd_remove_tag">Remove tag</string>
@@ -372,6 +371,14 @@
     <string name="search_bar_at_bottom">Position at bottom</string>
     <string name="search_bar_ripple_color">Touch color</string>
     <string name="search_bar_cursor_argb">Cursor color</string>
+    <string name="back_device_key">Back button</string>
+    <string name="action_show_untagged">Un-tagged</string>
+    <string name="dm_search_open_result">Initial result list</string>
+    <string name="action_app_to_run">App to run</string>
+    <string name="action_entry_to_show">Favorite to show</string>
+    <string name="no_favorites">No favorites set</string>
+    <string name="quick_list_animation">Animate show/hide</string>
+    <string name="initial_desktop">Initial desktop</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>

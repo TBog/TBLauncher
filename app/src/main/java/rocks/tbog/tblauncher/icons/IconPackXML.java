@@ -348,22 +348,23 @@ public class IconPackXML implements IconPack<IconPackXML.DrawableInfo> {
                                 }
                             }
 
-                            if (drawableName == null)
-                                continue;
-                            int drawableId = packResources.getIdentifier(drawableName, "drawable", iconPackPackageName);
-                            if (drawableId != 0) {
-                                DrawableInfo drawableInfo = new DrawableInfo(drawableName, drawableId);
-                                drawableList.add(drawableInfo);
-                                if (componentName != null) {
-                                    ArraySet<DrawableInfo> infoSet = drawablesByComponent.get(componentName);
-                                    if (infoSet == null)
-                                        drawablesByComponent.put(componentName, infoSet = new ArraySet<>(1));
-                                    infoSet.add(drawableInfo);
+                            if (drawableName != null) {
+                                int drawableId = packResources.getIdentifier(drawableName, "drawable", iconPackPackageName);
+                                if (drawableId != 0) {
+                                    DrawableInfo drawableInfo = new DrawableInfo(drawableName, drawableId);
+                                    drawableList.add(drawableInfo);
+                                    if (componentName != null) {
+                                        ArraySet<DrawableInfo> infoSet = drawablesByComponent.get(componentName);
+                                        if (infoSet == null)
+                                            drawablesByComponent.put(componentName, infoSet = new ArraySet<>(1));
+                                        infoSet.add(drawableInfo);
+                                    }
                                 }
-                            } else {
-                                if (componentName == null)
-                                    componentName = "`null`";
-                                //Log.w(TAG, "Drawable `" + drawableName + "` for " + componentName + " not found");
+                                //else {
+                                //    if (componentName == null)
+                                //        componentName = "`null`";
+                                //    Log.w(TAG, "Drawable `" + drawableName + "` for " + componentName + " not found");
+                                //}
                             }
                         }
                     }

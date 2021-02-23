@@ -49,7 +49,7 @@ public abstract class StaticEntry extends EntryItem {
         adapter.add(new LinearAdapter.Item(context, R.string.menu_action_rename));
         adapter.add(new LinearAdapter.Item(context, R.string.menu_custom_icon));
 
-        if (Utilities.checkFlag(flags, FLAG_POPUP_MENU_QUICK_LIST)) {
+        if (Utilities.checkFlag(flags, LAUNCHED_FROM_QUICK_LIST)) {
             adapter.add(new LinearAdapter.ItemTitle(context, R.string.menu_popup_title_settings));
             adapter.add(new LinearAdapter.Item(context, R.string.menu_popup_quick_list_customize));
         }

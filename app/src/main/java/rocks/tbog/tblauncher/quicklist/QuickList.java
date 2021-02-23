@@ -34,6 +34,10 @@ import rocks.tbog.tblauncher.dataprovider.QuickListProvider;
 import rocks.tbog.tblauncher.entry.ActionEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.FilterEntry;
+import rocks.tbog.tblauncher.entry.StaticEntry;
+import rocks.tbog.tblauncher.entry.TagEntry;
+import rocks.tbog.tblauncher.result.ResultHelper;
+import rocks.tbog.tblauncher.searcher.Searcher;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.UIColors;
 
@@ -43,6 +47,7 @@ public class QuickList {
     private boolean mOnlyForResults = false;
     private boolean mListDirty = true;
     private LinearLayout mQuickList;
+    private SharedPreferences mSharedPreferences = null;
 
     // bAdapterEmpty is true when no search results are displayed
     private boolean bAdapterEmpty = true;
@@ -54,6 +59,7 @@ public class QuickList {
 
     // last filter scheme, used for better toggle behaviour
     private String mLastSelection = null;
+    private String mLastAction = null;
 
     public Context getContext() {
         return mTBLauncherActivity;
@@ -61,7 +67,7 @@ public class QuickList {
 
     public void onCreateActivity(TBLauncherActivity tbLauncherActivity) {
         mTBLauncherActivity = tbLauncherActivity;
-
+        mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mTBLauncherActivity);
         mQuickList = mTBLauncherActivity.findViewById(R.id.quickList);
         mListDirty = true;
     }
@@ -100,16 +106,23 @@ public class QuickList {
         List<EntryItem> list = provider != null ? provider.getPojos() : null;
         if (list == null)
             return;
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mQuickList.getContext());
+        final SharedPreferences prefs = mSharedPreferences;
         int drawFlags = getDrawFlags(prefs);
+        LayoutInflater inflater = LayoutInflater.from(getContext());
         for (EntryItem entry : list) {
-            View view = LayoutInflater.from(getContext()).inflate(entry.getResultLayout(drawFlags), mQuickList, false);
+            View view = inflater.inflate(entry.getResultLayout(drawFlags), mQuickList, false);
             entry.displayResult(view, drawFlags);
             mQuickList.addView(view);
 
-            view.setOnClickListener(entry::doLaunch);
+            view.setOnClickListener(v -> {
+                if (entry instanceof StaticEntry) {
+                    entry.doLaunch(v, EntryItem.LAUNCHED_FROM_QUICK_LIST);
+                } else {
+                    ResultHelper.launch(v, entry);
+                }
+            });
             view.setOnLongClickListener(v -> {
-                ListPopup menu = entry.getPopupMenu(v, EntryItem.FLAG_POPUP_MENU_QUICK_LIST);
+                ListPopup menu = entry.getPopupMenu(v, EntryItem.LAUNCHED_FROM_QUICK_LIST);
 
                 // show menu only if it contains elements
                 if (!menu.getAdapter().isEmpty()) {
@@ -132,11 +145,46 @@ public class QuickList {
         mQuickList.requestLayout();
     }
 
+    public void toggleSearch(@NonNull View v, @NonNull String query, @NonNull Class<? extends Searcher> searcherClass) {
+        Context ctx = v.getContext();
+        TBApplication app = TBApplication.getApplication(ctx);
+        final String actionId;
+        {
+            Object tag_actionId = v.getTag(R.id.tag_actionId);
+            actionId = tag_actionId instanceof String ? (String) tag_actionId : "";
+        }
+
+        // toggle off any filter
+        if (bFilterOn) {
+            animToggleOff();
+            bFilterOn = false;
+            app.behaviour().filterResults(null);
+        }
+
+        // show search content
+        {
+            // if the last action is not the current action, toggle on this action
+            if (!bActionOn || !actionId.equals(mLastSelection)) {
+                app.behaviour().runSearcher(query, searcherClass);
+
+                // update toggle information
+                mLastSelection = actionId;
+                bActionOn = true;
+            } else {
+                // to toggle off the action, set bActionOn to false
+                app.behaviour().clearSearch();
+            }
+        }
+    }
+
     public void toggleProvider(View v, IProvider<?> provider, @Nullable java.util.Comparator<? super EntryItem> comparator) {
         Context ctx = v.getContext();
         TBApplication app = TBApplication.getApplication(ctx);
-        Object tag_actionId = v.getTag(R.id.tag_actionId);
-        String actionId = tag_actionId instanceof String ? (String) tag_actionId : "";
+        final String actionId;
+        {
+            Object tag_actionId = v.getTag(R.id.tag_actionId);
+            actionId = tag_actionId instanceof String ? (String) tag_actionId : "";
+        }
 
         // toggle off any filter
         if (bFilterOn) {
@@ -158,8 +206,6 @@ public class QuickList {
                     // remove actions and filters from the result list
                     for (Iterator<? extends EntryItem> iterator = list.iterator(); iterator.hasNext(); ) {
                         EntryItem entry = iterator.next();
-                        if (entry instanceof ActionEntry)
-                            iterator.remove();
                         if (entry instanceof FilterEntry)
                             iterator.remove();
                     }
@@ -171,7 +217,7 @@ public class QuickList {
                     }
 
                     // show result list
-                    app.behaviour().clearSearch();
+                    app.behaviour().clearSearchText();
                     app.behaviour().updateAdapter(list, false);
 
                     // update toggle information
@@ -188,10 +234,15 @@ public class QuickList {
     public void toggleFilter(View v, IProvider<?> provider, @NonNull String filterName) {
         Context ctx = v.getContext();
         TBApplication app = TBApplication.getApplication(ctx);
+        final String actionId;
+        {
+            Object tag_actionId = v.getTag(R.id.tag_actionId);
+            actionId = tag_actionId instanceof String ? (String) tag_actionId : "";
+        }
 
         // if there is no search we need to filter, just show all matching entries
         if (bAdapterEmpty) {
-            if (bFilterOn && provider != null && filterName.equals(mLastSelection)) {
+            if (bFilterOn && provider != null && actionId.equals(mLastSelection)) {
                 app.behaviour().clearAdapter();
                 bFilterOn = false;
             } else {
@@ -199,7 +250,7 @@ public class QuickList {
                 list = provider != null ? provider.getPojos() : null;
                 if (list != null) {
                     app.behaviour().updateAdapter(list, false);
-                    mLastSelection = filterName;
+                    mLastSelection = actionId;
                     bFilterOn = true;
                 } else {
                     bFilterOn = false;
@@ -208,14 +259,21 @@ public class QuickList {
             // updateAdapter will change `bAdapterEmpty` and we change it back because we want
             // bAdapterEmpty to represent a search we need to filter
             bAdapterEmpty = true;
-        } else if (bFilterOn && (provider == null || filterName.equals(mLastSelection))) {
+        } else if (bFilterOn && (provider == null || actionId.equals(mLastSelection))) {
             animToggleOff();
+            if (mLastAction != null) {
+                bActionOn = true;
+                mLastSelection = mLastAction;
+                mLastAction = null;
+            }
             bFilterOn = false;
             app.behaviour().filterResults(null);
         } else if (provider != null) {
             animToggleOff();
+            if (bActionOn)
+                mLastAction = mLastSelection;
             bFilterOn = true;
-            mLastSelection = filterName;
+            mLastSelection = actionId;
             app.behaviour().filterResults(filterName);
         }
 
@@ -226,8 +284,9 @@ public class QuickList {
     }
 
     public void toggleFilter(View v, @Nullable Provider<? extends EntryItem> provider) {
-        String filterName = provider != null ? provider.getScheme() : "";
-        toggleFilter(v, provider, filterName);
+        Object tag_filterText = v.getTag(R.id.tag_filterText);
+        String filterText = (tag_filterText instanceof String) ? (String) tag_filterText : "";
+        toggleFilter(v, provider, filterText);
     }
 
     private void animToggleOn(View v) {
@@ -241,7 +300,7 @@ public class QuickList {
         int n = mQuickList.getChildCount();
         for (int i = 0; i < n; i += 1) {
             View view = mQuickList.getChildAt(i);
-            if (mLastSelection == null || mLastSelection == view.getTag(R.id.tag_filterName)) {
+            if (mLastSelection == null || mLastSelection == view.getTag(R.id.tag_actionId)) {
                 view.setSelected(false);
                 view.setHovered(false);
             }
@@ -261,21 +320,27 @@ public class QuickList {
         if (mListDirty)
             populateList();
         if (isQuickListEnabled()) {
-            mQuickList.animate()
-                    .scaleY(1f)
-                    .setInterpolator(new AccelerateDecelerateInterpolator())
-                    .setListener(new AnimatorListenerAdapter() {
-                        @Override
-                        public void onAnimationStart(Animator animation) {
-                            TBApplication.state().setQuickList(LauncherState.AnimatedVisibility.ANIM_TO_VISIBLE);
-                        }
+            final SharedPreferences pref = mSharedPreferences;
+            if (pref.getBoolean("quick-list-animation", true)) {
+                mQuickList.animate()
+                        .scaleY(1f)
+                        .setInterpolator(new AccelerateDecelerateInterpolator())
+                        .setListener(new AnimatorListenerAdapter() {
+                            @Override
+                            public void onAnimationStart(Animator animation) {
+                                TBApplication.state().setQuickList(LauncherState.AnimatedVisibility.ANIM_TO_VISIBLE);
+                            }
 
-                        @Override
-                        public void onAnimationEnd(Animator animation) {
-                            TBApplication.state().setQuickList(LauncherState.AnimatedVisibility.VISIBLE);
-                        }
-                    })
-                    .start();
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                TBApplication.state().setQuickList(LauncherState.AnimatedVisibility.VISIBLE);
+                            }
+                        })
+                        .start();
+            } else {
+                mQuickList.setScaleY(1f);
+                TBApplication.state().setQuickList(LauncherState.AnimatedVisibility.VISIBLE);
+            }
             mQuickList.setVisibility(View.VISIBLE);
         }
     }
@@ -313,7 +378,7 @@ public class QuickList {
     }
 
     public void onResume() {
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getContext());
+        final SharedPreferences pref = mSharedPreferences;
         mIsEnabled = pref.getBoolean("quick-list-enabled", true);
         mOnlyForResults = pref.getBoolean("quick-list-only-for-results", false);
         applyUiPref(pref, mQuickList);
@@ -326,13 +391,16 @@ public class QuickList {
         bAdapterEmpty = true;
         if (mOnlyForResults)
             hideQuickList(true);
+        mLastSelection = null;
     }
 
     public void adapterUpdated() {
         show();
         animToggleOff();
         bFilterOn = false;
-        bActionOn = false;
+        bActionOn = mLastSelection != null
+                && (mLastSelection.startsWith(ActionEntry.SCHEME)
+                || mLastSelection.startsWith(TagEntry.SCHEME));
         bAdapterEmpty = false;
     }
 
@@ -373,5 +441,14 @@ public class QuickList {
         int color = UIColors.getColor(pref, "quick-list-color");
         int alpha = UIColors.getAlpha(pref, "quick-list-alpha");
         return UIColors.setAlpha(color, alpha);
+    }
+
+    // ugly: check from where the entry was launched
+    public boolean isViewInList(View view) {
+        return mQuickList.indexOfChild(view) != -1;
+    }
+
+    public boolean isLastSelection(@NonNull String entryId) {
+        return entryId.equals(mLastSelection);
     }
 }

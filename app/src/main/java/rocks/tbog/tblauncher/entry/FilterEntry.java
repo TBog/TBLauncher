@@ -26,11 +26,12 @@ public class FilterEntry extends StaticEntry {
     public void displayResult(@NonNull View view, int drawFlags) {
         super.displayResult(view, drawFlags);
         // this is used for the toggle animation
-        view.setTag(R.id.tag_filterName, filterScheme);
+        view.setTag(R.id.tag_actionId, id);
+        view.setTag(R.id.tag_filterText, filterScheme);
     }
 
     @Override
-    public void doLaunch(@NonNull View view) {
+    public void doLaunch(@NonNull View view, int flags) {
         listener.onClick(view);
     }
 

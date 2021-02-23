@@ -3,6 +3,7 @@ package rocks.tbog.tblauncher.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 
 import rocks.tbog.tblauncher.R;
@@ -72,31 +73,37 @@ public class PrefCache {
         return RESULT_SEARCHER_CAP;
     }
 
-    public static boolean modeEmptyQuickListVisible(SharedPreferences mPref) {
-        return mPref.getBoolean("dm-empty-quick-list", false);
+    public static boolean modeEmptyQuickListVisible(SharedPreferences preferences) {
+        return preferences.getBoolean("dm-empty-quick-list", false);
     }
 
-    public static boolean modeEmptyFullscreen(SharedPreferences mPref) {
-        return mPref.getBoolean("dm-empty-fullscreen", true);
+    public static boolean modeEmptyFullscreen(SharedPreferences preferences) {
+        return preferences.getBoolean("dm-empty-fullscreen", true);
     }
 
-    public static boolean modeSearchQuickListVisible(SharedPreferences mPref) {
-        return mPref.getBoolean("dm-search-quick-list", true);
+    public static boolean modeSearchQuickListVisible(SharedPreferences preferences) {
+        return preferences.getBoolean("dm-search-quick-list", true);
     }
 
-    public static boolean modeSearchFullscreen(SharedPreferences mPref) {
-        return mPref.getBoolean("dm-search-fullscreen", false);
+    public static boolean modeSearchFullscreen(SharedPreferences preferences) {
+        return preferences.getBoolean("dm-search-fullscreen", false);
     }
 
-    public static boolean modeWidgetQuickListVisible(SharedPreferences mPref) {
-        return mPref.getBoolean("dm-widget-quick-list", false);
+    @NonNull
+    public static String modeSearchOpenResult(SharedPreferences preferences) {
+        String result = preferences.getString("dm-search-open-result", null);
+        return result == null ? "none" : result;
     }
 
-    public static boolean modeWidgetFullscreen(SharedPreferences mPref) {
-        return mPref.getBoolean("dm-widget-fullscreen", false);
+    public static boolean modeWidgetQuickListVisible(SharedPreferences preferences) {
+        return preferences.getBoolean("dm-widget-quick-list", false);
     }
 
-    public static boolean searchBarAtBottom(SharedPreferences mPref) {
-        return mPref.getBoolean("search-bar-at-bottom", true);
+    public static boolean modeWidgetFullscreen(SharedPreferences preferences) {
+        return preferences.getBoolean("dm-widget-fullscreen", false);
+    }
+
+    public static boolean searchBarAtBottom(SharedPreferences preferences) {
+        return preferences.getBoolean("search-bar-at-bottom", true);
     }
 }

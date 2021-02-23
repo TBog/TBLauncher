@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="application_not_found">Opa… nu am putut lansa acea aplicație</string>
+    <string name="application_not_found">Nu am putut lansa aplicația \"%s\"</string>
     <string name="stub_application">Numele aplicației</string>
     <plurals name="tag_entry_count">
         <item quantity="one">o intrare</item>
@@ -273,7 +273,6 @@
     <string name="cd_remove_tag">_Elimină etichetă</string>
     <string name="cd_undo_remove_tag">Anulați eliminarea etichetei</string>
     <string name="cd_add_tag">Adaugă etichetă</string>
-    <string name="cd_icon_preview">Previzualizare</string>
     <string name="cd_item_contact_call">Sună</string>
     <string name="cd_item_contact_message">Mesaj</string>
     <string name="cd_show_all_apps">Afișați toate aplicațiile</string>

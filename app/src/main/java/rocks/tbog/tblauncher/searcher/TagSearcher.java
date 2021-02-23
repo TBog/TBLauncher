@@ -39,20 +39,35 @@ public class TagSearcher extends Searcher {
         if (activity == null)
             return false;
 
-        for (EntryItem entryItem : pojos) {
-            if (entryItem instanceof EntryWithTags) {
-                if (((EntryWithTags) entryItem).getTags().contains(tagDetails)) {
-                    if (!foundIdSet.contains(entryItem.id)) {
-                        foundIdSet.add(entryItem.id);
-
-                        processedPojos.add(entryItem);
-                        if (processedPojos.size() > maxResults)
-                            processedPojos.poll();
+        if (query.isEmpty()) {
+            for (EntryItem entryItem : pojos) {
+                if (entryItem instanceof EntryWithTags) {
+                    if (((EntryWithTags) entryItem).getTags().isEmpty()) {
+                        addProcessedPojo((EntryWithTags) entryItem);
+                    }
+                }
+            }
+        } else {
+            for (EntryItem entryItem : pojos) {
+                if (entryItem instanceof EntryWithTags) {
+                    if (((EntryWithTags) entryItem).getTags().contains(tagDetails)) {
+                        addProcessedPojo((EntryWithTags) entryItem);
                     }
                 }
             }
         }
         return true;
+    }
+
+    private void addProcessedPojo(EntryWithTags entryItem) {
+        if (foundIdSet.contains(entryItem.id))
+            return;
+
+        foundIdSet.add(entryItem.id);
+
+        processedPojos.add(entryItem);
+        if (processedPojos.size() > maxResults)
+            processedPojos.poll();
     }
 
     @WorkerThread

@@ -207,7 +207,7 @@ public final class ShortcutEntry extends EntryWithTags {
     }
 
     @Override
-    public void doLaunch(@NonNull View view) {
+    public void doLaunch(@NonNull View view, int flags) {
         Context context = view.getContext();
         if (isOreoShortcut()) {
             // Oreo shortcuts
@@ -229,7 +229,7 @@ public final class ShortcutEntry extends EntryWithTags {
             context.startActivity(intent, startActivityOptions);
         } catch (Exception e) {
             // Application was just removed?
-            Toast.makeText(context, R.string.application_not_found, Toast.LENGTH_LONG).show();
+            Toast.makeText(context, context.getString(R.string.entry_not_found, shortcutData), Toast.LENGTH_LONG).show();
         }
     }
 
@@ -258,7 +258,7 @@ public final class ShortcutEntry extends EntryWithTags {
         }
 
         // Application removed? Invalid shortcut? Shortcut to an app on an unmounted SD card?
-        Toast.makeText(context, R.string.application_not_found, Toast.LENGTH_LONG).show();
+        Toast.makeText(context, context.getString(R.string.application_not_found, shortcutInfo), Toast.LENGTH_LONG).show();
     }
 
     @Override
@@ -275,7 +275,7 @@ public final class ShortcutEntry extends EntryWithTags {
         adapter.add(new LinearAdapter.Item(context, R.string.menu_shortcut_rename));
         adapter.add(new LinearAdapter.Item(context, R.string.menu_custom_icon));
 
-        if (Utilities.checkFlag(flags, FLAG_POPUP_MENU_QUICK_LIST)) {
+        if (Utilities.checkFlag(flags, LAUNCHED_FROM_QUICK_LIST)) {
             adapter.add(new LinearAdapter.ItemTitle(context, R.string.menu_popup_title_settings));
             adapter.add(new LinearAdapter.Item(context, R.string.menu_popup_quick_list_customize));
         }
