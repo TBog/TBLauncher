@@ -471,6 +471,243 @@
     </PreferenceScreen>
 
     <PreferenceScreen
+        android:icon="@drawable/ic_behaviour"
+        android:key="behaviour-holder"
+        android:summary="@string/behaviour_summary"
+        android:title="@string/title_behaviour">
+
+        <!-- Gestures -->
+        <PreferenceCategory
+            android:icon="@drawable/ic_gesture"
+            android:key="gesture-section"
+            android:title="@string/gesture_section">
+            <ListPreference
+                android:defaultValue="toggleSearchAndWidget"
+                android:entries="@array/gestureEntries"
+                android:entryValues="@array/gestureValues"
+                android:key="gesture-click"
+                android:title="@string/gesture_click" />
+            <ListPreference
+                android:key="gesture-click-app-to-run"
+                android:title="@string/action_app_to_run"
+                app:isPreferenceVisible="false" />
+            <ListPreference
+                android:key="gesture-click-entry-to-show"
+                android:title="@string/action_entry_to_show"
+                app:isPreferenceVisible="false" />
+
+            <ListPreference
+                android:defaultValue="expandNotificationsPanel"
+                android:entries="@array/gestureEntries"
+                android:entryValues="@array/gestureValues"
+                android:key="gesture-fling-down-left"
+                android:summary="@string/gesture_fling_down_left_summary"
+                android:title="@string/gesture_fling_down_left" />
+            <ListPreference
+                android:key="gesture-fling-down-left-app-to-run"
+                android:title="@string/action_app_to_run"
+                app:isPreferenceVisible="false" />
+            <ListPreference
+                android:key="gesture-fling-down-left-entry-to-show"
+                android:title="@string/action_entry_to_show"
+                app:isPreferenceVisible="false" />
+
+            <ListPreference
+                android:defaultValue="expandNotificationsPanel"
+                android:entries="@array/gestureEntries"
+                android:entryValues="@array/gestureValues"
+                android:key="gesture-fling-down-right"
+                android:summary="@string/gesture_fling_down_right_summary"
+                android:title="@string/gesture_fling_down_right" />
+            <ListPreference
+                android:key="gesture-fling-down-right-app-to-run"
+                android:title="@string/action_app_to_run"
+                app:isPreferenceVisible="false" />
+            <ListPreference
+                android:key="gesture-fling-down-right-entry-to-show"
+                android:title="@string/action_entry_to_show"
+                app:isPreferenceVisible="false" />
+
+            <ListPreference
+                android:defaultValue="none"
+                android:entries="@array/gestureEntries"
+                android:entryValues="@array/gestureValues"
+                android:key="gesture-fling-up"
+                android:title="@string/gesture_fling_up" />
+            <ListPreference
+                android:key="gesture-fling-up-app-to-run"
+                android:title="@string/action_app_to_run"
+                app:isPreferenceVisible="false" />
+            <ListPreference
+                android:key="gesture-fling-up-entry-to-show"
+                android:title="@string/action_entry_to_show"
+                app:isPreferenceVisible="false" />
+
+            <ListPreference
+                android:defaultValue="none"
+                android:entries="@array/gestureEntries"
+                android:entryValues="@array/gestureValues"
+                android:key="gesture-fling-left"
+                android:title="@string/gesture_fling_left" />
+            <ListPreference
+                android:key="gesture-fling-left-app-to-run"
+                android:title="@string/action_app_to_run"
+                app:isPreferenceVisible="false" />
+            <ListPreference
+                android:key="gesture-fling-left-entry-to-show"
+                android:title="@string/action_entry_to_show"
+                app:isPreferenceVisible="false" />
+
+            <ListPreference
+                android:defaultValue="none"
+                android:entries="@array/gestureEntries"
+                android:entryValues="@array/gestureValues"
+                android:key="gesture-fling-right"
+                android:title="@string/gesture_fling_right" />
+            <ListPreference
+                android:key="gesture-fling-right-app-to-run"
+                android:title="@string/action_app_to_run"
+                app:isPreferenceVisible="false" />
+            <ListPreference
+                android:key="gesture-fling-right-entry-to-show"
+                android:title="@string/action_entry_to_show"
+                app:isPreferenceVisible="false" />
+        </PreferenceCategory>
+
+        <!-- Behaviour -->
+        <androidx.preference.PreferenceCategory
+            android:icon="@drawable/ic_behaviour"
+            android:key="behaviour-section"
+            android:title="@string/behaviour_section">
+
+            <ListPreference
+                android:defaultValue="showAllAppsZA"
+                android:entries="@array/gestureEntries"
+                android:entryValues="@array/gestureValues"
+                android:key="button-launcher"
+                android:title="@string/button_launcher" />
+            <ListPreference
+                android:key="button-launcher-app-to-run"
+                android:title="@string/action_app_to_run"
+                app:isPreferenceVisible="false" />
+            <ListPreference
+                android:key="button-launcher-entry-to-show"
+                android:title="@string/action_entry_to_show"
+                app:isPreferenceVisible="false" />
+
+            <ListPreference
+                android:defaultValue="showSearchBar"
+                android:entries="@array/gestureEntries"
+                android:entryValues="@array/gestureValues"
+                android:key="button-home"
+                android:title="@string/button_home" />
+
+            <androidx.preference.SwitchPreference
+                android:defaultValue="true"
+                android:key="behaviour-link-keyboard-search-bar"
+                android:title="@string/behaviour_link_keyboard_search_bar" />
+
+            <androidx.preference.SwitchPreference
+                android:defaultValue="true"
+                android:key="behaviour-widget-after-launch"
+                android:title="@string/behaviour_widget_after_launch" />
+
+            <androidx.preference.SwitchPreference
+                android:defaultValue="true"
+                android:key="behaviour-clear-search-after-launch"
+                android:title="@string/behaviour_clear_search_after_launch" />
+
+            <ListPreference
+                android:defaultValue="showSearchBar"
+                android:entries="@array/desktopEntries"
+                android:entryValues="@array/desktopValues"
+                android:key="initial-desktop"
+                android:title="@string/initial_desktop" />
+
+            <!-- ‹Empty› desktop mode -->
+            <PreferenceScreen
+                android:key="feature-desktop-mode-empty-holder"
+                android:title="@string/title_desktop_mode_empty">
+
+                <androidx.preference.SwitchPreference
+                    android:defaultValue="false"
+                    android:key="dm-empty-quick-list"
+                    android:title="@string/dm_empty_quick_list" />
+
+                <androidx.preference.SwitchPreference
+                    android:defaultValue="true"
+                    android:key="dm-empty-fullscreen"
+                    android:title="@string/dm_empty_fullscreen" />
+
+                <ListPreference
+                    android:defaultValue="showWidgets"
+                    android:entries="@array/gestureEntries"
+                    android:entryValues="@array/gestureValues"
+                    android:key="dm-empty-back"
+                    android:title="@string/back_device_key" />
+
+            </PreferenceScreen>
+
+            <!-- ‹Search› desktop mode -->
+            <PreferenceScreen
+                android:key="feature-desktop-mode-search-holder"
+                android:title="@string/title_desktop_mode_search">
+
+                <androidx.preference.SwitchPreference
+                    android:defaultValue="true"
+                    android:key="dm-search-quick-list"
+                    android:title="@string/dm_search_quick_list" />
+
+                <androidx.preference.SwitchPreference
+                    android:defaultValue="false"
+                    android:key="dm-search-fullscreen"
+                    android:title="@string/dm_search_fullscreen" />
+
+                <ListPreference
+                    android:defaultValue="showEmpty"
+                    android:entries="@array/gestureEntries"
+                    android:entryValues="@array/gestureValues"
+                    android:key="dm-search-back"
+                    android:title="@string/back_device_key" />
+
+                <ListPreference
+                    android:defaultValue="resultHistoryByRecency"
+                    android:entries="@array/resultEntries"
+                    android:entryValues="@array/resultValues"
+                    android:key="dm-search-open-result"
+                    android:title="@string/dm_search_open_result" />
+
+            </PreferenceScreen>
+
+            <!-- ‹Widget› desktop mode -->
+            <PreferenceScreen
+                android:key="feature-desktop-mode-widget-holder"
+                android:title="@string/title_desktop_mode_widget">
+
+                <androidx.preference.SwitchPreference
+                    android:defaultValue="false"
+                    android:key="dm-widget-quick-list"
+                    android:title="@string/dm_widget_quick_list" />
+
+                <androidx.preference.SwitchPreference
+                    android:defaultValue="false"
+                    android:key="dm-widget-fullscreen"
+                    android:title="@string/dm_widget_fullscreen" />
+
+                <ListPreference
+                    android:defaultValue="showSearchBar"
+                    android:entries="@array/gestureEntries"
+                    android:entryValues="@array/gestureValues"
+                    android:key="dm-widget-back"
+                    android:title="@string/back_device_key" />
+
+            </PreferenceScreen>
+
+        </androidx.preference.PreferenceCategory>
+
+    </PreferenceScreen>
+
+    <PreferenceScreen
         android:icon="@drawable/ic_backup"
         android:key="backup-holder"
         android:summary="@string/backup_summary"

@@ -379,6 +379,8 @@
     <string name="no_favorites">No favorites set</string>
     <string name="quick_list_animation">Animate show/hide</string>
     <string name="initial_desktop">Initial desktop</string>
+    <string name="behaviour_summary">Gestures and behaviour</string>
+    <string name="title_behaviour">Behaviour</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>
