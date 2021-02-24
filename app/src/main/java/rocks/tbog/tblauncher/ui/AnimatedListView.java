@@ -40,9 +40,6 @@ public class AnimatedListView extends BlockableListView {
     }
 
     public void animateChange() {
-        if (mItemMap.isEmpty())
-            return;
-
         // check if we can use the ViewTreeObserver for animations
         final ViewTreeObserver observer = this.getViewTreeObserver();
         if (!observer.isAlive())
