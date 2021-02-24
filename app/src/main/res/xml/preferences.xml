@@ -626,7 +626,7 @@
 
             <!-- ‹Empty› desktop mode -->
             <PreferenceScreen
-                android:key="feature-desktop-mode-empty-holder"
+                android:key="desktop-mode-empty-holder"
                 android:title="@string/title_desktop_mode_empty">
 
                 <androidx.preference.SwitchPreference
@@ -650,7 +650,7 @@
 
             <!-- ‹Search› desktop mode -->
             <PreferenceScreen
-                android:key="feature-desktop-mode-search-holder"
+                android:key="desktop-mode-search-holder"
                 android:title="@string/title_desktop_mode_search">
 
                 <androidx.preference.SwitchPreference
@@ -681,7 +681,7 @@
 
             <!-- ‹Widget› desktop mode -->
             <PreferenceScreen
-                android:key="feature-desktop-mode-widget-holder"
+                android:key="desktop-mode-widget-holder"
                 android:title="@string/title_desktop_mode_widget">
 
                 <androidx.preference.SwitchPreference
