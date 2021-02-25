@@ -25,6 +25,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.collection.ArraySet;
@@ -855,6 +856,17 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case "enable-url":
             case "enable-calculator":
                 TBApplication.dataHandler(context).reloadProviders();
+                break;
+            case "root-mode":
+                if (sharedPreferences.getBoolean("root-mode", false) &&
+                        !TBApplication.rootHandler(context).isRootAvailable()) {
+                    //show error dialog
+                    new AlertDialog.Builder(context).setMessage(R.string.root_mode_error)
+                            .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                                sharedPreferences.edit().putBoolean("root-mode", false).apply();
+                            }).show();
+                }
+                TBApplication.rootHandler(context).resetRootHandler(sharedPreferences);
                 break;
         }
     }

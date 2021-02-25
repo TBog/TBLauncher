@@ -5,6 +5,12 @@
     android:summary="@string/features_summary"
     android:title="@string/title_features">
 
+    <androidx.preference.SwitchPreference
+        android:defaultValue="false"
+        android:summary="@string/root_mode_summary"
+        android:title="@string/root_mode"
+        android:key="root-mode"/>
+
     <!-- Quick List -->
     <androidx.preference.PreferenceCategory
         android:icon="@drawable/ic_quick"

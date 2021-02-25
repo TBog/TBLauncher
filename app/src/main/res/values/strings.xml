@@ -6,6 +6,8 @@
     <string name="copy_confirmation">Copied \"%s\" to clipboard</string>
 
     <string name="removed_item">Removed %s</string>
+    <string name="toast_hibernate_completed">%s hibernated, relaunch to awake</string>
+    <string name="toast_hibernate_error">[ERROR] %s not hibernated</string>
 
     <string name="unable_to_initialize_shortcuts">Unable to initialize shortcuts. Is TinyBit your default launcher?</string>
     <string name="cant_pin_shortcut">Could not add shortcut. Is TinyBit your default launcher?</string>
@@ -27,6 +29,7 @@
     <string name="menu_app_details">App info</string>
     <string name="menu_app_store">View in store</string>
     <string name="menu_app_uninstall">Uninstall</string>
+    <string name="menu_app_hibernate">Hibernate</string>
     <string name="menu_exclude_history">from history</string>
     <string name="menu_exclude_kiss">from TinyBit</string>
     <string name="application_not_found">Unable to launch \"%s\" app</string>
@@ -381,6 +384,9 @@
     <string name="initial_desktop">Initial desktop</string>
     <string name="behaviour_summary">Gestures and behaviour</string>
     <string name="title_behaviour">Behaviour</string>
+    <string name="root_mode">Root mode</string>
+    <string name="root_mode_summary">Used to hibernate apps</string>
+    <string name="root_mode_error">Unable to gain root privileges</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>
