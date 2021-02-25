@@ -24,7 +24,6 @@
         android:layout_height="match_parent"
         android:clipToPadding="false"
         android:fitsSystemWindows="true"
-        android:orientation="vertical"
         tools:layout_marginTop="30dp">
         <!-- This Layout insets its children based on system windows using
              android:fitsSystemWindows.
