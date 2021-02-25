@@ -10,6 +10,7 @@ import java.util.HashMap;
 
 public class AnimatedListView extends BlockableListView {
     private final static int MOVE_DURATION = 100;
+    private final static int SCALE_DURATION = 200;
     private final HashMap<Long, ItemInfo> mItemMap = new HashMap<>();
 
     public AnimatedListView(Context context) {
@@ -78,7 +79,7 @@ public class AnimatedListView extends BlockableListView {
                             // animate new views
                             child.setScaleY(0.f);
                             child.animate()
-                                    .setDuration(MOVE_DURATION)
+                                    .setDuration(SCALE_DURATION)
                                     .scaleY(1.f);
                         }
                     }

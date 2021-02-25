@@ -43,7 +43,6 @@ import rocks.tbog.tblauncher.utils.UIColors;
 
 public class QuickList {
     private TBLauncherActivity mTBLauncherActivity;
-    private boolean mIsEnabled = true;
     private boolean mOnlyForResults = false;
     private boolean mListDirty = true;
     private LinearLayout mQuickList;
@@ -308,7 +307,7 @@ public class QuickList {
     }
 
     private boolean isQuickListEnabled() {
-        return mIsEnabled;
+        return mSharedPreferences.getBoolean("quick-list-enabled", true);
     }
 
     public void showQuickList() {
@@ -379,7 +378,6 @@ public class QuickList {
 
     public void onResume() {
         final SharedPreferences pref = mSharedPreferences;
-        mIsEnabled = pref.getBoolean("quick-list-enabled", true);
         mOnlyForResults = pref.getBoolean("quick-list-only-for-results", false);
         applyUiPref(pref, mQuickList);
     }

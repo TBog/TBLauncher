@@ -841,6 +841,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     sharedPreferences.edit().putBoolean("fuzzy-search-tags", useTags).apply();
                 break;
             }
+            case "quick-list-enabled":
             case "quick-list-text-visible":
             case "quick-list-icons-visible":
             case "quick-list-show-badge":

@@ -1209,33 +1209,33 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             }
         }
 
-//        if (TBApplication.state().getDesktop() == LauncherState.Desktop.SEARCH) {
-//            // can't show keyboard if we don't have focus, wait for onWindowFocusChanged
-//            mSearchEditText.requestFocus();
-//            mSearchEditText.postDelayed(this::showKeyboard, UI_ANIMATION_DURATION);
-//        }
-
-//        TBApplication app = TBApplication.getApplication(getContext());
-//        app.getDataHandler().checkServices();
-//        LauncherState state = TBApplication.state();
-//        switch (state.getDesktop()) {
-//            case WIDGET:
-//                if (state.isSearchBarVisible())
-//                    hideSearchBar(0, false);
-//                break;
-//            case SEARCH:
-//                // can't show keyboard if we don't have focus, wait for onWindowFocusChanged
-//                mSearchEditText.requestFocus();
-//                mSearchEditText.postDelayed(this::showKeyboard, UI_ANIMATION_DURATION);
-//                showSearchBar();
-//                break;
-//            case EMPTY:
-//            default:
-//                if (state.isSearchBarVisible())
-//                    hideSearchBar(0, false);
-//                if (state.isQuickListVisible())
-//                    app.quickList().hideQuickList(false);
-//        }
+        LauncherState.Desktop desktop = TBApplication.state().getDesktop();
+        if (desktop != null) {
+            switch (desktop) {
+                case SEARCH:
+                    // hide/show the QuickList
+                    if (PrefCache.modeSearchQuickListVisible(mPref))
+                        TBApplication.quickList(getContext()).showQuickList();
+                    else
+                        TBApplication.quickList(getContext()).hideQuickList(false);
+                    break;
+                case WIDGET:
+                    // hide/show the QuickList
+                    if (PrefCache.modeWidgetQuickListVisible(mPref))
+                        TBApplication.quickList(getContext()).showQuickList();
+                    else
+                        TBApplication.quickList(getContext()).hideQuickList(false);
+                    break;
+                case EMPTY:
+                default:
+                    // hide/show the QuickList
+                    if (PrefCache.modeEmptyQuickListVisible(mPref))
+                        TBApplication.quickList(getContext()).showQuickList();
+                    else
+                        TBApplication.quickList(getContext()).hideQuickList(false);
+                    break;
+            }
+        }
     }
 
     public void onNewIntent() {
