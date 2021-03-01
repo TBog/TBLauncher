@@ -883,6 +883,10 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 //            runTask(searcher);
 //            return;
 //        }
+        if (isRefresh)
+            mResultList.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_NORMAL);
+        else
+            mResultList.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
 
         updateSearchRecords(isRefresh, new QuerySearcher(this, query));
     }
