@@ -38,6 +38,7 @@ import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.entry.TagEntry;
 import rocks.tbog.tblauncher.result.ResultHelper;
 import rocks.tbog.tblauncher.searcher.Searcher;
+import rocks.tbog.tblauncher.ui.AnimatedListView;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.UIColors;
 
@@ -46,6 +47,7 @@ public class QuickList {
     private boolean mOnlyForResults = false;
     private boolean mListDirty = true;
     private LinearLayout mQuickList;
+    private final ArrayList<EntryItem> mQuickListItems = new ArrayList<>(0);
     private SharedPreferences mSharedPreferences = null;
 
     // bAdapterEmpty is true when no search results are displayed
@@ -96,22 +98,43 @@ public class QuickList {
 
     private void populateList() {
         mListDirty = false;
+        View[] oldList = new View[mQuickList.getChildCount()];
+        for (int nChild = 0; nChild < oldList.length; nChild += 1)
+            oldList[nChild] = mQuickList.getChildAt(nChild);
         mQuickList.removeAllViews();
         if (!isQuickListEnabled()) {
+            mQuickListItems.clear();
             mQuickList.setVisibility(View.GONE);
             return;
         }
         QuickListProvider provider = TBApplication.dataHandler(getContext()).getQuickListProvider();
         List<EntryItem> list = provider != null ? provider.getPojos() : null;
         if (list == null)
-            return;
+            list = Collections.emptyList();
+
+        ArrayList<? extends EntryItem> oldItems = new ArrayList<>(mQuickListItems);
+        mQuickListItems.clear();
+
         final SharedPreferences prefs = mSharedPreferences;
         int drawFlags = getDrawFlags(prefs);
         LayoutInflater inflater = LayoutInflater.from(getContext());
         for (EntryItem entry : list) {
-            View view = inflater.inflate(entry.getResultLayout(drawFlags), mQuickList, false);
+            View view;
+            int oldPos = oldItems.indexOf(entry);
+            if (oldPos > -1)
+                view = oldList[oldPos];
+            else
+                view = inflater.inflate(entry.getResultLayout(drawFlags), mQuickList, false);
             entry.displayResult(view, drawFlags);
             mQuickList.addView(view);
+            mQuickListItems.add(entry);
+
+//            view.setScaleX(0f);
+//            view.animate()
+//                    .setInterpolator(new DecelerateInterpolator())
+//                    .scaleX(1f)
+//                    .setDuration(AnimatedListView.SCALE_DURATION)
+//                    .start();
 
             view.setOnClickListener(v -> {
                 if (entry instanceof StaticEntry) {
