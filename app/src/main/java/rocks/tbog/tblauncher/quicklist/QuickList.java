@@ -38,7 +38,6 @@ import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.entry.TagEntry;
 import rocks.tbog.tblauncher.result.ResultHelper;
 import rocks.tbog.tblauncher.searcher.Searcher;
-import rocks.tbog.tblauncher.ui.AnimatedListView;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.UIColors;
 
@@ -62,6 +61,11 @@ public class QuickList {
     private String mLastSelection = null;
     private String mLastAction = null;
 
+    private final Runnable runCleanList = () -> {
+        if (mListDirty && TBApplication.state().isQuickListVisible())
+            populateList();
+    };
+
     public Context getContext() {
         return mTBLauncherActivity;
     }
@@ -74,11 +78,11 @@ public class QuickList {
     }
 
     public void onFavoritesChanged() {
+        mListDirty = true;
         if (mQuickList == null)
             return;
-        mListDirty = true;
-        if (TBApplication.state().isQuickListVisible())
-            populateList();
+        mQuickList.removeCallbacks(runCleanList);
+        mQuickList.postDelayed(runCleanList, 100);
     }
 
     public static int getDrawFlags(SharedPreferences prefs) {
@@ -112,7 +116,9 @@ public class QuickList {
         if (list == null)
             list = Collections.emptyList();
 
-        ArrayList<? extends EntryItem> oldItems = new ArrayList<>(mQuickListItems);
+        ArrayList<String> oldItems = new ArrayList<>(mQuickListItems.size());
+        for (EntryItem entry : mQuickListItems)
+            oldItems.add(entry.id);
         mQuickListItems.clear();
 
         final SharedPreferences prefs = mSharedPreferences;
@@ -120,11 +126,14 @@ public class QuickList {
         LayoutInflater inflater = LayoutInflater.from(getContext());
         for (EntryItem entry : list) {
             View view;
-            int oldPos = oldItems.indexOf(entry);
-            if (oldPos > -1)
+            int oldPos = oldItems.indexOf(entry.id);
+            if (oldPos > -1) {
+                //Log.i("QL", "reuse view for " + entry.id);
                 view = oldList[oldPos];
-            else
+            } else {
+                //Log.i("QL", "inflate view for " + entry.id);
                 view = inflater.inflate(entry.getResultLayout(drawFlags), mQuickList, false);
+            }
             entry.displayResult(view, drawFlags);
             mQuickList.addView(view);
             mQuickListItems.add(entry);
@@ -339,6 +348,7 @@ public class QuickList {
     }
 
     private void show() {
+        mQuickList.removeCallbacks(runCleanList);
         if (mListDirty)
             populateList();
         if (isQuickListEnabled()) {

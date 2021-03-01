@@ -3,6 +3,9 @@ package rocks.tbog.tblauncher.dataprovider;
 import android.content.Context;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -13,6 +16,7 @@ import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.PlaceholderEntry;
 
 public class QuickListProvider extends DBProvider<EntryItem> {
+    private final HashMap<String, String> mFavPosition = new HashMap<>();
 
     public QuickListProvider(Context context) {
         super(context);
@@ -32,7 +36,25 @@ public class QuickListProvider extends DBProvider<EntryItem> {
             }
         }
         entryList.addAll(toAdd);
+        // if we have replaced some PlaceholderEntry then we need to sort again
+        if (!toAdd.isEmpty() && entryList.size() != toAdd.size())
+        {
+            // sort entryList
+            Collections.sort(entryList, (o1, o2) -> {
+                String p1 = mFavPosition.get(o1.id);
+                String p2 = mFavPosition.get(o2.id);
+                if (p1 == null || p2 == null)
+                    return 0;
+                return p1.compareTo(p2);
+            });
+        }
         return super.getPojos();
+    }
+
+    private void setRecords(ArrayList<FavRecord> favRecords) {
+        mFavPosition.clear();
+        for (FavRecord rec : favRecords)
+            mFavPosition.put(rec.record, rec.position);
     }
 
     @Override
@@ -41,6 +63,7 @@ public class QuickListProvider extends DBProvider<EntryItem> {
     }
 
     private static class QuickListLoader extends DBProvider.DBLoader<EntryItem> {
+        private ArrayList<FavRecord> mFavRecords = null;
 
         public QuickListLoader(DBProvider<EntryItem> provider) {
             super(provider);
@@ -48,10 +71,10 @@ public class QuickListProvider extends DBProvider<EntryItem> {
 
         @Override
         List<EntryItem> getEntryItems(DataHandler dataHandler) {
-            ArrayList<FavRecord> list = dataHandler.getFavorites();
-            ArrayList<EntryItem> quickList = new ArrayList<>(list.size());
+            mFavRecords = dataHandler.getFavorites();
+            ArrayList<EntryItem> quickList = new ArrayList<>(mFavRecords.size());
             // get EntryItem from FavRecord
-            for (FavRecord fav : list) {
+            for (FavRecord fav : mFavRecords) {
                 if (!fav.isInQuickList())
                     continue;
                 PlaceholderEntry entry = new PlaceholderEntry(fav.record);
@@ -68,8 +91,11 @@ public class QuickListProvider extends DBProvider<EntryItem> {
         protected void onPostExecute(List<EntryItem> entryItems) {
             super.onPostExecute(entryItems);
             DBProvider<EntryItem> provider = weakProvider.get();
-            if (provider != null)
+            if (provider != null) {
+                if (mFavRecords != null)
+                    ((QuickListProvider) provider).setRecords(mFavRecords);
                 TBApplication.quickList(provider.context).onFavoritesChanged();
+            }
         }
     }
 }
