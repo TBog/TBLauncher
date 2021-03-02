@@ -387,6 +387,7 @@
     <string name="root_mode">Root mode</string>
     <string name="root_mode_summary">Used to hibernate apps</string>
     <string name="root_mode_error">Unable to gain root privileges</string>
+    <string name="behaviour_link_close_keyboard_back_button">Close keyboard same as back button</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>

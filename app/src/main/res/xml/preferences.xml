@@ -609,6 +609,11 @@
 
             <androidx.preference.SwitchPreference
                 android:defaultValue="true"
+                android:key="behaviour-link-close-keyboard-back-button"
+                android:title="@string/behaviour_link_close_keyboard_back_button" />
+
+            <androidx.preference.SwitchPreference
+                android:defaultValue="true"
                 android:key="behaviour-widget-after-launch"
                 android:title="@string/behaviour_widget_after_launch" />
 

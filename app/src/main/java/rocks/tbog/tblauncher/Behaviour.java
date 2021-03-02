@@ -998,7 +998,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                 break;
         }
 
-        // Calling super.onBackPressed() will quit the launcher, only do this if KISS is not the user's default home.
+        // Calling super.onBackPressed() will quit the launcher, only do this if this is not the user's default home.
         // Action not handled (return false) if not the default launcher.
         return TBApplication.isDefaultLauncher(mTBLauncherActivity);
     }
@@ -1010,6 +1010,8 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         state.setKeyboard(LauncherState.AnimatedVisibility.HIDDEN);
         if (state.isSearchBarVisible() && PrefCache.modeSearchFullscreen(mPref))
             enableFullscreen(0);
+        if (PrefCache.linkCloseKeyboardToBackButton(mPref))
+            onBackPressed();
         return false;
     }
 
