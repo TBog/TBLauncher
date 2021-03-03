@@ -5,6 +5,7 @@ import android.appwidget.AppWidgetHost;
 import android.appwidget.AppWidgetHostView;
 import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
+import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -25,6 +26,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AlertDialog;
 import androidx.core.content.res.ResourcesCompat;
@@ -35,13 +37,13 @@ import java.util.Iterator;
 import rocks.tbog.tblauncher.db.DBHelper;
 import rocks.tbog.tblauncher.db.PlaceholderWidgetRecord;
 import rocks.tbog.tblauncher.db.WidgetRecord;
+import rocks.tbog.tblauncher.drawable.DrawableUtils;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.LinearAdapterPlus;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.ui.WidgetLayout;
 import rocks.tbog.tblauncher.ui.WidgetView;
 import rocks.tbog.tblauncher.utils.DebugInfo;
-import rocks.tbog.tblauncher.drawable.DrawableUtils;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public class WidgetManager {
@@ -479,12 +481,30 @@ public class WidgetManager {
 //        }
 
         if (appWidgetInfo.configure != null) {
-            Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_CONFIGURE);
-            intent.setComponent(appWidgetInfo.configure);
-            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
-            activity.startActivityForResult(intent, REQUEST_CREATE_APPWIDGET);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                startConfigActivity(appWidgetId, activity, REQUEST_CREATE_APPWIDGET);
+            } else {
+                Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_CONFIGURE);
+                intent.setComponent(appWidgetInfo.configure);
+                intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
+                try {
+                    activity.startActivityForResult(intent, REQUEST_CREATE_APPWIDGET);
+                } catch (SecurityException e) {
+                    Log.e(TAG, "ACTION_APPWIDGET_CONFIGURE", e);
+                    Toast.makeText(activity, e.getMessage(), Toast.LENGTH_LONG).show();
+                }
+            }
         } else {
             createWidget(activity, data);
+        }
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    public void startConfigActivity(int widgetId, Activity activity, int requestCode) {
+        try {
+            mAppWidgetHost.startAppWidgetConfigureActivityForResult(activity, widgetId, 0, requestCode, null);
+        } catch (ActivityNotFoundException | SecurityException e) {
+            Toast.makeText(activity, e.getMessage(), Toast.LENGTH_LONG).show();
         }
     }
 
