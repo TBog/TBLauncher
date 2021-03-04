@@ -166,6 +166,49 @@ public final class UIColors {
         return ColorUtils.HSLToColor(hsl);
     }
 
+    /**
+     * The Web Content Accessibility Guidelines (WCAG 2.0) level AA requires a 4.5:1 color contrast between text and background for normal text, and 3:1 to large text.
+     *
+     * @param background background color
+     * @return text color for large text
+     */
+    public static int getTextContrastColor(@ColorInt int background) {
+        int result = -1;
+        float lumBack = UIColors.luminance(background);
+
+        float min = 0f;
+        float max = 1f;
+        int count = 0;
+        float ratio;
+        // use binary search to find a text color to satisfy the color contrast
+        while (min < max) {
+            float mid = (min + max) * .5f;
+            float modulateAmount = lumBack < .5f ? (1f + mid) : (1f - mid);
+            int text = UIColors.modulateColorLightness(background, modulateAmount);
+
+            if (++count > 10) {
+                if (result == -1)
+                    result = text;
+                break;
+            }
+
+            float lumText = UIColors.luminance(text);
+            if (lumText >= lumBack) {
+                ratio = (lumText + .05f) / (lumBack + .05f);
+            } else {
+                ratio = (lumBack + .05f) / (lumText + .05f);
+            }
+            if (ratio < 4.5f) // 4.5:1 ratio
+                min = mid;
+            else {
+                max = mid;
+                result = text;
+            }
+        }
+        // return opaque color
+        return result | 0xFF000000;
+    }
+
     public static void setStatusBarColor(AppCompatActivity compatActivity, @ColorInt int notificationBarColor) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Window window = compatActivity.getWindow();

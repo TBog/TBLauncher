@@ -3,23 +3,29 @@ package rocks.tbog.tblauncher.ui;
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.animation.AccelerateInterpolator;
 import android.widget.AbsListView;
 
+import androidx.annotation.NonNull;
+
+import rocks.tbog.tblauncher.R;
+
 /**
  * Utility class for automatically hiding the keyboard when scrolling down a {@see ListView},
  * keeping the position of the finger on the list stable
  */
 public class KeyboardScrollHider implements View.OnTouchListener {
-    private final static int THRESHOLD = 24;
+    private static final String TAG = "KSH";
 
     private final KeyboardHandler handler;
     private final BlockableListView list;
     private final View listParent;
     private final BottomPullEffectView pullEffect;
+    private final int resultItemHeight;
     private int listHeightInitial = 0;
 
     private float offsetYStart = 0;
@@ -29,7 +35,7 @@ public class KeyboardScrollHider implements View.OnTouchListener {
     private MotionEvent lastMotionEvent;
     private int initialWindowPadding = 0;
     private boolean resizeDone = false;
-
+    private boolean keyboardHidden = false;
     private boolean scrollBarEnabled = true;
 
     public KeyboardScrollHider(KeyboardHandler handler, BlockableListView list, BottomPullEffectView pullEffect) {
@@ -37,6 +43,7 @@ public class KeyboardScrollHider implements View.OnTouchListener {
         this.list = list;
         this.listParent = (View) list.getParent();
         this.pullEffect = pullEffect;
+        resultItemHeight = list.getResources().getDimensionPixelSize(R.dimen.icon_size) / 2;
     }
 
     /**
@@ -58,27 +65,42 @@ public class KeyboardScrollHider implements View.OnTouchListener {
         this.handleResizeDone();
     }
 
-    private int getWindowPadding() {
+    @NonNull
+    private View getRootView() {
+        // we need a root view that has `android:fitsSystemWindows="true"` to find the height of the keyboard
         ViewGroup rootView = (ViewGroup) this.list.getRootView();
-        return rootView.getChildAt(0).getPaddingBottom();
+        ViewGroup rootLayout = rootView.findViewById(R.id.root_layout);
+        // child 0 is `R.id.notificationBackground`
+        // child 1 is a full-screen ViewGroup that has `android:fitsSystemWindows="true"`
+        return rootLayout.getChildAt(1);
+    }
+
+    private int getWindowPadding() {
+        // we need a root view that has `android:fitsSystemWindows="true"` to find the height of the keyboard
+        return getRootView().getPaddingBottom();
     }
 
     private int getWindowWidth() {
-        ViewGroup rootView = (ViewGroup) this.list.getRootView();
-        return rootView.getChildAt(0).getWidth();
+        return getRootView().getWidth();
     }
 
     private void setListLayoutHeight(int height) {
         final ViewGroup.LayoutParams params = this.list.getLayoutParams();
-        params.height = height;
-        this.list.setLayoutParams(params);
-        this.list.forceLayout();
+        if (params.height != height) {
+            //Log.i(TAG, "height=" + height + " scroll=" + this.list.getScrollY());
+            params.height = height;
+            this.list.setLayoutParams(params);
+            this.list.forceLayout();
+        }
     }
 
     private void handleResizeDone() {
         if (this.resizeDone) {
             return;
         }
+        Log.i(TAG, "resize done.");
+
+        this.list.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
 
         // Give the list view the control over it's input back
         this.list.unblockTouchEvents();
@@ -90,7 +112,8 @@ public class KeyboardScrollHider implements View.OnTouchListener {
         this.list.setVerticalScrollBarEnabled(this.scrollBarEnabled);
         this.setListLayoutHeight(ViewGroup.LayoutParams.MATCH_PARENT);
 
-        this.list.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_NORMAL);
+        this.list.post(() -> this.list.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_NORMAL));
+
 
         this.resizeDone = true;
     }
@@ -107,9 +130,9 @@ public class KeyboardScrollHider implements View.OnTouchListener {
 
         int heightContainer = this.listParent.getHeight();
         int offsetYDiff = (int) (this.offsetYCurrent - this.offsetYStart);
-        if (offsetYDiff < (this.offsetYDiff - THRESHOLD)) {
-            double pullFeedback = Math.sqrt((double) (this.offsetYDiff - offsetYDiff) / THRESHOLD);
-            offsetYDiff = this.offsetYDiff - (int) (THRESHOLD * pullFeedback);
+        if (offsetYDiff < (this.offsetYDiff - resultItemHeight)) {
+            double pullFeedback = Math.sqrt((double) (this.offsetYDiff - offsetYDiff) / resultItemHeight);
+            offsetYDiff = this.offsetYDiff - (int) (resultItemHeight * pullFeedback);
         }
 
         // Determine new size of list view widget within its container
@@ -147,6 +170,7 @@ public class KeyboardScrollHider implements View.OnTouchListener {
 
                 this.lastMotionEvent = event;
                 this.resizeDone = false;
+                this.keyboardHidden = false;
                 this.initialWindowPadding = this.getWindowPadding();
 
                 // Lock list view height to its current value
@@ -156,6 +180,8 @@ public class KeyboardScrollHider implements View.OnTouchListener {
 
             case MotionEvent.ACTION_MOVE:
                 this.offsetYCurrent = event.getY();
+                if (offsetYStart > offsetYCurrent)
+                    offsetYStart = offsetYCurrent;
                 this.lastMotionEvent = event;
 
                 this.updateListViewHeight();
@@ -212,9 +238,11 @@ public class KeyboardScrollHider implements View.OnTouchListener {
         }
 
         // Hide the keyboard if the user has scrolled down by about half a result item
-        if ((this.offsetYCurrent - this.offsetYStart) > THRESHOLD) {
-            this.list.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_DISABLED);
+        if (!this.keyboardHidden && (this.offsetYCurrent - this.offsetYStart) > resultItemHeight) {
+            this.list.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
             this.handler.hideKeyboard();
+            this.keyboardHidden = true;
+            //this.list.finishGlows(); // unfortunately it's a private method
         }
 
         return false;

@@ -25,6 +25,7 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.collection.ArraySet;
@@ -463,26 +464,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             SharedPreferences sharedPreferences = getPreferenceScreen().getSharedPreferences();
             sharedPreferences.registerOnSharedPreferenceChangeListener(this);
 
-            int color = UIColors.getColor(sharedPreferences, "notification-bar-color");
-            int alpha = UIColors.getAlpha(sharedPreferences, "notification-bar-alpha");
-            SettingsActivity activity = (SettingsActivity) requireActivity();
-            UIColors.setStatusBarColor(activity, UIColors.setAlpha(color, alpha));
-            int actionBarTextColor = activity.getTitleColor();
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                View view = getView();
-                if (view != null) {
-                    if (sharedPreferences.getBoolean("black-notification-icons", false)) {
-                        SystemUiVisibility.setLightStatusBar(view);
-                        actionBarTextColor = 0xFF000000;
-                    } else {
-                        SystemUiVisibility.clearLightStatusBar(view);
-                        actionBarTextColor = 0xFFffffff;
-                    }
-                }
-            } else {
-                actionBarTextColor = UIColors.isColorLight(color) ? 0xFF000000 : 0xFFffffff;
-            }
-            setActionBarTextColor(activity, actionBarTextColor);
+            applyNotificationBarColor(sharedPreferences, requireContext());
         }
 
         @Override
@@ -752,6 +734,28 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         actionBar.setTitle(text);
     }
 
+    private static void applyNotificationBarColor(@NonNull SharedPreferences sharedPreferences, @Nullable Context context) {
+        int color = UIColors.getColor(sharedPreferences, "notification-bar-color");
+        // keep the bars opaque to avoid white text on white background by mistake
+        int alpha = 0xFF;//UIColors.getAlpha(sharedPreferences, "notification-bar-alpha");
+        Activity activity = Utilities.getActivity(context);
+        if (activity instanceof SettingsActivity)
+            UIColors.setStatusBarColor((SettingsActivity) activity, UIColors.setAlpha(color, alpha));
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            View view = activity != null ? activity.findViewById(android.R.id.content) : null;
+            if (view == null && activity != null)
+                view = activity.getWindow() != null ? activity.getWindow().getDecorView() : null;
+            if (view != null) {
+                if (sharedPreferences.getBoolean("black-notification-icons", false)) {
+                    SystemUiVisibility.setLightStatusBar(view);
+                } else {
+                    SystemUiVisibility.clearLightStatusBar(view);
+                }
+            }
+        }
+        setActionBarTextColor(activity, UIColors.getTextContrastColor(color));
+    }
+
     public static void onSharedPreferenceChanged(Context context, SharedPreferences sharedPreferences, String key) {
         if (PREF_THAT_REQUIRE_LAYOUT_UPDATE.contains(key))
             TBApplication.getApplication(context).requireLayoutUpdate();
@@ -760,32 +764,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
         switch (key) {
             case "notification-bar-color":
-            case "notification-bar-alpha": {
-                int color = UIColors.getColor(sharedPreferences, "notification-bar-color");
-                int alpha = UIColors.getAlpha(sharedPreferences, "notification-bar-alpha");
-                Activity activity = Utilities.getActivity(context);
-                if (activity instanceof SettingsActivity) {
-                    UIColors.setStatusBarColor((SettingsActivity) activity, UIColors.setAlpha(color, alpha));
-                    if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
-                        setActionBarTextColor(activity, UIColors.isColorLight(color) ? 0xFF000000 : 0xFFffffff);
-                    }
-                }
-                break;
-            }
+            case "notification-bar-alpha":
             case "black-notification-icons":
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    Activity activity = Utilities.getActivity(context);
-                    View view = activity != null ? activity.findViewById(android.R.id.content) : null;
-                    if (view == null)
-                        break;
-                    if (sharedPreferences.getBoolean("black-notification-icons", false)) {
-                        SystemUiVisibility.setLightStatusBar(view);
-                        setActionBarTextColor(activity, 0xFF000000);
-                    } else {
-                        SystemUiVisibility.clearLightStatusBar(view);
-                        setActionBarTextColor(activity, 0xFFffffff);
-                    }
-                }
+                applyNotificationBarColor(sharedPreferences, context);
                 break;
             case "icon-scale-red":
             case "icon-scale-green":
@@ -861,6 +842,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     sharedPreferences.edit().putBoolean("fuzzy-search-tags", useTags).apply();
                 break;
             }
+            case "quick-list-enabled":
             case "quick-list-text-visible":
             case "quick-list-icons-visible":
             case "quick-list-show-badge":
@@ -874,6 +856,17 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case "enable-url":
             case "enable-calculator":
                 TBApplication.dataHandler(context).reloadProviders();
+                break;
+            case "root-mode":
+                if (sharedPreferences.getBoolean("root-mode", false) &&
+                        !TBApplication.rootHandler(context).isRootAvailable()) {
+                    //show error dialog
+                    new AlertDialog.Builder(context).setMessage(R.string.root_mode_error)
+                            .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                                sharedPreferences.edit().putBoolean("root-mode", false).apply();
+                            }).show();
+                }
+                TBApplication.rootHandler(context).resetRootHandler(sharedPreferences);
                 break;
         }
     }

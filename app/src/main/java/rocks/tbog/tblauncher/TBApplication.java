@@ -16,6 +16,7 @@ import androidx.preference.PreferenceManager;
 import rocks.tbog.tblauncher.icons.IconPackCache;
 import rocks.tbog.tblauncher.quicklist.QuickList;
 import rocks.tbog.tblauncher.searcher.Searcher;
+import rocks.tbog.tblauncher.utils.RootHandler;
 
 public class TBApplication extends Application {
 
@@ -61,6 +62,10 @@ public class TBApplication extends Application {
      * Manage widgets
      */
     private WidgetManager mWidgetManager = new WidgetManager();
+    /**
+     * Root handler - su
+     */
+    private RootHandler mRootHandler = null;
 
     public static TBApplication getApplication(Context context) {
         return (TBApplication) context.getApplicationContext();
@@ -106,6 +111,11 @@ public class TBApplication extends Application {
     @NonNull
     public static DataHandler dataHandler(Context context) {
         return getApplication(context).getDataHandler();
+    }
+
+    @NonNull
+    public static RootHandler rootHandler(Context context) {
+        return getApplication(context).rootHandler();
     }
 
     @NonNull
@@ -244,6 +254,7 @@ public class TBApplication extends Application {
         }
     }
 
+    @NonNull
     public IconsHandler iconsHandler() {
         if (iconsPackHandler == null) {
             iconsPackHandler = new IconsHandler(this);
@@ -254,6 +265,13 @@ public class TBApplication extends Application {
 
     public void resetIconsHandler() {
         iconsPackHandler = new IconsHandler(this);
+    }
+
+    @NonNull
+    public RootHandler rootHandler() {
+        if (mRootHandler == null)
+            mRootHandler = new RootHandler(this);
+        return mRootHandler;
     }
 
     public boolean isLayoutUpdateRequired() {

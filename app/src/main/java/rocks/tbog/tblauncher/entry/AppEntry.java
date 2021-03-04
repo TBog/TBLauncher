@@ -41,6 +41,7 @@ import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.DialogHelper;
+import rocks.tbog.tblauncher.utils.RootHandler;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
 
@@ -307,9 +308,10 @@ public final class AppEntry extends EntryWithTags {
         }
 
         // append root menu if available
-//        if (TBApplication.getApplication(context).getRootHandler().isRootActivated() && TBApplication.getApplication(context).getRootHandler().isRootAvailable()) {
-//            adapter.add(new ListPopup.Item(context, R.string.menu_app_hibernate));
-//        }
+        RootHandler rootHandler = TBApplication.rootHandler(context);
+        if (rootHandler.isRootActivated() && rootHandler.isRootAvailable()) {
+            adapter.add(new LinearAdapter.Item(context, R.string.menu_app_hibernate));
+        }
 
         if (Utilities.checkFlag(flags, LAUNCHED_FROM_QUICK_LIST)) {
             adapter.add(new LinearAdapter.ItemTitle(context, R.string.menu_popup_title_settings));
@@ -349,6 +351,9 @@ public final class AppEntry extends EntryWithTags {
                 return true;
             case R.string.menu_app_uninstall:
                 launchUninstall(ctx);
+                return true;
+            case R.string.menu_app_hibernate:
+                hibernate(ctx);
                 return true;
 //            case R.string.menu_app_hibernate:
 //                hibernate(context, appPojo);
@@ -528,6 +533,17 @@ public final class AppEntry extends EntryWithTags {
         Intent intent = new Intent(Intent.ACTION_DELETE,
                 Uri.fromParts("package", getPackageName(), null));
         context.startActivity(intent);
+    }
+
+    private void hibernate(Context context) {
+        String msg = context.getResources().getString(R.string.toast_hibernate_completed);
+        if (!TBApplication.rootHandler(context).hibernateApp(getPackageName())) {
+            msg = context.getResources().getString(R.string.toast_hibernate_error);
+//        } else {
+//            TBApplication.dataHandler(context).getAppProvider().reload(false);
+        }
+
+        Toast.makeText(context, String.format(msg, getName()), Toast.LENGTH_SHORT).show();
     }
 
     public static class AsyncSetEntryIcon extends ResultViewHelper.AsyncSetEntryDrawable {

@@ -106,4 +106,8 @@ public class PrefCache {
     public static boolean searchBarAtBottom(SharedPreferences preferences) {
         return preferences.getBoolean("search-bar-at-bottom", true);
     }
+
+    public static boolean linkCloseKeyboardToBackButton(SharedPreferences preferences) {
+        return preferences.getBoolean("behaviour-link-close-keyboard-back-button", true);
+    }
 }

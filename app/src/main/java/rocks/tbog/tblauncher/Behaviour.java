@@ -352,7 +352,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         String initialDesktop = mPref.getString("initial-desktop", null);
         if (executeAction(initialDesktop, null))
             return;
-        showDesktop(LauncherState.Desktop.EMPTY);
+        switchToDesktop(LauncherState.Desktop.EMPTY);
     }
 
     private ListPopup getMenuPopup(Context ctx) {
@@ -434,7 +434,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         }
     }
 
-    public void showDesktop(@NonNull LauncherState.Desktop mode) {
+    public void switchToDesktop(@NonNull LauncherState.Desktop mode) {
         // get current mode
         @Nullable
         LauncherState.Desktop currentMode = TBApplication.state().getDesktop();
@@ -460,6 +460,10 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         }
 
         // show next mode
+        showDesktop(mode);
+    }
+
+    private void showDesktop(LauncherState.Desktop mode) {
         TBApplication.state().setDesktop(mode);
         switch (mode) {
             case SEARCH:
@@ -879,6 +883,10 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 //            runTask(searcher);
 //            return;
 //        }
+        if (isRefresh)
+            mResultList.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_NORMAL);
+        else
+            mResultList.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
 
         updateSearchRecords(isRefresh, new QuerySearcher(this, query));
     }
@@ -957,7 +965,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             }
             if (PrefCache.showWidgetScreenAfterLaunch(mPref)) {
                 // show widgets when we return to the launcher
-                showDesktop(LauncherState.Desktop.WIDGET);
+                switchToDesktop(LauncherState.Desktop.WIDGET);
             }
         }, UI_ANIMATION_DELAY);
     }
@@ -990,7 +998,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                 break;
         }
 
-        // Calling super.onBackPressed() will quit the launcher, only do this if KISS is not the user's default home.
+        // Calling super.onBackPressed() will quit the launcher, only do this if this is not the user's default home.
         // Action not handled (return false) if not the default launcher.
         return TBApplication.isDefaultLauncher(mTBLauncherActivity);
     }
@@ -1002,6 +1010,8 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         state.setKeyboard(LauncherState.AnimatedVisibility.HIDDEN);
         if (state.isSearchBarVisible() && PrefCache.modeSearchFullscreen(mPref))
             enableFullscreen(0);
+        if (PrefCache.linkCloseKeyboardToBackButton(mPref))
+            onBackPressed();
         return false;
     }
 
@@ -1209,33 +1219,34 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             }
         }
 
-//        if (TBApplication.state().getDesktop() == LauncherState.Desktop.SEARCH) {
-//            // can't show keyboard if we don't have focus, wait for onWindowFocusChanged
-//            mSearchEditText.requestFocus();
-//            mSearchEditText.postDelayed(this::showKeyboard, UI_ANIMATION_DURATION);
-//        }
-
-//        TBApplication app = TBApplication.getApplication(getContext());
-//        app.getDataHandler().checkServices();
-//        LauncherState state = TBApplication.state();
-//        switch (state.getDesktop()) {
-//            case WIDGET:
-//                if (state.isSearchBarVisible())
-//                    hideSearchBar(0, false);
-//                break;
-//            case SEARCH:
-//                // can't show keyboard if we don't have focus, wait for onWindowFocusChanged
-//                mSearchEditText.requestFocus();
-//                mSearchEditText.postDelayed(this::showKeyboard, UI_ANIMATION_DURATION);
-//                showSearchBar();
-//                break;
-//            case EMPTY:
-//            default:
-//                if (state.isSearchBarVisible())
-//                    hideSearchBar(0, false);
-//                if (state.isQuickListVisible())
-//                    app.quickList().hideQuickList(false);
-//        }
+        LauncherState.Desktop desktop = TBApplication.state().getDesktop();
+        showDesktop(desktop);
+        if (desktop != null) {
+            switch (desktop) {
+                case SEARCH:
+                    // hide/show the QuickList
+                    if (PrefCache.modeSearchQuickListVisible(mPref))
+                        TBApplication.quickList(getContext()).showQuickList();
+                    else
+                        TBApplication.quickList(getContext()).hideQuickList(false);
+                    break;
+                case WIDGET:
+                    // hide/show the QuickList
+                    if (PrefCache.modeWidgetQuickListVisible(mPref))
+                        TBApplication.quickList(getContext()).showQuickList();
+                    else
+                        TBApplication.quickList(getContext()).hideQuickList(false);
+                    break;
+                case EMPTY:
+                default:
+                    // hide/show the QuickList
+                    if (PrefCache.modeEmptyQuickListVisible(mPref))
+                        TBApplication.quickList(getContext()).showQuickList();
+                    else
+                        TBApplication.quickList(getContext()).hideQuickList(false);
+                    break;
+            }
+        }
     }
 
     public void onNewIntent() {
@@ -1266,20 +1277,22 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     public void onWindowFocusChanged(boolean hasFocus) {
         Log.i(TAG, "onWindowFocusChanged " + hasFocus);
         LauncherState state = TBApplication.state();
-        if (hasFocus && state.getDesktop() == LauncherState.Desktop.SEARCH) {
-            if (state.isSearchBarVisible() && PrefCache.linkKeyboardAndSearchBar(mPref)) {
-                mSearchEditText.post(this::showKeyboard);
-                // UI_ANIMATION_DURATION should be the exact time the full-screen animation ends
-                mSearchEditText.postDelayed(this::showKeyboard, UI_ANIMATION_DURATION);
-            }
-            //if (mSearchEditText.getText().length() != 0 || !mResultAdapter.isEmpty())
-            if (TBApplication.state().isResultListVisible()) {
-                //updateSearchRecords();
-                showResultList(false);
-            }
-        } else {
-            if (state.getDesktop() == LauncherState.Desktop.WIDGET) {
-                hideKeyboard();
+        if (hasFocus) {
+            if (state.getDesktop() == LauncherState.Desktop.SEARCH) {
+                if (state.isSearchBarVisible() && PrefCache.linkKeyboardAndSearchBar(mPref)) {
+                    mSearchEditText.post(this::showKeyboard);
+                    // UI_ANIMATION_DURATION should be the exact time the full-screen animation ends
+                    mSearchEditText.postDelayed(this::showKeyboard, UI_ANIMATION_DURATION);
+                }
+                //if (mSearchEditText.getText().length() != 0 || !mResultAdapter.isEmpty())
+                if (TBApplication.state().isResultListVisible()) {
+                    //updateSearchRecords();
+                    showResultList(false);
+                }
+            } else {
+                if (state.getDesktop() == LauncherState.Desktop.WIDGET) {
+                    hideKeyboard();
+                }
             }
         }
     }
@@ -1289,8 +1302,8 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         EntryItem item = TBApplication.dataHandler(ctx).getPojo(entryId);
         if (item instanceof StaticEntry) {
             if (TBApplication.state().getDesktop() != LauncherState.Desktop.SEARCH) {
-                // TODO: showDesktop might show the result list, we may need to prevent this as an optimization
-                showDesktop(LauncherState.Desktop.SEARCH);
+                // TODO: switchToDesktop might show the result list, we may need to prevent this as an optimization
+                switchToDesktop(LauncherState.Desktop.SEARCH);
                 clearAdapter();
             }
             item.doLaunch(mLauncherButton, LAUNCHED_FROM_GESTURE);
@@ -1336,28 +1349,28 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                 Utilities.expandSettingsPanel(mTBLauncherActivity);
                 return true;
             case "showSearchBar":
-                showDesktop(LauncherState.Desktop.SEARCH);
+                switchToDesktop(LauncherState.Desktop.SEARCH);
                 return true;
             case "showWidgets":
-                showDesktop(LauncherState.Desktop.WIDGET);
+                switchToDesktop(LauncherState.Desktop.WIDGET);
                 return true;
             case "showEmpty":
-                showDesktop(LauncherState.Desktop.EMPTY);
+                switchToDesktop(LauncherState.Desktop.EMPTY);
                 return true;
             case "toggleSearchAndWidget":
                 if (TBApplication.state().getDesktop() == LauncherState.Desktop.SEARCH)
-                    showDesktop(LauncherState.Desktop.WIDGET);
+                    switchToDesktop(LauncherState.Desktop.WIDGET);
                 else
-                    showDesktop(LauncherState.Desktop.SEARCH);
+                    switchToDesktop(LauncherState.Desktop.SEARCH);
                 return true;
             case "toggleSearchWidgetEmpty": {
                 final LauncherState.Desktop desktop = TBApplication.state().getDesktop();
                 if (desktop == LauncherState.Desktop.SEARCH)
-                    showDesktop(LauncherState.Desktop.WIDGET);
+                    switchToDesktop(LauncherState.Desktop.WIDGET);
                 else if (desktop == LauncherState.Desktop.WIDGET)
-                    showDesktop(LauncherState.Desktop.EMPTY);
+                    switchToDesktop(LauncherState.Desktop.EMPTY);
                 else
-                    showDesktop(LauncherState.Desktop.SEARCH);
+                    switchToDesktop(LauncherState.Desktop.SEARCH);
                 return true;
             }
             case "reloadProviders":
