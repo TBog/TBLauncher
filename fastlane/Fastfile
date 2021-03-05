@@ -16,15 +16,15 @@
 default_platform(:android)
 
 platform :android do
-  desc "Runs all the tests"
-  lane :test do
-    gradle(task: "test")
-  end
+  #desc "Runs all the tests"
+  #lane :test do
+  #  gradle(task: "test")
+  #end
 
-  desc "Run lint"
-  lane :lint do
-    gradle(task: "lint")
-  end
+  #desc "Run lint"
+  #lane :lint do
+  #  gradle(task: "lint")
+  #end
 
   desc "Deploy a new Beta build to PlayStore"
   lane :beta do
@@ -32,9 +32,10 @@ platform :android do
     #   note the `..`, since fastlane runs in the _fastlane_ directory
     #changelog = File.read("../Changelog.txt")
     
-    gradle(task: "clean assembleRelease")
-    gradle(task: 'assemble', build_type: 'Release')
+    #gradle(task: "clean assembleRelease")
+    #gradle(task: 'assemble', build_type: 'Release')
     
+    gradle(task: "clean bundleRelease")
     upload_to_play_store(track: 'beta')
     
     #crashlytics
