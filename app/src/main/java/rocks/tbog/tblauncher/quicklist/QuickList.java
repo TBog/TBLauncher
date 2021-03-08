@@ -102,32 +102,52 @@ public class QuickList {
 
     private void populateList() {
         mListDirty = false;
-        View[] oldList = new View[mQuickList.getChildCount()];
+        // keep a list of the old views so we can reuse them
+        final View[] oldList = new View[mQuickList.getChildCount()];
         for (int nChild = 0; nChild < oldList.length; nChild += 1)
             oldList[nChild] = mQuickList.getChildAt(nChild);
+
+        // clean the QuickList
         mQuickList.removeAllViews();
         if (!isQuickListEnabled()) {
             mQuickListItems.clear();
             mQuickList.setVisibility(View.GONE);
             return;
         }
-        QuickListProvider provider = TBApplication.dataHandler(getContext()).getQuickListProvider();
-        List<EntryItem> list = provider != null ? provider.getPojos() : null;
-        if (list == null)
-            list = Collections.emptyList();
 
-        ArrayList<String> oldItems = new ArrayList<>(mQuickListItems.size());
-        for (EntryItem entry : mQuickListItems)
-            oldItems.add(entry.id);
-        mQuickListItems.clear();
+        // get list of entries we must show
+        final List<EntryItem> list;
+        {
+            QuickListProvider provider = TBApplication.dataHandler(getContext()).getQuickListProvider();
+            if (provider != null) {
+                List<EntryItem> pojos = provider.getPojos();
+                list = pojos != null ? pojos : Collections.emptyList();
+            } else {
+                list = Collections.emptyList();
+            }
+        }
+
+        // get old item ids
+        final List<String> oldItems;
+        // if the two lists have the same length, assume we can reuse the views
+        if (mQuickListItems.size() == oldList.length) {
+            oldItems = new ArrayList<>(mQuickListItems.size());
+            for (EntryItem entry : mQuickListItems)
+                oldItems.add(entry.id);
+        } else {
+            oldItems = Collections.emptyList();
+        }
 
         final SharedPreferences prefs = mSharedPreferences;
         int drawFlags = getDrawFlags(prefs);
         LayoutInflater inflater = LayoutInflater.from(getContext());
+
+        // clear old items before we add the new ones
+        mQuickListItems.clear();
         for (EntryItem entry : list) {
             View view;
             int oldPos = oldItems.indexOf(entry.id);
-            if (oldPos > -1) {
+            if (oldPos > -1 && oldPos < oldList.length) {
                 //Log.i("QL", "reuse view for " + entry.id);
                 view = oldList[oldPos];
             } else {
