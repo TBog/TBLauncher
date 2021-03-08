@@ -41,4 +41,5 @@ jobs:
           PLAY_CONFIG_JSON: ${{ secrets.PLAYSTORE_API_JSON }}
           
       - name: Distribute app to Beta track 🚀
-        run: bundle exec fastlane beta
+        run: bundle exec fastlane supply --track beta --json_key play_config.json
+
