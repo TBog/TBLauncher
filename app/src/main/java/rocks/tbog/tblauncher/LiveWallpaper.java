@@ -30,6 +30,7 @@ public class LiveWallpaper {
     private static final int doubleTapTimeout = ViewConfiguration.getDoubleTapTimeout();
     private static final float minMovement = .025f;
     private static final float minVelocity = .01f;
+    private static final int deltaAngle = 33;
     private static final String TAG = "LWP";
     private TBLauncherActivity mTBLauncherActivity = null;
     private WallpaperManager mWallpaperManager;
@@ -171,26 +172,40 @@ public class LiveWallpaper {
     }
 
     private boolean onFling(View view, float xMove, float yMove, float xVel, float yVel) {
-        int posX = (int) mFirstTouchPos.x;
+        final Behaviour behaviour = TBApplication.behaviour(view.getContext());
 
-        Behaviour behaviour = TBApplication.behaviour(view.getContext());
-        // fling direction is greater on the Y axis
-        if (Math.abs(yVel) > Math.abs(xVel)) {
-            // fling direction downward
-            if (yVel > 0.f) {
-                if (posX < (mWindowSize.x / 2))
-                    return behaviour.onFlingDownLeft();
-                else
-                    return behaviour.onFlingDownRight();
-            } else
-                return behaviour.onFlingUp();
-        } else {
-            if (xVel < 0.f) {
-                return behaviour.onFlingLeft();
-            } else {
-                return behaviour.onFlingRight();
-            }
+        final int angle;
+        if (xMove < minMovement && yMove < minMovement)
+            angle = (int) (.5 + Math.toDegrees(Math.atan2(yVel, xVel)));
+        else
+            angle = (int) (.5 + Math.toDegrees(Math.atan2(yMove, xMove)));
+
+        // fling upwards
+        if ((90 + deltaAngle) > angle && angle > (90 - deltaAngle)) {
+            Log.d(TAG, String.format(Locale.US, "Angle=%d - fling upward", angle));
+            return behaviour.onFlingUp();
         }
+        // fling downwards
+        else if ((90 + deltaAngle) > -angle && -angle > (90 - deltaAngle)) {
+            Log.d(TAG, String.format(Locale.US, "Angle=%d - fling downward", angle));
+            final int posX = (int) mFirstTouchPos.x;
+            if (posX < (mWindowSize.x / 2))
+                return behaviour.onFlingDownLeft();
+            else
+                return behaviour.onFlingDownRight();
+        }
+        // fling left
+        else if (deltaAngle > angle && angle > -deltaAngle) {
+            Log.d(TAG, String.format(Locale.US, "Angle=%d - fling left", angle));
+            return behaviour.onFlingLeft();
+        }
+        // fling right
+        else if ((180 - deltaAngle) < angle || angle < (-180 + deltaAngle)) {
+            Log.d(TAG, String.format(Locale.US, "Angle=%d - fling right", angle));
+            return behaviour.onFlingRight();
+        }
+        Log.d(TAG, String.format(Locale.US, "Angle=%d - fling direction uncertain", angle));
+        return false;
     }
 
     private void onLongClick(View view) {
@@ -289,19 +304,20 @@ public class LiveWallpaper {
                     float xVel = mVelocityTracker.getXVelocity() / mWindowSize.x;
                     float yVel = mVelocityTracker.getYVelocity() / mWindowSize.y;
                     Log.d(TAG, String.format(Locale.US, "Velocity=(%.3f, %.3f) Move=(%.3f, %.3f)", xVel, yVel, xMove, yMove));
-                    // if no movement detected
-                    if (Math.abs(xVel) < minVelocity
-                            && Math.abs(yVel) < minVelocity
-                            && Math.abs(xMove) < minMovement
-                            && Math.abs(yMove) < minMovement) {
-                        if (event.getEventTime() - event.getDownTime() < longPressTimeout)
-                            onActionUp(view);
+                    if (event.getEventTime() - event.getDownTime() < longPressTimeout) {
                         // snap position if needed
                         if (isPreferenceWPDragAnimate() && mAnimation.init())
                             mContentView.startAnimation(mAnimation);
-                        eventConsumed = true;
-                    } else {
-                        eventConsumed = onFling(view, xMove, yMove, xVel, yVel);
+                        // if no movement detected
+                        if (Math.abs(xVel) < minVelocity
+                                && Math.abs(yVel) < minVelocity
+                                && Math.abs(xMove) < minMovement
+                                && Math.abs(yMove) < minMovement) {
+                            onActionUp(view);
+                            eventConsumed = true;
+                        } else {
+                            eventConsumed = onFling(view, xMove, yMove, xVel, yVel);
+                        }
                     }
                 }
                 //fallthrough
@@ -327,7 +343,7 @@ public class LiveWallpaper {
                 break;
         }
 
-        Log.d(TAG, "onRootTouch event " + (eventConsumed ? "" : "NOT") + "consumed");
+        Log.d(TAG, "onRootTouch event " + (eventConsumed ? "" : "NOT ") + "consumed");
         return eventConsumed;
     }
 
