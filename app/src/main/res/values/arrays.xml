@@ -68,6 +68,7 @@
 
     <string-array name="gestureEntries">
         <item>Do nothing</item>
+        <item>Lock screen</item>
         <item>Show notifications panel</item>
         <item>Show settings panel</item>
         <item>Show &#171;Search&#187; desktop</item>
@@ -92,6 +93,7 @@
     </string-array>
     <array name="gestureValues" translatable="false">
         <item>none</item>
+        <item>lockScreen</item>
         <item>expandNotificationsPanel</item>
         <item>expandSettingsPanel</item>
         <item>showSearchBar</item>

@@ -3,8 +3,10 @@ package rocks.tbog.tblauncher.preference;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Looper;
@@ -18,7 +20,9 @@ import androidx.appcompat.app.AlertDialog;
 import androidx.preference.PreferenceGroup;
 import androidx.preference.PreferenceManager;
 
+import rocks.tbog.tblauncher.DeviceAdmin;
 import rocks.tbog.tblauncher.R;
+import rocks.tbog.tblauncher.SettingsActivity;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.db.XmlExport;
 import rocks.tbog.tblauncher.utils.FileUtils;
@@ -46,6 +50,17 @@ public class ConfirmDialog extends BasePreferenceDialog {
         final String key = preference.getKey();
 
         switch (key) {
+            case "device-admin": {
+                if (DeviceAdmin.isAdminActive(getContext())) {
+                    DeviceAdmin.removeActiveAdmin(getContext());
+                } else {
+                    Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
+                    intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, DeviceAdmin.getAdminComponent(getContext()));
+                    intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, getString(R.string.device_admin_explanation));
+                    startActivityForResult(intent, SettingsActivity.ENABLE_DEVICE_ADMIN);
+                }
+                break;
+            }
             case "reset-matrix":
                 preference
                         .getPreferenceManager()
@@ -112,6 +127,10 @@ public class ConfirmDialog extends BasePreferenceDialog {
         final String key = preference.getKey();
 
         switch (key) {
+            case "device-admin":
+                ((TextView) view.findViewById(android.R.id.text1)).setText(R.string.device_admin_disable);
+                ((TextView) view.findViewById(android.R.id.text2)).setVisibility(View.GONE);
+                break;
             case "reset-matrix":
                 ((TextView) view.findViewById(android.R.id.text1)).setText(R.string.reset_matrix_confirm);
                 ((TextView) view.findViewById(android.R.id.text2)).setText(R.string.reset_matrix_description);
@@ -174,6 +193,12 @@ public class ConfirmDialog extends BasePreferenceDialog {
         final String key = preference.getKey();
 
         switch (key) {
+            case "device-admin": {
+                if (!DeviceAdmin.isAdminActive(getContext())) {
+                    ((AlertDialog) getDialog()).getButton(DialogInterface.BUTTON_POSITIVE).performClick();
+                }
+                break;
+            }
             case "export-tags":
                 asyncWrite = t -> {
                     final Activity activity = Utilities.getActivity(getContext());

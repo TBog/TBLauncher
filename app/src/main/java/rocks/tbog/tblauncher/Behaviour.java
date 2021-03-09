@@ -1342,6 +1342,13 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         if (action == null)
             return false;
         switch (action) {
+            case "lockScreen":
+                if (DeviceAdmin.isAdminActive(mTBLauncherActivity)) {
+                    DeviceAdmin.lockScreen(mTBLauncherActivity);
+                } else {
+                    Toast.makeText(getContext(), R.string.device_admin_required, Toast.LENGTH_SHORT).show();
+                }
+                return true;
             case "expandNotificationsPanel":
                 Utilities.expandNotificationsPanel(mTBLauncherActivity);
                 return true;

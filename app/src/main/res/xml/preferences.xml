@@ -817,11 +817,18 @@
 
     <!--    </PreferenceScreen>-->
 
+    <!-- "settings-theme" ListPreference is only used if the ActionBar menu is unavailable. This also helps to backup this preference. -->
     <ListPreference
         android:entries="@array/settingsThemeEntries"
         android:entryValues="@array/settingsThemeValues"
         android:key="settings-theme"
         android:title="@string/settings_theme" />
+
+    <rocks.tbog.tblauncher.preference.CustomDialogPreference
+        android:dialogLayout="@layout/pref_confirm"
+        android:key="device-admin"
+        android:summary="@string/device_admin_explanation"
+        android:title="@string/device_admin" />
 
     <rocks.tbog.tblauncher.preference.CustomDialogPreference
         android:dialogLayout="@layout/pref_confirm"
