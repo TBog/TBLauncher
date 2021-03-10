@@ -1449,4 +1449,13 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     public boolean onClick() {
         return executeGestureAction("gesture-click");
     }
+
+    public boolean hasDoubleClick() {
+        String action = mPref.getString("gesture-double-click", null);
+        return action != null && !action.isEmpty() && !action.equals("none");
+    }
+
+    public boolean onDoubleClick() {
+        return executeGestureAction("gesture-double-click");
+    }
 }

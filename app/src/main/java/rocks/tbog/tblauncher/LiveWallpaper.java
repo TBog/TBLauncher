@@ -27,6 +27,7 @@ import rocks.tbog.tblauncher.ui.ListPopup;
 
 public class LiveWallpaper {
     private static final int longPressTimeout = ViewConfiguration.getLongPressTimeout();
+    private static final int doubleTapTimeout = ViewConfiguration.getDoubleTapTimeout();
     private static final float minMovement = .025f;
     private static final float minVelocity = .01f;
     private static final String TAG = "LWP";
@@ -50,6 +51,14 @@ public class LiveWallpaper {
     private boolean wpReturnCenter = true;
     private boolean wpStickToSides = false;
 
+    private int mClickCount = 0;
+    private final PointF mFirstClickPos = new PointF();
+    private final Runnable mClickRunnable = () -> {
+        // reset count
+        mClickCount = 0;
+        View view = mTBLauncherActivity.findViewById(R.id.root_layout);
+        onClick(view);
+    };
     private final Runnable mLongClickRunnable = () -> {
         if (!TBApplication.state().isWidgetScreenVisible())
             return;
@@ -115,8 +124,50 @@ public class LiveWallpaper {
         root.setOnTouchListener(this::onRootTouch);
     }
 
+    private boolean onActionUp(View view) {
+        Behaviour behaviour = TBApplication.behaviour(view.getContext());
+        boolean hasDoubleClick = behaviour.hasDoubleClick();
+        if (hasDoubleClick) {
+            if (mClickCount == 1) {
+                // reset count
+                mClickCount = 0;
+                // remove single click runnable
+                view.removeCallbacks(mClickRunnable);
+                // check if it's a valid double click
+                float doubleTapSlopSquare = minMovement * minMovement;
+                float deltaX = (mFirstClickPos.x - mLastTouchPos.x) / (float) mWindowSize.x;
+                float deltaY = (mFirstClickPos.y - mLastTouchPos.y) / (float) mWindowSize.y;
+                float deltaSquare = deltaX * deltaX + deltaY * deltaY;
+                if (deltaSquare < doubleTapSlopSquare)
+                    return onDoubleClick(view);
+                // else consider this a first click
+            }
+            if (mClickCount == 0) {
+                // increase count
+                mClickCount = 1;
+                mFirstClickPos.set(mFirstTouchPos);
+                // if user doesn't tap in doubleTapTimeout ms then launch runnable
+                view.postDelayed(mClickRunnable, doubleTapTimeout);
+                return true;
+            }
+        } else {
+            return onClick(view);
+        }
+        return false;
+    }
+
     private static boolean onClick(View view) {
+        if (!view.isAttachedToWindow()) {
+            return false;
+        }
         return TBApplication.behaviour(view.getContext()).onClick();
+    }
+
+    private static boolean onDoubleClick(View view) {
+        if (!view.isAttachedToWindow()) {
+            return false;
+        }
+        return TBApplication.behaviour(view.getContext()).onDoubleClick();
     }
 
     private boolean onFling(View view, float xMove, float yMove, float xVel, float yVel) {
@@ -143,6 +194,9 @@ public class LiveWallpaper {
     }
 
     private void onLongClick(View view) {
+        if (!view.isAttachedToWindow()) {
+            return;
+        }
         view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
         Context ctx = view.getContext();
         ListPopup menu = TBApplication.widgetManager(ctx).getConfigPopup(mTBLauncherActivity);
@@ -226,7 +280,7 @@ public class LiveWallpaper {
                     Log.d(TAG, String.format(Locale.US, "Move=(%.3f, %.3f)", xMove, yMove));
                     if (Math.abs(xMove) < minMovement && Math.abs(yMove) < minMovement) {
                         if (event.getEventTime() - event.getDownTime() < longPressTimeout) {
-                            eventConsumed = onClick(view);
+                            eventConsumed = onActionUp(view);
                         }
                     }
                 } else {
@@ -241,7 +295,7 @@ public class LiveWallpaper {
                             && Math.abs(xMove) < minMovement
                             && Math.abs(yMove) < minMovement) {
                         if (event.getEventTime() - event.getDownTime() < longPressTimeout)
-                            onClick(view);
+                            onActionUp(view);
                         // snap position if needed
                         if (isPreferenceWPDragAnimate() && mAnimation.init())
                             mContentView.startAnimation(mAnimation);

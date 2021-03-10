@@ -85,6 +85,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     ));
     private final static ArraySet<String> PREF_LISTS_WITH_DEPENDENCY = new ArraySet<>(Arrays.asList(
             "gesture-click",
+            "gesture-double-click",
             "gesture-fling-down-left",
             "gesture-fling-down-right",
             "gesture-fling-up",

@@ -497,6 +497,21 @@
                 app:isPreferenceVisible="false" />
 
             <ListPreference
+                android:defaultValue="none"
+                android:entries="@array/gestureEntries"
+                android:entryValues="@array/gestureValues"
+                android:key="gesture-double-click"
+                android:title="@string/gesture_double_click" />
+            <ListPreference
+                android:key="gesture-double-click-app-to-run"
+                android:title="@string/action_app_to_run"
+                app:isPreferenceVisible="false" />
+            <ListPreference
+                android:key="gesture-double-click-entry-to-show"
+                android:title="@string/action_entry_to_show"
+                app:isPreferenceVisible="false" />
+
+            <ListPreference
                 android:defaultValue="expandNotificationsPanel"
                 android:entries="@array/gestureEntries"
                 android:entryValues="@array/gestureValues"
