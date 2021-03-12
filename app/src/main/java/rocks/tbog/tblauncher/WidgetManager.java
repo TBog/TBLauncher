@@ -905,7 +905,7 @@ public class WidgetManager {
             AppWidgetHostView widgetHostView = mLayout.getWidget(appWidgetId);
             if (rec != null && widgetHostView != null) {
                 rec.saveProperties(widgetHostView);
-                Utilities.runAsync((t) -> DBHelper.setWidgetProperties(mLayout.getContext(), rec), null);
+                Utilities.runAsync(() -> DBHelper.setWidgetProperties(mLayout.getContext(), rec));
             }
         });
         mLayout.requestLayout();

@@ -2,7 +2,6 @@ package rocks.tbog.tblauncher.dataprovider;
 
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -19,6 +18,7 @@ import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.TBLauncherActivity;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.searcher.Searcher;
+import rocks.tbog.tblauncher.utils.TaskRunner;
 
 public abstract class DBProvider<T extends EntryItem> implements IProvider<T> {
     final Context context;
@@ -45,7 +45,7 @@ public abstract class DBProvider<T extends EntryItem> implements IProvider<T> {
         Log.i(Provider.TAG, "Starting provider: " + this.getClass().getSimpleName());
         start = System.currentTimeMillis();
         mLoadTask = newLoadTask();
-        mLoadTask.executeOnExecutor(DataHandler.EXECUTOR_PROVIDERS);
+        mLoadTask.execute();
     }
 
     protected abstract DBLoader<T> newLoadTask();
@@ -103,7 +103,7 @@ public abstract class DBProvider<T extends EntryItem> implements IProvider<T> {
         return entryList;
     }
 
-    protected abstract static class DBLoader<T extends EntryItem> extends AsyncTask<Void, Void, List<T>> {
+    protected abstract static class DBLoader<T extends EntryItem> extends TaskRunner.AsyncTask<Void, List<T>> {
         protected final WeakReference<DBProvider<T>> weakProvider;
 
         public DBLoader(DBProvider<T> provider) {
@@ -118,7 +118,7 @@ public abstract class DBProvider<T extends EntryItem> implements IProvider<T> {
         }
 
         @Override
-        protected List<T> doInBackground(Void... voids) {
+        protected List<T> doInBackground(Void param) {
             Context ctx = getContext();
             if (ctx == null)
                 return null;
@@ -150,6 +150,9 @@ public abstract class DBProvider<T extends EntryItem> implements IProvider<T> {
                 provider.context.sendBroadcast(i);
             }
         }
-    }
 
+        public void execute() {
+            TaskRunner.executeOnExecutor(DataHandler.EXECUTOR_PROVIDERS, this);
+        }
+    }
 }

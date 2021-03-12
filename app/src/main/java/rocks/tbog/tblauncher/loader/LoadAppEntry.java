@@ -39,7 +39,7 @@ public class LoadAppEntry extends LoadEntryItem<AppEntry> {
     }
 
     @Override
-    protected ArrayList<AppEntry> doInBackground(Void... params) {
+    protected ArrayList<AppEntry> doInBackground(Void param) {
         SystemAppLoader loader = new SystemAppLoader(context.get());
 
         // timer start
@@ -134,7 +134,7 @@ public class LoadAppEntry extends LoadEntryItem<AppEntry> {
             dbApps = null;
 
             TagsHandler tagsHandler = TBApplication.tagsHandler(ctx);
-            tagsHandler.runWhenLoaded(()->{
+            tagsHandler.runWhenLoaded(() -> {
                 for (AppEntry app : apps)
                     app.setTags(tagsHandler.getTags(app.id));
             });

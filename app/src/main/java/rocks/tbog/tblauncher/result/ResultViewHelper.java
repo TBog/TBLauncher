@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.graphics.ColorFilter;
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
@@ -23,20 +22,22 @@ import androidx.annotation.WorkerThread;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.EntryWithTags;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
+import rocks.tbog.tblauncher.utils.TaskRunner;
 import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.UISizes;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public final class ResultViewHelper {
 
-    public final static Executor EXECUTOR_LOAD_ICON = AsyncTask.SERIAL_EXECUTOR;
+    public final static ExecutorService EXECUTOR_LOAD_ICON = Executors.newSingleThreadExecutor();
     private static final String TAG = "RVH";
 
     private ResultViewHelper() {
@@ -133,7 +134,7 @@ public final class ResultViewHelper {
             Log.e(TAG, "new <? extends AsyncSetEntryDrawable>", e);
             return;
         }
-        task.executeOnExecutor(EXECUTOR_LOAD_ICON);
+        task.execute();
     }
 
     public static void applyPreferences(int drawFlags, TextView nameView, ImageView iconView) {
@@ -186,7 +187,7 @@ public final class ResultViewHelper {
         return colorFilter;
     }
 
-    public static abstract class AsyncSetEntryDrawable extends AsyncTask<Void, Void, Drawable> {
+    public static abstract class AsyncSetEntryDrawable extends TaskRunner.AsyncTask<Void, Drawable> {
         private final WeakReference<ImageView> weakImage;
         protected final String cacheId;
         protected int drawFlags;
@@ -226,7 +227,7 @@ public final class ResultViewHelper {
         }
 
         @Override
-        protected Drawable doInBackground(Void... voids) {
+        protected Drawable doInBackground(Void param) {
             ImageView image = getImageView();
             if (isCancelled() || image == null || image.getTag() != this) {
                 weakImage.clear();
@@ -250,6 +251,10 @@ public final class ResultViewHelper {
             image.setTag(cacheId);
             if (cacheId != null && !Utilities.checkFlag(drawFlags, EntryItem.FLAG_DRAW_NO_CACHE))
                 TBApplication.drawableCache(image.getContext()).cacheDrawable(cacheId, drawable);
+        }
+
+        public void execute() {
+            TaskRunner.executeOnExecutor(EXECUTOR_LOAD_ICON, this);
         }
     }
 

@@ -19,7 +19,6 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RectShape;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.os.Bundle;
 import android.util.Base64;
@@ -38,21 +37,51 @@ import androidx.annotation.UiThread;
 import androidx.annotation.WorkerThread;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.content.res.ResourcesCompat;
+import androidx.lifecycle.Lifecycle;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.SynchronousQueue;
+import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.ui.CutoutFactory;
 import rocks.tbog.tblauncher.ui.ICutout;
 
 public class Utilities {
-    final static Executor EXECUTOR_RUN_ASYNC = AsyncTask.THREAD_POOL_EXECUTOR;
+    public final static ExecutorService EXECUTOR_RUN_ASYNC;
     private final static int[] ON_SCREEN_POS = new int[2];
     private final static Rect ON_SCREEN_RECT = new Rect();
     private static final String TAG = "TBUtil";
+
+    private static final int CORE_POOL_SIZE = 1;
+    private static final int MAXIMUM_POOL_SIZE = 10;
+    private static final int KEEP_ALIVE_SECONDS = 3;
+    private static final ThreadFactory sThreadFactory = new ThreadFactory() {
+        private final AtomicInteger mCount = new AtomicInteger(1);
+
+        public Thread newThread(Runnable r) {
+            return new Thread(r, "UtilAsync #" + mCount.getAndIncrement());
+        }
+    };
+
+    static {
+        ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(
+                CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, KEEP_ALIVE_SECONDS, TimeUnit.SECONDS,
+                new SynchronousQueue<Runnable>(), sThreadFactory);
+        threadPoolExecutor.setRejectedExecutionHandler((runnable, executor) -> {
+            Log.w(TAG, "task rejected");
+            if (!executor.isShutdown()) {
+                runnable.run();
+            }
+        });
+        EXECUTOR_RUN_ASYNC = threadPoolExecutor;
+    }
 
     // https://stackoverflow.com/questions/3035692/how-to-convert-a-drawable-to-a-bitmap
     @NonNull
@@ -118,26 +147,30 @@ public class Utilities {
     }
 
     public static void setIconAsync(@NonNull ImageView image, @NonNull GetDrawable callback) {
-        new Utilities.AsyncSetDrawable(image) {
-            @Override
-            protected Drawable getDrawable(Context context) {
-                return callback.getDrawable(context);
-            }
-        }.executeOnExecutor(ResultViewHelper.EXECUTOR_LOAD_ICON);
+        TaskRunner.executeOnExecutor(ResultViewHelper.EXECUTOR_LOAD_ICON,
+                new Utilities.AsyncSetDrawable(image) {
+                    @Override
+                    protected Drawable getDrawable(Context context) {
+                        return callback.getDrawable(context);
+                    }
+                }
+        );
     }
 
     public static void setViewAsync(@NonNull View image, @NonNull GetDrawable cbGet, @NonNull SetDrawable cbSet) {
-        new Utilities.AsyncViewSet(image) {
-            @Override
-            protected Drawable getDrawable(Context context) {
-                return cbGet.getDrawable(context);
-            }
+        TaskRunner.executeOnExecutor(ResultViewHelper.EXECUTOR_LOAD_ICON,
+                new Utilities.AsyncViewSet(image) {
+                    @Override
+                    protected Drawable getDrawable(Context context) {
+                        return cbGet.getDrawable(context);
+                    }
 
-            @Override
-            protected void setDrawable(@NonNull View view, @NonNull Drawable drawable) {
-                cbSet.setDrawable(view, drawable);
-            }
-        }.executeOnExecutor(ResultViewHelper.EXECUTOR_LOAD_ICON);
+                    @Override
+                    protected void setDrawable(@NonNull View view, @NonNull Drawable drawable) {
+                        cbSet.setDrawable(view, drawable);
+                    }
+                }
+        );
     }
 
     public static void setIntentSourceBounds(@NonNull Intent intent, @Nullable View v) {
@@ -239,8 +272,24 @@ public class Utilities {
         toast.setGravity(Gravity.START | Gravity.TOP, toastX, toastY);
     }
 
-    public static Utilities.AsyncRun runAsync(@NonNull AsyncRun.Run background, @Nullable AsyncRun.Run after) {
-        return (Utilities.AsyncRun) new Utilities.AsyncRun(background, after).executeOnExecutor(EXECUTOR_RUN_ASYNC);
+    public static TaskRunner.CancellableTask runAsync(@NonNull Lifecycle lifecycle, @NonNull TaskRunner.AsyncRunnable background, @NonNull TaskRunner.AsyncRunnable after) {
+        TaskRunner.CancellableTask task = TaskRunner.newTask(lifecycle, background, after);
+        EXECUTOR_RUN_ASYNC.execute(task);
+        return task;
+    }
+
+    public static TaskRunner.CancellableTask runAsync(@NonNull TaskRunner.AsyncRunnable background, @NonNull TaskRunner.AsyncRunnable after) {
+        TaskRunner.CancellableTask task = TaskRunner.newTask(background, after);
+        EXECUTOR_RUN_ASYNC.execute(task);
+        return task;
+    }
+
+    public static void runAsync(@NonNull Runnable background) {
+        EXECUTOR_RUN_ASYNC.execute(background);
+    }
+
+    public static <I, O> void executeAsync(@NonNull TaskRunner.AsyncTask<I, O> task) {
+        TaskRunner.executeOnExecutor(EXECUTOR_RUN_ASYNC, task);
     }
 
     public static void setColorFilterMultiply(@NonNull ImageView imageView, int color) {
@@ -620,7 +669,7 @@ public class Utilities {
         void setDrawable(@NonNull View view, @NonNull Drawable drawable);
     }
 
-    public static abstract class AsyncViewSet extends AsyncTask<Void, Void, Drawable> {
+    public static abstract class AsyncViewSet extends TaskRunner.AsyncTask<Void, Drawable> {
         protected final WeakReference<View> weakView;
 
         protected AsyncViewSet(View view) {
@@ -632,7 +681,7 @@ public class Utilities {
         }
 
         @Override
-        protected Drawable doInBackground(Void... voids) {
+        protected Drawable doInBackground(Void param) {
             View image = weakView.get();
             Activity act = Utilities.getActivity(image);
             if (isCancelled() || act == null || image.getTag() != this) {
@@ -661,6 +710,10 @@ public class Utilities {
             setDrawable(view, drawable);
             view.setTag(null);
         }
+
+        public void execute() {
+            TaskRunner.executeOnExecutor(ResultViewHelper.EXECUTOR_LOAD_ICON, this);
+        }
     }
 
     public static abstract class AsyncSetDrawable extends AsyncViewSet {
@@ -675,40 +728,40 @@ public class Utilities {
         }
     }
 
-    public static class AsyncRun extends AsyncTask<Void, Void, Void> {
-        private final Run mBackground;
-        private final Run mAfter;
-
-        public interface Run {
-            void run(@NonNull Utilities.AsyncRun task);
-        }
-
-        public AsyncRun(@NonNull Run background, @Nullable Run after) {
-            super();
-            mBackground = background;
-            mAfter = after;
-        }
-
-        @Override
-        protected Void doInBackground(Void... voids) {
-            mBackground.run(this);
-            return null;
-        }
-
-        @Override
-        protected void onCancelled(Void aVoid) {
-            if (mAfter != null)
-                mAfter.run(this);
-        }
-
-        @Override
-        protected void onPostExecute(Void aVoid) {
-            if (mAfter != null)
-                mAfter.run(this);
-        }
-
-        public boolean cancel() {
-            return cancel(false);
-        }
-    }
+//    public static class AsyncRun extends TaskRunner.AsyncTask<Void, Void> {
+//        private final Run mBackground;
+//        private final Run mAfter;
+//
+//        public interface Run {
+//            void run(@NonNull Utilities.AsyncRun task);
+//        }
+//
+//        public AsyncRun(@NonNull Run background, @Nullable Run after) {
+//            super();
+//            mBackground = background;
+//            mAfter = after;
+//        }
+//
+//        @Override
+//        protected Void doInBackground(Void param) {
+//            mBackground.run(this);
+//            return null;
+//        }
+//
+//        @Override
+//        protected void onCancelled(Void aVoid) {
+//            if (mAfter != null)
+//                mAfter.run(this);
+//        }
+//
+//        @Override
+//        protected void onPostExecute(Void aVoid) {
+//            if (mAfter != null)
+//                mAfter.run(this);
+//        }
+//
+//        public boolean cancel() {
+//            return cancel(false);
+//        }
+//    }
 }

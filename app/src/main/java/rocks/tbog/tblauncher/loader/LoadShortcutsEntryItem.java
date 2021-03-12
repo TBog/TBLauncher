@@ -43,7 +43,7 @@ public class LoadShortcutsEntryItem extends LoadEntryItem<ShortcutEntry> {
     }
 
     @Override
-    protected ArrayList<ShortcutEntry> doInBackground(Void... arg0) {
+    protected ArrayList<ShortcutEntry> doInBackground(Void arg) {
         Context ctx = context.get();
         if (ctx == null) {
             return new ArrayList<>();

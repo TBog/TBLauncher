@@ -26,6 +26,7 @@ import rocks.tbog.tblauncher.SettingsActivity;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.db.XmlExport;
 import rocks.tbog.tblauncher.utils.FileUtils;
+import rocks.tbog.tblauncher.utils.TaskRunner;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public class ConfirmDialog extends BasePreferenceDialog {
@@ -189,7 +190,7 @@ public class ConfirmDialog extends BasePreferenceDialog {
     public void onStart() {
         super.onStart();
         CustomDialogPreference preference = (CustomDialogPreference) getPreference();
-        Utilities.AsyncRun.Run asyncWrite = null;
+        TaskRunner.AsyncRunnable asyncWrite = null;
         final String key = preference.getKey();
 
         switch (key) {
@@ -264,7 +265,7 @@ public class ConfirmDialog extends BasePreferenceDialog {
                 if (dialog instanceof AlertDialog)
                     ((AlertDialog) dialog).getButton(DialogInterface.BUTTON_POSITIVE).setEnabled(false);
             }
-            Utilities.runAsync(asyncWrite, (t) -> {
+            Utilities.runAsync(getLifecycle(), asyncWrite, (t) -> {
                 Activity activity = Utilities.getActivity(getContext());
                 Dialog dialog = getDialog();
                 // enable positive button after we generate the file

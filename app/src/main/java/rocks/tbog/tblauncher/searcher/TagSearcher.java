@@ -72,7 +72,7 @@ public class TagSearcher extends Searcher {
 
     @WorkerThread
     @Override
-    protected Void doInBackground(Void... voids) {
+    protected Void doInBackground(Void param) {
         ISearchActivity searchActivity = activityWeakReference.get();
         Context context = searchActivity != null ? searchActivity.getContext() : null;
         if (context == null)

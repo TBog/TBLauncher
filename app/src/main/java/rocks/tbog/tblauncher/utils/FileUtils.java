@@ -120,12 +120,13 @@ public class FileUtils {
     }
 
     public static void writeSettingsFile(@NonNull Context context, @NonNull String filename, @NonNull ContentGenerator generator) {
-        writeFile(context, SETTINGS_FOLDER, filename, SETTINGS_EXT, generator);
+        writeFile(context.getCacheDir(), SETTINGS_FOLDER, filename, SETTINGS_EXT, generator);
     }
 
-    private static File writeFile(Context context, String directory, String filename, String extension, @NonNull ContentGenerator content) {
-        File cacheDir = new File(context.getCacheDir(), directory);
-        File cacheFile = new File(cacheDir, filename + extension);
+    private static void writeFile(@NonNull File path, @NonNull String directory, @NonNull String filename, @Nullable String extension, @NonNull ContentGenerator content) {
+        File cacheDir = new File(path, directory);
+        String cacheName = extension != null ? (filename + extension) : filename;
+        File cacheFile = new File(cacheDir, cacheName);
 
         try {
             cacheDir.mkdirs();
@@ -140,7 +141,6 @@ public class FileUtils {
         } catch (IOException e) {
             Log.e(TAG, "Failed to write " + filename, e);
         }
-        return cacheFile;
     }
 
 //    @Nullable

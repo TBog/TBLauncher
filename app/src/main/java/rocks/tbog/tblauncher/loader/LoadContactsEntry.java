@@ -8,7 +8,6 @@ import android.provider.ContactsContract;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
-import androidx.core.app.ActivityCompat;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -34,7 +33,7 @@ public class LoadContactsEntry extends LoadEntryItem<ContactEntry> {
     }
 
     @Override
-    protected ArrayList<ContactEntry> doInBackground(Void... params) {
+    protected ArrayList<ContactEntry> doInBackground(Void param) {
         long start = System.nanoTime();
 
         ArrayList<ContactEntry> contacts = new ArrayList<>();

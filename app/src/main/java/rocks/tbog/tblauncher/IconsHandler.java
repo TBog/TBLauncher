@@ -36,6 +36,7 @@ import rocks.tbog.tblauncher.icons.IconPackXML;
 import rocks.tbog.tblauncher.icons.SystemIconPack;
 import rocks.tbog.tblauncher.drawable.TextDrawable;
 import rocks.tbog.tblauncher.drawable.DrawableUtils;
+import rocks.tbog.tblauncher.utils.TaskRunner;
 import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.UISizes;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
@@ -61,7 +62,7 @@ public class IconsHandler {
     private boolean mContactPackMask;
     private boolean mShortcutPackMask;
     private boolean mShortcutBadgePackMask;
-    private Utilities.AsyncRun mLoadIconsPackTask = null;
+    private TaskRunner.CancellableTask mLoadIconsPackTask = null;
 
     public IconsHandler(Context ctx) {
         super();

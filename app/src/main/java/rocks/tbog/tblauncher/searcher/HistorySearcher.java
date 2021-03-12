@@ -27,7 +27,7 @@ public class HistorySearcher extends Searcher {
     }
 
     @Override
-    protected Void doInBackground(Void... voids) {
+    protected Void doInBackground(Void param) {
 
         ISearchActivity searchActivity = activityWeakReference.get();
         Activity activity = searchActivity != null ? Utilities.getActivity(searchActivity.getContext()) : null;

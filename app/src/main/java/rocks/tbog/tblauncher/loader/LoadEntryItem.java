@@ -1,17 +1,18 @@
 package rocks.tbog.tblauncher.loader;
 
 import android.content.Context;
-import android.os.AsyncTask;
 
 import androidx.annotation.NonNull;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
+import rocks.tbog.tblauncher.DataHandler;
 import rocks.tbog.tblauncher.dataprovider.Provider;
 import rocks.tbog.tblauncher.entry.EntryItem;
+import rocks.tbog.tblauncher.utils.TaskRunner;
 
-public abstract class LoadEntryItem<T extends EntryItem> extends AsyncTask<Void, Void, ArrayList<T>> {
+public abstract class LoadEntryItem<T extends EntryItem> extends TaskRunner.AsyncTask<Void, ArrayList<T>> {
 
     final WeakReference<Context> context;
     private WeakReference<Provider<T>> weakProvider;
@@ -28,13 +29,16 @@ public abstract class LoadEntryItem<T extends EntryItem> extends AsyncTask<Void,
     @NonNull
     public abstract String getScheme();
 
-    @Override
+    protected abstract ArrayList<T> doInBackground(Void param);
+
     protected void onPostExecute(ArrayList<T> result) {
-        super.onPostExecute(result);
         Provider<T> provider = weakProvider.get();
-        if(provider != null) {
+        if (provider != null) {
             provider.loadOver(result);
         }
     }
 
+    public void execute() {
+        TaskRunner.executeOnExecutor(DataHandler.EXECUTOR_PROVIDERS, this);
+    }
 }

@@ -1,12 +1,12 @@
 package rocks.tbog.tblauncher.result;
 
-import android.os.AsyncTask;
-
 import java.util.ArrayList;
 
 import rocks.tbog.tblauncher.entry.EntryItem;
+import rocks.tbog.tblauncher.utils.TaskRunner;
+import rocks.tbog.tblauncher.utils.Utilities;
 
-public class LoadDataForAdapter extends AsyncTask<Void, Void, ArrayList<EntryItem>> {
+public class LoadDataForAdapter extends TaskRunner.AsyncTask<Void, ArrayList<EntryItem>> {
     private final EntryAdapter adapter;
     private final LoadInBackground task;
 
@@ -21,7 +21,7 @@ public class LoadDataForAdapter extends AsyncTask<Void, Void, ArrayList<EntryIte
     }
 
     @Override
-    protected ArrayList<EntryItem> doInBackground(Void... voids) {
+    protected ArrayList<EntryItem> doInBackground(Void param) {
         ArrayList<EntryItem> data = task.loadInBackground();
         data.trimToSize();
         return data;
@@ -32,5 +32,9 @@ public class LoadDataForAdapter extends AsyncTask<Void, Void, ArrayList<EntryIte
         if (data == null)
             return;
         adapter.addAll(data);
+    }
+
+    public void execute() {
+        Utilities.executeAsync(this);
     }
 }

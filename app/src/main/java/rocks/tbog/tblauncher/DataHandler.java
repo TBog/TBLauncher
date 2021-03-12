@@ -33,7 +33,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -68,9 +68,16 @@ public class DataHandler extends BroadcastReceiver
         implements SharedPreferences.OnSharedPreferenceChangeListener {
     final static private String TAG = "DataHandler";
 
-    public static final Executor EXECUTOR_PROVIDERS;
+    public static final ExecutorService EXECUTOR_PROVIDERS;
 
     static {
+        /*
+         corePoolSize: the number of threads to keep in the pool.
+         maximumPoolSize: the maximum number of threads to allow in the pool.
+         keepAliveTime: if the pool currently has more than corePoolSize threads, excess threads will be terminated if they have been idle for more than keepAliveTime.
+         unit: the time unit for the keepAliveTime argument. Can be NANOSECONDS, MILLISECONDS, SECONDS, MINUTES, HOURS and DAYS.
+         workQueue: the queue used for holding tasks before they are executed. Default choices are SynchronousQueue for multi-threaded pools and LinkedBlockingQueue for single-threaded pools.
+        */
         ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(
                 1, 1, 1, TimeUnit.SECONDS,
                 new LinkedBlockingQueue<>());

@@ -1,7 +1,6 @@
 package rocks.tbog.tblauncher.customicon;
 
 import android.graphics.drawable.Drawable;
-import android.os.AsyncTask;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -10,6 +9,7 @@ import androidx.annotation.NonNull;
 import java.lang.ref.WeakReference;
 
 import rocks.tbog.tblauncher.result.ResultViewHelper;
+import rocks.tbog.tblauncher.utils.TaskRunner;
 import rocks.tbog.tblauncher.utils.ViewHolderAdapter;
 
 public class IconViewHolder extends ViewHolderAdapter.ViewHolder<IconData> {
@@ -26,10 +26,10 @@ public class IconViewHolder extends ViewHolderAdapter.ViewHolder<IconData> {
         if (loader != null)
             loader.cancel(false);
         loader = new AsyncLoad(this);
-        loader.executeOnExecutor(ResultViewHelper.EXECUTOR_LOAD_ICON, content);
+        loader.execute(content);
     }
 
-    static class AsyncLoad extends AsyncTask<IconData, Void, Drawable> {
+    static class AsyncLoad extends TaskRunner.AsyncTask<IconData, Drawable> {
         private final WeakReference<IconViewHolder> holder;
 
         protected AsyncLoad(IconViewHolder holder) {
@@ -46,8 +46,8 @@ public class IconViewHolder extends ViewHolderAdapter.ViewHolder<IconData> {
         }
 
         @Override
-        protected Drawable doInBackground(IconData... iconData) {
-            return iconData[0].getIcon();
+        protected Drawable doInBackground(IconData iconData) {
+            return iconData.getIcon();
         }
 
         @Override
@@ -61,6 +61,10 @@ public class IconViewHolder extends ViewHolderAdapter.ViewHolder<IconData> {
             h.icon.setScaleY(0f);
             h.icon.setRotation((drawable.hashCode() & 1) == 1 ? 180f : -180f);
             h.icon.animate().scaleX(1f).scaleY(1f).rotation(0f).start();
+        }
+
+        public void execute(IconData content) {
+            TaskRunner.executeOnExecutor(ResultViewHelper.EXECUTOR_LOAD_ICON, this, content);
         }
     }
 }

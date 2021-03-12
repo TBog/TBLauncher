@@ -1,6 +1,5 @@
 package rocks.tbog.tblauncher.utils;
 
-import android.os.AsyncTask;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -97,7 +96,7 @@ public abstract class ViewHolderAdapter<T, VH extends ViewHolderAdapter.ViewHold
         protected abstract void setContent(T content, int position, @NonNull ViewHolderAdapter<T, ? extends ViewHolder<T>> adapter);
     }
 
-    public static abstract class LoadAsyncData<T> extends AsyncTask<Void, Void, Collection<T>> {
+    public static abstract class LoadAsyncData<T> extends TaskRunner.AsyncTask<Void, Collection<T>> {
         private final ViewHolderAdapter<T, ? extends ViewHolder<T>> adapter;
         private final LoadInBackground<T> task;
 
@@ -113,7 +112,7 @@ public abstract class ViewHolderAdapter<T, VH extends ViewHolderAdapter.ViewHold
         }
 
         @Override
-        protected Collection<T> doInBackground(Void... voids) {
+        protected Collection<T> doInBackground(Void param) {
             return task.loadInBackground();
         }
 
@@ -126,5 +125,9 @@ public abstract class ViewHolderAdapter<T, VH extends ViewHolderAdapter.ViewHold
         }
 
         protected abstract void onDataLoadFinished(@NonNull ViewHolderAdapter<T, ? extends ViewHolder<T>> adapter, @NonNull Collection<T> data);
+
+        public void execute() {
+            Utilities.executeAsync(this);
+        }
     }
 }

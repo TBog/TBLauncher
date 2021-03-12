@@ -43,7 +43,6 @@ import androidx.preference.PreferenceManager;
 import rocks.tbog.tblauncher.db.ShortcutRecord;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.ShortcutEntry;
-import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
 import rocks.tbog.tblauncher.utils.DebugInfo;
 import rocks.tbog.tblauncher.utils.Utilities;
@@ -146,8 +145,8 @@ public class PinShortcutConfirm extends Activity implements OnClickListener {
         }
     }
 
-    private static void setIconsAsync(ImageView icon1, ShortcutInfo shortcutInfo, Utilities.GetDrawable getIcon) {
-        new Utilities.AsyncSetDrawable(icon1) {
+    private static void setIconsAsync(ImageView icon, ShortcutInfo shortcutInfo, Utilities.GetDrawable getIcon) {
+        new Utilities.AsyncSetDrawable(icon) {
             Drawable appDrawable;
 
             @Override
@@ -160,10 +159,12 @@ public class PinShortcutConfirm extends Activity implements OnClickListener {
             protected void onPostExecute(Drawable drawable) {
                 ImageView icon1 = (ImageView) weakView.get();
                 super.onPostExecute(drawable);
-                int drawFlags = EntryItem.FLAG_DRAW_ICON | EntryItem.FLAG_DRAW_ICON_BADGE;
-                ShortcutEntry.setIcons(drawFlags, icon1, drawable, appDrawable);
+                if (icon1 != null) {
+                    int drawFlags = EntryItem.FLAG_DRAW_ICON | EntryItem.FLAG_DRAW_ICON_BADGE;
+                    ShortcutEntry.setIcons(drawFlags, icon1, drawable, appDrawable);
+                }
             }
-        }.executeOnExecutor(ResultViewHelper.EXECUTOR_LOAD_ICON);
+        }.execute();
     }
 
     @NonNull

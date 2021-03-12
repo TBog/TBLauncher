@@ -3,7 +3,6 @@ package rocks.tbog.tblauncher.searcher;
 
 import android.app.Activity;
 import android.content.Context;
-import android.os.AsyncTask;
 import android.util.Log;
 
 import androidx.annotation.CallSuper;
@@ -20,9 +19,10 @@ import java.util.concurrent.Executors;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.utils.PrefCache;
+import rocks.tbog.tblauncher.utils.TaskRunner;
 import rocks.tbog.tblauncher.utils.Utilities;
 
-public abstract class Searcher extends AsyncTask<Void, EntryItem, Void> {
+public abstract class Searcher extends TaskRunner.AsyncTask<Void, Void> {
     // define a different thread than the default AsyncTask thread or else we will block everything else that uses AsyncTask while we search
     public static final ExecutorService SEARCH_THREAD = Executors.newSingleThreadExecutor();
     protected static final int INITIAL_CAPACITY = 50;
@@ -131,5 +131,9 @@ public abstract class Searcher extends AsyncTask<Void, EntryItem, Void> {
 
     public boolean tagsEnabled() {
         return tagsEnabled;
+    }
+
+    public void execute() {
+        TaskRunner.executeOnExecutor(Searcher.SEARCH_THREAD, this);
     }
 }

@@ -370,7 +370,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
                 if (savedInstanceState == null) {
                     // Run asynchronously to open settings fast
-                    Utilities.runAsync(
+                    Utilities.runAsync(getLifecycle(),
                             t -> SettingsFragment.this.setListPreferenceIconsPacksData(iconsPack),
                             t -> iconsPack.setEnabled(true));
                 } else {
@@ -387,7 +387,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     updateAppToRunList(sharedPreferences, gesturePref);
             };
             if (AppToRunListContent == null) {
-                Utilities.runAsync(t -> {
+                Utilities.runAsync(getLifecycle(), t -> {
                     Pair<CharSequence[], CharSequence[]> content = generateAppToRunListContent(context);
                     synchronized (SettingsFragment.this) {
                         if (AppToRunListContent == null)
@@ -405,7 +405,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     updateEntryToShowList(sharedPreferences, gesturePref);
             };
             if (EntryToShowListContent == null) {
-                Utilities.runAsync(t -> {
+                Utilities.runAsync(getLifecycle(), t -> {
                     Pair<CharSequence[], CharSequence[]> content = generateEntryToShowListContent(context);
                     synchronized (SettingsFragment.this) {
                         if (EntryToShowListContent == null)
