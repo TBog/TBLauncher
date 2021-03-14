@@ -62,7 +62,7 @@ public class IconsHandler {
     private boolean mContactPackMask;
     private boolean mShortcutPackMask;
     private boolean mShortcutBadgePackMask;
-    private TaskRunner.CancellableTask mLoadIconsPackTask = null;
+    private TaskRunner.RunnableTask mLoadIconsPackTask = null;
 
     public IconsHandler(Context ctx) {
         super();

@@ -272,14 +272,14 @@ public class Utilities {
         toast.setGravity(Gravity.START | Gravity.TOP, toastX, toastY);
     }
 
-    public static TaskRunner.CancellableTask runAsync(@NonNull Lifecycle lifecycle, @NonNull TaskRunner.AsyncRunnable background, @NonNull TaskRunner.AsyncRunnable after) {
-        TaskRunner.CancellableTask task = TaskRunner.newTask(lifecycle, background, after);
+    public static TaskRunner.RunnableTask runAsync(@NonNull Lifecycle lifecycle, @NonNull TaskRunner.AsyncRunnable background, @NonNull TaskRunner.AsyncRunnable after) {
+        TaskRunner.RunnableTask task = TaskRunner.newTask(lifecycle, background, after);
         EXECUTOR_RUN_ASYNC.execute(task);
         return task;
     }
 
-    public static TaskRunner.CancellableTask runAsync(@NonNull TaskRunner.AsyncRunnable background, @NonNull TaskRunner.AsyncRunnable after) {
-        TaskRunner.CancellableTask task = TaskRunner.newTask(background, after);
+    public static TaskRunner.RunnableTask runAsync(@NonNull TaskRunner.AsyncRunnable background, @NonNull TaskRunner.AsyncRunnable after) {
+        TaskRunner.RunnableTask task = TaskRunner.newTask(background, after);
         EXECUTOR_RUN_ASYNC.execute(task);
         return task;
     }

@@ -4,188 +4,149 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 
-import androidx.annotation.CallSuper;
+import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.UiThread;
 import androidx.annotation.WorkerThread;
 import androidx.lifecycle.Lifecycle;
 
 import java.util.concurrent.Callable;
-import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 
 public class TaskRunner {
     private final static Handler handler = new Handler(Looper.getMainLooper());
     private final static String TAG = "TaskRun";
-//    private final Executor executor;
-
-    public interface Callback<R> {
-        @UiThread
-        void onComplete(R result);
-    }
 
     public interface AsyncRunnable {
-        void run(@NonNull CancellableTask task);
-    }
-
-//    public TaskRunner() {
-//        this(Executors.newSingleThreadExecutor());
-//    }
-//
-//    public TaskRunner(@NonNull Executor executor) {
-//        super();
-//        this.executor = executor;
-//    }
-
-    @NonNull
-    public static <R> CancellableTask newTask(@NonNull Lifecycle lifecycle, @NonNull AsyncRunnable worker, @NonNull AsyncRunnable main) {
-        return new CancellableTask() {
-            @Override
-            public void run() {
-                if (cancelled)
-                    return;
-                try {
-                    worker.run(this);
-                } catch (Exception e) {
-                    Log.e(TAG, "worker " + worker.toString(), e);
-                } finally {
-                    handler.post(() -> {
-                        if (lifecycle.getCurrentState().isAtLeast(Lifecycle.State.STARTED))
-                            main.run(this);
-                    });
-                }
-            }
-        };
+        void run(@NonNull RunnableTask task);
     }
 
     @NonNull
-    public static <R> CancellableTask newTask(@NonNull AsyncRunnable worker, @NonNull AsyncRunnable main) {
-        return new CancellableTask() {
-            @Override
-            public void run() {
-                if (cancelled)
-                    return;
-                try {
-                    worker.run(this);
-                } catch (Exception e) {
-                    Log.e(TAG, "worker " + worker.toString(), e);
-                } finally {
-                    handler.post(() -> main.run(this));
-                }
-            }
-        };
+    public static RunnableTask newTask(@NonNull Lifecycle lifecycle, @NonNull AsyncRunnable worker, @NonNull AsyncRunnable main) {
+        return new RunnableTask(worker, main, lifecycle);
     }
 
     @NonNull
-    public static <R> CancellableTask newTask(@NonNull Callable<R> callable, @NonNull Callback<R> callback) {
-        return new CancellableTask() {
-            @Override
-            public void run() {
-                if (cancelled)
-                    return;
-                R result = null;
-                try {
-                    result = callable.call();
-                } catch (Exception e) {
-                    Log.e(TAG, "callable " + callable.toString(), e);
-                } finally {
-                    final R finalResult = result;
-                    handler.post(() -> {
-                        if (cancelled)
-                            return;
-                        callback.onComplete(finalResult);
-                    });
-                }
-            }
-        };
+    public static RunnableTask newTask(@NonNull AsyncRunnable worker, @NonNull AsyncRunnable main) {
+        return new RunnableTask(worker, main);
     }
 
-    public static <R> CancellableTask executeAsync(@NonNull Executor executor, @NonNull Callable<R> callable, @NonNull Callback<R> callback) {
-        final CancellableTask task = newTask(callable, callback);
-        executor.execute(task);
-        return task;
-    }
-
+    @MainThread
     public static <In, Out, T extends AsyncTask<In, Out>> void executeOnExecutor(@NonNull ExecutorService executor, @NonNull T task) {
         executeOnExecutor(executor, task, null);
     }
 
-    public static <In, Out, T extends AsyncTask<In, Out>> void executeOnExecutor(@NonNull ExecutorService executor, @NonNull T task, @Nullable In input) {
-        task.onPreExecute(
-                executor.submit(() -> {
-                    Out output;
-                    try {
-                        output = task.doInBackground(input);
-                    } catch (Throwable th) {
-                        Log.w(TAG, task.getClass().toString(), th);
-                        task.taskFuture.cancel(false);
-                        throw th;
-                    } finally {
-                        handler.post(task::onPostExecute);
-                    }
-                    return output;
-                }));
+    @MainThread
+    public static <In, Out> void executeOnExecutor(@NonNull ExecutorService executor, @NonNull AsyncTask<In, Out> task, @Nullable In input) {
+        task.onPreExecute();
+        task.input = input;
+        executor.submit(task);
     }
 
-    public static class CancellableTask implements Runnable {
-        protected volatile boolean cancelled = false;
+    public static abstract class AsyncTask<In, Out> extends FutureTask<Out> {
+        private In input = null;
 
-        public void cancel() {
-            cancelled = true;
+        protected AsyncTask() {
+            this(new BackgroundWorker<>());
         }
 
-        public boolean isCancelled() {
-            return cancelled;
+        private AsyncTask(BackgroundWorker<In, Out> worker) {
+            super(worker);
+            worker.task = this;
         }
 
-        @WorkerThread
-        @Override
-        public void run() {
-
-        }
-    }
-
-    public static abstract class AsyncTask<In, Out> {
-        protected Future<Out> taskFuture = null;
-
-        public boolean cancel(boolean mayInterruptIfRunning) {
-            return taskFuture.cancel(mayInterruptIfRunning);
-        }
-
-        public boolean isCancelled() {
-            return taskFuture.isCancelled();
-        }
-
-        @CallSuper
-        protected void onPreExecute(Future<Out> taskFuture) {
-            this.taskFuture = taskFuture;
-            onPreExecute();
-        }
-
+        @MainThread
         protected void onPreExecute() {
         }
 
+        @WorkerThread
         protected abstract Out doInBackground(In input);
 
-        @CallSuper
-        protected void onPostExecute() {
-            Out output = null;
-            try {
-                output = taskFuture.get();
-            } catch (ExecutionException | InterruptedException e) {
-                Log.e(TAG, "get future", e);
-            } catch (CancellationException e) {
-                output = null;
-            } finally {
-                onPostExecute(output);
+        @Override
+        protected void done() {
+            handler.post(() -> {
+                if (isCancelled())
+                    onCancelled();
+                else {
+                    Out result = null;
+                    try {
+                        result = get();
+                    } catch (ExecutionException | InterruptedException e) {
+                        Log.e(TAG, "AsyncTask " + AsyncTask.this, e);
+                    }
+                    onPostExecute(result);
+                }
+            });
+        }
+
+        @MainThread
+        protected void onPostExecute(Out output) {
+        }
+
+        @MainThread
+        protected void onCancelled() {
+        }
+
+        private static class BackgroundWorker<In, Out> implements Callable<Out> {
+            private AsyncTask<In, Out> task = null;
+
+            @Override
+            public Out call() {
+                Out output = task.doInBackground(task.input);
+                task.input = null;
+                return output;
+            }
+        }
+    }
+
+    public static class RunnableTask extends FutureTask<RunnableTask> {
+        private AsyncRunnable whenDone = null;
+        private Lifecycle lifecycle = null;
+
+        public void cancel() {
+            cancel(false);
+        }
+
+        public RunnableTask(@NonNull AsyncRunnable worker, @Nullable AsyncRunnable main, @Nullable Lifecycle lifecycle) {
+            this(new BackgroundWorker(worker));
+            whenDone = main;
+            this.lifecycle = lifecycle;
+        }
+
+        public RunnableTask(@NonNull AsyncRunnable worker, @Nullable AsyncRunnable main) {
+            this(worker, main, null);
+        }
+
+        private RunnableTask(@NonNull BackgroundWorker background) {
+            super(background);
+            background.task = this;
+        }
+
+        @Override
+        protected void done() {
+            if (whenDone != null) {
+                handler.post(() -> {
+                    if (lifecycle == null || lifecycle.getCurrentState().isAtLeast(Lifecycle.State.STARTED))
+                        whenDone.run(this);
+                });
             }
         }
 
-        protected void onPostExecute(Out output) {
+        private static class BackgroundWorker implements Callable<RunnableTask> {
+            private RunnableTask task = null;
+            private final AsyncRunnable worker;
+
+            private BackgroundWorker(AsyncRunnable worker) {
+                this.worker = worker;
+            }
+
+            @Override
+            public RunnableTask call() {
+                worker.run(task);
+                return task;
+            }
         }
     }
 }
