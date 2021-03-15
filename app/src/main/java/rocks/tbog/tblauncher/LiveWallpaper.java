@@ -8,17 +8,18 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Build;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.Gravity;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
-import android.view.ViewConfiguration;
 import android.view.WindowMetrics;
 import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Transformation;
 
+import androidx.core.view.GestureDetectorCompat;
 import androidx.preference.PreferenceManager;
 
 import java.util.Locale;
@@ -26,12 +27,8 @@ import java.util.Locale;
 import rocks.tbog.tblauncher.ui.ListPopup;
 
 public class LiveWallpaper {
-    private static final int longPressTimeout = ViewConfiguration.getLongPressTimeout();
-    private static final int doubleTapTimeout = ViewConfiguration.getDoubleTapTimeout();
-    private static final float minMovement = .025f;
-    private static final float minVelocity = .01f;
-    private static final int deltaAngle = 33;
     private static final String TAG = "LWP";
+    private static final int deltaAngle = 33;
     private TBLauncherActivity mTBLauncherActivity = null;
     private WallpaperManager mWallpaperManager;
     private final Point mWindowSize = new Point(1, 1);
@@ -52,19 +49,51 @@ public class LiveWallpaper {
     private boolean wpReturnCenter = true;
     private boolean wpStickToSides = false;
 
-    private int mClickCount = 0;
-    private final PointF mFirstClickPos = new PointF();
-    private final Runnable mClickRunnable = () -> {
-        // reset count
-        mClickCount = 0;
-        View view = mTBLauncherActivity.findViewById(R.id.root_layout);
-        onClick(view);
-    };
-    private final Runnable mLongClickRunnable = () -> {
-        if (!TBApplication.state().isWidgetScreenVisible())
-            return;
-        View view = mTBLauncherActivity.findViewById(R.id.root_layout);
-        onLongClick(view);
+    private GestureDetectorCompat gestureDetector = null;
+    private final GestureDetector.SimpleOnGestureListener onGestureListener = new GestureDetector.SimpleOnGestureListener() {
+        @Override
+        public void onLongPress(MotionEvent e) {
+            if (!TBApplication.state().isWidgetScreenVisible())
+                return;
+            View view = mTBLauncherActivity.findViewById(R.id.root_layout);
+            onLongClick(view);
+        }
+
+        @Override
+        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            View view = mTBLauncherActivity.findViewById(R.id.root_layout);
+            float xMove = e1.getRawX() - e2.getRawX();
+            float yMove = e1.getRawY() - e2.getRawY();
+            return LiveWallpaper.this.onFling(view, xMove, yMove, velocityX, velocityY);
+        }
+
+        @Override
+        public boolean onDoubleTapEvent(MotionEvent e) {
+            if (e.getActionMasked() == MotionEvent.ACTION_UP) {
+                View view = mTBLauncherActivity.findViewById(R.id.root_layout);
+                return onDoubleClick(view);
+            }
+            return false;
+        }
+
+        @Override
+        public boolean onSingleTapUp(MotionEvent e) {
+            // if we have a double tap listener, wait for onSingleTapConfirmed
+            if (TBApplication.behaviour(mTBLauncherActivity).hasDoubleClick())
+                return true;
+            View view = mTBLauncherActivity.findViewById(R.id.root_layout);
+            return onClick(view);
+        }
+
+        @Override
+        public boolean onSingleTapConfirmed(MotionEvent e) {
+            // if we have both a double tap and click, handle click here
+            if (TBApplication.behaviour(mTBLauncherActivity).hasDoubleClick()) {
+                View view = mTBLauncherActivity.findViewById(R.id.root_layout);
+                return onClick(view);
+            }
+            return false;
+        }
     };
 
     LiveWallpaper() {
@@ -123,38 +152,9 @@ public class LiveWallpaper {
         mVelocityTracker = null;
         View root = mainActivity.findViewById(R.id.root_layout);
         root.setOnTouchListener(this::onRootTouch);
-    }
 
-    private boolean onActionUp(View view) {
-        Behaviour behaviour = TBApplication.behaviour(view.getContext());
-        boolean hasDoubleClick = behaviour.hasDoubleClick();
-        if (hasDoubleClick) {
-            if (mClickCount == 1) {
-                // reset count
-                mClickCount = 0;
-                // remove single click runnable
-                view.removeCallbacks(mClickRunnable);
-                // check if it's a valid double click
-                float doubleTapSlopSquare = minMovement * minMovement;
-                float deltaX = (mFirstClickPos.x - mLastTouchPos.x) / (float) mWindowSize.x;
-                float deltaY = (mFirstClickPos.y - mLastTouchPos.y) / (float) mWindowSize.y;
-                float deltaSquare = deltaX * deltaX + deltaY * deltaY;
-                if (deltaSquare < doubleTapSlopSquare)
-                    return onDoubleClick(view);
-                // else consider this a first click
-            }
-            if (mClickCount == 0) {
-                // increase count
-                mClickCount = 1;
-                mFirstClickPos.set(mFirstTouchPos);
-                // if user doesn't tap in doubleTapTimeout ms then launch runnable
-                view.postDelayed(mClickRunnable, doubleTapTimeout);
-                return true;
-            }
-        } else {
-            return onClick(view);
-        }
-        return false;
+        gestureDetector = new GestureDetectorCompat(mainActivity, onGestureListener);
+        gestureDetector.setIsLongpressEnabled(true);
     }
 
     private static boolean onClick(View view) {
@@ -171,14 +171,20 @@ public class LiveWallpaper {
         return TBApplication.behaviour(view.getContext()).onDoubleClick();
     }
 
+    private static int computeAngle(float x, float y) {
+        return (int) (.5 + Math.toDegrees(Math.atan2(y, x)));
+    }
+
     private boolean onFling(View view, float xMove, float yMove, float xVel, float yVel) {
         final Behaviour behaviour = TBApplication.behaviour(view.getContext());
 
         final int angle;
-        if (xMove < minMovement && yMove < minMovement)
-            angle = (int) (.5 + Math.toDegrees(Math.atan2(yVel, xVel)));
-        else
-            angle = (int) (.5 + Math.toDegrees(Math.atan2(yMove, xMove)));
+//        if (-minMovement < xMove && xMove < minMovement && -minMovement < yMove && yMove < minMovement) {
+//            // too little movement, use velocity
+//            angle = computeAngle(xVel, yVel);
+//        } else {
+        angle = computeAngle(xMove, yMove);
+//        }
 
         // fling upwards
         if ((90 + deltaAngle) > angle && angle > (90 - deltaAngle)) {
@@ -247,7 +253,6 @@ public class LiveWallpaper {
 
         switch (actionMasked) {
             case MotionEvent.ACTION_DOWN: {
-                view.postDelayed(mLongClickRunnable, longPressTimeout);
                 mFirstTouchPos.set(event.getRawX(), event.getRawY());
                 mLastTouchPos.set(mFirstTouchPos);
                 mFirstTouchOffset.set(mWallpaperOffset);
@@ -269,8 +274,6 @@ public class LiveWallpaper {
                 mLastTouchPos.set(event.getRawX(), event.getRawY());
                 float xMove = (mFirstTouchPos.x - mLastTouchPos.x) / mWindowSize.x;
                 float yMove = (mFirstTouchPos.y - mLastTouchPos.y) / mWindowSize.y;
-                if (Math.abs(xMove) > .01f || Math.abs(yMove) > .01f)
-                    view.removeCallbacks(mLongClickRunnable);
                 if (mVelocityTracker != null)
                     mVelocityTracker.addMovement(event);
 
@@ -293,37 +296,19 @@ public class LiveWallpaper {
                 float yMove = (mFirstTouchPos.y - mLastTouchPos.y) / mWindowSize.y;
                 if (mVelocityTracker == null) {
                     Log.d(TAG, String.format(Locale.US, "Move=(%.3f, %.3f)", xMove, yMove));
-                    if (Math.abs(xMove) < minMovement && Math.abs(yMove) < minMovement) {
-                        if (event.getEventTime() - event.getDownTime() < longPressTimeout) {
-                            eventConsumed = onActionUp(view);
-                        }
-                    }
                 } else {
                     mVelocityTracker.addMovement(event);
                     mVelocityTracker.computeCurrentVelocity(1000 / 30);
-                    float xVel = mVelocityTracker.getXVelocity() / mWindowSize.x;
-                    float yVel = mVelocityTracker.getYVelocity() / mWindowSize.y;
-                    Log.d(TAG, String.format(Locale.US, "Velocity=(%.3f, %.3f) Move=(%.3f, %.3f)", xVel, yVel, xMove, yMove));
-                    if (event.getEventTime() - event.getDownTime() < longPressTimeout) {
-                        // snap position if needed
-                        if (isPreferenceWPDragAnimate() && mAnimation.init())
-                            mContentView.startAnimation(mAnimation);
-                        // if no movement detected
-                        if (Math.abs(xVel) < minVelocity
-                                && Math.abs(yVel) < minVelocity
-                                && Math.abs(xMove) < minMovement
-                                && Math.abs(yMove) < minMovement) {
-                            onActionUp(view);
-                            eventConsumed = true;
-                        } else {
-                            eventConsumed = onFling(view, xMove, yMove, xVel, yVel);
-                        }
-                    }
+                    float xVel = mVelocityTracker.getXVelocity();// / mWindowSize.x;
+                    float yVel = mVelocityTracker.getYVelocity();// / mWindowSize.y;
+                    Log.d(TAG, String.format(Locale.US, "Velocity=(%.3f, %.3f)\u2248%d\u00b0 Move=(%.3f, %.3f)\u2248%d\u00b0", xVel, yVel, computeAngle(xVel, yVel), xMove, yMove, computeAngle(xMove, yMove)));
+                    // snap position if needed
+                    if (isPreferenceWPDragAnimate() && mAnimation.init())
+                        mContentView.startAnimation(mAnimation);
                 }
                 //fallthrough
             }
             case MotionEvent.ACTION_CANCEL:
-                view.removeCallbacks(mLongClickRunnable);
                 if (isPreferenceWPDragAnimate()) {
                     if (mVelocityTracker != null) {
                         mVelocityTracker.addMovement(event);
@@ -343,6 +328,7 @@ public class LiveWallpaper {
                 break;
         }
 
+        eventConsumed = gestureDetector.onTouchEvent(event) || eventConsumed;
         Log.d(TAG, "onRootTouch event " + (eventConsumed ? "" : "NOT ") + "consumed");
         return eventConsumed;
     }
