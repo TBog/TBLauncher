@@ -25,10 +25,13 @@ import androidx.preference.PreferenceManager;
 import java.util.Locale;
 
 import rocks.tbog.tblauncher.ui.ListPopup;
+import rocks.tbog.tblauncher.utils.UISizes;
+import rocks.tbog.tblauncher.utils.Utilities;
 
 public class LiveWallpaper {
     private static final String TAG = "LWP";
-    private static final int deltaAngle = 33;
+    private static final int FLING_DELTA_ANGLE = 33;
+    private static final int GD_TOUCH_SLOP_DP = 16;
     private TBLauncherActivity mTBLauncherActivity = null;
     private WallpaperManager mWallpaperManager;
     private final Point mWindowSize = new Point(1, 1);
@@ -155,6 +158,7 @@ public class LiveWallpaper {
 
         gestureDetector = new GestureDetectorCompat(mainActivity, onGestureListener);
         gestureDetector.setIsLongpressEnabled(true);
+        Utilities.setGestureDetectorTouchSlop(gestureDetector, UISizes.dp2px(mainActivity, GD_TOUCH_SLOP_DP));
     }
 
     private static boolean onClick(View view) {
@@ -187,12 +191,12 @@ public class LiveWallpaper {
 //        }
 
         // fling upwards
-        if ((90 + deltaAngle) > angle && angle > (90 - deltaAngle)) {
+        if ((90 + FLING_DELTA_ANGLE) > angle && angle > (90 - FLING_DELTA_ANGLE)) {
             Log.d(TAG, String.format(Locale.US, "Angle=%d - fling upward", angle));
             return behaviour.onFlingUp();
         }
         // fling downwards
-        else if ((90 + deltaAngle) > -angle && -angle > (90 - deltaAngle)) {
+        else if ((90 + FLING_DELTA_ANGLE) > -angle && -angle > (90 - FLING_DELTA_ANGLE)) {
             Log.d(TAG, String.format(Locale.US, "Angle=%d - fling downward", angle));
             final int posX = (int) mFirstTouchPos.x;
             if (posX < (mWindowSize.x / 2))
@@ -201,12 +205,12 @@ public class LiveWallpaper {
                 return behaviour.onFlingDownRight();
         }
         // fling left
-        else if (deltaAngle > angle && angle > -deltaAngle) {
+        else if (FLING_DELTA_ANGLE > angle && angle > -FLING_DELTA_ANGLE) {
             Log.d(TAG, String.format(Locale.US, "Angle=%d - fling left", angle));
             return behaviour.onFlingLeft();
         }
         // fling right
-        else if ((180 - deltaAngle) < angle || angle < (-180 + deltaAngle)) {
+        else if ((180 - FLING_DELTA_ANGLE) < angle || angle < (-180 + FLING_DELTA_ANGLE)) {
             Log.d(TAG, String.format(Locale.US, "Angle=%d - fling right", angle));
             return behaviour.onFlingRight();
         }
