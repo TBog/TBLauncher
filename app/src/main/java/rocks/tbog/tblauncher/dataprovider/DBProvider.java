@@ -16,9 +16,10 @@ import rocks.tbog.tblauncher.BuildConfig;
 import rocks.tbog.tblauncher.DataHandler;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.TBLauncherActivity;
+import rocks.tbog.tblauncher.WorkAsync.AsyncTask;
+import rocks.tbog.tblauncher.WorkAsync.TaskRunner;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.searcher.Searcher;
-import rocks.tbog.tblauncher.utils.TaskRunner;
 
 public abstract class DBProvider<T extends EntryItem> implements IProvider<T> {
     final Context context;
@@ -103,7 +104,7 @@ public abstract class DBProvider<T extends EntryItem> implements IProvider<T> {
         return entryList;
     }
 
-    protected abstract static class DBLoader<T extends EntryItem> extends TaskRunner.AsyncTask<Void, List<T>> {
+    protected abstract static class DBLoader<T extends EntryItem> extends AsyncTask<Void, List<T>> {
         protected final WeakReference<DBProvider<T>> weakProvider;
 
         public DBLoader(DBProvider<T> provider) {

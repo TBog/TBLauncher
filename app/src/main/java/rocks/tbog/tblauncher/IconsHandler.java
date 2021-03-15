@@ -27,16 +27,16 @@ import androidx.preference.PreferenceManager;
 import java.util.HashMap;
 import java.util.List;
 
+import rocks.tbog.tblauncher.WorkAsync.RunnableTask;
 import rocks.tbog.tblauncher.db.AppRecord;
+import rocks.tbog.tblauncher.drawable.DrawableUtils;
+import rocks.tbog.tblauncher.drawable.TextDrawable;
 import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.entry.ShortcutEntry;
 import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.icons.IconPack;
 import rocks.tbog.tblauncher.icons.IconPackXML;
 import rocks.tbog.tblauncher.icons.SystemIconPack;
-import rocks.tbog.tblauncher.drawable.TextDrawable;
-import rocks.tbog.tblauncher.drawable.DrawableUtils;
-import rocks.tbog.tblauncher.utils.TaskRunner;
 import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.UISizes;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
@@ -62,7 +62,7 @@ public class IconsHandler {
     private boolean mContactPackMask;
     private boolean mShortcutPackMask;
     private boolean mShortcutBadgePackMask;
-    private TaskRunner.RunnableTask mLoadIconsPackTask = null;
+    private RunnableTask mLoadIconsPackTask = null;
 
     public IconsHandler(Context ctx) {
         super();

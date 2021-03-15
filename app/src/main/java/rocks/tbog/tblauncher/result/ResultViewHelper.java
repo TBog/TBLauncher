@@ -26,11 +26,12 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import rocks.tbog.tblauncher.TBApplication;
+import rocks.tbog.tblauncher.WorkAsync.AsyncTask;
+import rocks.tbog.tblauncher.WorkAsync.TaskRunner;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.EntryWithTags;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
-import rocks.tbog.tblauncher.utils.TaskRunner;
 import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.UISizes;
 import rocks.tbog.tblauncher.utils.Utilities;
@@ -187,7 +188,7 @@ public final class ResultViewHelper {
         return colorFilter;
     }
 
-    public static abstract class AsyncSetEntryDrawable extends TaskRunner.AsyncTask<Void, Drawable> {
+    public static abstract class AsyncSetEntryDrawable extends AsyncTask<Void, Drawable> {
         private final WeakReference<ImageView> weakImage;
         protected final String cacheId;
         protected int drawFlags;

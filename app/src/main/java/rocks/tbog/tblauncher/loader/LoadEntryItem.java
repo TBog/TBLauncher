@@ -8,11 +8,12 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 
 import rocks.tbog.tblauncher.DataHandler;
+import rocks.tbog.tblauncher.WorkAsync.AsyncTask;
+import rocks.tbog.tblauncher.WorkAsync.TaskRunner;
 import rocks.tbog.tblauncher.dataprovider.Provider;
 import rocks.tbog.tblauncher.entry.EntryItem;
-import rocks.tbog.tblauncher.utils.TaskRunner;
 
-public abstract class LoadEntryItem<T extends EntryItem> extends TaskRunner.AsyncTask<Void, ArrayList<T>> {
+public abstract class LoadEntryItem<T extends EntryItem> extends AsyncTask<Void, ArrayList<T>> {
 
     final WeakReference<Context> context;
     private WeakReference<Provider<T>> weakProvider;

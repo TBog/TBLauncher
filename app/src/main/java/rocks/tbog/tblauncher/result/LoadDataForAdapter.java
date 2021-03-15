@@ -2,11 +2,11 @@ package rocks.tbog.tblauncher.result;
 
 import java.util.ArrayList;
 
+import rocks.tbog.tblauncher.WorkAsync.AsyncTask;
 import rocks.tbog.tblauncher.entry.EntryItem;
-import rocks.tbog.tblauncher.utils.TaskRunner;
 import rocks.tbog.tblauncher.utils.Utilities;
 
-public class LoadDataForAdapter extends TaskRunner.AsyncTask<Void, ArrayList<EntryItem>> {
+public class LoadDataForAdapter extends AsyncTask<Void, ArrayList<EntryItem>> {
     private final EntryAdapter adapter;
     private final LoadInBackground task;
 

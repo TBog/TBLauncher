@@ -49,6 +49,9 @@ import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import rocks.tbog.tblauncher.WorkAsync.AsyncTask;
+import rocks.tbog.tblauncher.WorkAsync.RunnableTask;
+import rocks.tbog.tblauncher.WorkAsync.TaskRunner;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.ui.CutoutFactory;
 import rocks.tbog.tblauncher.ui.ICutout;
@@ -272,14 +275,14 @@ public class Utilities {
         toast.setGravity(Gravity.START | Gravity.TOP, toastX, toastY);
     }
 
-    public static TaskRunner.RunnableTask runAsync(@NonNull Lifecycle lifecycle, @NonNull TaskRunner.AsyncRunnable background, @NonNull TaskRunner.AsyncRunnable after) {
-        TaskRunner.RunnableTask task = TaskRunner.newTask(lifecycle, background, after);
+    public static RunnableTask runAsync(@NonNull Lifecycle lifecycle, @NonNull TaskRunner.AsyncRunnable background, @NonNull TaskRunner.AsyncRunnable after) {
+        RunnableTask task = TaskRunner.newTask(lifecycle, background, after);
         EXECUTOR_RUN_ASYNC.execute(task);
         return task;
     }
 
-    public static TaskRunner.RunnableTask runAsync(@NonNull TaskRunner.AsyncRunnable background, @NonNull TaskRunner.AsyncRunnable after) {
-        TaskRunner.RunnableTask task = TaskRunner.newTask(background, after);
+    public static RunnableTask runAsync(@NonNull TaskRunner.AsyncRunnable background, @NonNull TaskRunner.AsyncRunnable after) {
+        RunnableTask task = TaskRunner.newTask(background, after);
         EXECUTOR_RUN_ASYNC.execute(task);
         return task;
     }
@@ -288,7 +291,7 @@ public class Utilities {
         EXECUTOR_RUN_ASYNC.execute(background);
     }
 
-    public static <I, O> void executeAsync(@NonNull TaskRunner.AsyncTask<I, O> task) {
+    public static <I, O> void executeAsync(@NonNull AsyncTask<I, O> task) {
         TaskRunner.executeOnExecutor(EXECUTOR_RUN_ASYNC, task);
     }
 
@@ -669,7 +672,7 @@ public class Utilities {
         void setDrawable(@NonNull View view, @NonNull Drawable drawable);
     }
 
-    public static abstract class AsyncViewSet extends TaskRunner.AsyncTask<Void, Drawable> {
+    public static abstract class AsyncViewSet extends AsyncTask<Void, Drawable> {
         protected final WeakReference<View> weakView;
 
         protected AsyncViewSet(View view) {

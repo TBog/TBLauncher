@@ -13,6 +13,7 @@ import androidx.annotation.Nullable;
 import java.util.Collection;
 
 import rocks.tbog.tblauncher.BuildConfig;
+import rocks.tbog.tblauncher.WorkAsync.AsyncTask;
 
 /**
  * Adapter class that implements the View holder pattern.
@@ -96,7 +97,7 @@ public abstract class ViewHolderAdapter<T, VH extends ViewHolderAdapter.ViewHold
         protected abstract void setContent(T content, int position, @NonNull ViewHolderAdapter<T, ? extends ViewHolder<T>> adapter);
     }
 
-    public static abstract class LoadAsyncData<T> extends TaskRunner.AsyncTask<Void, Collection<T>> {
+    public static abstract class LoadAsyncData<T> extends AsyncTask<Void, Collection<T>> {
         private final ViewHolderAdapter<T, ? extends ViewHolder<T>> adapter;
         private final LoadInBackground<T> task;
 

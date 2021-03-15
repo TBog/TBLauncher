@@ -17,7 +17,6 @@ import rocks.tbog.tblauncher.icons.IconPackCache;
 import rocks.tbog.tblauncher.quicklist.QuickList;
 import rocks.tbog.tblauncher.searcher.Searcher;
 import rocks.tbog.tblauncher.utils.RootHandler;
-import rocks.tbog.tblauncher.utils.TaskRunner;
 
 public class TBApplication extends Application {
 

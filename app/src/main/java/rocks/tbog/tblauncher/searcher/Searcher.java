@@ -17,12 +17,13 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import rocks.tbog.tblauncher.TBApplication;
+import rocks.tbog.tblauncher.WorkAsync.AsyncTask;
+import rocks.tbog.tblauncher.WorkAsync.TaskRunner;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.utils.PrefCache;
-import rocks.tbog.tblauncher.utils.TaskRunner;
 import rocks.tbog.tblauncher.utils.Utilities;
 
-public abstract class Searcher extends TaskRunner.AsyncTask<Void, Void> {
+public abstract class Searcher extends AsyncTask<Void, Void> {
     // define a different thread than the default AsyncTask thread or else we will block everything else that uses AsyncTask while we search
     public static final ExecutorService SEARCH_THREAD = Executors.newSingleThreadExecutor();
     protected static final int INITIAL_CAPACITY = 50;

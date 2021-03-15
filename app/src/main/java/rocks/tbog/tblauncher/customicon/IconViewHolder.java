@@ -8,8 +8,9 @@ import androidx.annotation.NonNull;
 
 import java.lang.ref.WeakReference;
 
+import rocks.tbog.tblauncher.WorkAsync.AsyncTask;
+import rocks.tbog.tblauncher.WorkAsync.TaskRunner;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
-import rocks.tbog.tblauncher.utils.TaskRunner;
 import rocks.tbog.tblauncher.utils.ViewHolderAdapter;
 
 public class IconViewHolder extends ViewHolderAdapter.ViewHolder<IconData> {
@@ -29,7 +30,7 @@ public class IconViewHolder extends ViewHolderAdapter.ViewHolder<IconData> {
         loader.execute(content);
     }
 
-    static class AsyncLoad extends TaskRunner.AsyncTask<IconData, Drawable> {
+    static class AsyncLoad extends AsyncTask<IconData, Drawable> {
         private final WeakReference<IconViewHolder> holder;
 
         protected AsyncLoad(IconViewHolder holder) {
