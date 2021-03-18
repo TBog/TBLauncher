@@ -3,6 +3,7 @@ package rocks.tbog.tblauncher.utils;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -37,6 +38,10 @@ public class DialogHelper {
                     TextView nameView = ((Dialog) dialog).findViewById(R.id.rename);
                     nameView.setText(currentName);
                     nameView.requestFocus();
+
+                    InputMethodManager mgr = (InputMethodManager) ((Dialog) dialog).getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+                    assert mgr != null;
+                    mgr.showSoftInput(nameView, InputMethodManager.SHOW_IMPLICIT);
                 });
     }
 }
