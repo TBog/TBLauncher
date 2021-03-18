@@ -72,7 +72,6 @@ public class LoadShortcutsEntryItem extends LoadEntryItem<ShortcutEntry> {
             final ShortcutEntry pojo = new ShortcutEntry(id, shortcutRecord.dbId, shortcutRecord.packageName, shortcutRecord.infoData);
 
             pojo.setName(shortcutRecord.displayName);
-            pojo.setTags(tagsHandler.getTags(pojo.id));
 
             FavRecord favRecord = favorites.get(pojo.id);
             if (favRecord != null && favRecord.hasCustomIcon())
@@ -103,7 +102,6 @@ public class LoadShortcutsEntryItem extends LoadEntryItem<ShortcutEntry> {
                 }
                 ShortcutEntry pojo = new ShortcutEntry(dbId, shortcutInfo);
                 pojo.setName(name);
-                pojo.setTags(tagsHandler.getTags(pojo.id));
 
                 FavRecord favRecord = favorites.get(pojo.id);
                 if (favRecord != null && favRecord.hasCustomIcon())
@@ -118,6 +116,11 @@ public class LoadShortcutsEntryItem extends LoadEntryItem<ShortcutEntry> {
                 //tagsHandler.removeAllTags(ShortcutEntry.SCHEME + record.infoData);
             }
         }
+
+        tagsHandler.runWhenLoaded(() -> {
+            for (ShortcutEntry shortcutEntry : pojos)
+                shortcutEntry.setTags(tagsHandler.getTags(shortcutEntry.id));
+        });
 
         return pojos;
     }

@@ -468,14 +468,16 @@ public class DataHandler extends BroadcastReceiver
      */
     public void requestAllRecords(Searcher searcher) {
         for (ProviderEntry entry : this.providers.values()) {
-            if (searcher.isCancelled())
-                break;
             if (entry.provider == null)
                 continue;
 
             List<? extends EntryItem> pojos = entry.provider.getPojos();
-            if (pojos != null)
-                searcher.addResult(pojos.toArray(new EntryItem[0]));
+            if (pojos == null)
+                continue;
+            boolean accept = searcher.addResult(pojos.toArray(new EntryItem[0]));
+            // if searcher will not accept any more results, exit
+            if (!accept)
+                break;
         }
     }
 

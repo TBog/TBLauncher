@@ -60,10 +60,9 @@ public class TagSearcher extends Searcher {
     }
 
     private void addProcessedPojo(EntryWithTags entryItem) {
-        if (foundIdSet.contains(entryItem.id))
+        // if id already processed, skip it
+        if (!foundIdSet.add(entryItem.id))
             return;
-
-        foundIdSet.add(entryItem.id);
 
         processedPojos.add(entryItem);
         if (processedPojos.size() > maxResults)

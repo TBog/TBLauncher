@@ -32,8 +32,7 @@ public abstract class EntryWithTags extends EntryItem {
         }
 
         public TagDetails(@NonNull String name) {
-            this.name = name;
-            normalized = StringNormalizer.normalizeWithResult(name, true);
+            this(name, StringNormalizer.normalizeWithResult(name, true));
         }
 
         public TagDetails(@NonNull String name, StringNormalizer.Result normalized) {
