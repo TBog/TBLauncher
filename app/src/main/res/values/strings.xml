@@ -367,6 +367,7 @@
     <string name="dm_widget_quick_list">Show quick list</string>
     <string name="dm_empty_fullscreen">Fullscreen</string>
     <string name="dm_search_fullscreen">Fullscreen</string>
+    <string name="dm_search_fullscreen_summary">Only when keyboard is closed</string>
     <string name="dm_widget_fullscreen">Fullscreen</string>
     <string name="title_desktop_mode_empty">Desktop mode &#171;Empty&#187;</string>
     <string name="title_desktop_mode_search">Desktop mode &#171;Search&#187;</string>

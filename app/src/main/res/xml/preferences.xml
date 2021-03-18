@@ -681,6 +681,7 @@
                 <androidx.preference.SwitchPreference
                     android:defaultValue="false"
                     android:key="dm-search-fullscreen"
+                    android:summary="@string/dm_search_fullscreen_summary"
                     android:title="@string/dm_search_fullscreen" />
 
                 <ListPreference

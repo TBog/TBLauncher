@@ -707,6 +707,10 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 
     public void hideKeyboard() {
         Log.i(TAG, "Keyboard - HIDE");
+
+        if (TBApplication.state().isSearchBarVisible() && PrefCache.modeSearchFullscreen(mPref))
+            enableFullscreen(0);
+
         TBApplication.state().setKeyboard(LauncherState.AnimatedVisibility.HIDDEN);
         mTBLauncherActivity.dismissPopup();
 
