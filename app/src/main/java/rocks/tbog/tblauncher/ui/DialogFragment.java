@@ -5,7 +5,9 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.os.Build;
 import android.os.Bundle;
+import android.util.Log;
 import android.util.TypedValue;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +22,7 @@ import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.utils.UITheme;
 
 public abstract class DialogFragment<Output> extends androidx.fragment.app.DialogFragment {
+    private static final String TAG = "DialogFrag";
     private OnDismissListener<Output> mOnDismissListener = null;
     private OnConfirmListener<Output> mOnConfirmListener = null;
 
@@ -56,27 +59,36 @@ public abstract class DialogFragment<Output> extends androidx.fragment.app.Dialo
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
+        //Log.i(TAG, "---> onCreate <---");
         super.onCreate(savedInstanceState);
-        int style = UITheme.getDialogTheme(requireContext());
-        if (style == UITheme.ID_NULL)
-            style = R.style.NoTitleDialogTheme;
-        setStyle(DialogFragment.STYLE_NO_FRAME, style);
+        int theme = UITheme.getDialogTheme(requireContext());
+        if (theme == UITheme.ID_NULL)
+            theme = R.style.NoTitleDialogTheme;
+        setStyle(DialogFragment.STYLE_NO_FRAME, theme);
+        //Log.i(TAG, "theme=" + getTheme());
+        //Log.i(TAG, "context=" + getContext());
     }
 
     @NonNull
     @Override
     public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        Context themeWrapper = UITheme.getDialogThemedContext(requireContext());
+        //Log.i(TAG, "---> onCreateDialog <---");
+        Context themeWrapper = new ContextThemeWrapper(requireContext(), getTheme());
         TypedValue outValue = new TypedValue();
         themeWrapper.getTheme().resolveAttribute(R.attr.alertDialogTheme, outValue, true);
         int dialogStyle = outValue.resourceId;
-        return new Dialog(themeWrapper, dialogStyle);
+        Dialog dialog = new Dialog(themeWrapper, dialogStyle);
+        //Log.i(TAG, "dialog=" + dialog);
+        Log.i(TAG, "dialog.context=" + dialog.getContext());
+        return dialog;
     }
 
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        //Log.i(TAG, "---> onCreateView <---");
         Dialog dialog = requireDialog();
+        //Log.i(TAG, "dialog=" + dialog);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         Window window = dialog.getWindow();
@@ -86,6 +98,9 @@ public abstract class DialogFragment<Output> extends androidx.fragment.app.Dialo
         }
         dialog.setCanceledOnTouchOutside(true);
 
+        //Log.i(TAG, "context=" + getContext());
+        //Log.i(TAG, "dialog.context=" + dialog.getContext());
+        Log.i(TAG, "inflater.context=" + inflater.getContext());
         View view = inflater.inflate(layoutRes(), container, false);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {

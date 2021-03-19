@@ -8,13 +8,21 @@
     tools:background="@drawable/dialog_background_dark"
     tools:theme="@style/TitleDialogTheme">
 
-    <!-- Code will inflate a preview of the entry here -->
-    <!--    <include-->
-    <!--        tools:targetApi=""-->
-    <!--        android:id="@+id/entry"-->
-    <!--        layout="@layout/item_app"-->
-    <!--        android:layout_width="match_parent"-->
-    <!--        android:layout_height="wrap_content" />-->
+    <FrameLayout
+        android:id="@+id/previewWrapper"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="@dimen/edit_tag_padding">
+
+        <!-- Code will inflate a preview of the entry here -->
+        <!--        <include-->
+        <!--            android:id="@+id/entry"-->
+        <!--            layout="@layout/item_app"-->
+        <!--            android:layout_width="match_parent"-->
+        <!--            android:layout_height="wrap_content" />-->
+
+    </FrameLayout>
+
 
     <GridView
         android:id="@+id/grid"
@@ -39,7 +47,7 @@
         android:paddingHorizontal="@dimen/result_margin_horizontal"
         android:paddingVertical="@dimen/result_margin_vertical">
 
-        <AutoCompleteTextView
+        <androidx.appcompat.widget.AppCompatAutoCompleteTextView
             android:id="@+id/newTag"
             android:layout_width="0dp"
             android:layout_height="wrap_content"

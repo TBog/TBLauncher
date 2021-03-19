@@ -51,10 +51,12 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        // make sure we use the dialog context
+        inflater = inflater.cloneInContext(requireDialog().getContext());
         View view = super.onCreateView(inflater, container, savedInstanceState);
         if (view == null)
             return null;
-        Context context = requireContext();
+        Context context = inflater.getContext();
 
         mPreviewLabel = view.findViewById(R.id.previewLabel);
         mViewPager = view.findViewById(R.id.viewPager);

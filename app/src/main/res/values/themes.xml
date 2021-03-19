@@ -130,6 +130,29 @@
         <item name="android:borderlessButtonStyle">@style/GradientBorderlessButton</item>
         <item name="buttonBarNegativeButtonStyle">@style/GradientBorderlessButton</item>
         <item name="buttonBarPositiveButtonStyle">@style/GradientBorderlessButton</item>
+
+        <item name="autoCompleteTextViewStyle">@style/AutoCompleteTextViewStyle</item>
+        <item name="tabLayoutStyle">@style/TabLayout.Dialog</item>
+    </style>
+
+    <style name="AutoCompleteTextViewStyle" parent="Widget.AppCompat.AutoCompleteTextView">
+        <item name="android:popupBackground">@drawable/dialog_background</item>
+    </style>
+
+    <style name="AutoCompleteTextViewStyle.White">
+        <item name="android:popupBackground">@drawable/dialog_background_light</item>
+    </style>
+
+    <style name="AutoCompleteTextViewStyle.Black">
+        <item name="android:popupBackground">@drawable/dialog_background_black</item>
+    </style>
+
+    <style name="AutoCompleteTextViewStyle.DeepBlues">
+        <item name="android:popupBackground">@drawable/tab_background_deep_blues</item>
+    </style>
+
+    <style name="AutoCompleteTextViewStyle.DarkBg">
+        <item name="android:popupBackground">@color/darkBackground</item>
     </style>
 
     <style name="NoTitleDialogTheme" parent="TitleDialogTheme">
@@ -187,6 +210,10 @@
         <item name="android:listDivider">@drawable/list_separator_light</item>
         <item name="android:windowTitleStyle">@style/SettingsDialogTitle</item>
 
+        <item name="tabIndicatorColor">@color/colorAccent</item>
+        <item name="tabBackground">@color/black_overlay</item>
+        <item name="tabSelectedTextColor">@color/colorAccent</item>
+
         <item name="android:textColorHighlight">?android:attr/textColorSecondary</item>
     </style>
 
@@ -211,6 +238,8 @@
         <item name="android:borderlessButtonStyle">@style/GradientBorderlessButton.White</item>
         <item name="buttonBarNegativeButtonStyle">@style/GradientBorderlessButton.White</item>
         <item name="buttonBarPositiveButtonStyle">@style/GradientBorderlessButton.White</item>
+
+        <item name="autoCompleteTextViewStyle">@style/AutoCompleteTextViewStyle.White</item>
     </style>
 
     <style name="SettingsDialogTheme.Black">
@@ -234,6 +263,8 @@
         <item name="android:borderlessButtonStyle">@style/GradientBorderlessButton.Black</item>
         <item name="buttonBarNegativeButtonStyle">@style/GradientBorderlessButton.Black</item>
         <item name="buttonBarPositiveButtonStyle">@style/GradientBorderlessButton.Black</item>
+
+        <item name="autoCompleteTextViewStyle">@style/AutoCompleteTextViewStyle.Black</item>
     </style>
 
     <style name="SettingsDialogTheme.DeepBlues">
@@ -250,13 +281,19 @@
         <item name="colorPrimaryDark">@color/DeepBlues_2</item>
         <item name="colorControlNormal">@color/DeepBlues_3</item>
         <item name="colorControlHighlight">@color/DeepBlues_selector_primary</item>
-        <item name="colorControlActivated">@color/DeepBlues_4</item>
+        <item name="colorControlActivated">@color/DeepBlues_selector_primary</item>
 
         <item name="android:buttonBarStyle">@style/GradientButtonBar.DeepBlues</item>
         <item name="android:buttonBarButtonStyle">@style/GradientBorderlessButton.DeepBlues</item>
         <item name="android:borderlessButtonStyle">@style/GradientBorderlessButton.DeepBlues</item>
         <item name="buttonBarNegativeButtonStyle">@style/GradientBorderlessButton.DeepBlues</item>
         <item name="buttonBarPositiveButtonStyle">@style/GradientBorderlessButton.DeepBlues</item>
+
+        <item name="autoCompleteTextViewStyle">@style/AutoCompleteTextViewStyle.DeepBlues</item>
+    </style>
+
+    <style name="SettingsDialogTheme.DarkBg">
+        <item name="autoCompleteTextViewStyle">@style/AutoCompleteTextViewStyle.DarkBg</item>
     </style>
 
     <style name="PreferenceTheme" parent="PreferenceThemeOverlay">
@@ -302,6 +339,18 @@
         <item name="tabTextColor">@null</item>
         <item name="tabRippleColor">?attr/colorControlHighlight</item>
         <item name="tabUnboundedRipple">false</item>
+        <item name="tabGravity">fill</item>
+        <item name="tabMode">fixed</item>
+    </style>
+
+    <style name="TabLayout.Dialog">
+        <item name="tabGravity">center</item>
+        <item name="tabMode">scrollable</item>
+        <item name="tabSelectedTextColor">?android:attr/textColorPrimary</item>
+        <item name="tabTextColor">?android:attr/textColorSecondary</item>
+        <item name="tabIndicatorColor">?attr/colorControlHighlight</item>
+        <item name="tabBackground">?attr/tabBackground</item>
+        <item name="tabTextAppearance">@android:style/TextAppearance.Widget.TabWidget</item>
     </style>
 
     <!--
@@ -316,7 +365,10 @@
         <item name="android:textColor">@color/settings_primary_selector_darkbg</item>
         <item name="android:textColorHint">?android:attr/textColorSecondary</item>
 
-        <item name="tabGravity">center</item>
+        <item name="tabIndicatorColor">@color/colorAccent</item>
+        <item name="tabBackground">@color/black_overlay</item>
+        <item name="tabSelectedTextColor">@color/colorAccent</item>
+        <item name="tabLayoutStyle">@style/TabLayout.Dialog</item>
 
         <item name="actionOverflowMenuStyle">@style/OptionsMenu</item>
         <item name="android:itemBackground">@drawable/dialog_background</item>
@@ -398,6 +450,7 @@
     -->
     <style name="SettingsTheme.DarkBg">
         <item name="android:windowBackground">@color/darkBackground</item>
+        <item name="alertDialogTheme">@style/SettingsDialogTheme.DarkBg</item>
         <item name="actionOverflowMenuStyle">@style/OptionsMenu.Dark</item>
         <item name="android:itemBackground">@null</item>
     </style>

@@ -44,6 +44,8 @@ public class EditTagsDialog extends DialogFragment<Set<String>> {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        // make sure we use the dialog context
+        inflater = inflater.cloneInContext(requireDialog().getContext());
         ViewGroup root = (ViewGroup) super.onCreateView(inflater, container, savedInstanceState);
         assert root != null;
         Context context = inflater.getContext();
@@ -53,11 +55,14 @@ public class EditTagsDialog extends DialogFragment<Set<String>> {
         String entryId = args.getString("entryId", "");
         TBApplication app = TBApplication.getApplication(context);
         EntryItem entry = app.getDataHandler().getPojo(entryId);
+        ViewGroup wrapper = root.findViewById(R.id.previewWrapper);
+        if (wrapper == null)
+            wrapper = root;
         if (entry != null) {
             int drawFlags = EntryItem.FLAG_DRAW_LIST | EntryItem.FLAG_DRAW_NAME | EntryItem.FLAG_DRAW_ICON;
-            View entryView = inflater.inflate(entry.getResultLayout(drawFlags), root, false);
+            View entryView = inflater.inflate(entry.getResultLayout(drawFlags), wrapper, false);
             entryView.setId(R.id.preview);
-            root.addView(entryView, 0);
+            wrapper.addView(entryView, 0);
             app.ui().setResultListPref(entryView);
         }
 
