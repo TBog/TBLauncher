@@ -24,6 +24,7 @@
         <item name="textShadowRadius">3</item>
 
         <item name="colorControlHighlight">@color/colorAccent</item>
+        <item name="tabLayoutStyle">@style/TabLayout</item>
 
         <item name="android:listPreferredItemHeight">40sp</item> <!-- 64dp -->
         <item name="android:listPreferredItemHeightSmall">20sp</item> <!-- 48dp -->
@@ -290,6 +291,17 @@
 
     <style name="OptionsMenuTextAppearance.DeepBlues" parent="TextAppearance.MaterialComponents.Body1">
         <item name="android:textColor">@color/DeepBlues_4</item>
+    </style>
+
+    <style name="TabLayout" parent="Widget.Design.TabLayout">
+        <item name="tabIndicatorColor">?attr/colorAccent</item>
+        <item name="tabIndicatorGravity">bottom</item>
+        <item name="tabPaddingStart">6sp</item>
+        <item name="tabPaddingEnd">6sp</item>
+        <item name="tabTextAppearance">@android:style/TextAppearance.Widget.TabWidget</item>
+        <item name="tabTextColor">@null</item>
+        <item name="tabRippleColor">?attr/colorControlHighlight</item>
+        <item name="tabUnboundedRipple">false</item>
     </style>
 
     <!--

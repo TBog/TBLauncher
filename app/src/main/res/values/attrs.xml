@@ -19,7 +19,9 @@
     <attr name="dividerDrawable" format="reference" />
     <attr name="appSelectableItemBackground" format="reference" />
     <attr name="textShadowRadius" format="reference|float" />
-    
+
+    <attr name="tabLayoutStyle" format="reference"/>
+
     <declare-styleable name="SwipeDisabledViewPager">
         <attr name="maxHeight" format="dimension"/>
     </declare-styleable>

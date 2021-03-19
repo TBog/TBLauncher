@@ -28,10 +28,10 @@
 
             <com.google.android.material.tabs.TabLayout
                 android:id="@+id/tabLayout"
+                style="?attr/tabLayoutStyle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                app:tabMode="scrollable"
-                app:tabTextAppearance="@android:style/TextAppearance.Widget.TabWidget" />
+                app:tabMode="scrollable" />
 
         </androidx.viewpager.widget.ViewPager>
 
