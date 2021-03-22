@@ -25,6 +25,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.WorkAsync.AsyncTask;
 import rocks.tbog.tblauncher.WorkAsync.TaskRunner;
@@ -114,12 +115,15 @@ public final class ResultViewHelper {
     }
 
     public static void setIconAsync(int drawFlags, @NonNull EntryItem entry, @NonNull ImageView appIcon, @NonNull Class<? extends AsyncSetEntryDrawable> asyncSetEntryIconClass) {
+        if (entry.id.equals(appIcon.getTag(R.id.tag_cacheId)) && !Utilities.checkFlag(drawFlags, EntryItem.FLAG_RELOAD))
+            return;
+
         if (!Utilities.checkFlag(drawFlags, EntryItem.FLAG_DRAW_NO_CACHE)) {
             Drawable cache = TBApplication.drawableCache(appIcon.getContext()).getCachedDrawable(entry.id);
             if (cache != null) {
                 // found the icon in cache
                 appIcon.setImageDrawable(cache);
-                appIcon.setTag(entry.id);
+                appIcon.setTag(R.id.tag_cacheId, entry.id);
                 // continue to run the async task only if FLAG_RELOAD set
                 if (!Utilities.checkFlag(drawFlags, EntryItem.FLAG_RELOAD))
                     return;
@@ -198,18 +202,29 @@ public final class ResultViewHelper {
             super();
             cacheId = entryItem.id;
 
-            Object tag = image.getTag();
-            image.setTag(this);
+            Object tag_cacheId = image.getTag(R.id.tag_cacheId);
+            Object tag_iconTask = image.getTag(R.id.tag_iconTask);
+
+            image.setTag(R.id.tag_cacheId, cacheId);
+            image.setTag(R.id.tag_iconTask, this);
+
             boolean keepIcon = false;
-            if (tag instanceof AsyncSetEntryDrawable) {
-                AsyncSetEntryDrawable task = (AsyncSetEntryDrawable) tag;
+            if (tag_iconTask instanceof AsyncSetEntryDrawable) {
+                AsyncSetEntryDrawable task = (AsyncSetEntryDrawable) tag_iconTask;
                 task.cancel(false);
                 // if the old task was loading the same entry we can keep the icon while we refresh it
                 keepIcon = entryItem.equals(task.entryItem);
-            } else if (tag instanceof String) {
+            } else if (tag_cacheId instanceof String) {
                 // if the tag equals cacheId then we can keep the icon while we refresh it
-                keepIcon = tag.equals(cacheId);
+                keepIcon = tag_cacheId.equals(cacheId);
             }
+            Log.i(TAG, "start task=" + Integer.toHexString(hashCode()) +
+                    " view=" + Integer.toHexString(image.hashCode()) +
+                    " tag_iconTask=" + (tag_iconTask != null ? Integer.toHexString(tag_iconTask.hashCode()) : "null") +
+                    " entry=" + entryItem.getName() +
+                    " keepIcon=" + keepIcon +
+                    " tag_cacheId=" + (tag_cacheId != null ? Integer.toHexString(tag_cacheId.hashCode()) : "null") +
+                    " cacheId=" + cacheId);
             if (!keepIcon)
                 image.setImageResource(android.R.color.transparent);
             this.weakImage = new WeakReference<>(image);
@@ -230,7 +245,7 @@ public final class ResultViewHelper {
         @Override
         protected Drawable doInBackground(Void param) {
             ImageView image = getImageView();
-            if (isCancelled() || image == null || image.getTag() != this) {
+            if (isCancelled() || image == null) {
                 weakImage.clear();
                 return null;
             }
@@ -248,10 +263,36 @@ public final class ResultViewHelper {
                 weakImage.clear();
                 return;
             }
+            Object tag_cacheId = image.getTag(R.id.tag_cacheId);
+            Object tag_iconTask = image.getTag(R.id.tag_iconTask);
+
+            Log.i(TAG, "end task=" + Integer.toHexString(hashCode()) +
+                    " view=" + Integer.toHexString(image.hashCode()) +
+                    " tag_iconTask=" + (tag_iconTask != null ? Integer.toHexString(tag_iconTask.hashCode()) : "null") +
+                    " cacheId=" + cacheId);
+            if (tag_iconTask instanceof AsyncSetEntryDrawable) {
+                AsyncSetEntryDrawable task = (AsyncSetEntryDrawable) tag_iconTask;
+                if (!entryItem.equals(task.entryItem)) {
+                    weakImage.clear();
+                    return;
+                }
+            } else if (tag_cacheId instanceof String) {
+                // if the tag equals cacheId then we can keep the icon while we refresh it
+                if (!tag_cacheId.equals(cacheId)) {
+                    weakImage.clear();
+                    return;
+                }
+            }
             image.setImageDrawable(drawable);
-            image.setTag(cacheId);
+            image.setTag(R.id.tag_iconTask, null);
             if (cacheId != null && !Utilities.checkFlag(drawFlags, EntryItem.FLAG_DRAW_NO_CACHE))
                 TBApplication.drawableCache(image.getContext()).cacheDrawable(cacheId, drawable);
+        }
+
+        @Override
+        protected void onCancelled() {
+            ImageView image = getImageView();
+            Log.i(TAG, "cancelled task=" + Integer.toHexString(hashCode()) + " view=" + (image != null ? Integer.toHexString(image.hashCode()) : "null"));
         }
 
         public void execute() {

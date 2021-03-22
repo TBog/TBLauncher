@@ -752,6 +752,8 @@ public class Utilities {
         @Override
         protected void onPostExecute(Drawable drawable) {
             View view = weakView.get();
+            if (view.getTag() != this)
+                return;
             Activity act = Utilities.getActivity(view);
             if (act == null || drawable == null) {
                 weakView.clear();
