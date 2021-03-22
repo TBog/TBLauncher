@@ -14,7 +14,7 @@ import java.util.List;
 public class DrawableCache {
     private static final String TAG = "DrawCache";
     private boolean mEnabled = true;
-    private LruCache<String, DrawableInfo> mCache = new LruCache<>(16);
+    private final LruCache<String, DrawableInfo> mCache = new LruCache<>(16);
 
     public void setSize(int maxSize) {
         mCache.resize(maxSize);
