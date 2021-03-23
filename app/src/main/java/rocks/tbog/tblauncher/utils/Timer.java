@@ -5,12 +5,17 @@ import androidx.annotation.NonNull;
 import java.util.concurrent.TimeUnit;
 
 public class Timer {
-    protected final long mStart;
+    protected long mStart;
     protected long mStop;
     protected TimeUnit mUnit;
 
+    public Timer() {
+        this(0, TimeUnit.MILLISECONDS);
+    }
+
     protected Timer(long now, @NonNull TimeUnit unit) {
         mStart = now;
+        mStop = now;
         mUnit = unit;
     }
 
@@ -20,6 +25,15 @@ public class Timer {
 
     public static Timer startMilli() {
         return new Timer(System.currentTimeMillis(), TimeUnit.MILLISECONDS);
+    }
+
+    public void start() {
+        if (mUnit == TimeUnit.NANOSECONDS) {
+            mStart = System.nanoTime();
+        } else {
+            mStart = System.currentTimeMillis();
+        }
+        mStop = mStart;
     }
 
     public void stop() {

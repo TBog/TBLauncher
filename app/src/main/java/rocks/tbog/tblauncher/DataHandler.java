@@ -22,6 +22,7 @@ import androidx.annotation.WorkerThread;
 import androidx.preference.PreferenceManager;
 
 import java.io.ByteArrayOutputStream;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -62,6 +63,7 @@ import rocks.tbog.tblauncher.entry.ShortcutEntry;
 import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.searcher.Searcher;
 import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
+import rocks.tbog.tblauncher.utils.Timer;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 
 public class DataHandler extends BroadcastReceiver
@@ -103,7 +105,8 @@ public class DataHandler extends BroadcastReceiver
     private String currentQuery;
     private final Map<String, ProviderEntry> providers = new LinkedHashMap<>(); // preserve insert order
     private boolean mFullLoadOverSent = false;
-    private long start;
+    private final ArrayDeque<Runnable> mAfterLoadOverTasks = new ArrayDeque<>(2);
+    private final Timer mTimer = new Timer();
 
     /**
      * Initialize all providers
@@ -114,7 +117,7 @@ public class DataHandler extends BroadcastReceiver
         //  to bind to services)
         this.context = context.getApplicationContext();
 
-        start = System.currentTimeMillis();
+        mTimer.start();
 
         IntentFilter intentFilter = new IntentFilter(TBLauncherActivity.LOAD_OVER);
         this.context.registerReceiver(this, intentFilter);
@@ -415,10 +418,14 @@ public class DataHandler extends BroadcastReceiver
         if (!allProvidersHaveLoaded())
             return;
 
-        long time = System.currentTimeMillis() - start;
-        Log.v(TAG, "Time to load all providers: " + time + "ms");
+        mTimer.stop();
+        Log.v(TAG, "Time to load all providers: " + mTimer);
 
         mFullLoadOverSent = true;
+        // run and remove tasks
+        Runnable task;
+        while (null != (task = mAfterLoadOverTasks.poll()))
+            task.run();
 
         // Broadcast the fact that the new providers list is ready
         try {
@@ -1022,7 +1029,7 @@ public class DataHandler extends BroadcastReceiver
     public void reloadProviders() {
         mFullLoadOverSent = false;
 
-        start = System.currentTimeMillis();
+        mTimer.start();
 
         IntentFilter intentFilter = new IntentFilter(TBLauncherActivity.LOAD_OVER);
         context.registerReceiver(this, intentFilter);
@@ -1122,6 +1129,15 @@ public class DataHandler extends BroadcastReceiver
 
     public boolean fullLoadOverSent() {
         return mFullLoadOverSent;
+    }
+
+    public void runAfterLoadOver(@NonNull Runnable task) {
+        synchronized (this) {
+            if (mFullLoadOverSent)
+                task.run();
+            else
+                mAfterLoadOverTasks.add(task);
+        }
     }
 
     static final class ProviderEntry {

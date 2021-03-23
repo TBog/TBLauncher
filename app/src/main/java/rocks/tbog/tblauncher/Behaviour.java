@@ -487,7 +487,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                     hideResultList(false);
                 } else {
                     // try to execute the action
-                    TBApplication.tagsHandler(getContext()).runWhenLoaded(()->{
+                    TBApplication.dataHandler(getContext()).runAfterLoadOver(()->{
                         mLauncherButton.postDelayed(() -> executeAction(openResult, null), KEYBOARD_ANIMATION_DELAY);
                     });
                 }
