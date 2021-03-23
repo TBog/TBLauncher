@@ -37,6 +37,7 @@ import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.icons.IconPack;
 import rocks.tbog.tblauncher.icons.IconPackXML;
 import rocks.tbog.tblauncher.icons.SystemIconPack;
+import rocks.tbog.tblauncher.utils.Timer;
 import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.UISizes;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
@@ -112,9 +113,16 @@ public class IconsHandler {
 
         // don't reload the icon pack
         if (mIconPack == null || !mIconPack.getPackPackageName().equals(packageName)) {
-            if (mLoadIconsPackTask != null)
+            if (mLoadIconsPackTask != null) {
                 mLoadIconsPackTask.cancel();
+                mLoadIconsPackTask = null;
+            }
             final IconPackXML iconPack = TBApplication.iconPackCache(ctx).getIconPack(packageName);
+
+            // timer start
+            Timer timer = Timer.startMilli();
+
+            Log.i(TAG, "[start] loading default icon pack: " + packageName);
             // set the current icon pack
             mIconPack = iconPack;
             // start async loading
@@ -122,7 +130,13 @@ public class IconsHandler {
                 if (task == mLoadIconsPackTask)
                     iconPack.load(ctx.getPackageManager());
             }, (task) -> {
+                // timer end
+                timer.stop();
+
                 if (!task.isCancelled() && task == mLoadIconsPackTask) {
+                    Log.i(TAG, "[end] loading default icon pack: " + packageName);
+
+                    Log.i("time", timer + " to load icon pack " + packageName);
                     mLoadIconsPackTask = null;
                     TBApplication.quickList(ctx).onFavoritesChanged();
                 }
