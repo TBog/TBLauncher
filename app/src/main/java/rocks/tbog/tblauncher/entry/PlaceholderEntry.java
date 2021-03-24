@@ -1,8 +1,6 @@
 package rocks.tbog.tblauncher.entry;
 
 import android.content.Context;
-import android.graphics.drawable.Animatable;
-import android.graphics.drawable.Drawable;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -25,14 +23,6 @@ public class PlaceholderEntry extends StaticEntry {
             adapter.add(new LinearAdapter.Item(context, R.string.menu_popup_quick_list_customize));
         }
         return inflatePopupMenu(context, adapter);
-    }
-
-    @Override
-    public Drawable getDefaultDrawable(Context context) {
-        Drawable drawable = super.getDefaultDrawable(context);
-        if (drawable instanceof Animatable)
-            ((Animatable) drawable).start();
-        return drawable;
     }
 
     @Override

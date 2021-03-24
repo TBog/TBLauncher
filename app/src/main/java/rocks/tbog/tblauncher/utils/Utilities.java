@@ -14,6 +14,7 @@ import android.graphics.ColorFilter;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
 import android.graphics.Rect;
+import android.graphics.drawable.Animatable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -708,6 +709,12 @@ public class Utilities {
         } catch (NoSuchFieldException | IllegalAccessException | NullPointerException e) {
             Log.w(TAG, gestureDetector.toString(), e);
         }
+    }
+
+    public static void startAnimatable(ImageView image) {
+        Drawable drawable = image.getDrawable();
+        if (drawable instanceof Animatable)
+            ((Animatable) drawable).start();
     }
 
     public interface GetDrawable {

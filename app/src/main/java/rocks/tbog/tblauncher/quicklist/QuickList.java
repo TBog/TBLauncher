@@ -34,6 +34,7 @@ import rocks.tbog.tblauncher.dataprovider.QuickListProvider;
 import rocks.tbog.tblauncher.entry.ActionEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.FilterEntry;
+import rocks.tbog.tblauncher.entry.PlaceholderEntry;
 import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.entry.TagEntry;
 import rocks.tbog.tblauncher.result.ResultHelper;
@@ -61,9 +62,15 @@ public class QuickList {
     private String mLastSelection = null;
     private String mLastAction = null;
 
-    private final Runnable runCleanList = () -> {
-        if (mListDirty && TBApplication.state().isQuickListVisible())
-            populateList();
+    private final Runnable runCleanList = new Runnable() {
+        @Override
+        public void run() {
+            if (mListDirty && TBApplication.state().isQuickListVisible()) {
+                QuickList.this.populateList();
+                if (mListDirty)
+                    mQuickList.postDelayed(this, 500);
+            }
+        }
     };
 
     public Context getContext() {
@@ -106,6 +113,7 @@ public class QuickList {
         final View[] oldList = new View[mQuickList.getChildCount()];
         for (int nChild = 0; nChild < oldList.length; nChild += 1)
             oldList[nChild] = mQuickList.getChildAt(nChild);
+        //Log.d("QL", "oldList.length=" + oldList.length + " getChildCount=" + mQuickList.getChildCount());
 
         // clean the QuickList
         mQuickList.removeAllViews();
@@ -119,11 +127,12 @@ public class QuickList {
         final List<EntryItem> list;
         {
             QuickListProvider provider = TBApplication.dataHandler(getContext()).getQuickListProvider();
-            if (provider != null) {
+            if (provider != null && provider.isLoaded()) {
                 List<EntryItem> pojos = provider.getPojos();
                 list = pojos != null ? pojos : Collections.emptyList();
             } else {
                 list = Collections.emptyList();
+                mListDirty = true;
             }
         }
 
@@ -132,8 +141,13 @@ public class QuickList {
         // if the two lists have the same length, assume we can reuse the views
         if (mQuickListItems.size() == oldList.length) {
             oldItems = new ArrayList<>(mQuickListItems.size());
-            for (EntryItem entry : mQuickListItems)
-                oldItems.add(entry.id);
+            for (EntryItem entry : mQuickListItems) {
+                if (entry instanceof PlaceholderEntry)
+                    oldItems.add("placeholder:" + entry.id);
+                else
+                    oldItems.add(entry.id);
+                //Log.i("QL", "oldItem[" + (oldItems.size() - 1) + "]=" + oldItems.get(oldItems.size() - 1));
+            }
         } else {
             oldItems = Collections.emptyList();
         }
@@ -145,10 +159,13 @@ public class QuickList {
         // clear old items before we add the new ones
         mQuickListItems.clear();
         for (EntryItem entry : list) {
+            if (entry instanceof PlaceholderEntry)
+                mListDirty = true;
             View view;
             int oldPos = oldItems.indexOf(entry.id);
+            //Log.d("QL", "oldPos=" + oldPos + " for " + entry.id);
             if (oldPos > -1 && oldPos < oldList.length) {
-                //Log.i("QL", "reuse view for " + entry.id);
+                //Log.i("QL", "[" + oldPos + "] reuse view for " + entry.id);
                 view = oldList[oldPos];
             } else {
                 //Log.i("QL", "inflate view for " + entry.id);
@@ -369,8 +386,11 @@ public class QuickList {
 
     private void show() {
         mQuickList.removeCallbacks(runCleanList);
-        if (mListDirty)
+        if (mListDirty) {
             populateList();
+            if (mListDirty)
+                mQuickList.postDelayed(runCleanList, 100);
+        }
         if (isQuickListEnabled()) {
             final SharedPreferences pref = mSharedPreferences;
             if (pref.getBoolean("quick-list-animation", true)) {

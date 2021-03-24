@@ -20,6 +20,7 @@ import rocks.tbog.tblauncher.WorkAsync.AsyncTask;
 import rocks.tbog.tblauncher.WorkAsync.TaskRunner;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.searcher.Searcher;
+import rocks.tbog.tblauncher.utils.Timer;
 
 public abstract class DBProvider<T extends EntryItem> implements IProvider<T> {
     final Context context;
@@ -27,7 +28,7 @@ public abstract class DBProvider<T extends EntryItem> implements IProvider<T> {
 
     private boolean mIsLoaded = false;
     private DBLoader<T> mLoadTask = null;
-    private long start;
+    protected final Timer mTimer = new Timer();
 
     public DBProvider(Context context) {
         this.context = context;
@@ -44,7 +45,7 @@ public abstract class DBProvider<T extends EntryItem> implements IProvider<T> {
         if (mLoadTask != null)
             mLoadTask.cancel(true);
         Log.i(Provider.TAG, "Starting provider: " + this.getClass().getSimpleName());
-        start = System.currentTimeMillis();
+        mTimer.start();
         mLoadTask = newLoadTask();
         mLoadTask.execute();
     }
@@ -54,6 +55,10 @@ public abstract class DBProvider<T extends EntryItem> implements IProvider<T> {
     @Override
     public boolean isLoaded() {
         return mIsLoaded;
+    }
+
+    protected void setLoaded() {
+        mIsLoaded = true;
     }
 
     @Override
@@ -141,15 +146,14 @@ public abstract class DBProvider<T extends EntryItem> implements IProvider<T> {
             provider.entryList = entryItems;
 
             // mark the provider as loaded
-            provider.mIsLoaded = true;
+            provider.setLoaded();
             provider.mLoadTask = null;
 
-            {
-                long time = System.currentTimeMillis() - provider.start;
-                Log.i("Provider", "Time to load " + provider.getClass().getSimpleName() + ": " + time + "ms");
-                Intent i = new Intent(TBLauncherActivity.LOAD_OVER);
-                provider.context.sendBroadcast(i);
-            }
+            provider.mTimer.stop();
+            Log.i("Provider", "Time to load " + provider.getClass().getSimpleName() + ": " + provider.mTimer);
+
+            Intent i = new Intent(TBLauncherActivity.LOAD_OVER);
+            provider.context.sendBroadcast(i);
         }
 
         public void execute() {

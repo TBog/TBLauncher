@@ -227,8 +227,10 @@ public final class ResultViewHelper {
                     " keepIcon=" + keepIcon +
                     " tag_cacheId=" + tag_cacheId +
                     " cacheId=" + cacheId);
-            if (!keepIcon)
-                image.setImageResource(android.R.color.transparent);
+            if (!keepIcon) {
+                image.setImageResource(R.drawable.ic_loading);
+                Utilities.startAnimatable(image);
+            }
             this.weakImage = new WeakReference<>(image);
             this.drawFlags = drawFlags;
             this.entryItem = entryItem;
@@ -295,6 +297,7 @@ public final class ResultViewHelper {
             }
             image.setImageDrawable(drawable);
             image.setTag(R.id.tag_iconTask, null);
+            Utilities.startAnimatable(image);
         }
 
         @Override
