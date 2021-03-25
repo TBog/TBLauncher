@@ -8,6 +8,7 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.PaintDrawable;
 import android.os.Build;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -67,8 +68,10 @@ public class QuickList {
         public void run() {
             if (mListDirty && TBApplication.state().isQuickListVisible()) {
                 QuickList.this.populateList();
-                if (mListDirty)
-                    mQuickList.postDelayed(this, 500);
+                TBApplication.dataHandler(mQuickList.getContext()).runAfterLoadOver(() -> {
+                    if (mListDirty)
+                        mQuickList.postDelayed(this, 500);
+                });
             }
         }
     };
@@ -386,11 +389,8 @@ public class QuickList {
 
     private void show() {
         mQuickList.removeCallbacks(runCleanList);
-        if (mListDirty) {
-            populateList();
-            if (mListDirty)
-                mQuickList.postDelayed(runCleanList, 100);
-        }
+        runCleanList.run();
+
         if (isQuickListEnabled()) {
             final SharedPreferences pref = mSharedPreferences;
             if (pref.getBoolean("quick-list-animation", true)) {

@@ -38,9 +38,23 @@ public class QuickListProvider extends DBProvider<EntryItem> {
         boolean needsSorting = false;
 
         Collection<FavRecord> recordIds = mQuickListFavRecords.values();
-        if (entryList.size() != recordIds.size()) {
+        boolean remakeEntries = false;
+        if (entryList.size() == recordIds.size()) {
+            for (EntryItem entryItem : entryList) {
+                if (!mQuickListFavRecords.containsKey(entryItem.id)) {
+                    Log.d(TAG, "remake: not found " + entryItem.id);
+                    remakeEntries = true;
+                    break;
+                }
+            }
+        } else {
+            Log.d(TAG, "remake: " + entryList.size() + " \u2260 " + recordIds.size());
+            remakeEntries = true;
+        }
+        if (remakeEntries) {
             needsSorting = true;
             entryList.clear();
+            // make them all placeholders, we'll replace later
             for (FavRecord fav : recordIds) {
                 PlaceholderEntry entry = new PlaceholderEntry(fav.record);
                 entry.setName(fav.displayName);
@@ -52,6 +66,8 @@ public class QuickListProvider extends DBProvider<EntryItem> {
 
         ArrayList<EntryItem> toAdd = new ArrayList<>();
         DataHandler dataHandler = TBApplication.dataHandler(context);
+
+        // replace placeholders with the correct entry
         for (Iterator<EntryItem> iterator = entryList.iterator(); iterator.hasNext(); ) {
             EntryItem entryItem = iterator.next();
             if (entryItem instanceof PlaceholderEntry) {
