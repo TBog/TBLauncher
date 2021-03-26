@@ -98,8 +98,11 @@ public class EditQuickList {
                     Context ctx = gridView.getContext();
                     ArrayList<EntryItem> data = new ArrayList<>();
                     {
-                        List<? extends EntryItem> entryItems = new FilterProvider(ctx).getPojos();
-                        data.addAll(entryItems);
+                        FilterProvider provider = TBApplication.dataHandler(ctx).getFilterProvider();
+                        if (provider != null) {
+                            List<? extends EntryItem> entryItems = provider.getPojos();
+                            data.addAll(entryItems);
+                        }
                     }
                     return data;
                 }).execute();
@@ -118,8 +121,11 @@ public class EditQuickList {
                     Context ctx = gridView.getContext();
                     ArrayList<EntryItem> data = new ArrayList<>();
                     {
-                        List<? extends EntryItem> entryItems = new ActionProvider(ctx).getPojos();
-                        data.addAll(entryItems);
+                        ActionProvider provider = TBApplication.dataHandler(ctx).getActionProvider();
+                        if (provider != null) {
+                            List<? extends EntryItem> entryItems = provider.getPojos();
+                            data.addAll(entryItems);
+                        }
                     }
                     return data;
                 }).execute();
