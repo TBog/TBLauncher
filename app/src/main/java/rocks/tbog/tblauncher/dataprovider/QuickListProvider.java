@@ -23,7 +23,7 @@ import rocks.tbog.tblauncher.utils.Utilities;
 public class QuickListProvider extends DBProvider<EntryItem> {
     private final static String TAG = QuickListProvider.class.getSimpleName();
     private final HashMap<String, FavRecord> mQuickListFavRecords = new HashMap<>();
-    private final QuickListRecordLoader mQuickListRecordLoadTask;
+    private QuickListRecordLoader mQuickListRecordLoadTask;
 
     public QuickListProvider(Context context) {
         super(context);
@@ -109,6 +109,13 @@ public class QuickListProvider extends DBProvider<EntryItem> {
         return new QuickListLoader(this);
     }
 
+    @Override
+    public void reload(boolean cancelCurrentLoadTask) {
+        mQuickListRecordLoadTask = new QuickListRecordLoader(this);
+        Utilities.runAsync(mQuickListRecordLoadTask);
+        super.reload(cancelCurrentLoadTask);
+    }
+
     private static class QuickListRecordLoader extends AsyncTask<Void, ArrayList<FavRecord>> {
         private final WeakReference<QuickListProvider> weakProvider;
 
@@ -136,7 +143,7 @@ public class QuickListProvider extends DBProvider<EntryItem> {
         @Override
         protected void onPostExecute(ArrayList<FavRecord> output) {
             QuickListProvider provider = weakProvider.get();
-            if (provider == null || output == null)
+            if (provider == null || output == null || provider.mQuickListRecordLoadTask != this)
                 return;
             provider.setRecords(output);
         }
