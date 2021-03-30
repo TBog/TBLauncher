@@ -118,6 +118,13 @@
             android:summary="@string/force_shape_summary"
             android:title="@string/force_shape" />
 
+        <ListPreference
+            android:defaultValue="none"
+            android:entries="@array/loadingIconEntries"
+            android:entryValues="@array/loadingIconValues"
+            android:key="loading-icon"
+            android:title="@string/loading_icon" />
+
         <!-- Icon pack -->
         <PreferenceCategory
             android:key="icon-pack-section"

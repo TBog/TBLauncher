@@ -15,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
@@ -33,6 +34,7 @@ import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.EntryWithTags;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
+import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.UISizes;
 import rocks.tbog.tblauncher.utils.Utilities;
@@ -194,6 +196,13 @@ public final class ResultViewHelper {
         return colorFilter;
     }
 
+    public static void setLoadingIcon(@NonNull ImageView image) {
+        @DrawableRes
+        int drawableId = PrefCache.getLoadingIconRes(image.getContext());
+        image.setImageResource(drawableId);
+        Utilities.startAnimatable(image);
+    }
+
     public static abstract class AsyncSetEntryDrawable extends AsyncTask<Void, Drawable> {
         private final WeakReference<ImageView> weakImage;
         protected final String cacheId;
@@ -228,8 +237,7 @@ public final class ResultViewHelper {
                     " tag_cacheId=" + tag_cacheId +
                     " cacheId=" + cacheId);
             if (!keepIcon) {
-                image.setImageResource(R.drawable.ic_loading);
-                Utilities.startAnimatable(image);
+                setLoadingIcon(image);
             }
             this.weakImage = new WeakReference<>(image);
             this.drawFlags = drawFlags;

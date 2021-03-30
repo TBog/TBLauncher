@@ -394,6 +394,7 @@
     <string name="device_admin_disable">Are you sure you want to remove this permission?</string>
     <string name="device_admin_required">Device admin is required for this action</string>
     <string name="gesture_double_click">Double tap screen</string>
+    <string name="loading_icon">Loading icon</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>
