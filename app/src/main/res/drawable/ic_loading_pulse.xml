@@ -3,28 +3,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:ignore="NewApi">
 
-    <!--
-    path circle:
-    cx, cy = center
-    r = radius
-
-    M cx cy
-    m -r, 0
-    a r,r 0 1,1 (r * 2),0
-    a r,r 0 1,1 -(r * 2),0
-    -->
-
     <aapt:attr name="android:drawable">
         <vector
-            android:width="64dp"
-            android:height="64dp"
+            android:width="6dp"
+            android:height="6dp"
             android:viewportWidth="100"
             android:viewportHeight="100">
             <group
                 android:name="rotationGroup"
                 android:pivotX="50.0"
-                android:pivotY="50.0"
-                android:rotation="45.0">
+                android:pivotY="50.0">
                 <path
                     android:name="circlePath"
                     android:fillColor="#FFF"
@@ -38,17 +26,6 @@
             </group>
         </vector>
     </aapt:attr>
-
-    <!--    <target android:name="rotationGroup">-->
-    <!--        <aapt:attr name="android:animation">-->
-    <!--            <objectAnimator-->
-    <!--                android:duration="6000"-->
-    <!--                android:propertyName="rotation"-->
-    <!--                android:repeatCount="infinite"-->
-    <!--                android:valueFrom="0"-->
-    <!--                android:valueTo="360" />-->
-    <!--        </aapt:attr>-->
-    <!--    </target>-->
 
     <target android:name="circlePath">
         <aapt:attr name="android:animation">

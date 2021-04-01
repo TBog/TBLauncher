@@ -120,7 +120,7 @@ public class PrefCache {
             iconName = "none";
         switch (iconName) {
             case "arrows":
-                return R.drawable.ic_loading;
+                return R.drawable.ic_loading_arrows;
             case "pulse":
                 return R.drawable.ic_loading_pulse;
             case "none":

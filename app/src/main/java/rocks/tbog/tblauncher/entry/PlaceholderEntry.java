@@ -16,7 +16,7 @@ import rocks.tbog.tblauncher.utils.Utilities;
 public class PlaceholderEntry extends StaticEntry {
 
     public PlaceholderEntry(@NonNull String id) {
-        super(id, R.drawable.ic_loading);
+        super(id, R.drawable.ic_loading_arrows);
     }
 
     @Override
