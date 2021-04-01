@@ -1,0 +1,101 @@
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:ignore="NewApi">
+
+    <!--
+    path circle:
+    cx, cy = center
+    r = radius
+
+    M cx cy
+    m -r, 0
+    a r,r 0 1,1 (r * 2),0
+    a r,r 0 1,1 -(r * 2),0
+    -->
+
+    <aapt:attr name="android:drawable">
+        <vector
+            android:width="64dp"
+            android:height="64dp"
+            android:viewportWidth="100"
+            android:viewportHeight="100">
+            <group
+                android:name="rotationGroup"
+                android:pivotX="50.0"
+                android:pivotY="50.0"
+                android:rotation="45.0">
+                <path
+                    android:name="circlePath"
+                    android:fillColor="#FFF"
+                    android:fillType="evenOdd"
+                    android:pathData="
+                    M 50, 50
+                    m -50, 0
+                    a50,50 0 1,0 100,0
+                     50,50 0 1,0 -100,0
+                    z" />
+            </group>
+        </vector>
+    </aapt:attr>
+
+    <!--    <target android:name="rotationGroup">-->
+    <!--        <aapt:attr name="android:animation">-->
+    <!--            <objectAnimator-->
+    <!--                android:duration="6000"-->
+    <!--                android:propertyName="rotation"-->
+    <!--                android:repeatCount="infinite"-->
+    <!--                android:valueFrom="0"-->
+    <!--                android:valueTo="360" />-->
+    <!--        </aapt:attr>-->
+    <!--    </target>-->
+
+    <target android:name="circlePath">
+        <aapt:attr name="android:animation">
+            <set android:shareInterpolator="false">
+
+                <objectAnimator
+                    android:duration="500"
+                    android:interpolator="@android:interpolator/accelerate_cubic"
+                    android:propertyName="pathData"
+                    android:repeatCount="infinite"
+                    android:repeatMode="reverse"
+                    android:valueFrom="
+                    M 50, 50
+                    m -30, 0
+                    a30,30 0 1,0 60,0
+                     30,30 0 1,0 -60,0
+                    z
+
+                    M 50, 50
+                    m -25, 0
+                    a25,25 0 1,0 50,0
+                     25,25 0 1,0 -50,0
+                    z"
+                    android:valueTo="
+                    M 50, 50
+                    m -50, 0
+                    a50,50 0 1,0 100,0
+                     50,50 0 1,0 -100,0
+                    z
+
+                    M 50, 50
+                    m -49, 0
+                    a49,49 0 1,0 98,0
+                     49,49 0 1,0 -98,0
+                    z"
+                    android:valueType="pathType" />
+
+                <objectAnimator
+                    android:duration="500"
+                    android:propertyName="fillAlpha"
+                    android:repeatCount="infinite"
+                    android:repeatMode="reverse"
+                    android:valueFrom="1"
+                    android:valueTo="0"
+                    android:valueType="floatType" />
+
+            </set>
+        </aapt:attr>
+    </target>
+</animated-vector>

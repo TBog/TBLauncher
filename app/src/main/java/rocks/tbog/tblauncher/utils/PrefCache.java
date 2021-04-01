@@ -121,6 +121,8 @@ public class PrefCache {
         switch (iconName) {
             case "arrows":
                 return R.drawable.ic_loading;
+            case "pulse":
+                return R.drawable.ic_loading_pulse;
             case "none":
             default:
                 return android.R.color.transparent;

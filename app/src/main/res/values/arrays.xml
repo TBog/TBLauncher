@@ -20,11 +20,13 @@
     <string-array name="loadingIconEntries">
         <item>None / Transparent</item>
         <item>Rotating arrows</item>
+        <item>Pulse circle</item>
     </string-array>
 
     <string-array name="loadingIconValues" translatable="false">
         <item>none</item>
         <item>arrows</item>
+        <item>pulse</item>
     </string-array>
 
     <string-array name="adaptiveEntries">
