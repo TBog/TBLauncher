@@ -7,30 +7,42 @@
         <vector
             android:width="6dp"
             android:height="6dp"
-            android:viewportWidth="100"
-            android:viewportHeight="100">
-            <group
-                android:name="rotationGroup"
-                android:pivotX="50.0"
-                android:pivotY="50.0">
-                <path
-                    android:name="circlePath"
-                    android:fillColor="#FFF"
-                    android:fillType="evenOdd"
-                    android:pathData="
-                    M 50, 50
-                    m -50, 0
-                    a50,50 0 1,0 100,0
-                     50,50 0 1,0 -100,0
+            android:viewportWidth="18"
+            android:viewportHeight="18">
+            <path
+                android:name="discPath"
+                android:fillColor="#FFF"
+                android:pathData="
+                    M 9, 9
+                    m -2, 0
+                    a2,2 0 1,0 4,0
+                     2,2 0 1,0 -4,0
+                    z"
+                android:strokeWidth="1"
+                android:strokeColor="#FFF" />
+
+            <path
+                android:name="circlePath"
+                android:fillColor="#FFF"
+                android:fillType="evenOdd"
+                android:pathData="
+                    M 9, 9
+                    m -3, 0
+                    a3,3 0 1,0 6,0
+                     3,3 0 1,0 -6,0
+                    z
+
+                    M 9, 9
+                    m -2, 0
+                    a2,2 0 1,0 4,0
+                     2,2 0 1,0 -4,0
                     z" />
-            </group>
         </vector>
     </aapt:attr>
 
     <target android:name="circlePath">
         <aapt:attr name="android:animation">
             <set android:shareInterpolator="false">
-
                 <objectAnimator
                     android:duration="500"
                     android:interpolator="@android:interpolator/accelerate_cubic"
@@ -38,40 +50,66 @@
                     android:repeatCount="infinite"
                     android:repeatMode="reverse"
                     android:valueFrom="
-                    M 50, 50
-                    m -30, 0
-                    a30,30 0 1,0 60,0
-                     30,30 0 1,0 -60,0
+                    M 9, 9
+                    m -3, 0
+                    a3,3 0 1,0 6,0
+                     3,3 0 1,0 -6,0
                     z
 
-                    M 50, 50
-                    m -25, 0
-                    a25,25 0 1,0 50,0
-                     25,25 0 1,0 -50,0
+                    M 9, 9
+                    m -2, 0
+                    a2,2 0 1,0 4,0
+                     2,2 0 1,0 -4,0
                     z"
                     android:valueTo="
-                    M 50, 50
-                    m -50, 0
-                    a50,50 0 1,0 100,0
-                     50,50 0 1,0 -100,0
+                    M 9, 9
+                    m -9, 0
+                    a9,9 0 1,0 18,0
+                     9,9 0 1,0 -18,0
                     z
 
-                    M 50, 50
-                    m -49, 0
-                    a49,49 0 1,0 98,0
-                     49,49 0 1,0 -98,0
+                    M 9, 9
+                    m -8, 0
+                    a8,8 0 1,0 16,0
+                     8,8 0 1,0 -16,0
                     z"
                     android:valueType="pathType" />
 
                 <objectAnimator
                     android:duration="500"
+                    android:interpolator="@android:interpolator/accelerate_decelerate"
                     android:propertyName="fillAlpha"
+                    android:repeatCount="infinite"
+                    android:repeatMode="restart"
+                    android:valueFrom="1"
+                    android:valueTo="0"
+                    android:valueType="floatType" />
+            </set>
+        </aapt:attr>
+    </target>
+
+    <target android:name="discPath">
+        <aapt:attr name="android:animation">
+            <set android:shareInterpolator="true">
+                <objectAnimator
+                    android:duration="1000"
+                    android:interpolator="@android:interpolator/accelerate_decelerate"
+                    android:propertyName="fillAlpha"
+                    android:repeatCount="infinite"
+                    android:repeatMode="reverse"
+                    android:valueFrom="0"
+                    android:valueTo="1"
+                    android:valueType="floatType" />
+
+                <objectAnimator
+                    android:duration="1000"
+                    android:interpolator="@android:interpolator/accelerate_decelerate"
+                    android:propertyName="strokeAlpha"
                     android:repeatCount="infinite"
                     android:repeatMode="reverse"
                     android:valueFrom="1"
                     android:valueTo="0"
                     android:valueType="floatType" />
-
             </set>
         </aapt:attr>
     </target>
