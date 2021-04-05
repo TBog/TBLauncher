@@ -1,10 +1,12 @@
 package rocks.tbog.tblauncher;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,9 +31,11 @@ import java.util.Set;
 
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.ui.DialogFragment;
+import rocks.tbog.tblauncher.ui.DialogWrapper;
 
 public class EditTagsDialog extends DialogFragment<Set<String>> {
 
+    private static final String TAG = EditTagsDialog.class.getSimpleName();
     private final ArraySet<String> mTagList = new ArraySet<>();
     private TagsAdapter mAdapter;
     private AutoCompleteTextView mNewTag;
@@ -171,12 +175,25 @@ public class EditTagsDialog extends DialogFragment<Set<String>> {
     @Override
     public void onStart() {
         super.onStart();
-        mNewTag.post(() -> {
-            mNewTag.requestFocus();
-            InputMethodManager mgr = (InputMethodManager) requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE);
-            assert mgr != null;
-            mgr.showSoftInput(mNewTag, InputMethodManager.SHOW_IMPLICIT);
-        });
+        Dialog dialog = getDialog();
+        if (dialog instanceof DialogWrapper) {
+            ((DialogWrapper) dialog).setOnWindowFocusChanged((dlg, hasFocus) -> {
+                if (hasFocus) {
+                    dlg.setOnWindowFocusChanged(null);
+                    showKeyboard(getDialog(), mNewTag);
+                }
+            });
+        }
+    }
+
+
+    static void showKeyboard(@NonNull Dialog dialog, @NonNull TextView textView) {
+        Log.i(TAG, "Keyboard - SHOW");
+        textView.requestFocus();
+
+        InputMethodManager mgr = (InputMethodManager) dialog.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        assert mgr != null;
+        mgr.showSoftInput(textView, InputMethodManager.SHOW_IMPLICIT);
     }
 
     private void addTag(String tag) {

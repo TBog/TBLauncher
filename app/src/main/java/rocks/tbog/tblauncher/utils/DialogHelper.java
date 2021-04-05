@@ -3,6 +3,7 @@ package rocks.tbog.tblauncher.utils;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
+import android.util.Log;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 import android.widget.TextView;
@@ -12,6 +13,8 @@ import androidx.annotation.NonNull;
 import rocks.tbog.tblauncher.R;
 
 public class DialogHelper {
+
+    private static final String TAG = DialogHelper.class.getSimpleName();
 
     public interface OnRename {
         void rename(Dialog dialog, String name);
@@ -35,13 +38,20 @@ public class DialogHelper {
                 .setNegativeButton(android.R.string.cancel, (dialog, which) -> dialog.cancel())
                 .afterInflate(dialog -> {
                     @SuppressLint("CutPasteId")
-                    TextView nameView = ((Dialog) dialog).findViewById(R.id.rename);
+                    EditText nameView = ((Dialog) dialog).findViewById(R.id.rename);
                     nameView.setText(currentName);
-                    nameView.requestFocus();
 
-                    InputMethodManager mgr = (InputMethodManager) ((Dialog) dialog).getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-                    assert mgr != null;
-                    mgr.showSoftInput(nameView, InputMethodManager.SHOW_IMPLICIT);
+                    showKeyboard((Dialog) dialog, nameView);
+                    nameView.postDelayed(() -> showKeyboard((Dialog) dialog, nameView), 500);
                 });
+    }
+
+    static void showKeyboard(@NonNull Dialog dialog, @NonNull TextView textView) {
+        Log.i(TAG, "Keyboard - SHOW");
+        textView.requestFocus();
+
+        InputMethodManager mgr = (InputMethodManager) dialog.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+        assert mgr != null;
+        mgr.showSoftInput(textView, InputMethodManager.SHOW_IMPLICIT);
     }
 }

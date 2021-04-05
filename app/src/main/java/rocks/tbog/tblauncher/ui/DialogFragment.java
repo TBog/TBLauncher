@@ -77,7 +77,7 @@ public abstract class DialogFragment<Output> extends androidx.fragment.app.Dialo
         TypedValue outValue = new TypedValue();
         themeWrapper.getTheme().resolveAttribute(R.attr.alertDialogTheme, outValue, true);
         int dialogStyle = outValue.resourceId;
-        Dialog dialog = new Dialog(themeWrapper, dialogStyle);
+        Dialog dialog = new DialogWrapper(themeWrapper, dialogStyle);
         //Log.i(TAG, "dialog=" + dialog);
         Log.i(TAG, "dialog.context=" + dialog.getContext());
         return dialog;
