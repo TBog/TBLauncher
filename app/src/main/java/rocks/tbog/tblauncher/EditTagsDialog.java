@@ -180,7 +180,7 @@ public class EditTagsDialog extends DialogFragment<Set<String>> {
             ((DialogWrapper) dialog).setOnWindowFocusChanged((dlg, hasFocus) -> {
                 if (hasFocus) {
                     dlg.setOnWindowFocusChanged(null);
-                    showKeyboard(getDialog(), mNewTag);
+                    showKeyboard(dlg, mNewTag);
                 }
             });
         }

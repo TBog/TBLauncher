@@ -1291,6 +1291,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         if (hasFocus) {
             if (state.getDesktop() == LauncherState.Desktop.SEARCH) {
                 if (state.isSearchBarVisible() && PrefCache.linkKeyboardAndSearchBar(mPref)) {
+                    mSearchEditText.requestFocus();
                     mSearchEditText.post(this::showKeyboard);
                     // UI_ANIMATION_DURATION should be the exact time the full-screen animation ends
                     mSearchEditText.postDelayed(this::showKeyboard, UI_ANIMATION_DURATION);
