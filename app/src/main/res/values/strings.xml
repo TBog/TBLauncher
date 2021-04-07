@@ -389,12 +389,14 @@
     <string name="root_mode_summary">Used to hibernate apps</string>
     <string name="root_mode_error">Unable to gain root privileges</string>
     <string name="behaviour_link_close_keyboard_back_button">Close keyboard same as back button</string>
+    <string name="keyboard_suggestions">Enable autocomplete/suggestions</string>
     <string name="device_admin_explanation">Used to lock the screen</string>
     <string name="device_admin">Device admin</string>
     <string name="device_admin_disable">Are you sure you want to remove this permission?</string>
     <string name="device_admin_required">Device admin is required for this action</string>
     <string name="gesture_double_click">Double tap screen</string>
     <string name="loading_icon">Loading icon</string>
+    <string name="keyboard_section">Keyboard</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>

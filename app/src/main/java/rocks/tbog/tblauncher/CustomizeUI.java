@@ -13,10 +13,13 @@ import android.graphics.drawable.PaintDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.graphics.drawable.StateListDrawable;
 import android.os.Build;
+import android.provider.Settings;
+import android.text.InputType;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
+import android.widget.EditText;
 import android.widget.ImageView;
 
 import androidx.annotation.IdRes;
@@ -40,7 +43,25 @@ public class CustomizeUI {
     private ImageView mLauncherButton;
     private ImageView mMenuButton;
     private ImageView mClearButton;
-    //private View mResultLayout;
+
+    /**
+     * InputType that behaves as if the consuming IME is a standard-obeying
+     * soft-keyboard
+     * <p>
+     * *Auto Complete* means "we're handling auto-completion ourselves". Then
+     * we ignore whatever the IME thinks we should display.
+     */
+    private final static int INPUT_TYPE_STANDARD = InputType.TYPE_CLASS_TEXT
+            | InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE
+            | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS;
+    /**
+     * InputType that behaves as if the consuming IME is SwiftKey
+     * <p>
+     * *Visible Password* fields will break many non-Latin IMEs and may show
+     * unexpected behaviour in numerous ways. (#454, #517)
+     */
+    private final static int INPUT_TYPE_WORKAROUND = InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
+            | InputType.TYPE_TEXT_FLAG_AUTO_CORRECT;
 
     @SuppressWarnings("TypeParameterUnusedInFormals")
     private <T extends View> T findViewById(@IdRes int id) {
@@ -60,6 +81,7 @@ public class CustomizeUI {
 
         setSearchBarPref();
         setResultListPref(findViewById(R.id.resultLayout));
+        adjustInputType(mSearchBar);
     }
 
     public void onPostCreate() {
@@ -207,6 +229,25 @@ public class CustomizeUI {
         }
     }
 
+    private void adjustInputType(EditText searchEditText) {
+        int currentInputType = searchEditText.getInputType();
+        int requiredInputType;
+
+        if (isSuggestionsEnabled()) {
+            requiredInputType = InputType.TYPE_CLASS_TEXT;
+        } else {
+            if (isNonCompliantKeyboard()) {
+                requiredInputType = INPUT_TYPE_WORKAROUND;
+            } else {
+                requiredInputType = INPUT_TYPE_STANDARD;
+            }
+        }
+
+        if (currentInputType != requiredInputType) {
+            searchEditText.setInputType(requiredInputType);
+        }
+    }
+
     public float getResultListRadius() {
         if (mPref.getBoolean("result-list-rounded", true)) {
             return getContext().getResources().getDimension(R.dimen.result_corner_radius);
@@ -286,5 +327,22 @@ public class CustomizeUI {
         }
 
         return null;
+    }
+
+    /**
+     * Should we force the keyboard not to display suggestions?
+     * (swiftkey is broken, see https://github.com/Neamar/KISS/issues/44)
+     * (same for flesky: https://github.com/Neamar/KISS/issues/1263)
+     */
+    private boolean isNonCompliantKeyboard() {
+        String currentKeyboard = Settings.Secure.getString(mTBLauncherActivity.getContentResolver(), Settings.Secure.DEFAULT_INPUT_METHOD).toLowerCase();
+        return currentKeyboard.contains("swiftkey") || currentKeyboard.contains("flesky") || currentKeyboard.endsWith(".latinime");
+    }
+
+    /**
+     * Should the keyboard autocomplete and suggest options
+     */
+    private boolean isSuggestionsEnabled() {
+        return mPref.getBoolean("enable-suggestions-keyboard", false);
     }
 }
