@@ -118,6 +118,13 @@
             android:summary="@string/force_shape_summary"
             android:title="@string/force_shape" />
 
+        <ListPreference
+            android:defaultValue="none"
+            android:entries="@array/loadingIconEntries"
+            android:entryValues="@array/loadingIconValues"
+            android:key="loading-icon"
+            android:title="@string/loading_icon" />
+
         <!-- Icon pack -->
         <PreferenceCategory
             android:key="icon-pack-section"
@@ -589,6 +596,29 @@
                 app:isPreferenceVisible="false" />
         </PreferenceCategory>
 
+        <!-- Keyboard -->
+        <androidx.preference.PreferenceCategory
+            android:icon="@drawable/ic_keyboard"
+            android:key="keyboard-section"
+            android:title="@string/keyboard_section">
+
+            <androidx.preference.SwitchPreference
+                android:defaultValue="true"
+                android:key="behaviour-link-keyboard-search-bar"
+                android:title="@string/behaviour_link_keyboard_search_bar" />
+
+            <androidx.preference.SwitchPreference
+                android:defaultValue="true"
+                android:key="behaviour-link-close-keyboard-back-button"
+                android:title="@string/behaviour_link_close_keyboard_back_button" />
+
+            <androidx.preference.SwitchPreference
+                android:defaultValue="false"
+                android:key="enable-suggestions-keyboard"
+                android:title="@string/keyboard_suggestions" />
+
+        </androidx.preference.PreferenceCategory>
+
         <!-- Behaviour -->
         <androidx.preference.PreferenceCategory
             android:icon="@drawable/ic_behaviour"
@@ -616,16 +646,6 @@
                 android:entryValues="@array/gestureValues"
                 android:key="button-home"
                 android:title="@string/button_home" />
-
-            <androidx.preference.SwitchPreference
-                android:defaultValue="true"
-                android:key="behaviour-link-keyboard-search-bar"
-                android:title="@string/behaviour_link_keyboard_search_bar" />
-
-            <androidx.preference.SwitchPreference
-                android:defaultValue="true"
-                android:key="behaviour-link-close-keyboard-back-button"
-                android:title="@string/behaviour_link_close_keyboard_back_button" />
 
             <androidx.preference.SwitchPreference
                 android:defaultValue="true"

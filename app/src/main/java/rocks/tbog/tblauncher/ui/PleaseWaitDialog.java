@@ -67,7 +67,7 @@ public class PleaseWaitDialog extends DialogFragment<Void> {
         // add progress indicator
         {
             ImageView loading = new ImageView(context);
-            loading.setImageResource(R.drawable.ic_loading);
+            loading.setImageResource(R.drawable.ic_loading_arrows);
             if (loading.getDrawable() instanceof Animatable)
                 ((Animatable) loading.getDrawable()).start();
             //loading.setImageDrawable(DrawableUtils.getProgressBarIndeterminate(context));

@@ -487,7 +487,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                     hideResultList(false);
                 } else {
                     // try to execute the action
-                    TBApplication.dataHandler(getContext()).runAfterLoadOver(()->{
+                    TBApplication.dataHandler(getContext()).runAfterLoadOver(() -> {
                         mLauncherButton.postDelayed(() -> executeAction(openResult, null), KEYBOARD_ANIMATION_DELAY);
                     });
                 }
@@ -898,11 +898,13 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     private void showResultList(boolean animate) {
+        Log.d(TAG, "showResultList (anim " + animate + ")");
         if (TBApplication.state().getResultListVisibility() != LauncherState.AnimatedVisibility.ANIM_TO_VISIBLE)
             mResultLayout.animate().cancel();
         if (mResultLayout.getVisibility() == View.VISIBLE)
             return;
         mResultLayout.setVisibility(View.VISIBLE);
+        Log.d(TAG, "mResultLayout set VISIBLE (anim " + animate + ")");
         if (animate) {
             TBApplication.state().setResultList(LauncherState.AnimatedVisibility.ANIM_TO_VISIBLE);
             mResultLayout.setAlpha(0f);
@@ -923,6 +925,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     private void hideResultList(boolean animate) {
+        Log.d(TAG, "hideResultList (anim " + animate + ")");
         if (TBApplication.state().getResultListVisibility() != LauncherState.AnimatedVisibility.ANIM_TO_HIDDEN)
             mResultLayout.animate().cancel();
         if (mResultLayout.getVisibility() != View.VISIBLE)
@@ -936,12 +939,14 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                         @Override
                         public void onAnimationEnd(Animator animation) {
                             TBApplication.state().setResultList(LauncherState.AnimatedVisibility.HIDDEN);
+                            Log.d(TAG, "mResultLayout set INVISIBLE");
                             mResultLayout.setVisibility(View.INVISIBLE);
                         }
                     })
                     .start();
         } else {
             TBApplication.state().setResultList(LauncherState.AnimatedVisibility.HIDDEN);
+            Log.d(TAG, "mResultLayout set INVISIBLE");
             mResultLayout.setVisibility(View.INVISIBLE);
         }
     }
@@ -1286,6 +1291,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         if (hasFocus) {
             if (state.getDesktop() == LauncherState.Desktop.SEARCH) {
                 if (state.isSearchBarVisible() && PrefCache.linkKeyboardAndSearchBar(mPref)) {
+                    mSearchEditText.requestFocus();
                     mSearchEditText.post(this::showKeyboard);
                     // UI_ANIMATION_DURATION should be the exact time the full-screen animation ends
                     mSearchEditText.postDelayed(this::showKeyboard, UI_ANIMATION_DURATION);
@@ -1312,6 +1318,8 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
                 switchToDesktop(LauncherState.Desktop.SEARCH);
                 clearAdapter();
             }
+            // make sure the QuickList will not toggle off
+            TBApplication.quickList(ctx).adapterCleared();
             item.doLaunch(mLauncherButton, LAUNCHED_FROM_GESTURE);
             return true;
         } else {

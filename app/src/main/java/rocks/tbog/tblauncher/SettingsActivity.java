@@ -81,7 +81,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             "notification-bar-color", "notification-bar-alpha", "notification-bar-gradient", "black-notification-icons",
             "search-bar-size", "search-bar-rounded", "search-bar-gradient", "search-bar-at-bottom",
             "search-bar-color", "search-bar-alpha", "search-bar-text-color", "search-bar-icon-color",
-            "search-bar-ripple-color", "search-bar-cursor-argb"
+            "search-bar-ripple-color", "search-bar-cursor-argb", "enable-suggestions-keyboard"
     ));
     private final static ArraySet<String> PREF_LISTS_WITH_DEPENDENCY = new ArraySet<>(Arrays.asList(
             "gesture-click",

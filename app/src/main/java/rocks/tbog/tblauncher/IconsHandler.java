@@ -138,7 +138,9 @@ public class IconsHandler {
 
                     Log.i("time", timer + " to load icon pack " + packageName);
                     mLoadIconsPackTask = null;
-                    TBApplication.quickList(ctx).onFavoritesChanged();
+                    TBApplication app = TBApplication.getApplication(ctx);
+                    app.behaviour().refreshSearchRecords();
+                    app.quickList().onFavoritesChanged();
                 }
             });
         }
