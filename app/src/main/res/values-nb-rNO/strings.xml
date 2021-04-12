@@ -335,4 +335,25 @@
     <string name="settings_theme">Innstillingsdrakt</string>
     <string name="popup_title_color">Tittelfarge</string>
     <string name="popup_text_color">Tekstfarge</string>
+    <string name="result_history_size_summary">Maksimalt antall elementer i historikkvisning</string>
+    <string name="export_widgets_summary">Import kan feile, eller kreve at hvert miniprogram legges til manuelt</string>
+    <string name="cache_half_apps_summary">Gjør LRU-huriglagerstørrelse halvparten av installerte programmer</string>
+    <string name="gesture_double_click">Dobbelttrykk på skjermen</string>
+    <string name="behaviour_summary">Håndvendinger og oppførsel</string>
+    <string name="dm_search_fullscreen_summary">Kun når tastaturet er lukket</string>
+    <string name="behaviour_link_keyboard_search_bar">Lenk tastatur til søkefeltssynlighet</string>
+    <string name="gesture_fling_down_left">Flikk fra |<b>←</b>|, <b>↓</b></string>
+    <string name="gesture_fling_down_left_summary">Start fra <b>←</b> side av skjermen og flikk <b>↓</b></string>
+    <string name="gesture_fling_down_right">Flikk fra |<b>→</b>|, <b>↓</b></string>
+    <string name="gesture_fling_down_right_summary">Start fra <b>→</b> side av skjermen og flikk <b>↓</b></string>
+    <string name="gesture_fling_left">Flikk ←</string>
+    <string name="gesture_fling_right">Flikk →</string>
+    <string name="gesture_fling_up">Flikk ↑</string>
+    <string name="choose_letter_color">Bokstavfarge</string>
+    <string name="device_admin_disable">Fjern tilgangen\?</string>
+    <string name="device_admin">Enhetsadministrator</string>
+    <string name="root_mode">Rot-modus</string>
+    <string name="title_behaviour">Oppførsel</string>
+    <string name="export_chooser">Eksporter %s</string>
+    <string name="title_backup">Sikkerhetskopi</string>
 </resources>
