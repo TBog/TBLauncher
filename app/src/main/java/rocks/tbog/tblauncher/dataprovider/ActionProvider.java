@@ -3,8 +3,8 @@ package rocks.tbog.tblauncher.dataprovider;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.StringRes;
 
-import java.util.ArrayList;
 import java.util.Collections;
 
 import rocks.tbog.tblauncher.R;
@@ -14,11 +14,14 @@ import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.searcher.HistorySearcher;
 import rocks.tbog.tblauncher.searcher.TagSearcher;
 
-public class ActionProvider extends StaticProvider<ActionEntry> {
+public class ActionProvider extends DBProvider<ActionEntry> {
 
-    public ActionProvider(@NonNull Context context) {
-        super(new ArrayList<>(7));
-        // show apps sorted by name
+    private static final ActionEntry[] s_entries = new ActionEntry[12];
+    @StringRes
+    private static final int[] s_names = new int[12];
+
+    static {
+        int cnt = 0;
         {
             String id = ActionEntry.SCHEME + "show/apps/byName";
             ActionEntry actionEntry = new ActionEntry(id, R.drawable.ic_apps_az);
@@ -27,8 +30,8 @@ public class ActionProvider extends StaticProvider<ActionEntry> {
                 Provider<? extends EntryItem> provider = TBApplication.dataHandler(ctx).getAppProvider();
                 TBApplication.quickList(ctx).toggleProvider(v, provider, EntryItem.NAME_COMPARATOR);
             });
-            actionEntry.setName(context.getResources().getString(R.string.action_show_apps));
-            pojos.add(actionEntry);
+            s_names[cnt] = R.string.action_show_apps;
+            s_entries[cnt++] = actionEntry;
         }
         // show apps sorted by name in reverse order
         {
@@ -39,8 +42,8 @@ public class ActionProvider extends StaticProvider<ActionEntry> {
                 Provider<? extends EntryItem> provider = TBApplication.dataHandler(ctx).getAppProvider();
                 TBApplication.quickList(ctx).toggleProvider(v, provider, Collections.reverseOrder(EntryItem.NAME_COMPARATOR));
             });
-            actionEntry.setName(context.getResources().getString(R.string.action_show_apps_reversed));
-            pojos.add(actionEntry);
+            s_names[cnt] = R.string.action_show_apps_reversed;
+            s_entries[cnt++] = actionEntry;
         }
         // show contacts sorted by name
         {
@@ -51,8 +54,8 @@ public class ActionProvider extends StaticProvider<ActionEntry> {
                 Provider<? extends EntryItem> provider = TBApplication.dataHandler(ctx).getContactsProvider();
                 TBApplication.quickList(ctx).toggleProvider(v, provider, EntryItem.NAME_COMPARATOR);
             });
-            actionEntry.setName(context.getResources().getString(R.string.action_show_contacts));
-            pojos.add(actionEntry);
+            s_names[cnt] = R.string.action_show_contacts;
+            s_entries[cnt++] = actionEntry;
         }
         // show contacts sorted by name in reverse order
         {
@@ -63,8 +66,8 @@ public class ActionProvider extends StaticProvider<ActionEntry> {
                 Provider<? extends EntryItem> provider = TBApplication.dataHandler(ctx).getContactsProvider();
                 TBApplication.quickList(ctx).toggleProvider(v, provider, Collections.reverseOrder(EntryItem.NAME_COMPARATOR));
             });
-            actionEntry.setName(context.getResources().getString(R.string.action_show_contacts_reversed));
-            pojos.add(actionEntry);
+            s_names[cnt] = R.string.action_show_contacts_reversed;
+            s_entries[cnt++] = actionEntry;
         }
         // show shortcuts sorted by name
         {
@@ -75,8 +78,8 @@ public class ActionProvider extends StaticProvider<ActionEntry> {
                 Provider<? extends EntryItem> provider = TBApplication.dataHandler(ctx).getShortcutsProvider();
                 TBApplication.quickList(ctx).toggleProvider(v, provider, EntryItem.NAME_COMPARATOR);
             });
-            actionEntry.setName(context.getResources().getString(R.string.action_show_shortcuts));
-            pojos.add(actionEntry);
+            s_names[cnt] = R.string.action_show_shortcuts;
+            s_entries[cnt++] = actionEntry;
         }
         // show shortcuts sorted by name in reverse order
         {
@@ -87,8 +90,8 @@ public class ActionProvider extends StaticProvider<ActionEntry> {
                 Provider<? extends EntryItem> provider = TBApplication.dataHandler(ctx).getShortcutsProvider();
                 TBApplication.quickList(ctx).toggleProvider(v, provider, Collections.reverseOrder(EntryItem.NAME_COMPARATOR));
             });
-            actionEntry.setName(context.getResources().getString(R.string.action_show_shortcuts_reversed));
-            pojos.add(actionEntry);
+            s_names[cnt] = R.string.action_show_shortcuts_reversed;
+            s_entries[cnt++] = actionEntry;
         }
         // show favorites sorted by name
         {
@@ -99,8 +102,8 @@ public class ActionProvider extends StaticProvider<ActionEntry> {
                 FavProvider provider = TBApplication.dataHandler(ctx).getFavProvider();
                 TBApplication.quickList(ctx).toggleProvider(v, provider, EntryItem.NAME_COMPARATOR);
             });
-            actionEntry.setName(context.getResources().getString(R.string.action_show_favorites));
-            pojos.add(actionEntry);
+            s_names[cnt] = R.string.action_show_favorites;
+            s_entries[cnt++] = actionEntry;
         }
         // show history sorted by how recent it was accessed
         {
@@ -110,8 +113,8 @@ public class ActionProvider extends StaticProvider<ActionEntry> {
                 Context ctx = v.getContext();
                 TBApplication.quickList(ctx).toggleSearch(v, "recency", HistorySearcher.class);
             });
-            actionEntry.setName(context.getResources().getString(R.string.action_show_history_recency));
-            pojos.add(actionEntry);
+            s_names[cnt] = R.string.action_show_history_recency;
+            s_entries[cnt++] = actionEntry;
         }
         // show history sorted by how frequent it was accessed
         {
@@ -121,8 +124,8 @@ public class ActionProvider extends StaticProvider<ActionEntry> {
                 Context ctx = v.getContext();
                 TBApplication.quickList(ctx).toggleSearch(v, "frequency", HistorySearcher.class);
             });
-            actionEntry.setName(context.getResources().getString(R.string.action_show_history_frequency));
-            pojos.add(actionEntry);
+            s_names[cnt] = R.string.action_show_history_frequency;
+            s_entries[cnt++] = actionEntry;
         }
         // show history sorted based on frequency * recency
         // frequency = #launches_for_app / #all_launches
@@ -134,8 +137,8 @@ public class ActionProvider extends StaticProvider<ActionEntry> {
                 Context ctx = v.getContext();
                 TBApplication.quickList(ctx).toggleSearch(v, "frecency", HistorySearcher.class);
             });
-            actionEntry.setName(context.getResources().getString(R.string.action_show_history_frecency));
-            pojos.add(actionEntry);
+            s_names[cnt] = R.string.action_show_history_frecency;
+            s_entries[cnt++] = actionEntry;
         }
         // show history sorted by how frequent it was accessed in the last 36 hours
         {
@@ -145,8 +148,8 @@ public class ActionProvider extends StaticProvider<ActionEntry> {
                 Context ctx = v.getContext();
                 TBApplication.quickList(ctx).toggleSearch(v, "adaptive", HistorySearcher.class);
             });
-            actionEntry.setName(context.getResources().getString(R.string.action_show_history_adaptive));
-            pojos.add(actionEntry);
+            s_names[cnt] = R.string.action_show_history_adaptive;
+            s_entries[cnt++] = actionEntry;
         }
         {
             String id = ActionEntry.SCHEME + "show/untagged";
@@ -155,13 +158,26 @@ public class ActionProvider extends StaticProvider<ActionEntry> {
                 Context ctx = v.getContext();
                 TBApplication.quickList(ctx).toggleSearch(v, "", TagSearcher.class);
             });
-            actionEntry.setName(context.getResources().getString(R.string.action_show_untagged));
-            pojos.add(actionEntry);
+            s_names[cnt] = R.string.action_show_untagged;
+            s_entries[cnt++] = actionEntry;
         }
+        //noinspection ConstantConditions
+        if (cnt != s_entries.length || cnt != s_names.length)
+            throw new IllegalStateException("ActionEntry static list size");
+    }
+
+    public ActionProvider(@NonNull Context context) {
+        super(context);
+    }
+
+    @Override
+    protected DBLoader<ActionEntry> newLoadTask() {
+        return new UpdateFromFavoritesLoader<>(this, s_entries, s_names);
     }
 
     @Override
     public boolean mayFindById(@NonNull String id) {
         return id.startsWith(ActionEntry.SCHEME);
     }
+
 }

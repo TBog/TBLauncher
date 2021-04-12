@@ -3,6 +3,7 @@ package rocks.tbog.tblauncher.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 
@@ -109,5 +110,22 @@ public class PrefCache {
 
     public static boolean linkCloseKeyboardToBackButton(SharedPreferences preferences) {
         return preferences.getBoolean("behaviour-link-close-keyboard-back-button", true);
+    }
+
+    @DrawableRes
+    public static int getLoadingIconRes(Context context) {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+        String iconName = pref.getString("loading-icon", null);
+        if (iconName == null)
+            iconName = "none";
+        switch (iconName) {
+            case "arrows":
+                return R.drawable.ic_loading_arrows;
+            case "pulse":
+                return R.drawable.ic_loading_pulse;
+            case "none":
+            default:
+                return android.R.color.transparent;
+        }
     }
 }

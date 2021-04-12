@@ -170,8 +170,10 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
         Log.d(TAG, "onResume()");
         super.onResume();
 
-        if (TBApplication.getApplication(this).isLayoutUpdateRequired()) {
-            TBApplication.getApplication(this).requireLayoutUpdate(false);
+        TBApplication app = TBApplication.getApplication(this);
+
+        if (app.isLayoutUpdateRequired()) {
+            app.requireLayoutUpdate(false);
             Log.i(TAG, "Restarting app after setting changes");
             // Restart current activity to refresh view, since some preferences may require using a new UI
             //getWindow().getDecorView().post(TBLauncherActivity.this::recreate);
@@ -181,8 +183,8 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
             return;
         }
 
-        TBApplication.behaviour(this).onResume();
-        TBApplication.quickList(this).onResume();
+        app.behaviour().onResume();
+        app.quickList().onResume();
     }
 
     @Override

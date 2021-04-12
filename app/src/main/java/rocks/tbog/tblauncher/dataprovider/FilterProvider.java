@@ -3,8 +3,7 @@ package rocks.tbog.tblauncher.dataprovider;
 import android.content.Context;
 
 import androidx.annotation.NonNull;
-
-import java.util.ArrayList;
+import androidx.annotation.StringRes;
 
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
@@ -13,10 +12,14 @@ import rocks.tbog.tblauncher.entry.ContactEntry;
 import rocks.tbog.tblauncher.entry.FilterEntry;
 import rocks.tbog.tblauncher.entry.ShortcutEntry;
 
-public class FilterProvider extends StaticProvider<FilterEntry> {
+public class FilterProvider extends DBProvider<FilterEntry> {
 
-    public FilterProvider(Context context) {
-        super(new ArrayList<>(3));
+    private static final FilterEntry[] s_entries = new FilterEntry[3];
+    @StringRes
+    private static final int[] s_names = new int[3];
+
+    static {
+        int cnt = 0;
         // apps filter
         {
             String id = FilterEntry.SCHEME + "applications";
@@ -26,8 +29,8 @@ public class FilterProvider extends StaticProvider<FilterEntry> {
                 AppProvider provider = TBApplication.getApplication(ctx).getDataHandler().getAppProvider();
                 TBApplication.quickList(ctx).toggleFilter(v, provider);
             });
-            filter.setName(context.getResources().getString(R.string.filter_apps));
-            pojos.add(filter);
+            s_names[cnt] = R.string.filter_apps;
+            s_entries[cnt++] = filter;
         }
         // contacts filter
         {
@@ -38,8 +41,8 @@ public class FilterProvider extends StaticProvider<FilterEntry> {
                 ContactsProvider provider = TBApplication.dataHandler(ctx).getContactsProvider();
                 TBApplication.quickList(ctx).toggleFilter(v, provider);
             });
-            filter.setName(context.getResources().getString(R.string.filter_contacts));
-            pojos.add(filter);
+            s_names[cnt] = R.string.filter_contacts;
+            s_entries[cnt++] = filter;
         }
         // pinned shortcuts filter
         {
@@ -50,10 +53,23 @@ public class FilterProvider extends StaticProvider<FilterEntry> {
                 ShortcutsProvider provider = TBApplication.dataHandler(ctx).getShortcutsProvider();
                 TBApplication.quickList(ctx).toggleFilter(v, provider);
             });
-            filter.setName(context.getResources().getString(R.string.filter_shortcuts));
-            pojos.add(filter);
+            s_names[cnt] = R.string.filter_shortcuts;
+            s_entries[cnt++] = filter;
         }
         // TODO: somehow enable filtering for the favorites, right now we can only show them
+
+        //noinspection ConstantConditions
+        if (cnt != s_entries.length || cnt != s_names.length)
+            throw new IllegalStateException("FilterEntry static list size");
+    }
+
+    public FilterProvider(Context context) {
+        super(context);
+    }
+
+    @Override
+    protected DBLoader<FilterEntry> newLoadTask() {
+        return new UpdateFromFavoritesLoader<>(this, s_entries, s_names);
     }
 
     @Override

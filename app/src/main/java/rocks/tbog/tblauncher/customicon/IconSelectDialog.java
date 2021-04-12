@@ -1,5 +1,6 @@
 package rocks.tbog.tblauncher.customicon;
 
+import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
@@ -31,6 +32,7 @@ import rocks.tbog.tblauncher.entry.ShortcutEntry;
 import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.icons.IconPack;
 import rocks.tbog.tblauncher.ui.DialogFragment;
+import rocks.tbog.tblauncher.ui.DialogWrapper;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.UISizes;
@@ -160,6 +162,28 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
         }
 
         return view;
+    }
+
+    @Override
+    public void onStart() {
+        super.onStart();
+        Dialog dialog = getDialog();
+        if (dialog instanceof DialogWrapper) {
+            ((DialogWrapper) dialog).setOnWindowFocusChanged((dlg, hasFocus) -> {
+                if (hasFocus) {
+                    dlg.setOnWindowFocusChanged(null);
+
+                    //hack: fix the height of the dialog so it doesn't flicker
+                    setFixedHeight(getView());
+                }
+            });
+        }
+    }
+    
+    private void setFixedHeight(View view) {
+        ViewGroup.LayoutParams params = view.getLayoutParams();
+        params.height = view.getMeasuredHeight();
+        view.setLayoutParams(params);
     }
 
     private void setSelectedDrawable(Drawable selected, Drawable preview) {
