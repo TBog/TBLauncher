@@ -63,6 +63,99 @@ public class EditQuickList {
         TBApplication.dataHandler(context).setQuickList(idList);
     }
 
+    private void addFilters(@NonNull LayoutInflater inflater, @NonNull ArrayList<Pair<String, View>> pages) {
+        GridView gridView = (GridView) inflater.inflate(R.layout.quick_list_editor_page, mViewPager, false);
+        pages.add(new Pair<>(inflater.getContext().getString(R.string.edit_quick_list_tab_filters), gridView));
+
+        ArrayList<EntryItem> list = new ArrayList<>();
+        EntryAdapter adapter = new EntryAdapter(list);
+        gridView.setAdapter(adapter);
+        new LoadDataForAdapter(adapter, () -> {
+            Context ctx = gridView.getContext();
+            ArrayList<EntryItem> data = new ArrayList<>();
+            {
+                FilterProvider provider = TBApplication.dataHandler(ctx).getFilterProvider();
+                if (provider != null) {
+                    List<? extends EntryItem> entryItems = provider.getPojos();
+                    data.addAll(entryItems);
+                }
+            }
+            return data;
+        }).execute();
+        gridView.setOnItemClickListener(mAddToQuickList);
+    }
+
+    private void addActions(@NonNull LayoutInflater inflater, @NonNull ArrayList<Pair<String, View>> pages) {
+        GridView gridView = (GridView) inflater.inflate(R.layout.quick_list_editor_page, mViewPager, false);
+        pages.add(new Pair<>(inflater.getContext().getString(R.string.edit_quick_list_tab_actions), gridView));
+
+        ArrayList<EntryItem> list = new ArrayList<>();
+        EntryAdapter adapter = new EntryAdapter(list);
+        gridView.setAdapter(adapter);
+        new LoadDataForAdapter(adapter, () -> {
+            Context ctx = gridView.getContext();
+            ArrayList<EntryItem> data = new ArrayList<>();
+            {
+                ActionProvider provider = TBApplication.dataHandler(ctx).getActionProvider();
+                if (provider != null) {
+                    List<? extends EntryItem> entryItems = provider.getPojos();
+                    data.addAll(entryItems);
+                }
+            }
+            return data;
+        }).execute();
+        gridView.setOnItemClickListener(mAddToQuickList);
+    }
+
+    private void addTags(@NonNull LayoutInflater inflater, @NonNull ArrayList<Pair<String, View>> pages) {
+        GridView gridView = (GridView) inflater.inflate(R.layout.quick_list_editor_page, mViewPager, false);
+        pages.add(new Pair<>(inflater.getContext().getString(R.string.edit_quick_list_tab_tags), gridView));
+
+        ArrayList<EntryItem> list = new ArrayList<>();
+        EntryAdapter adapter = new EntryAdapter(list);
+        gridView.setAdapter(adapter);
+        new LoadDataForAdapter(adapter, () -> {
+            Context ctx = gridView.getContext();
+            ArrayList<EntryItem> data = new ArrayList<>();
+            {
+                TagsProvider tagsProvider = TBApplication.dataHandler(ctx).getTagsProvider();
+                if (tagsProvider != null) {
+                    List<String> tagNameList = new ArrayList<>(TBApplication.tagsHandler(ctx).getValidTags());
+                    Collections.sort(tagNameList);
+                    for (String tagName : tagNameList) {
+                        TagEntry tagEntry = tagsProvider.getTagEntry(tagName);
+                        data.add(tagEntry);
+                    }
+                }
+            }
+            return data;
+        }).execute();
+        gridView.setOnItemClickListener(mAddToQuickList);
+    }
+
+    private void addFavorites(@NonNull LayoutInflater inflater, @NonNull ArrayList<Pair<String, View>> pages) {
+        GridView gridView = (GridView) inflater.inflate(R.layout.quick_list_editor_page, mViewPager, false);
+        pages.add(new Pair<>(inflater.getContext().getString(R.string.edit_quick_list_tab_favorites), gridView));
+
+        ArrayList<EntryItem> list = new ArrayList<>();
+        EntryAdapter adapter = new EntryAdapter(list);
+        gridView.setAdapter(adapter);
+        new LoadDataForAdapter(adapter, () -> {
+            Context ctx = gridView.getContext();
+            DataHandler dataHandler = TBApplication.dataHandler(ctx);
+            ArrayList<FavRecord> favRecords = dataHandler.getFavorites();
+            ArrayList<EntryItem> data = new ArrayList<>(favRecords.size());
+            for (FavRecord fav : favRecords) {
+                EntryItem entry = dataHandler.getPojo(fav.record);
+                // we have a separate section for StaticEntry (filters and actions), don't duplicate
+                if (entry != null && !(entry instanceof StaticEntry))
+                    data.add(entry);
+            }
+            return data;
+        }).execute();
+        gridView.setOnItemClickListener(mAddToQuickList);
+    }
+
     public void bindView(@NonNull View view) {
         final Context context = view.getContext();
         // keep the preview the same as the actual thing
@@ -87,101 +180,16 @@ public class EditQuickList {
             LayoutInflater inflater = LayoutInflater.from(context);
 
             // filters
-            {
-                GridView gridView = (GridView) inflater.inflate(R.layout.quick_list_editor_page, mViewPager, false);
-                pages.add(new Pair<>(context.getString(R.string.edit_quick_list_tab_filters), gridView));
-
-                ArrayList<EntryItem> list = new ArrayList<>();
-                EntryAdapter adapter = new EntryAdapter(list);
-                gridView.setAdapter(adapter);
-                new LoadDataForAdapter(adapter, () -> {
-                    Context ctx = gridView.getContext();
-                    ArrayList<EntryItem> data = new ArrayList<>();
-                    {
-                        FilterProvider provider = TBApplication.dataHandler(ctx).getFilterProvider();
-                        if (provider != null) {
-                            List<? extends EntryItem> entryItems = provider.getPojos();
-                            data.addAll(entryItems);
-                        }
-                    }
-                    return data;
-                }).execute();
-                gridView.setOnItemClickListener(mAddToQuickList);
-            }
+            addFilters(inflater, pages);
 
             // actions
-            {
-                GridView gridView = (GridView) inflater.inflate(R.layout.quick_list_editor_page, mViewPager, false);
-                pages.add(new Pair<>(context.getString(R.string.edit_quick_list_tab_actions), gridView));
-
-                ArrayList<EntryItem> list = new ArrayList<>();
-                EntryAdapter adapter = new EntryAdapter(list);
-                gridView.setAdapter(adapter);
-                new LoadDataForAdapter(adapter, () -> {
-                    Context ctx = gridView.getContext();
-                    ArrayList<EntryItem> data = new ArrayList<>();
-                    {
-                        ActionProvider provider = TBApplication.dataHandler(ctx).getActionProvider();
-                        if (provider != null) {
-                            List<? extends EntryItem> entryItems = provider.getPojos();
-                            data.addAll(entryItems);
-                        }
-                    }
-                    return data;
-                }).execute();
-                gridView.setOnItemClickListener(mAddToQuickList);
-            }
+            addActions(inflater, pages);
 
             // tags
-            {
-                GridView gridView = (GridView) inflater.inflate(R.layout.quick_list_editor_page, mViewPager, false);
-                pages.add(new Pair<>(context.getString(R.string.edit_quick_list_tab_tags), gridView));
-
-                ArrayList<EntryItem> list = new ArrayList<>();
-                EntryAdapter adapter = new EntryAdapter(list);
-                gridView.setAdapter(adapter);
-                new LoadDataForAdapter(adapter, () -> {
-                    Context ctx = gridView.getContext();
-                    ArrayList<EntryItem> data = new ArrayList<>();
-                    {
-                        TagsProvider tagsProvider = TBApplication.dataHandler(ctx).getTagsProvider();
-                        if (tagsProvider != null) {
-                            List<String> tagNameList = new ArrayList<>(TBApplication.tagsHandler(ctx).getValidTags());
-                            Collections.sort(tagNameList);
-                            for (String tagName : tagNameList) {
-                                TagEntry tagEntry = tagsProvider.getTagEntry(tagName);
-                                data.add(tagEntry);
-                            }
-                        }
-                    }
-                    return data;
-                }).execute();
-                gridView.setOnItemClickListener(mAddToQuickList);
-            }
+            addTags(inflater, pages);
 
             // favorites
-            {
-                GridView gridView = (GridView) inflater.inflate(R.layout.quick_list_editor_page, mViewPager, false);
-                pages.add(new Pair<>(context.getString(R.string.edit_quick_list_tab_favorites), gridView));
-
-                ArrayList<EntryItem> list = new ArrayList<>();
-                EntryAdapter adapter = new EntryAdapter(list);
-                gridView.setAdapter(adapter);
-                new LoadDataForAdapter(adapter, () -> {
-                    Context ctx = gridView.getContext();
-                    DataHandler dataHandler = TBApplication.dataHandler(ctx);
-                    ArrayList<FavRecord> favRecords = dataHandler.getFavorites();
-                    ArrayList<EntryItem> data = new ArrayList<>(favRecords.size());
-                    for (FavRecord fav : favRecords) {
-                        EntryItem entry = dataHandler.getPojo(fav.record);
-                        // we have a separate section for StaticEntry (filters and actions), don't duplicate
-                        if (entry != null && !(entry instanceof StaticEntry))
-                            data.add(entry);
-                    }
-                    return data;
-                }).execute();
-                gridView.setOnItemClickListener(mAddToQuickList);
-            }
+            addFavorites(inflater, pages);
 
             pages.trimToSize();
             mViewPager.setAdapter(new ViewPagerAdapter(pages));

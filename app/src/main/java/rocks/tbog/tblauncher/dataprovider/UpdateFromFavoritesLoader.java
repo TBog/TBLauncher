@@ -20,7 +20,7 @@ public class UpdateFromFavoritesLoader<T extends StaticEntry> extends DBProvider
     }
 
     @Override
-    List<T> getEntryItems(DataHandler dataHandler) {
+    public List<T> getEntryItems(DataHandler dataHandler) {
         DBProvider<T> provider = weakProvider.get();
         if (provider == null)
             return null;

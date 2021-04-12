@@ -186,8 +186,7 @@ public class EditTagsDialog extends DialogFragment<Set<String>> {
         }
     }
 
-
-    static void showKeyboard(@NonNull Dialog dialog, @NonNull TextView textView) {
+    private static void showKeyboard(@NonNull Dialog dialog, @NonNull TextView textView) {
         Log.i(TAG, "Keyboard - SHOW");
         textView.requestFocus();
 
