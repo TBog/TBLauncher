@@ -140,7 +140,7 @@ public final class ResultViewHelper {
             Constructor<? extends AsyncSetEntryDrawable> constructor = asyncSetEntryIconClass.getConstructor(ImageView.class, int.class, EntryItem.class);
             task = constructor.newInstance(appIcon, drawFlags, entry);
         } catch (IllegalAccessException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {
-            Log.e(TAG, "new <? extends AsyncSetEntryDrawable>", e);
+            Log.e(TAG, "new <? extends AsyncSetEntryDrawable>, ?=" + asyncSetEntryIconClass.getName(), e);
             return;
         }
         task.execute();
