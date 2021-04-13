@@ -44,7 +44,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
-            <EditText
+            <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/letters"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -52,6 +52,7 @@
                 android:hint="@string/static_icon_letters_label"
                 android:inputType="textAutoCorrect"
                 android:textAppearance="?android:attr/textAppearance" />
+
         </com.google.android.material.textfield.TextInputLayout>
 
         <TextView
