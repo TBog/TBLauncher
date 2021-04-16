@@ -397,6 +397,8 @@
     <string name="gesture_double_click">Double tap screen</string>
     <string name="loading_icon">Loading icon</string>
     <string name="keyboard_section">Keyboard</string>
+    <string name="debug_ksh_touch">Keyboard scroll hider</string>
+    <string name="debug_ksh_touch_summary">Show touch state with background color</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>

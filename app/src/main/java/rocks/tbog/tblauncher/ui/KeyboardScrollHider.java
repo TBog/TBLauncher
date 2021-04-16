@@ -13,6 +13,7 @@ import android.widget.AbsListView;
 import androidx.annotation.NonNull;
 
 import rocks.tbog.tblauncher.R;
+import rocks.tbog.tblauncher.utils.DebugInfo;
 
 /**
  * Utility class for automatically hiding the keyboard when scrolling down a {@see ListView},
@@ -32,7 +33,8 @@ public class KeyboardScrollHider implements View.OnTouchListener {
     private float offsetYCurrent = 0;
     private int offsetYDiff = 0;
 
-    private MotionEvent lastMotionEvent;
+    //private MotionEvent lastMotionEvent;
+    private float lastPosX = 0f;
     private int initialWindowPadding = 0;
     private boolean resizeDone = false;
     private boolean keyboardHidden = false;
@@ -90,6 +92,8 @@ public class KeyboardScrollHider implements View.OnTouchListener {
             //Log.i(TAG, "height=" + height + " scroll=" + this.list.getScrollY());
             params.height = height;
             this.list.setLayoutParams(params);
+            if (DebugInfo.keyboardScrollHiderTouch(list.getContext()))
+                list.setBackgroundColor(0x80ffd700);
             this.list.forceLayout();
         }
     }
@@ -114,7 +118,8 @@ public class KeyboardScrollHider implements View.OnTouchListener {
 
         this.list.post(() -> this.list.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_NORMAL));
 
-
+        if (DebugInfo.keyboardScrollHiderTouch(list.getContext()))
+            list.setBackgroundColor(0x00000000);
         this.resizeDone = true;
     }
 
@@ -155,7 +160,8 @@ public class KeyboardScrollHider implements View.OnTouchListener {
         // Display edge pulling effect while list view is detached from the bottom of its
         // container
         float distance = ((float) (heightContainer - listLayoutHeight)) / heightContainer;
-        float displacement = 1 - this.lastMotionEvent.getX() / getWindowWidth();
+        //float displacement = 1 - this.lastMotionEvent.getX() / getWindowWidth();
+        float displacement = 1 - this.lastPosX / getWindowWidth();
         this.pullEffect.setPull(distance, displacement, false);
     }
 
@@ -168,7 +174,7 @@ public class KeyboardScrollHider implements View.OnTouchListener {
                 this.offsetYCurrent = event.getY();
                 this.offsetYDiff = 0;
 
-                this.lastMotionEvent = event;
+                this.lastPosX = event.getX();
                 this.resizeDone = false;
                 this.keyboardHidden = false;
                 this.initialWindowPadding = this.getWindowPadding();
@@ -176,13 +182,15 @@ public class KeyboardScrollHider implements View.OnTouchListener {
                 // Lock list view height to its current value
                 this.listHeightInitial = this.list.getHeight();
                 this.setListLayoutHeight(this.listHeightInitial);
+                if (DebugInfo.keyboardScrollHiderTouch(list.getContext()))
+                    list.setBackgroundColor(0x80ff0000);
                 break;
 
             case MotionEvent.ACTION_MOVE:
                 this.offsetYCurrent = event.getY();
                 if (offsetYStart > offsetYCurrent)
                     offsetYStart = offsetYCurrent;
-                this.lastMotionEvent = event;
+                this.lastPosX = event.getX();
 
                 this.updateListViewHeight();
                 break;
@@ -190,7 +198,7 @@ public class KeyboardScrollHider implements View.OnTouchListener {
             case MotionEvent.ACTION_UP:
                 v.performClick();
             case MotionEvent.ACTION_CANCEL:
-                this.lastMotionEvent = null;
+                this.lastPosX = 0f;
 
                 if (!this.resizeDone) {
                     ValueAnimator animator = ValueAnimator.ofInt(
@@ -249,12 +257,9 @@ public class KeyboardScrollHider implements View.OnTouchListener {
     }
 
     public void fixScroll() {
-        this.list.post(new Runnable() {
-            @Override
-            public void run() {
-                resizeDone = false;
-                handleResizeDone();
-            }
+        this.list.post(() -> {
+            resizeDone = false;
+            handleResizeDone();
         });
     }
 

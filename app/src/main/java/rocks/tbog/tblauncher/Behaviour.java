@@ -59,6 +59,8 @@ import rocks.tbog.tblauncher.searcher.QuerySearcher;
 import rocks.tbog.tblauncher.searcher.Searcher;
 import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
 import rocks.tbog.tblauncher.ui.AnimatedListView;
+import rocks.tbog.tblauncher.ui.BlockableListView;
+import rocks.tbog.tblauncher.ui.BottomPullEffectView;
 import rocks.tbog.tblauncher.ui.DialogFragment;
 import rocks.tbog.tblauncher.ui.KeyboardScrollHider;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
@@ -75,7 +77,7 @@ import static rocks.tbog.tblauncher.entry.EntryItem.LAUNCHED_FROM_GESTURE;
 /**
  * Behaviour of the launcher, when are stuff hidden, animation, user interaction responses
  */
-public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardHandler {
+public class Behaviour implements ISearchActivity {
 
     private static final int UI_ANIMATION_DELAY = 300;
     // time to wait for the keyboard to show up
@@ -100,6 +102,51 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     private ImageView mLauncherButton;
     private View mDecorView;
     private View mNotificationBackground;
+    private KeyboardScrollHider mHider;
+
+    private final KeyboardScrollHider.KeyboardHandler mKeyboardHandler = new KeyboardScrollHider.KeyboardHandler() {
+        @Override
+        public void showKeyboard() {
+            LauncherState state = TBApplication.state();
+//            if (state.isSearchBarVisible() && PrefCache.modeSearchFullscreen(mPref))
+//                disableFullscreen();
+
+            Log.i(TAG, "Keyboard - SHOW");
+            state.setKeyboard(LauncherState.AnimatedVisibility.VISIBLE);
+            mTBLauncherActivity.dismissPopup();
+
+            mSearchEditText.requestFocus();
+
+            InputMethodManager mgr = (InputMethodManager) mTBLauncherActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
+            assert mgr != null;
+            mgr.showSoftInput(mSearchEditText, InputMethodManager.SHOW_IMPLICIT);
+        }
+
+        @Override
+        public void hideKeyboard() {
+            Log.i(TAG, "Keyboard - HIDE");
+
+            if (TBApplication.state().isSearchBarVisible() && PrefCache.modeSearchFullscreen(mPref))
+                enableFullscreen(0);
+
+            TBApplication.state().setKeyboard(LauncherState.AnimatedVisibility.HIDDEN);
+            mTBLauncherActivity.dismissPopup();
+
+            View focus = mTBLauncherActivity.getCurrentFocus();
+            mSearchEditText.clearFocus();
+
+            // Check if no view has focus:
+            InputMethodManager mgr = (InputMethodManager) mTBLauncherActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
+            assert mgr != null;
+
+            if (focus != null) {
+                focus.clearFocus();
+                mgr.hideSoftInputFromWindow(focus.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
+            } else {
+                mgr.hideSoftInputFromWindow(mSearchEditText.getWindowToken(), InputMethodManager.HIDE_IMPLICIT_ONLY);
+            }
+        }
+    };
 
     private final Runnable mHidePart2Runnable = new Runnable() {
         @Override
@@ -288,6 +335,10 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         });
     }
 
+    private void initKeyboardScrollHider(BottomPullEffectView listEdgeEffect, BlockableListView resultList) {
+        mHider = new KeyboardScrollHider(mKeyboardHandler, resultList, listEdgeEffect);
+    }
+
     public void onCreateActivity(TBLauncherActivity tbLauncherActivity) {
         mTBLauncherActivity = tbLauncherActivity;
         mPref = PreferenceManager.getDefaultSharedPreferences(tbLauncherActivity);
@@ -303,6 +354,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 
         mDecorView = mTBLauncherActivity.getWindow().getDecorView();
 
+        initKeyboardScrollHider(findViewById(R.id.listEdgeEffect), findViewById(R.id.resultList));
         initResultLayout();
         initSearchBarContainer();
         initLauncherButton();
@@ -691,45 +743,16 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     public void showKeyboard() {
-        LauncherState state = TBApplication.state();
-//        if (state.isSearchBarVisible() && PrefCache.modeSearchFullscreen(mPref))
-//            disableFullscreen();
+        mKeyboardHandler.showKeyboard();
 
-        Log.i(TAG, "Keyboard - SHOW");
-        state.setKeyboard(LauncherState.AnimatedVisibility.VISIBLE);
-        mTBLauncherActivity.dismissPopup();
-
-        mSearchEditText.requestFocus();
-
-        InputMethodManager mgr = (InputMethodManager) mTBLauncherActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
-        assert mgr != null;
-        mgr.showSoftInput(mSearchEditText, InputMethodManager.SHOW_IMPLICIT);
+        mHider.start();
         //mTBLauncherActivity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
     }
 
     public void hideKeyboard() {
-        Log.i(TAG, "Keyboard - HIDE");
+        mKeyboardHandler.hideKeyboard();
 
-        if (TBApplication.state().isSearchBarVisible() && PrefCache.modeSearchFullscreen(mPref))
-            enableFullscreen(0);
-
-        TBApplication.state().setKeyboard(LauncherState.AnimatedVisibility.HIDDEN);
-        mTBLauncherActivity.dismissPopup();
-
-        View focus = mTBLauncherActivity.getCurrentFocus();
-        mSearchEditText.clearFocus();
-
-        // Check if no view has focus:
-        InputMethodManager mgr = (InputMethodManager) mTBLauncherActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
-        assert mgr != null;
-
-        if (focus != null) {
-            focus.clearFocus();
-            mgr.hideSoftInputFromWindow(focus.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-        } else {
-            mgr.hideSoftInputFromWindow(mSearchEditText.getWindowToken(), InputMethodManager.HIDE_IMPLICIT_ONLY);
-        }
-
+        mHider.stop();
         //mTBLauncherActivity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
     }
 
@@ -889,10 +912,6 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 //            runTask(searcher);
 //            return;
 //        }
-        if (isRefresh)
-            mResultList.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_NORMAL);
-        else
-            mResultList.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
 
         updateSearchRecords(isRefresh, new QuerySearcher(this, query));
     }
@@ -952,6 +971,11 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     private void updateSearchRecords(boolean isRefresh, @NonNull Searcher searcher) {
+        if (isRefresh)
+            mResultList.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_NORMAL);
+        else
+            mResultList.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
+
         resetTask();
         mTBLauncherActivity.dismissPopup();
 
@@ -1471,5 +1495,9 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 
     public boolean onDoubleClick() {
         return executeGestureAction("gesture-double-click");
+    }
+
+    public void fixScroll() {
+        mHider.fixScroll();
     }
 }
