@@ -89,12 +89,12 @@ public abstract class DialogFragment<Output> extends androidx.fragment.app.Dialo
         //Log.i(TAG, "---> onCreateView <---");
         Dialog dialog = requireDialog();
         //Log.i(TAG, "dialog=" + dialog);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         Window window = dialog.getWindow();
         if (window != null) {
-            window.setDimAmount(0.7f);
+            window.requestFeature(Window.FEATURE_NO_TITLE);
             window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+            window.setDimAmount(0.7f);
         }
         dialog.setCanceledOnTouchOutside(true);
 
