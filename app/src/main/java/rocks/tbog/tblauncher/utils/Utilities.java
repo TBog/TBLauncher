@@ -280,13 +280,13 @@ public class Utilities {
 
     public static RunnableTask runAsync(@NonNull Lifecycle lifecycle, @NonNull TaskRunner.AsyncRunnable background, @NonNull TaskRunner.AsyncRunnable after) {
         RunnableTask task = TaskRunner.newTask(lifecycle, background, after);
-        EXECUTOR_RUN_ASYNC.execute(task);
+        TaskRunner.runOnUiThread(() -> EXECUTOR_RUN_ASYNC.execute(task));
         return task;
     }
 
     public static RunnableTask runAsync(@NonNull TaskRunner.AsyncRunnable background, @NonNull TaskRunner.AsyncRunnable after) {
         RunnableTask task = TaskRunner.newTask(background, after);
-        EXECUTOR_RUN_ASYNC.execute(task);
+        TaskRunner.runOnUiThread(() -> EXECUTOR_RUN_ASYNC.execute(task));
         return task;
     }
 

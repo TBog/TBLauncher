@@ -7,9 +7,9 @@
 
     <androidx.preference.SwitchPreference
         android:defaultValue="false"
+        android:key="root-mode"
         android:summary="@string/root_mode_summary"
-        android:title="@string/root_mode"
-        android:key="root-mode"/>
+        android:title="@string/root_mode" />
 
     <!-- Quick List -->
     <androidx.preference.PreferenceCategory
@@ -361,6 +361,12 @@
             android:defaultValue="false"
             android:key="debug-item-relevance"
             android:title="@string/debug_item_relevance" />
+
+        <androidx.preference.SwitchPreference
+            android:defaultValue="false"
+            android:key="debug-ksh-touch"
+            android:summary="@string/debug_ksh_touch_summary"
+            android:title="@string/debug_ksh_touch" />
 
     </androidx.preference.PreferenceCategory>
 

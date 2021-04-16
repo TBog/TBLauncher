@@ -21,4 +21,9 @@ public class DebugInfo {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         return prefs.getBoolean("debug-item-relevance", false);
     }
+
+    public static boolean keyboardScrollHiderTouch(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getBoolean("debug-ksh-touch", false);
+    }
 }
