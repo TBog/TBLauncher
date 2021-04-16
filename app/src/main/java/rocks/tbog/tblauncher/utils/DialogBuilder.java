@@ -11,6 +11,9 @@ import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewParent;
+import android.view.Window;
+import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 
 import androidx.annotation.IdRes;
@@ -164,10 +167,26 @@ public class DialogBuilder {
      * application layer and opaque.
      */
     public AlertDialog show() {
-        AlertDialog dialog = builder.show();
+        AlertDialog dialog = create();
         setButtonBarBackground(dialog);
         if (afterInflate != null)
-            afterInflate.onShow(dialog);
+            dialog.setOnShowListener((dlg)-> afterInflate.onShow(dlg));
+
+        // set window params to allow keyboard to open
+        {
+            Window win = dialog.getWindow();
+            int removeFlags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
+                    WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE;
+            int addFlags = WindowManager.LayoutParams.FLAG_DIM_BEHIND;
+            win.setFlags(addFlags, addFlags | removeFlags);
+            win.setDimAmount(.7f);
+            win.setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+        }
+//        InputMethodManager mgr = (InputMethodManager) dialog.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
+//        assert mgr != null;
+//        mgr.showSoftInput(dialog.getWindow().getDecorView(), InputMethodManager.SHOW_FORCED);
+
+        dialog.show();
         return dialog;
     }
 
