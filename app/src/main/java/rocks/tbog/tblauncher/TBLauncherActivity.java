@@ -201,7 +201,14 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
     }
 
     @Override
-    public boolean onKeyDown(int keycode, @NonNull KeyEvent e) {
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        Log.i(TAG, "onSaveInstanceState " + Integer.toHexString(outState.hashCode()));
+        super.onSaveInstanceState(outState);
+        outState.clear();
+    }
+
+    @Override
+    public boolean onKeyDown(int keycode, KeyEvent e) {
         // For devices with a physical menu button, we still want to display *our* contextual menu
         if (keycode == KeyEvent.KEYCODE_MENU) {
             TBApplication.behaviour(this).showContextMenu();
