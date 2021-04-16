@@ -272,6 +272,9 @@ public final class ResultViewHelper {
         protected void onPostExecute(Drawable drawable) {
             ImageView image = getImageView();
             if (image == null || drawable == null) {
+                Log.i(TAG, "end task=" + Integer.toHexString(hashCode()) +
+                        "view=" + (image == null ? "null" : Integer.toHexString(image.hashCode())) +
+                        "drawable=" + drawable);
                 weakImage.clear();
                 return;
             }
