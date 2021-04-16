@@ -21,9 +21,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.preference.PreferenceManager;
 
-import rocks.tbog.tblauncher.ui.BlockableListView;
-import rocks.tbog.tblauncher.ui.BottomPullEffectView;
-import rocks.tbog.tblauncher.ui.KeyboardScrollHider;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.DeviceUtils;
 
@@ -53,7 +50,6 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
     public static final String LOAD_OVER = "fr.neamar.summon.LOAD_OVER";
     public static final String FULL_LOAD_OVER = "fr.neamar.summon.FULL_LOAD_OVER";
 
-    private KeyboardScrollHider mHider;
     private PopupWindow mPopup;
 
     /**
@@ -128,8 +124,6 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
         if (BuildConfig.DEBUG) {
             DeviceUtils.showDeviceInfo("TBLauncher", this);
         }
-
-        initKeyboardScrollHider(findViewById(R.id.listEdgeEffect), findViewById(R.id.resultList));
 
         // call after all views are set
         TBApplication.behaviour(this).onCreateActivity(this);
@@ -218,11 +212,6 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
         return super.onKeyDown(keycode, e);
     }
 
-    private void initKeyboardScrollHider(BottomPullEffectView listEdgeEffect, BlockableListView resultList) {
-        mHider = new KeyboardScrollHider(TBApplication.behaviour(this), resultList, listEdgeEffect);
-        mHider.start();
-    }
-
     @Override
     public void onBackPressed() {
         if (dismissPopup())
@@ -256,7 +245,7 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
         mPopup = popup;
         //popup.setVisibilityHelper(systemUiVisibilityHelper);
         popup.setOnDismissListener(() -> TBLauncherActivity.this.mPopup = null);
-        mHider.fixScroll();
+        TBApplication.behaviour(this).fixScroll();
     }
 
     public boolean dismissPopup() {
