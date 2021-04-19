@@ -104,7 +104,7 @@ public class KeyboardScrollHider implements View.OnTouchListener {
         }
         Log.i(TAG, "resize done.");
 
-        this.list.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
+        //this.list.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
 
         // Give the list view the control over it's input back
         this.list.unblockTouchEvents();
@@ -116,7 +116,7 @@ public class KeyboardScrollHider implements View.OnTouchListener {
         this.list.setVerticalScrollBarEnabled(this.scrollBarEnabled);
         this.setListLayoutHeight(ViewGroup.LayoutParams.MATCH_PARENT);
 
-        this.list.post(() -> this.list.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_NORMAL));
+        //this.list.post(() -> this.list.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_NORMAL));
 
         if (DebugInfo.keyboardScrollHiderTouch(list.getContext()))
             list.setBackgroundColor(0x00000000);
