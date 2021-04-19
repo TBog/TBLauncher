@@ -495,6 +495,7 @@ public class Behaviour implements ISearchActivity {
         Log.d(TAG, "desktop changed " + currentMode + " -> " + mode);
         if (mode.equals(currentMode)) {
             // no change, maybe refresh?
+            //showDesktop(mode);
             return;
         }
 
@@ -1046,7 +1047,8 @@ public class Behaviour implements ISearchActivity {
             enableFullscreen(0);
         if (PrefCache.linkCloseKeyboardToBackButton(mPref))
             onBackPressed();
-        return false;
+        // check if we should hide the keyboard
+        return state.isSearchBarVisible() && PrefCache.linkKeyboardAndSearchBar(mPref);
     }
 
     public void launchCustomIconDialog(AppEntry appEntry) {
