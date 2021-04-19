@@ -116,6 +116,7 @@ public class Behaviour implements ISearchActivity {
             mTBLauncherActivity.dismissPopup();
 
             mSearchEditText.requestFocus();
+            mResultList.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_NORMAL);
 
             InputMethodManager mgr = (InputMethodManager) mTBLauncherActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
             assert mgr != null;
@@ -132,6 +133,7 @@ public class Behaviour implements ISearchActivity {
             TBApplication.state().setKeyboard(LauncherState.AnimatedVisibility.HIDDEN);
             mTBLauncherActivity.dismissPopup();
 
+            mResultList.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_NORMAL);
             View focus = mTBLauncherActivity.getCurrentFocus();
             mSearchEditText.clearFocus();
 
@@ -891,11 +893,6 @@ public class Behaviour implements ISearchActivity {
         mResultList.post(() -> mResultList.refreshViews());
     }
 
-    public void updateSearchRecords() {
-        if (mSearchEditText != null)
-            updateSearchRecords(true, mSearchEditText.getText().toString());
-    }
-
     /**
      * This function gets called on query changes.
      * It will ask all the providers for data
@@ -971,10 +968,12 @@ public class Behaviour implements ISearchActivity {
     }
 
     private void updateSearchRecords(boolean isRefresh, @NonNull Searcher searcher) {
-        if (isRefresh)
-            mResultList.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_NORMAL);
-        else
+        if (isRefresh) {
+            //mResultList.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_NORMAL);
+            temporarilyDisableTranscriptMode();
+        } else {
             mResultList.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
+        }
 
         resetTask();
         mTBLauncherActivity.dismissPopup();
