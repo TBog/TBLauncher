@@ -161,14 +161,17 @@ public class IconsHandler {
                     Log.w(TAG, "icon pack `" + mIconPack.getPackPackageName() + "` not loaded, reload");
                     SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(ctx);
                     loadIconsPack(pref.getString("icons-pack", null));
-                } else {
-                    Log.w(TAG, "icon pack `" + mIconPack.getPackPackageName() + "` not loaded, wait");
-                    try {
-                        mLoadIconsPackTask.wait();
-                    } catch (InterruptedException ignored) {
-                    }
+                    return null;
                 }
-                return null;
+                Log.w(TAG, "icon pack `" + mIconPack.getPackPackageName() + "` not loaded, wait");
+                try {
+                    mLoadIconsPackTask.wait();
+                } catch (InterruptedException ignored) {
+                }
+                if (!mIconPack.isLoaded()) {
+                    Log.e(TAG, "icon pack `" + mIconPack.getPackPackageName() + "` waiting failed to load");
+                    return null;
+                }
             }
             String componentString = componentName.toString();
             Drawable drawable = mIconPack.getComponentDrawable(componentString);
