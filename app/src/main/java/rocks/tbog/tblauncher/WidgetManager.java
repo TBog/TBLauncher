@@ -911,6 +911,12 @@ public class WidgetManager {
         mLayout.requestLayout();
     }
 
+    public void setPageCount(int horizontal, int vertical) {
+        if (mLayout == null)
+            return;
+        mLayout.setPageCount(horizontal, vertical);
+    }
+
     /**
      * Scroll to page, just like the wallpaper
      *
