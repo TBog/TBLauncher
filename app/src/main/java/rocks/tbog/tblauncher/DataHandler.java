@@ -377,6 +377,13 @@ public class DataHandler extends BroadcastReceiver
         for (ProviderEntry entry : this.providers.values())
             if (entry.provider == null || !entry.provider.isLoaded())
                 return false;
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        for (String providerName : PROVIDER_NAMES) {
+            if (prefs.getBoolean("enable-" + providerName, true)) {
+                if (!providers.containsKey(providerName))
+                    return false;
+            }
+        }
         return true;
     }
 
