@@ -399,6 +399,14 @@
     <string name="keyboard_section">Keyboard</string>
     <string name="debug_ksh_touch">Keyboard scroll hider</string>
     <string name="debug_ksh_touch_summary">Show touch state with background color</string>
+    <string name="lwp_scroll_pages">Enable pages</string>
+
+    <string name="lwp_page_count_vertical">Vertical pages</string>
+    <string name="lwp_page_count_horizontal">Horizontal pages</string>
+    <string name="lwp_pages_vertical_1">center page</string>
+    <string name="lwp_pages_vertical_2">2 pages (above and below)</string>
+    <string name="lwp_pages_horizontal_1">center page</string>
+    <string name="lwp_pages_horizontal_2">2 pages (left and right)</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>
