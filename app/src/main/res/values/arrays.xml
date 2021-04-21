@@ -169,6 +169,24 @@
         <item>showEmpty</item>
     </array>
 
+    <string-array name="lwpPageCountVerticalEntries">
+        <item>@string/lwp_pages_vertical_1</item>
+        <item>@string/lwp_pages_vertical_2</item>
+    </string-array>
+    <string-array name="lwpPageCountVerticalValues" translatable="false">
+        <item>1</item>
+        <item>3</item>
+    </string-array>
+
+    <string-array name="lwpPageCountHorizontalEntries">
+        <item>@string/lwp_pages_horizontal_1</item>
+        <item>@string/lwp_pages_horizontal_2</item>
+    </string-array>
+    <string-array name="lwpPageCountHorizontalValues" translatable="false">
+        <item>1</item>
+        <item>3</item>
+    </string-array>
+
     <array name="material_colors">
         <item>@array/mm2d_cc_red</item>
         <item>@array/mm2d_cc_pink</item>
