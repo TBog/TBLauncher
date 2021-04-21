@@ -214,6 +214,24 @@
         android:title="@string/title_wallpaper">
         <SwitchPreference
             android:defaultValue="true"
+            android:key="lwp-scroll-pages"
+            android:title="@string/lwp_scroll_pages" />
+        <ListPreference
+            android:defaultValue="1"
+            android:entries="@array/lwpPageCountVerticalEntries"
+            android:entryValues="@array/lwpPageCountVerticalValues"
+            android:dependency="lwp-scroll-pages"
+            android:key="lwp-page-count-vertical"
+            android:title="@string/lwp_page_count_vertical" />
+        <ListPreference
+            android:defaultValue="3"
+            android:entries="@array/lwpPageCountHorizontalEntries"
+            android:entryValues="@array/lwpPageCountHorizontalValues"
+            android:dependency="lwp-scroll-pages"
+            android:key="lwp-page-count-horizontal"
+            android:title="@string/lwp_page_count_horizontal" />
+        <SwitchPreference
+            android:defaultValue="true"
             android:key="lwp-touch"
             android:title="@string/lwp_touch" />
         <SwitchPreference
