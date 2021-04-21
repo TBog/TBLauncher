@@ -274,7 +274,8 @@ public final class ResultViewHelper {
             if (image == null || drawable == null) {
                 Log.i(TAG, "end task=" + Integer.toHexString(hashCode()) +
                         " view=" + (image == null ? "null" : Integer.toHexString(image.hashCode())) +
-                        " drawable=" + drawable);
+                        " drawable=" + drawable +
+                        " cacheId=`" + cacheId + "`");
                 weakImage.clear();
                 return;
             }
