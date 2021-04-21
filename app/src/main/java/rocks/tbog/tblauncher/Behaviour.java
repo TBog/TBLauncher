@@ -891,6 +891,8 @@ public class Behaviour implements ISearchActivity {
     }
 
     public void refreshSearchRecords() {
+        if (mResultList == null)
+            return;
         mResultList.post(() -> mResultList.refreshViews());
     }
 
