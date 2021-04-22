@@ -381,8 +381,8 @@ public class WidgetLayout extends ViewGroup {
             //TODO: check that child is not out of bounds
         }
 
-        for (int screenPosition : LayoutParams.SCREEN_POSITIONS) {
-            screenLayout(screenPosition, width, height, false);
+        for (int pagePosition : LayoutParams.PAGE_POSITIONS) {
+            pageLayout(pagePosition, width, height, false);
             width = Math.max(width, mTmpContainerRect.width());
             height = Math.max(height, mTmpContainerRect.height());
         }
@@ -393,17 +393,21 @@ public class WidgetLayout extends ViewGroup {
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        final int pageWidth = right - left;
+        final int pageHeight = bottom - top;
         if (mPageCount.x == 1 && mPageCount.y == 1) {
-            screenLayout(LayoutParams.SCREEN_MIDDLE, right - left, bottom - top, true);
+            pageLayout(LayoutParams.PAGE_MIDDLE, pageWidth, pageHeight, true);
         } else if (mPageCount.x > 1 && mPageCount.y == 1) {
-            horizontalLayout(changed, left, top, right, bottom);
+            for (int pagePos : LayoutParams.PAGE_POSITIONS_HORIZONTAL) {
+                pageLayout(pagePos, pageWidth, pageHeight, true);
+            }
         } else if (mPageCount.x == 1 && mPageCount.y > 1) {
-            verticalLayout(changed, left, top, right, bottom);
+            for (int pagePos : LayoutParams.PAGE_POSITIONS_VERTICAL) {
+                pageLayout(pagePos, pageWidth, pageHeight, true);
+            }
         } else {
-            int width = right - left;
-            int height = bottom - top;
-            for (int screenPos : LayoutParams.SCREEN_POSITIONS)
-                screenLayout(screenPos, width, height, true);
+            for (int pagePos : LayoutParams.PAGE_POSITIONS)
+                pageLayout(pagePos, pageWidth, pageHeight, true);
         }
         callAfterLayout();
     }
@@ -469,64 +473,35 @@ public class WidgetLayout extends ViewGroup {
         return false;
     }
 
-    private void horizontalLayout(boolean changed, int left, int top, int right, int bottom) {
-        final int screenWidth = right - left;
-
-        for (int screenPos : LayoutParams.SCREEN_POSITIONS_HORIZONTAL) {
-            // add padding
-            int screenLeft = left + getPaddingLeft();
-            int screenTop = top + getPaddingTop();
-            int screenRight = right - getPaddingRight();
-            int screenBottom = bottom - getPaddingBottom();
-
-            screenLayout(screenPos, screenRight - screenLeft, screenBottom - screenTop, true);
-            left += screenWidth;
-            right += screenWidth;
-        }
-    }
-
-    private void verticalLayout(boolean changed, int left, int top, int right, int bottom) {
-        final int screenHeight = bottom - top;
-
-        for (int screenPos : LayoutParams.SCREEN_POSITIONS_VERTICAL) {
-            // add padding
-            int screenLeft = left + getPaddingLeft();
-            int screenTop = top + getPaddingTop();
-            int screenRight = right - getPaddingRight();
-            int screenBottom = bottom - getPaddingBottom();
-
-            screenLayout(screenPos, screenRight - screenLeft, screenBottom - screenTop, true);
-            top += screenHeight;
-            bottom += screenHeight;
-        }
-    }
-
-    private int getLeftMarginForScreen(int screen, int width) {
+    private int getLeftMarginForPage(int page, int width) {
         if (mPageCount.x == 1)
             return 0;
         int leftOfCenter = mPageCount.x / 2;
-        if (screen == LayoutParams.SCREEN_LEFT)
+        if (page == LayoutParams.PAGE_LEFT)
             return 0;
-        if (screen == LayoutParams.SCREEN_RIGHT)
+        if (page == LayoutParams.PAGE_RIGHT)
             return leftOfCenter * (width + 1);
         return leftOfCenter * width;
     }
 
-    private int getTopMarginForScreen(int screen, int height) {
+    private int getTopMarginForPage(int page, int height) {
         if (mPageCount.y == 1)
             return 0;
-        if (screen == LayoutParams.SCREEN_UP)
+        if (page == LayoutParams.PAGE_UP)
             return 0;
         int leftOfCenter = mPageCount.y / 2;
-        if (screen == LayoutParams.SCREEN_DOWN)
+        if (page == LayoutParams.PAGE_DOWN)
             return leftOfCenter * (height + 1);
         return leftOfCenter * height;
     }
 
-    private void screenLayout(int position, int width, int height, boolean childLayout) {
+    private void pageLayout(int page, int width, int height, boolean childLayout) {
         mTmpContainerRect.setEmpty();
-        final int screenTop = getTopMarginForScreen(position, height);
-        final int screenLeft = getLeftMarginForScreen(position, width);
+        final int pageTop = getTopMarginForPage(page, height);
+        final int pageLeft = getLeftMarginForPage(page, width);
+        // apply padding
+        final int pageWidth = width - getPaddingLeft() - getPaddingRight();
+        final int pageHeight = height - getPaddingTop() - getPaddingBottom();
         int autoX = 0;
         int autoY = 0;
         int maxChildY = 0;
@@ -537,7 +512,7 @@ public class WidgetLayout extends ViewGroup {
                 continue;
 
             final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-            if (lp.screen != position)
+            if (lp.screenPage != page)
                 continue;
 
             mTmpChildRect.set(0, 0, child.getMeasuredWidth(), child.getMeasuredHeight());
@@ -545,13 +520,13 @@ public class WidgetLayout extends ViewGroup {
             switch (lp.placement) {
                 case AUTO:
                     mTmpChildRect.offset(autoX, autoY);
-                    if (mTmpChildRect.right > width) {
+                    if (mTmpChildRect.right > pageWidth) {
                         mTmpChildRect.offset(-autoX, -autoY);
                         autoX = 0;
                         autoY = maxChildY;
                         mTmpChildRect.offset(autoX, autoY);
                     }
-                    if (mTmpChildRect.bottom > height) {
+                    if (mTmpChildRect.bottom > pageHeight) {
                         mTmpChildRect.offset(-autoX, -autoY);
                         autoY = 0;
                         maxChildY = mTmpContainerRect.bottom;
@@ -567,7 +542,10 @@ public class WidgetLayout extends ViewGroup {
                     mTmpChildRect.offset(lp.leftMargin, lp.topMargin);
             }
 
-            mTmpChildRect.offset(screenLeft, screenTop);
+            // apply page offset
+            mTmpChildRect.offset(pageLeft, pageTop);
+            // apply page padding
+            mTmpChildRect.offset(getPaddingLeft(), getPaddingTop());
 
             // Place the child.
             if (childLayout)
@@ -710,21 +688,21 @@ public class WidgetLayout extends ViewGroup {
         /**
          * The screen/page to put this view into
          */
-        public static final int SCREEN_MIDDLE = 0;
-        public static final int SCREEN_LEFT = 1;
-        public static final int SCREEN_RIGHT = 2;
-        public static final int SCREEN_UP = 4;
-        public static final int SCREEN_DOWN = 8;
-        public static final int[] SCREEN_POSITIONS = new int[]{SCREEN_LEFT, SCREEN_UP, SCREEN_MIDDLE, SCREEN_RIGHT, SCREEN_DOWN};
-        public static final int[] SCREEN_POSITIONS_HORIZONTAL = new int[]{SCREEN_LEFT, SCREEN_MIDDLE, SCREEN_RIGHT};
-        public static final int[] SCREEN_POSITIONS_VERTICAL = new int[]{SCREEN_UP, SCREEN_MIDDLE, SCREEN_DOWN};
+        public static final int PAGE_MIDDLE = 0;
+        public static final int PAGE_LEFT = 1;
+        public static final int PAGE_RIGHT = 2;
+        public static final int PAGE_UP = 4;
+        public static final int PAGE_DOWN = 8;
+        public static final int[] PAGE_POSITIONS = new int[]{PAGE_LEFT, PAGE_UP, PAGE_MIDDLE, PAGE_RIGHT, PAGE_DOWN};
+        public static final int[] PAGE_POSITIONS_HORIZONTAL = new int[]{PAGE_LEFT, PAGE_MIDDLE, PAGE_RIGHT};
+        public static final int[] PAGE_POSITIONS_VERTICAL = new int[]{PAGE_UP, PAGE_MIDDLE, PAGE_DOWN};
 
         public enum Placement {
             AUTO,
             MARGIN_TL_AS_POSITION,
         }
 
-        public int screen = SCREEN_MIDDLE;
+        public int screenPage = PAGE_MIDDLE;
         public Placement placement = Placement.AUTO;
 
         public LayoutParams(Context ctx, AttributeSet attrs) {
@@ -741,7 +719,7 @@ public class WidgetLayout extends ViewGroup {
 
         public LayoutParams(LayoutParams source) {
             this((ViewGroup.MarginLayoutParams) source);
-            screen = source.screen;
+            screenPage = source.screenPage;
             placement = source.placement;
         }
     }
