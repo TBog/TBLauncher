@@ -28,11 +28,6 @@ import java.util.ArrayList;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 
-import static rocks.tbog.tblauncher.ui.WidgetLayout.LayoutParams.SCREEN_DOWN;
-import static rocks.tbog.tblauncher.ui.WidgetLayout.LayoutParams.SCREEN_MIDDLE;
-import static rocks.tbog.tblauncher.ui.WidgetLayout.LayoutParams.SCREEN_POSITIONS;
-import static rocks.tbog.tblauncher.ui.WidgetLayout.LayoutParams.SCREEN_RIGHT;
-
 public class WidgetLayout extends ViewGroup {
     /**
      * These are used for computing child frames based on their gravity.
@@ -386,7 +381,7 @@ public class WidgetLayout extends ViewGroup {
             //TODO: check that child is not out of bounds
         }
 
-        for (int screenPosition : SCREEN_POSITIONS) {
+        for (int screenPosition : LayoutParams.SCREEN_POSITIONS) {
             screenLayout(screenPosition, width, height, false);
             width = Math.max(width, mTmpContainerRect.width());
             height = Math.max(height, mTmpContainerRect.height());
@@ -398,17 +393,18 @@ public class WidgetLayout extends ViewGroup {
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        if (mPageCount.x > 1 && mPageCount.y == 1) {
+        if (mPageCount.x == 1 && mPageCount.y == 1) {
+            screenLayout(LayoutParams.SCREEN_MIDDLE, right - left, bottom - top, true);
+        } else if (mPageCount.x > 1 && mPageCount.y == 1) {
             horizontalLayout(changed, left, top, right, bottom);
-            callAfterLayout();
-            return;
+        } else if (mPageCount.x == 1 && mPageCount.y > 1) {
+            verticalLayout(changed, left, top, right, bottom);
+        } else {
+            int width = right - left;
+            int height = bottom - top;
+            for (int screenPos : LayoutParams.SCREEN_POSITIONS)
+                screenLayout(screenPos, width, height, true);
         }
-        int screenLeft = left + getPaddingLeft();
-        int screenTop = top + getPaddingTop();
-        int screenRight = right - getPaddingRight();
-        int screenBottom = bottom - getPaddingBottom();
-
-        screenLayout(SCREEN_MIDDLE, screenRight - screenLeft, screenBottom - screenTop, true);
         callAfterLayout();
     }
 
@@ -476,7 +472,7 @@ public class WidgetLayout extends ViewGroup {
     private void horizontalLayout(boolean changed, int left, int top, int right, int bottom) {
         final int screenWidth = right - left;
 
-        for (int screenPos : SCREEN_POSITIONS) {
+        for (int screenPos : LayoutParams.SCREEN_POSITIONS_HORIZONTAL) {
             // add padding
             int screenLeft = left + getPaddingLeft();
             int screenTop = top + getPaddingTop();
@@ -489,26 +485,42 @@ public class WidgetLayout extends ViewGroup {
         }
     }
 
+    private void verticalLayout(boolean changed, int left, int top, int right, int bottom) {
+        final int screenHeight = bottom - top;
+
+        for (int screenPos : LayoutParams.SCREEN_POSITIONS_VERTICAL) {
+            // add padding
+            int screenLeft = left + getPaddingLeft();
+            int screenTop = top + getPaddingTop();
+            int screenRight = right - getPaddingRight();
+            int screenBottom = bottom - getPaddingBottom();
+
+            screenLayout(screenPos, screenRight - screenLeft, screenBottom - screenTop, true);
+            top += screenHeight;
+            bottom += screenHeight;
+        }
+    }
+
     private int getLeftMarginForScreen(int screen, int width) {
         if (mPageCount.x == 1)
             return 0;
         int leftOfCenter = mPageCount.x / 2;
-        if (screen == SCREEN_MIDDLE)
-            return leftOfCenter * width;
-        if (screen == SCREEN_RIGHT)
+        if (screen == LayoutParams.SCREEN_LEFT)
+            return 0;
+        if (screen == LayoutParams.SCREEN_RIGHT)
             return leftOfCenter * (width + 1);
-        return 0;
+        return leftOfCenter * width;
     }
 
     private int getTopMarginForScreen(int screen, int height) {
         if (mPageCount.y == 1)
             return 0;
+        if (screen == LayoutParams.SCREEN_UP)
+            return 0;
         int leftOfCenter = mPageCount.y / 2;
-        if (screen == SCREEN_MIDDLE)
-            return leftOfCenter * height;
-        if (screen == SCREEN_DOWN)
+        if (screen == LayoutParams.SCREEN_DOWN)
             return leftOfCenter * (height + 1);
-        return 0;
+        return leftOfCenter * height;
     }
 
     private void screenLayout(int position, int width, int height, boolean childLayout) {
@@ -703,7 +715,9 @@ public class WidgetLayout extends ViewGroup {
         public static final int SCREEN_RIGHT = 2;
         public static final int SCREEN_UP = 4;
         public static final int SCREEN_DOWN = 8;
-        public static final int[] SCREEN_POSITIONS = new int[]{SCREEN_LEFT, SCREEN_MIDDLE, SCREEN_RIGHT};
+        public static final int[] SCREEN_POSITIONS = new int[]{SCREEN_LEFT, SCREEN_UP, SCREEN_MIDDLE, SCREEN_RIGHT, SCREEN_DOWN};
+        public static final int[] SCREEN_POSITIONS_HORIZONTAL = new int[]{SCREEN_LEFT, SCREEN_MIDDLE, SCREEN_RIGHT};
+        public static final int[] SCREEN_POSITIONS_VERTICAL = new int[]{SCREEN_UP, SCREEN_MIDDLE, SCREEN_DOWN};
 
         public enum Placement {
             AUTO,

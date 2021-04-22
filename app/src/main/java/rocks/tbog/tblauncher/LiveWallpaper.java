@@ -506,7 +506,7 @@ public class LiveWallpaper {
             boolean stickToSides = isPreferenceWPStickToSides();
             boolean stickToCenter = isPreferenceWPReturnCenter();
             float expectedPosX = -Math.min(Math.max(mVelocity.x / mWindowSize.x, -.5f), .5f) + mStartOffset.x;
-            //float expectedPosY = -Math.min(Math.max(mVelocity.y / mWindowSize.y, -.5f), .5f) + mStartOffset.y;
+            float expectedPosY = -Math.min(Math.max(mVelocity.y / mWindowSize.y, -.5f), .5f) + mStartOffset.y;
             //Log.d(TAG, "expectedPos=" + String.format(Locale.US, "%.2f %.2f", expectedPosX, expectedPosY));
 
             // stick to center
@@ -514,17 +514,34 @@ public class LiveWallpaper {
 
             // if we stick only to the center
             float leftStickPercent = -1.f;
+            float topStickPercent = -1.f;
             float rightStickPercent = 2.f;
+            float bottomStickPercent = 2.f;
 
             if (stickToSides && stickToCenter) {
                 // if we stick to the left, right and center
                 leftStickPercent = .2f;
+                topStickPercent = .2f;
                 rightStickPercent = .8f;
+                bottomStickPercent = .8f;
             } else if (stickToSides) {
                 // if we stick only to the center
                 leftStickPercent = .5f;
+                topStickPercent = .5f;
                 rightStickPercent = .5f;
+                bottomStickPercent = .5f;
             }
+
+            boolean ok = true;
+
+            if (expectedPosY <= topStickPercent)
+                mDeltaOffset.y = 0.f - mStartOffset.y;
+            else if (expectedPosY >= bottomStickPercent)
+                mDeltaOffset.y = 1.f - mStartOffset.y;
+            else if (stickToCenter)
+                mDeltaOffset.y = .5f - mStartOffset.y;
+            else
+                ok = false;
 
             if (expectedPosX <= leftStickPercent)
                 mDeltaOffset.x = 0.f - mStartOffset.x;
@@ -533,8 +550,9 @@ public class LiveWallpaper {
             else if (stickToCenter)
                 mDeltaOffset.x = .5f - mStartOffset.x;
             else
-                return false;
-            return true;
+                ok = false;
+
+            return ok;
         }
 
         @Override
