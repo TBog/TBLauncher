@@ -509,9 +509,6 @@ public class LiveWallpaper {
             float expectedPosY = -Math.min(Math.max(mVelocity.y / mWindowSize.y, -.5f), .5f) + mStartOffset.y;
             //Log.d(TAG, "expectedPos=" + String.format(Locale.US, "%.2f %.2f", expectedPosX, expectedPosY));
 
-            // stick to center
-            mDeltaOffset.y = .5f - mStartOffset.y;
-
             // if we stick only to the center
             float leftStickPercent = -1.f;
             float topStickPercent = -1.f;
@@ -533,19 +530,44 @@ public class LiveWallpaper {
             }
 
             boolean ok = true;
+            boolean stickToLeft = expectedPosX <= leftStickPercent;
+            boolean stickToTop = expectedPosY <= topStickPercent;
+            boolean stickToRight = expectedPosX >= rightStickPercent;
+            boolean stickToBottom = expectedPosY >= bottomStickPercent;
 
-            if (expectedPosY <= topStickPercent)
+            if (stickToTop) {
+                // don't stick to the top-left or top-right corner
+                if (stickToLeft) {
+                    stickToLeft = expectedPosX < expectedPosY;
+                    stickToTop = !stickToLeft;
+                } else if (stickToRight) {
+                    stickToRight = (1.f - expectedPosX) < expectedPosY;
+                    stickToTop = !stickToRight;
+                }
+            } else if (stickToBottom) {
+                // don't stick to the bottom-left or bottom-right corner
+                if (stickToLeft) {
+                    stickToLeft = expectedPosX < expectedPosY;
+                    stickToBottom = !stickToLeft;
+                } else if (stickToRight) {
+                    stickToRight = (1.f - expectedPosX) < expectedPosY;
+                    stickToBottom = !stickToRight;
+                }
+            }
+
+            // compute offset based on stick potision
+            if (stickToTop)
                 mDeltaOffset.y = 0.f - mStartOffset.y;
-            else if (expectedPosY >= bottomStickPercent)
+            else if (stickToBottom)
                 mDeltaOffset.y = 1.f - mStartOffset.y;
             else if (stickToCenter)
                 mDeltaOffset.y = .5f - mStartOffset.y;
             else
                 ok = false;
 
-            if (expectedPosX <= leftStickPercent)
+            if (stickToLeft)
                 mDeltaOffset.x = 0.f - mStartOffset.x;
-            else if (expectedPosX >= rightStickPercent)
+            else if (stickToRight)
                 mDeltaOffset.x = 1.f - mStartOffset.x;
             else if (stickToCenter)
                 mDeltaOffset.x = .5f - mStartOffset.x;
