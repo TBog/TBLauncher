@@ -177,10 +177,12 @@
     <string name="cfg_widget_move_resize">Move and resize</string>
     <string name="cfg_widget_move_resize_exit">Exit \"Move and resize\"</string>
     <string name="cfg_widget_remove">Remove</string>
-    <string name="cfg_widget_screen_left">Move to <br />\n<b>←</b> screen</string>
-    <string name="cfg_widget_screen_middle">Move to <br />\n<b>middle</b> screen</string>
-    <string name="cfg_widget_screen_right">Move to <br />\n<b>→</b> screen</string>
-    <string name="cfg_widget_back">Move <b>below</b> all</string>
+    <string name="cfg_widget_screen_left">Move to <b>←</b> screen</string>
+    <string name="cfg_widget_screen_up">Move to <b>↑</b> screen</string>
+    <string name="cfg_widget_screen_middle">Move to <b>middle</b> screen</string>
+    <string name="cfg_widget_screen_right">Move to <b>→</b> screen</string>
+    <string name="cfg_widget_screen_down">Move to <b>↓</b> screen</string>
+    <string name="cfg_widget_back">Move <b>behind</b> all</string>
     <string name="cfg_widget_front">Move <b>above</b> all</string>
 
     <string name="shortcut_with_appName">%1$s: %2$s</string>
