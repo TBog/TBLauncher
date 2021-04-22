@@ -481,7 +481,7 @@ public class LiveWallpaper {
         }
     }
 
-    class Anim extends Animation {
+    private class Anim extends Animation {
         final PointF mStartOffset = new PointF();
         final PointF mDeltaOffset = new PointF();
         final PointF mVelocity = new PointF();
@@ -503,12 +503,63 @@ public class LiveWallpaper {
             mStartOffset.set(mWallpaperOffset);
             //Log.d(TAG, "mStartOffset=" + String.format(Locale.US, "%.2f", mStartOffset));
 
-            boolean stickToSides = isPreferenceWPStickToSides();
-            boolean stickToCenter = isPreferenceWPReturnCenter();
-            float expectedPosX = -Math.min(Math.max(mVelocity.x / mWindowSize.x, -.5f), .5f) + mStartOffset.x;
-            float expectedPosY = -Math.min(Math.max(mVelocity.y / mWindowSize.y, -.5f), .5f) + mStartOffset.y;
+            final float expectedPosX = -Math.min(Math.max(mVelocity.x / mWindowSize.x, -.5f), .5f) + mStartOffset.x;
+            final float expectedPosY = -Math.min(Math.max(mVelocity.y / mWindowSize.y, -.5f), .5f) + mStartOffset.y;
             //Log.d(TAG, "expectedPos=" + String.format(Locale.US, "%.2f %.2f", expectedPosX, expectedPosY));
 
+            SnapInfo si = new SnapInfo(isPreferenceWPStickToSides(), isPreferenceWPReturnCenter());
+            si.init(expectedPosX, expectedPosY);
+            si.removeDiagonals(expectedPosX, expectedPosY);
+
+            // compute offset based on stick location
+            if (si.stickToTop)
+                mDeltaOffset.y = 0.f - mStartOffset.y;
+            else if (si.stickToBottom)
+                mDeltaOffset.y = 1.f - mStartOffset.y;
+            else if (si.stickToCenter)
+                mDeltaOffset.y = .5f - mStartOffset.y;
+
+            if (si.stickToLeft)
+                mDeltaOffset.x = 0.f - mStartOffset.x;
+            else if (si.stickToRight)
+                mDeltaOffset.x = 1.f - mStartOffset.x;
+            else if (si.stickToCenter)
+                mDeltaOffset.x = .5f - mStartOffset.x;
+
+            return si.stickToLeft || si.stickToTop || si.stickToRight || si.stickToBottom || si.stickToCenter;
+        }
+
+        @Override
+        protected void applyTransformation(float interpolatedTime, Transformation t) {
+            float offsetX = mStartOffset.x + mDeltaOffset.x * interpolatedTime;
+            float offsetY = mStartOffset.y + mDeltaOffset.y * interpolatedTime;
+            float velocityInterpolator = (float) Math.sqrt(interpolatedTime) * 3.f;
+            if (velocityInterpolator < 1.f) {
+                offsetX -= mVelocity.x / mWindowSize.x * velocityInterpolator;
+                offsetY -= mVelocity.y / mWindowSize.y * velocityInterpolator;
+            } else {
+                offsetX -= mVelocity.x / mWindowSize.x * (1.f - 0.5f * (velocityInterpolator - 1.f));
+                offsetY -= mVelocity.y / mWindowSize.y * (1.f - 0.5f * (velocityInterpolator - 1.f));
+            }
+            updateWallpaperOffset(offsetX, offsetY);
+        }
+    }
+
+    private static class SnapInfo {
+        public final boolean stickToSides;
+        public final boolean stickToCenter;
+
+        public boolean stickToLeft;
+        public boolean stickToTop;
+        public boolean stickToRight;
+        public boolean stickToBottom;
+
+        public SnapInfo(boolean sidesSnap, boolean centerSnap) {
+            stickToSides = sidesSnap;
+            stickToCenter = centerSnap;
+        }
+
+        public void init(float x, float y) {
             // if we stick only to the center
             float leftStickPercent = -1.f;
             float topStickPercent = -1.f;
@@ -529,67 +580,32 @@ public class LiveWallpaper {
                 bottomStickPercent = .5f;
             }
 
-            boolean ok = true;
-            boolean stickToLeft = expectedPosX <= leftStickPercent;
-            boolean stickToTop = expectedPosY <= topStickPercent;
-            boolean stickToRight = expectedPosX >= rightStickPercent;
-            boolean stickToBottom = expectedPosY >= bottomStickPercent;
+            stickToLeft = x <= leftStickPercent;
+            stickToTop = y <= topStickPercent;
+            stickToRight = x >= rightStickPercent;
+            stickToBottom = y >= bottomStickPercent;
+        }
 
+        public void removeDiagonals(float x, float y) {
             if (stickToTop) {
                 // don't stick to the top-left or top-right corner
                 if (stickToLeft) {
-                    stickToLeft = expectedPosX < expectedPosY;
+                    stickToLeft = x < y;
                     stickToTop = !stickToLeft;
                 } else if (stickToRight) {
-                    stickToRight = (1.f - expectedPosX) < expectedPosY;
+                    stickToRight = (1.f - x) < y;
                     stickToTop = !stickToRight;
                 }
             } else if (stickToBottom) {
                 // don't stick to the bottom-left or bottom-right corner
                 if (stickToLeft) {
-                    stickToLeft = expectedPosX < expectedPosY;
+                    stickToLeft = x < y;
                     stickToBottom = !stickToLeft;
                 } else if (stickToRight) {
-                    stickToRight = (1.f - expectedPosX) < expectedPosY;
+                    stickToRight = (1.f - x) < y;
                     stickToBottom = !stickToRight;
                 }
             }
-
-            // compute offset based on stick potision
-            if (stickToTop)
-                mDeltaOffset.y = 0.f - mStartOffset.y;
-            else if (stickToBottom)
-                mDeltaOffset.y = 1.f - mStartOffset.y;
-            else if (stickToCenter)
-                mDeltaOffset.y = .5f - mStartOffset.y;
-            else
-                ok = false;
-
-            if (stickToLeft)
-                mDeltaOffset.x = 0.f - mStartOffset.x;
-            else if (stickToRight)
-                mDeltaOffset.x = 1.f - mStartOffset.x;
-            else if (stickToCenter)
-                mDeltaOffset.x = .5f - mStartOffset.x;
-            else
-                ok = false;
-
-            return ok;
-        }
-
-        @Override
-        protected void applyTransformation(float interpolatedTime, Transformation t) {
-            float offsetX = mStartOffset.x + mDeltaOffset.x * interpolatedTime;
-            float offsetY = mStartOffset.y + mDeltaOffset.y * interpolatedTime;
-            float velocityInterpolator = (float) Math.sqrt(interpolatedTime) * 3.f;
-            if (velocityInterpolator < 1.f) {
-                offsetX -= mVelocity.x / mWindowSize.x * velocityInterpolator;
-                offsetY -= mVelocity.y / mWindowSize.y * velocityInterpolator;
-            } else {
-                offsetX -= mVelocity.x / mWindowSize.x * (1.f - 0.5f * (velocityInterpolator - 1.f));
-                offsetY -= mVelocity.y / mWindowSize.y * (1.f - 0.5f * (velocityInterpolator - 1.f));
-            }
-            updateWallpaperOffset(offsetX, offsetY);
         }
     }
 }
