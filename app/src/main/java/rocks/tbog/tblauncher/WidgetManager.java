@@ -745,10 +745,14 @@ public class WidgetManager {
             if (lp instanceof WidgetLayout.LayoutParams) {
                 if (((WidgetLayout.LayoutParams) lp).screen != WidgetLayout.LayoutParams.SCREEN_LEFT)
                     adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_screen_left, WidgetOptionItem.Action.MOVE2SCREEN_LEFT));
+                if (((WidgetLayout.LayoutParams) lp).screen != WidgetLayout.LayoutParams.SCREEN_UP)
+                    adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_screen_up, WidgetOptionItem.Action.MOVE2SCREEN_UP));
                 if (((WidgetLayout.LayoutParams) lp).screen != WidgetLayout.LayoutParams.SCREEN_MIDDLE)
                     adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_screen_middle, WidgetOptionItem.Action.MOVE2SCREEN_MIDDLE));
                 if (((WidgetLayout.LayoutParams) lp).screen != WidgetLayout.LayoutParams.SCREEN_RIGHT)
                     adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_screen_right, WidgetOptionItem.Action.MOVE2SCREEN_RIGHT));
+                if (((WidgetLayout.LayoutParams) lp).screen != WidgetLayout.LayoutParams.SCREEN_DOWN)
+                    adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_screen_down, WidgetOptionItem.Action.MOVE2SCREEN_DOWN));
                 adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_back, WidgetOptionItem.Action.MOVE_BELOW));
                 adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_front, WidgetOptionItem.Action.MOVE_ABOVE));
             }
@@ -861,9 +865,23 @@ public class WidgetManager {
                         saveWidgetProperties(view);
                         break;
                     }
+                    case MOVE2SCREEN_UP: {
+                        final WidgetLayout.LayoutParams lp = (WidgetLayout.LayoutParams) view.getLayoutParams();
+                        lp.screen = WidgetLayout.LayoutParams.SCREEN_UP;
+                        view.setLayoutParams(lp);
+                        saveWidgetProperties(view);
+                        break;
+                    }
                     case MOVE2SCREEN_RIGHT: {
                         final WidgetLayout.LayoutParams lp = (WidgetLayout.LayoutParams) view.getLayoutParams();
                         lp.screen = WidgetLayout.LayoutParams.SCREEN_RIGHT;
+                        view.setLayoutParams(lp);
+                        saveWidgetProperties(view);
+                        break;
+                    }
+                    case MOVE2SCREEN_DOWN: {
+                        final WidgetLayout.LayoutParams lp = (WidgetLayout.LayoutParams) view.getLayoutParams();
+                        lp.screen = WidgetLayout.LayoutParams.SCREEN_DOWN;
                         view.setLayoutParams(lp);
                         saveWidgetProperties(view);
                         break;
@@ -1010,7 +1028,7 @@ public class WidgetManager {
             MOVE_RESIZE, MOVE_RESIZE_SWITCH,
             RESET,
             REMOVE,
-            MOVE2SCREEN_LEFT, MOVE2SCREEN_MIDDLE, MOVE2SCREEN_RIGHT,
+            MOVE2SCREEN_LEFT, MOVE2SCREEN_UP, MOVE2SCREEN_MIDDLE, MOVE2SCREEN_RIGHT, MOVE2SCREEN_DOWN,
             MOVE_BELOW, MOVE_ABOVE,
         }
 
