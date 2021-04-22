@@ -14,6 +14,7 @@ import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.WindowMetrics;
 import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
@@ -66,6 +67,9 @@ public class LiveWallpaper {
 
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            long deltaTimeMs = e2.getEventTime() - e1.getEventTime();
+            if (deltaTimeMs > ViewConfiguration.getDoubleTapTimeout())
+                return false;
             View view = mTBLauncherActivity.findViewById(R.id.root_layout);
             float xMove = e1.getRawX() - e2.getRawX();
             float yMove = e1.getRawY() - e2.getRawY();
