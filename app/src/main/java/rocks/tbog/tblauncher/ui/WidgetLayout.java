@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 
+import static rocks.tbog.tblauncher.ui.WidgetLayout.LayoutParams.SCREEN_DOWN;
 import static rocks.tbog.tblauncher.ui.WidgetLayout.LayoutParams.SCREEN_MIDDLE;
 import static rocks.tbog.tblauncher.ui.WidgetLayout.LayoutParams.SCREEN_POSITIONS;
 import static rocks.tbog.tblauncher.ui.WidgetLayout.LayoutParams.SCREEN_RIGHT;
@@ -488,16 +489,32 @@ public class WidgetLayout extends ViewGroup {
         }
     }
 
+    private int getLeftMarginForScreen(int screen, int width) {
+        if (mPageCount.x == 1)
+            return 0;
+        int leftOfCenter = mPageCount.x / 2;
+        if (screen == SCREEN_MIDDLE)
+            return leftOfCenter * width;
+        if (screen == SCREEN_RIGHT)
+            return leftOfCenter * (width + 1);
+        return 0;
+    }
+
+    private int getTopMarginForScreen(int screen, int height) {
+        if (mPageCount.y == 1)
+            return 0;
+        int leftOfCenter = mPageCount.y / 2;
+        if (screen == SCREEN_MIDDLE)
+            return leftOfCenter * height;
+        if (screen == SCREEN_DOWN)
+            return leftOfCenter * (height + 1);
+        return 0;
+    }
+
     private void screenLayout(int position, int width, int height, boolean childLayout) {
         mTmpContainerRect.setEmpty();
-        final int screenTop = 0;
-        final int screenLeft;
-        if (position == SCREEN_MIDDLE)
-            screenLeft = width;
-        else if (position == SCREEN_RIGHT)
-            screenLeft = 2 * width;
-        else
-            screenLeft = 0;
+        final int screenTop = getTopMarginForScreen(position, height);
+        final int screenLeft = getLeftMarginForScreen(position, width);
         int autoX = 0;
         int autoY = 0;
         int maxChildY = 0;
@@ -684,6 +701,8 @@ public class WidgetLayout extends ViewGroup {
         public static final int SCREEN_MIDDLE = 0;
         public static final int SCREEN_LEFT = 1;
         public static final int SCREEN_RIGHT = 2;
+        public static final int SCREEN_UP = 4;
+        public static final int SCREEN_DOWN = 8;
         public static final int[] SCREEN_POSITIONS = new int[]{SCREEN_LEFT, SCREEN_MIDDLE, SCREEN_RIGHT};
 
         public enum Placement {
