@@ -704,6 +704,20 @@ public class WidgetManager {
         removeWidgetPopup.showCenter(mLayout);
     }
 
+    private boolean canMoveToPage(int from, int to) {
+        if (from != WidgetLayout.LayoutParams.PAGE_MIDDLE)
+            return to == WidgetLayout.LayoutParams.PAGE_MIDDLE;
+        if (mLayout == null)
+            return false;
+
+        boolean ok = false;
+        if (mLayout.getVerticalPageCount() > 1)
+            ok = ok || to == WidgetLayout.LayoutParams.PAGE_UP || to == WidgetLayout.LayoutParams.PAGE_DOWN;
+        if (mLayout.getHorizontalPageCount() > 1)
+            ok = ok || to == WidgetLayout.LayoutParams.PAGE_LEFT || to == WidgetLayout.LayoutParams.PAGE_RIGHT;
+        return ok;
+    }
+
     /**
      * Popup with options for the widget in the view
      *
@@ -743,15 +757,16 @@ public class WidgetManager {
             adapter.add(new LinearAdapter.ItemDivider());
             final ViewGroup.LayoutParams lp = view.getLayoutParams();
             if (lp instanceof WidgetLayout.LayoutParams) {
-                if (((WidgetLayout.LayoutParams) lp).screenPage != WidgetLayout.LayoutParams.PAGE_LEFT)
+                final int screenPage = ((WidgetLayout.LayoutParams) lp).screenPage;
+                if (canMoveToPage(screenPage, WidgetLayout.LayoutParams.PAGE_LEFT))
                     adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_screen_left, WidgetOptionItem.Action.MOVE2SCREEN_LEFT));
-                if (((WidgetLayout.LayoutParams) lp).screenPage != WidgetLayout.LayoutParams.PAGE_UP)
+                if (canMoveToPage(screenPage, WidgetLayout.LayoutParams.PAGE_UP))
                     adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_screen_up, WidgetOptionItem.Action.MOVE2SCREEN_UP));
-                if (((WidgetLayout.LayoutParams) lp).screenPage != WidgetLayout.LayoutParams.PAGE_MIDDLE)
+                if (canMoveToPage(screenPage, WidgetLayout.LayoutParams.PAGE_MIDDLE))
                     adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_screen_middle, WidgetOptionItem.Action.MOVE2SCREEN_MIDDLE));
-                if (((WidgetLayout.LayoutParams) lp).screenPage != WidgetLayout.LayoutParams.PAGE_RIGHT)
+                if (canMoveToPage(screenPage, WidgetLayout.LayoutParams.PAGE_RIGHT))
                     adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_screen_right, WidgetOptionItem.Action.MOVE2SCREEN_RIGHT));
-                if (((WidgetLayout.LayoutParams) lp).screenPage != WidgetLayout.LayoutParams.PAGE_DOWN)
+                if (canMoveToPage(screenPage, WidgetLayout.LayoutParams.PAGE_DOWN))
                     adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_screen_down, WidgetOptionItem.Action.MOVE2SCREEN_DOWN));
                 adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_back, WidgetOptionItem.Action.MOVE_BELOW));
                 adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_front, WidgetOptionItem.Action.MOVE_ABOVE));
