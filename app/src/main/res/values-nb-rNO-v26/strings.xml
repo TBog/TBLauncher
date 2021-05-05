@@ -5,4 +5,9 @@
     <string name="force_adaptive_summary">For ikke-adaptive ikoner, reduser skalaen og plasser den på en formet bakgrunn</string>
     <string name="force_adaptive">Påtving adaptive ikoner</string>
     <string name="adaptive_shape_name">Adaptiv ikonform</string>
+    <string name="removed_item">Fjernet %s</string>
+    <string name="ui_item_visit">Besøk \"%1$s\"</string>
+    <string name="ui_item_search">Søk i %1$s etter \"%2$s\"\?</string>
+    <string name="hint_ui_search">Søk i apper, kontakter, …</string>
+    <string name="app_name">TinyBit launcher</string>
 </resources>
