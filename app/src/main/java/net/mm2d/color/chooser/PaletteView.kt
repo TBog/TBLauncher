@@ -7,6 +7,7 @@
 
 package net.mm2d.color.chooser
 
+import kotlin.collections.forEach as kForEach
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Resources
@@ -111,7 +112,7 @@ internal class PaletteView
         var onColorChanged: ((color: Int) -> Unit)? = null
 
         init {
-            viewList.forEach {
+            viewList.kForEach {
                 it.setOnClickListener(::performOnColorChanged)
             }
         }
@@ -121,7 +122,7 @@ internal class PaletteView
         }
 
         fun apply(colors: IntArray, selected: Int) {
-            viewList.withIndex().forEach { (i, view) ->
+            viewList.withIndex().kForEach { (i, view) ->
                 val color = if (i < colors.size) colors[i] else Color.TRANSPARENT
                 view.tag = color
                 view.setColor(color)
