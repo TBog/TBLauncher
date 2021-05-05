@@ -7,6 +7,8 @@
 
 package net.mm2d.color.chooser
 
+import androidx.core.view.forEach as kForEach
+import kotlin.collections.forEach as kForEach
 import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
@@ -14,7 +16,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.LinearLayout
 import androidx.core.graphics.alpha
-import androidx.core.view.forEach
 import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
 import net.mm2d.color.chooser.util.toOpacity
@@ -48,13 +49,13 @@ internal class DialogView
         )
         binding.viewPager.adapter = ViewPagerAdapter(pages)
         binding.tabLayout.setupWithViewPager(binding.viewPager)
-        pages.forEach { observeRecursively(it.second, lifecycleOwner) }
+        pages.kForEach { observeRecursively(it.second, lifecycleOwner) }
         observeRecursively(binding.controlView, lifecycleOwner)
     }
 
     private fun observeRecursively(view: View, lifecycleOwner: LifecycleOwner) {
         if (view is ColorObserver) liveData.observe(lifecycleOwner, view)
-        (view as? ViewGroup)?.forEach { observeRecursively(it, lifecycleOwner) }
+        (view as? ViewGroup)?.kForEach { observeRecursively(it, lifecycleOwner) }
     }
 
     fun addObserver(obs: ColorObserver, lifecycleOwner: LifecycleOwner) {
