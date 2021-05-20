@@ -19,7 +19,7 @@
     tools:showIn="@layout/activity_fullscreen"
     tools:visibility="visible">
 
-    <rocks.tbog.tblauncher.ui.AnimatedListView
+    <rocks.tbog.tblauncher.ui.RecyclerList
         android:id="@+id/resultList"
         android:layout_width="match_parent"
         android:layout_height="match_parent"

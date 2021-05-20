@@ -34,6 +34,7 @@ import androidx.annotation.StringRes;
 import androidx.appcompat.app.ActionBar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.preference.PreferenceManager;
+import androidx.recyclerview.widget.LinearLayoutManager;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -52,7 +53,7 @@ import rocks.tbog.tblauncher.entry.EntryWithTags;
 import rocks.tbog.tblauncher.entry.ShortcutEntry;
 import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.quicklist.EditQuickListDialog;
-import rocks.tbog.tblauncher.result.ResultAdapter;
+import rocks.tbog.tblauncher.result.RecycleAdapter;
 import rocks.tbog.tblauncher.result.ResultHelper;
 import rocks.tbog.tblauncher.searcher.ISearchActivity;
 import rocks.tbog.tblauncher.searcher.QuerySearcher;
@@ -65,6 +66,7 @@ import rocks.tbog.tblauncher.ui.DialogFragment;
 import rocks.tbog.tblauncher.ui.KeyboardScrollHider;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
+import rocks.tbog.tblauncher.ui.RecyclerList;
 import rocks.tbog.tblauncher.ui.TagsManagerDialog;
 import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.SystemUiVisibility;
@@ -92,8 +94,8 @@ public class Behaviour implements ISearchActivity {
     private DialogFragment<?> mFragmentDialog = null;
 
     private View mResultLayout;
-    private AnimatedListView mResultList;
-    private ResultAdapter mResultAdapter;
+    private RecyclerList mResultList;
+    private RecycleAdapter mResultAdapter;
     private EditText mSearchEditText;
     private View mSearchBarContainer;
     private View mWidgetContainer;
@@ -219,11 +221,19 @@ public class Behaviour implements ISearchActivity {
     private SharedPreferences mPref;
 
     private void initResultLayout() {
-        mResultAdapter = new ResultAdapter(new ArrayList<>());
+        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
+        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        layoutManager.setReverseLayout(true);
+        //layoutManager.setStackFromEnd(true);
+
+        mResultAdapter = new RecycleAdapter(new ArrayList<>());
         mResultList = mResultLayout.findViewById(R.id.resultList);
-        mResultList.setAdapter(mResultAdapter);
         mResultList.setOnItemClickListener((parent, view, position, id) -> mResultAdapter.onClick(position, view));
         mResultList.setOnItemLongClickListener((parent, view, position, id) -> mResultAdapter.onLongClick(position, view));
+
+        mResultList.setHasFixedSize(true);
+        mResultList.setLayoutManager(layoutManager);
+        mResultList.setAdapter(mResultAdapter);
     }
 
     private void initSearchBarContainer() {
