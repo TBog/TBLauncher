@@ -12,6 +12,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import org.jetbrains.annotations.NotNull;
 
+import rocks.tbog.tblauncher.result.ResultListLayoutManager;
+
 public class RecyclerList extends RecyclerView {
     private boolean touchEventsBlocked = false;
     AdapterView.OnItemClickListener mOnItemClickListener = null;
@@ -55,35 +57,23 @@ public class RecyclerList extends RecyclerView {
         //super.setTranscriptMode(mode);
     }
 
-    public void prepareChangeAnim() {}
-    public void animateChange() {}
-    public void refreshViews() {}
-
-    public void setOnItemClickListener() {
-
+    public void prepareChangeAnim() {
+        ItemAnimator itemAnimator = getItemAnimator();
+        if (itemAnimator != null)
+            itemAnimator.endAnimations();
     }
 
-    /**
-     * Register a callback to be invoked when an item in this AdapterView has
-     * been clicked.
-     *
-     * @param listener The callback that will be invoked.
-     */
-    public void setOnItemClickListener(@Nullable AdapterView.OnItemClickListener listener) {
-        mOnItemClickListener = listener;
+    public void animateChange() {
+        ItemAnimator itemAnimator = getItemAnimator();
+        if (itemAnimator != null)
+            itemAnimator.isRunning(() -> {
+                LayoutManager layoutManager = getLayoutManager();
+                if (layoutManager instanceof ResultListLayoutManager) {
+                    ((ResultListLayoutManager)layoutManager).onItemAnimationsFinished();
+                }
+            });
     }
 
-    /**
-     * Register a callback to be invoked when an item in this AdapterView has
-     * been clicked and held
-     *
-     * @param listener The callback that will run
-     */
-    public void setOnItemLongClickListener(AdapterView.OnItemLongClickListener listener) {
-        if (!isLongClickable()) {
-            setLongClickable(true);
-        }
-        mOnItemLongClickListener = listener;
+    public void refreshViews() {
     }
-
 }
