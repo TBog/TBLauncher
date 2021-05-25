@@ -228,8 +228,8 @@ public class Behaviour implements ISearchActivity {
 
         mResultAdapter = new RecycleAdapter(new ArrayList<>());
         mResultList = mResultLayout.findViewById(R.id.resultList);
-        mResultList.setOnItemClickListener((parent, view, position, id) -> mResultAdapter.onClick(position, view));
-        mResultList.setOnItemLongClickListener((parent, view, position, id) -> mResultAdapter.onLongClick(position, view));
+        //mResultList.setOnItemClickListener((parent, view, position, id) -> mResultAdapter.onClick(position, view));
+        //mResultList.setOnItemLongClickListener((parent, view, position, id) -> mResultAdapter.onLongClick(position, view));
 
         mResultList.setHasFixedSize(true);
         mResultList.setLayoutManager(layoutManager);
