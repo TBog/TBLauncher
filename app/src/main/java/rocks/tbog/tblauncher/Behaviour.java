@@ -55,6 +55,7 @@ import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.quicklist.EditQuickListDialog;
 import rocks.tbog.tblauncher.result.RecycleAdapter;
 import rocks.tbog.tblauncher.result.ResultHelper;
+import rocks.tbog.tblauncher.result.ResultListLayoutManager;
 import rocks.tbog.tblauncher.searcher.ISearchActivity;
 import rocks.tbog.tblauncher.searcher.QuerySearcher;
 import rocks.tbog.tblauncher.searcher.Searcher;
@@ -221,10 +222,7 @@ public class Behaviour implements ISearchActivity {
     private SharedPreferences mPref;
 
     private void initResultLayout() {
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getContext());
-        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
-        layoutManager.setReverseLayout(true);
-        //layoutManager.setStackFromEnd(true);
+        LinearLayoutManager layoutManager = new ResultListLayoutManager(getContext());
 
         mResultAdapter = new RecycleAdapter(new ArrayList<>());
         mResultList = mResultLayout.findViewById(R.id.resultList);
@@ -819,6 +817,13 @@ public class Behaviour implements ISearchActivity {
             mResultAdapter.updateResults(results);
             mResultList.animateChange();
         }
+
+        if (!isRefresh) {
+            final int resultCount = mResultAdapter.getItemCount();
+            if (resultCount > 0)
+                mResultList.scrollToPosition(resultCount - 1);
+        }
+
         TBApplication.quickList(getContext()).adapterUpdated();
         mClearButton.setVisibility(View.VISIBLE);
         mMenuButton.setVisibility(View.INVISIBLE);
