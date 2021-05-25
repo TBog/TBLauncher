@@ -81,6 +81,9 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
 
     @Override
     public void onBindViewHolder(@NonNull @NotNull Holder holder, int position) {
+        holder.setOnClickListener(view -> onClick(position, view));
+        holder.setOnLongClickListener(view -> onLongClick(position, view));
+
         results.get(position).displayResult(holder.itemView, holder.drawFlags);
     }
 
@@ -191,13 +194,20 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
     }
 
     public static class Holder extends RecyclerView.ViewHolder {
-
         int drawFlags;
 
         public Holder(@NonNull @NotNull View itemView, int drawFlags) {
             super(itemView);
             itemView.setTag(this);
             this.drawFlags = drawFlags;
+        }
+
+        public void setOnClickListener(@Nullable View.OnClickListener listener) {
+            itemView.setOnClickListener(listener);
+        }
+
+        public void setOnLongClickListener(@Nullable View.OnLongClickListener listener) {
+            itemView.setOnLongClickListener(listener);
         }
     }
 }
