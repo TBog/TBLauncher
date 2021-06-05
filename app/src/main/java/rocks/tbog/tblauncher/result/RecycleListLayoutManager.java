@@ -7,20 +7,20 @@ import android.util.Log;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-public class ResultListLayoutManager extends LinearLayoutManager {
+public class RecycleListLayoutManager extends LinearLayoutManager {
     private static final String TAG = "RLLM";
     int lastScrollPos = -1;
 
-    public ResultListLayoutManager(Context context) {
+    public RecycleListLayoutManager(Context context) {
         this(context, LinearLayoutManager.VERTICAL, false);
         setStackFromEnd(true);
     }
 
-    public ResultListLayoutManager(Context context, int orientation, boolean reverseLayout) {
+    public RecycleListLayoutManager(Context context, int orientation, boolean reverseLayout) {
         super(context, orientation, reverseLayout);
     }
 
-    public ResultListLayoutManager(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
+    public RecycleListLayoutManager(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 

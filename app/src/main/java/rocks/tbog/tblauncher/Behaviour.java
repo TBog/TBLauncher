@@ -54,8 +54,9 @@ import rocks.tbog.tblauncher.entry.ShortcutEntry;
 import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.quicklist.EditQuickListDialog;
 import rocks.tbog.tblauncher.result.RecycleAdapter;
+import rocks.tbog.tblauncher.result.RecycleScrollListener;
 import rocks.tbog.tblauncher.result.ResultHelper;
-import rocks.tbog.tblauncher.result.ResultListLayoutManager;
+import rocks.tbog.tblauncher.result.RecycleListLayoutManager;
 import rocks.tbog.tblauncher.searcher.ISearchActivity;
 import rocks.tbog.tblauncher.searcher.QuerySearcher;
 import rocks.tbog.tblauncher.searcher.Searcher;
@@ -222,7 +223,7 @@ public class Behaviour implements ISearchActivity {
     private SharedPreferences mPref;
 
     private void initResultLayout() {
-        LinearLayoutManager layoutManager = new ResultListLayoutManager(getContext());
+        LinearLayoutManager layoutManager = new RecycleListLayoutManager(getContext());
 
         mResultAdapter = new RecycleAdapter(new ArrayList<>());
         mResultList = mResultLayout.findViewById(R.id.resultList);
@@ -232,6 +233,7 @@ public class Behaviour implements ISearchActivity {
         mResultList.setHasFixedSize(true);
         mResultList.setLayoutManager(layoutManager);
         mResultList.setAdapter(mResultAdapter);
+        mResultList.addOnScrollListener(new RecycleScrollListener(this));
     }
 
     private void initSearchBarContainer() {
@@ -1515,7 +1517,4 @@ public class Behaviour implements ISearchActivity {
         return executeGestureAction("gesture-double-click");
     }
 
-    public void fixScroll() {
-        mHider.fixScroll();
-    }
 }
