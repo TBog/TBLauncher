@@ -10,24 +10,22 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.jetbrains.annotations.NotNull;
-
-import rocks.tbog.tblauncher.result.ResultListLayoutManager;
+import rocks.tbog.tblauncher.result.RecycleListLayoutManager;
 
 public class RecyclerList extends RecyclerView {
     private boolean touchEventsBlocked = false;
     AdapterView.OnItemClickListener mOnItemClickListener = null;
     AdapterView.OnItemLongClickListener mOnItemLongClickListener = null;
 
-    public RecyclerList(@NonNull @NotNull Context context) {
+    public RecyclerList(@NonNull Context context) {
         super(context);
     }
 
-    public RecyclerList(@NonNull @NotNull Context context, @Nullable @org.jetbrains.annotations.Nullable AttributeSet attrs) {
+    public RecyclerList(@NonNull Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
     }
 
-    public RecyclerList(@NonNull @NotNull Context context, @Nullable @org.jetbrains.annotations.Nullable AttributeSet attrs, int defStyleAttr) {
+    public RecyclerList(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 
@@ -68,8 +66,8 @@ public class RecyclerList extends RecyclerView {
         if (itemAnimator != null)
             itemAnimator.isRunning(() -> {
                 LayoutManager layoutManager = getLayoutManager();
-                if (layoutManager instanceof ResultListLayoutManager) {
-                    ((ResultListLayoutManager)layoutManager).onItemAnimationsFinished();
+                if (layoutManager instanceof RecycleListLayoutManager) {
+                    ((RecycleListLayoutManager)layoutManager).onItemAnimationsFinished();
                 }
             });
     }
