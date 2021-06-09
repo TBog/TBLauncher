@@ -5,12 +5,15 @@ import android.animation.ValueAnimator;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewTreeObserver;
+import android.view.animation.DecelerateInterpolator;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.ui.KeyboardScrollHider;
+import rocks.tbog.tblauncher.ui.RecyclerList;
 
 public class RecycleScrollListener extends RecyclerView.OnScrollListener {
     private static final String TAG = "RScrL";
@@ -19,6 +22,8 @@ public class RecycleScrollListener extends RecyclerView.OnScrollListener {
     private int mHideKeyboardThreshold = 0;
     private int mKeyboardHeight = -1;
     private int mListHeight = -1;
+    private boolean mResizeFinished = true;
+    private boolean mResizeInProgress = false;
 
     public RecycleScrollListener(KeyboardScrollHider.KeyboardHandler handler) {
         this.handler = handler;
@@ -36,9 +41,17 @@ public class RecycleScrollListener extends RecyclerView.OnScrollListener {
             mHideKeyboardThreshold = lastItemHeight * 3 / 5;
         }
         Log.d(TAG, "scroll state=" + newState + " last=" + lastItem);
-        if (newState != RecyclerView.SCROLL_STATE_DRAGGING) {
-            if (recyclerView.getLayoutParams().height != ViewGroup.LayoutParams.MATCH_PARENT) {
+        if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
+            mResizeFinished = false;
+            mResizeInProgress = false;
+            mKeyboardHeight = getKeyboardHeight(recyclerView);
+            mListHeight = recyclerView.getHeight();
+            Log.d(TAG, "start drag; mKeyboardHeight=" + mKeyboardHeight + " mListHeight=" + mListHeight);
+        } else {
+            if (mResizeInProgress && !mResizeFinished) {
+                mResizeInProgress = false;
                 ValueAnimator anim = ValueAnimator.ofInt(recyclerView.getHeight(), ((View) recyclerView.getParent()).getHeight());
+                anim.setInterpolator(new DecelerateInterpolator());
                 anim.setDuration(recyclerView.getResources().getInteger(android.R.integer.config_longAnimTime));
                 anim.addUpdateListener(animation -> {
                     int h = (int) animation.getAnimatedValue();
@@ -47,12 +60,16 @@ public class RecycleScrollListener extends RecyclerView.OnScrollListener {
                 anim.addListener(new Animator.AnimatorListener() {
                     @Override
                     public void onAnimationStart(Animator animation) {
-
+                        if (recyclerView instanceof RecyclerList)
+                            ((RecyclerList) recyclerView).blockTouchEvents();
                     }
 
                     @Override
                     public void onAnimationEnd(Animator animation) {
+                        if (recyclerView instanceof RecyclerList)
+                            ((RecyclerList) recyclerView).unblockTouchEvents();
                         setListLayoutHeight(recyclerView, ViewGroup.LayoutParams.MATCH_PARENT);
+                        mResizeFinished = true;
                     }
 
                     @Override
@@ -67,40 +84,66 @@ public class RecycleScrollListener extends RecyclerView.OnScrollListener {
                 });
                 anim.start();
             }
+            mResizeFinished = true;
         }
     }
 
     @Override
     public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
         int state = recyclerView.getScrollState();
-        if (state == 0 && dx == 0 && dy == 0) {
+        if (state == RecyclerView.SCROLL_STATE_IDLE && dx == 0 && dy == 0) {
             // list got updated
             mScrollAmountY = 0;
-            mKeyboardHeight = getKeyboardHeight(recyclerView);
-            mListHeight = recyclerView.getHeight();
+//            mKeyboardHeight = getKeyboardHeight(recyclerView);
+//            mListHeight = recyclerView.getHeight();
+//            Log.d(TAG, "list updated; mKeyboardHeight=" + mKeyboardHeight + " mListHeight=" + mListHeight);
         }
+        if (mResizeFinished || state != RecyclerView.SCROLL_STATE_DRAGGING)
+            return;
+
         mScrollAmountY -= dy;
         Log.d(TAG, "state=" + state + " scrollY=" + mScrollAmountY);
 
         if (mScrollAmountY > mHideKeyboardThreshold) {
             int containerHeight = ((View) recyclerView.getParent()).getHeight();
-            final int listHeight;
-            if ((mListHeight + mScrollAmountY) < containerHeight)
+            Log.d(TAG, "containerHeight=" + containerHeight);
+            int listHeight = ViewGroup.LayoutParams.MATCH_PARENT;
+            if ((mListHeight + mScrollAmountY) >= containerHeight) {
+                // if list height is MATCH_PARENT then start the resize process (hide keyboard)
+                if (!mResizeInProgress && recyclerView.getLayoutParams().height == ViewGroup.LayoutParams.MATCH_PARENT) {
+                    mResizeInProgress = true;
+                    handler.hideKeyboard();
+
+                    ViewTreeObserver vto = recyclerView.getViewTreeObserver();
+                    vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                        @Override
+                        public void onGlobalLayout() {
+                            vto.removeOnGlobalLayoutListener(this);
+                            if (!mResizeFinished && recyclerView.getScrollState() == RecyclerView.SCROLL_STATE_DRAGGING) {
+                                mResizeInProgress = true;
+                                int height = Math.min(mListHeight + mScrollAmountY, ((View) recyclerView.getParent()).getHeight());
+                                setListLayoutHeight(recyclerView, height);
+                            }
+                        }
+                    });
+                } else if (recyclerView.getLayoutParams().height != ViewGroup.LayoutParams.MATCH_PARENT) {
+                    // list reached container size, stop resizing
+                    mResizeFinished = true;
+                    Log.d(TAG, "resize finished");
+                    listHeight = ViewGroup.LayoutParams.MATCH_PARENT;
+                }
+            } else {
                 listHeight = mListHeight + mScrollAmountY;
-            else
-                listHeight = ViewGroup.LayoutParams.MATCH_PARENT;
-            setListLayoutHeight(recyclerView, listHeight);
-            if (recyclerView.getLayoutParams().height == ViewGroup.LayoutParams.MATCH_PARENT) {
-                handler.hideKeyboard();
-                recyclerView.post(() -> setListLayoutHeight(recyclerView, listHeight));
             }
+            //if (mResizeInProgress)
+            setListLayoutHeight(recyclerView, listHeight);
         }
     }
 
     private void setListLayoutHeight(ViewGroup list, int height) {
         final ViewGroup.LayoutParams params = list.getLayoutParams();
         if (params.height != height) {
-            //Log.i(TAG, "height=" + height + " scroll=" + this.list.getScrollY());
+            Log.i(TAG, "set layout height " + height);
             params.height = height;
             list.setLayoutParams(params);
             list.forceLayout();
