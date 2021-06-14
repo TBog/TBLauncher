@@ -262,10 +262,4 @@ public class KeyboardScrollHider implements View.OnTouchListener {
             handleResizeDone();
         });
     }
-
-    public interface KeyboardHandler {
-        void showKeyboard();
-
-        void hideKeyboard();
-    }
 }

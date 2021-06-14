@@ -245,8 +245,6 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
         mPopup = popup;
         //popup.setVisibilityHelper(systemUiVisibilityHelper);
         popup.setOnDismissListener(() -> TBLauncherActivity.this.mPopup = null);
-        if (mHider != null)
-            mHider.fixScroll();
     }
 
     public boolean dismissPopup() {

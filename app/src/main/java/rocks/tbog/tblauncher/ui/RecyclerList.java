@@ -4,7 +4,6 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
-import android.widget.AdapterView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -14,8 +13,6 @@ import rocks.tbog.tblauncher.result.RecycleListLayoutManager;
 
 public class RecyclerList extends RecyclerView {
     private boolean touchEventsBlocked = false;
-    AdapterView.OnItemClickListener mOnItemClickListener = null;
-    AdapterView.OnItemLongClickListener mOnItemLongClickListener = null;
 
     public RecyclerList(@NonNull Context context) {
         super(context);
@@ -67,11 +64,12 @@ public class RecyclerList extends RecyclerView {
             itemAnimator.isRunning(() -> {
                 LayoutManager layoutManager = getLayoutManager();
                 if (layoutManager instanceof RecycleListLayoutManager) {
-                    ((RecycleListLayoutManager)layoutManager).onItemAnimationsFinished();
+                    ((RecycleListLayoutManager) layoutManager).onItemAnimationsFinished();
                 }
             });
     }
 
     public void refreshViews() {
+        //TODO: implement this
     }
 }

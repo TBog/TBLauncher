@@ -84,7 +84,7 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
         holder.setOnClickListener(view -> onClick(position, view));
         holder.setOnLongClickListener(view -> onLongClick(position, view));
 
-        results.get(position).displayResult(holder.itemView, holder.drawFlags);
+        results.get(position).displayResult(holder.itemView, holder.mDrawFlags);
     }
 
     @Override
@@ -194,12 +194,12 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
     }
 
     public static class Holder extends RecyclerView.ViewHolder {
-        int drawFlags;
+        private final int mDrawFlags;
 
         public Holder(@NonNull @NotNull View itemView, int drawFlags) {
             super(itemView);
             itemView.setTag(this);
-            this.drawFlags = drawFlags;
+            mDrawFlags = drawFlags;
         }
 
         public void setOnClickListener(@Nullable View.OnClickListener listener) {

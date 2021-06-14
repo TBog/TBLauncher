@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 
 public class RecycleListLayoutManager extends LinearLayoutManager {
     private static final String TAG = "RLLM";
-    int lastScrollPos = -1;
+    private int mLastScrollPos = -1;
 
     public RecycleListLayoutManager(Context context) {
         this(context, LinearLayoutManager.VERTICAL, false);
@@ -27,17 +27,17 @@ public class RecycleListLayoutManager extends LinearLayoutManager {
     @Override
     public void onLayoutCompleted(RecyclerView.State state) {
         super.onLayoutCompleted(state);
-        scrollToPositionWithOffset(lastScrollPos, 0);
+        scrollToPositionWithOffset(mLastScrollPos, 0);
     }
 
     @Override
     public void scrollToPosition(int position) {
-        Log.d(TAG, "scrollToPosition: pos=" + position + " lastScrollPos=" + lastScrollPos);
-        lastScrollPos = position;
+        Log.d(TAG, "scrollToPosition: pos=" + position + " mLastScrollPos=" + mLastScrollPos);
+        mLastScrollPos = position;
         super.scrollToPosition(position);
     }
 
     public void onItemAnimationsFinished() {
-        scrollToPositionWithOffset(lastScrollPos, 0);
+        scrollToPositionWithOffset(mLastScrollPos, 0);
     }
 }
