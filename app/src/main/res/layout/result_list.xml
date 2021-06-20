@@ -31,6 +31,7 @@
         android:dividerHeight="1dp"
         android:stackFromBottom="true"
         android:transcriptMode="alwaysScroll"
+        android:scrollbars="vertical"
         tools:listitem="@layout/item_app" />
 
     <rocks.tbog.tblauncher.ui.BottomPullEffectView
