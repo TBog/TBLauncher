@@ -261,7 +261,7 @@ public class CustomizeUI {
         listView.setSelector(selector);
     }
 
-    public Drawable getSelectorDrawable(View view, int color, boolean borderless) {
+    public static Drawable getSelectorDrawable(View view, int color, boolean borderless) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             Drawable mask = borderless ? null : new ColorDrawable(Color.WHITE);
             Drawable content = borderless ? null : view.getBackground();

@@ -2,6 +2,7 @@ package rocks.tbog.tblauncher.result;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -18,9 +19,11 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import rocks.tbog.tblauncher.CustomizeUI;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.ui.ListPopup;
+import rocks.tbog.tblauncher.utils.UIColors;
 
 public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> {
 
@@ -85,6 +88,11 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
         holder.setOnLongClickListener(view -> onLongClick(position, view));
 
         results.get(position).displayResult(holder.itemView, holder.mDrawFlags);
+
+        // TODO: move selector background setup outside of adapter
+        int touchColor = UIColors.getResultListRipple(holder.itemView.getContext());
+        Drawable selectorBackground = CustomizeUI.getSelectorDrawable(holder.itemView, touchColor, false);
+        holder.itemView.setBackground(selectorBackground);
     }
 
     @Override
@@ -157,6 +165,24 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
         return mFilter;
     }
 
+    public static class Holder extends RecyclerView.ViewHolder {
+        private final int mDrawFlags;
+
+        public Holder(@NonNull @NotNull View itemView, int drawFlags) {
+            super(itemView);
+            itemView.setTag(this);
+            mDrawFlags = drawFlags;
+        }
+
+        public void setOnClickListener(@Nullable View.OnClickListener listener) {
+            itemView.setOnClickListener(listener);
+        }
+
+        public void setOnLongClickListener(@Nullable View.OnLongClickListener listener) {
+            itemView.setOnLongClickListener(listener);
+        }
+    }
+
     private class FilterById extends Filter {
 
         //Invoked in a worker thread to filter the data according to the constraint.
@@ -190,24 +216,6 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
                 resultsOriginal = null;
                 notifyDataSetChanged();
             }
-        }
-    }
-
-    public static class Holder extends RecyclerView.ViewHolder {
-        private final int mDrawFlags;
-
-        public Holder(@NonNull @NotNull View itemView, int drawFlags) {
-            super(itemView);
-            itemView.setTag(this);
-            mDrawFlags = drawFlags;
-        }
-
-        public void setOnClickListener(@Nullable View.OnClickListener listener) {
-            itemView.setOnClickListener(listener);
-        }
-
-        public void setOnLongClickListener(@Nullable View.OnLongClickListener listener) {
-            itemView.setOnLongClickListener(listener);
         }
     }
 }
