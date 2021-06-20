@@ -14,11 +14,13 @@ import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.VelocityTracker;
 import android.view.View;
+import android.view.ViewConfiguration;
 import android.view.WindowMetrics;
 import android.view.animation.Animation;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Transformation;
 
+import androidx.annotation.NonNull;
 import androidx.core.view.GestureDetectorCompat;
 import androidx.preference.PreferenceManager;
 
@@ -43,9 +45,10 @@ public class LiveWallpaper {
     private Anim mAnimation;
     private VelocityTracker mVelocityTracker;
 
-    public static final int SCREEN_COUNT_HORIZONTAL = Integer.parseInt("3");
-    public static final int SCREEN_COUNT_VERTICAL = Integer.parseInt("1"); // not tested with values != 1
+    public static int SCREEN_COUNT_HORIZONTAL = Integer.parseInt("3");
+    public static int SCREEN_COUNT_VERTICAL = Integer.parseInt("1"); // not tested with values != 1
 
+    private boolean lwpScrollPages = true;
     private boolean lwpTouch = true;
     private boolean lwpDrag = false;
     private boolean wpDragAnimate = true;
@@ -64,6 +67,9 @@ public class LiveWallpaper {
 
         @Override
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+            long deltaTimeMs = e2.getEventTime() - e1.getEventTime();
+            if (deltaTimeMs > ViewConfiguration.getDoubleTapTimeout())
+                return false;
             View view = mTBLauncherActivity.findViewById(R.id.root_layout);
             float xMove = e1.getRawX() - e2.getRawX();
             float yMove = e1.getRawY() - e2.getRawY();
@@ -112,8 +118,6 @@ public class LiveWallpaper {
     }
 
     public void scroll(MotionEvent e1, MotionEvent e2) {
-        if (!isPreferenceWPDragAnimate())
-            return;
         cacheWindowSize();
         mFirstTouchPos.set(e1.getRawX(), e1.getRawY());
         mLastTouchPos.set(e2.getRawX(), e2.getRawY());
@@ -124,17 +128,31 @@ public class LiveWallpaper {
         updateWallpaperOffset(offsetX, offsetY);
     }
 
+    private int prefGetInt(@NonNull SharedPreferences prefs, @NonNull String key, int defaultValue) {
+        String value = prefs.getString(key, null);
+        if (value != null) {
+            try {
+                return Integer.parseInt(value);
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        return defaultValue;
+    }
+
     public void onCreateActivity(TBLauncherActivity mainActivity) {
         mTBLauncherActivity = mainActivity;
 
         // load preferences
         {
             SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(mainActivity);
+            lwpScrollPages = prefs.getBoolean("lwp-scroll-pages", true);
             lwpTouch = prefs.getBoolean("lwp-touch", true);
             lwpDrag = prefs.getBoolean("lwp-drag", false);
             wpDragAnimate = prefs.getBoolean("wp-drag-animate", false);
             wpReturnCenter = prefs.getBoolean("wp-animate-center", true);
             wpStickToSides = prefs.getBoolean("wp-animate-sides", false);
+            SCREEN_COUNT_VERTICAL = prefGetInt(prefs, "lwp-page-count-vertical", SCREEN_COUNT_VERTICAL);
+            SCREEN_COUNT_HORIZONTAL = prefGetInt(prefs, "lwp-page-count-horizontal", SCREEN_COUNT_HORIZONTAL);
         }
 
         mWallpaperManager = (WallpaperManager) mainActivity.getSystemService(Context.WALLPAPER_SERVICE);
@@ -142,15 +160,8 @@ public class LiveWallpaper {
 
         // set mContentView before we call updateWallpaperOffset
         mContentView = mainActivity.findViewById(android.R.id.content);
-        {
-            float xStep = (SCREEN_COUNT_HORIZONTAL > 1) ? (1.f / (SCREEN_COUNT_HORIZONTAL - 1)) : 0.f;
-            float yStep = (SCREEN_COUNT_VERTICAL > 1) ? (1.f / (SCREEN_COUNT_VERTICAL - 1)) : 0.f;
-            mWallpaperManager.setWallpaperOffsetSteps(xStep, yStep);
+        resetPageCount();
 
-            int centerScreenX = SCREEN_COUNT_HORIZONTAL / 2;
-            int centerScreenY = SCREEN_COUNT_VERTICAL / 2;
-            updateWallpaperOffset(centerScreenX * xStep, centerScreenY * yStep);
-        }
         mAnimation = new Anim();
         mVelocityTracker = null;
         View root = mainActivity.findViewById(R.id.root_layout);
@@ -159,6 +170,19 @@ public class LiveWallpaper {
         gestureDetector = new GestureDetectorCompat(mainActivity, onGestureListener);
         gestureDetector.setIsLongpressEnabled(true);
         Utilities.setGestureDetectorTouchSlop(gestureDetector, UISizes.dp2px(mainActivity, GD_TOUCH_SLOP_DP));
+    }
+
+    private void resetPageCount() {
+        float xStep = (SCREEN_COUNT_HORIZONTAL > 1) ? (1.f / (SCREEN_COUNT_HORIZONTAL - 1)) : 0.f;
+        float yStep = (SCREEN_COUNT_VERTICAL > 1) ? (1.f / (SCREEN_COUNT_VERTICAL - 1)) : 0.f;
+        mWallpaperManager.setWallpaperOffsetSteps(xStep, yStep);
+
+        if (isPreferenceLWPScrollPages())
+            TBApplication.widgetManager(mTBLauncherActivity).setPageCount(SCREEN_COUNT_HORIZONTAL, SCREEN_COUNT_VERTICAL);
+
+        int centerScreenX = SCREEN_COUNT_HORIZONTAL / 2;
+        int centerScreenY = SCREEN_COUNT_VERTICAL / 2;
+        updateWallpaperOffset(centerScreenX * xStep, centerScreenY * yStep);
     }
 
     private static boolean onClick(View view) {
@@ -261,7 +285,7 @@ public class LiveWallpaper {
                 mLastTouchPos.set(mFirstTouchPos);
                 mFirstTouchOffset.set(mWallpaperOffset);
                 cacheWindowSize();
-                if (isPreferenceWPDragAnimate()) {
+                if (isScrollEnabled()) {
                     mContentView.clearAnimation();
                 }
                 if (mVelocityTracker != null)
@@ -281,7 +305,7 @@ public class LiveWallpaper {
                 if (mVelocityTracker != null)
                     mVelocityTracker.addMovement(event);
 
-                if (isPreferenceWPDragAnimate()) {
+                if (isScrollEnabled()) {
                     float offsetX = mFirstTouchOffset.x + xMove * 1.01f;
                     float offsetY = mFirstTouchOffset.y + yMove * 1.01f;
                     updateWallpaperOffset(offsetX, offsetY);
@@ -290,7 +314,7 @@ public class LiveWallpaper {
                 //send move/drag event to the LWP
                 if (isPreferenceLWPDrag())
                     sendTouchEvent(view, event);
-                if (isPreferenceWPDragAnimate())
+                if (isScrollEnabled())
                     eventConsumed = true;
                 break;
             }
@@ -307,13 +331,13 @@ public class LiveWallpaper {
                     float yVel = mVelocityTracker.getYVelocity();// / mWindowSize.y;
                     Log.d(TAG, String.format(Locale.US, "Velocity=(%.3f, %.3f)\u2248%d\u00b0 Move=(%.3f, %.3f)\u2248%d\u00b0", xVel, yVel, computeAngle(xVel, yVel), xMove, yMove, computeAngle(xMove, yMove)));
                     // snap position if needed
-                    if (isPreferenceWPDragAnimate() && mAnimation.init())
+                    if (isScrollEnabled() && mAnimation.init())
                         mContentView.startAnimation(mAnimation);
                 }
                 //fallthrough
             }
             case MotionEvent.ACTION_CANCEL:
-                if (isPreferenceWPDragAnimate()) {
+                if (isScrollEnabled()) {
                     if (mVelocityTracker != null) {
                         mVelocityTracker.addMovement(event);
 
@@ -343,6 +367,9 @@ public class LiveWallpaper {
 
     public void onPrefChanged(SharedPreferences prefs, String key) {
         switch (key) {
+            case "lwp-scroll-pages":
+                lwpScrollPages = prefs.getBoolean("lwp-scroll-pages", true);
+                break;
             case "lwp-touch":
                 lwpTouch = prefs.getBoolean("lwp-touch", true);
                 break;
@@ -358,7 +385,31 @@ public class LiveWallpaper {
             case "wp-animate-sides":
                 wpStickToSides = prefs.getBoolean("wp-animate-sides", false);
                 break;
+            case "lwp-page-count-vertical": {
+                int count = prefGetInt(prefs, "lwp-page-count-vertical", SCREEN_COUNT_VERTICAL);
+                if (SCREEN_COUNT_VERTICAL != count) {
+                    SCREEN_COUNT_VERTICAL = count;
+                    resetPageCount();
+                }
+                break;
+            }
+            case "lwp-page-count-horizontal": {
+                int count = prefGetInt(prefs, "lwp-page-count-horizontal", SCREEN_COUNT_HORIZONTAL);
+                if (SCREEN_COUNT_HORIZONTAL != count) {
+                    SCREEN_COUNT_HORIZONTAL = count;
+                    resetPageCount();
+                }
+                break;
+            }
         }
+    }
+
+    private boolean isScrollEnabled() {
+        return lwpScrollPages || wpDragAnimate;
+    }
+
+    private boolean isPreferenceLWPScrollPages() {
+        return lwpScrollPages;
     }
 
     private boolean isPreferenceLWPTouch() {
@@ -389,10 +440,13 @@ public class LiveWallpaper {
         offsetX = Math.max(0.f, Math.min(1.f, offsetX));
         offsetY = Math.max(0.f, Math.min(1.f, offsetY));
         mWallpaperOffset.set(offsetX, offsetY);
-        TBApplication.widgetManager(mTBLauncherActivity).scroll(offsetX, offsetY);
-        android.os.IBinder iBinder = getWindowToken();
-        if (iBinder != null) {
-            mWallpaperManager.setWallpaperOffsets(iBinder, offsetX, offsetY);
+        if (isPreferenceLWPScrollPages())
+            TBApplication.widgetManager(mTBLauncherActivity).scroll(offsetX, offsetY);
+        if (isPreferenceWPDragAnimate()) {
+            android.os.IBinder iBinder = getWindowToken();
+            if (iBinder != null) {
+                mWallpaperManager.setWallpaperOffsets(iBinder, offsetX, offsetY);
+            }
         }
     }
 
@@ -427,7 +481,7 @@ public class LiveWallpaper {
         }
     }
 
-    class Anim extends Animation {
+    private class Anim extends Animation {
         final PointF mStartOffset = new PointF();
         final PointF mDeltaOffset = new PointF();
         final PointF mVelocity = new PointF();
@@ -449,38 +503,30 @@ public class LiveWallpaper {
             mStartOffset.set(mWallpaperOffset);
             //Log.d(TAG, "mStartOffset=" + String.format(Locale.US, "%.2f", mStartOffset));
 
-            boolean stickToSides = isPreferenceWPStickToSides();
-            boolean stickToCenter = isPreferenceWPReturnCenter();
-            float expectedPosX = -Math.min(Math.max(mVelocity.x / mWindowSize.x, -.5f), .5f) + mStartOffset.x;
-            //float expectedPosY = -Math.min(Math.max(mVelocity.y / mWindowSize.y, -.5f), .5f) + mStartOffset.y;
+            final float expectedPosX = -Math.min(Math.max(mVelocity.x / mWindowSize.x, -.5f), .5f) + mStartOffset.x;
+            final float expectedPosY = -Math.min(Math.max(mVelocity.y / mWindowSize.y, -.5f), .5f) + mStartOffset.y;
             //Log.d(TAG, "expectedPos=" + String.format(Locale.US, "%.2f %.2f", expectedPosX, expectedPosY));
 
-            // stick to center
-            mDeltaOffset.y = .5f - mStartOffset.y;
+            SnapInfo si = new SnapInfo(isPreferenceWPStickToSides(), isPreferenceWPReturnCenter());
+            si.init(expectedPosX, expectedPosY);
+            si.removeDiagonals(expectedPosX, expectedPosY);
 
-            // if we stick only to the center
-            float leftStickPercent = -1.f;
-            float rightStickPercent = 2.f;
+            // compute offset based on stick location
+            if (si.stickToTop)
+                mDeltaOffset.y = 0.f - mStartOffset.y;
+            else if (si.stickToBottom)
+                mDeltaOffset.y = 1.f - mStartOffset.y;
+            else if (si.stickToCenter)
+                mDeltaOffset.y = .5f - mStartOffset.y;
 
-            if (stickToSides && stickToCenter) {
-                // if we stick to the left, right and center
-                leftStickPercent = .2f;
-                rightStickPercent = .8f;
-            } else if (stickToSides) {
-                // if we stick only to the center
-                leftStickPercent = .5f;
-                rightStickPercent = .5f;
-            }
-
-            if (expectedPosX <= leftStickPercent)
+            if (si.stickToLeft)
                 mDeltaOffset.x = 0.f - mStartOffset.x;
-            else if (expectedPosX >= rightStickPercent)
+            else if (si.stickToRight)
                 mDeltaOffset.x = 1.f - mStartOffset.x;
-            else if (stickToCenter)
+            else if (si.stickToCenter)
                 mDeltaOffset.x = .5f - mStartOffset.x;
-            else
-                return false;
-            return true;
+
+            return si.stickToLeft || si.stickToTop || si.stickToRight || si.stickToBottom || si.stickToCenter;
         }
 
         @Override
@@ -496,6 +542,70 @@ public class LiveWallpaper {
                 offsetY -= mVelocity.y / mWindowSize.y * (1.f - 0.5f * (velocityInterpolator - 1.f));
             }
             updateWallpaperOffset(offsetX, offsetY);
+        }
+    }
+
+    private static class SnapInfo {
+        public final boolean stickToSides;
+        public final boolean stickToCenter;
+
+        public boolean stickToLeft;
+        public boolean stickToTop;
+        public boolean stickToRight;
+        public boolean stickToBottom;
+
+        public SnapInfo(boolean sidesSnap, boolean centerSnap) {
+            stickToSides = sidesSnap;
+            stickToCenter = centerSnap;
+        }
+
+        public void init(float x, float y) {
+            // if we stick only to the center
+            float leftStickPercent = -1.f;
+            float topStickPercent = -1.f;
+            float rightStickPercent = 2.f;
+            float bottomStickPercent = 2.f;
+
+            if (stickToSides && stickToCenter) {
+                // if we stick to the left, right and center
+                leftStickPercent = .2f;
+                topStickPercent = .2f;
+                rightStickPercent = .8f;
+                bottomStickPercent = .8f;
+            } else if (stickToSides) {
+                // if we stick only to the center
+                leftStickPercent = .5f;
+                topStickPercent = .5f;
+                rightStickPercent = .5f;
+                bottomStickPercent = .5f;
+            }
+
+            stickToLeft = x <= leftStickPercent;
+            stickToTop = y <= topStickPercent;
+            stickToRight = x >= rightStickPercent;
+            stickToBottom = y >= bottomStickPercent;
+        }
+
+        public void removeDiagonals(float x, float y) {
+            if (stickToTop) {
+                // don't stick to the top-left or top-right corner
+                if (stickToLeft) {
+                    stickToLeft = x < y;
+                    stickToTop = !stickToLeft;
+                } else if (stickToRight) {
+                    stickToRight = (1.f - x) < y;
+                    stickToTop = !stickToRight;
+                }
+            } else if (stickToBottom) {
+                // don't stick to the bottom-left or bottom-right corner
+                if (stickToLeft) {
+                    stickToLeft = x < y;
+                    stickToBottom = !stickToLeft;
+                } else if (stickToRight) {
+                    stickToRight = (1.f - x) < y;
+                    stickToBottom = !stickToRight;
+                }
+            }
         }
     }
 }

@@ -166,6 +166,6 @@ public class WidgetRecord {
         height = lp.height;
         left = lp.leftMargin;
         top = lp.topMargin;
-        screen = lp.screen;
+        screen = lp.screenPage;
     }
 }

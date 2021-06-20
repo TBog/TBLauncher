@@ -320,7 +320,7 @@ public class WidgetManager {
             params = new WidgetLayout.LayoutParams(rec.width, rec.height);
             params.leftMargin = rec.left;
             params.topMargin = rec.top;
-            params.screen = rec.screen;
+            params.screenPage = rec.screen;
             params.placement = WidgetLayout.LayoutParams.Placement.MARGIN_TL_AS_POSITION;
         }
         hostView.setMinimumWidth(appWidgetInfo.minWidth);
@@ -369,7 +369,7 @@ public class WidgetManager {
             WidgetLayout.LayoutParams params = new WidgetLayout.LayoutParams(rec.width, rec.height);
             params.leftMargin = rec.left;
             params.topMargin = rec.top;
-            params.screen = rec.screen;
+            params.screenPage = rec.screen;
             params.placement = WidgetLayout.LayoutParams.Placement.MARGIN_TL_AS_POSITION;
             placeholder.setLayoutParams(params);
         }
@@ -704,6 +704,20 @@ public class WidgetManager {
         removeWidgetPopup.showCenter(mLayout);
     }
 
+    private boolean canMoveToPage(int from, int to) {
+        if (from != WidgetLayout.LayoutParams.PAGE_MIDDLE)
+            return to == WidgetLayout.LayoutParams.PAGE_MIDDLE;
+        if (mLayout == null)
+            return false;
+
+        boolean ok = false;
+        if (mLayout.getVerticalPageCount() > 1)
+            ok = ok || to == WidgetLayout.LayoutParams.PAGE_UP || to == WidgetLayout.LayoutParams.PAGE_DOWN;
+        if (mLayout.getHorizontalPageCount() > 1)
+            ok = ok || to == WidgetLayout.LayoutParams.PAGE_LEFT || to == WidgetLayout.LayoutParams.PAGE_RIGHT;
+        return ok;
+    }
+
     /**
      * Popup with options for the widget in the view
      *
@@ -743,12 +757,17 @@ public class WidgetManager {
             adapter.add(new LinearAdapter.ItemDivider());
             final ViewGroup.LayoutParams lp = view.getLayoutParams();
             if (lp instanceof WidgetLayout.LayoutParams) {
-                if (((WidgetLayout.LayoutParams) lp).screen != WidgetLayout.LayoutParams.SCREEN_LEFT)
+                final int screenPage = ((WidgetLayout.LayoutParams) lp).screenPage;
+                if (canMoveToPage(screenPage, WidgetLayout.LayoutParams.PAGE_LEFT))
                     adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_screen_left, WidgetOptionItem.Action.MOVE2SCREEN_LEFT));
-                if (((WidgetLayout.LayoutParams) lp).screen != WidgetLayout.LayoutParams.SCREEN_MIDDLE)
+                if (canMoveToPage(screenPage, WidgetLayout.LayoutParams.PAGE_UP))
+                    adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_screen_up, WidgetOptionItem.Action.MOVE2SCREEN_UP));
+                if (canMoveToPage(screenPage, WidgetLayout.LayoutParams.PAGE_MIDDLE))
                     adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_screen_middle, WidgetOptionItem.Action.MOVE2SCREEN_MIDDLE));
-                if (((WidgetLayout.LayoutParams) lp).screen != WidgetLayout.LayoutParams.SCREEN_RIGHT)
+                if (canMoveToPage(screenPage, WidgetLayout.LayoutParams.PAGE_RIGHT))
                     adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_screen_right, WidgetOptionItem.Action.MOVE2SCREEN_RIGHT));
+                if (canMoveToPage(screenPage, WidgetLayout.LayoutParams.PAGE_DOWN))
+                    adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_screen_down, WidgetOptionItem.Action.MOVE2SCREEN_DOWN));
                 adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_back, WidgetOptionItem.Action.MOVE_BELOW));
                 adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_front, WidgetOptionItem.Action.MOVE_ABOVE));
             }
@@ -856,21 +875,35 @@ public class WidgetManager {
                         break;
                     case MOVE2SCREEN_LEFT: {
                         final WidgetLayout.LayoutParams lp = (WidgetLayout.LayoutParams) view.getLayoutParams();
-                        lp.screen = WidgetLayout.LayoutParams.SCREEN_LEFT;
+                        lp.screenPage = WidgetLayout.LayoutParams.PAGE_LEFT;
+                        view.setLayoutParams(lp);
+                        saveWidgetProperties(view);
+                        break;
+                    }
+                    case MOVE2SCREEN_UP: {
+                        final WidgetLayout.LayoutParams lp = (WidgetLayout.LayoutParams) view.getLayoutParams();
+                        lp.screenPage = WidgetLayout.LayoutParams.PAGE_UP;
                         view.setLayoutParams(lp);
                         saveWidgetProperties(view);
                         break;
                     }
                     case MOVE2SCREEN_RIGHT: {
                         final WidgetLayout.LayoutParams lp = (WidgetLayout.LayoutParams) view.getLayoutParams();
-                        lp.screen = WidgetLayout.LayoutParams.SCREEN_RIGHT;
+                        lp.screenPage = WidgetLayout.LayoutParams.PAGE_RIGHT;
+                        view.setLayoutParams(lp);
+                        saveWidgetProperties(view);
+                        break;
+                    }
+                    case MOVE2SCREEN_DOWN: {
+                        final WidgetLayout.LayoutParams lp = (WidgetLayout.LayoutParams) view.getLayoutParams();
+                        lp.screenPage = WidgetLayout.LayoutParams.PAGE_DOWN;
                         view.setLayoutParams(lp);
                         saveWidgetProperties(view);
                         break;
                     }
                     case MOVE2SCREEN_MIDDLE: {
                         final WidgetLayout.LayoutParams lp = (WidgetLayout.LayoutParams) view.getLayoutParams();
-                        lp.screen = WidgetLayout.LayoutParams.SCREEN_MIDDLE;
+                        lp.screenPage = WidgetLayout.LayoutParams.PAGE_MIDDLE;
                         view.setLayoutParams(lp);
                         saveWidgetProperties(view);
                         break;
@@ -909,6 +942,12 @@ public class WidgetManager {
             }
         });
         mLayout.requestLayout();
+    }
+
+    public void setPageCount(int horizontal, int vertical) {
+        if (mLayout == null)
+            return;
+        mLayout.setPageCount(horizontal, vertical);
     }
 
     /**
@@ -1004,7 +1043,7 @@ public class WidgetManager {
             MOVE_RESIZE, MOVE_RESIZE_SWITCH,
             RESET,
             REMOVE,
-            MOVE2SCREEN_LEFT, MOVE2SCREEN_MIDDLE, MOVE2SCREEN_RIGHT,
+            MOVE2SCREEN_LEFT, MOVE2SCREEN_UP, MOVE2SCREEN_MIDDLE, MOVE2SCREEN_RIGHT, MOVE2SCREEN_DOWN,
             MOVE_BELOW, MOVE_ABOVE,
         }
 
