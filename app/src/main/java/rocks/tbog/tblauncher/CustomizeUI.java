@@ -27,6 +27,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.preference.PreferenceManager;
 
+import rocks.tbog.tblauncher.ui.RecyclerList;
 import rocks.tbog.tblauncher.ui.SearchEditText;
 import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.SystemUiVisibility;
@@ -225,6 +226,8 @@ public class CustomizeUI {
             if (list instanceof AbsListView) {
                 setListViewSelectorPref((AbsListView) list, false);
                 setListViewScrollbarPref(list);
+            } else if (list instanceof RecyclerList) {
+                setListViewScrollbarPref(list);
             }
         }
     }
@@ -280,12 +283,12 @@ public class CustomizeUI {
         }
     }
 
-    public void setListViewScrollbarPref(View listView) {
+    public static void setListViewScrollbarPref(View listView) {
         int color = UIColors.getResultListRipple(listView.getContext());
         setListViewScrollbarPref(listView, UIColors.setAlpha(color, 0x7F));
     }
 
-    public void setListViewScrollbarPref(View listView, int color) {
+    public static void setListViewScrollbarPref(View listView, int color) {
         GradientDrawable drawable = new GradientDrawable(GradientDrawable.Orientation.LEFT_RIGHT, new int[]{color, color});
         drawable.setCornerRadius(UISizes.dp2px(listView.getContext(), 3));
         drawable.setSize(UISizes.dp2px(listView.getContext(), 4), drawable.getIntrinsicHeight());

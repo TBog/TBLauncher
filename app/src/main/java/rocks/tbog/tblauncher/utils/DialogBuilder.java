@@ -13,7 +13,6 @@ import android.view.View;
 import android.view.ViewParent;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.TextView;
 
 import androidx.annotation.IdRes;
@@ -170,7 +169,7 @@ public class DialogBuilder {
         AlertDialog dialog = create();
         setButtonBarBackground(dialog);
         if (afterInflate != null)
-            dialog.setOnShowListener((dlg)-> afterInflate.onShow(dlg));
+            dialog.setOnShowListener((dlg) -> afterInflate.onShow(dlg));
 
         // set window params to allow keyboard to open
         {

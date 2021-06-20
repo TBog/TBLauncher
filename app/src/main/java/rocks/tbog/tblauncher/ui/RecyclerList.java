@@ -15,7 +15,7 @@ public class RecyclerList extends RecyclerView {
     private boolean touchEventsBlocked = false;
 
     public RecyclerList(@NonNull Context context) {
-        super(context);
+        this(context, null);
     }
 
     public RecyclerList(@NonNull Context context, @Nullable AttributeSet attrs) {

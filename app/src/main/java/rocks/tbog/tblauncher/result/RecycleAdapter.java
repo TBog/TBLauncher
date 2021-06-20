@@ -56,7 +56,7 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
     @NonNull
     @NotNull
     @Override
-    public Holder onCreateViewHolder(@NonNull @NotNull ViewGroup parent, int viewType) {
+    public Holder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         Context context = parent.getContext();
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -78,21 +78,26 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
             }
         }
 
+
         LayoutInflater inflater = LayoutInflater.from(context);
-        return new Holder(inflater.inflate(layoutRes, parent, false), drawFlags);
+        View itemView = inflater.inflate(layoutRes, parent, false);
+
+        {
+            // TODO: move selector background setup outside of adapter
+            int touchColor = UIColors.getResultListRipple(itemView.getContext());
+            Drawable selectorBackground = CustomizeUI.getSelectorDrawable(itemView, touchColor, false);
+            itemView.setBackground(selectorBackground);
+        }
+
+        return new Holder(itemView, drawFlags);
     }
 
     @Override
-    public void onBindViewHolder(@NonNull @NotNull Holder holder, int position) {
+    public void onBindViewHolder(@NonNull Holder holder, int position) {
         holder.setOnClickListener(view -> onClick(position, view));
         holder.setOnLongClickListener(view -> onLongClick(position, view));
 
         results.get(position).displayResult(holder.itemView, holder.mDrawFlags);
-
-        // TODO: move selector background setup outside of adapter
-        int touchColor = UIColors.getResultListRipple(holder.itemView.getContext());
-        Drawable selectorBackground = CustomizeUI.getSelectorDrawable(holder.itemView, touchColor, false);
-        holder.itemView.setBackground(selectorBackground);
     }
 
     @Override
@@ -168,7 +173,7 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
     public static class Holder extends RecyclerView.ViewHolder {
         private final int mDrawFlags;
 
-        public Holder(@NonNull @NotNull View itemView, int drawFlags) {
+        public Holder(@NonNull View itemView, int drawFlags) {
             super(itemView);
             itemView.setTag(this);
             mDrawFlags = drawFlags;
