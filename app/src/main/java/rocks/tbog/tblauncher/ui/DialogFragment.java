@@ -13,7 +13,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.TextView;
 
+import androidx.annotation.IdRes;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -25,6 +27,13 @@ public abstract class DialogFragment<Output> extends androidx.fragment.app.Dialo
     private static final String TAG = "DialogFrag";
     private OnDismissListener<Output> mOnDismissListener = null;
     private OnConfirmListener<Output> mOnConfirmListener = null;
+    private OnButtonClickListener<Output> mOnPositiveClickListener = null;
+    private OnButtonClickListener<Output> mOnNeutralClickListener = null;
+    private OnButtonClickListener<Output> mOnNegativeClickListener = null;
+
+    public enum Button {
+        POSITIVE, NEGATIVE, NEUTRAL
+    }
 
     @LayoutRes
     protected abstract int layoutRes();
@@ -37,12 +46,28 @@ public abstract class DialogFragment<Output> extends androidx.fragment.app.Dialo
         void onConfirm(@Nullable T output);
     }
 
+    public interface OnButtonClickListener<T> {
+        void onButtonClick(@NonNull DialogFragment<T> dialog, @NonNull Button button);
+    }
+
     public void setOnDismissListener(OnDismissListener<Output> listener) {
         mOnDismissListener = listener;
     }
 
     public void setOnConfirmListener(OnConfirmListener<Output> listener) {
         mOnConfirmListener = listener;
+    }
+
+    public void setOnPositiveClickListener(OnButtonClickListener<Output> listener) {
+        mOnPositiveClickListener = listener;
+    }
+
+    public void setOnNegativeClickListener(OnButtonClickListener<Output> listener) {
+        mOnNegativeClickListener = listener;
+    }
+
+    public void setOnNeutralClickListener(OnButtonClickListener<Output> listener) {
+        mOnNeutralClickListener = listener;
     }
 
     @Override
@@ -107,6 +132,62 @@ public abstract class DialogFragment<Output> extends androidx.fragment.app.Dialo
             view.setClipToOutline(true);
         }
 
+        if (mOnPositiveClickListener != null || mOnNegativeClickListener != null || mOnNeutralClickListener != null)
+            createButtonBar(view, inflater);
+
         return view;
+    }
+
+    private void createButtonBar(View view, LayoutInflater inflater) {
+        Bundle args = getArguments() != null ? getArguments() : new Bundle();
+
+        if (mOnPositiveClickListener != null) {
+            TextView button = getButtonBarButton(android.R.id.button1, view, inflater);
+            if (button == null)
+                throw new IllegalStateException("failed to inflate button1 bar");
+            button.setVisibility(View.VISIBLE);
+            button.setText(args.getCharSequence("btnPositiveText", ""));
+            button.setOnClickListener(v -> mOnPositiveClickListener.onButtonClick(this, Button.POSITIVE));
+        }
+
+        if (mOnNegativeClickListener != null) {
+            TextView button = getButtonBarButton(android.R.id.button2, view, inflater);
+            if (button == null)
+                throw new IllegalStateException("failed to inflate button2 bar");
+            button.setVisibility(View.VISIBLE);
+            button.setText(args.getCharSequence("btnNegativeText", ""));
+            button.setOnClickListener(v -> mOnPositiveClickListener.onButtonClick(this, Button.NEGATIVE));
+        }
+
+        if (mOnNeutralClickListener != null) {
+            TextView button = getButtonBarButton(android.R.id.button3, view, inflater);
+            if (button == null)
+                throw new IllegalStateException("failed to inflate button3 bar");
+            button.setVisibility(View.VISIBLE);
+            button.setText(args.getCharSequence("btnNeutralText", ""));
+            button.setOnClickListener(v -> mOnPositiveClickListener.onButtonClick(this, Button.NEUTRAL));
+        } else {
+            View button = view.findViewById(android.R.id.button3);
+            if (button instanceof TextView)
+                button.setVisibility(View.GONE);
+            View spacer = view.findViewById(R.id.spacer);
+            if (spacer != null)
+                spacer.setVisibility(View.GONE);
+        }
+    }
+
+    @Nullable
+    private TextView getButtonBarButton(@IdRes int button, @NonNull View view, @NonNull LayoutInflater inflater) {
+        View btnView = view.findViewById(button);
+        if (btnView == null && view instanceof ViewGroup) {
+            inflater.inflate(R.layout.ok_cancel_button_bar, (ViewGroup) view, true);
+            btnView = view.findViewById(button);
+        }
+        return btnView instanceof TextView ? (TextView) btnView : null;
+    }
+
+    @Nullable
+    public <T extends View> T findViewById(@IdRes int id) {
+        return requireDialog().findViewById(id);
     }
 }

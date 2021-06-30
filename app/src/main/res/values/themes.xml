@@ -135,6 +135,18 @@
         <item name="tabLayoutStyle">@style/TabLayout.Dialog</item>
     </style>
 
+    <style name="EditTextViewStyle" parent="Widget.AppCompat.EditText">
+        <item name="android:textSelectHandle">@drawable/abc_text_select_handle_middle_mtrl_dark</item>
+        <item name="android:textSelectHandleLeft">@drawable/abc_text_select_handle_left_mtrl_dark</item>
+        <item name="android:textSelectHandleRight">@drawable/abc_text_select_handle_right_mtrl_dark</item>
+    </style>
+
+    <style name="EditTextViewStyle.White">
+        <item name="android:textSelectHandle">@drawable/abc_text_select_handle_middle_mtrl_light</item>
+        <item name="android:textSelectHandleLeft">@drawable/abc_text_select_handle_left_mtrl_light</item>
+        <item name="android:textSelectHandleRight">@drawable/abc_text_select_handle_right_mtrl_light</item>
+    </style>
+
     <style name="AutoCompleteTextViewStyle" parent="Widget.AppCompat.AutoCompleteTextView">
         <item name="android:popupBackground">@drawable/dialog_background</item>
     </style>
@@ -205,6 +217,8 @@
     </style>
 
     <style name="SettingsDialogTheme" parent="NoTitleDialogTheme">
+        <item name="android:background">@null</item>
+        <item name="background">@null</item>
         <item name="android:textColor">@color/primary_text_selector_darkbg</item>
         <item name="android:textColorPrimary">@color/primary_text_selector_darkbg</item>
         <item name="android:textColorSecondary">@color/secondary_text_selector_darkbg</item>
@@ -216,6 +230,8 @@
         <item name="tabSelectedTextColor">@color/colorAccent</item>
 
         <item name="android:textColorHighlight">?android:attr/textColorSecondary</item>
+        <item name="autoCompleteTextViewStyle">@style/AutoCompleteTextViewStyle</item>
+        <item name="editTextStyle">@style/EditTextViewStyle</item>
     </style>
 
     <style name="SettingsDialogTheme.White">
@@ -241,6 +257,7 @@
         <item name="buttonBarPositiveButtonStyle">@style/GradientBorderlessButton.White</item>
 
         <item name="autoCompleteTextViewStyle">@style/AutoCompleteTextViewStyle.White</item>
+        <item name="editTextStyle">@style/EditTextViewStyle.White</item>
     </style>
 
     <style name="SettingsDialogTheme.Black">
@@ -358,6 +375,8 @@
         Settings
     -->
     <style name="SettingsTheme" parent="AppThemeTransparent">
+        <item name="android:background">@null</item>
+        <item name="background">@null</item>
         <item name="windowActionBar">true</item>
         <item name="windowNoTitle">false</item>
         <item name="android:windowBackground">@android:color/black</item>

@@ -25,24 +25,24 @@ import androidx.appcompat.app.AlertDialog;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 
-public class DialogBuilder {
+public class KeyboardDialogBuilder {
     final private AlertDialog.Builder builder;
     private DialogInterface.OnShowListener afterInflate = null;
 
-    private DialogBuilder(@NonNull Context context, @StyleRes int theme) {
+    private KeyboardDialogBuilder(@NonNull Context context, @StyleRes int theme) {
         builder = new AlertDialog.Builder(context, theme);
     }
 
-    public static DialogBuilder withContext(@NonNull Context context) {
+    public static KeyboardDialogBuilder withContext(@NonNull Context context) {
         // resolve alert dialog theme
         TypedValue outValue = new TypedValue();
         context.getTheme().resolveAttribute(R.attr.alertDialogTheme, outValue, true);
         int dialogStyle = outValue.resourceId;
 
-        return new DialogBuilder(context, dialogStyle);
+        return new KeyboardDialogBuilder(context, dialogStyle);
     }
 
-    public static DialogBuilder withContext(@NonNull Context context, @StyleRes int theme) {
+    public static KeyboardDialogBuilder withContext(@NonNull Context context, @StyleRes int theme) {
         ContextThemeWrapper themeWrapper = new ContextThemeWrapper(context, theme);
         return withContext(themeWrapper);
     }
@@ -82,7 +82,7 @@ public class DialogBuilder {
      *
      * @return This Builder object to allow for chaining of calls to set methods
      */
-    public DialogBuilder setTitle(@StringRes int titleId) {
+    public KeyboardDialogBuilder setTitle(@StringRes int titleId) {
         CharSequence title = builder.getContext().getText(titleId);
         setCustomTitle(builder, title);
         return this;
@@ -93,7 +93,7 @@ public class DialogBuilder {
      *
      * @return This Builder object to allow for chaining of calls to set methods
      */
-    public DialogBuilder setTitle(CharSequence title) {
+    public KeyboardDialogBuilder setTitle(CharSequence title) {
         setCustomTitle(builder, title);
         return this;
     }
@@ -106,7 +106,7 @@ public class DialogBuilder {
      * @return this Builder object to allow for chaining of calls to set
      * methods
      */
-    public DialogBuilder setView(@LayoutRes int layoutResId) {
+    public KeyboardDialogBuilder setView(@LayoutRes int layoutResId) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             builder.setView(layoutResId);
         } else {
@@ -122,7 +122,7 @@ public class DialogBuilder {
      * @param listener The {@link DialogInterface.OnClickListener} to use.
      * @return This Builder object to allow for chaining of calls to set methods
      */
-    public DialogBuilder setPositiveButton(@StringRes int textId, final DialogInterface.OnClickListener listener) {
+    public KeyboardDialogBuilder setPositiveButton(@StringRes int textId, final DialogInterface.OnClickListener listener) {
         builder.setPositiveButton(textId, listener);
         return this;
     }
@@ -134,7 +134,7 @@ public class DialogBuilder {
      * @param listener The {@link DialogInterface.OnClickListener} to use.
      * @return This Builder object to allow for chaining of calls to set methods
      */
-    public DialogBuilder setNegativeButton(@StringRes int textId, final DialogInterface.OnClickListener listener) {
+    public KeyboardDialogBuilder setNegativeButton(@StringRes int textId, final DialogInterface.OnClickListener listener) {
         builder.setNegativeButton(textId, listener);
         return this;
     }
@@ -146,7 +146,7 @@ public class DialogBuilder {
      * @param listener The {@link DialogInterface.OnClickListener} to use.
      * @return This Builder object to allow for chaining of calls to set methods
      */
-    public DialogBuilder setNeutralButton(@StringRes int textId, final DialogInterface.OnClickListener listener) {
+    public KeyboardDialogBuilder setNeutralButton(@StringRes int textId, final DialogInterface.OnClickListener listener) {
         builder.setNeutralButton(textId, listener);
         return this;
     }
@@ -156,7 +156,7 @@ public class DialogBuilder {
      *
      * @return This Builder object to allow for chaining of calls to set methods
      */
-    public DialogBuilder afterInflate(DialogInterface.OnShowListener listener) {
+    public KeyboardDialogBuilder afterInflate(DialogInterface.OnShowListener listener) {
         afterInflate = listener;
         return this;
     }

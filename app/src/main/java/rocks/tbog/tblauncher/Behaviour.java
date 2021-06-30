@@ -1235,6 +1235,11 @@ public class Behaviour implements ISearchActivity {
         return mFragmentDialog != null && mFragmentDialog.isVisible();
     }
 
+    public void showDialog(@NonNull DialogFragment<?> dialog, @Nullable String tag) {
+        openFragmentDialog(dialog);
+        dialog.show(mTBLauncherActivity.getSupportFragmentManager(), tag);
+    }
+
     private void openFragmentDialog(DialogFragment<?> dialog) {
         closeFragmentDialog();
         mFragmentDialog = dialog;
