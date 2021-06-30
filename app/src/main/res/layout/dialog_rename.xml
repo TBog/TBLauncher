@@ -1,18 +1,39 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:paddingHorizontal="@dimen/result_margin_horizontal"
-    android:paddingVertical="@dimen/result_margin_vertical">
-
-    <EditText
-        android:id="@+id/rename"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:autofillHints="application,name"
-        android:inputType="textAutoCorrect"
-        tools:ignore="LabelFor" />
+        android:layout_height="match_parent"
+        android:layout_margin="0dp"
+        android:orientation="vertical"
+        android:paddingHorizontal="@dimen/result_margin_horizontal"
+        android:paddingVertical="@dimen/result_margin_vertical"
+        tools:background="@drawable/dialog_background_dark"
+        tools:theme="@style/TitleDialogTheme">
+
+    <TextView
+            android:id="@android:id/title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="" />
+
+    <com.google.android.material.textfield.TextInputLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+        <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/rename"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:autofillHints="application,name"
+                android:inputType="textAutoCorrect"
+                android:textSelectHandle="@drawable/abc_text_select_handle_middle_mtrl_dark"
+                android:textSelectHandleLeft="@drawable/abc_text_select_handle_left_mtrl_dark"
+                android:textSelectHandleRight="@drawable/abc_text_select_handle_right_mtrl_dark"
+                tools:ignore="LabelFor" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <!-- Alert dialog style buttons along the bottom. -->
+    <include layout="@layout/abc_alert_dialog_button_bar_material" />
 
 </LinearLayout>

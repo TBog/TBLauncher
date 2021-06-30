@@ -458,7 +458,7 @@ public final class AppEntry extends EntryWithTags {
         })
                 .setTitle(R.string.title_app_rename)
                 .setNeutralButton(R.string.custom_name_set_default, (dialog, which) -> {
-                    Context context = ((Dialog) dialog).getContext();
+                    Context context = dialog.getContext();
                     String name = null;
                     PackageManager pm = context.getPackageManager();
                     try {

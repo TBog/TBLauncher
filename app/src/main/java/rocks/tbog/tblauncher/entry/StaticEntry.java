@@ -84,8 +84,7 @@ public abstract class StaticEntry extends EntryItem {
             Toast.makeText(ctx, msg, Toast.LENGTH_SHORT).show();
         })
                 .setTitle(R.string.title_static_rename)
-                .setNeutralButton(R.string.custom_name_set_default, (dlg, which) -> {
-                    Dialog dialog = (Dialog) dlg;
+                .setNeutralButton(R.string.custom_name_set_default, (dialog, which) -> {
                     Context ctx = dialog.getContext();
                     DataHandler dataHandler = TBApplication.dataHandler(ctx);
                     dataHandler.renameStaticEntry(id, null);
