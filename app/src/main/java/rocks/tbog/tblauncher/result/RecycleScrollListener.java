@@ -225,7 +225,7 @@ public class RecycleScrollListener extends RecyclerView.OnScrollListener {
         mResizeFinished = true;
     }
 
-    private void setListLayoutHeight(ViewGroup list, int height) {
+    public static void setListLayoutHeight(ViewGroup list, int height) {
         final ViewGroup.LayoutParams params = list.getLayoutParams();
         if (params.height != height) {
             Log.d(TAG, "set layout height " + (height == ViewGroup.LayoutParams.MATCH_PARENT ? "MATCH_PARENT" : height));
