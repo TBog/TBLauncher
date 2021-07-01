@@ -1,5 +1,7 @@
-<?xml version="1.0" encoding="utf-8"?><!-- Alert dialog style buttons along the bottom. -->
+<!-- Alert dialog style buttons. Layout similar to @layout/abc_alert_dialog_button_bar_material -->
+<!-- TODO: copy functionality from androidx.appcompat.widget.ButtonBarLayout to allow buttons to be stacked -->
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
         android:id="@+id/buttonPanel"
         style="?android:attr/buttonBarStyle"
         android:layout_width="match_parent"
@@ -10,37 +12,39 @@
 
     <Button
             android:id="@android:id/button3"
-            style="?android:attr/buttonBarButtonStyle"
+            style="?attr/buttonBarNeutralButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:clickable="true"
             android:focusable="true"
-            android:text="@android:string/cancel" />
+            tools:text="@android:string/unknownName"
+            tools:visibility="gone" />
 
     <android.widget.Space
             android:id="@+id/spacer"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_weight="1"
-            android:visibility="gone" />
+            android:visibility="invisible" />
 
     <Button
             android:id="@android:id/button2"
-            style="?android:attr/buttonBarButtonStyle"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@android:string/unknownName"
-            android:visibility="gone" />
-
-    <Button
-            android:id="@android:id/button1"
-            style="?android:attr/buttonBarButtonStyle"
+            style="?attr/buttonBarNegativeButtonStyle"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:clickable="true"
             android:focusable="true"
-            android:text="@android:string/ok" />
+            tools:text="@android:string/cancel" />
+
+    <Button
+            android:id="@android:id/button1"
+            style="?attr/buttonBarPositiveButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:focusable="true"
+            tools:text="@android:string/ok" />
 </LinearLayout>
