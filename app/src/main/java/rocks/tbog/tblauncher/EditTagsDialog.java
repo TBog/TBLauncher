@@ -24,6 +24,8 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.collection.ArraySet;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -48,14 +50,21 @@ public class EditTagsDialog extends DialogFragment<Set<String>> {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        Context context = requireDialog().getContext();
+
+        Bundle args = getArguments() != null ? getArguments() : new Bundle();
+        if (!isStateSaved()) {
+            args.putCharSequence("btnPositiveText", context.getText(android.R.string.ok));
+            args.putCharSequence("btnNegativeText", context.getText(android.R.string.cancel));
+            setArguments(args);
+        }
+
         // make sure we use the dialog context
-        inflater = inflater.cloneInContext(requireDialog().getContext());
-        ViewGroup root = (ViewGroup) super.onCreateView(inflater, container, savedInstanceState);
+        LayoutInflater dialogInflater = inflater.cloneInContext(context);
+        ViewGroup root = (ViewGroup) super.onCreateView(dialogInflater, container, savedInstanceState);
         assert root != null;
-        Context context = inflater.getContext();
 
         // make a layout for the entry we are changing
-        Bundle args = getArguments() != null ? getArguments() : new Bundle();
         String entryId = args.getString("entryId", "");
         TBApplication app = TBApplication.getApplication(context);
         EntryItem entry = app.getDataHandler().getPojo(entryId);
@@ -64,7 +73,7 @@ public class EditTagsDialog extends DialogFragment<Set<String>> {
             wrapper = root;
         if (entry != null) {
             int drawFlags = EntryItem.FLAG_DRAW_LIST | EntryItem.FLAG_DRAW_NAME | EntryItem.FLAG_DRAW_ICON;
-            View entryView = inflater.inflate(entry.getResultLayout(drawFlags), wrapper, false);
+            View entryView = dialogInflater.inflate(entry.getResultLayout(drawFlags), wrapper, false);
             entryView.setId(R.id.preview);
             wrapper.addView(entryView, 0);
             app.ui().setResultListPref(entryView);
@@ -153,23 +162,16 @@ public class EditTagsDialog extends DialogFragment<Set<String>> {
             String tag = mNewTag.getText().toString();
             addTag(tag);
         });
+    }
 
-        // OK button
-        {
-            View button = view.findViewById(android.R.id.button1);
-            button.setOnClickListener(v -> {
-                String tag = mNewTag.getText().toString();
-                addTag(tag);
-                onConfirm(mTagList);
-                dismiss();
-            });
+    @Override
+    public void onButtonClick(@NonNull @NotNull Button button) {
+        if (button == Button.POSITIVE) {
+            String tag = mNewTag.getText().toString();
+            addTag(tag);
+            onConfirm(mTagList);
         }
-
-        // CANCEL button
-        {
-            View button = view.findViewById(android.R.id.button2);
-            button.setOnClickListener(v -> dismiss());
-        }
+        super.onButtonClick(button);
     }
 
     @Override

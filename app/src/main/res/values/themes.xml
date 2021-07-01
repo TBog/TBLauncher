@@ -75,6 +75,7 @@
     <style name="GradientBorderlessButton">
         <item name="android:background">?attr/selectableItemBackgroundBorderless</item>
         <item name="android:textColor">@color/colorAccent</item>
+        <item name="android:textAllCaps">false</item>
     </style>
 
     <style name="GradientBorderlessButton.White">
@@ -126,8 +127,10 @@
         <item name="android:textColorPrimaryDisableOnly">@color/undefined</item>
 
         <item name="android:buttonBarStyle">@style/GradientButtonBar</item>
+        <item name="buttonBarStyle">@style/GradientButtonBar</item>
         <item name="android:buttonBarButtonStyle">@style/GradientBorderlessButton</item>
         <item name="android:borderlessButtonStyle">@style/GradientBorderlessButton</item>
+        <item name="buttonBarNeutralButtonStyle">@style/GradientBorderlessButton</item>
         <item name="buttonBarNegativeButtonStyle">@style/GradientBorderlessButton</item>
         <item name="buttonBarPositiveButtonStyle">@style/GradientBorderlessButton</item>
 
@@ -136,15 +139,23 @@
     </style>
 
     <style name="EditTextViewStyle" parent="Widget.AppCompat.EditText">
-        <item name="android:textSelectHandle">@drawable/abc_text_select_handle_middle_mtrl_dark</item>
-        <item name="android:textSelectHandleLeft">@drawable/abc_text_select_handle_left_mtrl_dark</item>
-        <item name="android:textSelectHandleRight">@drawable/abc_text_select_handle_right_mtrl_dark</item>
+        <item name="android:textSelectHandle">@drawable/abc_text_select_handle_middle_mtrl_dark
+        </item>
+        <item name="android:textSelectHandleLeft">@drawable/abc_text_select_handle_left_mtrl_dark
+        </item>
+        <item name="android:textSelectHandleRight">
+            @drawable/abc_text_select_handle_right_mtrl_dark
+        </item>
     </style>
 
     <style name="EditTextViewStyle.White">
-        <item name="android:textSelectHandle">@drawable/abc_text_select_handle_middle_mtrl_light</item>
-        <item name="android:textSelectHandleLeft">@drawable/abc_text_select_handle_left_mtrl_light</item>
-        <item name="android:textSelectHandleRight">@drawable/abc_text_select_handle_right_mtrl_light</item>
+        <item name="android:textSelectHandle">@drawable/abc_text_select_handle_middle_mtrl_light
+        </item>
+        <item name="android:textSelectHandleLeft">@drawable/abc_text_select_handle_left_mtrl_light
+        </item>
+        <item name="android:textSelectHandleRight">
+            @drawable/abc_text_select_handle_right_mtrl_light
+        </item>
     </style>
 
     <style name="AutoCompleteTextViewStyle" parent="Widget.AppCompat.AutoCompleteTextView">
@@ -253,6 +264,7 @@
         <item name="android:buttonBarStyle">@style/GradientButtonBar.White</item>
         <item name="android:buttonBarButtonStyle">@style/GradientBorderlessButton.White</item>
         <item name="android:borderlessButtonStyle">@style/GradientBorderlessButton.White</item>
+        <item name="buttonBarNeutralButtonStyle">@style/GradientBorderlessButton.White</item>
         <item name="buttonBarNegativeButtonStyle">@style/GradientBorderlessButton.White</item>
         <item name="buttonBarPositiveButtonStyle">@style/GradientBorderlessButton.White</item>
 
@@ -279,6 +291,7 @@
         <item name="android:buttonBarStyle">@style/GradientButtonBar.Black</item>
         <item name="android:buttonBarButtonStyle">@style/GradientBorderlessButton.Black</item>
         <item name="android:borderlessButtonStyle">@style/GradientBorderlessButton.Black</item>
+        <item name="buttonBarNeutralButtonStyle">@style/GradientBorderlessButton.Black</item>
         <item name="buttonBarNegativeButtonStyle">@style/GradientBorderlessButton.Black</item>
         <item name="buttonBarPositiveButtonStyle">@style/GradientBorderlessButton.Black</item>
 
@@ -304,6 +317,7 @@
         <item name="android:buttonBarStyle">@style/GradientButtonBar.DeepBlues</item>
         <item name="android:buttonBarButtonStyle">@style/GradientBorderlessButton.DeepBlues</item>
         <item name="android:borderlessButtonStyle">@style/GradientBorderlessButton.DeepBlues</item>
+        <item name="buttonBarNeutralButtonStyle">@style/GradientBorderlessButton.DeepBlues</item>
         <item name="buttonBarNegativeButtonStyle">@style/GradientBorderlessButton.DeepBlues</item>
         <item name="buttonBarPositiveButtonStyle">@style/GradientBorderlessButton.DeepBlues</item>
 

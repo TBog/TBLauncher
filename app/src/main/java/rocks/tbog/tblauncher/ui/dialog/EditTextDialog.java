@@ -41,15 +41,13 @@ public class EditTextDialog extends DialogFragment<CharSequence> {
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         // make sure we use the dialog context
-        inflater = inflater.cloneInContext(requireDialog().getContext());
-        return super.onCreateView(inflater, container, savedInstanceState);
+        LayoutInflater dialogInflater = inflater.cloneInContext(requireDialog().getContext());
+        return super.onCreateView(dialogInflater, container, savedInstanceState);
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
-        final Context context = view.getContext();
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             view.setClipToOutline(true);
