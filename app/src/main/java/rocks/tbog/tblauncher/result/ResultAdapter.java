@@ -14,8 +14,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.preference.PreferenceManager;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -40,7 +38,7 @@ public class ResultAdapter extends BaseAdapter implements SectionIndexer, Filter
     private String[] sections = new String[0];
     private Filter mFilter = new FilterById();
 
-    public ResultAdapter(@NotNull ArrayList<EntryItem> results) {
+    public ResultAdapter(@NonNull ArrayList<EntryItem> results) {
         this.results = results;
     }
 

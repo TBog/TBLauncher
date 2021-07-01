@@ -24,8 +24,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.collection.ArraySet;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -165,7 +163,7 @@ public class EditTagsDialog extends DialogFragment<Set<String>> {
     }
 
     @Override
-    public void onButtonClick(@NonNull @NotNull Button button) {
+    public void onButtonClick(@NonNull Button button) {
         if (button == Button.POSITIVE) {
             String tag = mNewTag.getText().toString();
             addTag(tag);

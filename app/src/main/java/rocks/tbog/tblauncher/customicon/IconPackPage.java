@@ -13,8 +13,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
-
-import org.jetbrains.annotations.NotNull;
+import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -41,7 +40,7 @@ class IconPackPage extends PageAdapter.Page {
     }
 
     @Override
-    void setupView(@NotNull Context context, @Nullable OnItemClickListener iconClickListener, @Nullable OnItemClickListener iconLongClickListener) {
+    void setupView(@NonNull Context context, @Nullable OnItemClickListener iconClickListener, @Nullable OnItemClickListener iconLongClickListener) {
         mIconLoadingBar = pageView.findViewById(R.id.iconLoadingBar);
 
         Drawable packIcon = null;
