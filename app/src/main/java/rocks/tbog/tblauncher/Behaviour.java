@@ -1001,11 +1001,13 @@ public class Behaviour implements ISearchActivity {
     }
 
     public void beforeLaunchOccurred() {
+        RecycleScrollListener.setListLayoutHeight(mResultList, mResultList.getHeight());
         hideKeyboard();
     }
 
     public void afterLaunchOccurred() {
         mSearchEditText.postDelayed(() -> {
+            RecycleScrollListener.setListLayoutHeight(mResultList, ViewGroup.LayoutParams.MATCH_PARENT);
             if (PrefCache.clearSearchAfterLaunch(mPref)) {
                 // We selected an item on the list, now we can cleanup the filter:
                 if (mSearchEditText.getText().length() > 0) {
