@@ -35,6 +35,9 @@ import androidx.appcompat.app.ActionBar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
+
+import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -197,6 +200,16 @@ public class Behaviour implements ISearchActivity {
         mResultList.setLayoutManager(layoutManager);
         mResultList.setAdapter(mResultAdapter);
         mResultList.addOnScrollListener(new RecycleScrollListener(mKeyboardHandler));
+//        mResultList.addOnScrollListener(new RecyclerView.OnScrollListener() {
+//            @Override
+//            public void onScrollStateChanged(@NonNull @NotNull RecyclerView recyclerView, int newState) {
+//                if (newState != RecyclerView.SCROLL_STATE_IDLE) {
+//                    if (mResultList.getLayoutManager() instanceof RecycleListLayoutManager) {
+//                        ((RecycleListLayoutManager) mResultList.getLayoutManager()).resetLastScrollPosition();
+//                    }
+//                }
+//            }
+//        });
     }
 
     private void initSearchBarContainer() {
@@ -820,9 +833,7 @@ public class Behaviour implements ISearchActivity {
         }
 
         if (!isRefresh) {
-            final int resultCount = mResultAdapter.getItemCount();
-            if (resultCount > 0)
-                mResultList.scrollToPosition(resultCount - 1);
+            mResultList.scrollToLastPosition();
         }
 
         TBApplication.quickList(getContext()).adapterUpdated();
