@@ -3,6 +3,7 @@ package rocks.tbog.tblauncher.ui;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.MotionEvent;
 
 import androidx.annotation.NonNull;
@@ -12,6 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import rocks.tbog.tblauncher.result.RecycleListLayoutManager;
 
 public class RecyclerList extends RecyclerView {
+    private static final String TAG = "list";
     private boolean touchEventsBlocked = false;
 
     public RecyclerList(@NonNull Context context) {
@@ -35,11 +37,33 @@ public class RecyclerList extends RecyclerView {
         this.touchEventsBlocked = true;
     }
 
+//    @Override
+//    public void onScrolled(int dx, int dy) {
+//        super.onScrolled(dx, dy);
+//    }
+//
+//    @Override
+//    public void onScrollStateChanged(int state) {
+//        super.onScrollStateChanged(state);
+//    }
+
     /**
      * Stop preventing this ListView from receiving touch events
      */
     public void unblockTouchEvents() {
         this.touchEventsBlocked = false;
+    }
+
+    public boolean touchEventsBlocked() {
+        return touchEventsBlocked;
+    }
+
+    public void scrollToLastPosition() {
+        final int resultCount = getAdapter() != null ? getAdapter().getItemCount() : 0;
+        if (resultCount > 0) {
+            Log.d(TAG, "scrollToPosition( " + (resultCount - 1) + " )");
+            scrollToPosition(resultCount - 1);
+        }
     }
 
     @SuppressLint("ClickableViewAccessibility")

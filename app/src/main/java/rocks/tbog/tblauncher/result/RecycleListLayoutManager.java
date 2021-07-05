@@ -27,7 +27,8 @@ public class RecycleListLayoutManager extends LinearLayoutManager {
     @Override
     public void onLayoutCompleted(RecyclerView.State state) {
         super.onLayoutCompleted(state);
-        scrollToPositionWithOffset(mLastScrollPos, 0);
+        if (mLastScrollPos != -1)
+            scrollToPositionWithOffset(mLastScrollPos, 0);
     }
 
     @Override
@@ -38,6 +39,24 @@ public class RecycleListLayoutManager extends LinearLayoutManager {
     }
 
     public void onItemAnimationsFinished() {
-        scrollToPositionWithOffset(mLastScrollPos, 0);
+        if (mLastScrollPos != -1)
+            scrollToPositionWithOffset(mLastScrollPos, 0);
     }
+
+    public void resetLastScrollPosition() {
+        Log.d(TAG, "scrollToPosition: pos=-1 mLastScrollPos=" + mLastScrollPos);
+        mLastScrollPos = -1;
+    }
+
+//    public void scrollToLastPosition() {
+//        int itemCount = getItemCount();
+//        if (itemCount > 0) {
+//            int position = itemCount - 1;
+//            Log.d(TAG, "scrollToLastPosition: pos=" + position + " mLastScrollPos=" + mLastScrollPos);
+//            mLastScrollPos = position;
+//        } else {
+//            Log.d(TAG, "scrollToLastPosition: itemCount=" + itemCount + " mLastScrollPos=" + mLastScrollPos);
+//            mLastScrollPos = -1;
+//        }
+//    }
 }
