@@ -34,10 +34,7 @@ import androidx.annotation.StringRes;
 import androidx.appcompat.app.ActionBar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.preference.PreferenceManager;
-import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
-import org.jetbrains.annotations.NotNull;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -57,7 +54,7 @@ import rocks.tbog.tblauncher.entry.ShortcutEntry;
 import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.quicklist.EditQuickListDialog;
 import rocks.tbog.tblauncher.result.RecycleAdapter;
-import rocks.tbog.tblauncher.result.RecycleListLayoutManager;
+import rocks.tbog.tblauncher.result.RecycleCustomLayoutManager;
 import rocks.tbog.tblauncher.result.RecycleScrollListener;
 import rocks.tbog.tblauncher.result.ResultHelper;
 import rocks.tbog.tblauncher.searcher.ISearchActivity;
@@ -189,27 +186,18 @@ public class Behaviour implements ISearchActivity {
     }
 
     private void initResultLayout() {
-        LinearLayoutManager layoutManager = new RecycleListLayoutManager(getContext());
+        RecyclerView.LayoutManager layoutManager = new RecycleCustomLayoutManager();
+//        RecyclerView.LayoutManager layoutManager = new RecycleListLayoutManager(getContext());
+        RecycleScrollListener recycleScrollListener = new RecycleScrollListener(mKeyboardHandler);
 
         mResultAdapter = new RecycleAdapter(new ArrayList<>());
         mResultList = mResultLayout.findViewById(R.id.resultList);
-        //mResultList.setOnItemClickListener((parent, view, position, id) -> mResultAdapter.onClick(position, view));
-        //mResultList.setOnItemLongClickListener((parent, view, position, id) -> mResultAdapter.onLongClick(position, view));
 
         mResultList.setHasFixedSize(true);
         mResultList.setLayoutManager(layoutManager);
         mResultList.setAdapter(mResultAdapter);
-        mResultList.addOnScrollListener(new RecycleScrollListener(mKeyboardHandler));
-//        mResultList.addOnScrollListener(new RecyclerView.OnScrollListener() {
-//            @Override
-//            public void onScrollStateChanged(@NonNull @NotNull RecyclerView recyclerView, int newState) {
-//                if (newState != RecyclerView.SCROLL_STATE_IDLE) {
-//                    if (mResultList.getLayoutManager() instanceof RecycleListLayoutManager) {
-//                        ((RecycleListLayoutManager) mResultList.getLayoutManager()).resetLastScrollPosition();
-//                    }
-//                }
-//            }
-//        });
+        mResultList.addOnScrollListener(recycleScrollListener);
+        mResultList.addOnLayoutChangeListener(recycleScrollListener);
     }
 
     private void initSearchBarContainer() {

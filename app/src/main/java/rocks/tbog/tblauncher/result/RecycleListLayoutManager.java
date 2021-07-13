@@ -24,12 +24,29 @@ public class RecycleListLayoutManager extends LinearLayoutManager {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
 
+
+
     @Override
-    public void onLayoutCompleted(RecyclerView.State state) {
-        super.onLayoutCompleted(state);
-        if (mLastScrollPos != -1)
-            scrollToPositionWithOffset(mLastScrollPos, 0);
+    public boolean isAutoMeasureEnabled() {
+        return false;
     }
+
+    public void onBeforeLayout() {
+        if (mLastScrollPos != -1) {
+            Log.d(TAG, "onBeforeLayout: mLastScrollPos=" + mLastScrollPos);
+            scrollToPositionWithOffset(mLastScrollPos, 0);
+
+        }
+    }
+
+//    @Override
+//    public void onLayoutCompleted(RecyclerView.State state) {
+//        super.onLayoutCompleted(state);
+//        if (mLastScrollPos != -1) {
+//            Log.d(TAG, "onLayoutCompleted: mLastScrollPos=" + mLastScrollPos);
+//            scrollToPositionWithOffset(mLastScrollPos, 0);
+//        }
+//    }
 
     @Override
     public void scrollToPosition(int position) {
@@ -43,9 +60,21 @@ public class RecycleListLayoutManager extends LinearLayoutManager {
             scrollToPositionWithOffset(mLastScrollPos, 0);
     }
 
+    public void resetLastScrollPosition(int newPos) {
+        Log.d(TAG, "scrollToPosition: pos=" + newPos + " mLastScrollPos=" + mLastScrollPos);
+        mLastScrollPos = newPos;
+    }
+
     public void resetLastScrollPosition() {
-        Log.d(TAG, "scrollToPosition: pos=-1 mLastScrollPos=" + mLastScrollPos);
-        mLastScrollPos = -1;
+        resetLastScrollPosition(-1);
+    }
+
+    public int scrollToLastScrollPosition() {
+        if (mLastScrollPos != -1) {
+            Log.d(TAG, "scrollToLastPosition: mLastScrollPos=" + mLastScrollPos);
+            scrollToPositionWithOffset(mLastScrollPos, 0);
+        }
+        return mLastScrollPos;
     }
 
 //    public void scrollToLastPosition() {
