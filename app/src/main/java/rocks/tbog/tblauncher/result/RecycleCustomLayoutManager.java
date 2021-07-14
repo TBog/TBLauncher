@@ -62,6 +62,9 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
      * @param count Number of columns.
      */
     public void setTotalColumnCount(int count) {
+        assertNotInLayoutOrScroll(null);
+        if (mTotalColumnCount == count)
+            return;
         mTotalColumnCount = count;
         requestLayout();
     }
@@ -102,7 +105,7 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
     }
 
     private int getPaddingStartHorizontal() {
-        return mStackFromEnd ? getPaddingRight() : getPaddingLeft();
+        return getPaddingLeft();
     }
 
     private int getPaddingStartVertical() {
@@ -110,7 +113,7 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
     }
 
     private int getDecoratedStartHorizontal(@NonNull View child) {
-        return mStackFromEnd ? getDecoratedRight(child) : getDecoratedLeft(child);
+        return getDecoratedLeft(child);
     }
 
     private int getDecoratedStartVertical(@NonNull View child) {
@@ -206,11 +209,13 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
             mFirstVisiblePosition = 0;
             childHoriz = getPaddingStartHorizontal();
             childVert = getPaddingStartVertical();
+            Log.d(TAG, "-1- childHoriz=" + childHoriz + " childVert=" + childVert);
         } else if (!state.isPreLayout() && getVisibleChildCount() >= state.getItemCount()) {
             //Data set is too small to scroll fully, just reset position
             mFirstVisiblePosition = 0;
             childHoriz = getPaddingStartHorizontal();
             childVert = getPaddingStartVertical();
+            Log.d(TAG, "-2- childHoriz=" + childHoriz + " childVert=" + childVert);
         } else { //Adapter data set changes
             /*
              * Keep the existing initial position, and save off
@@ -219,6 +224,7 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
             final View referenceChild = getReferenceChild();
             childHoriz = getDecoratedStartHorizontal(referenceChild);
             childVert = getDecoratedStartVertical(referenceChild);
+            Log.d(TAG, "-3- childHoriz=" + childHoriz + " childVert=" + childVert);
 
             /*
              * When data set is too small to scroll vertically, adjust vertical offset
@@ -233,6 +239,7 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
                     mFirstVisiblePosition = Math.max(state.getItemCount() - mVisibleColumnCount, 0);
                     childHoriz = getPaddingStartHorizontal();
                 }
+                Log.d(TAG, "-4- childHoriz=" + childHoriz + " childVert=" + childVert);
             }
 
             /*
@@ -262,6 +269,7 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
 
                 childHoriz = getHorizontalSpace() - (mDecoratedChildWidth * mVisibleColumnCount);
                 childVert = getVerticalSpace() - (mDecoratedChildHeight * mVisibleRowCount);
+                Log.d(TAG, "-5- childHoriz=" + childHoriz + " childVert=" + childVert);
 
                 //Correct cases where shifting to the bottom-right overscrolls the top-left
                 // This happens on data sets too small to scroll in a direction.
@@ -271,6 +279,7 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
                 if (getFirstVisibleColumn() == 0) {
                     childHoriz = Math.min(childHoriz, getPaddingLeft());
                 }
+                Log.d(TAG, "-6- childHoriz=" + childHoriz + " childVert=" + childVert);
             }
         }
 
@@ -278,6 +287,7 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
         detachAndScrapAttachedViews(recycler);
 
         //Fill the grid for the initial layout of views
+        Log.d(TAG, "initial childHoriz=" + childHoriz + " childVert=" + childVert);
         fillGrid(DIRECTION_NONE, childHoriz, childVert, recycler, state, removedCache);
 
         //Evaluate any disappearing views that may exist
@@ -330,16 +340,41 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
         if (mVisibleRowCount > getTotalRowCount()) {
             mVisibleRowCount = getTotalRowCount();
         }
+
+        Log.i(TAG, "mVisibleRowCount=" + mVisibleRowCount + " mVisibleColumnCount=" + mVisibleColumnCount);
     }
 
     private void fillGrid(int direction, RecyclerView.Recycler recycler, RecyclerView.State state) {
-        fillGrid(direction, 0, 0, recycler, state, null);
+        if (mStackFromEnd)
+            fillGrid(direction, getHorizontalSpace(), getVerticalSpace(), recycler, state, null);
+        else
+            fillGrid(direction, 0, 0, recycler, state, null);
+    }
+
+    @NonNull
+    private static String directionToString(int direction) {
+        switch (direction) {
+            case DIRECTION_UP:
+                return "up";
+            case DIRECTION_DOWN:
+                return "down";
+            case DIRECTION_START:
+                return "start";
+            case DIRECTION_END:
+                return "end";
+        }
+        return String.valueOf(direction);
     }
 
     private void fillGrid(int direction, int emptyHorizontal, int emptyVertical,
                           RecyclerView.Recycler recycler,
                           RecyclerView.State state,
                           SparseIntArray removedPositions) {
+        Log.d(TAG, "fillGrid " + directionToString(direction) +
+                " h=" + emptyHorizontal +
+                " v=" + emptyVertical +
+                " preLayout=" + state.isPreLayout());
+
         if (mFirstVisiblePosition < 0) mFirstVisiblePosition = 0;
         if (mFirstVisiblePosition >= getItemCount()) mFirstVisiblePosition = (getItemCount() - 1);
 
@@ -353,38 +388,21 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
         int startVerticalOffset = emptyVertical;
         if (getChildCount() != 0) {
             final View refView = getReferenceChild();
-            startHorizontalOffset = getDecoratedStartHorizontal(refView);
-            startVerticalOffset = getDecoratedStartVertical(refView);
-            if (mStackFromEnd) {
-                switch (direction) {
-                    case DIRECTION_END:
-                        startHorizontalOffset -= mDecoratedChildWidth;
-                        break;
-                    case DIRECTION_START:
-                        startHorizontalOffset += mDecoratedChildWidth;
-                        break;
-                    case DIRECTION_DOWN:
-                        startVerticalOffset -= mDecoratedChildHeight;
-                        break;
-                    case DIRECTION_UP:
-                        startVerticalOffset += mDecoratedChildHeight;
-                        break;
-                }
-            } else {
-                switch (direction) {
-                    case DIRECTION_START:
-                        startHorizontalOffset -= mDecoratedChildWidth;
-                        break;
-                    case DIRECTION_END:
-                        startHorizontalOffset += mDecoratedChildWidth;
-                        break;
-                    case DIRECTION_UP:
-                        startVerticalOffset -= mDecoratedChildHeight;
-                        break;
-                    case DIRECTION_DOWN:
-                        startVerticalOffset += mDecoratedChildHeight;
-                        break;
-                }
+            startHorizontalOffset = mStackFromEnd ? getDecoratedRight(refView) : getDecoratedLeft(refView);//getDecoratedStartHorizontal(refView);
+            startVerticalOffset = mStackFromEnd ? getDecoratedBottom(refView) : getDecoratedTop(refView);//getDecoratedStartVertical(refView);
+            switch (direction) {
+                case DIRECTION_START:
+                    startHorizontalOffset -= mDecoratedChildWidth;
+                    break;
+                case DIRECTION_END:
+                    startHorizontalOffset += mDecoratedChildWidth;
+                    break;
+                case DIRECTION_UP:
+                    startVerticalOffset -= mDecoratedChildHeight;
+                    break;
+                case DIRECTION_DOWN:
+                    startVerticalOffset += mDecoratedChildHeight;
+                    break;
             }
 
             //Cache all views by their existing position, before updating counts
@@ -428,10 +446,8 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
          */
         int leftOffset = startHorizontalOffset;
         int topOffset = startVerticalOffset;
-        if (mStackFromEnd) {
-            leftOffset = getHorizontalSpace() - startHorizontalOffset;
-            topOffset = getVerticalSpace() - startVerticalOffset;
-        }
+        Log.d(TAG, "leftOffset=" + leftOffset + " topOffset=" + topOffset +
+                " mDecoratedChildWidth=" + mDecoratedChildWidth + " mDecoratedChildHeight=" + mDecoratedChildHeight);
 
         for (int i = 0; i < getVisibleChildCount(); i++) {
             int nextPosition = positionOfIndex(i);
@@ -510,7 +526,7 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
             }
 
             if (i % mVisibleColumnCount == (mVisibleColumnCount - 1)) {
-                leftOffset = mStackFromEnd ? getHorizontalSpace() - startHorizontalOffset : startHorizontalOffset;
+                leftOffset = startHorizontalOffset;
                 if (mStackFromEnd)
                     topOffset -= mDecoratedChildHeight;
                 else
@@ -521,6 +537,7 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
                     layoutAppearingViews(recycler, view, nextPosition, removedPositions.size(), offsetPositionDelta);
                 }
             } else {
+                Log.d(TAG, "i=" + i + " mVisibleColumnCount=" + mVisibleColumnCount);
                 if (mStackFromEnd)
                     leftOffset -= mDecoratedChildWidth;
                 else
@@ -606,7 +623,7 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
     @Override
     public boolean canScrollHorizontally() {
         //We do allow scrolling
-        return true;
+        return mTotalColumnCount > 1;
     }
 
     /*
@@ -715,8 +732,8 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
 
         int delta;
         int maxRowCount = getTotalRowCount();
-        boolean topBoundReached = getFirstVisibleRow() == 0;
-        boolean bottomBoundReached = getLastVisibleRow() >= maxRowCount;
+        boolean topBoundReached = mStackFromEnd ? getLastVisibleRow() >= maxRowCount : getFirstVisibleRow() == 0;
+        boolean bottomBoundReached = mStackFromEnd ? getFirstVisibleRow() == 0 : getLastVisibleRow() >= maxRowCount;
         if (dy > 0) { // Contents are scrolling up
             //Check against bottom bound
             if (bottomBoundReached) {
@@ -756,13 +773,13 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
 
         if (dy > 0) {
             if (getDecoratedBottom(topView) < 0 && !bottomBoundReached) {
-                fillGrid(DIRECTION_DOWN, recycler, state);
+                fillGrid(mStackFromEnd ? DIRECTION_UP : DIRECTION_DOWN, recycler, state);
             } else if (!bottomBoundReached) {
                 fillGrid(DIRECTION_NONE, recycler, state);
             }
         } else {
             if (getDecoratedTop(topView) > 0 && !topBoundReached) {
-                fillGrid(DIRECTION_UP, recycler, state);
+                fillGrid(mStackFromEnd ? DIRECTION_DOWN : DIRECTION_UP, recycler, state);
             } else if (!topBoundReached) {
                 fillGrid(DIRECTION_NONE, recycler, state);
             }
@@ -917,9 +934,14 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
         int layoutLeft = getDecoratedLeft(referenceView) + colDelta * mDecoratedChildWidth;
 
         measureChildWithMargins(child, 0, 0);
-        layoutDecorated(child, layoutLeft, layoutTop,
-                layoutLeft + mDecoratedChildWidth,
-                layoutTop + mDecoratedChildHeight);
+        if (mStackFromEnd)
+            layoutDecorated(child, layoutLeft - mDecoratedChildWidth,
+                    layoutTop - mDecoratedChildHeight,
+                    layoutLeft, layoutTop);
+        else
+            layoutDecorated(child, layoutLeft, layoutTop,
+                    layoutLeft + mDecoratedChildWidth,
+                    layoutTop + mDecoratedChildHeight);
     }
 
     /**
