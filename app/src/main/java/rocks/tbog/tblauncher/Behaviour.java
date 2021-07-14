@@ -55,6 +55,7 @@ import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.quicklist.EditQuickListDialog;
 import rocks.tbog.tblauncher.result.RecycleAdapter;
 import rocks.tbog.tblauncher.result.RecycleCustomLayoutManager;
+import rocks.tbog.tblauncher.result.RecycleListLayoutManager;
 import rocks.tbog.tblauncher.result.RecycleScrollListener;
 import rocks.tbog.tblauncher.result.ResultHelper;
 import rocks.tbog.tblauncher.searcher.ISearchActivity;
@@ -186,8 +187,11 @@ public class Behaviour implements ISearchActivity {
     }
 
     private void initResultLayout() {
-        RecyclerView.LayoutManager layoutManager = new RecycleCustomLayoutManager();
-//        RecyclerView.LayoutManager layoutManager = new RecycleListLayoutManager(getContext());
+        RecyclerView.LayoutManager layoutManager;
+        if (mPref.getBoolean("result-custom-layout", false))
+            layoutManager = new RecycleCustomLayoutManager();
+        else
+            layoutManager = new RecycleListLayoutManager(getContext());
         RecycleScrollListener recycleScrollListener = new RecycleScrollListener(mKeyboardHandler);
 
         mResultAdapter = new RecycleAdapter(new ArrayList<>());
