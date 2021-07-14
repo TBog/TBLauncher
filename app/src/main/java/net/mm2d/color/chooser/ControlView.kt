@@ -138,7 +138,7 @@ internal class ControlView
         ): CharSequence? {
             val converted = source.toString()
                     .replace("[^0-9a-fA-F]".toRegex(), "")
-                    .toUpperCase(Locale.ENGLISH)
+                    .uppercase(Locale.ENGLISH)
             if (source.toString() == converted) return null
             if (source !is Spanned) return converted
             return SpannableString(converted).also {
