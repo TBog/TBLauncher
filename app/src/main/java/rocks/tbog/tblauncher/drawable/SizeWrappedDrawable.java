@@ -14,14 +14,12 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
-import org.jetbrains.annotations.NotNull;
-
 public class SizeWrappedDrawable extends Drawable {
     @NonNull
     private final Drawable mDrawable;
     private final int mSize;
 
-    public SizeWrappedDrawable(@NotNull Drawable drawable, int size) {
+    public SizeWrappedDrawable(@NonNull Drawable drawable, int size) {
         mDrawable = drawable;
         mSize = size;
     }

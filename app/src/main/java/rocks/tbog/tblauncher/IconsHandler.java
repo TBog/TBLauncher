@@ -112,7 +112,9 @@ public class IconsHandler {
         }
 
         // don't reload the icon pack
-        if (mIconPack == null || !mIconPack.getPackPackageName().equals(packageName)) {
+        if (mIconPack == null
+                || !mIconPack.getPackPackageName().equals(packageName)
+                || (mLoadIconsPackTask == null && !mIconPack.isLoaded())) {
             if (mLoadIconsPackTask != null) {
                 mLoadIconsPackTask.cancel();
                 mLoadIconsPackTask = null;
@@ -154,8 +156,23 @@ public class IconsHandler {
         // check the icon pack for a resource
         if (mIconPack != null) {
             // just checking will make this thread wait for the icon pack to load
-            if (!mIconPack.isLoaded())
-                return null;
+            if (!mIconPack.isLoaded()) {
+                if (mLoadIconsPackTask == null) {
+                    Log.w(TAG, "icon pack `" + mIconPack.getPackPackageName() + "` not loaded, reload");
+                    SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(ctx);
+                    loadIconsPack(pref.getString("icons-pack", null));
+                    return null;
+                }
+                Log.w(TAG, "icon pack `" + mIconPack.getPackPackageName() + "` not loaded, wait");
+                try {
+                    mLoadIconsPackTask.wait();
+                } catch (InterruptedException ignored) {
+                }
+                if (!mIconPack.isLoaded()) {
+                    Log.e(TAG, "icon pack `" + mIconPack.getPackPackageName() + "` waiting failed to load");
+                    return null;
+                }
+            }
             String componentString = componentName.toString();
             Drawable drawable = mIconPack.getComponentDrawable(componentString);
             if (drawable != null) {

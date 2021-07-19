@@ -18,10 +18,10 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
-import android.view.inputmethod.InputMethodManager;
 import android.widget.AbsListView;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -34,6 +34,7 @@ import androidx.annotation.StringRes;
 import androidx.appcompat.app.ActionBar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.preference.PreferenceManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -52,18 +53,22 @@ import rocks.tbog.tblauncher.entry.EntryWithTags;
 import rocks.tbog.tblauncher.entry.ShortcutEntry;
 import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.quicklist.EditQuickListDialog;
-import rocks.tbog.tblauncher.result.ResultAdapter;
+import rocks.tbog.tblauncher.result.RecycleAdapter;
+import rocks.tbog.tblauncher.result.RecycleCustomLayoutManager;
+import rocks.tbog.tblauncher.result.RecycleListLayoutManager;
+import rocks.tbog.tblauncher.result.RecycleScrollListener;
 import rocks.tbog.tblauncher.result.ResultHelper;
 import rocks.tbog.tblauncher.searcher.ISearchActivity;
 import rocks.tbog.tblauncher.searcher.QuerySearcher;
 import rocks.tbog.tblauncher.searcher.Searcher;
 import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
-import rocks.tbog.tblauncher.ui.AnimatedListView;
 import rocks.tbog.tblauncher.ui.DialogFragment;
 import rocks.tbog.tblauncher.ui.KeyboardScrollHider;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
+import rocks.tbog.tblauncher.ui.RecyclerList;
 import rocks.tbog.tblauncher.ui.TagsManagerDialog;
+import rocks.tbog.tblauncher.ui.WindowInsetsHelper;
 import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.SystemUiVisibility;
 import rocks.tbog.tblauncher.utils.UISizes;
@@ -71,67 +76,29 @@ import rocks.tbog.tblauncher.utils.Utilities;
 
 import static rocks.tbog.tblauncher.entry.EntryItem.LAUNCHED_FROM_GESTURE;
 
-
 /**
  * Behaviour of the launcher, when are stuff hidden, animation, user interaction responses
  */
-public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardHandler {
+public class Behaviour implements ISearchActivity {
 
+    public static final int LAUNCH_DELAY = 100;
+    static final String DIALOG_CUSTOM_ICON = "custom_icon_dialog";
     private static final int UI_ANIMATION_DELAY = 300;
     // time to wait for the keyboard to show up
     private static final int KEYBOARD_ANIMATION_DELAY = 100;
     private static final int UI_ANIMATION_DURATION = 200;
-    public static final int LAUNCH_DELAY = 100;
     private static final String TAG = Behaviour.class.getSimpleName();
-
-    static final String DIALOG_CUSTOM_ICON = "custom_icon_dialog";
-
     private TBLauncherActivity mTBLauncherActivity = null;
     private DialogFragment<?> mFragmentDialog = null;
 
     private View mResultLayout;
-    private AnimatedListView mResultList;
-    private ResultAdapter mResultAdapter;
+    private RecyclerList mResultList;
+    private RecycleAdapter mResultAdapter;
     private EditText mSearchEditText;
     private View mSearchBarContainer;
     private View mWidgetContainer;
     private View mClearButton;
     private View mMenuButton;
-    private ImageView mLauncherButton;
-    private View mDecorView;
-    private View mNotificationBackground;
-
-    private final Runnable mHidePart2Runnable = new Runnable() {
-        @Override
-        public void run() {
-//            if (TBApplication.state().isKeyboardVisible()) {
-//                // if keyboard is visible, the notification bar is also visible
-//                return;
-//            }
-
-            // Delayed hide UI elements
-            ActionBar actionBar = mTBLauncherActivity != null ? mTBLauncherActivity.getSupportActionBar() : null;
-            if (actionBar != null) {
-                actionBar.hide();
-            }
-            SystemUiVisibility.setFullscreen(mDecorView);
-            //mTBLauncherActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
-        }
-    };
-
-    private final Runnable mShowPart2Runnable = new Runnable() {
-        @Override
-        public void run() {
-            // Delayed display of UI elements
-            ActionBar actionBar = mTBLauncherActivity != null ? mTBLauncherActivity.getSupportActionBar() : null;
-            if (actionBar != null) {
-                actionBar.show();
-            }
-            SystemUiVisibility.clearFullscreen(mDecorView);
-            //mTBLauncherActivity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
-        }
-    };
-
     private final TextWatcher mSearchTextWatcher = new TextWatcher() {
         @NonNull
         String lastText = "";
@@ -166,15 +133,75 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             // do nothing
         }
     };
+    private ImageView mLauncherButton;
+    private View mDecorView;
+    private final Runnable mHidePart2Runnable = new Runnable() {
+        @Override
+        public void run() {
+//            if (TBApplication.state().isKeyboardVisible()) {
+//                // if keyboard is visible, the notification bar is also visible
+//                return;
+//            }
 
+            // Delayed hide UI elements
+            ActionBar actionBar = mTBLauncherActivity != null ? mTBLauncherActivity.getSupportActionBar() : null;
+            if (actionBar != null) {
+                actionBar.hide();
+            }
+            SystemUiVisibility.setFullscreen(mDecorView);
+            //mTBLauncherActivity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        }
+    };
+    private final Runnable mShowPart2Runnable = new Runnable() {
+        @Override
+        public void run() {
+            // Delayed display of UI elements
+            ActionBar actionBar = mTBLauncherActivity != null ? mTBLauncherActivity.getSupportActionBar() : null;
+            if (actionBar != null) {
+                actionBar.show();
+            }
+            SystemUiVisibility.clearFullscreen(mDecorView);
+            //mTBLauncherActivity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
+        }
+    };
+    private View mNotificationBackground;
+    private KeyboardScrollHider mHider = null;
+    private WindowInsetsHelper mKeyboardHandler = null;
     private SharedPreferences mPref;
 
+    static void launchIntent(@NonNull Behaviour behaviour, @NonNull View view, @NonNull Intent intent) {
+        behaviour.beforeLaunchOccurred();
+        view.postDelayed(() -> {
+            Activity activity = Utilities.getActivity(view);
+            if (activity == null)
+                return;
+            Utilities.setIntentSourceBounds(intent, view);
+            Bundle startActivityOptions = Utilities.makeStartActivityOptions(view);
+            try {
+                activity.startActivity(intent, startActivityOptions);
+            } catch (ActivityNotFoundException ignored) {
+                return;
+            }
+            behaviour.afterLaunchOccurred();
+        }, LAUNCH_DELAY);
+    }
+
     private void initResultLayout() {
-        mResultAdapter = new ResultAdapter(new ArrayList<>());
+        RecyclerView.LayoutManager layoutManager;
+        if (mPref.getBoolean("result-custom-layout", false))
+            layoutManager = new RecycleCustomLayoutManager();
+        else
+            layoutManager = new RecycleListLayoutManager(getContext());
+        RecycleScrollListener recycleScrollListener = new RecycleScrollListener(mKeyboardHandler);
+
+        mResultAdapter = new RecycleAdapter(new ArrayList<>());
         mResultList = mResultLayout.findViewById(R.id.resultList);
+
+        mResultList.setHasFixedSize(true);
+        mResultList.setLayoutManager(layoutManager);
         mResultList.setAdapter(mResultAdapter);
-        mResultList.setOnItemClickListener((parent, view, position, id) -> mResultAdapter.onClick(position, view));
-        mResultList.setOnItemLongClickListener((parent, view, position, id) -> mResultAdapter.onLongClick(position, view));
+        mResultList.addOnScrollListener(recycleScrollListener);
+        mResultList.addOnLayoutChangeListener(recycleScrollListener);
     }
 
     private void initSearchBarContainer() {
@@ -288,6 +315,50 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         });
     }
 
+    private void initKeyboardScrollHider() {
+        //findViewById(R.id.listEdgeEffect), findViewById(R.id.resultList)
+        //mHider = new KeyboardScrollHider(mKeyboardHandler, resultList, listEdgeEffect);
+        mKeyboardHandler = new WindowInsetsHelper(findViewById(R.id.root_layout)) {
+            @Override
+            public void showKeyboard() {
+                LauncherState state = TBApplication.state();
+
+                if (state.isSearchBarVisible() && PrefCache.modeSearchFullscreen(mPref)) {
+                    showSystemBars();
+                    disableFullscreen();
+                }
+
+                Log.i(TAG, "Keyboard - SHOW");
+                state.setKeyboard(LauncherState.AnimatedVisibility.VISIBLE);
+                mTBLauncherActivity.dismissPopup();
+
+                mSearchEditText.requestFocus();
+
+                super.showKeyboard();
+            }
+
+            @Override
+            public void hideKeyboard() {
+                Log.i(TAG, "Keyboard - HIDE");
+
+                if (TBApplication.state().isSearchBarVisible() && PrefCache.modeSearchFullscreen(mPref)) {
+                    //hideSystemBars();
+                    enableFullscreen(0);
+                }
+
+                TBApplication.state().setKeyboard(LauncherState.AnimatedVisibility.HIDDEN);
+                mTBLauncherActivity.dismissPopup();
+
+                View focus = mTBLauncherActivity.getCurrentFocus();
+                if (focus != null)
+                    focus.clearFocus();
+                mSearchEditText.clearFocus();
+
+                super.hideKeyboard();
+            }
+        };
+    }
+
     public void onCreateActivity(TBLauncherActivity tbLauncherActivity) {
         mTBLauncherActivity = tbLauncherActivity;
         mPref = PreferenceManager.getDefaultSharedPreferences(tbLauncherActivity);
@@ -301,8 +372,22 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         mClearButton = findViewById(R.id.clearButton);
         mMenuButton = findViewById(R.id.menuButton);
 
-        mDecorView = mTBLauncherActivity.getWindow().getDecorView();
+        Window window = mTBLauncherActivity.getWindow();
+//        WindowCompat.setDecorFitsSystemWindows(window, false);
+//        ViewCompat.setOnApplyWindowInsetsListener(window.getDecorView(), (v, insets) -> {
+//            int left = v.getPaddingLeft();
+//            int top = v.getPaddingTop();
+//            int right = v.getPaddingRight();
+//            int bottom = v.getPaddingBottom();
+//            @WindowInsetsCompat.Type.InsetsType
+//            int type = WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.ime();
+//            v.setPadding(left, top, right, insets.getInsets(type).bottom);
+//            return insets;
+//        });
 
+        mDecorView = window.getDecorView();
+
+        initKeyboardScrollHider();
         initResultLayout();
         initSearchBarContainer();
         initLauncherButton();
@@ -402,23 +487,6 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         launchIntent(this, view, intent);
     }
 
-    static void launchIntent(@NonNull Behaviour behaviour, @NonNull View view, @NonNull Intent intent) {
-        behaviour.beforeLaunchOccurred();
-        view.postDelayed(() -> {
-            Activity activity = Utilities.getActivity(view);
-            if (activity == null)
-                return;
-            Utilities.setIntentSourceBounds(intent, view);
-            Bundle startActivityOptions = Utilities.makeStartActivityOptions(view);
-            try {
-                activity.startActivity(intent, startActivityOptions);
-            } catch (ActivityNotFoundException ignored) {
-                return;
-            }
-            behaviour.afterLaunchOccurred();
-        }, LAUNCH_DELAY);
-    }
-
     @SuppressWarnings("TypeParameterUnusedInFormals")
     private <T extends View> T findViewById(@IdRes int id) {
         return mTBLauncherActivity.findViewById(id);
@@ -441,6 +509,7 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
         Log.d(TAG, "desktop changed " + currentMode + " -> " + mode);
         if (mode.equals(currentMode)) {
             // no change, maybe refresh?
+            //showDesktop(mode);
             return;
         }
 
@@ -691,45 +760,16 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     public void showKeyboard() {
-        LauncherState state = TBApplication.state();
-//        if (state.isSearchBarVisible() && PrefCache.modeSearchFullscreen(mPref))
-//            disableFullscreen();
-
-        Log.i(TAG, "Keyboard - SHOW");
-        state.setKeyboard(LauncherState.AnimatedVisibility.VISIBLE);
-        mTBLauncherActivity.dismissPopup();
-
-        mSearchEditText.requestFocus();
-
-        InputMethodManager mgr = (InputMethodManager) mTBLauncherActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
-        assert mgr != null;
-        mgr.showSoftInput(mSearchEditText, InputMethodManager.SHOW_IMPLICIT);
+        mKeyboardHandler.showKeyboard();
+        if (mHider != null)
+            mHider.start();
         //mTBLauncherActivity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
     }
 
     public void hideKeyboard() {
-        Log.i(TAG, "Keyboard - HIDE");
-
-        if (TBApplication.state().isSearchBarVisible() && PrefCache.modeSearchFullscreen(mPref))
-            enableFullscreen(0);
-
-        TBApplication.state().setKeyboard(LauncherState.AnimatedVisibility.HIDDEN);
-        mTBLauncherActivity.dismissPopup();
-
-        View focus = mTBLauncherActivity.getCurrentFocus();
-        mSearchEditText.clearFocus();
-
-        // Check if no view has focus:
-        InputMethodManager mgr = (InputMethodManager) mTBLauncherActivity.getSystemService(Context.INPUT_METHOD_SERVICE);
-        assert mgr != null;
-
-        if (focus != null) {
-            focus.clearFocus();
-            mgr.hideSoftInputFromWindow(focus.getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
-        } else {
-            mgr.hideSoftInputFromWindow(mSearchEditText.getWindowToken(), InputMethodManager.HIDE_IMPLICIT_ONLY);
-        }
-
+        mKeyboardHandler.hideKeyboard();
+        if (mHider != null)
+            mHider.stop();
         //mTBLauncherActivity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
     }
 
@@ -783,6 +823,11 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             mResultAdapter.updateResults(results);
             mResultList.animateChange();
         }
+
+        if (!isRefresh) {
+            mResultList.scrollToLastPosition();
+        }
+
         TBApplication.quickList(getContext()).adapterUpdated();
         mClearButton.setVisibility(View.VISIBLE);
         mMenuButton.setVisibility(View.INVISIBLE);
@@ -865,12 +910,9 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     public void refreshSearchRecords() {
+        if (mResultList == null)
+            return;
         mResultList.post(() -> mResultList.refreshViews());
-    }
-
-    public void updateSearchRecords() {
-        if (mSearchEditText != null)
-            updateSearchRecords(true, mSearchEditText.getText().toString());
     }
 
     /**
@@ -889,10 +931,6 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 //            runTask(searcher);
 //            return;
 //        }
-        if (isRefresh)
-            mResultList.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_NORMAL);
-        else
-            mResultList.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
 
         updateSearchRecords(isRefresh, new QuerySearcher(this, query));
     }
@@ -952,6 +990,11 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     private void updateSearchRecords(boolean isRefresh, @NonNull Searcher searcher) {
+        if (isRefresh)
+            mResultList.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_NORMAL);
+        else
+            mResultList.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
+
         resetTask();
         mTBLauncherActivity.dismissPopup();
 
@@ -961,11 +1004,13 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     }
 
     public void beforeLaunchOccurred() {
+        RecycleScrollListener.setListLayoutHeight(mResultList, mResultList.getHeight());
         hideKeyboard();
     }
 
     public void afterLaunchOccurred() {
         mSearchEditText.postDelayed(() -> {
+            RecycleScrollListener.setListLayoutHeight(mResultList, ViewGroup.LayoutParams.MATCH_PARENT);
             if (PrefCache.clearSearchAfterLaunch(mPref)) {
                 // We selected an item on the list, now we can cleanup the filter:
                 if (mSearchEditText.getText().length() > 0) {
@@ -1023,7 +1068,8 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
             enableFullscreen(0);
         if (PrefCache.linkCloseKeyboardToBackButton(mPref))
             onBackPressed();
-        return false;
+        // check if we should hide the keyboard
+        return state.isSearchBarVisible() && PrefCache.linkKeyboardAndSearchBar(mPref);
     }
 
     public void launchCustomIconDialog(AppEntry appEntry) {
@@ -1192,6 +1238,11 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
 
     private boolean isFragmentDialogVisible() {
         return mFragmentDialog != null && mFragmentDialog.isVisible();
+    }
+
+    public void showDialog(@NonNull DialogFragment<?> dialog, @Nullable String tag) {
+        openFragmentDialog(dialog);
+        dialog.show(mTBLauncherActivity.getSupportFragmentManager(), tag);
     }
 
     private void openFragmentDialog(DialogFragment<?> dialog) {
@@ -1472,4 +1523,5 @@ public class Behaviour implements ISearchActivity, KeyboardScrollHider.KeyboardH
     public boolean onDoubleClick() {
         return executeGestureAction("gesture-double-click");
     }
+
 }

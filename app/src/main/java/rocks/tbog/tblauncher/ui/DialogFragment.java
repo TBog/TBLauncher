@@ -13,7 +13,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.TextView;
 
+import androidx.annotation.IdRes;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -25,6 +27,13 @@ public abstract class DialogFragment<Output> extends androidx.fragment.app.Dialo
     private static final String TAG = "DialogFrag";
     private OnDismissListener<Output> mOnDismissListener = null;
     private OnConfirmListener<Output> mOnConfirmListener = null;
+    private OnButtonClickListener<Output> mOnPositiveClickListener = null;
+    private OnButtonClickListener<Output> mOnNeutralClickListener = null;
+    private OnButtonClickListener<Output> mOnNegativeClickListener = null;
+
+    public enum Button {
+        POSITIVE, NEGATIVE, NEUTRAL
+    }
 
     @LayoutRes
     protected abstract int layoutRes();
@@ -37,12 +46,28 @@ public abstract class DialogFragment<Output> extends androidx.fragment.app.Dialo
         void onConfirm(@Nullable T output);
     }
 
+    public interface OnButtonClickListener<T> {
+        void onButtonClick(@NonNull DialogFragment<T> dialog, @NonNull Button button);
+    }
+
     public void setOnDismissListener(OnDismissListener<Output> listener) {
         mOnDismissListener = listener;
     }
 
     public void setOnConfirmListener(OnConfirmListener<Output> listener) {
         mOnConfirmListener = listener;
+    }
+
+    public void setOnPositiveClickListener(OnButtonClickListener<Output> listener) {
+        mOnPositiveClickListener = listener;
+    }
+
+    public void setOnNegativeClickListener(OnButtonClickListener<Output> listener) {
+        mOnNegativeClickListener = listener;
+    }
+
+    public void setOnNeutralClickListener(OnButtonClickListener<Output> listener) {
+        mOnNeutralClickListener = listener;
     }
 
     @Override
@@ -55,6 +80,24 @@ public abstract class DialogFragment<Output> extends androidx.fragment.app.Dialo
     public void onConfirm(@Nullable Output output) {
         if (mOnConfirmListener != null)
             mOnConfirmListener.onConfirm(output);
+    }
+
+    public void onButtonClick(@NonNull Button button) {
+        switch (button) {
+            case POSITIVE:
+                if (mOnPositiveClickListener != null)
+                    mOnPositiveClickListener.onButtonClick(this, button);
+                break;
+            case NEGATIVE:
+                if (mOnNegativeClickListener != null)
+                    mOnNegativeClickListener.onButtonClick(this, button);
+                break;
+            case NEUTRAL:
+                if (mOnNeutralClickListener != null)
+                    mOnNeutralClickListener.onButtonClick(this, button);
+                break;
+        }
+        dismiss();
     }
 
     @Override
@@ -89,12 +132,12 @@ public abstract class DialogFragment<Output> extends androidx.fragment.app.Dialo
         //Log.i(TAG, "---> onCreateView <---");
         Dialog dialog = requireDialog();
         //Log.i(TAG, "dialog=" + dialog);
-        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
 
         Window window = dialog.getWindow();
         if (window != null) {
-            window.setDimAmount(0.7f);
+            window.requestFeature(Window.FEATURE_NO_TITLE);
             window.addFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND);
+            window.setDimAmount(0.7f);
         }
         dialog.setCanceledOnTouchOutside(true);
 
@@ -107,6 +150,75 @@ public abstract class DialogFragment<Output> extends androidx.fragment.app.Dialo
             view.setClipToOutline(true);
         }
 
+        createButtonBar(view, inflater);
+
         return view;
+    }
+
+    private void createButtonBar(View view, LayoutInflater inflater) {
+        Bundle args = getArguments();
+        if (args == null)
+            return;
+
+        CharSequence btnPositiveText = args.getCharSequence("btnPositiveText", "");
+        CharSequence btnNegativeText = args.getCharSequence("btnNegativeText", "");
+        CharSequence btnNeutralText = args.getCharSequence("btnNeutralText", "");
+        if (btnPositiveText.length() == 0 && btnNegativeText.length() == 0 && btnNeutralText.length() == 0)
+            return;
+
+        View buttonPanel = resolvePanel(view, inflater);
+        if (buttonPanel == null) {
+            Log.e(TAG, "failed to inflate button bar");
+            return;
+        }
+
+        TextView button1 = buttonPanel.findViewById(android.R.id.button1);
+        TextView button2 = buttonPanel.findViewById(android.R.id.button2);
+        TextView button3 = buttonPanel.findViewById(android.R.id.button3);
+
+        if (btnPositiveText.length() == 0) {
+            button1.setVisibility(View.GONE);
+        } else {
+            button1.setVisibility(View.VISIBLE);
+            button1.setText(btnPositiveText);
+            button1.setOnClickListener(v -> onButtonClick(Button.POSITIVE));
+        }
+
+        if (btnNegativeText.length() == 0) {
+            button2.setVisibility(View.GONE);
+        } else {
+            button2.setVisibility(View.VISIBLE);
+            button2.setText(btnNegativeText);
+            button2.setOnClickListener(v -> onButtonClick(Button.NEGATIVE));
+        }
+
+        if (btnNeutralText.length() == 0) {
+            button3.setVisibility(View.GONE);
+            View spacer = buttonPanel.findViewById(R.id.spacer);
+            if (spacer != null)
+                spacer.setVisibility(View.GONE);
+        } else {
+            button3.setVisibility(View.VISIBLE);
+            button3.setText(btnNeutralText);
+            button3.setOnClickListener(v -> onButtonClick(Button.NEUTRAL));
+        }
+    }
+
+    @Nullable
+    private ViewGroup resolvePanel(@NonNull View view, @NonNull LayoutInflater inflater) {
+        View buttonPanel = view.findViewById(R.id.buttonPanel);
+        if (buttonPanel instanceof ViewGroup)
+            return (ViewGroup) buttonPanel;
+        if (view instanceof ViewGroup) {
+            buttonPanel = inflater.inflate(R.layout.ok_cancel_button_bar, (ViewGroup) view, false);
+            ((ViewGroup) view).addView(buttonPanel);
+            return (ViewGroup) buttonPanel;
+        }
+        return null;
+    }
+
+    @Nullable
+    public <T extends View> T findViewById(@IdRes int id) {
+        return requireDialog().findViewById(id);
     }
 }

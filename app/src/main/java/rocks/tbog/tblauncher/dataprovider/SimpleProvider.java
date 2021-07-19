@@ -1,6 +1,6 @@
 package rocks.tbog.tblauncher.dataprovider;
 
-import org.jetbrains.annotations.NotNull;
+import androidx.annotation.NonNull;
 
 import java.util.List;
 
@@ -37,12 +37,12 @@ public abstract class SimpleProvider<T extends EntryItem> implements IProvider<T
     }
 
     @Override
-    public boolean mayFindById(@NotNull String id) {
+    public boolean mayFindById(@NonNull String id) {
         return false;
     }
 
     @Override
-    public T findById(@NotNull String id) {
+    public T findById(@NonNull String id) {
         return null;
     }
 
