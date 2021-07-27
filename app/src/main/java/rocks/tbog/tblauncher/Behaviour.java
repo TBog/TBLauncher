@@ -188,11 +188,13 @@ public class Behaviour implements ISearchActivity {
 
     private void initResultLayout() {
         RecyclerView.LayoutManager layoutManager;
-        if (mPref.getBoolean("result-custom-layout", false))
+        RecycleScrollListener recycleScrollListener;
+        if (mPref.getBoolean("result-custom-layout", false)) {
             layoutManager = new RecycleCustomLayoutManager();
-        else
+        } else {
             layoutManager = new RecycleListLayoutManager(getContext());
-        RecycleScrollListener recycleScrollListener = new RecycleScrollListener(mKeyboardHandler);
+        }
+        recycleScrollListener = new RecycleScrollListener(mKeyboardHandler);
 
         mResultAdapter = new RecycleAdapter(new ArrayList<>());
         mResultList = mResultLayout.findViewById(R.id.resultList);
@@ -201,7 +203,7 @@ public class Behaviour implements ISearchActivity {
         mResultList.setLayoutManager(layoutManager);
         mResultList.setAdapter(mResultAdapter);
         mResultList.addOnScrollListener(recycleScrollListener);
-        mResultList.addOnLayoutChangeListener(recycleScrollListener);
+//        mResultList.addOnLayoutChangeListener(recycleScrollListener);
     }
 
     private void initSearchBarContainer() {

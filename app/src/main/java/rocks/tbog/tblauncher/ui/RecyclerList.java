@@ -66,11 +66,11 @@ public class RecyclerList extends RecyclerView {
     }
 
     public void scrollToLastPosition() {
-        final int resultCount = getAdapter() != null ? getAdapter().getItemCount() : 0;
-        if (resultCount > 0) {
-            Log.d(TAG, "scrollToPosition( " + (resultCount - 1) + " )");
-            scrollToPosition(resultCount - 1);
-        }
+//        final int resultCount = getAdapter() != null ? getAdapter().getItemCount() : 0;
+//        if (resultCount > 0) {
+//            Log.d(TAG, "scrollToPosition( " + (resultCount - 1) + " )");
+//            scrollToPosition(resultCount - 1);
+//        }
     }
 
     @SuppressLint("ClickableViewAccessibility")

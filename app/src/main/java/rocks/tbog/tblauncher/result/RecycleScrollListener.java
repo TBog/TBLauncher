@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
 import android.view.animation.DecelerateInterpolator;
-import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
@@ -248,6 +247,7 @@ public class RecycleScrollListener extends RecyclerView.OnScrollListener impleme
             } else if ((mListHeight + mScrollAmountY) >= containerHeight) {
 //                if (list instanceof RecyclerList)
 //                    ((RecyclerList) list).blockTouchEvents();
+                setListLayoutHeight(list, mListHeight);
                 hideKeyboardWhileDragging(list);
             }
         }
@@ -263,7 +263,7 @@ public class RecycleScrollListener extends RecyclerView.OnScrollListener impleme
             mResizeInProgress = true;
             handler.hideKeyboard();
 
-            ViewTreeObserver vto = list.getViewTreeObserver();
+            ViewTreeObserver vto = ((View) list.getParent()).getViewTreeObserver();
             vto.addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
                 @Override
                 public boolean onPreDraw() {
@@ -275,7 +275,7 @@ public class RecycleScrollListener extends RecyclerView.OnScrollListener impleme
                         // proceed with the current drawing pass, waiting for the keyboard to close
                         return true;
                     }
-                    ViewTreeObserver vto = list.getViewTreeObserver();
+                    ViewTreeObserver vto = ((View) list.getParent()).getViewTreeObserver();
                     vto.removeOnPreDrawListener(this);
                     if (!mWaitForInsets || mResizeFinished) {
                         Log.d(TAG, "onPreDraw called when mWaitForInsets=" + mWaitForInsets + " mResizeFinished=" + mResizeFinished);
@@ -341,15 +341,15 @@ public class RecycleScrollListener extends RecyclerView.OnScrollListener impleme
         if (mResizeFinished && recyclerView.getScrollState() == RecyclerView.SCROLL_STATE_IDLE) {
             if (recyclerView.getLayoutManager() instanceof RecycleListLayoutManager) {
                 int scrollPosition = ((RecycleListLayoutManager) recyclerView.getLayoutManager()).scrollToLastScrollPosition();
-                RecyclerView.ViewHolder viewHolder = recyclerView.findViewHolderForAdapterPosition(scrollPosition);
-                if (viewHolder != null) {
-                    View text1 = viewHolder.itemView.findViewById(android.R.id.text1);
-                    if (text1 instanceof TextView)
-                        Log.d(TAG, "requestChildFocus: scrollPosition=" + scrollPosition + "(" + ((TextView) text1).getText() + ")");
-                    else
-                        Log.d(TAG, "requestChildFocus: scrollPosition=" + scrollPosition);
-                    //recyclerView.requestChildFocus(viewHolder.itemView, viewHolder.itemView);
-                }
+//                RecyclerView.ViewHolder viewHolder = recyclerView.findViewHolderForAdapterPosition(scrollPosition);
+//                if (viewHolder != null) {
+//                    View text1 = viewHolder.itemView.findViewById(android.R.id.text1);
+//                    if (text1 instanceof TextView)
+//                        Log.d(TAG, "requestChildFocus: scrollPosition=" + scrollPosition + "(" + ((TextView) text1).getText() + ")");
+//                    else
+//                        Log.d(TAG, "requestChildFocus: scrollPosition=" + scrollPosition);
+//                    recyclerView.requestChildFocus(viewHolder.itemView, viewHolder.itemView);
+//                }
             }
 //            if (recyclerView.getLayoutManager() instanceof RecycleListLayoutManager) {
 //                int lastVisible = ((RecycleListLayoutManager) recyclerView.getLayoutManager()).findLastVisibleItemPosition();
