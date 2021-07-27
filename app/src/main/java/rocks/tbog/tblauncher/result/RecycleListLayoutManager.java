@@ -5,7 +5,6 @@ import android.util.AttributeSet;
 import android.util.Log;
 
 import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
 
 public class RecycleListLayoutManager extends LinearLayoutManager {
     private static final String TAG = "RLLM";
@@ -23,7 +22,6 @@ public class RecycleListLayoutManager extends LinearLayoutManager {
     public RecycleListLayoutManager(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
     }
-
 
 
     @Override

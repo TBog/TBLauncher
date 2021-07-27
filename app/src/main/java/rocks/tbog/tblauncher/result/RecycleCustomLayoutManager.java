@@ -36,24 +36,37 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
     private static final int DIRECTION_UP = 2;
     private static final int DIRECTION_DOWN = 3;
 
-    /* First (top-left) position visible at any point */
-    private int mFirstVisiblePosition;
-    /* Consistent size applied to all child views */
-    private int mDecoratedChildWidth;
-    private int mDecoratedChildHeight;
     /* Number of columns that exist in the grid */
     private int mTotalColumnCount = DEFAULT_COUNT;
     /* Metrics for the visible window of our data */
     private int mVisibleColumnCount;
     private int mVisibleRowCount;
 
+    /* First (top-left) position visible at any point */
+    private int mFirstVisiblePosition;
+    /* Consistent size applied to all child views */
+    private int mDecoratedChildWidth;
+    private int mDecoratedChildHeight;
+
     /* Used for starting the layout from the bottom / right */
-    private boolean mStackFromEnd = true;
+    private boolean mFirstAtBottom = true;
+    /* Used for reversing adapter order */
+    private boolean mReverseAdapter = true;
 
     /* Used for tracking off-screen change events */
     private int mFirstChangedPosition;
     private int mChangedPositionCount;
 
+    /**
+     * temporary variable
+     **/
+    private final LayoutInfo mLayoutInfo = new LayoutInfo();
+
+    private static class LayoutInfo {
+        /* Where we start the layout of children */
+        int startX;
+        int startY;
+    }
 
     /**
      * Set the number of columns the layout manager will use. This will
@@ -69,12 +82,21 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
         requestLayout();
     }
 
-    public void setStackFromEnd(boolean stackFromEnd) {
+    public void setFirstAtBottom(boolean firstAtBottom) {
         assertNotInLayoutOrScroll(null);
-        if (mStackFromEnd == stackFromEnd) {
+        if (mFirstAtBottom == firstAtBottom) {
             return;
         }
-        mStackFromEnd = stackFromEnd;
+        mFirstAtBottom = firstAtBottom;
+        requestLayout();
+    }
+
+    public void setReverseAdapter(boolean reverseAdapter) {
+        assertNotInLayoutOrScroll(null);
+        if (mReverseAdapter == reverseAdapter) {
+            return;
+        }
+        mReverseAdapter = reverseAdapter;
         requestLayout();
     }
 
@@ -104,26 +126,34 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
         mChangedPositionCount = itemCount;
     }
 
+    private int getStartHorizontal() {
+        return getPaddingLeft();
+    }
+
+    private int getStartHorizontal(View referenceChild) {
+        return getDecoratedLeft(referenceChild);
+    }
+
+    private int getStartVertical() {
+        return mFirstAtBottom ? getVerticalSpace() - getPaddingBottom() : getPaddingTop();
+    }
+
+    private int getStartVertical(View referenceChild) {
+        return mFirstAtBottom ? getDecoratedBottom(referenceChild) : getDecoratedTop(referenceChild);
+    }
+
     private int getPaddingStartHorizontal() {
         return getPaddingLeft();
     }
 
     private int getPaddingStartVertical() {
-        return mStackFromEnd ? getPaddingBottom() : getPaddingTop();
-    }
-
-    private int getDecoratedStartHorizontal(@NonNull View child) {
-        return getDecoratedLeft(child);
-    }
-
-    private int getDecoratedStartVertical(@NonNull View child) {
-        return mStackFromEnd ? getDecoratedBottom(child) : getDecoratedTop(child);
+        return mFirstAtBottom ? getPaddingBottom() : getPaddingTop();
     }
 
     @Nullable
-    private View getReferenceChild() {
-        int idx = mStackFromEnd ? getChildCount() - 1 : 0;
-        return getChildAt(idx);
+    private View getFirstChild() {
+        //int idx = mFirstAtBottom ? getChildCount() - 1 : 0;
+        return getChildAt(0);
     }
 
     /*
@@ -202,93 +232,18 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
             }
         }
 
-        int childHoriz;
-        int childVert;
-        if (getChildCount() == 0) { //First or empty layout
-            //Reset the visible and scroll positions
-            mFirstVisiblePosition = 0;
-            childHoriz = getPaddingStartHorizontal();
-            childVert = getPaddingStartVertical();
-            Log.d(TAG, "-1- childHoriz=" + childHoriz + " childVert=" + childVert);
-        } else if (!state.isPreLayout() && getVisibleChildCount() >= state.getItemCount()) {
-            //Data set is too small to scroll fully, just reset position
-            mFirstVisiblePosition = 0;
-            childHoriz = getPaddingStartHorizontal();
-            childVert = getPaddingStartVertical();
-            Log.d(TAG, "-2- childHoriz=" + childHoriz + " childVert=" + childVert);
-        } else { //Adapter data set changes
-            /*
-             * Keep the existing initial position, and save off
-             * the current scrolled offset.
-             */
-            final View referenceChild = getReferenceChild();
-            childHoriz = getDecoratedStartHorizontal(referenceChild);
-            childVert = getDecoratedStartVertical(referenceChild);
-            Log.d(TAG, "-3- childHoriz=" + childHoriz + " childVert=" + childVert);
-
-            /*
-             * When data set is too small to scroll vertically, adjust vertical offset
-             * and shift position to the first row, preserving current column
-             */
-            if (!state.isPreLayout() && getVerticalSpace() > (getTotalRowCount() * mDecoratedChildHeight)) {
-                mFirstVisiblePosition = mFirstVisiblePosition % getTotalColumnCount();
-                childVert = getPaddingStartVertical();
-
-                //If the shift overscrolls the column max, back it off
-                if ((mFirstVisiblePosition + mVisibleColumnCount) > state.getItemCount()) {
-                    mFirstVisiblePosition = Math.max(state.getItemCount() - mVisibleColumnCount, 0);
-                    childHoriz = getPaddingStartHorizontal();
-                }
-                Log.d(TAG, "-4- childHoriz=" + childHoriz + " childVert=" + childVert);
-            }
-
-            /*
-             * Adjust the visible position if out of bounds in the
-             * new layout. This occurs when the new item count in an adapter
-             * is much smaller than it was before, and you are scrolled to
-             * a location where no items would exist.
-             */
-            int maxFirstRow = getTotalRowCount() - (mVisibleRowCount - 1);
-            int maxFirstCol = getTotalColumnCount() - (mVisibleColumnCount - 1);
-            boolean isOutOfRowBounds = getFirstVisibleRow() > maxFirstRow;
-            boolean isOutOfColBounds = getFirstVisibleColumn() > maxFirstCol;
-            if (isOutOfRowBounds || isOutOfColBounds) {
-                int firstRow;
-                if (isOutOfRowBounds) {
-                    firstRow = maxFirstRow;
-                } else {
-                    firstRow = getFirstVisibleRow();
-                }
-                int firstCol;
-                if (isOutOfColBounds) {
-                    firstCol = maxFirstCol;
-                } else {
-                    firstCol = getFirstVisibleColumn();
-                }
-                mFirstVisiblePosition = firstRow * getTotalColumnCount() + firstCol;
-
-                childHoriz = getHorizontalSpace() - (mDecoratedChildWidth * mVisibleColumnCount);
-                childVert = getVerticalSpace() - (mDecoratedChildHeight * mVisibleRowCount);
-                Log.d(TAG, "-5- childHoriz=" + childHoriz + " childVert=" + childVert);
-
-                //Correct cases where shifting to the bottom-right overscrolls the top-left
-                // This happens on data sets too small to scroll in a direction.
-                if (getFirstVisibleRow() == 0) {
-                    childVert = Math.min(childVert, getPaddingTop());
-                }
-                if (getFirstVisibleColumn() == 0) {
-                    childHoriz = Math.min(childHoriz, getPaddingLeft());
-                }
-                Log.d(TAG, "-6- childHoriz=" + childHoriz + " childVert=" + childVert);
-            }
-        }
+        final LayoutInfo layoutInfo = computeLayoutInfo(state);
 
         //Clear all attached views into the recycle bin
         detachAndScrapAttachedViews(recycler);
 
-        //Fill the grid for the initial layout of views
-        Log.d(TAG, "initial childHoriz=" + childHoriz + " childVert=" + childVert);
-        fillGrid(DIRECTION_NONE, childHoriz, childVert, recycler, state, removedCache);
+        {
+            //Fill the grid for the initial layout of views
+            int childHoriz = layoutInfo.startX;
+            int childVert = layoutInfo.startY;
+            Log.d(TAG, "initial childHoriz=" + childHoriz + " childVert=" + childVert);
+            fillGrid(DIRECTION_NONE, childHoriz, childVert, recycler, state, removedCache);
+        }
 
         //Evaluate any disappearing views that may exist
         if (!state.isPreLayout() && !recycler.getScrapList().isEmpty()) {
@@ -307,6 +262,103 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
                 layoutDisappearingView(child);
             }
         }
+    }
+
+    private LayoutInfo computeLayoutInfo(RecyclerView.State state) {
+        int childHoriz = getStartHorizontal();
+        int childVert = getStartVertical();
+        if (getChildCount() == 0) { //First or empty layout
+            //Reset the visible and scroll positions
+            mFirstVisiblePosition = 0;
+            Log.d(TAG, "-1- childHoriz=" + childHoriz + " childVert=" + childVert);
+        } else if (!state.isPreLayout() && getVisibleChildCount() >= state.getItemCount()) {
+            //Data set is too small to scroll fully, just reset position
+            mFirstVisiblePosition = 0;
+            Log.d(TAG, "-2- childHoriz=" + childHoriz + " childVert=" + childVert);
+        } else { //Adapter data set changes
+            /*
+             * Keep the existing initial position, and save off
+             * the current scrolled offset.
+             */
+            final View referenceChild = getFirstChild();
+            childHoriz = getStartHorizontal(referenceChild);
+            childVert = getStartVertical(referenceChild);
+            Log.d(TAG, "-3a- childHoriz=" + childHoriz + " childVert=" + childVert);
+
+            /*
+             * When data set is too small to scroll vertically, adjust vertical offset
+             * and shift position to the first row, preserving current column
+             */
+            if (!state.isPreLayout() && getVerticalSpace() > (getTotalRowCount() * mDecoratedChildHeight)) {
+                mFirstVisiblePosition = mFirstVisiblePosition % getTotalColumnCount();
+                childVert = getPaddingStartVertical();
+
+                //If the shift overscrolls the column max, back it off
+                if ((mFirstVisiblePosition + mVisibleColumnCount) > state.getItemCount()) {
+                    mFirstVisiblePosition = Math.max(state.getItemCount() - mVisibleColumnCount, 0);
+                    childHoriz = getPaddingStartHorizontal();
+                }
+                Log.d(TAG, "-3b- childHoriz=" + childHoriz + " childVert=" + childVert);
+            }
+
+            /*
+             * Adjust the visible position if out of bounds in the
+             * new layout. This occurs when the new item count in an adapter
+             * is much smaller than it was before, and you are scrolled to
+             * a location where no items would exist.
+             */
+            if (mFirstAtBottom) {
+                int childBot = getBottomChildIdx();
+                if (childBot == mFirstVisiblePosition) {
+                    View bottomView = getChildAt(childBot);
+                    final int verticalSpace = getVerticalSpace();
+                    if (bottomView.getBottom() < verticalSpace) {
+                        childVert = verticalSpace;
+                        Log.d(TAG, "first is visible - bottom too high");
+                    } else if (bottomView.getTop() > verticalSpace) {
+                        childVert = verticalSpace;
+                        Log.d(TAG, "first is visible - top too low");
+                    }
+                }
+            } else {
+                int maxFirstRow = getTotalRowCount() - (mVisibleRowCount - 1);
+                int maxFirstCol = getTotalColumnCount() - (mVisibleColumnCount - 1);
+                boolean isOutOfRowBounds = getFirstVisibleRow() > maxFirstRow;
+                boolean isOutOfColBounds = getFirstVisibleColumn() > maxFirstCol;
+                if (isOutOfRowBounds || isOutOfColBounds) {
+                    int firstRow;
+                    if (isOutOfRowBounds) {
+                        firstRow = maxFirstRow;
+                    } else {
+                        firstRow = getFirstVisibleRow();
+                    }
+                    int firstCol;
+                    if (isOutOfColBounds) {
+                        firstCol = maxFirstCol;
+                    } else {
+                        firstCol = getFirstVisibleColumn();
+                    }
+                    mFirstVisiblePosition = firstRow * getTotalColumnCount() + firstCol;
+
+                    childHoriz = getHorizontalSpace() - (mDecoratedChildWidth * mVisibleColumnCount);
+                    childVert = getVerticalSpace() - (mDecoratedChildHeight * mVisibleRowCount);
+                    Log.d(TAG, "-3c- childHoriz=" + childHoriz + " childVert=" + childVert);
+
+                    //Correct cases where shifting to the bottom-right overscrolls the top-left
+                    // This happens on data sets too small to scroll in a direction.
+                    if (getFirstVisibleRow() == 0) {
+                        childVert = Math.min(childVert, getPaddingTop());
+                    }
+                    if (getFirstVisibleColumn() == 0) {
+                        childHoriz = Math.min(childHoriz, getPaddingLeft());
+                    }
+                    Log.d(TAG, "-3d- childHoriz=" + childHoriz + " childVert=" + childVert);
+                }
+            }
+        }
+        mLayoutInfo.startX = childHoriz;
+        mLayoutInfo.startY = childVert;
+        return mLayoutInfo;
     }
 
     @Override
@@ -345,8 +397,8 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
     }
 
     private void fillGrid(int direction, RecyclerView.Recycler recycler, RecyclerView.State state) {
-        if (mStackFromEnd)
-            fillGrid(direction, getHorizontalSpace(), getVerticalSpace(), recycler, state, null);
+        if (mFirstAtBottom)
+            fillGrid(direction, 0, getVerticalSpace(), recycler, state, null);
         else
             fillGrid(direction, 0, 0, recycler, state, null);
     }
@@ -387,22 +439,34 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
         int startHorizontalOffset = emptyHorizontal;
         int startVerticalOffset = emptyVertical;
         if (getChildCount() != 0) {
-            final View refView = getReferenceChild();
-            startHorizontalOffset = mStackFromEnd ? getDecoratedRight(refView) : getDecoratedLeft(refView);//getDecoratedStartHorizontal(refView);
-            startVerticalOffset = mStackFromEnd ? getDecoratedBottom(refView) : getDecoratedTop(refView);//getDecoratedStartVertical(refView);
-            switch (direction) {
-                case DIRECTION_START:
-                    startHorizontalOffset -= mDecoratedChildWidth;
-                    break;
-                case DIRECTION_END:
-                    startHorizontalOffset += mDecoratedChildWidth;
-                    break;
-                case DIRECTION_UP:
-                    startVerticalOffset -= mDecoratedChildHeight;
-                    break;
-                case DIRECTION_DOWN:
-                    startVerticalOffset += mDecoratedChildHeight;
-                    break;
+            if (mFirstAtBottom) {
+                final View refView = getFirstChild();
+                switch (direction) {
+                    case DIRECTION_UP: // up
+                        startVerticalOffset = getDecoratedTop(refView);
+                        break;
+                    case DIRECTION_DOWN: // down
+                        startVerticalOffset = getDecoratedBottom(refView) + mDecoratedChildHeight;
+                        break;
+                }
+            } else {
+                final View refView = getFirstChild();
+                startHorizontalOffset = getStartHorizontal(refView);//getDecoratedStartHorizontal(refView);
+                startVerticalOffset = getStartVertical(refView);//getDecoratedStartVertical(refView);
+                switch (direction) {
+                    case DIRECTION_START: // left
+                        startHorizontalOffset -= mDecoratedChildWidth;
+                        break;
+                    case DIRECTION_END: // right
+                        startHorizontalOffset += mDecoratedChildWidth;
+                        break;
+                    case DIRECTION_UP: // up
+                        startVerticalOffset -= mFirstAtBottom ? -mDecoratedChildHeight : mDecoratedChildHeight;
+                        break;
+                    case DIRECTION_DOWN: // down
+                        startVerticalOffset += mFirstAtBottom ? 0 : mDecoratedChildHeight;
+                        break;
+                }
             }
 
             //Cache all views by their existing position, before updating counts
@@ -430,12 +494,20 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
             case DIRECTION_END:
                 mFirstVisiblePosition++;
                 break;
-            case DIRECTION_UP:
-                mFirstVisiblePosition -= getTotalColumnCount();
+            case DIRECTION_UP: {
+                int amount = getTotalColumnCount();
+                if (mFirstAtBottom)
+                    amount = -amount;
+                mFirstVisiblePosition -= amount;
                 break;
-            case DIRECTION_DOWN:
-                mFirstVisiblePosition += getTotalColumnCount();
+            }
+            case DIRECTION_DOWN: {
+                int amount = getTotalColumnCount();
+                if (mFirstAtBottom)
+                    amount = -amount;
+                mFirstVisiblePosition += amount;
                 break;
+            }
         }
 
         /*
@@ -508,15 +580,7 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
                  * this for views we are just re-arranging.
                  */
                 measureChildWithMargins(view, 0, 0);
-                if (mStackFromEnd)
-                    layoutDecorated(view,
-                            leftOffset - mDecoratedChildWidth,
-                            topOffset - mDecoratedChildHeight,
-                            leftOffset, topOffset);
-                else
-                    layoutDecorated(view, leftOffset, topOffset,
-                            leftOffset + mDecoratedChildWidth,
-                            topOffset + mDecoratedChildHeight);
+                layoutChildView(view, leftOffset, topOffset);
                 Log.d(TAG, "child #" + i + " pos=" + nextPosition + " (" + view.getLeft() + " " + view.getTop() + " " + view.getRight() + " " + view.getBottom() + ")");
             } else {
                 //Re-attach the cached view at its new index
@@ -526,8 +590,9 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
             }
 
             if (i % mVisibleColumnCount == (mVisibleColumnCount - 1)) {
+                // next row
                 leftOffset = startHorizontalOffset;
-                if (mStackFromEnd)
+                if (mFirstAtBottom)
                     topOffset -= mDecoratedChildHeight;
                 else
                     topOffset += mDecoratedChildHeight;
@@ -537,11 +602,9 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
                     layoutAppearingViews(recycler, view, nextPosition, removedPositions.size(), offsetPositionDelta);
                 }
             } else {
+                // next column
                 Log.d(TAG, "i=" + i + " mVisibleColumnCount=" + mVisibleColumnCount);
-                if (mStackFromEnd)
-                    leftOffset -= mDecoratedChildWidth;
-                else
-                    leftOffset += mDecoratedChildWidth;
+                leftOffset += mDecoratedChildWidth;
             }
         }
 
@@ -554,6 +617,18 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
             final View removingView = viewCache.valueAt(i);
             recycler.recycleView(removingView);
         }
+    }
+
+    private void layoutChildView(View view, int left, int top) {
+        int leftOffset = left;
+        int topOffset = top;
+        if (mFirstAtBottom) {
+            // align the child using the bottom left corner
+            topOffset -= mDecoratedChildHeight;
+        }
+        layoutDecorated(view, leftOffset, topOffset,
+                leftOffset + mDecoratedChildWidth,
+                topOffset + mDecoratedChildHeight);
     }
 
     /*
@@ -718,23 +793,33 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
             return 0;
         }
 
+        int childTop = mFirstAtBottom ? (getChildCount() - 1) : 0;
+        int childBot = mFirstAtBottom ? 0 : (getChildCount() - 1);
+
+        Log.d(TAG, "dy=" + dy + " scroll top=" + positionOfIndex(childTop) + " (#" + childTop + ") bot=" + positionOfIndex(childBot) + " (#" + childBot + ") lastVisibleRow=" + getLastVisibleRow());
+
         //Take top measurements from the top-left child
-        final View topView = getChildAt(mStackFromEnd ? getChildCount() - 1 : 0);
+        final View topView = getChildAt(childTop);
         //Take bottom measurements from the bottom-right child.
-        final View bottomView = getChildAt(mStackFromEnd ? 0 : getChildCount() - 1);
+        final View bottomView = getChildAt(childBot);
+
+        if (topView == null || bottomView == null)
+            return 0;
 
         //Optimize the case where the entire data set is too small to scroll
         final int viewSpan = getDecoratedBottom(bottomView) - getDecoratedTop(topView);
         if (viewSpan < getVerticalSpace()) {
             //We cannot scroll in either direction
+            Log.d(TAG, "viewSpan=" + viewSpan + " (" + getDecoratedBottom(bottomView) + " - " + getDecoratedTop(topView) + ")");
             return 0;
         }
 
         int delta;
         int maxRowCount = getTotalRowCount();
-        boolean topBoundReached = mStackFromEnd ? getLastVisibleRow() >= maxRowCount : getFirstVisibleRow() == 0;
-        boolean bottomBoundReached = mStackFromEnd ? getFirstVisibleRow() == 0 : getLastVisibleRow() >= maxRowCount;
+        boolean topBoundReached = mFirstAtBottom ? getLastVisibleRow() >= maxRowCount : getFirstVisibleRow() == 0;
+        boolean bottomBoundReached = mFirstAtBottom ? getFirstVisibleRow() == 0 : getLastVisibleRow() >= maxRowCount;
         if (dy > 0) { // Contents are scrolling up
+            int offset = getScrollBottomOffset();
             //Check against bottom bound
             if (bottomBoundReached) {
                 //If we've reached the last row, enforce limits
@@ -750,7 +835,7 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
                      * ensure that at least one element in that row isn't fully recycled.
                      */
                     bottomOffset = getVerticalSpace() - (getDecoratedBottom(bottomView)
-                            + mDecoratedChildHeight) + getPaddingBottom();
+                            + (mFirstAtBottom ? 0 : mDecoratedChildHeight)) + getPaddingBottom();
                 }
 
                 delta = Math.max(-dy, bottomOffset);
@@ -773,13 +858,13 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
 
         if (dy > 0) {
             if (getDecoratedBottom(topView) < 0 && !bottomBoundReached) {
-                fillGrid(mStackFromEnd ? DIRECTION_UP : DIRECTION_DOWN, recycler, state);
+                fillGrid(DIRECTION_DOWN, recycler, state);
             } else if (!bottomBoundReached) {
                 fillGrid(DIRECTION_NONE, recycler, state);
             }
         } else {
             if (getDecoratedTop(topView) > 0 && !topBoundReached) {
-                fillGrid(mStackFromEnd ? DIRECTION_DOWN : DIRECTION_UP, recycler, state);
+                fillGrid(DIRECTION_UP, recycler, state);
             } else if (!topBoundReached) {
                 fillGrid(DIRECTION_NONE, recycler, state);
             }
@@ -792,6 +877,49 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
          * an edge effect.
          */
         return -delta;
+    }
+
+    private View getTopChild() {
+        int childTop = mFirstAtBottom ? (getChildCount() - 1) : 0;
+        return getChildAt(childTop);
+    }
+
+    private int getBottomChildIdx() {
+        return mFirstAtBottom ? 0 : (getChildCount() - 1);
+    }
+
+    private View getBottomChild() {
+        int childBot = getBottomChildIdx();
+        return getChildAt(childBot);
+    }
+
+    private int getScrollBottomOffset() {
+        int maxRowCount = getTotalRowCount();
+        boolean bottomBoundReached = mFirstAtBottom ? getFirstVisibleRow() == 0 : getLastVisibleRow() >= maxRowCount;
+        if (bottomBoundReached) {
+            final View bottomView = getBottomChild();
+            //If we've reached the last row, enforce limits
+            int bottomOffset;
+            if (rowOfIndex(getChildCount() - 1) >= (maxRowCount - 1)) {
+                //We are truly at the bottom, determine how far
+                bottomOffset = getVerticalSpace() - getDecoratedBottom(bottomView)
+                        + getPaddingBottom();
+            } else {
+                /*
+                 * Extra space added to account for allowing bottom space in the grid.
+                 * This occurs when the overlap in the last row is not large enough to
+                 * ensure that at least one element in that row isn't fully recycled.
+                 */
+                bottomOffset = getVerticalSpace() - (getDecoratedBottom(bottomView)
+                        + (mFirstAtBottom ? 0 : mDecoratedChildHeight)) + getPaddingBottom();
+            }
+            return bottomOffset;
+//            delta = Math.max(-dy, bottomOffset);
+        } else {
+            //No limits while the last row isn't visible
+//            delta = -dy;
+        }
+        return 0;
     }
 
     /*
@@ -899,9 +1027,9 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
 
             //Find layout delta from reference position
             final int newRow = getGlobalRowOfPosition(extraPosition + offset);
-            final int rowDelta = newRow - getGlobalRowOfPosition(referencePosition + offset);
+            final int rowDelta = newRow - getGlobalRowOfPosition(extraPosition);
             final int newCol = getGlobalColumnOfPosition(extraPosition + offset);
-            final int colDelta = newCol - getGlobalColumnOfPosition(referencePosition + offset);
+            final int colDelta = newCol - getGlobalColumnOfPosition(extraPosition);
 
             layoutTempChildView(appearing, rowDelta, colDelta, referenceView);
         }
@@ -934,14 +1062,7 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
         int layoutLeft = getDecoratedLeft(referenceView) + colDelta * mDecoratedChildWidth;
 
         measureChildWithMargins(child, 0, 0);
-        if (mStackFromEnd)
-            layoutDecorated(child, layoutLeft - mDecoratedChildWidth,
-                    layoutTop - mDecoratedChildHeight,
-                    layoutLeft, layoutTop);
-        else
-            layoutDecorated(child, layoutLeft, layoutTop,
-                    layoutLeft + mDecoratedChildWidth,
-                    layoutTop + mDecoratedChildHeight);
+        layoutChildView(child, layoutLeft, layoutTop);
     }
 
     /**
@@ -950,15 +1071,11 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
 
     /* Return the overall column index of this position in the global layout */
     private int getGlobalColumnOfPosition(int position) {
-//        if (mStackFromEnd)
-//            return (getItemCount() - 1 - position) % mTotalColumnCount;
         return position % mTotalColumnCount;
     }
 
     /* Return the overall row index of this position in the global layout */
     private int getGlobalRowOfPosition(int position) {
-//        if (mStackFromEnd)
-//            return (getItemCount() - 1 - position) / mTotalColumnCount;
         return position / mTotalColumnCount;
     }
 
@@ -967,12 +1084,12 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
      * positions helps fill the proper views during scrolling.
      */
     private int positionOfIndex(int childIndex) {
-        //int idx = mStackFromEnd ? getItemCount() - 1 - childIndex : childIndex;
+        int idx = mReverseAdapter ? getItemCount() - 1 - childIndex : childIndex;
 
-        int row = childIndex / mVisibleColumnCount;
-        int column = childIndex % mVisibleColumnCount;
+        int row = idx / mVisibleColumnCount;
+        int column = idx % mVisibleColumnCount;
 
-        return mFirstVisiblePosition + (row * getTotalColumnCount()) + column;
+        return (row * getTotalColumnCount()) + column + (mReverseAdapter ? -mFirstVisiblePosition : mFirstVisiblePosition);
     }
 
     private int rowOfIndex(int childIndex) {
