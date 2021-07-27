@@ -20,7 +20,7 @@ import rocks.tbog.tblauncher.ui.RecyclerList;
 import rocks.tbog.tblauncher.ui.WindowInsetsHelper;
 import rocks.tbog.tblauncher.utils.DebugInfo;
 
-public class RecycleScrollListener extends RecyclerView.OnScrollListener implements View.OnLayoutChangeListener {
+public class RecycleScrollListener extends RecyclerView.OnScrollListener {
     private static final String TAG = "RScrL";
     private final KeyboardHandler handler;
     private int mScrollAmountY = 0;
@@ -214,7 +214,6 @@ public class RecycleScrollListener extends RecyclerView.OnScrollListener impleme
                                     list.setBackgroundColor(0x00000000);
                                 list.unblockTouchEvents();
 //                                list.scrollToLastPosition();
-                                //list.stopScroll();
                                 break;
                             case MotionEvent.ACTION_MOVE: {
                                 int newHeight = Math.min(mListHeight + mScrollAmountY, containerHeight);
@@ -238,6 +237,8 @@ public class RecycleScrollListener extends RecyclerView.OnScrollListener impleme
                                 }
                                 break;
                             }
+                            default:
+                                break;
                         }
                         return false;
                     });
@@ -330,47 +331,6 @@ public class RecycleScrollListener extends RecyclerView.OnScrollListener impleme
             params.height = height;
             list.setLayoutParams(params);
             list.forceLayout();
-        }
-    }
-
-    @Override
-    public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
-        if (!(v instanceof RecyclerList))
-            return;
-        final RecyclerList recyclerView = (RecyclerList) v;
-        if (mResizeFinished && recyclerView.getScrollState() == RecyclerView.SCROLL_STATE_IDLE) {
-            if (recyclerView.getLayoutManager() instanceof RecycleListLayoutManager) {
-                int scrollPosition = ((RecycleListLayoutManager) recyclerView.getLayoutManager()).scrollToLastScrollPosition();
-//                RecyclerView.ViewHolder viewHolder = recyclerView.findViewHolderForAdapterPosition(scrollPosition);
-//                if (viewHolder != null) {
-//                    View text1 = viewHolder.itemView.findViewById(android.R.id.text1);
-//                    if (text1 instanceof TextView)
-//                        Log.d(TAG, "requestChildFocus: scrollPosition=" + scrollPosition + "(" + ((TextView) text1).getText() + ")");
-//                    else
-//                        Log.d(TAG, "requestChildFocus: scrollPosition=" + scrollPosition);
-//                    recyclerView.requestChildFocus(viewHolder.itemView, viewHolder.itemView);
-//                }
-            }
-//            if (recyclerView.getLayoutManager() instanceof RecycleListLayoutManager) {
-//                int lastVisible = ((RecycleListLayoutManager) recyclerView.getLayoutManager()).findLastVisibleItemPosition();
-//                int itemCount = recyclerView.getAdapter() != null ? recyclerView.getAdapter().getItemCount() : 0;
-//
-//                final int range = recyclerView.computeVerticalScrollRange();
-//                final int extent = recyclerView.computeVerticalScrollExtent();
-//                final int offset = recyclerView.computeVerticalScrollOffset();
-//                Log.d(TAG, "onLayoutChange: lastVisible=" + (lastVisible + 1) + "/" + itemCount + " range=" + range + " extent=" + extent + " offset=" + offset);
-//
-//                if (lastVisible < (itemCount - 1)) {
-//                    Log.d(TAG, "onLayoutChange: resetLastScrollPosition");
-//                    ((RecycleListLayoutManager) recyclerView.getLayoutManager()).resetLastScrollPosition();
-//                    mScrollAmountY = range - extent - offset;
-//                } else {
-////                    Log.i(TAG, "onScrolled: scrollToLastPosition");
-////                    recyclerView.scrollToLastPosition();
-//                    mScrollAmountY = 0;
-//                }
-//                Log.i(TAG, "onLayoutChange: scrollY=" + mScrollAmountY);
-//            }
         }
     }
 }

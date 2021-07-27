@@ -64,8 +64,8 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
 
     private static class LayoutInfo {
         /* Where we start the layout of children */
-        int startX;
-        int startY;
+        private int startX;
+        private int startY;
     }
 
     /**
@@ -414,8 +414,9 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
                 return "start";
             case DIRECTION_END:
                 return "end";
+            default:
+                return String.valueOf(direction);
         }
-        return String.valueOf(direction);
     }
 
     private void fillGrid(int direction, int emptyHorizontal, int emptyVertical,
@@ -439,8 +440,8 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
         int startHorizontalOffset = emptyHorizontal;
         int startVerticalOffset = emptyVertical;
         if (getChildCount() != 0) {
+            final View refView = getFirstChild();
             if (mFirstAtBottom) {
-                final View refView = getFirstChild();
                 switch (direction) {
                     case DIRECTION_UP: // up
                         startVerticalOffset = getDecoratedTop(refView);
@@ -448,9 +449,10 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
                     case DIRECTION_DOWN: // down
                         startVerticalOffset = getDecoratedBottom(refView) + mDecoratedChildHeight;
                         break;
+                    default:
+                        break;
                 }
             } else {
-                final View refView = getFirstChild();
                 startHorizontalOffset = getStartHorizontal(refView);//getDecoratedStartHorizontal(refView);
                 startVerticalOffset = getStartVertical(refView);//getDecoratedStartVertical(refView);
                 switch (direction) {
@@ -465,6 +467,8 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
                         break;
                     case DIRECTION_DOWN: // down
                         startVerticalOffset += mFirstAtBottom ? 0 : mDecoratedChildHeight;
+                        break;
+                    default:
                         break;
                 }
             }
@@ -508,6 +512,8 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
                 mFirstVisiblePosition += amount;
                 break;
             }
+            default:
+                break;
         }
 
         /*
@@ -793,8 +799,8 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
             return 0;
         }
 
-        int childTop = mFirstAtBottom ? (getChildCount() - 1) : 0;
-        int childBot = mFirstAtBottom ? 0 : (getChildCount() - 1);
+        int childTop = getTopChildIdx();
+        int childBot = getBottomChildIdx();
 
         Log.d(TAG, "dy=" + dy + " scroll top=" + positionOfIndex(childTop) + " (#" + childTop + ") bot=" + positionOfIndex(childBot) + " (#" + childBot + ") lastVisibleRow=" + getLastVisibleRow());
 
@@ -819,7 +825,6 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
         boolean topBoundReached = mFirstAtBottom ? getLastVisibleRow() >= maxRowCount : getFirstVisibleRow() == 0;
         boolean bottomBoundReached = mFirstAtBottom ? getFirstVisibleRow() == 0 : getLastVisibleRow() >= maxRowCount;
         if (dy > 0) { // Contents are scrolling up
-            int offset = getScrollBottomOffset();
             //Check against bottom bound
             if (bottomBoundReached) {
                 //If we've reached the last row, enforce limits
@@ -879,47 +884,12 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
         return -delta;
     }
 
-    private View getTopChild() {
-        int childTop = mFirstAtBottom ? (getChildCount() - 1) : 0;
-        return getChildAt(childTop);
+    private int getTopChildIdx() {
+        return mFirstAtBottom ? (getChildCount() - 1) : 0;
     }
 
     private int getBottomChildIdx() {
         return mFirstAtBottom ? 0 : (getChildCount() - 1);
-    }
-
-    private View getBottomChild() {
-        int childBot = getBottomChildIdx();
-        return getChildAt(childBot);
-    }
-
-    private int getScrollBottomOffset() {
-        int maxRowCount = getTotalRowCount();
-        boolean bottomBoundReached = mFirstAtBottom ? getFirstVisibleRow() == 0 : getLastVisibleRow() >= maxRowCount;
-        if (bottomBoundReached) {
-            final View bottomView = getBottomChild();
-            //If we've reached the last row, enforce limits
-            int bottomOffset;
-            if (rowOfIndex(getChildCount() - 1) >= (maxRowCount - 1)) {
-                //We are truly at the bottom, determine how far
-                bottomOffset = getVerticalSpace() - getDecoratedBottom(bottomView)
-                        + getPaddingBottom();
-            } else {
-                /*
-                 * Extra space added to account for allowing bottom space in the grid.
-                 * This occurs when the overlap in the last row is not large enough to
-                 * ensure that at least one element in that row isn't fully recycled.
-                 */
-                bottomOffset = getVerticalSpace() - (getDecoratedBottom(bottomView)
-                        + (mFirstAtBottom ? 0 : mDecoratedChildHeight)) + getPaddingBottom();
-            }
-            return bottomOffset;
-//            delta = Math.max(-dy, bottomOffset);
-        } else {
-            //No limits while the last row isn't visible
-//            delta = -dy;
-        }
-        return 0;
     }
 
     /*

@@ -812,6 +812,7 @@ public class Behaviour implements ISearchActivity {
 
     @Override
     public void updateAdapter(List<? extends EntryItem> results, boolean isRefresh) {
+        Log.d(TAG, "updateAdapter " + results.size() + " result(s); isRefresh=" + isRefresh);
         if (isRefresh) {
             // We're refreshing an existing dataset, do not reset scroll!
             temporarilyDisableTranscriptMode();
@@ -1284,7 +1285,7 @@ public class Behaviour implements ISearchActivity {
         }
 
         LauncherState.Desktop desktop = TBApplication.state().getDesktop();
-        showDesktop(desktop);
+        //showDesktop(desktop);
         if (desktop != null) {
             switch (desktop) {
                 case SEARCH:
