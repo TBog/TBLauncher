@@ -93,6 +93,7 @@ public abstract class DialogFragment<Output> extends androidx.fragment.app.Dialo
                     mOnNegativeClickListener.onButtonClick(this, button);
                 break;
             case NEUTRAL:
+            default:
                 if (mOnNeutralClickListener != null)
                     mOnNeutralClickListener.onButtonClick(this, button);
                 break;
