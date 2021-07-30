@@ -2,26 +2,30 @@ package rocks.tbog.tblauncher.result;
 
 import android.content.Context;
 import android.graphics.PointF;
+import android.os.Parcel;
+import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
 
-import org.jetbrains.annotations.NotNull;
-
 import java.util.HashSet;
 import java.util.List;
 
-public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
+import rocks.tbog.tblauncher.R;
 
-    private static final String TAG = "RCLM";
+public class GridAlignRecycleLayoutManager extends RecyclerView.LayoutManager {
+
+    private static final String TAG = "GaLM";
+    private static final boolean DEBUG = true;
 
     private static final int DEFAULT_COUNT = 1;
 
@@ -57,15 +61,67 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
     private int mFirstChangedPosition;
     private int mChangedPositionCount;
 
+    private SavedState mPendingSavedState = null;
+
     /**
      * temporary variable
      **/
-    private final LayoutInfo mLayoutInfo = new LayoutInfo();
+    // Reusable int array to be passed to method calls that mutate it in order to "return" two ints.
+    // This should only be used used transiently and should not be used to retain any state over
+    // time.
+    private final int[] mReusableIntPair = new int[2];
 
-    private static class LayoutInfo {
-        /* Where we start the layout of children */
-        private int startX;
-        private int startY;
+    public static class SavedState implements Parcelable {
+
+        private int mFirstVisiblePosition;
+        private int mFirstVisibleOffset;
+        private boolean mFirstAtBottom;
+        private boolean mReverseAdapter;
+
+        public SavedState() {
+
+        }
+
+        SavedState(Parcel in) {
+            mFirstVisiblePosition = in.readInt();
+            mFirstAtBottom = in.readInt() == 1;
+            mReverseAdapter = in.readInt() == 1;
+        }
+
+        public SavedState(SavedState other) {
+            mFirstVisiblePosition = other.mFirstVisiblePosition;
+            mFirstAtBottom = other.mFirstAtBottom;
+            mReverseAdapter = other.mReverseAdapter;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel dest, int flags) {
+            dest.writeInt(mFirstVisiblePosition);
+            dest.writeInt(mFirstAtBottom ? 1 : 0);
+            dest.writeInt(mReverseAdapter ? 1 : 0);
+        }
+
+        public static final Parcelable.Creator<SavedState> CREATOR =
+                new Parcelable.Creator<SavedState>() {
+                    @Override
+                    public SavedState createFromParcel(Parcel in) {
+                        return new SavedState(in);
+                    }
+
+                    @Override
+                    public SavedState[] newArray(int size) {
+                        return new SavedState[size];
+                    }
+                };
+    }
+
+    public static class StateExtraInfo {
+        public boolean layoutWhileScrolling = false;
     }
 
     /**
@@ -121,7 +177,7 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
      * happen AFTER pre-layout.
      */
     @Override
-    public void onItemsRemoved(@NotNull RecyclerView recyclerView, int positionStart, int itemCount) {
+    public void onItemsRemoved(@NonNull RecyclerView recyclerView, int positionStart, int itemCount) {
         mFirstChangedPosition = positionStart;
         mChangedPositionCount = itemCount;
     }
@@ -181,6 +237,15 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
             return;
         }
 
+        final StateExtraInfo extraInfo = extraStateInfo(state);
+        extraInfo.layoutWhileScrolling = false;
+
+        if (mPendingSavedState != null) {
+            mFirstVisiblePosition = mPendingSavedState.mFirstVisiblePosition;
+            mFirstAtBottom = mPendingSavedState.mFirstAtBottom;
+            mReverseAdapter = mPendingSavedState.mReverseAdapter;
+        }
+
         //Clear change tracking state when a real layout occurs
         if (!state.isPreLayout()) {
             mFirstChangedPosition = mChangedPositionCount = 0;
@@ -232,15 +297,18 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
             }
         }
 
-        final LayoutInfo layoutInfo = computeLayoutInfo(state);
+        int childHoriz, childVert;
+        {
+            final int[] layoutInfo = computeLayoutInfo(state);
+            childHoriz = layoutInfo[0];
+            childVert = layoutInfo[1];
+        }
 
         //Clear all attached views into the recycle bin
         detachAndScrapAttachedViews(recycler);
 
         {
             //Fill the grid for the initial layout of views
-            int childHoriz = layoutInfo.startX;
-            int childVert = layoutInfo.startY;
             Log.d(TAG, "initial childHoriz=" + childHoriz + " childVert=" + childVert);
             fillGrid(DIRECTION_NONE, childHoriz, childVert, recycler, state, removedCache);
         }
@@ -264,7 +332,13 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
         }
     }
 
-    private LayoutInfo computeLayoutInfo(RecyclerView.State state) {
+    @Override
+    public void onLayoutCompleted(RecyclerView.State state) {
+        super.onLayoutCompleted(state);
+        mPendingSavedState = null; // we don't need this anymore
+    }
+
+    private int[] computeLayoutInfo(RecyclerView.State state) {
         int childHoriz = getStartHorizontal();
         int childVert = getStartVertical();
         if (getChildCount() == 0) { //First or empty layout
@@ -276,6 +350,7 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
             mFirstVisiblePosition = 0;
             Log.d(TAG, "-2- childHoriz=" + childHoriz + " childVert=" + childVert);
         } else { //Adapter data set changes
+            final StateExtraInfo extraInfo = extraStateInfo(state);
             /*
              * Keep the existing initial position, and save off
              * the current scrolled offset.
@@ -314,10 +389,27 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
                     final int verticalSpace = getVerticalSpace();
                     if (bottomView.getBottom() < verticalSpace) {
                         childVert = verticalSpace;
-                        Log.d(TAG, "first is visible - bottom too high");
+                        Log.d(TAG, "reset first visible - bottom too high");
                     } else if (bottomView.getTop() > verticalSpace) {
                         childVert = verticalSpace;
-                        Log.d(TAG, "first is visible - top too low");
+                        Log.d(TAG, "reset first visible - top too low");
+                    }
+                } else {
+                    for (int i = 0; i < getChildCount(); i += 1) {
+                        View child = getChildAt(i);
+                        if (child == null)
+                            continue;
+                        if (isViewPartiallyVisible(child, false, false)) {
+                            mFirstVisiblePosition = adapterIndex(child);
+                            childVert = child.getBottom();
+                            Log.d(TAG, "reset first visible to child #" + i + " pos=" + mFirstVisiblePosition + " (partially visible)");
+                            break;
+                        } else if (isViewPartiallyVisible(child, true, false)) {
+                            mFirstVisiblePosition = adapterIndex(child);
+                            childVert = child.getBottom();
+                            Log.d(TAG, "reset first visible to child #" + i + " pos=" + mFirstVisiblePosition + " (fully visible)");
+                            break;
+                        }
                     }
                 }
             } else {
@@ -356,9 +448,9 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
                 }
             }
         }
-        mLayoutInfo.startX = childHoriz;
-        mLayoutInfo.startY = childVert;
-        return mLayoutInfo;
+        mReusableIntPair[0] = childHoriz;
+        mReusableIntPair[1] = childVert;
+        return mReusableIntPair;
     }
 
     @Override
@@ -367,14 +459,45 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
         removeAllViews();
     }
 
+    @Override
+    public Parcelable onSaveInstanceState() {
+        if (mPendingSavedState != null) {
+            return new SavedState(mPendingSavedState);
+        }
+        SavedState state = new SavedState();
+        state.mFirstVisiblePosition = mFirstVisiblePosition;
+        View firstVisibleView = findViewByPosition(mFirstVisiblePosition);
+        if (firstVisibleView == null)
+            state.mFirstVisibleOffset = 0;
+        else
+            state.mFirstVisibleOffset = mFirstAtBottom ? firstVisibleView.getBottom() - getVerticalSpace() : firstVisibleView.getTop();
+        state.mFirstAtBottom = mFirstAtBottom;
+        state.mReverseAdapter = mReverseAdapter;
+        return state;
+    }
+
+    @Override
+    public void onRestoreInstanceState(Parcelable state) {
+        if (state instanceof SavedState) {
+            mPendingSavedState = (SavedState) state;
+            requestLayout();
+            if (DEBUG) {
+                Log.d(TAG, "loaded saved state");
+            }
+        } else if (DEBUG) {
+            Log.d(TAG, "invalid saved state class");
+        }
+    }
+
     /*
      * Rather than continuously checking how many views we can fit
      * based on scroll offsets, we simplify the math by computing the
      * visible grid as what will initially fit on screen, plus one.
      */
     private void updateWindowSizing() {
-        mVisibleColumnCount = (getHorizontalSpace() / mDecoratedChildWidth) + 1;
-        if (getHorizontalSpace() % mDecoratedChildWidth > 0) {
+        int horizontalSpace = getHorizontalSpace();
+        mVisibleColumnCount = (horizontalSpace / mDecoratedChildWidth) + 1;
+        if (horizontalSpace % mDecoratedChildWidth > 0) {
             mVisibleColumnCount++;
         }
 
@@ -383,9 +506,9 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
             mVisibleColumnCount = getTotalColumnCount();
         }
 
-
-        mVisibleRowCount = (getVerticalSpace() / mDecoratedChildHeight) + 1;
-        if (getVerticalSpace() % mDecoratedChildHeight > 0) {
+        int verticalSpace = getVerticalSpace();
+        mVisibleRowCount = (verticalSpace / mDecoratedChildHeight) + 1;
+        if (verticalSpace % mDecoratedChildHeight > 0) {
             mVisibleRowCount++;
         }
 
@@ -393,7 +516,8 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
             mVisibleRowCount = getTotalRowCount();
         }
 
-        Log.i(TAG, "mVisibleRowCount=" + mVisibleRowCount + " mVisibleColumnCount=" + mVisibleColumnCount);
+        Log.i(TAG, "verticalSpace=" + verticalSpace + " mVisibleRowCount=" + mVisibleRowCount +
+                " horizontalSpace=" + horizontalSpace + " mVisibleColumnCount=" + mVisibleColumnCount);
     }
 
     private void fillGrid(int direction, RecyclerView.Recycler recycler, RecyclerView.State state) {
@@ -426,7 +550,9 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
         Log.d(TAG, "fillGrid " + directionToString(direction) +
                 " h=" + emptyHorizontal +
                 " v=" + emptyVertical +
-                " preLayout=" + state.isPreLayout());
+                " preLayout=" + state.isPreLayout() +
+                " mFirstVisiblePosition=" + mFirstVisiblePosition +
+                " " + state);
 
         if (mFirstVisiblePosition < 0) mFirstVisiblePosition = 0;
         if (mFirstVisiblePosition >= getItemCount()) mFirstVisiblePosition = (getItemCount() - 1);
@@ -475,8 +601,10 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
 
             //Cache all views by their existing position, before updating counts
             for (int i = 0; i < getChildCount(); i++) {
-                int position = positionOfIndex(i);
                 final View child = getChildAt(i);
+                if (child == null)
+                    continue;
+                int position = positionOfIndex(i);
                 viewCache.put(position, child);
             }
 
@@ -525,7 +653,8 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
         int leftOffset = startHorizontalOffset;
         int topOffset = startVerticalOffset;
         Log.d(TAG, "leftOffset=" + leftOffset + " topOffset=" + topOffset +
-                " mDecoratedChildWidth=" + mDecoratedChildWidth + " mDecoratedChildHeight=" + mDecoratedChildHeight);
+                " childWidth=" + mDecoratedChildWidth + " childHeight=" + mDecoratedChildHeight +
+                " mFirstVisiblePosition=" + mFirstVisiblePosition);
 
         for (int i = 0; i < getVisibleChildCount(); i++) {
             int nextPosition = positionOfIndex(i);
@@ -587,12 +716,12 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
                  */
                 measureChildWithMargins(view, 0, 0);
                 layoutChildView(view, leftOffset, topOffset);
-                Log.d(TAG, "child #" + i + " pos=" + nextPosition + " (" + view.getLeft() + " " + view.getTop() + " " + view.getRight() + " " + view.getBottom() + ")");
+                Log.d(TAG, "child #" + i + " pos=" + nextPosition + " (" + view.getLeft() + " " + view.getTop() + " " + view.getRight() + " " + view.getBottom() + ") " + getDebugName(view));
             } else {
                 //Re-attach the cached view at its new index
                 attachView(view);
                 viewCache.remove(nextPosition);
-                Log.d(TAG, "child #" + i + " pos=" + nextPosition + " (" + view.getLeft() + " " + view.getTop() + " " + view.getRight() + " " + view.getBottom() + ") re-attach");
+                Log.d(TAG, "child #" + i + " pos=" + nextPosition + " (" + view.getLeft() + " " + view.getTop() + " " + view.getRight() + " " + view.getBottom() + ") re-attach " + getDebugName(view));
             }
 
             if (i % mVisibleColumnCount == (mVisibleColumnCount - 1)) {
@@ -623,6 +752,29 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
             final View removingView = viewCache.valueAt(i);
             recycler.recycleView(removingView);
         }
+    }
+
+    private static String getDebugName(View v) {
+        View name;
+        name = v.findViewById(R.id.item_app_name);
+        if (name instanceof TextView) {
+            CharSequence text = ((TextView) name).getText();
+            if (text != null && text.length() > 0)
+                return text.toString();
+        }
+        name = v.findViewById(R.id.item_contact_name);
+        if (name instanceof TextView) {
+            CharSequence text = ((TextView) name).getText();
+            if (text != null && text.length() > 0)
+                return text.toString();
+        }
+        name = v.findViewById(android.R.id.text1);
+        if (name instanceof TextView) {
+            CharSequence text = ((TextView) name).getText();
+            if (text != null && text.length() > 0)
+                return text.toString();
+        }
+        return "";
     }
 
     private void layoutChildView(View view, int left, int top) {
@@ -813,12 +965,16 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
             return 0;
 
         //Optimize the case where the entire data set is too small to scroll
-        final int viewSpan = getDecoratedBottom(bottomView) - getDecoratedTop(topView);
+        final int viewSpan = getTotalRowCount() * mDecoratedChildHeight;//getDecoratedBottom(bottomView) - getDecoratedTop(topView);
         if (viewSpan < getVerticalSpace()) {
             //We cannot scroll in either direction
-            Log.d(TAG, "viewSpan=" + viewSpan + " (" + getDecoratedBottom(bottomView) + " - " + getDecoratedTop(topView) + ")");
+//            Log.d(TAG, "viewSpan=" + viewSpan + " (" + getDecoratedBottom(bottomView) + " - " + getDecoratedTop(topView) + ")");
+            Log.d(TAG, "viewSpan=" + viewSpan + " = (" + getTotalRowCount() + " * " + mDecoratedChildHeight + ")");
             return 0;
         }
+
+        final StateExtraInfo extraInfo = extraStateInfo(state);
+        extraInfo.layoutWhileScrolling = true;
 
         int delta;
         int maxRowCount = getTotalRowCount();
@@ -882,6 +1038,14 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
          * an edge effect.
          */
         return -delta;
+    }
+
+    @NonNull
+    private StateExtraInfo extraStateInfo(RecyclerView.State state) {
+        StateExtraInfo info = state.get(R.id.resultLayout);
+        if (info == null)
+            state.put(R.id.resultLayout, info = new StateExtraInfo());
+        return info;
     }
 
     private int getTopChildIdx() {
@@ -1060,6 +1224,11 @@ public class RecycleCustomLayoutManager extends RecyclerView.LayoutManager {
         int column = idx % mVisibleColumnCount;
 
         return (row * getTotalColumnCount()) + column + (mReverseAdapter ? -mFirstVisiblePosition : mFirstVisiblePosition);
+    }
+
+    private int adapterIndex(@NonNull View child) {
+        int adapterPos = ((LayoutParams) child.getLayoutParams()).getViewAdapterPosition();
+        return mReverseAdapter ? getItemCount() - 1 - adapterPos : adapterPos;
     }
 
     private int rowOfIndex(int childIndex) {
