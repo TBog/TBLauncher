@@ -53,8 +53,8 @@ import rocks.tbog.tblauncher.entry.EntryWithTags;
 import rocks.tbog.tblauncher.entry.ShortcutEntry;
 import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.quicklist.EditQuickListDialog;
+import rocks.tbog.tblauncher.result.CustomRecycleLayoutManager;
 import rocks.tbog.tblauncher.result.RecycleAdapter;
-import rocks.tbog.tblauncher.result.GridAlignRecycleLayoutManager;
 import rocks.tbog.tblauncher.result.RecycleListLayoutManager;
 import rocks.tbog.tblauncher.result.RecycleScrollListener;
 import rocks.tbog.tblauncher.result.ResultHelper;
@@ -187,17 +187,21 @@ public class Behaviour implements ISearchActivity {
     }
 
     private void initResultLayout() {
+        mResultList = mResultLayout.findViewById(R.id.resultList);
+        if (mResultList == null)
+            throw new IllegalStateException("mResultList==null");
+
         RecyclerView.LayoutManager layoutManager;
         RecycleScrollListener recycleScrollListener;
         if (mPref.getBoolean("result-custom-layout", false)) {
-            layoutManager = new GridAlignRecycleLayoutManager();
+            layoutManager = new CustomRecycleLayoutManager();
+            mResultList.setPadding(0, 100, 0, 10);
         } else {
             layoutManager = new RecycleListLayoutManager(getContext());
         }
         recycleScrollListener = new RecycleScrollListener(mKeyboardHandler);
 
         mResultAdapter = new RecycleAdapter(new ArrayList<>());
-        mResultList = mResultLayout.findViewById(R.id.resultList);
 
         mResultList.setHasFixedSize(true);
         mResultList.setLayoutManager(layoutManager);
