@@ -195,7 +195,6 @@ public class Behaviour implements ISearchActivity {
         RecycleScrollListener recycleScrollListener;
         if (mPref.getBoolean("result-custom-layout", false)) {
             layoutManager = new CustomRecycleLayoutManager();
-            mResultList.setPadding(0, 100, 0, 10);
         } else {
             layoutManager = new RecycleListLayoutManager(getContext());
         }
