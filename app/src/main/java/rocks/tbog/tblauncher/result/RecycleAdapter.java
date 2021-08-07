@@ -155,10 +155,17 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
     }
 
     public void removeResult(EntryItem result) {
+        int position = results.indexOf(result);
         results.remove(result);
         if (resultsOriginal != null)
             resultsOriginal.remove(result);
-        notifyDataSetChanged();
+        //notifyDataSetChanged();
+        notifyItemRemoved(position);
+    }
+
+    public void notifyItemChanged(EntryItem result) {
+        int position = results.indexOf(result);
+        notifyItemChanged(position);
     }
 
     public Filter getFilter() {

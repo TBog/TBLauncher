@@ -918,7 +918,11 @@ public class Behaviour implements ISearchActivity {
     public void refreshSearchRecords() {
         if (mResultList == null)
             return;
-        mResultList.post(() -> mResultList.refreshViews());
+        mResultList.post(() -> mResultAdapter.notifyDataSetChanged());
+    }
+
+    public void refreshSearchRecord(EntryItem entry) {
+        mResultAdapter.notifyItemChanged(entry);
     }
 
     /**
@@ -1105,7 +1109,7 @@ public class Behaviour implements ISearchActivity {
             else
                 TBApplication.getApplication(mTBLauncherActivity).iconsHandler().changeIcon(appEntry, drawable);
             // force a result refresh to update the icon in the view
-            refreshSearchRecords();
+            refreshSearchRecord(appEntry);
             TBApplication.quickList(mTBLauncherActivity).onFavoritesChanged();
         });
         dialog.show(mTBLauncherActivity.getSupportFragmentManager(), DIALOG_CUSTOM_ICON);
@@ -1142,7 +1146,7 @@ public class Behaviour implements ISearchActivity {
                 app.iconsHandler().changeIcon(shortcutEntry, drawable);
             }
             // force a result refresh to update the icon in the view
-            refreshSearchRecords();
+            refreshSearchRecord(shortcutEntry);
             TBApplication.quickList(mTBLauncherActivity).onFavoritesChanged();
         });
         dialog.show(mTBLauncherActivity.getSupportFragmentManager(), DIALOG_CUSTOM_ICON);
@@ -1173,7 +1177,7 @@ public class Behaviour implements ISearchActivity {
             else
                 TBApplication.getApplication(mTBLauncherActivity).iconsHandler().changeIcon(staticEntry, drawable);
             // force a result refresh to update the icon in the view
-            refreshSearchRecords();
+            refreshSearchRecord(staticEntry);
             TBApplication.quickList(mTBLauncherActivity).onFavoritesChanged();
         });
         dialog.show(mTBLauncherActivity.getSupportFragmentManager(), DIALOG_CUSTOM_ICON);
@@ -1224,7 +1228,7 @@ public class Behaviour implements ISearchActivity {
 
         dialog.setOnConfirmListener(newTags -> {
             TBApplication.tagsHandler(mTBLauncherActivity).setTags(entry, newTags);
-            refreshSearchRecords();
+            refreshSearchRecord(entry);
         });
 
         dialog.show(mTBLauncherActivity.getSupportFragmentManager(), "dialog_edit_tags");

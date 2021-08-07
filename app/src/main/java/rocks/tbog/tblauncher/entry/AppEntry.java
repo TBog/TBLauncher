@@ -388,14 +388,14 @@ public final class AppEntry extends EntryWithTags {
             case R.string.menu_hide:
                 if (TBApplication.dataHandler(ctx).addToHidden(this)) {
                     setHiddenByUser(true);
-                    TBApplication.behaviour(ctx).refreshSearchRecords();
+                    TBApplication.behaviour(ctx).refreshSearchRecord(this);
                     //Toast.makeText(ctx, "App "+getName()+" hidden from search", Toast.LENGTH_LONG).show();
                 }
                 break;
             case R.string.menu_show:
                 if (TBApplication.dataHandler(ctx).removeFromHidden(this)) {
                     setHiddenByUser(false);
-                    TBApplication.behaviour(ctx).refreshSearchRecords();
+                    TBApplication.behaviour(ctx).refreshSearchRecord(this);
                     //Toast.makeText(ctx, "App "+getName()+" shown in searches", Toast.LENGTH_LONG).show();
                 }
                 break;
