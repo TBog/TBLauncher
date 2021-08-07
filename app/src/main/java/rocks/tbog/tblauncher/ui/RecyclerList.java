@@ -99,8 +99,4 @@ public class RecyclerList extends RecyclerView {
                 }
             });
     }
-
-    public void refreshViews() {
-        //TODO: implement this
-    }
 }

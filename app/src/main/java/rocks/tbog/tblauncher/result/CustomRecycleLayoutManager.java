@@ -10,12 +10,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
+import rocks.tbog.tblauncher.BuildConfig;
 import rocks.tbog.tblauncher.R;
 
 public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager {
 
     private static final String TAG = "CRLM";
-    private static final Boolean DEBUG = false;
+    private static final Boolean LOG_DEBUG = BuildConfig.DEBUG;
 
     /* First position visible at any point (adapter index) */
     private int mFirstVisiblePosition;
@@ -100,9 +101,9 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager {
         return new RecyclerView.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
     }
 
-    private int getHorizontalSpace() {
-        return getWidth() - getPaddingRight() - getPaddingLeft();
-    }
+//    private int getHorizontalSpace() {
+//        return getWidth() - getPaddingRight() - getPaddingLeft();
+//    }
 
     private int getVerticalSpace() {
         return getHeight() - getPaddingBottom() - getPaddingTop();
@@ -240,7 +241,6 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager {
             child = getChildAt(i);
             if (child == null)
                 throw new IllegalStateException("null child when count=" + getChildCount() + " and idx=" + i);
-            //if (((RecyclerView.LayoutParams)child.getLayoutParams()).viewNeedsUpdate())
             int position = adapterPosition(child);
             mViewCache.put(position, child);
             logDebug("info #" + i + " pos=" + position + " " + getDebugInfo(child) + " " + getDebugName(child));
@@ -251,15 +251,22 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager {
 
         if (mRefreshViews) {
             logDebug("detachAndScrapAttachedViews");
+            // If we want to refresh all views, just scrap them and let the recycler rebind them
             mRefreshViews = false;
             mViewCache.clear();
             detachAndScrapAttachedViews(recycler);
         } else {
             logDebug("detachViews");
-            //Temporarily detach all views.
-            // Views we still need will be added back with the proper child index.
+            // Temporarily detach all views. We do this to easily reorder them.
             for (int i = 0; i < mViewCache.size(); i++) {
-                detachView(mViewCache.valueAt(i));
+                child = mViewCache.valueAt(i);
+                // When an update is in order, scrap the view and let the recycler rebind it
+                if (viewNeedsUpdate(child)) {
+                    detachAndScrapView(child, recycler);
+                    mViewCache.removeAt(i--);
+                } else {
+                    detachView(child);
+                }
             }
         }
 
@@ -281,25 +288,20 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager {
             child = mViewCache.get(adapterPos);
             if (child == null) {
                 /*
-                 * The Recycler will give us either a newly constructed view,
-                 * or a recycled view it has on-hand. In either case, the
-                 * view will already be fully bound to the data by the
-                 * adapter for us.
+                 * The Recycler will give us either a newly constructed view or a recycled view it has on-hand.
+                 * In either case, the view will already be fully bound to the data by the adapter for us.
                  */
                 child = recycler.getViewForPosition(adapterPos);
                 addView(child);
                 /*
-                 * It is prudent to measure/layout each new view we
-                 * receive from the Recycler. We don't have to do
-                 * this for views we are just re-arranging.
+                 * It is prudent to measure/layout each new view we receive from the Recycler.
+                 * We don't have to do this for views we are just re-arranging.
                  */
                 measureChildWithMargins(child, 0, 0);
                 layoutChildView(child, posX, topPos);
                 logDebug("child #" + childIdx + " pos=" + adapterPos + " (" + child.getLeft() + " " + child.getTop() + " " + child.getRight() + " " + child.getBottom() + ") delta=" + (prevTop - child.getTop()) + " " + getDebugInfo(child) + " " + getDebugName(child));
             } else {
-                //((RecyclerView.LayoutParams)child.getLayoutParams()).viewNeedsUpdate()
                 attachView(child);
-                //child.setTop(topOffset);
                 logDebug("cache #" + childIdx + " pos=" + adapterPos + " (" + child.getLeft() + " " + child.getTop() + " " + child.getRight() + " " + child.getBottom() + ") delta=" + (prevTop - child.getTop()) + " top=" + topPos + " " + getDebugInfo(child) + " " + getDebugName(child));
                 mViewCache.remove(adapterPos);
             }
@@ -548,6 +550,11 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager {
         return -1;
     }
 
+    private static boolean viewNeedsUpdate(View v) {
+        RecyclerView.LayoutParams p = (RecyclerView.LayoutParams) v.getLayoutParams();
+        return p.viewNeedsUpdate();
+    }
+
     private static String getDebugName(View v) {
         View name;
         name = v.findViewById(R.id.item_app_name);
@@ -586,7 +593,7 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager {
     }
 
     private static void logDebug(String message) {
-        if (DEBUG)
+        if (LOG_DEBUG)
             Log.d(TAG, message);
     }
 }
