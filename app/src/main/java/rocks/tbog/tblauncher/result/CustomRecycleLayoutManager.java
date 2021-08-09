@@ -36,6 +36,24 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager {
     // Reusable array. This should only be used used transiently and should not be used to retain any state over time.
     private SparseArray<View> mViewCache = null;
 
+    public void setFirstAtBottom(boolean firstAtBottom) {
+        assertNotInLayoutOrScroll(null);
+        if (mFirstAtBottom == firstAtBottom) {
+            return;
+        }
+        mFirstAtBottom = firstAtBottom;
+        requestLayout();
+    }
+
+    public void setReverseAdapter(boolean reverseAdapter) {
+        assertNotInLayoutOrScroll(null);
+        if (mReverseAdapter == reverseAdapter) {
+            return;
+        }
+        mReverseAdapter = reverseAdapter;
+        requestLayout();
+    }
+
     /*
      * You must return true from this method if you want your
      * LayoutManager to support anything beyond "simple" item
@@ -60,8 +78,6 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager {
     public void onItemsRemoved(@NonNull RecyclerView recyclerView, int positionStart, int itemCount) {
         logDebug("onItemsRemoved start=" + positionStart + " count=" + itemCount);
         mRefreshViews = true;
-//        mFirstChangedPosition = positionStart;
-//        mChangedPositionCount = itemCount;
     }
 
     /**
@@ -100,10 +116,6 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager {
     public RecyclerView.LayoutParams generateDefaultLayoutParams() {
         return new RecyclerView.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
     }
-
-//    private int getHorizontalSpace() {
-//        return getWidth() - getPaddingRight() - getPaddingLeft();
-//    }
 
     private int getVerticalSpace() {
         return getHeight() - getPaddingBottom() - getPaddingTop();
@@ -207,7 +219,7 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager {
      *
      * @return top value for first visible
      */
-    private int getFirstVisibleTop() {
+    private int smartGetFirstVisibleTop() {
         if (mViewCache.size() > 0) {
             int missing = 0;
             for (int i = 0; i < mVisibleCount; i += 1) {
@@ -247,7 +259,7 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager {
         }
 
         // compute start position after we populate `mViewCache`
-        final int firstTopPos = getFirstVisibleTop();
+        final int firstTopPos = smartGetFirstVisibleTop();
 
         if (mRefreshViews) {
             logDebug("detachAndScrapAttachedViews");
@@ -270,6 +282,7 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager {
             }
         }
 
+        final int nextTopPosDelta = mFirstAtBottom ? -mDecoratedChildHeight : mDecoratedChildHeight;
         int prevTop = posY;
         int childIdx = 0;
 
@@ -282,7 +295,7 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager {
                 continue;
             }
 
-            int topPos = firstTopPos + childIdx * (mFirstAtBottom ? -mDecoratedChildHeight : mDecoratedChildHeight);
+            int topPos = firstTopPos + childIdx * nextTopPosDelta;
 
             //Layout this position
             child = mViewCache.get(adapterPos);
@@ -404,15 +417,6 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager {
     }
 
     /**
-     * When the extra view becomes visible while scrolling `mFirstVisiblePosition` gets changed
-     *
-     * @return child that triggers the adding of a new view while scrolling
-     */
-    private View getExtraView() {
-        return getChildAt(getChildCount() - 1);
-    }
-
-    /**
      * First (or last) item from the adapter that can be displayed at the top of the list
      *
      * @return index from adapter
@@ -491,47 +495,8 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager {
         offsetChildrenVertical(-amount);
 
         // check if we need to layout after the scroll
-        {
-            View child = getExtraView();
-            int adapterPosition = adapterPosition(child);
-            // check top
-            if (adapterPosition != ((mFirstAtBottom ^ mReverseAdapter) ? 0 : getItemCount())) {
-                final boolean extraVisible;
-                if (mFirstAtBottom) {
-                    extraVisible = getDecoratedTop(child) > 0;
-                } else {
-                    extraVisible = getDecoratedBottom(child) < getHeight();
-                }
-                if (extraVisible) {
-                    int oldValue = mFirstVisiblePosition;
-                    int newValue = mFirstAtBottom ? aboveAdapterItemIdx(mFirstVisiblePosition) : belowAdapterItemIdx(mFirstVisiblePosition);
-                    newValue = Math.max(Math.min(newValue, getItemCount() - 1), 0);
-                    logDebug("mFirstVisiblePosition changed from " + oldValue + " to " + newValue + " " + getDebugName(child) + " top=" + getDecoratedTop(child) + " bottom=" + getDecoratedBottom(child));
-                    mFirstVisiblePosition = newValue;
-                    layoutChildren(recycler);
-                }
-            }
-
-            child = getChildAt(0);
-            adapterPosition = adapterPosition(child);
-            // check bottom
-            if (adapterPosition != ((mFirstAtBottom ^ mReverseAdapter) ? getItemCount() : 0)) {
-                final boolean extraVisible;
-                if (mFirstAtBottom) {
-                    extraVisible = getDecoratedBottom(child) < getHeight();
-                } else {
-                    extraVisible = getDecoratedTop(child) > 0;
-                }
-                if (extraVisible) {
-                    int oldValue = mFirstVisiblePosition;
-                    int newValue = mFirstAtBottom ? belowAdapterItemIdx(mFirstVisiblePosition) : aboveAdapterItemIdx(mFirstVisiblePosition);
-                    newValue = Math.max(Math.min(newValue, getItemCount() - 1), 0);
-                    logDebug("mFirstVisiblePosition changed from " + oldValue + " to " + newValue + " " + getDebugName(child) + " top=" + getDecoratedTop(child) + " bottom=" + getDecoratedBottom(child));
-                    mFirstVisiblePosition = newValue;
-                    layoutChildren(recycler);
-                }
-            }
-        }
+        checkVisibilityAfterScroll(recycler, true);
+        checkVisibilityAfterScroll(recycler, false);
 
         /*
          * Return value determines if a boundary has been reached
@@ -542,12 +507,45 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager {
         return amount;
     }
 
-    private int indexOfChild(View child) {
-        for (int i = 0; i < getChildCount(); i += 1) {
-            if (child == getChildAt(i))
-                return i;
+    private void checkVisibilityAfterScroll(RecyclerView.Recycler recycler, boolean checkTop) {
+        View child = checkTop ? getTopView() : getBottomView();
+        int adapterPosition = adapterPosition(child);
+        int top = getDecoratedTop(child);
+        int newFirstVisible = mFirstVisiblePosition;
+        while (needsVisibilityChange(adapterPosition, top, checkTop)) {
+            if (checkTop) {
+                adapterPosition = aboveAdapterItemIdx(adapterPosition);
+                newFirstVisible = aboveAdapterItemIdx(newFirstVisible);
+                top -= mDecoratedChildHeight;
+            } else {
+                adapterPosition = belowAdapterItemIdx(adapterPosition);
+                newFirstVisible = belowAdapterItemIdx(newFirstVisible);
+                top += mDecoratedChildHeight;
+            }
         }
-        return -1;
+        changeFirstVisible(recycler, newFirstVisible);
+    }
+
+    /**
+     * @param adapterPosition needed to stop checking if adapter start or end reached
+     * @param top             child decorated top
+     * @param checkTop        `bound` is the top position or the bottom
+     * @return if we need to change `mFirstVisiblePosition`
+     */
+    private boolean needsVisibilityChange(int adapterPosition, int top, boolean checkTop) {
+        if (adapterPosition <= 0 || adapterPosition >= (getItemCount() - 1))
+            return false;
+        return checkTop ? (top > 0) : ((top + mDecoratedChildHeight) < getHeight());
+    }
+
+    private void changeFirstVisible(RecyclerView.Recycler recycler, int newValue) {
+        int oldValue = mFirstVisiblePosition;
+        newValue = Math.max(Math.min(newValue, getItemCount() - 1), 0);
+        if (oldValue != newValue) {
+            logDebug("mFirstVisiblePosition changed from " + oldValue + " to " + newValue);// + " " + getDebugName(child) + " top=" + getDecoratedTop(child) + " bottom=" + getDecoratedBottom(child));
+            mFirstVisiblePosition = newValue;
+            layoutChildren(recycler);
+        }
     }
 
     private static boolean viewNeedsUpdate(View v) {
