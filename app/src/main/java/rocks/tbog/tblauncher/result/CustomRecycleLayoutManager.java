@@ -54,6 +54,30 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager {
         requestLayout();
     }
 
+    @Override
+    public int computeVerticalScrollExtent(@NonNull RecyclerView.State state) {
+        if (getChildCount() == 0)
+            return 0;
+        View topView = getVisibleTopView();
+        View botView = getVisibleBottomView();
+        return botView.getTop() - topView.getBottom();
+    }
+
+    @Override
+    public int computeVerticalScrollOffset(@NonNull RecyclerView.State state) {
+        if (getChildCount() <= 1)
+            return 0;
+        View topView = getVisibleTopView();
+        int hiddenCount = Math.abs(topAdapterItemIdx() - adapterPosition(topView));
+        return -topView.getTop() + hiddenCount * mDecoratedChildHeight;
+    }
+
+    @Override
+    public int computeVerticalScrollRange(@NonNull RecyclerView.State state) {
+        return mDecoratedChildHeight * state.getItemCount();
+    }
+
+
     /*
      * You must return true from this method if you want your
      * LayoutManager to support anything beyond "simple" item
@@ -402,6 +426,24 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager {
         return child;
     }
 
+    @NonNull
+    private View getVisibleTopView() {
+        final int childCount = getChildCount();
+        int topChildIdx = mFirstAtBottom ? (childCount - 1) : 0;
+        View child = getChildAt(topChildIdx);
+        if (child == null)
+            throw new IllegalStateException("null child when count=" + childCount + " and topChildIdx=" + topChildIdx);
+        while (child.getBottom() < 0) {
+            topChildIdx += mFirstAtBottom ? -1 : 1;
+            if (topChildIdx < 0 || topChildIdx >= childCount)
+                return child;
+            child = getChildAt(topChildIdx);
+            if (child == null)
+                throw new IllegalStateException("null child when count=" + childCount + " and topChildIdx=" + topChildIdx);
+        }
+        return child;
+    }
+
     /**
      * Return bottom child view on screen (may not be visible)
      *
@@ -413,6 +455,24 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager {
         View child = getChildAt(bottomChildIdx);
         if (child == null)
             throw new IllegalStateException("null child when count=" + getChildCount() + " and bottomChildIdx=" + bottomChildIdx);
+        return child;
+    }
+
+    @NonNull
+    private View getVisibleBottomView() {
+        final int childCount = getChildCount();
+        int botChildIdx = mFirstAtBottom ? 0 : (childCount - 1);
+        View child = getChildAt(botChildIdx);
+        if (child == null)
+            throw new IllegalStateException("null child when count=" + childCount + " and bottomChildIdx=" + botChildIdx);
+        while (child.getTop() > getHeight()) {
+            botChildIdx += mFirstAtBottom ? 1 : -1;
+            if (botChildIdx < 0 || botChildIdx >= childCount)
+                return child;
+            child = getChildAt(botChildIdx);
+            if (child == null)
+                throw new IllegalStateException("null child when count=" + childCount + " and bottomChildIdx=" + botChildIdx);
+        }
         return child;
     }
 
