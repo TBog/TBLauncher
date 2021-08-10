@@ -61,7 +61,7 @@ public class RecyclerList extends RecyclerView {
     }
 
     public void setTranscriptMode(int mode) {
-        //super.setTranscriptMode(mode);
+        // no need, this was useful for the ListView
     }
 
     public void prepareChangeAnim() {
@@ -71,5 +71,6 @@ public class RecyclerList extends RecyclerView {
     }
 
     public void animateChange() {
+        // no need, the RecyclerView takes care of it
     }
 }

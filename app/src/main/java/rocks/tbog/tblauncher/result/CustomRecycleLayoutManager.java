@@ -278,15 +278,7 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager {
         else
             mViewCache.clear();
 
-        //Cache all views by their existing position, before updating counts
-        for (int i = 0; i < getChildCount(); i++) {
-            child = getChildAt(i);
-            if (child == null)
-                throw new IllegalStateException("null child when count=" + getChildCount() + " and idx=" + i);
-            int position = adapterPosition(child);
-            mViewCache.put(position, child);
-            logDebug("info #" + i + " pos=" + position + " " + getDebugInfo(child) + " " + getDebugName(child));
-        }
+        cacheChildren();
 
         // compute start position after we populate `mViewCache`
         final int firstTopPos = smartGetFirstVisibleTop();
@@ -313,7 +305,6 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager {
         }
 
         final int nextTopPosDelta = mFirstAtBottom ? -mDecoratedChildHeight : mDecoratedChildHeight;
-        int prevTop = posY;
         int childIdx = 0;
 
         // layout
@@ -325,30 +316,10 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager {
                 continue;
             }
 
-            int topPos = firstTopPos + childIdx * nextTopPosDelta;
+            final int topPos = firstTopPos + childIdx * nextTopPosDelta;
 
             //Layout this position
-            child = mViewCache.get(adapterPos);
-            if (child == null) {
-                /*
-                 * The Recycler will give us either a newly constructed view or a recycled view it has on-hand.
-                 * In either case, the view will already be fully bound to the data by the adapter for us.
-                 */
-                child = recycler.getViewForPosition(adapterPos);
-                addView(child);
-                /*
-                 * It is prudent to measure/layout each new view we receive from the Recycler.
-                 * We don't have to do this for views we are just re-arranging.
-                 */
-                measureChildWithMargins(child, 0, 0);
-                layoutChildView(child, posX, topPos);
-                logDebug("child #" + childIdx + " pos=" + adapterPos + " (" + child.getLeft() + " " + child.getTop() + " " + child.getRight() + " " + child.getBottom() + ") delta=" + (prevTop - child.getTop()) + " " + getDebugInfo(child) + " " + getDebugName(child));
-            } else {
-                attachView(child);
-                logDebug("cache #" + childIdx + " pos=" + adapterPos + " (" + child.getLeft() + " " + child.getTop() + " " + child.getRight() + " " + child.getBottom() + ") delta=" + (prevTop - child.getTop()) + " top=" + topPos + " " + getDebugInfo(child) + " " + getDebugName(child));
-                mViewCache.remove(adapterPos);
-            }
-            prevTop = child.getTop();
+            child = layoutAdapterPos(recycler, adapterPos, posX, topPos);
 
             childIdx += 1;
             if (childIdx == mVisibleCount) {
@@ -360,23 +331,73 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager {
             }
         }
 
-        /*
-         * Finally, we ask the Recycler to scrap and store any views
-         * that we did not re-attach. These are views that are not currently
-         * necessary because they are no longer visible.
-         */
-        for (int i = 0; i < mViewCache.size(); i++) {
-            final View removingView = mViewCache.valueAt(i);
-            logDebug("recycleView pos=" + mViewCache.keyAt(i) + " " + getDebugName(removingView));
-            recycler.recycleView(removingView);
+        clearViewCache(recycler);
+    }
+
+    /**
+     * Cache all views by their existing position
+     */
+    private void cacheChildren() {
+        for (int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
+            if (child == null)
+                throw new IllegalStateException("null child when count=" + getChildCount() + " and idx=" + i);
+            int position = adapterPosition(child);
+            mViewCache.put(position, child);
+            logDebug("info #" + i + " pos=" + position + " " + getDebugInfo(child) + " " + getDebugName(child));
         }
-        mViewCache.clear();
+    }
+
+    /**
+     * Layout view from cache or recycler
+     *
+     * @param recycler   the recycler
+     * @param adapterPos adapter index
+     * @param leftPos    layout position X
+     * @param topPos     layout position Y
+     * @return child view
+     */
+    private View layoutAdapterPos(RecyclerView.Recycler recycler, int adapterPos, int leftPos, int topPos) {
+        View child = mViewCache.get(adapterPos);
+        if (child == null) {
+            /*
+             * The Recycler will give us either a newly constructed view or a recycled view it has on-hand.
+             * In either case, the view will already be fully bound to the data by the adapter for us.
+             */
+            child = recycler.getViewForPosition(adapterPos);
+            addView(child);
+            /*
+             * It is prudent to measure/layout each new view we receive from the Recycler.
+             * We don't have to do this for views we are just re-arranging.
+             */
+            measureChildWithMargins(child, 0, 0);
+            layoutChildView(child, leftPos, topPos);
+            logDebug("child #" + indexOfChild(child) + " pos=" + adapterPos + " (" + child.getLeft() + " " + child.getTop() + " " + child.getRight() + " " + child.getBottom() + ") " + getDebugInfo(child) + " " + getDebugName(child));
+        } else {
+            attachView(child);
+            logDebug("cache #" + indexOfChild(child) + " pos=" + adapterPos + " (" + child.getLeft() + " " + child.getTop() + " " + child.getRight() + " " + child.getBottom() + ") top=" + topPos + " " + getDebugInfo(child) + " " + getDebugName(child));
+            mViewCache.remove(adapterPos);
+        }
+        return child;
     }
 
     private void layoutChildView(View view, int left, int top) {
         layoutDecorated(view, left, top,
                 left + mDecoratedChildWidth,
                 top + mDecoratedChildHeight);
+    }
+
+    /**
+     * We ask the Recycler to scrap and store any views that we did not re-attach.
+     * These are views that are not currently necessary because they are no longer visible.
+     */
+    private void clearViewCache(RecyclerView.Recycler recycler) {
+        for (int i = 0; i < mViewCache.size(); i++) {
+            final View removingView = mViewCache.valueAt(i);
+            logDebug("recycleView pos=" + mViewCache.keyAt(i) + " " + getDebugName(removingView));
+            recycler.recycleView(removingView);
+        }
+        mViewCache.clear();
     }
 
     /*
@@ -405,6 +426,14 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager {
     public boolean canScrollVertically() {
         //We do allow scrolling
         return mDecoratedChildHeight * mVisibleCount > getVerticalSpace();
+    }
+
+    private int indexOfChild(View child) {
+        for (int idx = getChildCount() - 1; idx >= 0; idx -= 1) {
+            if (getChildAt(idx) == child)
+                return idx;
+        }
+        return -1;
     }
 
     private int adapterPosition(@NonNull View child) {
@@ -605,11 +634,11 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager {
         return checkTop ? (top > 0) : ((top + mDecoratedChildHeight) < getHeight());
     }
 
-    private void changeFirstVisible(RecyclerView.Recycler recycler, int newValue) {
+    private void changeFirstVisible(RecyclerView.Recycler recycler, int value) {
         int oldValue = mFirstVisiblePosition;
-        newValue = Math.max(Math.min(newValue, getItemCount() - 1), 0);
+        int newValue = Math.max(Math.min(value, getItemCount() - 1), 0);
         if (oldValue != newValue) {
-            logDebug("mFirstVisiblePosition changed from " + oldValue + " to " + newValue);// + " " + getDebugName(child) + " top=" + getDecoratedTop(child) + " bottom=" + getDecoratedBottom(child));
+            logDebug("mFirstVisiblePosition changed from " + oldValue + " to " + newValue);
             mFirstVisiblePosition = newValue;
             layoutChildren(recycler);
         }
