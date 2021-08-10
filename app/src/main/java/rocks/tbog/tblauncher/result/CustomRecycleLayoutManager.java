@@ -73,7 +73,7 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager {
     public int computeVerticalScrollOffset(@NonNull RecyclerView.State state) {
         if (getChildCount() <= 1)
             return 0;
-        View view = getVisibleBottomView();
+        View view = findBottomVisibleItemView();
         int aboveCount = Math.abs(topAdapterItemIdx() - adapterPosition(view));
         return getPaddingTop() - view.getBottom() + (aboveCount + 1) * mDecoratedChildHeight;
     }
@@ -447,7 +447,7 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager {
     }
 
     @NonNull
-    private View getVisibleBottomView() {
+    private View findBottomVisibleItemView() {
         final int childCount = getChildCount();
         int botChildIdx = mFirstAtBottom ? 0 : (childCount - 1);
         View child = getChildAt(botChildIdx);
@@ -462,6 +462,25 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager {
                 throw new IllegalStateException("null child when count=" + childCount + " and bottomChildIdx=" + botChildIdx);
         }
         return child;
+    }
+
+    public int findLastVisibleItemPosition() {
+        final int childCount = getChildCount();
+        int botChildIdx = mFirstAtBottom ? 0 : (childCount - 1);
+        if (botChildIdx < 0 || botChildIdx >= childCount)
+            return -1;
+        View child = getChildAt(botChildIdx);
+        if (child == null)
+            throw new IllegalStateException("null child when count=" + childCount + " and bottomChildIdx=" + botChildIdx);
+        while (child.getTop() > getHeight()) {
+            botChildIdx += mFirstAtBottom ? 1 : -1;
+            if (botChildIdx < 0 || botChildIdx >= childCount)
+                return adapterPosition(child);
+            child = getChildAt(botChildIdx);
+            if (child == null)
+                throw new IllegalStateException("null child when count=" + childCount + " and bottomChildIdx=" + botChildIdx);
+        }
+        return adapterPosition(child);
     }
 
     /**

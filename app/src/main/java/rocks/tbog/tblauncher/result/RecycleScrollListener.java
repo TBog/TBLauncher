@@ -40,8 +40,8 @@ public class RecycleScrollListener extends RecyclerView.OnScrollListener {
     @Override
     public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
         if (mHideKeyboardThreshold == -1) {
-            if (recyclerView.getLayoutManager() instanceof RecycleListLayoutManager) {
-                final int lastItem = ((RecycleListLayoutManager) recyclerView.getLayoutManager()).findLastVisibleItemPosition();
+            if (recyclerView.getLayoutManager() instanceof CustomRecycleLayoutManager) {
+                final int lastItem = ((CustomRecycleLayoutManager) recyclerView.getLayoutManager()).findLastVisibleItemPosition();
                 RecyclerView.ViewHolder vh = recyclerView.findViewHolderForAdapterPosition(lastItem);
                 int lastItemHeight = vh != null ? vh.itemView.getHeight() : 0;
                 if (lastItemHeight == 0)
@@ -68,21 +68,16 @@ public class RecycleScrollListener extends RecyclerView.OnScrollListener {
             if (!WindowInsetsHelper.isKeyboardVisible(recyclerView))
                 handleResizeDone(recyclerView);
         } else if (newState == RecyclerView.SCROLL_STATE_IDLE) {
-            if (recyclerView.getLayoutManager() instanceof RecycleListLayoutManager) {
-                int lastVisible = ((RecycleListLayoutManager) recyclerView.getLayoutManager()).findLastVisibleItemPosition();
+            if (recyclerView.getLayoutManager() instanceof CustomRecycleLayoutManager) {
+                int lastVisible = ((CustomRecycleLayoutManager) recyclerView.getLayoutManager()).findLastVisibleItemPosition();
                 int itemCount = recyclerView.getAdapter() != null ? recyclerView.getAdapter().getItemCount() : 0;
                 if (lastVisible < (itemCount - 1)) {
-                    //Log.d(TAG, "resetLastScrollPosition");
-                    ((RecycleListLayoutManager) recyclerView.getLayoutManager()).resetLastScrollPosition(lastVisible);
-
                     final int range = recyclerView.computeVerticalScrollRange();
                     final int extent = recyclerView.computeVerticalScrollExtent();
                     final int offset = recyclerView.computeVerticalScrollOffset();
                     Log.d(TAG, "lastVisible=" + (lastVisible + 1) + "/" + itemCount + " range=" + range + " extent=" + extent + " offset=" + offset);
                     mScrollAmountY = range - extent - offset;
                 } else {
-//                    Log.i(TAG, "onScrolled: scrollToLastPosition");
-//                    recyclerView.scrollToLastPosition();
                     mScrollAmountY = 0;
                 }
                 Log.i(TAG, "scrollY=" + mScrollAmountY);
@@ -154,12 +149,6 @@ public class RecycleScrollListener extends RecyclerView.OnScrollListener {
             return;
         final RecyclerList list = (RecyclerList) recyclerView;
         int state = list.getScrollState();
-//        if (state == RecyclerView.SCROLL_STATE_IDLE && dx == 0 && dy == 0) {
-//            // list got updated
-//            mScrollAmountY = 0;
-//            Log.i(TAG, "onScrolled: scrollToLastPosition");
-//            list.scrollToLastPosition();
-//        }
         if (mResizeFinished || state == RecyclerView.SCROLL_STATE_IDLE)
             return;
 
@@ -213,14 +202,11 @@ public class RecycleScrollListener extends RecyclerView.OnScrollListener {
                                 if (DebugInfo.keyboardScrollHiderTouch(list.getContext()))
                                     list.setBackgroundColor(0x00000000);
                                 list.unblockTouchEvents();
-//                                list.scrollToLastPosition();
                                 break;
                             case MotionEvent.ACTION_MOVE: {
                                 int newHeight = Math.min(mListHeight + mScrollAmountY, containerHeight);
                                 setListLayoutHeight(list, newHeight);
                                 if (newHeight == containerHeight) {
-//                                    if (list.getLayoutManager() instanceof RecycleListLayoutManager)
-//                                        ((RecycleListLayoutManager) list.getLayoutManager()).scrollToLastPosition();
                                     handleResizeDone(list);
                                     // after the resize finished, set scroll
                                     ViewTreeObserver vto = list.getViewTreeObserver();
@@ -246,8 +232,6 @@ public class RecycleScrollListener extends RecyclerView.OnScrollListener {
                     setListLayoutHeight(list, height);
                 }
             } else if ((mListHeight + mScrollAmountY) >= containerHeight) {
-//                if (list instanceof RecyclerList)
-//                    ((RecyclerList) list).blockTouchEvents();
                 setListLayoutHeight(list, mListHeight);
                 hideKeyboardWhileDragging(list);
             }

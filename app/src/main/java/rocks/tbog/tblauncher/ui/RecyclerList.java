@@ -10,8 +10,6 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 
-import rocks.tbog.tblauncher.result.RecycleListLayoutManager;
-
 public class RecyclerList extends RecyclerView {
     private static final String TAG = "list";
     private boolean touchEventsBlocked = false;
@@ -28,13 +26,6 @@ public class RecyclerList extends RecyclerView {
         super(context, attrs, defStyleAttr);
     }
 
-    @Override
-    protected void onLayout(boolean changed, int l, int t, int r, int b) {
-        if (getLayoutManager() instanceof RecycleListLayoutManager)
-            ((RecycleListLayoutManager) getLayoutManager()).onBeforeLayout();
-        super.onLayout(changed, l, t, r, b);
-    }
-
     /**
      * Prevent this ListView from receiving any new touch events
      * <p>
@@ -43,16 +34,6 @@ public class RecyclerList extends RecyclerView {
     public void blockTouchEvents() {
         this.touchEventsBlocked = true;
     }
-
-//    @Override
-//    public void onScrolled(int dx, int dy) {
-//        super.onScrolled(dx, dy);
-//    }
-//
-//    @Override
-//    public void onScrollStateChanged(int state) {
-//        super.onScrollStateChanged(state);
-//    }
 
     /**
      * Stop preventing this ListView from receiving touch events
@@ -90,13 +71,5 @@ public class RecyclerList extends RecyclerView {
     }
 
     public void animateChange() {
-        ItemAnimator itemAnimator = getItemAnimator();
-        if (itemAnimator != null)
-            itemAnimator.isRunning(() -> {
-                LayoutManager layoutManager = getLayoutManager();
-                if (layoutManager instanceof RecycleListLayoutManager) {
-                    ((RecycleListLayoutManager) layoutManager).onItemAnimationsFinished();
-                }
-            });
     }
 }
