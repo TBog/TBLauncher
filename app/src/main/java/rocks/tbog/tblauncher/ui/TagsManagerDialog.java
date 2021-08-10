@@ -1,10 +1,10 @@
 package rocks.tbog.tblauncher.ui;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -24,12 +24,18 @@ public class TagsManagerDialog extends DialogFragment<Void> {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        Context context = requireDialog().getContext();
+
+        Bundle args = getArguments() != null ? getArguments() : new Bundle();
+        if (!isStateSaved()) {
+            args.putCharSequence("btnPositiveText", context.getText(android.R.string.ok));
+            args.putCharSequence("btnNegativeText", context.getText(android.R.string.cancel));
+            setArguments(args);
+        }
+
         // make sure we use the dialog context
-        inflater = inflater.cloneInContext(requireDialog().getContext());
-        View root = super.onCreateView(inflater, container, savedInstanceState);
-        assert root != null;
-        root.findViewById(R.id.ok_cancel_button_bar).setVisibility(View.VISIBLE);
-        return root;
+        inflater = inflater.cloneInContext(context);
+        return super.onCreateView(inflater, container, savedInstanceState);
     }
 
     @Override
@@ -37,21 +43,10 @@ public class TagsManagerDialog extends DialogFragment<Void> {
         super.onViewCreated(view, savedInstanceState);
         mManager.bindView(view);
 
-        // OK button
-        {
-            View button = view.findViewById(android.R.id.button1);
-            button.setOnClickListener(v -> {
-                mManager.applyChanges(requireContext());
-                onConfirm(null);
-                dismiss();
-            });
-        }
-
-        // CANCEL button
-        {
-            View button = view.findViewById(android.R.id.button2);
-            button.setOnClickListener(v -> dismiss());
-        }
+        setOnPositiveClickListener((dialog, button) -> {
+            mManager.applyChanges(requireContext());
+            onConfirm(null);
+        });
     }
 
     @Override
