@@ -26,15 +26,25 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager {
     private int mDecoratedChildWidth;
     private int mDecoratedChildHeight;
 
-    /* Used for starting the layout from the bottom / right */
-    private boolean mFirstAtBottom = true;
+    /* Used for starting the layout from the bottom */
+    private boolean mFirstAtBottom;
     /* Used for reversing adapter order */
-    private boolean mReverseAdapter = true;
+    private boolean mReverseAdapter;
 
     private boolean mRefreshViews = false;
 
     // Reusable array. This should only be used used transiently and should not be used to retain any state over time.
     private SparseArray<View> mViewCache = null;
+
+    public CustomRecycleLayoutManager() {
+        this(true, true);
+    }
+
+    public CustomRecycleLayoutManager(boolean firstAtBottom, boolean reverseAdapter) {
+        super();
+        mFirstAtBottom = firstAtBottom;
+        mReverseAdapter = reverseAdapter;
+    }
 
     public void setFirstAtBottom(boolean firstAtBottom) {
         assertNotInLayoutOrScroll(null);
@@ -56,20 +66,16 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager {
 
     @Override
     public int computeVerticalScrollExtent(@NonNull RecyclerView.State state) {
-        if (getChildCount() == 0)
-            return 0;
-        View topView = getVisibleTopView();
-        View botView = getVisibleBottomView();
-        return botView.getTop() - topView.getBottom();
+        return getVerticalSpace();
     }
 
     @Override
     public int computeVerticalScrollOffset(@NonNull RecyclerView.State state) {
         if (getChildCount() <= 1)
             return 0;
-        View topView = getVisibleTopView();
-        int hiddenCount = Math.abs(topAdapterItemIdx() - adapterPosition(topView));
-        return -topView.getTop() + hiddenCount * mDecoratedChildHeight;
+        View view = getVisibleBottomView();
+        int aboveCount = Math.abs(topAdapterItemIdx() - adapterPosition(view));
+        return getPaddingTop() - view.getBottom() + (aboveCount + 1) * mDecoratedChildHeight;
     }
 
     @Override
@@ -423,24 +429,6 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager {
         View child = getChildAt(topChildIdx);
         if (child == null)
             throw new IllegalStateException("null child when count=" + getChildCount() + " and topChildIdx=" + topChildIdx);
-        return child;
-    }
-
-    @NonNull
-    private View getVisibleTopView() {
-        final int childCount = getChildCount();
-        int topChildIdx = mFirstAtBottom ? (childCount - 1) : 0;
-        View child = getChildAt(topChildIdx);
-        if (child == null)
-            throw new IllegalStateException("null child when count=" + childCount + " and topChildIdx=" + topChildIdx);
-        while (child.getBottom() < 0) {
-            topChildIdx += mFirstAtBottom ? -1 : 1;
-            if (topChildIdx < 0 || topChildIdx >= childCount)
-                return child;
-            child = getChildAt(topChildIdx);
-            if (child == null)
-                throw new IllegalStateException("null child when count=" + childCount + " and topChildIdx=" + topChildIdx);
-        }
         return child;
     }
 
