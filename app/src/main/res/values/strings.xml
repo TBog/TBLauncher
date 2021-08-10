@@ -399,7 +399,6 @@
     <string name="keyboard_section">Keyboard</string>
     <string name="debug_ksh_touch">Keyboard scroll hider</string>
     <string name="debug_ksh_touch_summary">Show touch state with background color</string>
-    <string name="result_custom_layout">WIP layout</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>

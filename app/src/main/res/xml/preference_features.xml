@@ -142,11 +142,6 @@
             android:summary="@string/unlimited_search_cap_summary"
             android:title="@string/unlimited_search_cap" />
 
-        <androidx.preference.SwitchPreference
-                android:defaultValue="false"
-                android:key="result-custom-layout"
-                android:title="@string/result_custom_layout" />
-
     </PreferenceCategory>
 
     <!-- Icons -->

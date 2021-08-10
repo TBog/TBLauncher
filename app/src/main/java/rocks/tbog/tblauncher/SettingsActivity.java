@@ -78,7 +78,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
     private final static ArraySet<String> PREF_THAT_REQUIRE_LAYOUT_UPDATE = new ArraySet<>(Arrays.asList(
             "result-list-color", "result-list-alpha", "result-ripple-color", "result-list-rounded",
-            "result-custom-layout",
             "notification-bar-color", "notification-bar-alpha", "notification-bar-gradient", "black-notification-icons",
             "search-bar-size", "search-bar-rounded", "search-bar-gradient", "search-bar-at-bottom",
             "search-bar-color", "search-bar-alpha", "search-bar-text-color", "search-bar-icon-color",
