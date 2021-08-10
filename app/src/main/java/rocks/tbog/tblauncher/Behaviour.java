@@ -1,5 +1,7 @@
 package rocks.tbog.tblauncher;
 
+import static rocks.tbog.tblauncher.entry.EntryItem.LAUNCHED_FROM_GESTURE;
+
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
@@ -55,7 +57,6 @@ import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.quicklist.EditQuickListDialog;
 import rocks.tbog.tblauncher.result.CustomRecycleLayoutManager;
 import rocks.tbog.tblauncher.result.RecycleAdapter;
-import rocks.tbog.tblauncher.result.RecycleListLayoutManager;
 import rocks.tbog.tblauncher.result.RecycleScrollListener;
 import rocks.tbog.tblauncher.result.ResultHelper;
 import rocks.tbog.tblauncher.searcher.ISearchActivity;
@@ -73,8 +74,6 @@ import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.SystemUiVisibility;
 import rocks.tbog.tblauncher.utils.UISizes;
 import rocks.tbog.tblauncher.utils.Utilities;
-
-import static rocks.tbog.tblauncher.entry.EntryItem.LAUNCHED_FROM_GESTURE;
 
 /**
  * Behaviour of the launcher, when are stuff hidden, animation, user interaction responses
@@ -193,11 +192,8 @@ public class Behaviour implements ISearchActivity {
 
         RecyclerView.LayoutManager layoutManager;
         RecycleScrollListener recycleScrollListener;
-        if (mPref.getBoolean("result-custom-layout", false)) {
-            layoutManager = new CustomRecycleLayoutManager();
-        } else {
-            layoutManager = new RecycleListLayoutManager(getContext());
-        }
+
+        layoutManager = new CustomRecycleLayoutManager();
         recycleScrollListener = new RecycleScrollListener(mKeyboardHandler);
 
         mResultAdapter = new RecycleAdapter(new ArrayList<>());
