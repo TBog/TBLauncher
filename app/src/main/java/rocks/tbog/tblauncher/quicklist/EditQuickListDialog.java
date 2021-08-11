@@ -1,10 +1,10 @@
 package rocks.tbog.tblauncher.quicklist;
 
+import android.content.Context;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -24,11 +24,13 @@ public class EditQuickListDialog extends DialogFragment<Void> {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        Context context = requireDialog().getContext();
+
+        setupDefaultButtons(context);
+
         // make sure we use the dialog context
-        inflater = inflater.cloneInContext(requireDialog().getContext());
-        View root = super.onCreateView(inflater, container, savedInstanceState);
-        // add button bar, just like the preferences dialog
-        return inflater.inflate(R.layout.ok_cancel_button_bar, (ViewGroup) root, true);
+        inflater = inflater.cloneInContext(context);
+        return super.onCreateView(inflater, container, savedInstanceState);
     }
 
     @Override
@@ -36,20 +38,9 @@ public class EditQuickListDialog extends DialogFragment<Void> {
         super.onViewCreated(view, savedInstanceState);
         mEditor.bindView(view);
 
-        // OK button
-        {
-            View button = view.findViewById(android.R.id.button1);
-            button.setOnClickListener(v -> {
-                mEditor.applyChanges(requireContext());
-                onConfirm(null);
-                dismiss();
-            });
-        }
-
-        // CANCEL button
-        {
-            View button = view.findViewById(android.R.id.button2);
-            button.setOnClickListener(v -> dismiss());
-        }
+        setOnPositiveClickListener((dialog, button) -> {
+            mEditor.applyChanges(requireContext());
+            onConfirm(null);
+        });
     }
 }

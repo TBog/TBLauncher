@@ -5,6 +5,7 @@ import android.database.DataSetObserver;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
+import android.util.Log;
 import android.view.ContextThemeWrapper;
 import android.view.Gravity;
 import android.view.MotionEvent;
@@ -26,6 +27,7 @@ import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.UISizes;
 
 public class ListPopup extends PopupWindow {
+    private static final String TAG = "Popup";
     private final Rect mTempRect = new Rect();
     private final int[] mTempLocation = new int[2];
     private OnItemLongClickListener mItemLongClickListener = null;
@@ -37,6 +39,7 @@ public class ListPopup extends PopupWindow {
     private boolean mIsModal = false; // send all touch events to this window
 
     public static ListPopup create(@NonNull Context context, ListAdapter adapter) {
+        Log.d(TAG, "initial context=" + context);
         ContextThemeWrapper ctx = new ContextThemeWrapper(context, R.style.ListPopupTheme);
         ListPopup popup = new ListPopup(ctx);
         View root = popup.getContentView().getRootView();
@@ -52,7 +55,7 @@ public class ListPopup extends PopupWindow {
             root.setClipToOutline(true);
         }
 
-        customizeUI.setListViewScrollbarPref(popup.getContentView(), UIColors.getPopupRipple(ctx));
+        CustomizeUI.setListViewScrollbarPref(popup.getContentView(), UIColors.getPopupRipple(ctx));
 
         popup.setAdapter(adapter);
         return popup;
@@ -62,12 +65,13 @@ public class ListPopup extends PopupWindow {
         super(context, null, android.R.attr.popupMenuStyle);
         ScrollView scrollView = new ScrollView(context);
         LinearLayout layout = new LinearLayout(context);
+        layout.setId(R.id.root_layout);
         layout.setOrientation(LinearLayout.VERTICAL);
         scrollView.addView(layout);
 
         setContentView(scrollView);
-        setWidth(LinearLayout.LayoutParams.WRAP_CONTENT);
-        setHeight(LinearLayout.LayoutParams.WRAP_CONTENT);
+        setWidth(ViewGroup.LayoutParams.WRAP_CONTENT);
+        setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
     }
 
     public ListPopup setOnItemClickListener(OnItemClickListener onItemClickListener) {
@@ -129,15 +133,13 @@ public class ListPopup extends PopupWindow {
     }
 
     private LinearLayout getLinearLayout() {
-        return (LinearLayout) ((ScrollView) getContentView()).getChildAt(0);
+        return getContentView().findViewById(R.id.root_layout);
+        //return (LinearLayout) ((ScrollView) getContentView()).getChildAt(0);
     }
 
     private void updateItems() {
         LinearLayout layout = getLinearLayout();
         Context ctx = layout.getContext();
-//        TBApplication app = TBApplication.getApplication(ctx);
-//        CustomizeUI ui = app.ui();
-        CustomizeUI ui = TBApplication.ui(ctx);
         int selectorColor = UIColors.getPopupRipple(ctx);
         int textColor = UIColors.getPopupTextColor(ctx);
         int titleColor = UIColors.getPopupTitleColor(ctx);
@@ -147,7 +149,7 @@ public class ListPopup extends PopupWindow {
             View view = mAdapter.getView(i, null, layout);
 
             // apply selector background
-            view.setBackground(ui.getSelectorDrawable(view, selectorColor, false));
+            view.setBackground(CustomizeUI.getSelectorDrawable(view, selectorColor, false));
             setTextColorRecursive(view, mAdapter.isEnabled(i) ? textColor : titleColor);
 
             layout.addView(view);
