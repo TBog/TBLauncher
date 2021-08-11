@@ -712,7 +712,7 @@ public class WidgetManager {
      */
     protected ListPopup getConfigPopup(WidgetView view) {
         final int appWidgetId = view.getAppWidgetId();
-        Context ctx = view.getContext();
+        Context ctx = mLayout.getContext();
         LinearAdapter adapter = new LinearAdapter();
 
         WidgetRecord widget = mWidgets.get(appWidgetId);
