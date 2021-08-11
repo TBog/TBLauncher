@@ -50,12 +50,8 @@ public class EditTagsDialog extends DialogFragment<Set<String>> {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         Context context = requireDialog().getContext();
 
+        setupDefaultButtons(context);
         Bundle args = getArguments() != null ? getArguments() : new Bundle();
-        if (!isStateSaved()) {
-            args.putCharSequence("btnPositiveText", context.getText(android.R.string.ok));
-            args.putCharSequence("btnNegativeText", context.getText(android.R.string.cancel));
-            setArguments(args);
-        }
 
         // make sure we use the dialog context
         LayoutInflater dialogInflater = inflater.cloneInContext(context);

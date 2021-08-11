@@ -26,12 +26,7 @@ public class TagsManagerDialog extends DialogFragment<Void> {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         Context context = requireDialog().getContext();
 
-        Bundle args = getArguments() != null ? getArguments() : new Bundle();
-        if (!isStateSaved()) {
-            args.putCharSequence("btnPositiveText", context.getText(android.R.string.ok));
-            args.putCharSequence("btnNegativeText", context.getText(android.R.string.cancel));
-            setArguments(args);
-        }
+        setupDefaultButtons(context);
 
         // make sure we use the dialog context
         inflater = inflater.cloneInContext(context);
