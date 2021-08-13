@@ -173,6 +173,8 @@ public class LiveWallpaper {
     }
 
     private void resetPageCount() {
+        Log.i(TAG, "resetPageCount " + SCREEN_COUNT_HORIZONTAL + "x" + SCREEN_COUNT_VERTICAL);
+
         float xStep = (SCREEN_COUNT_HORIZONTAL > 1) ? (1.f / (SCREEN_COUNT_HORIZONTAL - 1)) : 0.f;
         float yStep = (SCREEN_COUNT_VERTICAL > 1) ? (1.f / (SCREEN_COUNT_VERTICAL - 1)) : 0.f;
         mWallpaperManager.setWallpaperOffsetSteps(xStep, yStep);

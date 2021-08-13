@@ -9,6 +9,7 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Build;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -27,8 +28,10 @@ import java.util.ArrayList;
 
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
+import rocks.tbog.tblauncher.utils.ArrayHelper;
 
 public class WidgetLayout extends ViewGroup {
+    private static final String TAG = "WdgLayout";
     /**
      * These are used for computing child frames based on their gravity.
      */
@@ -382,7 +385,7 @@ public class WidgetLayout extends ViewGroup {
         }
 
         for (int pagePosition : LayoutParams.PAGE_POSITIONS) {
-            pageLayout(pagePosition, width, height, false);
+            layoutPagePosition(pagePosition, width, height, false);
             width = Math.max(width, mTmpContainerRect.width());
             height = Math.max(height, mTmpContainerRect.height());
         }
@@ -395,19 +398,20 @@ public class WidgetLayout extends ViewGroup {
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
         final int pageWidth = right - left;
         final int pageHeight = bottom - top;
+        Log.d(TAG, "onLayout left=" + left + " top=" + top + " width=" + pageWidth + " height=" + pageHeight + " pageCount=" + mPageCount.x + "x" + mPageCount.y);
         if (mPageCount.x == 1 && mPageCount.y == 1) {
-            pageLayout(LayoutParams.PAGE_MIDDLE, pageWidth, pageHeight, true);
+            layoutPagePosition(LayoutParams.PAGE_MIDDLE, pageWidth, pageHeight, true);
         } else if (mPageCount.x > 1 && mPageCount.y == 1) {
             for (int pagePos : LayoutParams.PAGE_POSITIONS_HORIZONTAL) {
-                pageLayout(pagePos, pageWidth, pageHeight, true);
+                layoutPagePosition(pagePos, pageWidth, pageHeight, true);
             }
         } else if (mPageCount.x == 1 && mPageCount.y > 1) {
             for (int pagePos : LayoutParams.PAGE_POSITIONS_VERTICAL) {
-                pageLayout(pagePos, pageWidth, pageHeight, true);
+                layoutPagePosition(pagePos, pageWidth, pageHeight, true);
             }
         } else {
             for (int pagePos : LayoutParams.PAGE_POSITIONS)
-                pageLayout(pagePos, pageWidth, pageHeight, true);
+                layoutPagePosition(pagePos, pageWidth, pageHeight, true);
         }
         callAfterLayout();
     }
@@ -476,32 +480,63 @@ public class WidgetLayout extends ViewGroup {
     private int getLeftMarginForPage(int page, int width) {
         if (mPageCount.x == 1)
             return 0;
-        int leftOfCenter = mPageCount.x / 2;
-        if (page == LayoutParams.PAGE_LEFT)
-            return 0;
-        if (page == LayoutParams.PAGE_RIGHT)
-            return leftOfCenter * (width + 1);
-        return leftOfCenter * width;
+        final int pagePos = LayoutParams.getPagePosition(page);
+        final int pageIdx = LayoutParams.getPageIndex(page);
+        if (pagePos == LayoutParams.PAGE_LEFT)
+            return (mPageCount.x / 2 - pageIdx) * width;
+
+        final int center = mPageCount.y / 2 * width;
+        if (pagePos == LayoutParams.PAGE_RIGHT)
+            return center + pageIdx * width;
+
+        return center;
     }
 
     private int getTopMarginForPage(int page, int height) {
         if (mPageCount.y == 1)
             return 0;
-        if (page == LayoutParams.PAGE_UP)
-            return 0;
-        int leftOfCenter = mPageCount.y / 2;
-        if (page == LayoutParams.PAGE_DOWN)
-            return leftOfCenter * (height + 1);
-        return leftOfCenter * height;
+        final int pagePos = LayoutParams.getPagePosition(page);
+        final int pageIdx = LayoutParams.getPageIndex(page);
+        if (pagePos == LayoutParams.PAGE_UP)
+            return (mPageCount.y / 2 - pageIdx) * height;
+
+        final int center = mPageCount.y / 2 * height;
+        if (pagePos == LayoutParams.PAGE_DOWN)
+            return center + pageIdx * height;
+
+        return center;
+    }
+
+    private void layoutPagePosition(int pagePosition, int width, int height, boolean childLayout) {
+        final int pageStart;
+        final int pageCount;
+        if (pagePosition == LayoutParams.PAGE_MIDDLE) {
+            pageStart = 0;
+            pageCount = 1;
+        } else {
+            pageStart = 1;
+            boolean horizontal = ArrayHelper.contains(LayoutParams.PAGE_POSITIONS_HORIZONTAL, pagePosition);
+            pageCount = 1 + (horizontal ? mPageCount.x : mPageCount.y) / 2;
+        }
+        for (int pageIdx = pageStart; pageIdx < pageCount; pageIdx += 1) {
+            int page = LayoutParams.makePage(pagePosition, pageIdx);
+            pageLayout(page, width, height, childLayout);
+            width = Math.max(width, mTmpContainerRect.width());
+            height = Math.max(height, mTmpContainerRect.height());
+        }
     }
 
     private void pageLayout(int page, int width, int height, boolean childLayout) {
         mTmpContainerRect.setEmpty();
         final int pageTop = getTopMarginForPage(page, height);
         final int pageLeft = getLeftMarginForPage(page, width);
+
         // apply padding
         final int pageWidth = width - getPaddingLeft() - getPaddingRight();
         final int pageHeight = height - getPaddingTop() - getPaddingBottom();
+
+        Log.d(TAG, "pageLayout " + LayoutParams.debugPage(page) + " left=" + pageLeft + " top=" + pageTop + " width=" + pageWidth + " height=" + pageHeight);
+
         int autoX = 0;
         int autoY = 0;
         int maxChildY = 0;
@@ -512,7 +547,7 @@ public class WidgetLayout extends ViewGroup {
                 continue;
 
             final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-            if (lp.screenPage != page)
+            if (LayoutParams.validatedPage(lp.screenPage) != page)
                 continue;
 
             mTmpChildRect.set(0, 0, child.getMeasuredWidth(), child.getMeasuredHeight());
@@ -544,12 +579,28 @@ public class WidgetLayout extends ViewGroup {
 
             // apply page offset
             mTmpChildRect.offset(pageLeft, pageTop);
+
+            // don't let the child start to the right of this page
+            while (mTmpChildRect.left > (pageLeft + width))
+                mTmpChildRect.offset(-Math.min(width, mTmpChildRect.width()) / 4, 0);
+            // don't let the child end to the left of this page
+            while (mTmpChildRect.right < pageLeft)
+                mTmpChildRect.offset(Math.min(width, mTmpChildRect.width()) / 4, 0);
+            // don't let the child start below this page
+            while (mTmpChildRect.top > (pageTop + height))
+                mTmpChildRect.offset(0, -Math.min(height, mTmpChildRect.height()) / 4);
+            // don't let the child end above this page
+            while (mTmpChildRect.bottom < pageTop)
+                mTmpChildRect.offset(0, Math.min(height, mTmpChildRect.height()) / 4);
+
             // apply page padding
             mTmpChildRect.offset(getPaddingLeft(), getPaddingTop());
 
             // Place the child.
-            if (childLayout)
+            if (childLayout) {
                 child.layout(mTmpChildRect.left, mTmpChildRect.top, mTmpChildRect.right, mTmpChildRect.bottom);
+                Log.d(TAG, "layout child #" + childIdx + " rect=(" + mTmpChildRect.left + " " + mTmpChildRect.top + " " + mTmpChildRect.right + " " + mTmpChildRect.bottom + ")");
+            }
             mTmpContainerRect.union(mTmpChildRect);
         }
     }
@@ -693,9 +744,60 @@ public class WidgetLayout extends ViewGroup {
         public static final int PAGE_RIGHT = 2;
         public static final int PAGE_UP = 4;
         public static final int PAGE_DOWN = 8;
+        public static final int PAGE_POSITION_SHIFT = 0;
+        public static final int PAGE_POSITION_MASK = (PAGE_LEFT | PAGE_RIGHT | PAGE_UP | PAGE_DOWN) << PAGE_POSITION_SHIFT; // = 0xf
+        public static final int PAGE_DISTANCE_SHIFT = 4;
+        public static final int PAGE_DISTANCE_MASK = 0xf << PAGE_DISTANCE_SHIFT;
         public static final int[] PAGE_POSITIONS = new int[]{PAGE_LEFT, PAGE_UP, PAGE_MIDDLE, PAGE_RIGHT, PAGE_DOWN};
         public static final int[] PAGE_POSITIONS_HORIZONTAL = new int[]{PAGE_LEFT, PAGE_MIDDLE, PAGE_RIGHT};
         public static final int[] PAGE_POSITIONS_VERTICAL = new int[]{PAGE_UP, PAGE_MIDDLE, PAGE_DOWN};
+
+        public static int makePage(int pagePosition, int pageIdx) {
+            int pos = (pagePosition << PAGE_POSITION_SHIFT) & PAGE_POSITION_MASK;
+            int idx = (pageIdx << PAGE_DISTANCE_SHIFT) & PAGE_DISTANCE_MASK;
+            return pos | idx;
+        }
+
+        public static int validatedPage(int page) {
+            int pos = getPagePosition(page);
+            int idx = getPageIndex(page);
+            return makePage(pos, idx);
+        }
+
+        public static String debugPage(int page) {
+            int pos = (page & PAGE_POSITION_MASK) >> PAGE_POSITION_SHIFT;
+            int idx = (page & PAGE_DISTANCE_MASK) >> PAGE_DISTANCE_SHIFT;
+            switch (pos) {
+                case PAGE_LEFT:
+                    return idx + "L";
+                case PAGE_UP:
+                    return idx + "U";
+                case PAGE_RIGHT:
+                    return idx + "R";
+                case PAGE_DOWN:
+                    return idx + "D";
+                case PAGE_MIDDLE:
+                    return idx + "M";
+                default:
+                    return String.valueOf(idx);
+            }
+        }
+
+        public static int getPagePosition(int page) {
+            return (page & PAGE_POSITION_MASK) >> PAGE_POSITION_SHIFT;
+        }
+
+        public static int getPageIndex(int page) {
+            int pos = (page & PAGE_POSITION_MASK) >> PAGE_POSITION_SHIFT;
+            int idx = (page & PAGE_DISTANCE_MASK) >> PAGE_DISTANCE_SHIFT;
+            // middle page is special
+            if (pos == PAGE_MIDDLE)
+                return 0;
+            // only middle page is allowed to have idx 0
+            if (idx == 0)
+                return 1;
+            return idx;
+        }
 
         public enum Placement {
             AUTO,
