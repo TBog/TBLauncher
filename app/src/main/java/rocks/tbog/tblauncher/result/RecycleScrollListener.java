@@ -3,9 +3,7 @@ package rocks.tbog.tblauncher.result;
 import android.animation.Animator;
 import android.animation.ValueAnimator;
 import android.annotation.SuppressLint;
-import android.graphics.PointF;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewTreeObserver;
@@ -26,12 +24,54 @@ public class RecycleScrollListener extends RecyclerView.OnScrollListener {
     private int mScrollAmountY = 0;
     private int mHideKeyboardThreshold = -1;
     private int mListHeight = -1;
-    // list resize after keyboard hidden has finished
-    private boolean mResizeFinished = false;
-    // keyboard hide requested
-    private boolean mResizeInProgress = false;
-    // waiting for the keyboard to set window insets
-    private boolean mWaitForInsets = false;
+    private final State mState = new State();
+
+    private static class State {
+        // list resize after keyboard hidden has finished
+        private boolean resizeFinished = false;
+        // keyboard hide requested
+        private boolean resizeInProgress = false;
+        // waiting for the keyboard to set window insets
+        private boolean waitForInsets = false;
+        private boolean resizeWithScroll = false;
+
+        public boolean resizeFinished() {
+            return resizeFinished;
+        }
+
+        public boolean resizeInProgress() {
+            return resizeInProgress && !resizeFinished;
+        }
+
+        public boolean resizeWithScroll() {
+            return resizeWithScroll && !resizeFinished;
+        }
+
+        @NonNull
+        @Override
+        public String toString() {
+            return "[resizeWithScroll=" + resizeWithScroll + " waitForInsets=" + waitForInsets + " resizeInProgress=" + resizeInProgress + " resizeFinished=" + resizeFinished + "]";
+        }
+
+        public void reset() {
+            resizeFinished = false;
+            resizeInProgress = false;
+            waitForInsets = false;
+            resizeWithScroll = false;
+        }
+
+        public void setResizeAnimation() {
+            resizeInProgress = false;
+        }
+
+        public void setResizeWithScroll() {
+            resizeWithScroll = true;
+        }
+
+        public void setResizeFinished() {
+            resizeFinished = true;
+        }
+    }
 
     public RecycleScrollListener(KeyboardHandler handler) {
         this.handler = handler;
@@ -54,9 +94,7 @@ public class RecycleScrollListener extends RecyclerView.OnScrollListener {
         }
         Log.d(TAG, "scroll state=" + scrollStateString(newState));
         if (newState == RecyclerView.SCROLL_STATE_DRAGGING) {
-            mResizeFinished = false;
-            mResizeInProgress = false;
-            mWaitForInsets = false;
+            mState.reset();
             mListHeight = recyclerView.getHeight();
             int keyboardHeight = WindowInsetsHelper.getKeyboardHeight(recyclerView);
             boolean keyboardVisible = WindowInsetsHelper.isKeyboardVisible(recyclerView);
@@ -80,10 +118,10 @@ public class RecycleScrollListener extends RecyclerView.OnScrollListener {
                 } else {
                     mScrollAmountY = 0;
                 }
-                Log.i(TAG, "scrollY=" + mScrollAmountY);
             }
-            if (mResizeInProgress && !mResizeFinished) {
-                mResizeInProgress = false;
+            Log.i(TAG, "scrollY=" + mScrollAmountY);
+            if (mState.resizeInProgress()) {
+                mState.setResizeAnimation();
                 int layoutParamsHeight = recyclerView.getLayoutParams().height;
                 final int fromValue = layoutParamsHeight < 0 ? recyclerView.getHeight() : layoutParamsHeight;
                 final int toValue = ((View) recyclerView.getParent()).getHeight();
@@ -100,11 +138,9 @@ public class RecycleScrollListener extends RecyclerView.OnScrollListener {
                     anim.addListener(new Animator.AnimatorListener() {
                         @Override
                         public void onAnimationStart(Animator animation) {
-                            if (recyclerView instanceof RecyclerList)
-                                ((RecyclerList) recyclerView).blockTouchEvents();
                             if (DebugInfo.keyboardScrollHiderTouch(recyclerView.getContext()))
                                 recyclerView.setBackgroundColor(0x800000ff);
-
+                            setListAutoScroll(recyclerView, true);
                         }
 
                         @Override
@@ -114,7 +150,7 @@ public class RecycleScrollListener extends RecyclerView.OnScrollListener {
 
                         @Override
                         public void onAnimationCancel(Animator animation) {
-                            // not happening
+                            handleResizeDone(recyclerView);
                         }
 
                         @Override
@@ -149,15 +185,23 @@ public class RecycleScrollListener extends RecyclerView.OnScrollListener {
             return;
         final RecyclerList list = (RecyclerList) recyclerView;
         int state = list.getScrollState();
-        if (mResizeFinished || state == RecyclerView.SCROLL_STATE_IDLE)
+        if (mState.resizeFinished() || state == RecyclerView.SCROLL_STATE_IDLE)
             return;
 
         mScrollAmountY -= dy;
         final boolean keyboardVisible = WindowInsetsHelper.isKeyboardVisible(list);
-        Log.d(TAG, "state=" + scrollStateString(state) + " scrollY=" + mScrollAmountY + " KV=" + keyboardVisible + " waitForInsets=" + mWaitForInsets + " resizeInProgress=" + mResizeInProgress + " resizeFinished=" + mResizeFinished);
+        Log.d(TAG, "state=" + scrollStateString(state) + " scrollY=" + mScrollAmountY + " KV=" + keyboardVisible + " state=" + mState);
 
-        if (list.touchEventsBlocked() && state == RecyclerView.SCROLL_STATE_DRAGGING) {
-            Log.d(TAG, "onScrolled: exit because touchEventsBlocked");
+        // if resize while scrolling is active ... resize
+        if (mState.resizeWithScroll()) {
+            int containerHeight = ((View) list.getParent()).getHeight();
+            int newHeight = Math.min(mListHeight + mScrollAmountY, containerHeight);
+            Log.d(TAG, "onScrolled: resizeWithScroll newHeight=" + newHeight + " containerHeight=" + containerHeight);
+            if (newHeight == containerHeight) {
+                handleResizeDone(list);
+            } else if (newHeight > list.getHeight()) {
+                setListLayoutHeight(list, newHeight);
+            }
             return;
         }
 
@@ -166,86 +210,35 @@ public class RecycleScrollListener extends RecyclerView.OnScrollListener {
             int containerHeight = ((View) list.getParent()).getHeight();
             Log.d(TAG, "containerHeight=" + containerHeight);
 
-            if (!mWaitForInsets && mResizeInProgress) {
+            if (!mState.waitForInsets && mState.resizeInProgress()) {
                 // resize list to keep items under the dragging finger
-                int height = Math.min(mListHeight + mScrollAmountY, containerHeight);
-                if (height == containerHeight)
+                int newHeight = Math.min(mListHeight + mScrollAmountY, containerHeight);
+                if (newHeight == containerHeight) {
                     handleResizeDone(list);
-                else if (!list.touchEventsBlocked()) {
-                    list.blockTouchEvents();
-                    setListLayoutHeight(list, height);
-                    if (DebugInfo.keyboardScrollHiderTouch(list.getContext()))
-                        list.setBackgroundColor(0x7f007fff);
-
-                    final PointF lastTouchPos = new PointF(-1, -1);
-                    list.setOnTouchListener((view, event) -> {
-                        if (!view.isAttachedToWindow()) {
-                            view.setOnTouchListener(null);
-                            return false;
-                        }
-
-                        Log.d(TAG, "onListTouch\r\n" + event);
-
-                        if (lastTouchPos.x == -1f && lastTouchPos.y == -1f)
-                            lastTouchPos.set(event.getRawX(), event.getRawY());
-                        float deltaY = event.getRawY() - lastTouchPos.y;
-                        if (deltaY < 0f)
-                            deltaY = 0f;
-                        mScrollAmountY += deltaY;
-                        lastTouchPos.set(event.getRawX(), event.getRawY());
-
-                        int actionMasked = event.getActionMasked();
-                        switch (actionMasked) {
-                            case MotionEvent.ACTION_CANCEL:
-                            case MotionEvent.ACTION_UP:
-                                view.setOnTouchListener(null);
-                                if (DebugInfo.keyboardScrollHiderTouch(list.getContext()))
-                                    list.setBackgroundColor(0x00000000);
-                                list.unblockTouchEvents();
-                                break;
-                            case MotionEvent.ACTION_MOVE: {
-                                int newHeight = Math.min(mListHeight + mScrollAmountY, containerHeight);
-                                setListLayoutHeight(list, newHeight);
-                                if (newHeight == containerHeight) {
-                                    handleResizeDone(list);
-                                    // after the resize finished, set scroll
-                                    ViewTreeObserver vto = list.getViewTreeObserver();
-                                    vto.addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
-                                        @Override
-                                        public void onGlobalLayout() {
-                                            ViewTreeObserver vto = list.getViewTreeObserver();
-                                            vto.removeOnGlobalLayoutListener(this);
-                                            // calling `scrollToLastPosition` will change scroll state to "idle"
-                                            list.scrollToLastPosition();
-                                        }
-                                    });
-                                    return true;
-                                }
-                                break;
-                            }
-                            default:
-                                break;
-                        }
-                        return false;
-                    });
                 } else {
-                    setListLayoutHeight(list, height);
+                    setListLayoutHeight(list, newHeight);
+                    // activate resize while scrolling
+                    mState.setResizeWithScroll();
+                    if (DebugInfo.keyboardScrollHiderTouch(list.getContext()))
+                        list.setBackgroundColor(0x80ff0000);
                 }
             } else if ((mListHeight + mScrollAmountY) >= containerHeight) {
                 setListLayoutHeight(list, mListHeight);
                 hideKeyboardWhileDragging(list);
+                // let the Scroll Listener resize the list without any additional scrolling
+                setListAutoScroll(list, false);
             }
         }
     }
 
     private void hideKeyboardWhileDragging(RecyclerView list) {
-        if (mWaitForInsets) {
+        if (mState.waitForInsets) {
             int keyboardHeight = WindowInsetsHelper.getKeyboardHeight(list);
             Log.d(TAG, "onScrolled called while mWaitForInsets=true and keyboard height=" + keyboardHeight);
         } else {
             // start the resize process (hide keyboard)
-            mWaitForInsets = true;
-            mResizeInProgress = true;
+            mState.waitForInsets = true;
+            mState.resizeInProgress = true;
             handler.hideKeyboard();
 
             ViewTreeObserver vto = ((View) list.getParent()).getViewTreeObserver();
@@ -255,25 +248,25 @@ public class RecycleScrollListener extends RecyclerView.OnScrollListener {
                     int keyboardHeight = WindowInsetsHelper.getKeyboardHeight(list);
                     boolean keyboardVisible = WindowInsetsHelper.isKeyboardVisible(list);
                     if (keyboardVisible) {
-                        Log.d(TAG, "onPreDraw called with keyboard (height=" + keyboardHeight + " visible=" + keyboardVisible + ")");
+                        Log.d(TAG, "onPreDraw called with keyboard visible and height=" + keyboardHeight);
 
                         // proceed with the current drawing pass, waiting for the keyboard to close
                         return true;
                     }
                     ViewTreeObserver vto = ((View) list.getParent()).getViewTreeObserver();
                     vto.removeOnPreDrawListener(this);
-                    if (!mWaitForInsets || mResizeFinished) {
-                        Log.d(TAG, "onPreDraw called when mWaitForInsets=" + mWaitForInsets + " mResizeFinished=" + mResizeFinished);
+                    if (!mState.waitForInsets || mState.resizeFinished()) {
+                        Log.d(TAG, "onPreDraw called when mWaitForInsets=" + mState.waitForInsets + " mResizeFinished=" + mState.resizeFinished);
                         return true;
                     }
                     if (list.getScrollState() == RecyclerView.SCROLL_STATE_IDLE) {
                         handleResizeDone(list);
                     } else {
-                        mWaitForInsets = false;
+                        mState.waitForInsets = false;
                         int containerHeight = ((View) list.getParent()).getHeight();
-                        int height = Math.min(mListHeight + mScrollAmountY, containerHeight);
+                        int newHeight = Math.min(mListHeight + mScrollAmountY, containerHeight);
                         Log.d(TAG, "onPreDraw height=min(" + (mListHeight + mScrollAmountY) + ", " + containerHeight + ")");
-                        setListLayoutHeight(list, height);
+                        setListLayoutHeight(list, newHeight);
 
                         if (DebugInfo.keyboardScrollHiderTouch(list.getContext()))
                             list.setBackgroundColor(0x8000ff00);
@@ -288,9 +281,14 @@ public class RecycleScrollListener extends RecyclerView.OnScrollListener {
         }
     }
 
+    private void setListAutoScroll(@NonNull RecyclerView list, boolean value) {
+        if (list.getLayoutManager() instanceof CustomRecycleLayoutManager)
+            ((CustomRecycleLayoutManager) list.getLayoutManager()).setAutoScrollBottom(value);
+    }
+
     @SuppressLint("ClickableViewAccessibility")
     private void handleResizeDone(@NonNull RecyclerView list) {
-        if (mResizeFinished) {
+        if (mState.resizeFinished()) {
             return;
         }
         mScrollAmountY = 0;
@@ -298,14 +296,11 @@ public class RecycleScrollListener extends RecyclerView.OnScrollListener {
         if (DebugInfo.keyboardScrollHiderTouch(list.getContext()))
             list.setBackgroundColor(0x00000000);
 
-        list.setOnTouchListener(null);
-        // Give the list view the control over it's input back
-        if (list instanceof RecyclerList)
-            ((RecyclerList) list).unblockTouchEvents();
+        setListAutoScroll(list, true);
 
         setListLayoutHeight(list, ViewGroup.LayoutParams.MATCH_PARENT);
 
-        mResizeFinished = true;
+        mState.setResizeFinished();
     }
 
     public static void setListLayoutHeight(ViewGroup list, int height) {
