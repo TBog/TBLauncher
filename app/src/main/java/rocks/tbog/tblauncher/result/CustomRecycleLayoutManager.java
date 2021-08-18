@@ -30,6 +30,8 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager {
     private boolean mFirstAtBottom;
     /* Used for reversing adapter order */
     private boolean mReverseAdapter;
+    /* When list height grows, keep bottom view at the bottom */
+    private boolean mAutoScrollBottom = true;
 
     private boolean mRefreshViews = false;
 
@@ -62,6 +64,10 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager {
         }
         mReverseAdapter = reverseAdapter;
         requestLayout();
+    }
+
+    public void setAutoScrollBottom(boolean autoScrollBottom) {
+        mAutoScrollBottom = autoScrollBottom;
     }
 
     @Override
@@ -221,13 +227,13 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager {
 
         if (getChildCount() > 0) {
             // check if this was a resize that requires a forced scroll
-            if (mFirstAtBottom) {
+            if (mFirstAtBottom && mAutoScrollBottom) {
                 int bottomDelta = getPaddingTop() + getVerticalSpace() - getBottomView().getBottom();
                 if (bottomDelta > 0) {
                     // the last view is too high
                     offsetChildrenVertical(bottomDelta);
                     logDebug("(1) auto-scroll bottom amount=" + bottomDelta);
-                } else if (bottomDelta != 0 && bottomAdapterItemIdx() == mFirstVisiblePosition) {
+                } else if (bottomDelta < 0 && bottomAdapterItemIdx() == mFirstVisiblePosition) {
                     // the first visible item (at the bottom) is hidden, scroll it into view
                     offsetChildrenVertical(bottomDelta);
                     logDebug("(2) auto-scroll bottom amount=" + bottomDelta);
