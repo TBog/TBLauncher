@@ -93,7 +93,7 @@ public class WidgetLayout extends ViewGroup {
 
     public void setPageCount(int horizontal, int vertical) {
         if (horizontal < 1 || vertical < 1)
-            throw new IllegalStateException("Page count must be >= 1");
+            throw new IllegalStateException("setPageCount(" + horizontal + "," + vertical + ") Page count must be >= 1");
         mPageCount.set(horizontal, vertical);
     }
 
@@ -507,7 +507,7 @@ public class WidgetLayout extends ViewGroup {
         return center;
     }
 
-    private void layoutPagePosition(int pagePosition, int width, int height, boolean childLayout) {
+    private void layoutPagePosition(int pagePosition, int pageWidth, int pageHeight, boolean childLayout) {
         final int pageStart;
         final int pageCount;
         if (pagePosition == LayoutParams.PAGE_MIDDLE) {
@@ -518,6 +518,8 @@ public class WidgetLayout extends ViewGroup {
             boolean horizontal = ArrayHelper.contains(LayoutParams.PAGE_POSITIONS_HORIZONTAL, pagePosition);
             pageCount = 1 + (horizontal ? mPageCount.x : mPageCount.y) / 2;
         }
+        int width = pageWidth;
+        int height = pageHeight;
         for (int pageIdx = pageStart; pageIdx < pageCount; pageIdx += 1) {
             int page = LayoutParams.makePage(pagePosition, pageIdx);
             pageLayout(page, width, height, childLayout);
@@ -752,6 +754,9 @@ public class WidgetLayout extends ViewGroup {
         public static final int[] PAGE_POSITIONS_HORIZONTAL = new int[]{PAGE_LEFT, PAGE_MIDDLE, PAGE_RIGHT};
         public static final int[] PAGE_POSITIONS_VERTICAL = new int[]{PAGE_UP, PAGE_MIDDLE, PAGE_DOWN};
 
+        public int screenPage = PAGE_MIDDLE;
+        public Placement placement = Placement.AUTO;
+
         public static int makePage(int pagePosition, int pageIdx) {
             int pos = (pagePosition << PAGE_POSITION_SHIFT) & PAGE_POSITION_MASK;
             int idx = (pageIdx << PAGE_DISTANCE_SHIFT) & PAGE_DISTANCE_MASK;
@@ -803,9 +808,6 @@ public class WidgetLayout extends ViewGroup {
             AUTO,
             MARGIN_TL_AS_POSITION,
         }
-
-        public int screenPage = PAGE_MIDDLE;
-        public Placement placement = Placement.AUTO;
 
         public LayoutParams(Context ctx, AttributeSet attrs) {
             super(ctx, attrs);
