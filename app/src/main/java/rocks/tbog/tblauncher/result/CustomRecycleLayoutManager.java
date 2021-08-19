@@ -144,6 +144,10 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager {
 
     @Override
     public void scrollToPosition(int position) {
+        if (position < 0 || position >= getItemCount()) {
+            Log.e(TAG, "Cannot scroll to " + position + ", item count " + getItemCount());
+            return;
+        }
         logDebug("scrollToPosition mFirstVisiblePosition changed from " + mFirstVisiblePosition + " to " + position);
         mFirstVisiblePosition = position;
     }
