@@ -29,8 +29,8 @@ public class EditQuickListDialog extends DialogFragment<Void> {
         setupDefaultButtons(context);
 
         // make sure we use the dialog context
-        inflater = inflater.cloneInContext(context);
-        return super.onCreateView(inflater, container, savedInstanceState);
+        LayoutInflater contextInflater = inflater.cloneInContext(context);
+        return super.onCreateView(contextInflater, container, savedInstanceState);
     }
 
     @Override
