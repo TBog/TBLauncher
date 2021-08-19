@@ -17,6 +17,7 @@ import rocks.tbog.tblauncher.ui.KeyboardHandler;
 import rocks.tbog.tblauncher.ui.RecyclerList;
 import rocks.tbog.tblauncher.ui.WindowInsetsHelper;
 import rocks.tbog.tblauncher.utils.DebugInfo;
+import rocks.tbog.tblauncher.utils.DebugString;
 
 public class RecycleScrollListener extends RecyclerView.OnScrollListener {
     private static final String TAG = "RScrL";
@@ -306,7 +307,7 @@ public class RecycleScrollListener extends RecyclerView.OnScrollListener {
     public static void setListLayoutHeight(ViewGroup list, int height) {
         final ViewGroup.LayoutParams params = list.getLayoutParams();
         if (params.height != height) {
-            Log.d(TAG, "set layout height " + (height == ViewGroup.LayoutParams.MATCH_PARENT ? "MATCH_PARENT" : height));
+            Log.d(TAG, "change layout height from " + DebugString.layoutParamSize(params.height) + " to " + DebugString.layoutParamSize(height));
             params.height = height;
             list.setLayoutParams(params);
             list.forceLayout();

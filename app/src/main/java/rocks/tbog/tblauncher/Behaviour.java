@@ -64,7 +64,6 @@ import rocks.tbog.tblauncher.searcher.QuerySearcher;
 import rocks.tbog.tblauncher.searcher.Searcher;
 import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
 import rocks.tbog.tblauncher.ui.DialogFragment;
-import rocks.tbog.tblauncher.ui.KeyboardScrollHider;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.ui.RecyclerList;
@@ -164,7 +163,6 @@ public class Behaviour implements ISearchActivity {
         }
     };
     private View mNotificationBackground;
-    private KeyboardScrollHider mHider = null;
     private WindowInsetsHelper mKeyboardHandler = null;
     private SharedPreferences mPref;
 
@@ -317,8 +315,6 @@ public class Behaviour implements ISearchActivity {
     }
 
     private void initKeyboardScrollHider() {
-        //findViewById(R.id.listEdgeEffect), findViewById(R.id.resultList)
-        //mHider = new KeyboardScrollHider(mKeyboardHandler, resultList, listEdgeEffect);
         mKeyboardHandler = new WindowInsetsHelper(findViewById(R.id.root_layout)) {
             @Override
             public void showKeyboard() {
@@ -762,15 +758,11 @@ public class Behaviour implements ISearchActivity {
 
     public void showKeyboard() {
         mKeyboardHandler.showKeyboard();
-        if (mHider != null)
-            mHider.start();
         //mTBLauncherActivity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
     }
 
     public void hideKeyboard() {
         mKeyboardHandler.hideKeyboard();
-        if (mHider != null)
-            mHider.stop();
         //mTBLauncherActivity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
     }
 
