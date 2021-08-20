@@ -13,7 +13,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import rocks.tbog.tblauncher.BuildConfig;
 import rocks.tbog.tblauncher.R;
 
-public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager {
+public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager implements ReversibleAdapterRecyclerLayoutManager {
 
     private static final String TAG = "CRLM";
     private static final Boolean LOG_DEBUG = BuildConfig.DEBUG;
@@ -57,6 +57,7 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager {
         requestLayout();
     }
 
+    @Override
     public void setReverseAdapter(boolean reverseAdapter) {
         assertNotInLayoutOrScroll(null);
         if (mReverseAdapter == reverseAdapter) {
@@ -64,6 +65,11 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager {
         }
         mReverseAdapter = reverseAdapter;
         requestLayout();
+    }
+
+    @Override
+    public boolean isReverseAdapter() {
+        return mReverseAdapter;
     }
 
     public void setAutoScrollBottom(boolean autoScrollBottom) {
@@ -134,6 +140,12 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager {
         } else {
             logDebug("onItemsChanged");
         }
+    }
+
+    @Override
+    public void onItemsUpdated(@NonNull RecyclerView recyclerView, int positionStart, int itemCount) {
+        logDebug("onItemsUpdated start=" + positionStart + " count=" + itemCount);
+        mRefreshViews = true;
     }
 
     @Override

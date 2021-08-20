@@ -24,7 +24,6 @@ import android.view.Window;
 import android.view.animation.AccelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
-import android.widget.AbsListView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -804,22 +803,16 @@ public class Behaviour implements ISearchActivity {
     @Override
     public void updateAdapter(List<? extends EntryItem> results, boolean isRefresh) {
         Log.d(TAG, "updateAdapter " + results.size() + " result(s); isRefresh=" + isRefresh);
-        if (isRefresh) {
-            // We're refreshing an existing dataset, do not reset scroll!
-            temporarilyDisableTranscriptMode();
-        }
-        if (isFragmentDialogVisible()) {
-            mResultAdapter.updateResults(results);
-        } else {
+
+        if (!isFragmentDialogVisible()) {
             if (!TBApplication.state().isResultListVisible())
                 showResultList(false);
-            mResultList.prepareChangeAnim();
-            mResultAdapter.updateResults(results);
-            mResultList.animateChange();
         }
+        mResultAdapter.updateResults(results);
 
         if (!isRefresh) {
-            mResultList.scrollToLastPosition();
+            // Make sure the first item is visible when we search
+            mResultList.scrollToFirstItem();
         }
 
         TBApplication.quickList(getContext()).adapterUpdated();
@@ -829,41 +822,13 @@ public class Behaviour implements ISearchActivity {
 
     @Override
     public void removeResult(EntryItem result) {
-        mResultAdapter.removeResult(result);
         // Do not reset scroll, we want the remaining items to still be in view
-        temporarilyDisableTranscriptMode();
+        mResultAdapter.removeResult(result);
     }
 
     @Override
     public void filterResults(String text) {
-        mResultList.prepareChangeAnim();
-        mResultAdapter.getFilter().filter(text, count -> mResultList.animateChange());
-    }
-
-    /**
-     * transcriptMode on the listView decides when to scroll back to the first item.
-     * The value we have by default, TRANSCRIPT_MODE_ALWAYS_SCROLL, means that on every new search,
-     * (actually, on any change to the listview's adapter items)
-     * scroll is reset to the bottom, which makes sense as we want the most relevant search results
-     * to be visible first (searching for "ab" after "a" should reset the scroll).
-     * However, when updating an existing result set (for instance to remove a record, add a tag,
-     * etc.), we don't want the scroll to be reset. When this happens, we temporarily disable
-     * the scroll mode.
-     * However, we need to be careful here: the PullView system we use actually relies on
-     * TRANSCRIPT_MODE_ALWAYS_SCROLL being active. So we add a new message in the queue to change
-     * back the transcript mode once we've rendered the change.
-     * <p>
-     * (why is PullView dependent on this? When you show the keyboard, no event is being dispatched
-     * to our application, but if we don't reset the scroll when the keyboard appears then you
-     * could be looking at an element that isn't the latest one as you start scrolling down
-     * [which will hide the keyboard] and start a very ugly animation revealing items currently
-     * hidden. Fairly easy to test, remove the transcript mode from the XML and the .post() here,
-     * then scroll in your history, display the keyboard and scroll again on your history)
-     */
-    private void temporarilyDisableTranscriptMode() {
-        mResultList.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_DISABLED);
-        // Add a message to be processed after all current messages, to reset transcript mode to default
-        mResultList.post(() -> mResultList.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL));
+        mResultAdapter.getFilter().filter(text);
     }
 
     public void runSearcher(@NonNull String query, @NonNull Class<? extends Searcher> searcherClass) {
@@ -904,33 +869,13 @@ public class Behaviour implements ISearchActivity {
     }
 
     public void refreshSearchRecords() {
-        if (mResultList == null)
+        if (mResultList == null || mResultList.getLayoutManager() == null)
             return;
-        mResultList.post(() -> mResultAdapter.notifyDataSetChanged());
+        mResultList.getLayoutManager().onItemsUpdated(mResultList, 0, mResultAdapter.getItemCount());
     }
 
     public void refreshSearchRecord(EntryItem entry) {
         mResultAdapter.notifyItemChanged(entry);
-    }
-
-    /**
-     * This function gets called on query changes.
-     * It will ask all the providers for data
-     * This function is not called for non search-related changes! Have a look at onDataSetChanged() if that's what you're looking for :)
-     *
-     * @param isRefresh whether the query is refreshing the existing result, or is a completely new query
-     * @param query     the query on which to search
-     */
-    private void updateSearchRecords(boolean isRefresh, @NonNull String query) {
-//        if (isRefresh && isViewingAllApps()) {
-//            // Refreshing while viewing all apps (for instance app installed or uninstalled in the background)
-//            Searcher searcher = new ApplicationsSearcher(this);
-//            searcher.setRefresh(isRefresh);
-//            runTask(searcher);
-//            return;
-//        }
-
-        updateSearchRecords(isRefresh, new QuerySearcher(this, query));
     }
 
     private void showResultList(boolean animate) {
@@ -987,16 +932,34 @@ public class Behaviour implements ISearchActivity {
         }
     }
 
+    public void updateSearchRecords() {
+        Editable searchText = mSearchEditText.getText();
+        if (searchText.length() > 0) {
+            String text = searchText.toString();
+            updateSearchRecords(true, text);
+        } else {
+            refreshSearchRecords();
+        }
+    }
+
+    /**
+     * This function gets called on query changes.
+     * It will ask all the providers for data
+     * This function is not called for non search-related changes! Have a look at onDataSetChanged() if that's what you're looking for :)
+     *
+     * @param isRefresh whether the query is refreshing the existing result, or is a completely new query
+     * @param query     the query on which to search
+     */
+    private void updateSearchRecords(boolean isRefresh, @NonNull String query) {
+        updateSearchRecords(isRefresh, new QuerySearcher(this, query));
+    }
+
     private void updateSearchRecords(boolean isRefresh, @NonNull Searcher searcher) {
-        if (isRefresh)
-            mResultList.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_NORMAL);
-        else
-            mResultList.setTranscriptMode(AbsListView.TRANSCRIPT_MODE_ALWAYS_SCROLL);
+        searcher.setRefresh(isRefresh);
 
         resetTask();
         mTBLauncherActivity.dismissPopup();
 
-        searcher.setRefresh(isRefresh);
         TBApplication.runTask(getContext(), searcher);
         showResultList(true);
     }

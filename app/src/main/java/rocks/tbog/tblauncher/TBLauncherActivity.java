@@ -93,8 +93,7 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
                 if (START_LOAD.equalsIgnoreCase(intent.getAction())) {
                     app.behaviour().displayLoader(true);
                 } else if (LOAD_OVER.equalsIgnoreCase(intent.getAction())) {
-                    app.behaviour().refreshSearchRecords();
-                    //app.behaviour().updateSearchRecords();
+                    app.behaviour().updateSearchRecords();
                 } else if (FULL_LOAD_OVER.equalsIgnoreCase(intent.getAction())) {
                     Log.v(TAG, "All providers are done loading.");
 

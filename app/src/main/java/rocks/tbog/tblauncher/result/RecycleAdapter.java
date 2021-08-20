@@ -1,5 +1,6 @@
 package rocks.tbog.tblauncher.result;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
@@ -143,10 +144,13 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
     }
 
     public void clear() {
+        resultsOriginal = null;
+        final int itemCount = results.size();
         results.clear();
-        notifyDataSetChanged();
+        notifyItemRangeRemoved(0, itemCount);
     }
 
+    @SuppressLint("NotifyDataSetChanged")
     public void updateResults(Collection<? extends EntryItem> results) {
         resultsOriginal = null;
         this.results.clear();
@@ -159,7 +163,6 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
         results.remove(result);
         if (resultsOriginal != null)
             resultsOriginal.remove(result);
-        //notifyDataSetChanged();
         notifyItemRemoved(position);
     }
 
@@ -213,6 +216,7 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
 
         //Invoked in the UI thread to publish the filtering results in the user interface.
         @SuppressWarnings("unchecked")
+        @SuppressLint("NotifyDataSetChanged")
         @Override
         protected void publishResults(CharSequence constraint, FilterResults filterResults) {
             if (filterResults != null) {
