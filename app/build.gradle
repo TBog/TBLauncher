@@ -3,14 +3,14 @@ apply plugin: 'kotlin-android'
 
 android {
     compileSdkVersion 30
-    buildToolsVersion '30.0.2'
+    buildToolsVersion '30.0.3'
 
     defaultConfig {
         applicationId "rocks.tbog.tblauncher"
         minSdkVersion 19
         targetSdkVersion 30
-        versionCode 25
-        versionName "6.3"
+        versionCode 27
+        versionName "6.5"
         vectorDrawables.useSupportLibrary = true
     }
 
