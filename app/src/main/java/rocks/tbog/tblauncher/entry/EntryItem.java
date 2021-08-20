@@ -179,11 +179,11 @@ public abstract class EntryItem {
         public int compare(EntryItem lhs, EntryItem rhs) {
             if (lhs.getRelevance() == rhs.getRelevance()) {
                 if (lhs.relevanceSource != null && rhs.relevanceSource != null)
-                    return lhs.relevanceSource.compareTo(rhs.relevanceSource);
+                    return rhs.relevanceSource.compareTo(lhs.relevanceSource);
                 else
-                    return lhs.name.compareTo(rhs.name);
+                    return rhs.name.compareTo(lhs.name);
             }
-            return lhs.getRelevance() - rhs.getRelevance();
+            return rhs.getRelevance() - lhs.getRelevance();
         }
 
     }
@@ -192,8 +192,8 @@ public abstract class EntryItem {
         @Override
         public int compare(EntryItem lhs, EntryItem rhs) {
             if (lhs.normalizedName != null && rhs.normalizedName != null)
-                return lhs.normalizedName.compareTo(rhs.normalizedName);
-            return lhs.name.compareTo(rhs.name);
+                return rhs.normalizedName.compareTo(lhs.normalizedName);
+            return rhs.name.compareTo(lhs.name);
         }
 
     }

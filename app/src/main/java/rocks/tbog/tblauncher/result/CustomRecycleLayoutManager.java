@@ -39,7 +39,7 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
     private SparseArray<View> mViewCache = null;
 
     public CustomRecycleLayoutManager() {
-        this(true, true);
+        this(true, false);
     }
 
     public CustomRecycleLayoutManager(boolean firstAtBottom, boolean reverseAdapter) {
