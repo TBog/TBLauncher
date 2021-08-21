@@ -308,7 +308,7 @@ public class Behaviour implements ISearchActivity {
                 return onKeyboardClosed();
 
             // launch most relevant result
-            mResultAdapter.onClick(mResultAdapter.getCount() - 1, view);
+            mResultAdapter.onClick(0, view);
             return true;
         });
     }
