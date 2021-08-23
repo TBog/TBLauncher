@@ -19,16 +19,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.ShortcutEntry;
+import rocks.tbog.tblauncher.utils.PrefCache;
 
 public class DBHelper {
     private static final String TAG = DBHelper.class.getSimpleName();
     private static DB database = null;
     private static final String[] TABLE_COLUMNS_APPS = new String[]{"_id", "display_name", "component_name", "custom_flags"};//, "custom_icon"};
     private static final String[] TABLE_APPS_CUSTOM_ICON = new String[]{"custom_icon"};
+    private static final String[] TABLE_APPS_CACHED_ICON = new String[]{"cached_icon"};
     private static final String[] TABLE_FAVORITES_CUSTOM_ICON = new String[]{"custom_icon"};
     private static final String[] TABLE_COLUMNS_FAVORITES = new String[]{"record", "position", "custom_flags", "name"};//, "custom_icon"};
     private static final String[] TABLE_COLUMNS_SHORTCUTS = new String[]{"_id", "name", "package", "info_data", "icon_png", "custom_flags"};
@@ -533,7 +534,7 @@ public class DBHelper {
      * Add all tags from the provided map values
      *
      * @param context android context
-     * @param tags map with record names as key and a list of tags as value
+     * @param tags    map with record names as key and a list of tags as value
      */
     public static void addTags(Context context, Map<String, ? extends Collection<String>> tags) {
         SQLiteDatabase db = getDatabase(context);
@@ -765,6 +766,25 @@ public class DBHelper {
         return null;
     }
 
+    public static boolean setCachedAppIcon(Context context, String componentName, byte[] icon) {
+        SQLiteDatabase db = getDatabase(context);
+        String sql = "UPDATE apps SET cached_icon=? WHERE component_name=?";
+        try {
+            SQLiteStatement statement = db.compileStatement(sql);
+            statement.bindBlob(1, icon);
+            statement.bindString(2, componentName);
+            int count = statement.executeUpdateDelete();
+            if (count != 1) {
+                Log.e(TAG, "setCachedAppIcon; count = " + count);
+            }
+            statement.close();
+        } catch (Exception e) {
+            Log.e(TAG, "Insert or Update cached app icon `" + componentName + "`", e);
+            return false;
+        }
+        return true;
+    }
+
     public static AppRecord setCustomAppIcon(Context context, String componentName, byte[] icon) {
         SQLiteDatabase db = getDatabase(context);
         String sql = "UPDATE apps SET custom_flags=custom_flags|?, custom_icon=? WHERE component_name=?";
@@ -779,7 +799,7 @@ public class DBHelper {
             }
             statement.close();
         } catch (Exception e) {
-            Log.e(TAG, "Insert or Update custom app name", e);
+            Log.e(TAG, "Insert or Update custom app icon `" + componentName + "`", e);
         }
 
         return getAppRecord(db, componentName);
@@ -799,7 +819,7 @@ public class DBHelper {
             }
             statement.close();
         } catch (Exception e) {
-            Log.e(TAG, "Insert or Update custom fav name", e);
+            Log.e(TAG, "Insert or Update custom fav icon `" + entryId + "`", e);
         }
 
         //return getAppRecord(db, componentName);
@@ -863,16 +883,26 @@ public class DBHelper {
     }
 
     @Nullable
-    public static byte[] getCustomAppIcon(Context context, String componentName) {
+    private static byte[] getAppIcon(Context context, String componentName, String[] dbColumn) {
         SQLiteDatabase db = getDatabase(context);
         String[] selArgs = new String[]{componentName};
-        try (Cursor cursor = db.query("apps", TABLE_APPS_CUSTOM_ICON,
+        try (Cursor cursor = db.query("apps", dbColumn,
                 "component_name=?", selArgs, null, null, null)) {
             if (cursor.moveToNext()) {
                 return cursor.getBlob(0);
             }
         }
         return null;
+    }
+
+    @Nullable
+    public static byte[] getCachedAppIcon(Context context, String componentName) {
+        return getAppIcon(context, componentName, TABLE_APPS_CACHED_ICON);
+    }
+
+    @Nullable
+    public static byte[] getCustomAppIcon(Context context, String componentName) {
+        return getAppIcon(context, componentName, TABLE_APPS_CUSTOM_ICON);
     }
 
     @Nullable

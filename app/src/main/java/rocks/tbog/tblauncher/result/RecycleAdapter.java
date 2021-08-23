@@ -109,16 +109,8 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
         try {
             result = results.get(position);
             ResultHelper.launch(v, result);
-        } catch (ArrayIndexOutOfBoundsException e) {
-//            return;
+        } catch (ArrayIndexOutOfBoundsException ignored) {
         }
-
-        // Record the launch after some period,
-        // * to ensure the animation runs smoothly
-        // * to avoid a flickering -- launchOccurred will refresh the list
-        // Thus TOUCH_DELAY * 3
-//        Handler handler = new Handler();
-//        handler.postDelayed(() -> TBApplication.behaviour(v.getContext()).onLaunchOccurred(), TBApplication.TOUCH_DELAY * 3);
     }
 
     public boolean onLongClick(final int pos, View v) {

@@ -21,7 +21,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import androidx.preference.PreferenceManager;
 
-import java.io.ByteArrayOutputStream;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -65,6 +64,7 @@ import rocks.tbog.tblauncher.searcher.Searcher;
 import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
 import rocks.tbog.tblauncher.utils.Timer;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
+import rocks.tbog.tblauncher.utils.Utilities;
 
 public class DataHandler extends BroadcastReceiver
         implements SharedPreferences.OnSharedPreferenceChangeListener {
@@ -940,44 +940,42 @@ public class DataHandler extends BroadcastReceiver
         DBHelper.removeCustomAppName(context, componentName, defaultName);
     }
 
-    public AppRecord setCustomAppIcon(String componentName, Bitmap bitmap) {
-        ByteArrayOutputStream stream = null;
-        try {
-            stream = new ByteArrayOutputStream(1024);
-            if (!bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream))
-                stream = null;
-            else {
-                stream.flush();
-                stream.close();
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Unable to convert bitmap", e);
+    public void setCachedAppIcon(String componentName, Bitmap bitmap) {
+        byte[] array = Utilities.bitmapToByteArray(bitmap);
+        if (array == null) {
+            Log.e(TAG, "bitmapToByteArray failed for `" + componentName + "` with bitmap " + bitmap);
+            return;
         }
-        if (stream == null)
+        if (!DBHelper.setCachedAppIcon(context, componentName, array)) {
+            Log.w(TAG, "setCachedAppIcon failed for `" + componentName + "` with bitmap " + bitmap);
+        }
+    }
+
+    public AppRecord setCustomAppIcon(String componentName, Bitmap bitmap) {
+        byte[] array = Utilities.bitmapToByteArray(bitmap);
+        if (array == null) {
+            Log.e(TAG, "bitmapToByteArray failed for `" + componentName + "` with bitmap " + bitmap);
             return null;
-        return DBHelper.setCustomAppIcon(context, componentName, stream.toByteArray());
+        }
+        return DBHelper.setCustomAppIcon(context, componentName, array);
     }
 
     public void setCustomStaticEntryIcon(String entryId, Bitmap bitmap) {
-        ByteArrayOutputStream stream = null;
-        try {
-            stream = new ByteArrayOutputStream(1024);
-            if (!bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream))
-                stream = null;
-            else {
-                stream.flush();
-                stream.close();
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Unable to convert bitmap", e);
-        }
-        if (stream != null) {
-            DBHelper.setCustomStaticEntryIcon(context, entryId, stream.toByteArray());
+        byte[] array = Utilities.bitmapToByteArray(bitmap);
+        if (array != null) {
+            DBHelper.setCustomStaticEntryIcon(context, entryId, array);
             // reload provider to make sure we're up to date
             FavProvider favProvider = getFavProvider();
             if (favProvider != null)
                 favProvider.reload(true);
         }
+    }
+
+    public Bitmap getCachedAppIcon(String componentName) {
+        byte[] bytes = DBHelper.getCachedAppIcon(context, componentName);
+        if (bytes == null)
+            return null;
+        return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
     }
 
     public Bitmap getCustomAppIcon(String componentName) {

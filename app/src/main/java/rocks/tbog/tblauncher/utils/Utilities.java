@@ -42,6 +42,7 @@ import androidx.core.content.res.ResourcesCompat;
 import androidx.core.view.GestureDetectorCompat;
 import androidx.lifecycle.Lifecycle;
 
+import java.io.ByteArrayOutputStream;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -115,6 +116,24 @@ public class Utilities {
             canvas.drawRGB(255, 255, 255);
         }
         return bitmap;
+    }
+
+    @Nullable
+    public static byte[] bitmapToByteArray(@NonNull Bitmap bitmap) {
+        ByteArrayOutputStream stream = null;
+        try {
+            stream = new ByteArrayOutputStream(1024);
+            if (!bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream))
+                stream = null;
+            else {
+                stream.flush();
+                stream.close();
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Unable to convert bitmap", e);
+            stream = null;
+        }
+        return stream != null ? stream.toByteArray() : null;
     }
 
     /**

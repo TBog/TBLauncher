@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ResolveInfo;
@@ -21,6 +22,7 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
+import androidx.core.content.pm.PackageInfoCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.preference.PreferenceManager;
 
@@ -131,6 +133,16 @@ public class IconsHandler {
             mLoadIconsPackTask = Utilities.runAsync((task) -> {
                 if (task == mLoadIconsPackTask)
                     iconPack.load(ctx.getPackageManager());
+                if (iconPack.isLoaded()) {
+                    PackageInfo packageInfo;
+                    try {
+                        packageInfo = ctx.getPackageManager().getPackageInfo(iconPack.getPackPackageName(), 0);
+                    } catch (NameNotFoundException ignored) {
+                        packageInfo = null;
+                    }
+                    long version = packageInfo != null ? PackageInfoCompat.getLongVersionCode(packageInfo) : 0;
+                    TBApplication.dataHandler(ctx).runAfterLoadOver(() -> Utilities.runAsync(() -> cacheAppIcons(version)));
+                }
             }, (task) -> {
                 // timer end
                 timer.stop();
@@ -148,6 +160,36 @@ public class IconsHandler {
         }
     }
 
+    private void cacheAppIcons(long cacheVersion) {
+        if (mIconPack == null) {
+            Log.e(TAG, "mIconPack==null and we want to cache icons?");
+            return;
+        }
+        if (!mIconPack.isLoaded()) {
+            Log.e(TAG, "icon pack `" + mIconPack.getPackPackageName() + "` not loaded and we want to cache icons?");
+            return;
+        }
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+        long version = prefs.getLong("cached-app-icons-version", -1);
+        if (version == cacheVersion) {
+            Log.i(TAG, "cached app icons version found " + version);
+            return;
+        }
+
+        DataHandler dataHandler = TBApplication.dataHandler(ctx);
+        List<AppEntry> appEntries = dataHandler.getApplications();
+        if (appEntries == null)
+            return;
+        for (AppEntry appEntry : appEntries) {
+            Drawable drawable = getDrawableIconForPackage(appEntry.componentName, UserHandleCompat.CURRENT_USER);
+            Bitmap bitmap = getIconBitmap(ctx, drawable);
+            dataHandler.setCachedAppIcon(appEntry.getUserComponentName(), bitmap);
+        }
+
+        prefs.edit().putLong("cached-app-icons-version", cacheVersion).apply();
+        Log.i(TAG, "cached app icons version changed from " + version + " to " + cacheVersion);
+    }
+
     /**
      * Get or generate icon for an app
      */
@@ -157,12 +199,20 @@ public class IconsHandler {
         if (mIconPack != null) {
             // just checking will make this thread wait for the icon pack to load
             if (!mIconPack.isLoaded()) {
+                String componentString = componentName.toString();
                 if (mLoadIconsPackTask == null) {
                     Log.w(TAG, "icon pack `" + mIconPack.getPackPackageName() + "` not loaded, reload");
                     SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(ctx);
                     loadIconsPack(pref.getString("icons-pack", null));
-                    return null;
+                    return getCachedAppIcon(componentString);
                 }
+
+                Drawable cachedIcon = getCachedAppIcon(componentString);
+                if (cachedIcon != null) {
+                    Log.i(TAG, "icon pack `" + mIconPack.getPackPackageName() + "` not loaded, cached icon used");
+                    return cachedIcon;
+                }
+
                 Log.w(TAG, "icon pack `" + mIconPack.getPackPackageName() + "` not loaded, wait");
                 try {
                     mLoadIconsPackTask.wait();
@@ -289,6 +339,17 @@ public class IconsHandler {
         return null;
     }
 
+    @WorkerThread
+    public Drawable getCachedAppIcon(String componentName) {
+        Bitmap bitmap = TBApplication.dataHandler(ctx).getCachedAppIcon(componentName);
+        if (bitmap != null)
+            return new BitmapDrawable(ctx.getResources(), bitmap);
+
+        Log.e(TAG, "Unable to get cached app icon for " + componentName);
+        return null;
+    }
+
+    @WorkerThread
     public Drawable getCustomIcon(String componentName, long customIcon) {
         Bitmap bitmap = TBApplication.dataHandler(ctx).getCustomAppIcon(componentName);
         if (bitmap != null)

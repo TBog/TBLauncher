@@ -11,7 +11,7 @@ import rocks.tbog.tblauncher.entry.FilterEntry;
 class DB extends SQLiteOpenHelper {
 
     private final static String DB_NAME = "kiss.s3db";
-    private final static int DB_VERSION = 12;
+    private final static int DB_VERSION = 13;
 
     DB(Context context) {
         super(context, DB_NAME, null, DB_VERSION);
@@ -135,6 +135,10 @@ class DB extends SQLiteOpenHelper {
                         database.endTransaction();
                         database.execSQL("PRAGMA foreign_keys=on");
                     }
+                    // fall through
+                case 12:
+                    database.execSQL("ALTER TABLE \"apps\" ADD COLUMN \"cached_icon\" BLOB DEFAULT NULL");
+                    // fall through
                 default:
                     break;
             }
