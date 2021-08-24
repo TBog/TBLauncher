@@ -391,7 +391,7 @@
     <string name="title_behaviour">Behaviour</string>
     <string name="root_mode">Root mode</string>
     <string name="root_mode_summary">Used to hibernate apps</string>
-    <string name="root_mode_error">Could not get root access</string>
+    <string name="root_mode_error">Could not gain root access</string>
     <string name="behaviour_link_close_keyboard_back_button">Close keyboard with «Back» button</string>
     <string name="keyboard_suggestions">Autocompletion/suggestions</string>
     <string name="device_admin_explanation">Used to lock the screen</string>
