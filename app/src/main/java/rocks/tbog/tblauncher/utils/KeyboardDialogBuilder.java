@@ -13,7 +13,6 @@ import android.view.View;
 import android.view.ViewParent;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.annotation.IdRes;
@@ -58,12 +57,22 @@ public class KeyboardDialogBuilder {
     }
 
     public static void setButtonBarBackground(Dialog dialog) {
+        Context ctx = dialog.getContext();
         View buttonLayout;
-        @IdRes
-        int buttonPanel = dialog.getContext().getResources().getIdentifier("buttonPanel", "id", "android");
+        @IdRes int buttonPanel;
+
+        // try to find the `buttonPanel` defined in the android layout
+        buttonPanel = ctx.getResources().getIdentifier("buttonPanel", "id", "android");
         buttonLayout = dialog.findViewById(buttonPanel);
+
+        // try to find the `buttonPanel` defined in the androidx layout
         if (buttonLayout == null) {
-            // hack: can't find the button container by id, get the parent of one button
+            buttonPanel = ctx.getResources().getIdentifier("buttonPanel", "id", ctx.getPackageName());
+            buttonLayout = dialog.findViewById(buttonPanel);
+        }
+
+        // hack: can't find the button container by id, get the parent of one button
+        if (buttonLayout == null) {
             View button = dialog.findViewById(android.R.id.button1);
             ViewParent parent = button == null ? null : button.getParent();
             if (parent instanceof View) {
@@ -72,13 +81,14 @@ public class KeyboardDialogBuilder {
                 // assuming the buttonPanel is inflated from `abc_alert_dialog_button_bar_material.xml`
                 if (buttonLayout instanceof androidx.appcompat.widget.ButtonBarLayout) {
                     parent = buttonLayout.getParent();
-                    if (parent instanceof ScrollView)
-                        buttonLayout = (ScrollView) parent;
+                    if (parent instanceof android.widget.ScrollView)
+                        buttonLayout = (View) parent;
                 }
             }
         }
+
+        // apply the background
         if (buttonLayout != null) {
-            Context ctx = dialog.getContext();
             Drawable background = TBApplication.ui(ctx).getDialogButtonBarBackgroundDrawable(ctx.getTheme());
             if (background != null)
                 buttonLayout.setBackground(background);
