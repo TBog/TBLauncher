@@ -485,7 +485,7 @@ public class WidgetLayout extends ViewGroup {
         if (pagePos == LayoutParams.PAGE_LEFT)
             return (mPageCount.x / 2 - pageIdx) * width;
 
-        final int center = mPageCount.y / 2 * width;
+        final int center = mPageCount.x / 2 * width;
         if (pagePos == LayoutParams.PAGE_RIGHT)
             return center + pageIdx * width;
 
