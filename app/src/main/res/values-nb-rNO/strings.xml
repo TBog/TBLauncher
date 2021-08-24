@@ -356,4 +356,7 @@
     <string name="title_behaviour">Oppførsel</string>
     <string name="export_chooser">Eksporter %s</string>
     <string name="title_backup">Sikkerhetskopi</string>
+    <string name="menu_app_hibernate">Send i dvalemodus</string>
+    <string name="toast_hibernate_error">[Feil] %s er ikke i dvalemodus</string>
+    <string name="toast_hibernate_completed">%s i dvalemodus, kjør igjen for å vekke</string>
 </resources>
