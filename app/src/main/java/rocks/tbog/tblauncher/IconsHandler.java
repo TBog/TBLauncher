@@ -170,24 +170,46 @@ public class IconsHandler {
             return;
         }
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
-        long version = prefs.getLong("cached-app-icons-version", -1);
-        if (version == cacheVersion) {
-            Log.i(TAG, "cached app icons version found " + version);
+        final long version = prefs.getLong("cached-app-icons-version", -1);
+        final String packName = prefs.getString("cached-app-icons-pack", "");
+
+        // check icon pack name and version
+        if (version == cacheVersion && packName.equals(mIconPack.getPackPackageName())) {
+            Log.i(TAG, "cached app icons `" + packName + "` v" + version + " found. Skip cache build.");
             return;
         }
 
         DataHandler dataHandler = TBApplication.dataHandler(ctx);
         List<AppEntry> appEntries = dataHandler.getApplications();
-        if (appEntries == null)
+        if (appEntries == null) {
+            Log.w(TAG, "Can't build icon cache. dataHandler.getApplications() == null");
             return;
+        }
+
+        // build the cache
         for (AppEntry appEntry : appEntries) {
             Drawable drawable = getDrawableIconForPackage(appEntry.componentName, UserHandleCompat.CURRENT_USER);
             Bitmap bitmap = getIconBitmap(ctx, drawable);
             dataHandler.setCachedAppIcon(appEntry.getUserComponentName(), bitmap);
         }
 
-        prefs.edit().putLong("cached-app-icons-version", cacheVersion).apply();
-        Log.i(TAG, "cached app icons version changed from " + version + " to " + cacheVersion);
+        // save icon pack name and version
+        prefs.edit()
+                .putLong("cached-app-icons-version", cacheVersion)
+                .putString("cached-app-icons-pack", mIconPack.getPackPackageName())
+                .apply();
+
+        Log.i(TAG, "cached app icons changed from " +
+                "`" + packName + "` v" + version + " to " +
+                "`" + mIconPack.getPackPackageName() + "` v" + cacheVersion);
+    }
+
+    public void resetCachedAppIcons() {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+        prefs.edit()
+                .putLong("cached-app-icons-version", 0)
+                .putString("cached-app-icons-pack", "")
+                .apply();
     }
 
     /**

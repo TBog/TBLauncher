@@ -83,6 +83,9 @@ public class ConfirmDialog extends BasePreferenceDialog {
                 PreferenceManager.setDefaultValues(requireContext(), R.xml.preferences, true);
                 PreferenceManager.setDefaultValues(requireContext(), R.xml.preference_features, true);
                 break;
+            case "reset-cached-app-icons":
+                TBApplication.iconsHandler(getContext()).resetCachedAppIcons();
+                break;
             case "exit-app":
                 //getActivity().finishAffinity();
                 System.exit(0);
@@ -139,6 +142,10 @@ public class ConfirmDialog extends BasePreferenceDialog {
             case "reset-preferences":
                 ((TextView) view.findViewById(android.R.id.text1)).setText(R.string.reset_preferences_confirm);
                 ((TextView) view.findViewById(android.R.id.text2)).setText(R.string.reset_preferences_description);
+                break;
+            case "reset-cached-app-icons":
+                ((TextView) view.findViewById(android.R.id.text1)).setText(R.string.reset_cached_app_icons_confirm);
+                ((TextView) view.findViewById(android.R.id.text2)).setText(R.string.reset_cached_app_icons_description);
                 break;
             case "exit-app":
                 ((TextView) view.findViewById(android.R.id.text1)).setText(R.string.exit_the_app_confirm);

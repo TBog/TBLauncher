@@ -330,6 +330,8 @@
     <string name="reset_preferences">Reset preferences</string>
     <string name="reset_preferences_confirm">Really discard preferences?</string>
     <string name="reset_preferences_description">All settings will be reset to the default value</string>
+    <string name="reset_cached_app_icons_confirm">Really reset icon pack cache?</string>
+    <string name="reset_cached_app_icons_description">The cached icon pack name and version will be reset. This will force a rebuild of the cache the next time the icon pack is loaded.</string>
     <string name="reset_matrix_confirm">Set default values?</string>
     <string name="reset_matrix_description">All icon settings on this screen will be reset to the default, neutral values</string>
     <string name="popup_section">Popup</string>
@@ -409,6 +411,7 @@
     <string name="lwp_pages_vertical_2">2 pages (above and below)</string>
     <string name="lwp_pages_horizontal_1">center page</string>
     <string name="lwp_pages_horizontal_2">2 pages (left and right)</string>
+    <string name="reset_cached_app_icons">Reset icon pack cache</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>

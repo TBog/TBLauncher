@@ -537,6 +537,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "device-admin":
                     case "reset-matrix":
                     case "reset-preferences":
+                    case "reset-cached-app-icons":
                     case "exit-app":
                     case "reset-default-launcher":
                     case "export-tags":

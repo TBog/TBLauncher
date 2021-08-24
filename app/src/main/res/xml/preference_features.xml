@@ -291,6 +291,11 @@
             android:summary="@string/screen_off_cache_clear_summary"
             android:title="@string/screen_off_cache_clear" />
 
+        <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:dialogLayout="@layout/pref_confirm"
+                android:key="reset-cached-app-icons"
+                android:title="@string/reset_cached_app_icons" />
+
     </androidx.preference.PreferenceCategory>
 
     <!-- Providers -->
