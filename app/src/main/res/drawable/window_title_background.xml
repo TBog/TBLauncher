@@ -1,60 +1,14 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
-
     <item
-        android:left="@dimen/dialog_margin_horizontal"
-        android:right="@dimen/dialog_margin_horizontal"
-        android:top="@dimen/dialog_margin_vertical">
+            android:left="@dimen/dialog_margin_horizontal"
+            android:right="@dimen/dialog_margin_horizontal"
+            android:top="@dimen/dialog_margin_vertical">
         <shape>
-            <size
-                android:width="32dp"
-                android:height="64dp" />
             <gradient
-                android:angle="90"
-                android:endColor="#FF000000"
-                android:startColor="#00000000"
-                android:type="linear" />
+                    android:angle="90"
+                    android:endColor="#FF000000"
+                    android:startColor="#00000000"
+                    android:type="linear" />
         </shape>
     </item>
-
-    <item
-        android:gravity="top"
-        android:left="@dimen/dialog_margin_horizontal"
-        android:right="@dimen/dialog_margin_horizontal"
-        android:top="@dimen/dialog_margin_vertical">
-        <shape>
-            <size android:height="1dp" />
-            <solid android:color="@color/colorAccent" />
-        </shape>
-    </item>
-
-    <item
-        android:gravity="left"
-        android:left="@dimen/dialog_margin_horizontal"
-        android:right="@dimen/dialog_margin_horizontal"
-        android:top="@dimen/dialog_margin_vertical">
-        <shape>
-            <size android:width="1dp" />
-            <gradient
-                android:angle="90"
-                android:endColor="@color/colorAccent"
-                android:startColor="#00000000"
-                android:type="linear" />
-        </shape>
-    </item>
-
-    <item
-        android:gravity="right"
-        android:left="@dimen/dialog_margin_horizontal"
-        android:right="@dimen/dialog_margin_horizontal"
-        android:top="@dimen/dialog_margin_vertical">
-        <shape>
-            <size android:width="1dp" />
-            <gradient
-                android:angle="90"
-                android:endColor="@color/colorAccent"
-                android:startColor="#00000000"
-                android:type="linear" />
-        </shape>
-    </item>
-
 </layer-list>

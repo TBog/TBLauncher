@@ -1,0 +1,59 @@
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+            android:bottom="@dimen/dialog_margin_vertical"
+            android:left="@dimen/dialog_margin_horizontal"
+            android:right="@dimen/dialog_margin_horizontal">
+        <shape>
+            <size
+                    android:width="16dp"
+                    android:height="16dp" />
+            <gradient
+                    android:angle="270"
+                    android:endColor="#FF000000"
+                    android:startColor="#00000000"
+                    android:type="linear" />
+        </shape>
+    </item>
+
+    <item
+            android:bottom="@dimen/dialog_margin_vertical"
+            android:gravity="bottom"
+            android:left="@dimen/dialog_margin_horizontal"
+            android:right="@dimen/dialog_margin_horizontal">
+        <shape>
+            <size android:height="1dp" />
+            <solid android:color="@color/colorAccent" />
+        </shape>
+    </item>
+
+    <item
+            android:bottom="@dimen/dialog_margin_vertical"
+            android:gravity="left"
+            android:left="@dimen/dialog_margin_horizontal"
+            android:right="@dimen/dialog_margin_horizontal">
+        <shape>
+            <size android:width="1dp" />
+            <gradient
+                    android:angle="90"
+                    android:endColor="#00000000"
+                    android:startColor="@color/colorAccent"
+                    android:type="linear" />
+        </shape>
+    </item>
+
+    <item
+            android:bottom="@dimen/dialog_margin_vertical"
+            android:gravity="right"
+            android:left="@dimen/dialog_margin_horizontal"
+            android:right="@dimen/dialog_margin_horizontal">
+        <shape>
+            <size android:width="1dp" />
+            <gradient
+                    android:angle="90"
+                    android:endColor="#00000000"
+                    android:startColor="@color/colorAccent"
+                    android:type="linear" />
+        </shape>
+    </item>
+
+</layer-list>

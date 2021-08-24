@@ -13,6 +13,7 @@ import android.view.View;
 import android.view.ViewParent;
 import android.view.Window;
 import android.view.WindowManager;
+import android.widget.ScrollView;
 import android.widget.TextView;
 
 import androidx.annotation.IdRes;
@@ -67,6 +68,13 @@ public class KeyboardDialogBuilder {
             ViewParent parent = button == null ? null : button.getParent();
             if (parent instanceof View) {
                 buttonLayout = (View) parent;
+
+                // assuming the buttonPanel is inflated from `abc_alert_dialog_button_bar_material.xml`
+                if (buttonLayout instanceof androidx.appcompat.widget.ButtonBarLayout) {
+                    parent = buttonLayout.getParent();
+                    if (parent instanceof ScrollView)
+                        buttonLayout = (ScrollView) parent;
+                }
             }
         }
         if (buttonLayout != null) {
