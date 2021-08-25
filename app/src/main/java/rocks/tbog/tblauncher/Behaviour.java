@@ -554,9 +554,10 @@ public class Behaviour implements ISearchActivity {
                     hideResultList(false);
                 } else {
                     // try to execute the action
-                    TBApplication.dataHandler(getContext()).runAfterLoadOver(() -> {
-                        mLauncherButton.postDelayed(() -> executeAction(openResult, null), KEYBOARD_ANIMATION_DELAY);
-                    });
+                    mLauncherButton.postDelayed(() ->
+                                    TBApplication.dataHandler(getContext()).runAfterLoadOver(() ->
+                                            executeAction(openResult, null)),
+                            KEYBOARD_ANIMATION_DELAY);
                 }
                 break;
             case WIDGET:
@@ -1249,46 +1250,13 @@ public class Behaviour implements ISearchActivity {
 
         LauncherState.Desktop desktop = TBApplication.state().getDesktop();
         showDesktop(desktop);
-        if (desktop != null) {
-            switch (desktop) {
-                case SEARCH:
-                    // hide/show the QuickList
-                    if (PrefCache.modeSearchQuickListVisible(mPref))
-                        TBApplication.quickList(getContext()).showQuickList();
-                    else
-                        TBApplication.quickList(getContext()).hideQuickList(false);
-                    break;
-                case WIDGET:
-                    // hide/show the QuickList
-                    if (PrefCache.modeWidgetQuickListVisible(mPref))
-                        TBApplication.quickList(getContext()).showQuickList();
-                    else
-                        TBApplication.quickList(getContext()).hideQuickList(false);
-                    break;
-                case EMPTY:
-                default:
-                    // hide/show the QuickList
-                    if (PrefCache.modeEmptyQuickListVisible(mPref))
-                        TBApplication.quickList(getContext()).showQuickList();
-                    else
-                        TBApplication.quickList(getContext()).hideQuickList(false);
-                    break;
-            }
-        }
     }
 
     public void onNewIntent() {
         LauncherState state = TBApplication.state();
         Log.i(TAG, "onNewIntent desktop=" + state.getDesktop());
 
-        executeButtonAction("button-home");
-//        if (mSearchEditText.getText().length() > 0) {
-//            mSearchEditText.setText("");
-//            hideKeyboard();
-//            hideSearchBar(false);
-//        } else if (!TBApplication.state().isResultListVisible()) {
-//            toggleSearchBar();
-//        }
+        closeFragmentDialog();
 
         Intent intent = mTBLauncherActivity.getIntent();
         if (intent != null) {
@@ -1296,10 +1264,11 @@ public class Behaviour implements ISearchActivity {
             if (LauncherApps.ACTION_CONFIRM_PIN_SHORTCUT.equals(action)) {
                 // Save single shortcut via a pin request
                 ShortcutUtil.addShortcut(mTBLauncherActivity, intent);
+                return;
             }
         }
 
-        closeFragmentDialog();
+        executeButtonAction("button-home");
     }
 
     public void onWindowFocusChanged(boolean hasFocus) {
@@ -1313,7 +1282,6 @@ public class Behaviour implements ISearchActivity {
                     // UI_ANIMATION_DURATION should be the exact time the full-screen animation ends
                     mSearchEditText.postDelayed(this::showKeyboard, UI_ANIMATION_DURATION);
                 }
-                //if (mSearchEditText.getText().length() != 0 || !mResultAdapter.isEmpty())
                 if (TBApplication.state().isResultListVisible()) {
                     //updateSearchRecords();
                     showResultList(false);

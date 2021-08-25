@@ -26,7 +26,7 @@ public class SaveSingleOreoShortcutAsync extends AsyncTask<Void, Integer, Boolea
     private static final String TAG = "OreoShortcutAsync";
     private final WeakReference<Context> context;
     private final WeakReference<DataHandler> dataHandler;
-    private Intent intent;
+    private final Intent intent;
 
     public SaveSingleOreoShortcutAsync(@NonNull Context context, @NonNull Intent intent) {
         this.context = new WeakReference<>(context);
