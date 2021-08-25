@@ -128,4 +128,9 @@ public class PrefCache {
                 return android.R.color.transparent;
         }
     }
+
+    public static boolean modulateContactIcons(Context context) {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+        return pref.getBoolean("matrix-contacts", false);
+    }
 }

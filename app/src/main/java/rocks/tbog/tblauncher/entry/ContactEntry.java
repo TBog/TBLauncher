@@ -25,6 +25,7 @@ import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.result.ResultHelper;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
+import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.Utilities;
 
@@ -122,7 +123,8 @@ public final class ContactEntry extends EntryItem {
         // Contact photo
         ImageView contactIcon = view.findViewById(android.R.id.icon);
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
-            ResultViewHelper.setIconColorFilter(contactIcon, drawFlags);
+            if (PrefCache.modulateContactIcons(context))
+                ResultViewHelper.setIconColorFilter(contactIcon, drawFlags);
             contactIcon.setVisibility(View.VISIBLE);
             ResultViewHelper.setIconAsync(drawFlags, this, contactIcon, AsyncSetEntryIcon.class);
         } else {
@@ -158,7 +160,8 @@ public final class ContactEntry extends EntryItem {
         ImageView contactIcon = view.findViewById(android.R.id.icon);
 
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
-            ResultViewHelper.setIconColorFilter(contactIcon, drawFlags);
+            if (PrefCache.modulateContactIcons(context))
+                ResultViewHelper.setIconColorFilter(contactIcon, drawFlags);
             contactIcon.setVisibility(View.VISIBLE);
             ResultViewHelper.setIconAsync(drawFlags, this, contactIcon, AsyncSetEntryIcon.class);
         } else {
