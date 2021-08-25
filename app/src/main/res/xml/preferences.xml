@@ -105,6 +105,12 @@
         </PreferenceScreen>
 
         <SwitchPreference
+                android:defaultValue="false"
+                android:key="matrix-contacts"
+                android:summary="@string/matrix_contacts_summary"
+                android:title="@string/matrix_contacts" />
+
+        <SwitchPreference
             android:defaultValue="true"
             android:disableDependentsState="true"
             android:key="force-adaptive"

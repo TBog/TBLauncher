@@ -412,6 +412,8 @@
     <string name="lwp_pages_horizontal_1">center page</string>
     <string name="lwp_pages_horizontal_2">2 pages (← and →)</string>
     <string name="reset_cached_app_icons">Reset icon pack</string>
+    <string name="matrix_contacts">Modulate contacts</string>
+    <string name="matrix_contacts_summary">Modulate colors of contact icons</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>
