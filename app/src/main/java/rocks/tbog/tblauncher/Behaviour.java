@@ -1243,7 +1243,7 @@ public class Behaviour implements ISearchActivity {
         }
 
         LauncherState.Desktop desktop = TBApplication.state().getDesktop();
-        //showDesktop(desktop);
+        showDesktop(desktop);
         if (desktop != null) {
             switch (desktop) {
                 case SEARCH:
