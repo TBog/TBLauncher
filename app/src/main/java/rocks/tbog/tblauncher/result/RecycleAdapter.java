@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,6 +27,7 @@ import rocks.tbog.tblauncher.utils.UIColors;
 
 public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> {
 
+    private static final String TAG = RecycleAdapter.class.getSimpleName();
     /**
      * Array list containing all the results currently displayed
      */
@@ -76,7 +78,6 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
             }
         }
 
-
         LayoutInflater inflater = LayoutInflater.from(context);
         View itemView = inflater.inflate(layoutRes, parent, false);
 
@@ -92,8 +93,16 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
 
     @Override
     public void onBindViewHolder(@NonNull Holder holder, int position) {
-        holder.setOnClickListener(view -> onClick(position, view));
-        holder.setOnLongClickListener(view -> onLongClick(position, view));
+        final EntryItem result;
+        try {
+            result = results.get(position);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            Log.e(TAG, "pos=" + position + " size=" + results.size(), e);
+            return;
+        }
+
+        holder.setOnClickListener(view -> onClick(result, view));
+        holder.setOnLongClickListener(view -> onLongClick(result, view));
 
         results.get(position).displayResult(holder.itemView, holder.mDrawFlags);
     }
@@ -103,23 +112,24 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
         return results.size();
     }
 
-    public void onClick(final int position, View v) {
+    public void onClick(int index, View anyView) {
         final EntryItem result;
-
         try {
-            result = results.get(position);
-            ResultHelper.launch(v, result);
-        } catch (ArrayIndexOutOfBoundsException ignored) {
+            result = results.get(index);
+        } catch (ArrayIndexOutOfBoundsException e) {
+            Log.e(TAG, "pos=" + index + " size=" + results.size(), e);
+            return;
         }
+
+        onClick(result, anyView);
     }
 
-    public boolean onLongClick(final int pos, View v) {
-        ListPopup menu;
-        try {
-            menu = results.get(pos).getPopupMenu(v);
-        } catch (ArrayIndexOutOfBoundsException ignored) {
-            return false;
-        }
+    public static void onClick(final EntryItem result, View v) {
+        ResultHelper.launch(v, result);
+    }
+
+    public static boolean onLongClick(final EntryItem result, View v) {
+        ListPopup menu = result.getPopupMenu(v);
 
         // check if menu contains elements and if yes show it
         if (!menu.getAdapter().isEmpty()) {
