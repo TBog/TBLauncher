@@ -25,15 +25,16 @@ public class RecyclerList extends RecyclerView {
         super(context, attrs, defStyleAttr);
     }
 
-    public void scrollToFirstItem() {
-        final int adapterPos;
+    public int getAdapterFirstItemIdx() {
         if (getLayoutManager() instanceof ReversibleAdapterRecyclerLayoutManager) {
             ReversibleAdapterRecyclerLayoutManager lm = (ReversibleAdapterRecyclerLayoutManager) getLayoutManager();
-            adapterPos = lm.isReverseAdapter() ? (getLayoutManager().getItemCount() - 1) : 0;
-        } else {
-            adapterPos = 0;
+            return lm.isReverseAdapter() ? (getLayoutManager().getItemCount() - 1) : 0;
         }
+        return 0;
+    }
 
+    public void scrollToFirstItem() {
+        final int adapterPos = getAdapterFirstItemIdx();
         if (adapterPos >= 0) {
             Log.d(TAG, "scrollToPosition( " + adapterPos + " )");
             scrollToPosition(adapterPos);

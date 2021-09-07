@@ -308,7 +308,9 @@ public class Behaviour implements ISearchActivity {
                 return onKeyboardClosed();
 
             // launch most relevant result
-            mResultAdapter.onClick(0, view);
+            final int mostRelevantIdx = mResultList.getAdapterFirstItemIdx();
+            RecyclerView.ViewHolder holder = mResultList.findViewHolderForAdapterPosition(mostRelevantIdx);
+            mResultAdapter.onClick(mostRelevantIdx, holder != null ? holder.itemView : view);
             return true;
         });
     }
