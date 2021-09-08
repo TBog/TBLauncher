@@ -8,7 +8,6 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.PaintDrawable;
 import android.os.Build;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -25,6 +24,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import rocks.tbog.tblauncher.CustomizeUI;
 import rocks.tbog.tblauncher.LauncherState;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
@@ -209,7 +209,7 @@ public class QuickList {
                 color = UIColors.getQuickListToggleColor(prefs);
             else
                 color = UIColors.getQuickListRipple(prefs);
-            Drawable selector = TBApplication.ui(getContext()).getSelectorDrawable(view, color, true);
+            Drawable selector = CustomizeUI.getSelectorDrawable(view, color, true);
             view.setBackground(selector);
         }
         //mQuickList.setVisibility(mQuickList.getChildCount() == 0 ? View.GONE : View.VISIBLE);
@@ -235,7 +235,7 @@ public class QuickList {
         // show search content
         {
             // if the last action is not the current action, toggle on this action
-            if (!bActionOn || !actionId.equals(mLastSelection)) {
+            if (!bActionOn || !isLastSelection(actionId)) {
                 app.behaviour().runSearcher(query, searcherClass);
 
                 // update toggle information
@@ -267,7 +267,7 @@ public class QuickList {
         // show action provider content
         {
             // if the last action is not the current action, toggle on this action
-            if (!bActionOn || !actionId.equals(mLastSelection)) {
+            if (!bActionOn || !isLastSelection(actionId)) {
                 List<? extends EntryItem> list;
                 list = provider != null ? provider.getPojos() : null;
                 if (list != null) {
@@ -313,7 +313,7 @@ public class QuickList {
 
         // if there is no search we need to filter, just show all matching entries
         if (bAdapterEmpty) {
-            if (bFilterOn && provider != null && actionId.equals(mLastSelection)) {
+            if (bFilterOn && provider != null && isLastSelection(actionId)) {
                 app.behaviour().clearAdapter();
                 bFilterOn = false;
             } else {
@@ -330,7 +330,7 @@ public class QuickList {
             // updateAdapter will change `bAdapterEmpty` and we change it back because we want
             // bAdapterEmpty to represent a search we need to filter
             bAdapterEmpty = true;
-        } else if (bFilterOn && (provider == null || actionId.equals(mLastSelection))) {
+        } else if (bFilterOn && (provider == null || isLastSelection(actionId))) {
             animToggleOff();
             if (mLastAction != null) {
                 bActionOn = true;
