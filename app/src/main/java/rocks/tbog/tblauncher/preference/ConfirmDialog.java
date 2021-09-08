@@ -52,17 +52,19 @@ public class ConfirmDialog extends BasePreferenceDialog {
 
         switch (key) {
             case "device-admin": {
-                if (DeviceAdmin.isAdminActive(getContext())) {
-                    DeviceAdmin.removeActiveAdmin(getContext());
+                final Context context = requireContext();
+                if (DeviceAdmin.isAdminActive(context)) {
+                    DeviceAdmin.removeActiveAdmin(context);
                 } else {
                     Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
-                    intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, DeviceAdmin.getAdminComponent(getContext()));
+                    intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, DeviceAdmin.getAdminComponent(context));
                     intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, getString(R.string.device_admin_explanation));
                     startActivityForResult(intent, SettingsActivity.ENABLE_DEVICE_ADMIN);
                 }
                 break;
             }
-            case "reset-matrix":
+            case "reset-matrix": {
+                final Context context = requireContext();
                 preference
                         .getPreferenceManager()
                         .getSharedPreferences()
@@ -76,8 +78,13 @@ public class ConfirmDialog extends BasePreferenceDialog {
                         .remove("icon-brightness")
                         .remove("icon-saturation")
                         .commit();
-                PreferenceManager.setDefaultValues(requireContext(), R.xml.preferences, true);
+
+                PreferenceManager.setDefaultValues(context, R.xml.preferences, true);
+                TBApplication.drawableCache(context).clearCache();
+                TBApplication.behaviour(context).refreshSearchRecords();
+                TBApplication.quickList(context).onFavoritesChanged();
                 break;
+            }
             case "reset-preferences":
                 preference.getPreferenceManager().getSharedPreferences().edit().clear().commit();
                 PreferenceManager.setDefaultValues(requireContext(), R.xml.preferences, true);

@@ -786,6 +786,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case "icon-saturation":
             case "icon-background-argb":
                 TBApplication.drawableCache(context).clearCache();
+                TBApplication.behaviour(context).refreshSearchRecords();
                 // fallthrough
             case "quick-list-color":
             case "quick-list-ripple-color":
