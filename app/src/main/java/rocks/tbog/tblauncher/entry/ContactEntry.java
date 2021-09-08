@@ -125,6 +125,8 @@ public final class ContactEntry extends EntryItem {
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
             if (PrefCache.modulateContactIcons(context))
                 ResultViewHelper.setIconColorFilter(contactIcon, drawFlags);
+            else
+                ResultViewHelper.removeIconColorFilter(contactIcon);
             contactIcon.setVisibility(View.VISIBLE);
             ResultViewHelper.setIconAsync(drawFlags, this, contactIcon, AsyncSetEntryIcon.class);
         } else {
@@ -162,6 +164,8 @@ public final class ContactEntry extends EntryItem {
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
             if (PrefCache.modulateContactIcons(context))
                 ResultViewHelper.setIconColorFilter(contactIcon, drawFlags);
+            else
+                ResultViewHelper.removeIconColorFilter(contactIcon);
             contactIcon.setVisibility(View.VISIBLE);
             ResultViewHelper.setIconAsync(drawFlags, this, contactIcon, AsyncSetEntryIcon.class);
         } else {

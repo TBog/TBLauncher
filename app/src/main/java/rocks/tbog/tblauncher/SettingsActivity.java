@@ -785,6 +785,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case "icon-brightness":
             case "icon-saturation":
             case "icon-background-argb":
+            case "matrix-contacts":
                 TBApplication.drawableCache(context).clearCache();
                 TBApplication.behaviour(context).refreshSearchRecords();
                 // fallthrough

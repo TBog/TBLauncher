@@ -190,10 +190,14 @@ public final class ResultViewHelper {
     }
 
     @Nullable
-    public static ColorFilter setIconColorFilter(@NonNull ImageView appIcon, int drawFlags) {
-        ColorFilter colorFilter = getColorFilter(appIcon.getContext(), drawFlags);
-        appIcon.setColorFilter(colorFilter);
+    public static ColorFilter setIconColorFilter(@NonNull ImageView icon, int drawFlags) {
+        ColorFilter colorFilter = getColorFilter(icon.getContext(), drawFlags);
+        icon.setColorFilter(colorFilter);
         return colorFilter;
+    }
+
+    public static void removeIconColorFilter(@NonNull ImageView icon) {
+        icon.clearColorFilter();
     }
 
     public static void setLoadingIcon(@NonNull ImageView image) {
