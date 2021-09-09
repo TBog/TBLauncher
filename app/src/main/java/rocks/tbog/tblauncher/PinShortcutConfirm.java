@@ -15,7 +15,6 @@
  */
 package rocks.tbog.tblauncher;
 
-import android.app.Activity;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -27,7 +26,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.text.Html;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.Window;
@@ -38,6 +36,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.preference.PreferenceManager;
 
 import rocks.tbog.tblauncher.db.ShortcutRecord;
@@ -48,7 +47,7 @@ import rocks.tbog.tblauncher.utils.DebugInfo;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 @RequiresApi(api = Build.VERSION_CODES.O)
-public class PinShortcutConfirm extends Activity implements OnClickListener {
+public class PinShortcutConfirm extends AppCompatActivity implements OnClickListener {
     private static final String TAG = "ShortcutConfirm";
 
     protected LauncherApps mLauncherApps;
@@ -61,7 +60,7 @@ public class PinShortcutConfirm extends Activity implements OnClickListener {
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
-        //requestWindowFeature(Window.FEATURE_NO_TITLE);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
         Window window = getWindow();
         if (window != null) {
             window.setDimAmount(0.7f);
@@ -71,8 +70,26 @@ public class PinShortcutConfirm extends Activity implements OnClickListener {
 
         mLauncherApps = getSystemService(LauncherApps.class);
 
-        findViewById(android.R.id.button1).setOnClickListener(this);
-        findViewById(android.R.id.button2).setOnClickListener(this);
+        // OK button
+        {
+            TextView button1 = findViewById(android.R.id.button1);
+            button1.setOnClickListener(this);
+            button1.setText(android.R.string.ok);
+        }
+        // Cancel button
+        {
+            TextView button2 = findViewById(android.R.id.button2);
+            button2.setOnClickListener(this);
+            button2.setText(android.R.string.cancel);
+        }
+        // Other button
+        {
+            TextView button3 = findViewById(android.R.id.button3);
+            button3.setVisibility(View.GONE);
+            View spacer = findViewById(R.id.spacer);
+            if (spacer != null)
+                spacer.setVisibility(View.GONE);
+        }
 
         mRequest = mLauncherApps.getPinItemRequest(getIntent());
         final ShortcutInfo shortcutInfo = mRequest.getShortcutInfo();
@@ -210,11 +227,6 @@ public class PinShortcutConfirm extends Activity implements OnClickListener {
                 finish();
                 break;
         }
-    }
-
-    @Override
-    public boolean onTouchEvent(MotionEvent event) {
-        return super.onTouchEvent(event);
     }
 
     private void acceptShortcut() {

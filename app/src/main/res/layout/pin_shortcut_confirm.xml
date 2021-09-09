@@ -1,83 +1,84 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:gravity="center_horizontal"
-    android:orientation="vertical">
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:gravity="center_horizontal"
+        android:orientation="vertical"
+        tools:theme="@style/TitleDialogTheme">
 
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="16dp"
-        android:labelFor="@+id/shortcutName"
-        android:text="@string/pin_shortcut_icon"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="16dp"
+            android:labelFor="@+id/shortcutName"
+            android:text="@string/pin_shortcut_icon"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="@dimen/icon_size"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginBottom="16dp"
-        android:baselineAligned="false"
-        android:gravity="center"
-        android:measureWithLargestChild="true"
-        android:orientation="horizontal">
+            android:layout_width="match_parent"
+            android:layout_height="@dimen/icon_size"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="16dp"
+            android:baselineAligned="false"
+            android:gravity="center"
+            android:measureWithLargestChild="true"
+            android:orientation="horizontal">
 
         <!-- TODO: let user choose if he wants badge or not -->
         <include
-            android:id="@+id/image"
-            layout="@layout/item_grid_shortcut"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:visibility="gone" />
+                android:id="@+id/image"
+                layout="@layout/item_grid_shortcut"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:visibility="gone" />
 
         <include
-            android:id="@+id/imageWithBadge"
-            layout="@layout/item_grid_shortcut"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1" />
+                android:id="@+id/imageWithBadge"
+                layout="@layout/item_grid_shortcut"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_weight="1" />
 
     </LinearLayout>
 
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="16dp"
-        android:labelFor="@+id/shortcutName"
-        android:text="@string/pin_shortcut_label"
-        android:textAppearance="?android:attr/textAppearanceSmall" />
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="16dp"
+            android:labelFor="@+id/shortcutName"
+            android:text="@string/pin_shortcut_label"
+            android:textAppearance="?android:attr/textAppearanceSmall" />
 
     <EditText
-        android:id="@+id/shortcutName"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginBottom="16dp"
-        android:importantForAutofill="no"
-        android:inputType="text"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:id="@+id/shortcutName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginBottom="16dp"
+            android:importantForAutofill="no"
+            android:inputType="text"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:text="@string/pin_shortcut_message"
-        android:textAppearance="?android:attr/textAppearanceMedium" />
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:text="@string/pin_shortcut_message"
+            android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <TextView
-        android:id="@+id/shortcutDetails"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_margin="16dp"
-        android:minLines="6"
-        android:textAppearance="?android:attr/textAppearance"
-        tools:layout_weight="1"
-        tools:text="&lt;text&gt;\n\t&lt;second line of text &#x2F;&gt;\n\t&lt;some more text &#x2F;&gt;\n&lt;&#x2F;text&gt;" />
+            android:id="@+id/shortcutDetails"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="16dp"
+            android:minLines="6"
+            android:textAppearance="?android:attr/textAppearance"
+            tools:layout_weight="1"
+            tools:text="&lt;text&gt;\n\t&lt;second line of text &#x2F;&gt;\n\t&lt;some more text &#x2F;&gt;\n&lt;&#x2F;text&gt;" />
 
     <!-- Alert dialog style buttons along the bottom. -->
     <include layout="@layout/ok_cancel_button_bar" />
