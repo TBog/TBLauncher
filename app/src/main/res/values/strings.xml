@@ -296,6 +296,7 @@
     <string name="action_show_history_frequency">Most accessed</string>
     <string name="action_show_history_frecency">Recent and frequent</string>
     <string name="action_show_history_adaptive">Adaptive history</string>
+    <string name="show_tags_menu">Open tags menu</string>
     <string name="result_history_adaptive">Adaptive duration</string>
     <string name="result_history_adaptive_summary">Number of hours for adaptive history</string>
 
