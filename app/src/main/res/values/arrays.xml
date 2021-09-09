@@ -100,6 +100,7 @@
         <item>@string/action_show_history_frequency</item>
         <item>@string/action_show_history_frecency</item>
         <item>@string/action_show_history_adaptive</item>
+        <item>@string/show_tags_menu</item>
         <item>Run app…</item>
         <item>Show favorite…</item>
     </string-array>
@@ -125,6 +126,7 @@
         <item>showHistoryByFrequency</item>
         <item>showHistoryByFrecency</item>
         <item>showHistoryByAdaptive</item>
+        <item>showTagsMenu</item>
         <item>runApp</item>
         <item>showEntry</item>
     </array>
