@@ -689,12 +689,13 @@ public class Behaviour implements ISearchActivity {
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         TBApplication.state().setSearchBar(LauncherState.AnimatedVisibility.VISIBLE);
+                        if (PrefCache.linkKeyboardAndSearchBar(mPref))
+                            showKeyboard();
                     }
                 })
                 .start();
 
-        if (PrefCache.linkKeyboardAndSearchBar(mPref))
-            showKeyboard();
+        mSearchEditText.requestFocus();
     }
 
     private void hideWidgets() {
