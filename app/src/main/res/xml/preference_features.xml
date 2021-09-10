@@ -302,18 +302,28 @@
     <androidx.preference.PreferenceCategory
         android:key="provider-section"
         android:title="@string/provider_section"
-        app:initialExpandedChildrenCount="2">
+        app:initialExpandedChildrenCount="4">
+
+        <androidx.preference.SwitchPreference
+                android:defaultValue="true"
+                android:key="enable-calculator"
+                android:title="@string/enable_calculator" />
+
+        <androidx.preference.SwitchPreference
+                android:defaultValue="true"
+                android:key="enable-contacts"
+                android:title="@string/enable_contacts" />
+
+        <androidx.preference.SwitchPreference
+                android:defaultValue="true"
+                android:dependency="enable-search"
+                android:key="enable-url"
+                android:title="@string/enable_url" />
 
         <androidx.preference.SwitchPreference
             android:defaultValue="true"
             android:key="enable-search"
             android:title="@string/enable_search" />
-
-        <androidx.preference.SwitchPreference
-            android:defaultValue="true"
-            android:dependency="enable-search"
-            android:key="enable-url"
-            android:title="@string/enable_url" />
 
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
             android:dependency="enable-search"
@@ -334,11 +344,6 @@
             android:key="reset-search-engines"
             android:summary="@string/reset_search_engines_summary"
             android:title="@string/reset_search_engines" />
-
-        <androidx.preference.SwitchPreference
-            android:defaultValue="true"
-            android:key="enable-calculator"
-            android:title="@string/enable_calculator" />
 
         <!-- This is here just to set the default value and be saved in backup, not visible for user -->
         <MultiSelectListPreference

@@ -218,6 +218,7 @@
     <string name="enable_search">Search engine</string>
     <string name="enable_url">Web URL</string>
     <string name="enable_calculator">Calculator</string>
+    <string name="enable_contacts">Phone contacts</string>
 
     <string name="edit_search_engines">Edit search engines</string>
     <string name="edit_search_engines_summary">Toggle and edit search providers</string>
