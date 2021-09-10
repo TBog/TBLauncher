@@ -1037,6 +1037,8 @@ public class Behaviour implements ISearchActivity {
             enableFullscreen(0);
         if (PrefCache.linkCloseKeyboardToBackButton(mPref))
             onBackPressed();
+        if (!state.isKeyboardVisible())
+            onBackPressed();
         // check if we should hide the keyboard
         return state.isSearchBarVisible() && PrefCache.linkKeyboardAndSearchBar(mPref);
     }
