@@ -27,8 +27,8 @@ import androidx.preference.PreferenceManager;
 import java.util.Locale;
 
 import rocks.tbog.tblauncher.ui.ListPopup;
+import rocks.tbog.tblauncher.utils.GestureDetectorHelper;
 import rocks.tbog.tblauncher.utils.UISizes;
-import rocks.tbog.tblauncher.utils.Utilities;
 
 public class LiveWallpaper {
     private static final String TAG = "LWP";
@@ -169,7 +169,7 @@ public class LiveWallpaper {
 
         gestureDetector = new GestureDetectorCompat(mainActivity, onGestureListener);
         gestureDetector.setIsLongpressEnabled(true);
-        Utilities.setGestureDetectorTouchSlop(gestureDetector, UISizes.dp2px(mainActivity, GD_TOUCH_SLOP_DP));
+        GestureDetectorHelper.setGestureDetectorTouchSlop(gestureDetector, UISizes.dp2px(mainActivity, GD_TOUCH_SLOP_DP));
     }
 
     private void resetPageCount() {

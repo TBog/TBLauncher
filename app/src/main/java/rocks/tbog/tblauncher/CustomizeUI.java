@@ -29,6 +29,7 @@ import androidx.preference.PreferenceManager;
 
 import rocks.tbog.tblauncher.ui.RecyclerList;
 import rocks.tbog.tblauncher.ui.SearchEditText;
+import rocks.tbog.tblauncher.utils.EdgeGlowHelper;
 import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.SystemUiVisibility;
 import rocks.tbog.tblauncher.utils.UIColors;
@@ -218,16 +219,21 @@ public class CustomizeUI {
         }
         resultLayout.setBackground(drawable);
 
+        int overscrollColor = UIColors.getResultListRipple(resultLayout.getContext());
+        overscrollColor = UIColors.setAlpha(overscrollColor, 0x7F);
         if (resultLayout instanceof AbsListView) {
             setListViewSelectorPref((AbsListView) resultLayout, true);
             setListViewScrollbarPref(resultLayout);
+            EdgeGlowHelper.setEdgeGlowColor((AbsListView) resultLayout, overscrollColor);
         } else {
             View list = resultLayout.findViewById(R.id.resultList);
             if (list instanceof AbsListView) {
                 setListViewSelectorPref((AbsListView) list, false);
                 setListViewScrollbarPref(list);
+                EdgeGlowHelper.setEdgeGlowColor((AbsListView) list, overscrollColor);
             } else if (list instanceof RecyclerList) {
                 setListViewScrollbarPref(list);
+                EdgeGlowHelper.setEdgeGlowColor((RecyclerList) list, overscrollColor);
             }
         }
     }
