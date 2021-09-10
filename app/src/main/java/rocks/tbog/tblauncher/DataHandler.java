@@ -429,10 +429,6 @@ public class DataHandler extends BroadcastReceiver
         Log.v(TAG, "Time to load all providers: " + mTimer);
 
         mFullLoadOverSent = true;
-        // run and remove tasks
-        Runnable task;
-        while (null != (task = mAfterLoadOverTasks.poll()))
-            task.run();
 
         // Broadcast the fact that the new providers list is ready
         try {
@@ -1142,6 +1138,23 @@ public class DataHandler extends BroadcastReceiver
                 task.run();
             else
                 mAfterLoadOverTasks.add(task);
+        }
+    }
+
+    public void executeAfterLoadOverTasks() {
+        synchronized (this) {
+            if (!mFullLoadOverSent) {
+                Log.e(TAG, "executeAfterLoadOverTasks called before mFullLoadOverSent==true");
+                return;
+            }
+            // run and remove tasks
+            int count = 0;
+            Runnable task;
+            while (null != (task = mAfterLoadOverTasks.poll())) {
+                task.run();
+                count += 1;
+            }
+            Log.d(TAG, "executeAfterLoadOverTasks count=" + count);
         }
     }
 

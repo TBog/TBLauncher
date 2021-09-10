@@ -97,6 +97,7 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
                 } else if (FULL_LOAD_OVER.equalsIgnoreCase(intent.getAction())) {
                     Log.v(TAG, "All providers are done loading.");
 
+                    app.getDataHandler().executeAfterLoadOverTasks();
                     app.behaviour().displayLoader(false);
 
                     SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(TBLauncherActivity.this);
@@ -108,9 +109,6 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
                     // Run GC once to free all the garbage accumulated during provider initialization
                     System.gc();
                 }
-
-                // New provider might mean new favorites
-                //onFavoriteChange();
             }
         };
 
