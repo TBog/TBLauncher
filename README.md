@@ -28,7 +28,7 @@ Motives for developing ~~a new~~ my own launcher:
 
 | Homescreen | Search `tbl` | Edit QuickList | Launcher settings | Customize any icon |
 | :---: | :---: | :---: | :---: | :---: |
-| [![Homescreen](https://i.imgur.com/hYzrZNX.jpg)](https://i.imgur.com/hYzrZNX) | [![Search `tbl`](https://imgur.com/lpH7N36.png)](https://imgur.com/lpH7N36) | ![Edit QuickList](https://imgur.com/qJbxTcq.png) | [![Settings](https://imgur.com/TsIY1HV.png)](https://imgur.com/TsIY1HV) | [![Customize any icon](https://imgur.com/BENFmHO.png)](https://imgur.com/BENFmHO) |
+| [![Homescreen](https://imgur.com/fEbPIPM.png)](https://imgur.com/fEbPIPM) | [![Search `tbl`](https://imgur.com/2YKHjSv.png)](https://imgur.com/2YKHjSv) | [![Edit QuickList](https://imgur.com/cGcTImL.png)](https://imgur.com/cGcTImL) | [![Settings](https://imgur.com/bQ3C6Pi.png)](https://imgur.com/bQ3C6Pi) | [![Customize any icon](https://imgur.com/xJ749DL.png)](https://imgur.com/xJ749DL) |
 
 ### Where one can get it
 
