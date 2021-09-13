@@ -310,7 +310,9 @@ public final class ShortcutEntry extends EntryWithTags {
         DialogHelper.makeRenameDialog(ctx, getName(), (dialog, newName) -> {
             Context context = dialog.getContext();
             setName(newName);
-            TBApplication.getApplication(context).getDataHandler().renameShortcut(this, newName);
+            TBApplication app = TBApplication.getApplication(context);
+            app.getDataHandler().renameShortcut(this, newName);
+            app.behaviour().refreshSearchRecord(ShortcutEntry.this);
 
             // Show toast message
             String msg = context.getString(R.string.shortcut_rename_confirmation, getName());

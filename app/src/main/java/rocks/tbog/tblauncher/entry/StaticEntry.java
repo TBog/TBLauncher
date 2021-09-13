@@ -76,7 +76,9 @@ public abstract class StaticEntry extends EntryItem {
 
             // Set new name
             setName(newName);
-            TBApplication.getApplication(ctx).getDataHandler().renameStaticEntry(id, newName);
+            TBApplication app = TBApplication.getApplication(ctx);
+            app.getDataHandler().renameStaticEntry(id, newName);
+            app.behaviour().refreshSearchRecord(StaticEntry.this);
 
             // Show toast message
             String msg = ctx.getString(R.string.app_rename_confirmation, getName());
@@ -85,8 +87,10 @@ public abstract class StaticEntry extends EntryItem {
                 .setTitle(R.string.title_static_rename)
                 .setNeutralButton(R.string.custom_name_set_default, (dialog, which) -> {
                     Context ctx = dialog.getContext();
-                    DataHandler dataHandler = TBApplication.dataHandler(ctx);
+                    TBApplication app = TBApplication.getApplication(ctx);
+                    DataHandler dataHandler = app.getDataHandler();
                     dataHandler.renameStaticEntry(id, null);
+                    app.behaviour().refreshSearchRecord(StaticEntry.this);
 
                     String name = null;
 

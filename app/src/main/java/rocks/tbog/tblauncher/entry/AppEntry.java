@@ -1,5 +1,8 @@
 package rocks.tbog.tblauncher.entry;
 
+import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_DYNAMIC;
+import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_MANIFEST;
+
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
@@ -43,9 +46,6 @@ import rocks.tbog.tblauncher.utils.DialogHelper;
 import rocks.tbog.tblauncher.utils.RootHandler;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
-
-import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_DYNAMIC;
-import static android.content.pm.LauncherApps.ShortcutQuery.FLAG_MATCH_MANIFEST;
 
 public final class AppEntry extends EntryWithTags {
 
@@ -449,7 +449,9 @@ public final class AppEntry extends EntryWithTags {
             // Set new name
             setName(name);
             Context context = dialog.getContext();
-            TBApplication.getApplication(context).getDataHandler().renameApp(getUserComponentName(), name);
+            TBApplication app = TBApplication.getApplication(context);
+            app.getDataHandler().renameApp(getUserComponentName(), name);
+            app.behaviour().refreshSearchRecord(AppEntry.this);
 
             // Show toast message
             String msg = context.getResources().getString(R.string.app_rename_confirmation, getName());
@@ -467,7 +469,9 @@ public final class AppEntry extends EntryWithTags {
                     }
                     if (name != null) {
                         setName(name);
-                        TBApplication.getApplication(context).getDataHandler().removeRenameApp(getUserComponentName(), name);
+                        TBApplication app = TBApplication.getApplication(context);
+                        app.getDataHandler().removeRenameApp(getUserComponentName(), name);
+                        app.behaviour().refreshSearchRecord(AppEntry.this);
 
                         // Show toast message
                         String msg = context.getString(R.string.app_rename_confirmation, getName());

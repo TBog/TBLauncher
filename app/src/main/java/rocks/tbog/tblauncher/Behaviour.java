@@ -1071,13 +1071,14 @@ public class Behaviour implements ISearchActivity {
 //            dialog.setOnDismissListener(dlg -> mResultLayout.setVisibility(View.VISIBLE));
 
         dialog.setOnConfirmListener(drawable -> {
+            TBApplication app = TBApplication.getApplication(mTBLauncherActivity);
             if (drawable == null)
-                TBApplication.getApplication(mTBLauncherActivity).iconsHandler().restoreDefaultIcon(appEntry);
+                app.iconsHandler().restoreDefaultIcon(appEntry);
             else
-                TBApplication.getApplication(mTBLauncherActivity).iconsHandler().changeIcon(appEntry, drawable);
+                app.iconsHandler().changeIcon(appEntry, drawable);
             // force a result refresh to update the icon in the view
             refreshSearchRecord(appEntry);
-            TBApplication.quickList(mTBLauncherActivity).onFavoritesChanged();
+            app.quickList().onFavoritesChanged();
         });
         dialog.show(mTBLauncherActivity.getSupportFragmentManager(), DIALOG_CUSTOM_ICON);
     }
@@ -1096,10 +1097,10 @@ public class Behaviour implements ISearchActivity {
         }
 
         dialog.setOnConfirmListener(drawable -> {
+            final TBApplication app = TBApplication.getApplication(mTBLauncherActivity);
             if (drawable == null)
-                TBApplication.iconsHandler(mTBLauncherActivity).restoreDefaultIcon(shortcutEntry);
+                app.iconsHandler().restoreDefaultIcon(shortcutEntry);
             else {
-                final TBApplication app = TBApplication.getApplication(mTBLauncherActivity);
                 final DataHandler dh = app.getDataHandler();
                 EntryItem favItem = null;
                 // if the shortcut is not in the favorites, add it before changing the icon
@@ -1139,10 +1140,11 @@ public class Behaviour implements ISearchActivity {
             dialog.setOnDismissListener(dlg -> mResultLayout.setVisibility(View.VISIBLE));
 
         dialog.setOnConfirmListener(drawable -> {
+            final TBApplication app = TBApplication.getApplication(mTBLauncherActivity);
             if (drawable == null)
-                TBApplication.getApplication(mTBLauncherActivity).iconsHandler().restoreDefaultIcon(staticEntry);
+                app.iconsHandler().restoreDefaultIcon(staticEntry);
             else
-                TBApplication.getApplication(mTBLauncherActivity).iconsHandler().changeIcon(staticEntry, drawable);
+                app.iconsHandler().changeIcon(staticEntry, drawable);
             // force a result refresh to update the icon in the view
             refreshSearchRecord(staticEntry);
             TBApplication.quickList(mTBLauncherActivity).onFavoritesChanged();
