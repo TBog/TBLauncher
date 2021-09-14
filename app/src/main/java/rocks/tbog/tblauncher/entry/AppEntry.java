@@ -350,6 +350,8 @@ public final class AppEntry extends EntryWithTags {
                 return true;
             case R.string.menu_app_uninstall:
                 launchUninstall(ctx);
+                // work-around until I figure out a way to refresh the result list without resetting scroll
+                TBApplication.behaviour(ctx).removeResult(this);
                 return true;
             case R.string.menu_app_hibernate:
                 hibernate(ctx);
