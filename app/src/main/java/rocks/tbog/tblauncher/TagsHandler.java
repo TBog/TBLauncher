@@ -28,6 +28,7 @@ import rocks.tbog.tblauncher.db.DBHelper;
 import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.EntryWithTags;
+import rocks.tbog.tblauncher.searcher.TagSearcher;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
@@ -199,7 +200,10 @@ public class TagsHandler {
         {
             adapter.add(new ListPopup.Item(tagName));
         }
-        return ListPopup.create(ctx, adapter);
+        return ListPopup.create(ctx, adapter).setOnItemClickListener((a, v, pos) -> {
+            ListPopup.Item item = (ListPopup.Item) a.getItem(pos);
+            TBApplication.quickList(ctx).toggleSearch(v, item.toString(), TagSearcher.class);
+        });
     }
 
     @NonNull
