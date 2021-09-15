@@ -227,15 +227,15 @@ public class ListPopup extends PopupWindow {
         }
     }
 
-    public void showCenter(View viewForWindowToken) {
+    public void showCenter(@NonNull View viewForWindowToken) {
         showAtLocation(viewForWindowToken, Gravity.CENTER, 0, 0);
     }
 
-    public void show(View anchor) {
+    public void show(@NonNull View anchor) {
         show(anchor, .5f);
     }
 
-    public void show(View anchor, float anchorOverlap) {
+    public void show(@NonNull View anchor, float anchorOverlap) {
         beforeShow();
 
         final Rect displayFrame = mTempRect;

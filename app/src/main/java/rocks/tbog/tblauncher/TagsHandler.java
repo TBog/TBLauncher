@@ -8,7 +8,6 @@ import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.os.Build;
 import android.widget.ArrayAdapter;
-import android.widget.ListAdapter;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;

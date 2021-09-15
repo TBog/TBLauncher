@@ -1414,10 +1414,16 @@ public class Behaviour implements ISearchActivity {
             case "showUntagged":
                 return launchActionEntry("show/untagged");
             case "showTagsMenu": {
+                View anchor = null;
+                if ("button-launcher".equals(source))
+                    anchor = mLauncherButton;
                 Context ctx = mLauncherButton.getContext();
                 ListPopup menu = TBApplication.tagsHandler(ctx).getTagsMenu(ctx);
                 registerPopup(menu);
-                menu.show(mLauncherButton);
+                if (anchor != null)
+                    menu.show(anchor);
+                else
+                    menu.showCenter(mLauncherButton);
 
             }
             return true;
