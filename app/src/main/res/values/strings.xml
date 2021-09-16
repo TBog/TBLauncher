@@ -44,6 +44,7 @@
     <string name="menu_popup_android_settings">Device settings</string>
     <string name="menu_popup_launcher_settings">TinyBit settings</string>
     <string name="menu_popup_tags_manager">Tag manager</string>
+    <string name="menu_popup_tags_menu">Tags menu</string>
     <string name="rate_the_app">Rate the app</string>
     <string name="user_interface_summary">Themes, transparency and colors</string>
     <string name="title_ui">User interface</string>
@@ -416,6 +417,10 @@
     <string name="reset_cached_app_icons">Reset icon pack</string>
     <string name="matrix_contacts">Modulate contacts</string>
     <string name="matrix_contacts_summary">Modulate colors of contact icons</string>
+
+    <string name="tags_menu_section">Tags Menu</string>
+    <string name="tags_menu_icons">Show icons</string>
+    <string name="tags_menu_icon_size">Icon size</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>

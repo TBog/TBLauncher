@@ -463,6 +463,27 @@
 
         </PreferenceCategory>
 
+        <!-- Tags Menu -->
+        <PreferenceCategory
+                android:key="tags-menu-section"
+                android:title="@string/tags_menu_section">
+
+            <androidx.preference.SwitchPreference
+                    android:defaultValue="false"
+                    android:key="tags-menu-icons"
+                    android:title="@string/tags_menu_icons" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                    android:defaultValue="@integer/default_size_icon"
+                    android:dialogLayout="@layout/pref_slider"
+                    android:dependency="tags-menu-icons"
+                    android:key="tags-menu-icon-size"
+                    android:title="@string/tags_menu_icon_size"
+                    android:widgetLayout="@layout/pref_size_preview" />
+
+        </PreferenceCategory>
+
+
         <!--        <PreferenceCategory android:title="@string/misc">-->
         <!--            <SwitchPreference-->
         <!--                android:defaultValue="false"-->

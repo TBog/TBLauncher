@@ -15,6 +15,7 @@ public class PrefCache {
     private static int RESULT_HISTORY_ADAPTIVE = 0;
     private static int RESULT_SEARCHER_CAP = -1;
     private static Boolean FUZZY_SEARCH_TAGS = null;
+    private static Boolean TAGS_MENU_ICONS = null;
 
     private PrefCache() {
     }
@@ -23,6 +24,8 @@ public class PrefCache {
         RESULT_HISTORY_SIZE = 0;
         RESULT_HISTORY_ADAPTIVE = 0;
         RESULT_SEARCHER_CAP = -1;
+        FUZZY_SEARCH_TAGS = null;
+        TAGS_MENU_ICONS = null;
     }
 
     public static int getResultHistorySize(Context context) {
@@ -61,6 +64,14 @@ public class PrefCache {
             FUZZY_SEARCH_TAGS = pref.getBoolean("fuzzy-search-tags", true);
         }
         return FUZZY_SEARCH_TAGS;
+    }
+
+    public static boolean showTagsMenuIcons(Context context) {
+        if (TAGS_MENU_ICONS == null) {
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+            TAGS_MENU_ICONS = pref.getBoolean("tags-menu-icons", false);
+        }
+        return TAGS_MENU_ICONS;
     }
 
     public static int getResultSearcherCap(Context context) {

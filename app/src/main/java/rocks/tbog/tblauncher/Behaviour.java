@@ -453,6 +453,7 @@ public class Behaviour implements ISearchActivity {
         adapter.add(new LinearAdapter.ItemTitle(ctx, R.string.menu_popup_title_settings));
         adapter.add(new LinearAdapter.Item(ctx, R.string.menu_popup_launcher_settings));
         adapter.add(new LinearAdapter.Item(ctx, R.string.menu_popup_tags_manager));
+        adapter.add(new LinearAdapter.Item(ctx, R.string.menu_popup_tags_menu));
         adapter.add(new LinearAdapter.Item(ctx, R.string.menu_popup_android_settings));
 
         menu.setOnItemClickListener((a, v, pos) -> {
@@ -464,6 +465,8 @@ public class Behaviour implements ISearchActivity {
             Context c = mTBLauncherActivity;
             if (stringId == R.string.menu_popup_tags_manager) {
                 launchTagsManagerDialog();
+            } else if (stringId == R.string.menu_popup_tags_menu) {
+                executeAction("showTagsMenu", "button-menu");
             } else if (stringId == R.string.menu_popup_launcher_settings) {
                 Intent intent = new Intent(mClearButton.getContext(), SettingsActivity.class);
                 launchIntent(this, mClearButton, intent);

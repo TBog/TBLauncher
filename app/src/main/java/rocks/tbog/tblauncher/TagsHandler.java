@@ -29,6 +29,7 @@ import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.EntryWithTags;
 import rocks.tbog.tblauncher.searcher.TagSearcher;
 import rocks.tbog.tblauncher.ui.ListPopup;
+import rocks.tbog.tblauncher.ui.TagsMenuUtils;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
 
@@ -194,15 +195,7 @@ public class TagsHandler {
 
     @NonNull
     public ListPopup getTagsMenu(Context ctx) {
-        ArrayAdapter<ListPopup.Item> adapter = new ArrayAdapter<>(ctx, android.R.layout.simple_list_item_1);
-        for (String tagName : getValidTags())
-        {
-            adapter.add(new ListPopup.Item(tagName));
-        }
-        return ListPopup.create(ctx, adapter).setOnItemClickListener((a, v, pos) -> {
-            ListPopup.Item item = (ListPopup.Item) a.getItem(pos);
-            TBApplication.quickList(ctx).toggleSearch(v, item.toString(), TagSearcher.class);
-        });
+        return TagsMenuUtils.createTagsMenu(ctx, getValidTags());
     }
 
     @NonNull

@@ -16,6 +16,7 @@ public final class UISizes {
     private static int CACHED_SIZE_RESULT_TEXT = 0;
     private static int CACHED_SIZE_RESULT_TEXT2 = 0;
     private static int CACHED_SIZE_RESULT_ICON = 0;
+    private static int CACHED_SIZE_TAGS_MENU_ICON = 0;
     private static int CACHED_SIZE_STATUS_BAR = 0;
     private static int CACHED_RADIUS_POPUP_CORNER = -1;
 
@@ -26,6 +27,7 @@ public final class UISizes {
         CACHED_SIZE_RESULT_TEXT = 0;
         CACHED_SIZE_RESULT_TEXT2 = 0;
         CACHED_SIZE_RESULT_ICON = 0;
+        CACHED_SIZE_TAGS_MENU_ICON = 0;
         CACHED_SIZE_STATUS_BAR = 0;
         CACHED_RADIUS_POPUP_CORNER = -1;
     }
@@ -70,6 +72,16 @@ public final class UISizes {
             CACHED_SIZE_RESULT_ICON = dp2px(context, Math.max(1, size));
         }
         return CACHED_SIZE_RESULT_ICON;
+    }
+
+    public static int getTagsMenuIconSize(Context context) {
+        if (CACHED_SIZE_TAGS_MENU_ICON == 0) {
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+            final int defaultSize = context.getResources().getInteger(R.integer.default_size_icon);
+            final int size = pref.getInt("tags-menu-icon-size", defaultSize);
+            CACHED_SIZE_TAGS_MENU_ICON = dp2px(context, Math.max(1, size));
+        }
+        return CACHED_SIZE_TAGS_MENU_ICON;
     }
 
     public static int getStatusBarSize(Context context) {
