@@ -523,6 +523,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "result-history-size":
                     case "result-history-adaptive":
                     case "result-search-cap":
+                    case "tags-menu-icon-size":
                     case "icon-scale-red":
                     case "icon-scale-green":
                     case "icon-scale-blue":
@@ -815,6 +816,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case "result-text-size":
             case "result-text2-size":
             case "result-icon-size":
+            case "tags-menu-icon-size":
             case "popup-corner-radius":
                 UISizes.resetCache();
                 break;
@@ -822,6 +824,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case "result-history-adaptive":
             case "fuzzy-search-tags":
             case "result-search-cap":
+            case "tags-menu-icons":
                 PrefCache.resetCache();
                 break;
             case "adaptive-shape":
