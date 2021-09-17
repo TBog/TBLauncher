@@ -309,9 +309,12 @@ public class Behaviour implements ISearchActivity {
 
             // launch most relevant result
             final int mostRelevantIdx = mResultList.getAdapterFirstItemIdx();
-            RecyclerView.ViewHolder holder = mResultList.findViewHolderForAdapterPosition(mostRelevantIdx);
-            mResultAdapter.onClick(mostRelevantIdx, holder != null ? holder.itemView : view);
-            return true;
+            if (mostRelevantIdx >= 0 && mostRelevantIdx < mResultAdapter.getItemCount()) {
+                RecyclerView.ViewHolder holder = mResultList.findViewHolderForAdapterPosition(mostRelevantIdx);
+                mResultAdapter.onClick(mostRelevantIdx, holder != null ? holder.itemView : view);
+                return true;
+            }
+            return false;
         });
     }
 
