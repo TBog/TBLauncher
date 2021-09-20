@@ -35,6 +35,7 @@ import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.fragment.app.FragmentTransaction;
 import androidx.preference.ListPreference;
+import androidx.preference.MultiSelectListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceFragmentCompat;
 import androidx.preference.PreferenceGroup;
@@ -46,7 +47,10 @@ import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import rocks.tbog.tblauncher.dataprovider.FavProvider;
 import rocks.tbog.tblauncher.db.XmlImport;
@@ -99,11 +103,18 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     ));
     private static Pair<CharSequence[], CharSequence[]> AppToRunListContent = null;
     private static Pair<CharSequence[], CharSequence[]> EntryToShowListContent = null;
+    private static TagsMenuData TagsMenuContent = null;
 
     private static final int FILE_SELECT_XML_SET = 63;
     private static final int FILE_SELECT_XML_OVERWRITE = 62;
     private static final int FILE_SELECT_XML_APPEND = 61;
     public static final int ENABLE_DEVICE_ADMIN = 60;
+
+    private static class TagsMenuData {
+        private CharSequence[] entries;
+        private CharSequence[] entryValues;
+        private Set<String> values;
+    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -130,6 +141,14 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        AppToRunListContent = null;
+        EntryToShowListContent = null;
+        TagsMenuContent = null;
     }
 
     @Override
@@ -351,6 +370,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             if (savedInstanceState == null) {
                 initAppToRunLists(context, sharedPreferences);
                 initEntryToShowLists(context, sharedPreferences);
+                initTagsMenuList(context);
             } else {
                 synchronized (SettingsFragment.this) {
                     if (AppToRunListContent == null)
@@ -414,6 +434,62 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 }, t -> updateLists.run());
             } else {
                 updateLists.run();
+            }
+        }
+
+        private void initTagsMenuList(@NonNull Context context) {
+            Preference listPref = findPreference("tags-menu-list");
+            if (!(listPref instanceof MultiSelectListPreference))
+                return;
+            MultiSelectListPreference tagsMenuList = (MultiSelectListPreference) listPref;
+
+            // set the preference disabled until we load the content for it
+            tagsMenuList.setEnabled(false);
+            final Runnable setTagsMenuValues = () -> {
+                tagsMenuList.setEntries(TagsMenuContent.entries);
+                tagsMenuList.setEntryValues(TagsMenuContent.entryValues);
+                if (tagsMenuList.getValues().isEmpty() && !TagsMenuContent.values.isEmpty())
+                    tagsMenuList.setValues(TagsMenuContent.values);
+                // preference can be enabled now
+                tagsMenuList.setEnabled(true);
+            };
+
+            if (TagsMenuContent == null) {
+                Utilities.runAsync(getLifecycle(), t -> {
+                    TagsHandler tagsHandler = TBApplication.tagsHandler(context);
+                    Set<String> validTags = tagsHandler.getValidTags();
+
+                    ArrayList<String> prefEntries = new ArrayList<>(validTags);
+                    // make sure we have the selected values as entries (so the user can remove them)
+                    for (String tagName : tagsMenuList.getValues()) {
+                        if (!validTags.contains(tagName))
+                            prefEntries.add(tagName);
+                    }
+                    // sort entries
+                    Collections.sort(prefEntries, String.CASE_INSENSITIVE_ORDER);
+
+                    // set preference entries and values
+                    CharSequence[] entries = prefEntries.toArray(new String[0]);
+                    CharSequence[] entryValues = prefEntries.toArray(new String[0]);
+
+                    // set default values if we need them
+                    HashSet<String> defaultValues = new HashSet<>();
+                    for (String tagName : validTags) {
+                        if (defaultValues.size() >= 5)
+                            break;
+                        defaultValues.add(tagName);
+                    }
+                    synchronized (SettingsFragment.this) {
+                        if (TagsMenuContent == null) {
+                            TagsMenuContent = new TagsMenuData();
+                            TagsMenuContent.entries = entries;
+                            TagsMenuContent.entryValues = entryValues;
+                            TagsMenuContent.values = defaultValues;
+                        }
+                    }
+                }, t -> setTagsMenuValues.run());
+            } else {
+                setTagsMenuValues.run();
             }
         }
 

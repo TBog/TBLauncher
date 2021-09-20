@@ -421,6 +421,7 @@
     <string name="tags_menu_section">Tags Menu</string>
     <string name="tags_menu_icons">Show icons</string>
     <string name="tags_menu_icon_size">Icon size</string>
+    <string name="tags_menu_list">Tags to show</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>
