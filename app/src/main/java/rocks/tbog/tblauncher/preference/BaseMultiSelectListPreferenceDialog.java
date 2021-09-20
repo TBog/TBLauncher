@@ -3,14 +3,14 @@ package rocks.tbog.tblauncher.preference;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AlertDialog;
-import androidx.preference.ListPreferenceDialogFragmentCompat;
+import androidx.preference.MultiSelectListPreferenceDialogFragmentCompat;
 
 import rocks.tbog.tblauncher.utils.KeyboardDialogBuilder;
 
-public class BaseListPreferenceDialog extends ListPreferenceDialogFragmentCompat {
+public class BaseMultiSelectListPreferenceDialog extends MultiSelectListPreferenceDialogFragmentCompat {
 
-    public static BaseListPreferenceDialog newInstance(String key) {
-        final BaseListPreferenceDialog fragment = new BaseListPreferenceDialog();
+    public static BaseMultiSelectListPreferenceDialog newInstance(String key) {
+        final BaseMultiSelectListPreferenceDialog fragment = new BaseMultiSelectListPreferenceDialog();
         final Bundle b = new Bundle(1);
         b.putString(ARG_KEY, key);
         fragment.setArguments(b);

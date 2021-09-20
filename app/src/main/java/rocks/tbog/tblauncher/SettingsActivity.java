@@ -62,6 +62,7 @@ import rocks.tbog.tblauncher.entry.FilterEntry;
 import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.entry.TagEntry;
 import rocks.tbog.tblauncher.preference.BaseListPreferenceDialog;
+import rocks.tbog.tblauncher.preference.BaseMultiSelectListPreferenceDialog;
 import rocks.tbog.tblauncher.preference.ChooseColorDialog;
 import rocks.tbog.tblauncher.preference.ConfirmDialog;
 import rocks.tbog.tblauncher.preference.CustomDialogPreference;
@@ -645,6 +646,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 }
             } else if (preference instanceof ListPreference) {
                 dialogFragment = BaseListPreferenceDialog.newInstance(preference.getKey());
+            } else if (preference instanceof MultiSelectListPreference) {
+                dialogFragment = BaseMultiSelectListPreferenceDialog.newInstance(preference.getKey());
             }
 
             // If it was one of our custom Preferences, show its dialog
