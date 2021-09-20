@@ -3,14 +3,15 @@ package rocks.tbog.tblauncher;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.os.Build;
-import android.widget.ArrayAdapter;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.preference.PreferenceManager;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -27,7 +28,6 @@ import rocks.tbog.tblauncher.db.DBHelper;
 import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.EntryWithTags;
-import rocks.tbog.tblauncher.searcher.TagSearcher;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.ui.TagsMenuUtils;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
@@ -195,7 +195,11 @@ public class TagsHandler {
 
     @NonNull
     public ListPopup getTagsMenu(Context ctx) {
-        return TagsMenuUtils.createTagsMenu(ctx, getValidTags());
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(ctx);
+        Set<String> tagList = pref.getStringSet("tags-menu-list", Collections.emptySet());
+        if (tagList.isEmpty())
+            tagList = getValidTags();
+        return TagsMenuUtils.createTagsMenu(ctx, tagList);
     }
 
     @NonNull
