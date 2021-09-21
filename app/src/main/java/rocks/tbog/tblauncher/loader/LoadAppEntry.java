@@ -79,7 +79,7 @@ public class LoadAppEntry extends LoadEntryItem<AppEntry> {
             if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 UserManager manager = (UserManager) ctx.getSystemService(Context.USER_SERVICE);
                 LauncherApps launcher = (LauncherApps) ctx.getSystemService(Context.LAUNCHER_APPS_SERVICE);
-                if (manager != null && launcher != null)
+                if (manager != null && launcher != null) {
                     // Handle multi-profile support introduced in Android 5 (#542)
                     for (android.os.UserHandle profile : manager.getUserProfiles()) {
                         UserHandleCompat user = new UserHandleCompat(manager.getSerialNumberForUser(profile), profile);
@@ -90,11 +90,15 @@ public class LoadAppEntry extends LoadEntryItem<AppEntry> {
                             ApplicationInfo appInfo = activityInfo.getApplicationInfo();
 
                             String displayName = activityInfo.getLabel().toString();
+                            if (displayName.equals(appInfo.packageName))
+                                displayName = activityInfo.getName();
+
                             AppEntry app = processApp(displayName, appInfo.packageName, activityInfo.getName(), user);
 
                             apps.add(app);
                         }
                     }
+                }
             } else {
                 PackageManager manager = ctx.getPackageManager();
 
