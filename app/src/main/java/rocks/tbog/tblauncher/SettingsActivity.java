@@ -50,6 +50,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 import rocks.tbog.tblauncher.dataprovider.FavProvider;
@@ -68,6 +69,7 @@ import rocks.tbog.tblauncher.preference.ConfirmDialog;
 import rocks.tbog.tblauncher.preference.CustomDialogPreference;
 import rocks.tbog.tblauncher.preference.EditSearchEnginesPreferenceDialog;
 import rocks.tbog.tblauncher.preference.EditSearchHintPreferenceDialog;
+import rocks.tbog.tblauncher.preference.OrderListPreferenceDialog;
 import rocks.tbog.tblauncher.preference.QuickListPreferenceDialog;
 import rocks.tbog.tblauncher.preference.SliderDialog;
 import rocks.tbog.tblauncher.ui.PleaseWaitDialog;
@@ -372,6 +374,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 initAppToRunLists(context, sharedPreferences);
                 initEntryToShowLists(context, sharedPreferences);
                 initTagsMenuList(context);
+                initOrderedList(context, sharedPreferences, "tags-menu-list", "tags-menu-order");
             } else {
                 synchronized (SettingsFragment.this) {
                     if (AppToRunListContent == null)
@@ -492,6 +495,40 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             } else {
                 setTagsMenuValues.run();
             }
+        }
+
+        private void initOrderedList(@NonNull Context context, @NonNull SharedPreferences sharedPreferences, @NonNull String listKey, @NonNull String orderKey) {
+            Set<String> valuesSet = sharedPreferences.getStringSet(listKey, null);
+            if (valuesSet == null)
+                return;
+            Preference pref = findPreference(orderKey);
+            if (!(pref instanceof MultiSelectListPreference))
+                return;
+            MultiSelectListPreference listPref = (MultiSelectListPreference) pref;
+            final ArrayList<String> entryValues;
+            if (listPref.getValues().isEmpty()) {
+                // if no order found, take the order from the set
+                entryValues = new ArrayList<>(valuesSet.size());
+                int ord = 0;
+                for (String value : valuesSet) {
+                    entryValues.add(String.format(Locale.US, "%08x. %s", ord, value));
+                    ord += 1;
+                }
+            } else {
+                entryValues = new ArrayList<>(listPref.getValues());
+                // sort entries
+                Collections.sort(entryValues);
+            }
+
+            // retrieve entry names from the entry values that also contain the order
+            ArrayList<String> entries = new ArrayList<>(entryValues.size());
+            for (String entry : entryValues) {
+                int pos = entry.indexOf(". ");
+                pos = pos >= 0 ? pos + 2 : 0;
+                entries.add(entry.substring(pos));
+            }
+            listPref.setEntries(entries.toArray(new String[0]));
+            listPref.setEntryValues(entryValues.toArray(new String[0]));
         }
 
         private void tintPreferenceIcons(Preference preference, int color) {
@@ -647,7 +684,12 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             } else if (preference instanceof ListPreference) {
                 dialogFragment = BaseListPreferenceDialog.newInstance(preference.getKey());
             } else if (preference instanceof MultiSelectListPreference) {
-                dialogFragment = BaseMultiSelectListPreferenceDialog.newInstance(preference.getKey());
+                String key = preference.getKey();
+                if ("tags-menu-order".equals(key)) {
+                    dialogFragment = OrderListPreferenceDialog.newInstance(key);
+                } else {
+                    dialogFragment = BaseMultiSelectListPreferenceDialog.newInstance(key);
+                }
             }
 
             // If it was one of our custom Preferences, show its dialog
