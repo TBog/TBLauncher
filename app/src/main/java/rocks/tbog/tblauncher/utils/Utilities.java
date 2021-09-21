@@ -27,6 +27,7 @@ import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.Gravity;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -406,6 +407,7 @@ public class Utilities {
             boolean setResToNull = false;
             if (classContainsDeclaredField(TextView.class, "mCursorDrawable")) {
                 try {
+                    @SuppressLint("BlockedPrivateApi")
                     Field fmCursorDrawable = TextView.class.getDeclaredField("mCursorDrawable");
                     fmCursorDrawable.setAccessible(true);
                     fmCursorDrawable.set(editText, drawable);
@@ -687,6 +689,26 @@ public class Utilities {
         Drawable drawable = image.getDrawable();
         if (drawable instanceof Animatable)
             ((Animatable) drawable).start();
+    }
+
+    public static void startAnimatable(TextView textView) {
+        final Runnable startAnimation = () -> {
+            Drawable[] drawables = textView.getCompoundDrawables();
+            for (Drawable drawable : drawables)
+                if (drawable instanceof Animatable)
+                    ((Animatable) drawable).start();
+        };
+        if (textView.isLaidOut()) {
+            startAnimation.run();
+        } else {
+            textView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.OnGlobalLayoutListener() {
+                @Override
+                public void onGlobalLayout() {
+                    textView.getViewTreeObserver().removeOnGlobalLayoutListener(this);
+                    startAnimation.run();
+                }
+            });
+        }
     }
 
     public interface GetDrawable {
