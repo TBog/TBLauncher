@@ -221,6 +221,10 @@
                 android:key="tags-menu-list"
                 android:title="@string/tags_menu_list" />
 
+        <MultiSelectListPreference
+                android:key="tags-menu-order"
+                android:title="@string/tags_menu_order"/>
+
     </PreferenceCategory>
 
     <!-- Wallpaper / LWP - LiveWallpaper -->

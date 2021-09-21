@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:descendantFocusability="blocksDescendants"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="@dimen/result_margin_horizontal"
+        android:paddingVertical="@dimen/result_margin_vertical"
+        tools:layout_gravity="center"
+        tools:theme="@style/SettingsDialogTheme">
+
+    <ImageView
+            android:id="@android:id/icon"
+            android:layout_width="@dimen/icon_size"
+            android:layout_height="@dimen/icon_size"
+            android:layout_marginVertical="@dimen/icon_margin_vertical"
+            android:layout_marginStart="@dimen/icon_margin_left"
+            android:layout_marginEnd="@dimen/icon_margin_right"
+            android:importantForAccessibility="no"
+            android:src="@null" />
+
+    <TextView
+            android:id="@android:id/text1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:shadowColor="?attr/resultShadowColor"
+            android:shadowDx="1"
+            android:shadowDy="2"
+            android:shadowRadius="?attr/textShadowRadius"
+            android:singleLine="true"
+            android:textColor="?attr/resultColor"
+            android:textSize="@dimen/result_title_size"
+            tools:text="@tools:sample/last_names" />
+
+    <ImageView
+            android:id="@android:id/button1"
+            android:layout_width="@dimen/icon_size"
+            android:layout_height="@dimen/icon_size"
+            android:layout_gravity="center"
+            android:background="?attr/appSelectableItemBackground"
+            android:contentDescription="@string/cd_remove_tag"
+            android:scaleType="center"
+            app:srcCompat="@drawable/ic_remove_tag" />
+
+    <ImageView
+            android:id="@android:id/button2"
+            android:layout_width="@dimen/icon_size"
+            android:layout_height="@dimen/icon_size"
+            android:layout_gravity="center"
+            android:background="?attr/appSelectableItemBackground"
+            android:contentDescription="@string/cd_rename_tag"
+            android:scaleType="center"
+            app:srcCompat="@drawable/ic_edit" />
+
+</LinearLayout>

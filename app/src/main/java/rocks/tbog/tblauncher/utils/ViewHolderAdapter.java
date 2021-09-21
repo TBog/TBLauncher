@@ -56,7 +56,7 @@ public abstract class ViewHolderAdapter<T, VH extends ViewHolderAdapter.ViewHold
         VH holder = null;
         try {
             holder = mViewHolderClass.getDeclaredConstructor(View.class).newInstance(view);
-        } catch (ReflectiveOperationException e) {
+        } catch (Exception e) {
             Log.e("VHA", "ViewHolder can't be instantiated (make sure class and constructor are public)", e);
         }
         return holder;
