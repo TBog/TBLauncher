@@ -1,6 +1,7 @@
 package rocks.tbog.tblauncher.ui;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -26,10 +27,11 @@ public class TagsMenuUtils {
             MenuTagItem menuItem = tagEntry != null ? new MenuTagItem(tagEntry) : new MenuTagItem(tagName);
             adapter.add(menuItem);
         }
-        return ListPopup.create(ctx, adapter).setOnItemClickListener((a, v, pos) -> {
-            ListPopup.Item item = (ListPopup.Item) a.getItem(pos);
-            TBApplication.quickList(ctx).toggleSearch(v, item.toString(), TagSearcher.class);
-        });
+        return ListPopup.create(ctx, adapter)
+                .setOnItemClickListener((a, v, pos) -> {
+                    ListPopup.Item item = (ListPopup.Item) a.getItem(pos);
+                    TBApplication.quickList(ctx).toggleSearch(v, item.toString(), TagSearcher.class);
+                });
     }
 
     private static class MenuTagAdapter extends ArrayAdapter<ListPopup.Item> {
@@ -67,22 +69,26 @@ public class TagsMenuUtils {
                 return;
             }
             Context ctx = textView.getContext();
-            if (PrefCache.showTagsMenuIcons(ctx)) {
-                // async load and show the icon
-                Utilities.setViewAsync(textView, tagEntry::getIconDrawable, (view, drawable) -> {
-                    if (view instanceof TextView) {
-                        int size = UISizes.getTagsMenuIconSize(view.getContext());
-                        drawable.setBounds(0, 0, size, size);
-                        TextView v = (TextView) view;
-                        v.setCompoundDrawables(drawable, null, null, null);
-                        v.setPadding(0, 0, 0, 0);
-                    }
-                });
+            if (!PrefCache.showTagsMenuIcons(ctx))
+                return;
+            // make sure we have enough space to inline the drawable
+            final int size = UISizes.getTagsMenuIconSize(ctx);
+            Drawable loadingIcon = PrefCache.getLoadingIconDrawable(ctx);
+            loadingIcon.setBounds(0, 0, size, size);
+            textView.setCompoundDrawables(loadingIcon, null, null, null);
+            textView.setCompoundDrawablePadding(UISizes.sp2px(ctx, 2));
+            Utilities.startAnimatable(textView);
 
-                // make sure we have enough space to inline the drawable
-                int size = UISizes.getTagsMenuIconSize(ctx);
-                textView.setPadding(size, size / 2, 0, size / 2);
-            }
+            // async load and show the icon
+            Utilities.setViewAsync(textView,
+                    tagEntry::getIconDrawable,
+                    (view, drawable) -> {
+                        if (view instanceof TextView) {
+                            drawable.setBounds(0, 0, size, size);
+                            TextView v = (TextView) view;
+                            v.setCompoundDrawables(drawable, null, null, null);
+                        }
+                    });
         }
     }
 }

@@ -904,6 +904,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case "fuzzy-search-tags":
             case "result-search-cap":
             case "tags-menu-icons":
+            case "loading-icon":
                 PrefCache.resetCache();
                 break;
             case "adaptive-shape":

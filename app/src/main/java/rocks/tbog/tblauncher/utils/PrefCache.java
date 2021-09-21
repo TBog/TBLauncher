@@ -2,9 +2,13 @@ package rocks.tbog.tblauncher.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
+import android.graphics.drawable.Drawable;
 
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.preference.PreferenceManager;
 
 import rocks.tbog.tblauncher.R;
@@ -14,6 +18,7 @@ public class PrefCache {
     private static int RESULT_HISTORY_SIZE = 0;
     private static int RESULT_HISTORY_ADAPTIVE = 0;
     private static int RESULT_SEARCHER_CAP = -1;
+    private static int LOADING_ICON_RES = 0; // Resources.ID_NULL
     private static Boolean FUZZY_SEARCH_TAGS = null;
     private static Boolean TAGS_MENU_ICONS = null;
 
@@ -24,6 +29,7 @@ public class PrefCache {
         RESULT_HISTORY_SIZE = 0;
         RESULT_HISTORY_ADAPTIVE = 0;
         RESULT_SEARCHER_CAP = -1;
+        LOADING_ICON_RES = 0;
         FUZZY_SEARCH_TAGS = null;
         TAGS_MENU_ICONS = null;
     }
@@ -124,20 +130,36 @@ public class PrefCache {
     }
 
     @DrawableRes
-    public static int getLoadingIconRes(Context context) {
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
-        String iconName = pref.getString("loading-icon", null);
-        if (iconName == null)
-            iconName = "none";
-        switch (iconName) {
-            case "arrows":
-                return R.drawable.ic_loading_arrows;
-            case "pulse":
-                return R.drawable.ic_loading_pulse;
-            case "none":
-            default:
-                return android.R.color.transparent;
+    public static int getLoadingIconRes(@NonNull Context context) {
+        if (LOADING_ICON_RES == 0) {
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+            String iconName = pref.getString("loading-icon", null);
+            if (iconName == null)
+                iconName = "none";
+            switch (iconName) {
+                case "arrows":
+                    LOADING_ICON_RES = R.drawable.ic_loading_arrows;
+                    break;
+                case "pulse":
+                    LOADING_ICON_RES = R.drawable.ic_loading_pulse;
+                    break;
+                case "none":
+                default:
+                    LOADING_ICON_RES = android.R.color.transparent;
+                    break;
+            }
         }
+        return LOADING_ICON_RES;
+    }
+
+    @NonNull
+    public static Drawable getLoadingIconDrawable(@NonNull Context context) {
+        @DrawableRes
+        int loadingIconRes = getLoadingIconRes(context);
+        Drawable loadingIcon = AppCompatResources.getDrawable(context, loadingIconRes);
+        if (loadingIcon == null)
+            loadingIcon = new ColorDrawable(Color.TRANSPARENT);
+        return loadingIcon;
     }
 
     public static boolean modulateContactIcons(Context context) {
