@@ -74,6 +74,7 @@ import rocks.tbog.tblauncher.preference.SliderDialog;
 import rocks.tbog.tblauncher.ui.PleaseWaitDialog;
 import rocks.tbog.tblauncher.utils.FileUtils;
 import rocks.tbog.tblauncher.utils.PrefCache;
+import rocks.tbog.tblauncher.utils.PrefOrderedListHelper;
 import rocks.tbog.tblauncher.utils.SystemUiVisibility;
 import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.UISizes;
@@ -108,57 +109,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     private static final int FILE_SELECT_XML_OVERWRITE = 62;
     private static final int FILE_SELECT_XML_APPEND = 61;
     public static final int ENABLE_DEVICE_ADMIN = 60;
-
-    /**
-     * Synchronize the toggle list with the order list. Remove toggled off entries and add at the end new ones.
-     *
-     * @param sharedPreferences we get the list from here and apply the changes to
-     * @param listKey           preference key of the list
-     * @param orderKey          preference key of the order list
-     */
-    private static void syncOrderedList(@NonNull SharedPreferences sharedPreferences, @NonNull String listKey, @NonNull String orderKey) {
-        // get list values in a set I can modify
-        Set<String> listSet = new HashSet<>(sharedPreferences.getStringSet(listKey, Collections.emptySet()));
-        final int listSize = listSet.size();
-        // get order
-        final List<String> orderValues;
-        Set<String> orderSet = sharedPreferences.getStringSet(orderKey, null);
-        if (orderSet == null) {
-            // we don't have any order yet
-            orderValues = Collections.emptyList();
-        } else {
-            orderValues = new ArrayList<>(orderSet);
-            Collections.sort(orderValues);
-        }
-
-        // this will be the new order
-        ArrayList<String> newValues = new ArrayList<>(listSize);
-
-        // keep previous order
-        int idx = 0;
-        for (String value : orderValues) {
-            String name = OrderListPreferenceDialog.getOrderedValueName(value);
-            if (listSet.remove(name)) {
-                newValues.add(OrderListPreferenceDialog.makeOrderedValue(name, idx++));
-            }
-        }
-
-        // add at the end all the new values
-        for (String name : listSet)
-            newValues.add(OrderListPreferenceDialog.makeOrderedValue(name, idx++));
-
-        Set<String> newOrderSet = new HashSet<>(newValues);
-        if (!newOrderSet.equals(orderSet))
-            sharedPreferences.edit().putStringSet(orderKey, newOrderSet).apply();
-    }
-
-    public static List<String> getOrderedList(@NonNull SharedPreferences sharedPreferences, @NonNull String listKey, @NonNull String orderKey) {
-        syncOrderedList(sharedPreferences, listKey, orderKey);
-        Set<String> orderSet = sharedPreferences.getStringSet(orderKey, Collections.emptySet());
-        List<String> orderValues = new ArrayList<>(orderSet);
-        Collections.sort(orderValues);
-        return orderValues;
-    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -359,7 +309,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     this.orderedValues = new ArrayList<>(entryValues.length);
                     int ord = 0;
                     for (CharSequence value : entryValues) {
-                        String orderedValue = OrderListPreferenceDialog.makeOrderedValue(value.toString(), ord);
+                        String orderedValue = PrefOrderedListHelper.makeOrderedValue(value.toString(), ord);
                         this.orderedValues.add(orderedValue);
                         ord += 1;
                     }
@@ -557,7 +507,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
             ArrayList<String> entries = new ArrayList<>(orderedValues.size());
             for (String value : orderedValues) {
-                entries.add(OrderListPreferenceDialog.getOrderedValueName(value));
+                entries.add(PrefOrderedListHelper.getOrderedValueName(value));
             }
 
             listPref.setEntries(entries.toArray(new String[0]));
@@ -1084,7 +1034,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 TBApplication.rootHandler(context).resetRootHandler(sharedPreferences);
                 break;
             case "tags-menu-list":
-                syncOrderedList(sharedPreferences, "tags-menu-list", "tags-menu-order");
+                PrefOrderedListHelper.syncOrderedList(sharedPreferences, "tags-menu-list", "tags-menu-order");
                 break;
         }
     }
