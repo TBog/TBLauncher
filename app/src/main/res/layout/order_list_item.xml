@@ -44,7 +44,7 @@
             android:background="?attr/appSelectableItemBackground"
             android:contentDescription="@string/cd_remove_tag"
             android:scaleType="center"
-            app:srcCompat="@drawable/ic_remove_tag" />
+            app:srcCompat="@android:drawable/arrow_up_float" />
 
     <ImageView
             android:id="@android:id/button2"
@@ -54,6 +54,6 @@
             android:background="?attr/appSelectableItemBackground"
             android:contentDescription="@string/cd_rename_tag"
             android:scaleType="center"
-            app:srcCompat="@drawable/ic_edit" />
+            app:srcCompat="@android:drawable/arrow_down_float" />
 
 </LinearLayout>
