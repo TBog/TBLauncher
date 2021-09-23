@@ -103,9 +103,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             "dm-search-back",
             "dm-widget-back"
     ));
-    private static Pair<CharSequence[], CharSequence[]> AppToRunListContent = null;
-    private static Pair<CharSequence[], CharSequence[]> EntryToShowListContent = null;
-    private static TagsMenuData TagsMenuContent = null;
 
     private static final int FILE_SELECT_XML_SET = 63;
     private static final int FILE_SELECT_XML_OVERWRITE = 62;
@@ -215,14 +212,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        AppToRunListContent = null;
-        EntryToShowListContent = null;
-        TagsMenuContent = null;
     }
 
     @Override
@@ -373,9 +362,13 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     }
 
     public static class SettingsFragment extends PreferenceFragmentCompat implements SharedPreferences.OnSharedPreferenceChangeListener {
-        static final String FRAGMENT_TAG = SettingsFragment.class.getName();
+        private static final String FRAGMENT_TAG = SettingsFragment.class.getName();
         private static final String DIALOG_FRAGMENT_TAG = "androidx.preference.PreferenceFragment.DIALOG";
         private static final String TAG = "Settings";
+
+        private static Pair<CharSequence[], CharSequence[]> AppToRunListContent = null;
+        private static Pair<CharSequence[], CharSequence[]> EntryToShowListContent = null;
+        private static TagsMenuData TagsMenuContent = null;
 
         public SettingsFragment() {
             super();
@@ -623,6 +616,16 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         public void onPause() {
             super.onPause();
             getPreferenceScreen().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
+        }
+
+        @Override
+        public void onDestroy() {
+            super.onDestroy();
+            synchronized (SettingsFragment.this) {
+                AppToRunListContent = null;
+                EntryToShowListContent = null;
+                TagsMenuContent = null;
+            }
         }
 
         @Override
