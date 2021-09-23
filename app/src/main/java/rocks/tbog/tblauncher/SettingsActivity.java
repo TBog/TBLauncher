@@ -50,7 +50,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Set;
 
 import rocks.tbog.tblauncher.dataprovider.FavProvider;
@@ -113,10 +112,82 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     private static final int FILE_SELECT_XML_APPEND = 61;
     public static final int ENABLE_DEVICE_ADMIN = 60;
 
+    /**
+     * Synchronize the toggle list with the order list. Remove toggled off entries and add at the end new ones.
+     *
+     * @param sharedPreferences we get the list from here and apply the changes to
+     * @param listKey           preference key of the list
+     * @param orderKey          preference key of the order list
+     */
+    private static void syncOrderedList(@NonNull SharedPreferences sharedPreferences, @NonNull String listKey, @NonNull String orderKey) {
+        // get list values in a set I can modify
+        Set<String> listSet = new HashSet<>(sharedPreferences.getStringSet(listKey, Collections.emptySet()));
+        final int listSize = listSet.size();
+        // get order
+        final List<String> orderValues;
+        Set<String> orderSet = sharedPreferences.getStringSet(orderKey, null);
+        if (orderSet == null) {
+            // we don't have any order yet
+            orderValues = Collections.emptyList();
+        } else {
+            orderValues = new ArrayList<>(orderSet);
+            Collections.sort(orderValues);
+        }
+
+        // this will be the new order
+        ArrayList<String> newValues = new ArrayList<>(listSize);
+
+        // keep previous order
+        int idx = 0;
+        for (String value : orderValues) {
+            String name = OrderListPreferenceDialog.getOrderedValueName(value);
+            if (listSet.remove(name)) {
+                newValues.add(OrderListPreferenceDialog.makeOrderedValue(name, idx++));
+            }
+        }
+
+        // add at the end all the new values
+        for (String name : listSet)
+            newValues.add(OrderListPreferenceDialog.makeOrderedValue(name, idx++));
+
+        Set<String> newOrderSet = new HashSet<>(newValues);
+        if (!newOrderSet.equals(orderSet))
+            sharedPreferences.edit().putStringSet(orderKey, newOrderSet).apply();
+    }
+
     private static class TagsMenuData {
-        private CharSequence[] entries;
-        private CharSequence[] entryValues;
-        private Set<String> values;
+        private final CharSequence[] entries;
+        private final CharSequence[] entryValues;
+        private final Set<String> defaultValues;
+        private final List<String> orderedValues;
+
+        public TagsMenuData(CharSequence[] entries, CharSequence[] entryValues, Set<String> defaultValues, Set<String> orderedValues) {
+            this.entries = entries;
+            this.entryValues = entryValues;
+            this.defaultValues = defaultValues;
+
+            if (orderedValues == null || orderedValues.isEmpty()) {
+                // if no order found
+                this.orderedValues = new ArrayList<>(entryValues.length);
+                int ord = 0;
+                for (CharSequence value : entryValues) {
+                    String orderedValue = OrderListPreferenceDialog.makeOrderedValue(value.toString(), ord);
+                    this.orderedValues.add(orderedValue);
+                    ord += 1;
+                }
+            } else {
+                this.orderedValues = new ArrayList<>(orderedValues);
+                // sort entries
+                Collections.sort(this.orderedValues);
+            }
+        }
+
+        public void reloadOrderedValues(@NonNull SharedPreferences sharedPreferences, @NonNull SettingsFragment settings) {
+            orderedValues.clear();
+            orderedValues.addAll(sharedPreferences.getStringSet("tags-menu-order", Collections.emptySet()));
+            Collections.sort(orderedValues);
+            settings.setOrderedListValues("tags-menu-order", orderedValues);
+        }
     }
 
     @Override
@@ -164,7 +235,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
     @SuppressLint("ApplySharedPref")
     @Override
-    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+    public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getTitle() != null) {
             String itemName = item.getTitle().toString();
 
@@ -373,19 +444,23 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             if (savedInstanceState == null) {
                 initAppToRunLists(context, sharedPreferences);
                 initEntryToShowLists(context, sharedPreferences);
-                initTagsMenuList(context);
-                initOrderedList(context, sharedPreferences, "tags-menu-list", "tags-menu-order");
+                initTagsMenuList(context, sharedPreferences);
             } else {
                 synchronized (SettingsFragment.this) {
                     if (AppToRunListContent == null)
                         AppToRunListContent = generateAppToRunListContent(context);
                     if (EntryToShowListContent == null)
                         EntryToShowListContent = generateEntryToShowListContent(context);
+                    if (TagsMenuContent == null) {
+                        TagsMenuContent = generateTagsMenuContent(context, sharedPreferences);
+                    }
                 }
                 for (String gesturePref : PREF_LISTS_WITH_DEPENDENCY) {
                     updateAppToRunList(sharedPreferences, gesturePref);
                     updateEntryToShowList(sharedPreferences, gesturePref);
                 }
+                setMultiListValues("tags-menu-list", TagsMenuContent.entries, TagsMenuContent.entryValues, TagsMenuContent.defaultValues);
+                setOrderedListValues("tags-menu-order", TagsMenuContent.orderedValues);
             }
 
             final ListPreference iconsPack = findPreference("icons-pack");
@@ -441,54 +516,18 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             }
         }
 
-        private void initTagsMenuList(@NonNull Context context) {
-            Preference listPref = findPreference("tags-menu-list");
-            if (!(listPref instanceof MultiSelectListPreference))
-                return;
-            MultiSelectListPreference tagsMenuList = (MultiSelectListPreference) listPref;
-
-            // set the preference disabled until we load the content for it
-            tagsMenuList.setEnabled(false);
+        private void initTagsMenuList(@NonNull Context context, @NonNull SharedPreferences sharedPreferences) {
             final Runnable setTagsMenuValues = () -> {
-                tagsMenuList.setEntries(TagsMenuContent.entries);
-                tagsMenuList.setEntryValues(TagsMenuContent.entryValues);
-                if (tagsMenuList.getValues().isEmpty() && !TagsMenuContent.values.isEmpty())
-                    tagsMenuList.setValues(TagsMenuContent.values);
-                // preference can be enabled now
-                tagsMenuList.setEnabled(true);
+                setMultiListValues("tags-menu-list", TagsMenuContent.entries, TagsMenuContent.entryValues, TagsMenuContent.defaultValues);
+                setOrderedListValues("tags-menu-order", TagsMenuContent.orderedValues);
             };
 
             if (TagsMenuContent == null) {
                 Utilities.runAsync(getLifecycle(), t -> {
-                    TagsHandler tagsHandler = TBApplication.tagsHandler(context);
-                    Set<String> validTags = tagsHandler.getValidTags();
-
-                    ArrayList<String> prefEntries = new ArrayList<>(validTags);
-                    // make sure we have the selected values as entries (so the user can remove them)
-                    for (String tagName : tagsMenuList.getValues()) {
-                        if (!validTags.contains(tagName))
-                            prefEntries.add(tagName);
-                    }
-                    // sort entries
-                    Collections.sort(prefEntries, String.CASE_INSENSITIVE_ORDER);
-
-                    // set preference entries and values
-                    CharSequence[] entries = prefEntries.toArray(new String[0]);
-                    CharSequence[] entryValues = prefEntries.toArray(new String[0]);
-
-                    // set default values if we need them
-                    HashSet<String> defaultValues = new HashSet<>();
-                    for (String tagName : validTags) {
-                        if (defaultValues.size() >= 5)
-                            break;
-                        defaultValues.add(tagName);
-                    }
+                    TagsMenuData content = generateTagsMenuContent(context, sharedPreferences);
                     synchronized (SettingsFragment.this) {
                         if (TagsMenuContent == null) {
-                            TagsMenuContent = new TagsMenuData();
-                            TagsMenuContent.entries = entries;
-                            TagsMenuContent.entryValues = entryValues;
-                            TagsMenuContent.values = defaultValues;
+                            TagsMenuContent = content;
                         }
                     }
                 }, t -> setTagsMenuValues.run());
@@ -497,38 +536,31 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             }
         }
 
-        private void initOrderedList(@NonNull Context context, @NonNull SharedPreferences sharedPreferences, @NonNull String listKey, @NonNull String orderKey) {
-            Set<String> valuesSet = sharedPreferences.getStringSet(listKey, null);
-            if (valuesSet == null)
+        private void setMultiListValues(@NonNull String listKey, @NonNull CharSequence[] entries, @NonNull CharSequence[] values, @Nullable Set<String> defaultValues) {
+            Preference listPref = findPreference(listKey);
+            if (!(listPref instanceof MultiSelectListPreference))
                 return;
+            MultiSelectListPreference tagsMenuList = (MultiSelectListPreference) listPref;
+
+            tagsMenuList.setEntries(entries);
+            tagsMenuList.setEntryValues(values);
+            if (defaultValues != null && tagsMenuList.getValues().isEmpty())
+                tagsMenuList.setValues(defaultValues);
+        }
+
+        private void setOrderedListValues(@NonNull String orderKey, List<String> orderedValues) {
             Preference pref = findPreference(orderKey);
             if (!(pref instanceof MultiSelectListPreference))
                 return;
             MultiSelectListPreference listPref = (MultiSelectListPreference) pref;
-            final ArrayList<String> entryValues;
-            if (listPref.getValues().isEmpty()) {
-                // if no order found, take the order from the set
-                entryValues = new ArrayList<>(valuesSet.size());
-                int ord = 0;
-                for (String value : valuesSet) {
-                    entryValues.add(String.format(Locale.US, "%08x. %s", ord, value));
-                    ord += 1;
-                }
-            } else {
-                entryValues = new ArrayList<>(listPref.getValues());
-                // sort entries
-                Collections.sort(entryValues);
+
+            ArrayList<String> entries = new ArrayList<>(orderedValues.size());
+            for (String value : orderedValues) {
+                entries.add(OrderListPreferenceDialog.getOrderedValueName(value));
             }
 
-            // retrieve entry names from the entry values that also contain the order
-            ArrayList<String> entries = new ArrayList<>(entryValues.size());
-            for (String entry : entryValues) {
-                int pos = entry.indexOf(". ");
-                pos = pos >= 0 ? pos + 2 : 0;
-                entries.add(entry.substring(pos));
-            }
             listPref.setEntries(entries.toArray(new String[0]));
-            listPref.setEntryValues(entryValues.toArray(new String[0]));
+            listPref.setEntryValues(orderedValues.toArray(new String[0]));
         }
 
         private void tintPreferenceIcons(Preference preference, int color) {
@@ -764,6 +796,37 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             return new Pair<>(entries, entryValues);
         }
 
+        private static TagsMenuData generateTagsMenuContent(@NonNull Context context, @NonNull SharedPreferences sharedPreferences) {
+            TagsHandler tagsHandler = TBApplication.tagsHandler(context);
+            Set<String> validTags = tagsHandler.getValidTags();
+
+            Set<String> tagsMenuListValues = sharedPreferences.getStringSet("tags-menu-list", Collections.emptySet());
+
+            ArrayList<String> prefEntries = new ArrayList<>(validTags);
+            // make sure we have the selected values as entries (so the user can remove them)
+            for (String tagName : tagsMenuListValues) {
+                if (!validTags.contains(tagName))
+                    prefEntries.add(0, tagName);
+            }
+            // sort entries
+            Collections.sort(prefEntries, String.CASE_INSENSITIVE_ORDER);
+
+            // set preference entries and values
+            CharSequence[] entries = prefEntries.toArray(new String[0]);
+            CharSequence[] entryValues = prefEntries.toArray(new String[0]);
+
+            // set default values if we need them
+            HashSet<String> defaultValues = new HashSet<>();
+            for (String tagName : validTags) {
+                if (defaultValues.size() >= 5)
+                    break;
+                defaultValues.add(tagName);
+            }
+
+            Set<String> orderedValues = sharedPreferences.getStringSet("tags-menu-order", null);
+            return new TagsMenuData(entries, entryValues, defaultValues, orderedValues);
+        }
+
         private void updateListPrefDependency(@NonNull String dependOnKey, @Nullable String dependOnValue, @NonNull String enableValue, @NonNull String listKey, @Nullable Pair<CharSequence[], CharSequence[]> listContent) {
             Preference prefAppToRun = findPreference(listKey);
             if (prefAppToRun instanceof ListPreference && listContent != null) {
@@ -836,6 +899,12 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             getListView().getAdapter().notifyDataSetChanged();
 
             SettingsActivity.onSharedPreferenceChanged(activity, sharedPreferences, key);
+
+            if (TagsMenuContent != null) {
+                if ("tags-menu-list".equals(key) || "tags-menu-order".equals(key)) {
+                    TagsMenuContent.reloadOrderedValues(sharedPreferences, this);
+                }
+            }
         }
     }
 
@@ -1002,6 +1071,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                             }).show();
                 }
                 TBApplication.rootHandler(context).resetRootHandler(sharedPreferences);
+                break;
+            case "tags-menu-list":
+                syncOrderedList(sharedPreferences, "tags-menu-list", "tags-menu-order");
                 break;
         }
     }

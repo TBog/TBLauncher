@@ -14,7 +14,8 @@ import androidx.preference.PreferenceDialogFragmentCompat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.Locale;
+import java.util.Objects;
 
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
@@ -32,7 +33,7 @@ public class OrderListPreferenceDialog extends PreferenceDialogFragmentCompat {
     private static final String SAVE_STATE_ENTRIES = "OrderListPreferenceDialogFragment.entries";
     private static final String SAVE_STATE_ENTRY_VALUES = "OrderListPreferenceDialogFragment.entryValues";
 
-    private Set<String> mNewValues = new HashSet<>();
+    private final HashSet<String> mNewValues = new HashSet<>();
     boolean mPreferenceChanged;
     private CharSequence[] mEntries;
     private CharSequence[] mEntryValues;
@@ -88,15 +89,53 @@ public class OrderListPreferenceDialog extends PreferenceDialogFragmentCompat {
         super.onPrepareDialogBuilder(builder);
         KeyboardDialogBuilder.setCustomTitle(builder, getPreference().getDialogTitle());
 
-        ArrayList<ListEntry> list = new ArrayList<>(mEntries.length);
+        final int entryCount = mEntries.length;
+        ArrayList<ListEntry> entryArrayList = new ArrayList<>(entryCount);
         for (CharSequence entry : mEntries) {
-            ListEntry listEntry = new ListEntry();
-            listEntry.name = entry;
-            list.add(listEntry);
+            ListEntry listEntry = new ListEntry(entry.toString());
+            entryArrayList.add(listEntry);
         }
 
-        EntryAdapter adapter = new EntryAdapter(list);
-        builder.setAdapter(adapter, null);
+        EntryAdapter entryAdapter = new EntryAdapter(entryArrayList);
+        builder.setAdapter(entryAdapter, null);
+
+        entryAdapter.mOnMoveUpListener = (adapter, view, position) -> {
+            List<ListEntry> list = adapter.getList();
+            ListEntry entry = list.remove(position);
+            list.add(position - 1, entry);
+            adapter.notifyDataSetChanged();
+
+            mPreferenceChanged = true;
+            generateNewValues(list);
+        };
+
+        entryAdapter.mOnMoveDownListener = (adapter, view, position) -> {
+            List<ListEntry> list = adapter.getList();
+            ListEntry entry = list.remove(position);
+            list.add(position + 1, entry);
+            adapter.notifyDataSetChanged();
+
+            mPreferenceChanged = true;
+            generateNewValues(list);
+        };
+    }
+
+    private void generateNewValues(List<ListEntry> list) {
+        mNewValues.clear();
+        int ord = 0;
+        for (ListEntry entry : list) {
+            mNewValues.add(makeOrderedValue(entry.name, ord++));
+        }
+    }
+
+    public static String makeOrderedValue(String name, int position) {
+        return String.format(Locale.US, "%08x. %s", position, name);
+    }
+
+    public static String getOrderedValueName(String value) {
+        int pos = value.indexOf(". ");
+        pos = pos >= 0 ? pos + 2 : 0;
+        return value.substring(pos);
     }
 
     @Override
@@ -104,6 +143,7 @@ public class OrderListPreferenceDialog extends PreferenceDialogFragmentCompat {
         if (positiveResult && mPreferenceChanged) {
             final MultiSelectListPreference preference = getListPreference();
             if (preference.callChangeListener(mNewValues)) {
+                preference.setEntryValues(mNewValues.toArray(new CharSequence[0]));
                 preference.setValues(mNewValues);
             }
         }
@@ -111,7 +151,26 @@ public class OrderListPreferenceDialog extends PreferenceDialogFragmentCompat {
     }
 
     public static class ListEntry {
-        CharSequence name;
+        final String name;
+
+        public ListEntry(@NonNull String name) {
+            this.name = name;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o)
+                return true;
+            if (o == null || getClass() != o.getClass())
+                return false;
+            ListEntry entry = (ListEntry) o;
+            return name.equals(entry.name);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(name);
+        }
     }
 
     static class EntryAdapter extends ViewHolderListAdapter<ListEntry, EntryViewHolder> {
@@ -130,6 +189,10 @@ public class OrderListPreferenceDialog extends PreferenceDialogFragmentCompat {
         @Override
         public View getView(int position, View convertView, ViewGroup parent) {
             return super.getView(position, convertView, parent);
+        }
+
+        public List<ListEntry> getList() {
+            return mList;
         }
     }
 
@@ -153,7 +216,7 @@ public class OrderListPreferenceDialog extends PreferenceDialogFragmentCompat {
 
             if (icon != null) {
                 TagsProvider tagsProvider = TBApplication.dataHandler(icon.getContext()).getTagsProvider();
-                TagEntry tagEntry = tagsProvider != null ? tagsProvider.getTagEntry(content.name.toString()) : null;
+                TagEntry tagEntry = tagsProvider != null ? tagsProvider.getTagEntry(content.name) : null;
                 if (tagEntry != null)
                     Utilities.setIconAsync(icon, tagEntry::getIconDrawable);
                 else
