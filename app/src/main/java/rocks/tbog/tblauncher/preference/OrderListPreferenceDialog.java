@@ -14,7 +14,6 @@ import androidx.preference.PreferenceDialogFragmentCompat;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 
 import rocks.tbog.tblauncher.R;
@@ -22,6 +21,7 @@ import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.dataprovider.TagsProvider;
 import rocks.tbog.tblauncher.entry.TagEntry;
 import rocks.tbog.tblauncher.utils.KeyboardDialogBuilder;
+import rocks.tbog.tblauncher.utils.PrefOrderedListHelper;
 import rocks.tbog.tblauncher.utils.Utilities;
 import rocks.tbog.tblauncher.utils.ViewHolderAdapter;
 import rocks.tbog.tblauncher.utils.ViewHolderListAdapter;
@@ -124,18 +124,8 @@ public class OrderListPreferenceDialog extends PreferenceDialogFragmentCompat {
         mNewValues.clear();
         int ord = 0;
         for (ListEntry entry : list) {
-            mNewValues.add(makeOrderedValue(entry.name, ord++));
+            mNewValues.add(PrefOrderedListHelper.makeOrderedValue(entry.name, ord++));
         }
-    }
-
-    public static String makeOrderedValue(String name, int position) {
-        return String.format(Locale.US, "%08x. %s", position, name);
-    }
-
-    public static String getOrderedValueName(String value) {
-        int pos = value.indexOf(". ");
-        pos = pos >= 0 ? pos + 2 : 0;
-        return value.substring(pos);
     }
 
     @Override
