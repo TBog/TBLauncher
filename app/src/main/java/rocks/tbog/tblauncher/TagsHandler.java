@@ -28,6 +28,7 @@ import rocks.tbog.tblauncher.db.DBHelper;
 import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.EntryWithTags;
+import rocks.tbog.tblauncher.preference.OrderListPreferenceDialog;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.ui.TagsMenuUtils;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
@@ -196,9 +197,12 @@ public class TagsHandler {
     @NonNull
     public ListPopup getTagsMenu(Context ctx) {
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(ctx);
-        Set<String> tagList = pref.getStringSet("tags-menu-list", Collections.emptySet());
-        if (tagList.isEmpty())
-            tagList = getValidTags();
+
+        List<String> tagOrder = SettingsActivity.getOrderedList(pref, "tags-menu-list", "tags-menu-order");
+        ArrayList<String> tagList = new ArrayList<>(tagOrder.size());
+        for (String orderValue : tagOrder)
+            tagList.add(OrderListPreferenceDialog.getOrderedValueName(orderValue));
+
         return TagsMenuUtils.createTagsMenu(ctx, tagList);
     }
 

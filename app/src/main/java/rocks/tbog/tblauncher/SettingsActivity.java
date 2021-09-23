@@ -152,39 +152,12 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             sharedPreferences.edit().putStringSet(orderKey, newOrderSet).apply();
     }
 
-    private static class TagsMenuData {
-        private final CharSequence[] entries;
-        private final CharSequence[] entryValues;
-        private final Set<String> defaultValues;
-        private final List<String> orderedValues;
-
-        public TagsMenuData(CharSequence[] entries, CharSequence[] entryValues, Set<String> defaultValues, Set<String> orderedValues) {
-            this.entries = entries;
-            this.entryValues = entryValues;
-            this.defaultValues = defaultValues;
-
-            if (orderedValues == null || orderedValues.isEmpty()) {
-                // if no order found
-                this.orderedValues = new ArrayList<>(entryValues.length);
-                int ord = 0;
-                for (CharSequence value : entryValues) {
-                    String orderedValue = OrderListPreferenceDialog.makeOrderedValue(value.toString(), ord);
-                    this.orderedValues.add(orderedValue);
-                    ord += 1;
-                }
-            } else {
-                this.orderedValues = new ArrayList<>(orderedValues);
-                // sort entries
-                Collections.sort(this.orderedValues);
-            }
-        }
-
-        public void reloadOrderedValues(@NonNull SharedPreferences sharedPreferences, @NonNull SettingsFragment settings) {
-            orderedValues.clear();
-            orderedValues.addAll(sharedPreferences.getStringSet("tags-menu-order", Collections.emptySet()));
-            Collections.sort(orderedValues);
-            settings.setOrderedListValues("tags-menu-order", orderedValues);
-        }
+    public static List<String> getOrderedList(@NonNull SharedPreferences sharedPreferences, @NonNull String listKey, @NonNull String orderKey) {
+        syncOrderedList(sharedPreferences, listKey, orderKey);
+        Set<String> orderSet = sharedPreferences.getStringSet(orderKey, Collections.emptySet());
+        List<String> orderValues = new ArrayList<>(orderSet);
+        Collections.sort(orderValues);
+        return orderValues;
     }
 
     @Override
@@ -369,6 +342,41 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         private static Pair<CharSequence[], CharSequence[]> AppToRunListContent = null;
         private static Pair<CharSequence[], CharSequence[]> EntryToShowListContent = null;
         private static TagsMenuData TagsMenuContent = null;
+
+        private static class TagsMenuData {
+            private final CharSequence[] entries;
+            private final CharSequence[] entryValues;
+            private final Set<String> defaultValues;
+            private final List<String> orderedValues;
+
+            public TagsMenuData(CharSequence[] entries, CharSequence[] entryValues, Set<String> defaultValues, Set<String> orderedValues) {
+                this.entries = entries;
+                this.entryValues = entryValues;
+                this.defaultValues = defaultValues;
+
+                if (orderedValues == null || orderedValues.isEmpty()) {
+                    // if no order found
+                    this.orderedValues = new ArrayList<>(entryValues.length);
+                    int ord = 0;
+                    for (CharSequence value : entryValues) {
+                        String orderedValue = OrderListPreferenceDialog.makeOrderedValue(value.toString(), ord);
+                        this.orderedValues.add(orderedValue);
+                        ord += 1;
+                    }
+                } else {
+                    this.orderedValues = new ArrayList<>(orderedValues);
+                    // sort entries
+                    Collections.sort(this.orderedValues);
+                }
+            }
+
+            public void reloadOrderedValues(@NonNull SharedPreferences sharedPreferences, @NonNull SettingsFragment settings) {
+                orderedValues.clear();
+                orderedValues.addAll(sharedPreferences.getStringSet("tags-menu-order", Collections.emptySet()));
+                Collections.sort(orderedValues);
+                settings.setOrderedListValues("tags-menu-order", orderedValues);
+            }
+        }
 
         public SettingsFragment() {
             super();
