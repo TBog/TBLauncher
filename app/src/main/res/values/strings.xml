@@ -423,6 +423,7 @@
     <string name="tags_menu_icon_size">Icon size</string>
     <string name="tags_menu_list">Tags to show</string>
     <string name="tags_menu_order">Tags order</string>
+    <string name="tags_menu_untagged">Show untagged</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>

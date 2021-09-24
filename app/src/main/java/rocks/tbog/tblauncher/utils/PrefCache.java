@@ -21,6 +21,7 @@ public class PrefCache {
     private static int LOADING_ICON_RES = 0; // Resources.ID_NULL
     private static Boolean FUZZY_SEARCH_TAGS = null;
     private static Boolean TAGS_MENU_ICONS = null;
+    private static Boolean TAGS_MENU_UNTAGGED = null;
 
     private PrefCache() {
     }
@@ -32,6 +33,7 @@ public class PrefCache {
         LOADING_ICON_RES = 0;
         FUZZY_SEARCH_TAGS = null;
         TAGS_MENU_ICONS = null;
+        TAGS_MENU_UNTAGGED = null;
     }
 
     public static int getResultHistorySize(Context context) {
@@ -78,6 +80,14 @@ public class PrefCache {
             TAGS_MENU_ICONS = pref.getBoolean("tags-menu-icons", false);
         }
         return TAGS_MENU_ICONS;
+    }
+
+    public static boolean showTagsMenuUntagged(Context context) {
+        if (TAGS_MENU_UNTAGGED == null) {
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+            TAGS_MENU_UNTAGGED = pref.getBoolean("tags-menu-untagged", false);
+        }
+        return TAGS_MENU_UNTAGGED;
     }
 
     public static int getResultSearcherCap(Context context) {

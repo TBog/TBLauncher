@@ -221,6 +221,11 @@
                 android:key="tags-menu-list"
                 android:title="@string/tags_menu_list" />
 
+        <androidx.preference.SwitchPreference
+                android:defaultValue="false"
+                android:key="tags-menu-untagged"
+                android:title="@string/tags_menu_untagged"/>
+
         <MultiSelectListPreference
                 android:key="tags-menu-order"
                 android:title="@string/tags_menu_order"/>

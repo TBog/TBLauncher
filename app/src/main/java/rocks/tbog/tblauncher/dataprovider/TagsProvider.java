@@ -49,6 +49,7 @@ public class TagsProvider extends DBProvider<TagEntry> {
         return id.startsWith(TagEntry.SCHEME);
     }
 
+    @NonNull
     public TagEntry getTagEntry(String tagName) {
         String id = TagEntry.SCHEME + tagName;
         TagEntry entryItem = findById(id);

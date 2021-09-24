@@ -1484,4 +1484,7 @@ public class Behaviour implements ISearchActivity {
         return executeGestureAction("gesture-double-click");
     }
 
+    public void showUntagged() {
+        executeAction("showUntagged", null);
+    }
 }

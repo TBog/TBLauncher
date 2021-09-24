@@ -977,6 +977,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case "result-search-cap":
             case "tags-menu-icons":
             case "loading-icon":
+            case "tags-menu-untagged":
                 PrefCache.resetCache();
                 break;
             case "adaptive-shape":
