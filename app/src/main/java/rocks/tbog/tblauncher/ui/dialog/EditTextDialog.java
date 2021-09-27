@@ -81,6 +81,7 @@ public class EditTextDialog extends DialogFragment<CharSequence> {
                 }
                 return false;
             });
+            textView.requestFocus();
         }
         // title
         {

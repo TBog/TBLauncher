@@ -80,6 +80,9 @@ public class Behaviour implements ISearchActivity {
 
     public static final int LAUNCH_DELAY = 100;
     static final String DIALOG_CUSTOM_ICON = "custom_icon_dialog";
+    static final String DIALOG_EDIT_TAGS = "edit_tags_dialog";
+    static final String DIALOG_EDIT_QUICK_LIST = "edit_quick_list_dialog";
+    static final String DIALOG_TAGS_MANAGER = "tags_manager_dialog";
     private static final int UI_ANIMATION_DELAY = 300;
     // time to wait for the keyboard to show up
     private static final int KEYBOARD_ANIMATION_DELAY = 100;
@@ -1051,7 +1054,7 @@ public class Behaviour implements ISearchActivity {
 
     public void launchCustomIconDialog(AppEntry appEntry) {
         IconSelectDialog dialog = new IconSelectDialog();
-        openFragmentDialog(dialog);
+        openFragmentDialog(dialog, DIALOG_CUSTOM_ICON);
 
         // If mResultLayout is visible
 //        boolean bResultListVisible = TBApplication.state().isResultListVisible();
@@ -1085,7 +1088,7 @@ public class Behaviour implements ISearchActivity {
 
     public void launchCustomIconDialog(ShortcutEntry shortcutEntry) {
         IconSelectDialog dialog = new IconSelectDialog();
-        openFragmentDialog(dialog);
+        openFragmentDialog(dialog, DIALOG_CUSTOM_ICON);
 
         // set args
         {
@@ -1122,7 +1125,7 @@ public class Behaviour implements ISearchActivity {
 
     public void launchCustomIconDialog(StaticEntry staticEntry) {
         IconSelectDialog dialog = new IconSelectDialog();
-        openFragmentDialog(dialog);
+        openFragmentDialog(dialog, DIALOG_CUSTOM_ICON);
 
         // If mResultLayout is visible
         boolean bResultListVisible = TBApplication.state().isResultListVisible();
@@ -1185,7 +1188,7 @@ public class Behaviour implements ISearchActivity {
 
     public void launchEditTagsDialog(EntryWithTags entry) {
         EditTagsDialog dialog = new EditTagsDialog();
-        openFragmentDialog(dialog);
+        openFragmentDialog(dialog, DIALOG_EDIT_TAGS);
 
         // set args
         {
@@ -1200,19 +1203,19 @@ public class Behaviour implements ISearchActivity {
             refreshSearchRecord(entry);
         });
 
-        dialog.show(mTBLauncherActivity.getSupportFragmentManager(), "dialog_edit_tags");
+        dialog.show(mTBLauncherActivity.getSupportFragmentManager(), DIALOG_EDIT_TAGS);
     }
 
     public void launchEditQuickListDialog() {
         EditQuickListDialog dialog = new EditQuickListDialog();
-        openFragmentDialog(dialog);
-        dialog.show(mTBLauncherActivity.getSupportFragmentManager(), "dialog_edit_quick_list");
+        openFragmentDialog(dialog, DIALOG_EDIT_QUICK_LIST);
+        dialog.show(mTBLauncherActivity.getSupportFragmentManager(), DIALOG_EDIT_QUICK_LIST);
     }
 
     public void launchTagsManagerDialog() {
         TagsManagerDialog dialog = new TagsManagerDialog();
-        openFragmentDialog(dialog);
-        dialog.show(mTBLauncherActivity.getSupportFragmentManager(), "dialog_tags_manager");
+        openFragmentDialog(dialog, DIALOG_TAGS_MANAGER);
+        dialog.show(mTBLauncherActivity.getSupportFragmentManager(), DIALOG_TAGS_MANAGER);
     }
 
     private boolean isFragmentDialogVisible() {
@@ -1220,19 +1223,28 @@ public class Behaviour implements ISearchActivity {
     }
 
     public void showDialog(@NonNull DialogFragment<?> dialog, @Nullable String tag) {
-        openFragmentDialog(dialog);
+        openFragmentDialog(dialog, tag);
         dialog.show(mTBLauncherActivity.getSupportFragmentManager(), tag);
     }
 
-    private void openFragmentDialog(DialogFragment<?> dialog) {
-        closeFragmentDialog();
+    private void openFragmentDialog(DialogFragment<?> dialog, @Nullable String tag) {
+        closeFragmentDialog(tag);
         mFragmentDialog = dialog;
     }
 
     private boolean closeFragmentDialog() {
+        return closeFragmentDialog(null);
+    }
+
+    private boolean closeFragmentDialog(@Nullable String tag) {
         if (mFragmentDialog != null && mFragmentDialog.isVisible()) {
-            mFragmentDialog.dismiss();
-            return true;
+            if (tag != null && tag.equals(mFragmentDialog.getTag())) {
+                mFragmentDialog.dismiss();
+                return true;
+            } else if ( tag == null) {
+                mFragmentDialog.dismiss();
+                return true;
+            }
         }
         return false;
     }
