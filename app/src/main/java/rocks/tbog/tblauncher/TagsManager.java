@@ -6,6 +6,7 @@ import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -157,7 +158,15 @@ public class TagsManager {
     public void onStart() {
         // Set list adapter after the view inflated
         // This is a workaround to fix listview items not having the correct width
-        mListView.post(() -> mListView.setAdapter(mAdapter));
+        mListView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                mListView.getViewTreeObserver().removeOnPreDrawListener(this);
+                mListView.setAdapter(mAdapter);
+                return false;
+            }
+        });
+        //mListView.post(() -> mListView.setAdapter(mAdapter));
     }
 
     static class TagsAdapter extends ViewHolderListAdapter<TagInfo, TagViewHolder> {

@@ -181,10 +181,12 @@ public class ShortcutsProvider extends Provider<ShortcutEntry> {
     @Override
     public void onDestroy() {
         unregisterReceiver(mProfileReceiver);
-        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
-            LauncherApps launcher = (LauncherApps) this.getSystemService(Context.LAUNCHER_APPS_SERVICE);
-            assert launcher != null;
-            launcher.unregisterCallback(appsCallback);
+        if (appsCallback != null) {
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                LauncherApps launcher = (LauncherApps) this.getSystemService(Context.LAUNCHER_APPS_SERVICE);
+                assert launcher != null;
+                launcher.unregisterCallback(appsCallback);
+            }
         }
         super.onDestroy();
     }

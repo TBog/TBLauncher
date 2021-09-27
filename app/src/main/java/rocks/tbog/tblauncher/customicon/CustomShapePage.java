@@ -10,6 +10,7 @@ import android.graphics.drawable.Drawable;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
+import android.view.ViewTreeObserver;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.SeekBar;
@@ -118,7 +119,17 @@ class CustomShapePage extends PageAdapter.Page {
         {
             GridView gridView = pageView.findViewById(R.id.iconGrid);
             mShapedIconAdapter = new ShapedIconAdapter();
-            gridView.setAdapter(mShapedIconAdapter);
+
+            gridView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+                @Override
+                public boolean onPreDraw() {
+                    gridView.getViewTreeObserver().removeOnPreDrawListener(this);
+                    gridView.setAdapter(mShapedIconAdapter);
+                    return false;
+                }
+            });
+            //gridView.setAdapter(mShapedIconAdapter);
+
             if (iconClickListener != null)
                 gridView.setOnItemClickListener((parent, view, position, id) -> {
                     Object item = parent.getAdapter().getItem(position);
