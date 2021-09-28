@@ -847,23 +847,22 @@ public class Behaviour implements ISearchActivity {
     }
 
     public void runSearcher(@NonNull String query, @NonNull Class<? extends Searcher> searcherClass) {
-        if (mSearchEditText == null)
-            return;
-        /*if (TBApplication.state().isResultListVisible() && mSearchEditText.getText().length() == 0) {
-            mSearchEditText.setText("");
-        } else*/
-        {
-            clearSearchText();
-            Searcher searcher = null;
-            try {
-                Constructor<? extends Searcher> constructor = searcherClass.getConstructor(ISearchActivity.class, String.class);
-                searcher = constructor.newInstance(this, query);
-            } catch (IllegalAccessException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {
-                Log.e(TAG, "new <? extends Searcher>", e);
-            }
-            if (searcher != null)
-                updateSearchRecords(false, searcher);
+        if (TBApplication.state().getDesktop() != LauncherState.Desktop.SEARCH) {
+            // TODO: switchToDesktop might show the result list, we may need to prevent this as an optimization
+            switchToDesktop(LauncherState.Desktop.SEARCH);
+            clearAdapter();
         }
+
+        clearSearchText();
+        Searcher searcher = null;
+        try {
+            Constructor<? extends Searcher> constructor = searcherClass.getConstructor(ISearchActivity.class, String.class);
+            searcher = constructor.newInstance(this, query);
+        } catch (IllegalAccessException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {
+            Log.e(TAG, "new <? extends Searcher>", e);
+        }
+        if (searcher != null)
+            updateSearchRecords(false, searcher);
     }
 
     public void clearSearchText() {
