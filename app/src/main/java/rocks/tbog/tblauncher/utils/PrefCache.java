@@ -11,7 +11,11 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.preference.PreferenceManager;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import rocks.tbog.tblauncher.R;
+import rocks.tbog.tblauncher.preference.ContentLoadHelper;
 
 public class PrefCache {
 
@@ -175,5 +179,22 @@ public class PrefCache {
     public static boolean modulateContactIcons(Context context) {
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
         return pref.getBoolean("matrix-contacts", false);
+    }
+
+    public static List<Integer> getResultPopupOrder(@NonNull Context context) {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+        ContentLoadHelper.OrderedMultiSelectListData data = ContentLoadHelper.generateResultPopupContent(context, pref);
+        List<String> orderedValues = data.getOrderedListValues();
+        ArrayList<Integer> categories = new ArrayList<>(orderedValues.size());
+        for (String orderValue : orderedValues) {
+            String value = PrefOrderedListHelper.getOrderedValueName(orderValue);
+            for (ContentLoadHelper.CategoryItem categoryItem : ContentLoadHelper.RESULT_POPUP_CATEGORIES) {
+                if (categoryItem.value.equals(value)) {
+                    categories.add(categoryItem.textId);
+                    break;
+                }
+            }
+        }
+        return categories;
     }
 }

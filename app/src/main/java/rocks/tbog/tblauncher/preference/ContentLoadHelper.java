@@ -22,19 +22,20 @@ import rocks.tbog.tblauncher.TagsHandler;
 import rocks.tbog.tblauncher.utils.PrefOrderedListHelper;
 
 public class ContentLoadHelper {
-    private static final int[] RESULT_POPUP_CATEGORIES = {
-            R.string.popup_title_hist_fav,
-            R.string.popup_title_customize,
-            R.string.popup_title_link,
+    public static final CategoryItem[] RESULT_POPUP_CATEGORIES = {
+            new CategoryItem(R.string.popup_title_hist_fav, "prefs"),
+            new CategoryItem(R.string.popup_title_customize, "customize"),
+            new CategoryItem(R.string.popup_title_link, "links"),
     };
 
     public static OrderedMultiSelectListData generateResultPopupContent(@NonNull Context context, @NonNull SharedPreferences sharedPreferences) {
         final HashSet<String> values = new HashSet<>(RESULT_POPUP_CATEGORIES.length);
         // get default values
-        for (int stringResId : RESULT_POPUP_CATEGORIES) {
-            String categoryText = context.getString(stringResId);
-            values.add(categoryText);
+        for (CategoryItem categoryItem : RESULT_POPUP_CATEGORIES) {
+            categoryItem.updateText(context);
+            values.add(categoryItem.value);
         }
+
         // get values from previous order
         final ArrayList<String> orderedValues;
         {
@@ -42,6 +43,7 @@ public class ContentLoadHelper {
             orderedValues = new ArrayList<>(order);
             Collections.sort(orderedValues);
         }
+
         // sync current categories with previous order
         ArrayList<String> newOrder = new ArrayList<>(RESULT_POPUP_CATEGORIES.length);
         for (String orderValue : orderedValues) {
@@ -49,17 +51,31 @@ public class ContentLoadHelper {
             if (values.remove(valueName))
                 newOrder.add(valueName);
         }
-        for (int stringResId : RESULT_POPUP_CATEGORIES) {
-            String categoryText = context.getString(stringResId);
-            if (values.remove(categoryText))
-                newOrder.add(categoryText);
+        for (CategoryItem categoryItem : RESULT_POPUP_CATEGORIES) {
+            if (values.remove(categoryItem.value))
+                newOrder.add(categoryItem.value);
         }
 
         // make new order values
         orderedValues.clear();
         orderedValues.addAll(PrefOrderedListHelper.getOrderedArrayList(newOrder));
 
-        return new OrderedMultiSelectListData(null, null, null, orderedValues);
+        // initialize entries using the ordered values
+        CharSequence[] entries = new CharSequence[orderedValues.size()];
+        CharSequence[] entryValues = new CharSequence[orderedValues.size()];
+        for (int i = 0; i < orderedValues.size(); i += 1) {
+            String orderValue = orderedValues.get(i);
+            String value = PrefOrderedListHelper.getOrderedValueName(orderValue);
+            for (CategoryItem categoryItem : RESULT_POPUP_CATEGORIES) {
+                if (categoryItem.value.equals(value)) {
+                    entries[i] = categoryItem.text;
+                    entryValues[i] = categoryItem.value;
+                    break;
+                }
+            }
+        }
+
+        return new OrderedMultiSelectListData(entries, entryValues, null, orderedValues);
     }
 
     public static OrderedMultiSelectListData generateTagsMenuContent(@NonNull Context context, @NonNull SharedPreferences sharedPreferences) {
@@ -91,6 +107,21 @@ public class ContentLoadHelper {
 
         Set<String> orderedValues = sharedPreferences.getStringSet("tags-menu-order", null);
         return new OrderedMultiSelectListData(entries, entryValues, defaultValues, orderedValues);
+    }
+
+    public static class CategoryItem {
+        public final int textId;
+        public final String value;
+        private String text = null;
+
+        public CategoryItem(int textId, String value) {
+            this.textId = textId;
+            this.value = value;
+        }
+
+        public void updateText(@NonNull Context context) {
+            text = context.getString(textId);
+        }
     }
 
     public static class OrderedMultiSelectListData {
@@ -139,14 +170,23 @@ public class ContentLoadHelper {
                 return;
             MultiSelectListPreference listPref = (MultiSelectListPreference) preference;
 
-            ArrayList<String> entries = new ArrayList<>(orderedValues.size());
-            for (String value : orderedValues) {
-                entries.add(PrefOrderedListHelper.getOrderedValueName(value));
+            ArrayList<CharSequence> entryNames = new ArrayList<>(orderedValues.size());
+            for (String orderedValue : orderedValues) {
+                String value = PrefOrderedListHelper.getOrderedValueName(orderedValue);
+                for (int i = 0; i < entryValues.length; i += 1) {
+                    if (entryValues[i].equals(value)) {
+                        entryNames.add(entries[i]);
+                        break;
+                    }
+                }
             }
 
-            listPref.setEntries(entries.toArray(new String[0]));
-            listPref.setEntryValues(orderedValues.toArray(new String[0]));
+            listPref.setEntries(entryNames.toArray(new CharSequence[0]));
+            listPref.setEntryValues(orderedValues.toArray(new CharSequence[0]));
         }
 
+        public List<String> getOrderedListValues() {
+            return orderedValues;
+        }
     }
 }

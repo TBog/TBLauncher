@@ -43,6 +43,7 @@ import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.DialogHelper;
+import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.RootHandler;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
@@ -263,53 +264,59 @@ public final class AppEntry extends EntryWithTags {
             }
         }
 
-        adapter.add(new LinearAdapter.ItemTitle(context, R.string.popup_title_hist_fav));
-        //adapter.add(new LinearAdapter.Item(context, R.string.menu_exclude));
-        adapter.add(new LinearAdapter.Item(context, R.string.menu_remove_history));
-        adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_add));
-        adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_remove));
-        if (isHiddenByUser())
-            adapter.add(new LinearAdapter.Item(context, R.string.menu_show));
-        else
-            adapter.add(new LinearAdapter.Item(context, R.string.menu_hide));
+        List<Integer> categoryTitle = PrefCache.getResultPopupOrder(context);
 
-        adapter.add(new LinearAdapter.ItemTitle(context, R.string.popup_title_customize));
-        if (getTags().isEmpty())
-            adapter.add(new LinearAdapter.Item(context, R.string.menu_tags_add));
-        else
-            adapter.add(new LinearAdapter.Item(context, R.string.menu_tags_edit));
-        adapter.add(new LinearAdapter.Item(context, R.string.menu_app_rename));
-        adapter.add(new LinearAdapter.Item(context, R.string.menu_custom_icon));
+        for (Integer titleStringId : categoryTitle) {
+            if (titleStringId == R.string.popup_title_hist_fav) {
+                adapter.add(new LinearAdapter.ItemTitle(context, R.string.popup_title_hist_fav));
+                //adapter.add(new LinearAdapter.Item(context, R.string.menu_exclude));
+                adapter.add(new LinearAdapter.Item(context, R.string.menu_remove_history));
+                adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_add));
+                adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_remove));
+                if (isHiddenByUser())
+                    adapter.add(new LinearAdapter.Item(context, R.string.menu_show));
+                else
+                    adapter.add(new LinearAdapter.Item(context, R.string.menu_hide));
+            } else if (titleStringId == R.string.popup_title_customize) {
+                adapter.add(new LinearAdapter.ItemTitle(context, R.string.popup_title_customize));
+                if (getTags().isEmpty())
+                    adapter.add(new LinearAdapter.Item(context, R.string.menu_tags_add));
+                else
+                    adapter.add(new LinearAdapter.Item(context, R.string.menu_tags_edit));
+                adapter.add(new LinearAdapter.Item(context, R.string.menu_app_rename));
+                adapter.add(new LinearAdapter.Item(context, R.string.menu_custom_icon));
+            } else if (titleStringId == R.string.popup_title_link) {
+                adapter.add(new LinearAdapter.ItemTitle(context, R.string.popup_title_link));
+                adapter.add(new LinearAdapter.Item(context, R.string.menu_app_details));
+                adapter.add(new LinearAdapter.Item(context, R.string.menu_app_store));
 
-        adapter.add(new LinearAdapter.ItemTitle(context, R.string.popup_title_link));
-        adapter.add(new LinearAdapter.Item(context, R.string.menu_app_details));
-        adapter.add(new LinearAdapter.Item(context, R.string.menu_app_store));
+                try {
+                    // app installed under /system can't be uninstalled
+                    ApplicationInfo ai;
+                    if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        LauncherApps launcher = (LauncherApps) context.getSystemService(Context.LAUNCHER_APPS_SERVICE);
+                        assert launcher != null;
+                        //LauncherActivityInfo info = launcher.getActivityList(this.appPojo().packageName, this.appPojo().userHandle.getRealHandle()).get(0);
+                        LauncherActivityInfo info = getActivityList(launcher).get(0);
+                        ai = info.getApplicationInfo();
 
-        try {
-            // app installed under /system can't be uninstalled
-            ApplicationInfo ai;
-            if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                LauncherApps launcher = (LauncherApps) context.getSystemService(Context.LAUNCHER_APPS_SERVICE);
-                assert launcher != null;
-                //LauncherActivityInfo info = launcher.getActivityList(this.appPojo().packageName, this.appPojo().userHandle.getRealHandle()).get(0);
-                LauncherActivityInfo info = getActivityList(launcher).get(0);
-                ai = info.getApplicationInfo();
+                    } else {
+                        ai = context.getPackageManager().getApplicationInfo(getPackageName(), 0);
+                    }
 
-            } else {
-                ai = context.getPackageManager().getApplicationInfo(getPackageName(), 0);
+                    if ((ai.flags & ApplicationInfo.FLAG_SYSTEM) == 0 && canUninstall()) {
+                        adapter.add(new LinearAdapter.Item(context, R.string.menu_app_uninstall));
+                    }
+                } catch (PackageManager.NameNotFoundException | IndexOutOfBoundsException e) {
+                    // should not happen
+                }
+
+                // append root menu if available
+                RootHandler rootHandler = TBApplication.rootHandler(context);
+                if (rootHandler.isRootActivated() && rootHandler.isRootAvailable()) {
+                    adapter.add(new LinearAdapter.Item(context, R.string.menu_app_hibernate));
+                }
             }
-
-            if ((ai.flags & ApplicationInfo.FLAG_SYSTEM) == 0 && canUninstall()) {
-                adapter.add(new LinearAdapter.Item(context, R.string.menu_app_uninstall));
-            }
-        } catch (PackageManager.NameNotFoundException | IndexOutOfBoundsException e) {
-            // should not happen
-        }
-
-        // append root menu if available
-        RootHandler rootHandler = TBApplication.rootHandler(context);
-        if (rootHandler.isRootActivated() && rootHandler.isRootAvailable()) {
-            adapter.add(new LinearAdapter.Item(context, R.string.menu_app_hibernate));
         }
 
         if (Utilities.checkFlag(flags, LAUNCHED_FROM_QUICK_LIST)) {

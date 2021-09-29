@@ -91,10 +91,10 @@ public class OrderListPreferenceDialog extends PreferenceDialogFragmentCompat {
         super.onPrepareDialogBuilder(builder);
         KeyboardDialogBuilder.setCustomTitle(builder, getPreference().getDialogTitle());
 
-        final int entryCount = mEntries.length;
+        final int entryCount = mEntryValues.length;
         ArrayList<ListEntry> entryArrayList = new ArrayList<>(entryCount);
-        for (CharSequence entry : mEntries) {
-            ListEntry listEntry = new ListEntry(entry.toString());
+        for (int i = 0; i < mEntryValues.length; i++) {
+            ListEntry listEntry = new ListEntry(mEntries[i].toString(), mEntryValues[i].toString());
             entryArrayList.add(listEntry);
         }
 
@@ -128,7 +128,7 @@ public class OrderListPreferenceDialog extends PreferenceDialogFragmentCompat {
         mNewValues.clear();
         int ord = 0;
         for (ListEntry entry : list) {
-            mNewValues.add(PrefOrderedListHelper.makeOrderedValue(entry.name, ord++));
+            mNewValues.add(PrefOrderedListHelper.makeOrderedValue(entry.value, ord++));
         }
     }
 
@@ -146,9 +146,11 @@ public class OrderListPreferenceDialog extends PreferenceDialogFragmentCompat {
 
     public static class ListEntry {
         final String name;
+        final String value;
 
-        public ListEntry(@NonNull String name) {
+        public ListEntry(@NonNull String name, @NonNull String value) {
             this.name = name;
+            this.value = value;
         }
 
         @Override
@@ -158,12 +160,12 @@ public class OrderListPreferenceDialog extends PreferenceDialogFragmentCompat {
             if (o == null || getClass() != o.getClass())
                 return false;
             ListEntry entry = (ListEntry) o;
-            return name.equals(entry.name);
+            return name.equals(entry.name) && value.equals(entry.value);
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(name);
+            return Objects.hash(name, value);
         }
     }
 
