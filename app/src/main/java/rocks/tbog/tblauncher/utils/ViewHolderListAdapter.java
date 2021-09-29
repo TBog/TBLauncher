@@ -13,7 +13,7 @@ public abstract class ViewHolderListAdapter<T, VH extends ViewHolderAdapter.View
     @NonNull
     protected final List<T> mList;
 
-    protected ViewHolderListAdapter(@NonNull Class<VH> viewHolderClass, int listItemLayout, @NonNull List<T> list) {
+    protected ViewHolderListAdapter(@NonNull Class<? extends VH> viewHolderClass, int listItemLayout, @NonNull List<T> list) {
         super(viewHolderClass, listItemLayout);
         mList = list;
     }

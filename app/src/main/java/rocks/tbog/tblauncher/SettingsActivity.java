@@ -47,10 +47,7 @@ import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 import rocks.tbog.tblauncher.dataprovider.FavProvider;
 import rocks.tbog.tblauncher.db.XmlImport;
@@ -65,6 +62,7 @@ import rocks.tbog.tblauncher.preference.BaseListPreferenceDialog;
 import rocks.tbog.tblauncher.preference.BaseMultiSelectListPreferenceDialog;
 import rocks.tbog.tblauncher.preference.ChooseColorDialog;
 import rocks.tbog.tblauncher.preference.ConfirmDialog;
+import rocks.tbog.tblauncher.preference.ContentLoadHelper;
 import rocks.tbog.tblauncher.preference.CustomDialogPreference;
 import rocks.tbog.tblauncher.preference.EditSearchEnginesPreferenceDialog;
 import rocks.tbog.tblauncher.preference.EditSearchHintPreferenceDialog;
@@ -291,42 +289,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
         private static Pair<CharSequence[], CharSequence[]> AppToRunListContent = null;
         private static Pair<CharSequence[], CharSequence[]> EntryToShowListContent = null;
-        private static TagsMenuData TagsMenuContent = null;
-
-        private static class TagsMenuData {
-            private final CharSequence[] entries;
-            private final CharSequence[] entryValues;
-            private final Set<String> defaultValues;
-            private final List<String> orderedValues;
-
-            public TagsMenuData(CharSequence[] entries, CharSequence[] entryValues, Set<String> defaultValues, Set<String> orderedValues) {
-                this.entries = entries;
-                this.entryValues = entryValues;
-                this.defaultValues = defaultValues;
-
-                if (orderedValues == null || orderedValues.isEmpty()) {
-                    // if no order found
-                    this.orderedValues = new ArrayList<>(entryValues.length);
-                    int ord = 0;
-                    for (CharSequence value : entryValues) {
-                        String orderedValue = PrefOrderedListHelper.makeOrderedValue(value.toString(), ord);
-                        this.orderedValues.add(orderedValue);
-                        ord += 1;
-                    }
-                } else {
-                    this.orderedValues = new ArrayList<>(orderedValues);
-                    // sort entries
-                    Collections.sort(this.orderedValues);
-                }
-            }
-
-            public void reloadOrderedValues(@NonNull SharedPreferences sharedPreferences, @NonNull SettingsFragment settings) {
-                orderedValues.clear();
-                orderedValues.addAll(sharedPreferences.getStringSet("tags-menu-order", Collections.emptySet()));
-                Collections.sort(orderedValues);
-                settings.setOrderedListValues("tags-menu-order", orderedValues);
-            }
-        }
+        private static ContentLoadHelper.OrderedMultiSelectListData TagsMenuContent = null;
+        private static ContentLoadHelper.OrderedMultiSelectListData ResultPopupContent = null;
 
         public SettingsFragment() {
             super();
@@ -396,22 +360,25 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 initAppToRunLists(context, sharedPreferences);
                 initEntryToShowLists(context, sharedPreferences);
                 initTagsMenuList(context, sharedPreferences);
+                initResultPopupList(context, sharedPreferences);
             } else {
                 synchronized (SettingsFragment.this) {
                     if (AppToRunListContent == null)
                         AppToRunListContent = generateAppToRunListContent(context);
                     if (EntryToShowListContent == null)
                         EntryToShowListContent = generateEntryToShowListContent(context);
-                    if (TagsMenuContent == null) {
-                        TagsMenuContent = generateTagsMenuContent(context, sharedPreferences);
-                    }
+                    if (TagsMenuContent == null)
+                        TagsMenuContent = ContentLoadHelper.generateTagsMenuContent(context, sharedPreferences);
+                    if (ResultPopupContent == null)
+                        ResultPopupContent = ContentLoadHelper.generateResultPopupContent(context, sharedPreferences);
                 }
                 for (String gesturePref : PREF_LISTS_WITH_DEPENDENCY) {
                     updateAppToRunList(sharedPreferences, gesturePref);
                     updateEntryToShowList(sharedPreferences, gesturePref);
                 }
-                setMultiListValues("tags-menu-list", TagsMenuContent.entries, TagsMenuContent.entryValues, TagsMenuContent.defaultValues);
-                setOrderedListValues("tags-menu-order", TagsMenuContent.orderedValues);
+                TagsMenuContent.setMultiListValues(findPreference("tags-menu-list"));
+                TagsMenuContent.setOrderedListValues(findPreference("tags-menu-order"));
+                ResultPopupContent.setOrderedListValues(findPreference("result-popup-order"));
             }
 
             final ListPreference iconsPack = findPreference("icons-pack");
@@ -469,13 +436,13 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
         private void initTagsMenuList(@NonNull Context context, @NonNull SharedPreferences sharedPreferences) {
             final Runnable setTagsMenuValues = () -> {
-                setMultiListValues("tags-menu-list", TagsMenuContent.entries, TagsMenuContent.entryValues, TagsMenuContent.defaultValues);
-                setOrderedListValues("tags-menu-order", TagsMenuContent.orderedValues);
+                TagsMenuContent.setMultiListValues(findPreference("tags-menu-list"));
+                TagsMenuContent.setOrderedListValues(findPreference("tags-menu-order"));
             };
 
             if (TagsMenuContent == null) {
                 Utilities.runAsync(getLifecycle(), t -> {
-                    TagsMenuData content = generateTagsMenuContent(context, sharedPreferences);
+                    ContentLoadHelper.OrderedMultiSelectListData content = ContentLoadHelper.generateTagsMenuContent(context, sharedPreferences);
                     synchronized (SettingsFragment.this) {
                         if (TagsMenuContent == null) {
                             TagsMenuContent = content;
@@ -487,31 +454,23 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             }
         }
 
-        private void setMultiListValues(@NonNull String listKey, @NonNull CharSequence[] entries, @NonNull CharSequence[] values, @Nullable Set<String> defaultValues) {
-            Preference listPref = findPreference(listKey);
-            if (!(listPref instanceof MultiSelectListPreference))
-                return;
-            MultiSelectListPreference tagsMenuList = (MultiSelectListPreference) listPref;
+        private void initResultPopupList(@NonNull Context context, @NonNull SharedPreferences sharedPreferences) {
+            final Runnable setResultPopupValues = () -> {
+                ResultPopupContent.setOrderedListValues(findPreference("result-popup-order"));
+            };
 
-            tagsMenuList.setEntries(entries);
-            tagsMenuList.setEntryValues(values);
-            if (defaultValues != null && tagsMenuList.getValues().isEmpty())
-                tagsMenuList.setValues(defaultValues);
-        }
-
-        private void setOrderedListValues(@NonNull String orderKey, List<String> orderedValues) {
-            Preference pref = findPreference(orderKey);
-            if (!(pref instanceof MultiSelectListPreference))
-                return;
-            MultiSelectListPreference listPref = (MultiSelectListPreference) pref;
-
-            ArrayList<String> entries = new ArrayList<>(orderedValues.size());
-            for (String value : orderedValues) {
-                entries.add(PrefOrderedListHelper.getOrderedValueName(value));
+            if (ResultPopupContent == null) {
+                Utilities.runAsync(getLifecycle(), t -> {
+                    ContentLoadHelper.OrderedMultiSelectListData content = ContentLoadHelper.generateResultPopupContent(context, sharedPreferences);
+                    synchronized (SettingsFragment.this) {
+                        if (ResultPopupContent == null) {
+                            ResultPopupContent = content;
+                        }
+                    }
+                }, t -> setResultPopupValues.run());
+            } else {
+                setResultPopupValues.run();
             }
-
-            listPref.setEntries(entries.toArray(new String[0]));
-            listPref.setEntryValues(orderedValues.toArray(new String[0]));
         }
 
         private void tintPreferenceIcons(Preference preference, int color) {
@@ -679,7 +638,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             } else if (preference instanceof MultiSelectListPreference) {
                 String key = preference.getKey();
                 if ("tags-menu-order".equals(key)) {
-                    dialogFragment = OrderListPreferenceDialog.newInstance(key);
+                    dialogFragment = OrderListPreferenceDialog.newInstance(key, true);
+                } else if ("result-popup-order".equals(key)) {
+                    dialogFragment = OrderListPreferenceDialog.newInstance(key, false);
                 } else {
                     dialogFragment = BaseMultiSelectListPreferenceDialog.newInstance(key);
                 }
@@ -757,37 +718,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             return new Pair<>(entries, entryValues);
         }
 
-        private static TagsMenuData generateTagsMenuContent(@NonNull Context context, @NonNull SharedPreferences sharedPreferences) {
-            TagsHandler tagsHandler = TBApplication.tagsHandler(context);
-            Set<String> validTags = tagsHandler.getValidTags();
-
-            Set<String> tagsMenuListValues = sharedPreferences.getStringSet("tags-menu-list", Collections.emptySet());
-
-            ArrayList<String> prefEntries = new ArrayList<>(validTags);
-            // make sure we have the selected values as entries (so the user can remove them)
-            for (String tagName : tagsMenuListValues) {
-                if (!validTags.contains(tagName))
-                    prefEntries.add(0, tagName);
-            }
-            // sort entries
-            Collections.sort(prefEntries, String.CASE_INSENSITIVE_ORDER);
-
-            // set preference entries and values
-            CharSequence[] entries = prefEntries.toArray(new String[0]);
-            CharSequence[] entryValues = prefEntries.toArray(new String[0]);
-
-            // set default values if we need them
-            HashSet<String> defaultValues = new HashSet<>();
-            for (String tagName : validTags) {
-                if (defaultValues.size() >= 5)
-                    break;
-                defaultValues.add(tagName);
-            }
-
-            Set<String> orderedValues = sharedPreferences.getStringSet("tags-menu-order", null);
-            return new TagsMenuData(entries, entryValues, defaultValues, orderedValues);
-        }
-
         private void updateListPrefDependency(@NonNull String dependOnKey, @Nullable String dependOnValue, @NonNull String enableValue, @NonNull String listKey, @Nullable Pair<CharSequence[], CharSequence[]> listContent) {
             Preference prefAppToRun = findPreference(listKey);
             if (prefAppToRun instanceof ListPreference && listContent != null) {
@@ -863,7 +793,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
             if (TagsMenuContent != null) {
                 if ("tags-menu-list".equals(key) || "tags-menu-order".equals(key)) {
-                    TagsMenuContent.reloadOrderedValues(sharedPreferences, this);
+                    TagsMenuContent.reloadOrderedValues(sharedPreferences, this, "tags-menu-order");
+                } else if ("result-popup-order".equals(key)) {
+                    ResultPopupContent.reloadOrderedValues(sharedPreferences, this, "result-popup-order");
                 }
             }
         }

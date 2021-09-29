@@ -424,6 +424,8 @@
     <string name="tags_menu_list">Tags to show</string>
     <string name="tags_menu_order">Tags order</string>
     <string name="tags_menu_untagged">Show untagged</string>
+    <string name="result_popup_order">Long touch category order</string>
+    <string name="result_popup_order_summary">Category order for long touch popup items</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>

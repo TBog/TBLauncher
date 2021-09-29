@@ -24,11 +24,11 @@ import rocks.tbog.tblauncher.WorkAsync.AsyncTask;
  */
 public abstract class ViewHolderAdapter<T, VH extends ViewHolderAdapter.ViewHolder<T>> extends BaseAdapter {
     @NonNull
-    final Class<VH> mViewHolderClass;
+    final Class<? extends VH> mViewHolderClass;
     @LayoutRes
     final int mListItemLayout;
 
-    protected ViewHolderAdapter(@NonNull Class<VH> viewHolderClass, @LayoutRes int listItemLayout) {
+    protected ViewHolderAdapter(@NonNull Class<? extends VH> viewHolderClass, @LayoutRes int listItemLayout) {
         mViewHolderClass = viewHolderClass;
         mListItemLayout = listItemLayout;
     }

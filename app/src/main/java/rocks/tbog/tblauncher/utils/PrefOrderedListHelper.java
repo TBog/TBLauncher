@@ -72,4 +72,26 @@ public class PrefOrderedListHelper {
     public static String makeOrderedValue(String name, int position) {
         return String.format(Locale.US, "%08x. %s", position, name);
     }
+
+    public static ArrayList<String> getOrderedArrayList(CharSequence[] entryValues) {
+        ArrayList<String> orderedValues = new ArrayList<>(entryValues.length);
+        int ord = 0;
+        for (CharSequence value : entryValues) {
+            String orderedValue = makeOrderedValue(value.toString(), ord);
+            orderedValues.add(orderedValue);
+            ord += 1;
+        }
+        return orderedValues;
+    }
+
+    public static ArrayList<String> getOrderedArrayList(List<String> entryValues) {
+        ArrayList<String> orderedValues = new ArrayList<>(entryValues.size());
+        int ord = 0;
+        for (String value : entryValues) {
+            String orderedValue = makeOrderedValue(value, ord);
+            orderedValues.add(orderedValue);
+            ord += 1;
+        }
+        return orderedValues;
+    }
 }

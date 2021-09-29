@@ -142,6 +142,11 @@
                 android:summary="@string/unlimited_search_cap_summary"
                 android:title="@string/unlimited_search_cap" />
 
+        <MultiSelectListPreference
+                android:key="result-popup-order"
+                android:summary="@string/result_popup_order_summary"
+                android:title="@string/result_popup_order"/>
+
     </PreferenceCategory>
 
     <!-- Icons -->

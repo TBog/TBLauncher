@@ -2,7 +2,6 @@ package rocks.tbog.tblauncher.preference;
 
 import android.os.Bundle;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -28,6 +27,8 @@ import rocks.tbog.tblauncher.utils.ViewHolderListAdapter;
 
 public class OrderListPreferenceDialog extends PreferenceDialogFragmentCompat {
 
+    protected static final String ARG_TAG_ICONS = "showTagIcons";
+
     private static final String SAVE_STATE_VALUES = "OrderListPreferenceDialogFragment.values";
     private static final String SAVE_STATE_CHANGED = "OrderListPreferenceDialogFragment.changed";
     private static final String SAVE_STATE_ENTRIES = "OrderListPreferenceDialogFragment.entries";
@@ -38,10 +39,11 @@ public class OrderListPreferenceDialog extends PreferenceDialogFragmentCompat {
     private CharSequence[] mEntries;
     private CharSequence[] mEntryValues;
 
-    public static OrderListPreferenceDialog newInstance(String key) {
+    public static OrderListPreferenceDialog newInstance(String key, boolean showTagIcons) {
         final OrderListPreferenceDialog fragment = new OrderListPreferenceDialog();
-        final Bundle b = new Bundle(1);
+        final Bundle b = new Bundle(2);
         b.putString(ARG_KEY, key);
+        b.putBoolean(ARG_TAG_ICONS, showTagIcons);
         fragment.setArguments(b);
         return fragment;
     }
@@ -96,7 +98,9 @@ public class OrderListPreferenceDialog extends PreferenceDialogFragmentCompat {
             entryArrayList.add(listEntry);
         }
 
-        EntryAdapter entryAdapter = new EntryAdapter(entryArrayList);
+        final Bundle args = getArguments();
+        boolean tagIcons = args != null && args.getBoolean(ARG_TAG_ICONS, false);
+        EntryAdapter entryAdapter = new EntryAdapter(tagIcons ? TagEntryViewHolder.class : EntryViewHolder.class, entryArrayList);
         builder.setAdapter(entryAdapter, null);
 
         entryAdapter.mOnMoveUpListener = (adapter, view, position) -> {
@@ -163,7 +167,7 @@ public class OrderListPreferenceDialog extends PreferenceDialogFragmentCompat {
         }
     }
 
-    static class EntryAdapter extends ViewHolderListAdapter<ListEntry, EntryViewHolder> {
+    private static class EntryAdapter extends ViewHolderListAdapter<ListEntry, EntryViewHolder> {
 
         private OnItemClickListener mOnMoveUpListener = null;
         private OnItemClickListener mOnMoveDownListener = null;
@@ -172,13 +176,8 @@ public class OrderListPreferenceDialog extends PreferenceDialogFragmentCompat {
             void onClick(EntryAdapter adapter, View view, int position);
         }
 
-        protected EntryAdapter(@NonNull List<ListEntry> list) {
-            super(EntryViewHolder.class, R.layout.order_list_item, list);
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            return super.getView(position, convertView, parent);
+        protected EntryAdapter(@NonNull Class<? extends EntryViewHolder> viewHolderClass, @NonNull List<ListEntry> list) {
+            super(viewHolderClass, R.layout.order_list_item, list);
         }
 
         public List<ListEntry> getList() {
@@ -187,14 +186,12 @@ public class OrderListPreferenceDialog extends PreferenceDialogFragmentCompat {
     }
 
     public static class EntryViewHolder extends ViewHolderAdapter.ViewHolder<ListEntry> {
-        ImageView icon;
         TextView textView;
         View btnUp;
         View btnDown;
 
         protected EntryViewHolder(View view) {
             super(view);
-            icon = view.findViewById(android.R.id.icon);
             textView = view.findViewById(android.R.id.text1);
             btnUp = view.findViewById(android.R.id.button1);
             btnDown = view.findViewById(android.R.id.button2);
@@ -204,26 +201,47 @@ public class OrderListPreferenceDialog extends PreferenceDialogFragmentCompat {
         protected void setContent(ListEntry content, int position, @NonNull ViewHolderAdapter<ListEntry, ? extends ViewHolderAdapter.ViewHolder<ListEntry>> adapter) {
             EntryAdapter entryAdapter = (EntryAdapter) adapter;
 
-            if (icon != null) {
-                TagsProvider tagsProvider = TBApplication.dataHandler(icon.getContext()).getTagsProvider();
-                TagEntry tagEntry = tagsProvider != null ? tagsProvider.getTagEntry(content.name) : null;
-                if (tagEntry != null)
-                    Utilities.setIconAsync(icon, tagEntry::getIconDrawable);
-                else
-                    icon.setImageDrawable(null);
-            }
-
             textView.setText(content.name);
 
             btnUp.setOnClickListener(v -> {
-                if (entryAdapter.mOnMoveUpListener != null)
-                    entryAdapter.mOnMoveUpListener.onClick(entryAdapter, v, position);
+                if (entryAdapter.mOnMoveUpListener == null)
+                    return;
+                int pos = entryAdapter.getList().indexOf(content);
+                if (pos != -1)
+                    entryAdapter.mOnMoveUpListener.onClick(entryAdapter, v, pos);
             });
 
             btnDown.setOnClickListener(v -> {
-                if (entryAdapter.mOnMoveDownListener != null)
-                    entryAdapter.mOnMoveDownListener.onClick(entryAdapter, v, position);
+                if (entryAdapter.mOnMoveDownListener == null)
+                    return;
+                int pos = entryAdapter.getList().indexOf(content);
+                if (pos != -1)
+                    entryAdapter.mOnMoveDownListener.onClick(entryAdapter, v, pos);
             });
+        }
+    }
+
+    public static class TagEntryViewHolder extends EntryViewHolder {
+        ImageView icon;
+
+        protected TagEntryViewHolder(View view) {
+            super(view);
+            icon = view.findViewById(android.R.id.icon);
+        }
+
+        @Override
+        protected void setContent(ListEntry content, int position, @NonNull ViewHolderAdapter<ListEntry, ? extends ViewHolderAdapter.ViewHolder<ListEntry>> adapter) {
+            super.setContent(content, position, adapter);
+            if (icon == null)
+                return;
+
+            icon.setVisibility(View.VISIBLE);
+            TagsProvider tagsProvider = TBApplication.dataHandler(icon.getContext()).getTagsProvider();
+            TagEntry tagEntry = tagsProvider != null ? tagsProvider.getTagEntry(content.name) : null;
+            if (tagEntry != null)
+                Utilities.setIconAsync(icon, tagEntry::getIconDrawable);
+            else
+                icon.setImageDrawable(null);
         }
     }
 }
