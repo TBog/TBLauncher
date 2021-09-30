@@ -26,6 +26,7 @@ import rocks.tbog.tblauncher.utils.PrefOrderedListHelper;
 
 public class ContentLoadHelper {
     public static final CategoryItem[] RESULT_POPUP_CATEGORIES = {
+            new CategoryItem(R.string.popup_title_shortcut_dynamic, "dyn_shortcut"),
             new CategoryItem(R.string.popup_title_hist_fav, "prefs"),
             new CategoryItem(R.string.popup_title_customize, "customize"),
             new CategoryItem(R.string.popup_title_link, "links"),

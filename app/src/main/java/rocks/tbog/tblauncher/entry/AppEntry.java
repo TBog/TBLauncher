@@ -253,18 +253,6 @@ public final class AppEntry extends EntryWithTags {
 //            adapter.add(new ListPopup.Item(context, R.string.menu_remove));
 //        }
 
-        if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            List<ShortcutInfo> list = ShortcutUtil.getShortcut(context, getPackageName(), FLAG_MATCH_MANIFEST | FLAG_MATCH_DYNAMIC);
-            for (ShortcutInfo info : list) {
-                CharSequence label = info.getLongLabel();
-                if (label == null)
-                    label = info.getShortLabel();
-                if (label == null)
-                    continue;
-                adapter.add(new ShortcutItem(label.toString(), info));
-            }
-        }
-
         List<ContentLoadHelper.CategoryItem> categoryTitle = PrefCache.getResultPopupOrder(context);
 
         for (ContentLoadHelper.CategoryItem categoryItem : categoryTitle) {
@@ -317,6 +305,22 @@ public final class AppEntry extends EntryWithTags {
                 RootHandler rootHandler = TBApplication.rootHandler(context);
                 if (rootHandler.isRootActivated() && rootHandler.isRootAvailable()) {
                     adapter.add(new LinearAdapter.Item(context, R.string.menu_app_hibernate));
+                }
+            } else if (titleStringId == R.string.popup_title_shortcut_dynamic) {
+                int shortcutCount = 0;
+                if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    List<ShortcutInfo> list = ShortcutUtil.getShortcut(context, getPackageName(), FLAG_MATCH_MANIFEST | FLAG_MATCH_DYNAMIC);
+                    for (ShortcutInfo info : list) {
+                        CharSequence label = info.getLongLabel();
+                        if (label == null)
+                            label = info.getShortLabel();
+                        if (label == null)
+                            continue;
+                        if (shortcutCount == 0)
+                            adapter.add(new LinearAdapter.ItemTitle(context, R.string.popup_title_shortcut_dynamic));
+                        adapter.add(new ShortcutItem(label.toString(), info));
+                        shortcutCount += 1;
+                    }
                 }
             }
         }

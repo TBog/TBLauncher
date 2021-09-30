@@ -114,6 +114,7 @@
     <string name="tags_enabled_summary">Show tags for each app in the result list</string>
     <string name="icons_section">Icons</string>
     <string name="icons_visible">Show Icons</string>
+    <string name="popup_title_shortcut_dynamic">Shortcuts</string>
     <string name="popup_title_hist_fav">Preferences</string>
     <string name="popup_title_customize">Customize</string>
     <string name="popup_title_link">Links</string>
