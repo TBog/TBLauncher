@@ -1,6 +1,7 @@
 package rocks.tbog.tblauncher.preference;
 
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -11,6 +12,7 @@ import androidx.preference.MultiSelectListPreference;
 import androidx.preference.PreferenceDialogFragmentCompat;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -71,6 +73,8 @@ public class OrderListPreferenceDialog extends PreferenceDialogFragmentCompat {
             mEntries = savedInstanceState.getCharSequenceArray(SAVE_STATE_ENTRIES);
             mEntryValues = savedInstanceState.getCharSequenceArray(SAVE_STATE_ENTRY_VALUES);
         }
+
+        Log.d("pref", "OrderListPreferenceDialog " + getPreference().getKey() + "\n entries=" + Arrays.toString(mEntries) + "\n values=" + Arrays.toString(mEntryValues));
     }
 
     @Override
@@ -91,9 +95,12 @@ public class OrderListPreferenceDialog extends PreferenceDialogFragmentCompat {
         super.onPrepareDialogBuilder(builder);
         KeyboardDialogBuilder.setCustomTitle(builder, getPreference().getDialogTitle());
 
+        if (mEntryValues.length != mEntries.length)
+            throw new IllegalStateException("mEntryValues.length=" + mEntryValues.length + " mEntries.length=" + mEntries.length);
+
         final int entryCount = mEntryValues.length;
         ArrayList<ListEntry> entryArrayList = new ArrayList<>(entryCount);
-        for (int i = 0; i < mEntryValues.length; i++) {
+        for (int i = 0; i < entryCount; i += 1) {
             ListEntry listEntry = new ListEntry(mEntries[i].toString(), mEntryValues[i].toString());
             entryArrayList.add(listEntry);
         }
@@ -136,6 +143,7 @@ public class OrderListPreferenceDialog extends PreferenceDialogFragmentCompat {
     public void onDialogClosed(boolean positiveResult) {
         if (positiveResult && mPreferenceChanged) {
             final MultiSelectListPreference preference = getListPreference();
+            Log.d("pref", "onDialogClosed " + preference.getKey() + "\n mNewValues=" + mNewValues);
             if (preference.callChangeListener(mNewValues)) {
                 preference.setEntryValues(mNewValues.toArray(new CharSequence[0]));
                 preference.setValues(mNewValues);

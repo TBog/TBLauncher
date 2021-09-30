@@ -542,6 +542,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 AppToRunListContent = null;
                 EntryToShowListContent = null;
                 TagsMenuContent = null;
+                ResultPopupContent = null;
             }
         }
 
@@ -910,6 +911,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case "tags-menu-icons":
             case "loading-icon":
             case "tags-menu-untagged":
+            case "result-popup-order":
                 PrefCache.resetCache();
                 break;
             case "adaptive-shape":

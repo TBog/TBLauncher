@@ -2,13 +2,16 @@ package rocks.tbog.tblauncher.preference;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
 import androidx.preference.MultiSelectListPreference;
 import androidx.preference.Preference;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -110,8 +113,21 @@ public class ContentLoadHelper {
     }
 
     public static class CategoryItem {
+        /**
+         * String resource used when inflating the popup menu.
+         * Currently we use this to generate the preference menu as well
+         */
+        @StringRes
         public final int textId;
+
+        /**
+         * Value stored in the preference. Must not change with language.
+         */
         public final String value;
+
+        /**
+         * String to be used for the preference menu.
+         */
         private String text = null;
 
         public CategoryItem(int textId, String value) {
@@ -119,6 +135,10 @@ public class ContentLoadHelper {
             this.value = value;
         }
 
+        /**
+         * Using context generate the string for the preference menu
+         * @param context so we can get the string from the resource id
+         */
         public void updateText(@NonNull Context context) {
             text = context.getString(textId);
         }
@@ -163,6 +183,8 @@ public class ContentLoadHelper {
                 multiSelectList.setEntryValues(entryValues);
             if (defaultValues != null && multiSelectList.getValues().isEmpty())
                 multiSelectList.setValues(defaultValues);
+
+            Log.d("pref", "setMultiListValues " + preference.getKey() + "\n entries=" + Arrays.toString(entries) + "\n values=" + Arrays.toString(entryValues));
         }
 
         public void setOrderedListValues(@Nullable Preference preference) {
@@ -170,19 +192,22 @@ public class ContentLoadHelper {
                 return;
             MultiSelectListPreference listPref = (MultiSelectListPreference) preference;
 
-            ArrayList<CharSequence> entryNames = new ArrayList<>(orderedValues.size());
+            ArrayList<CharSequence> orderedEntries = new ArrayList<>(orderedValues.size());
+            ArrayList<CharSequence> orderedEntryValues = new ArrayList<>(orderedValues.size());
             for (String orderedValue : orderedValues) {
                 String value = PrefOrderedListHelper.getOrderedValueName(orderedValue);
                 for (int i = 0; i < entryValues.length; i += 1) {
                     if (entryValues[i].equals(value)) {
-                        entryNames.add(entries[i]);
+                        orderedEntries.add(entries[i]);
+                        orderedEntryValues.add(entryValues[i]);
                         break;
                     }
                 }
             }
 
-            listPref.setEntries(entryNames.toArray(new CharSequence[0]));
-            listPref.setEntryValues(orderedValues.toArray(new CharSequence[0]));
+            listPref.setEntries(orderedEntries.toArray(new CharSequence[0]));
+            listPref.setEntryValues(orderedEntryValues.toArray(new CharSequence[0]));
+            Log.d("pref", "setOrderedListValues " + listPref.getKey() + "\n entries=" + orderedEntries + "\n values=" + orderedValues);
         }
 
         public List<String> getOrderedListValues() {

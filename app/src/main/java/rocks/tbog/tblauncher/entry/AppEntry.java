@@ -38,6 +38,7 @@ import rocks.tbog.tblauncher.BuildConfig;
 import rocks.tbog.tblauncher.IconsHandler;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
+import rocks.tbog.tblauncher.preference.ContentLoadHelper;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
@@ -264,9 +265,10 @@ public final class AppEntry extends EntryWithTags {
             }
         }
 
-        List<Integer> categoryTitle = PrefCache.getResultPopupOrder(context);
+        List<ContentLoadHelper.CategoryItem> categoryTitle = PrefCache.getResultPopupOrder(context);
 
-        for (Integer titleStringId : categoryTitle) {
+        for (ContentLoadHelper.CategoryItem categoryItem : categoryTitle) {
+            int titleStringId = categoryItem.textId;
             if (titleStringId == R.string.popup_title_hist_fav) {
                 adapter.add(new LinearAdapter.ItemTitle(context, R.string.popup_title_hist_fav));
                 //adapter.add(new LinearAdapter.Item(context, R.string.menu_exclude));

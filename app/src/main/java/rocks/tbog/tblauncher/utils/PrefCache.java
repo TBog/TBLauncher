@@ -26,6 +26,7 @@ public class PrefCache {
     private static Boolean FUZZY_SEARCH_TAGS = null;
     private static Boolean TAGS_MENU_ICONS = null;
     private static Boolean TAGS_MENU_UNTAGGED = null;
+    private static List<ContentLoadHelper.CategoryItem> RESULT_POPUP_ORDER = null;
 
     private PrefCache() {
     }
@@ -38,6 +39,7 @@ public class PrefCache {
         FUZZY_SEARCH_TAGS = null;
         TAGS_MENU_ICONS = null;
         TAGS_MENU_UNTAGGED = null;
+        RESULT_POPUP_ORDER = null;
     }
 
     public static int getResultHistorySize(Context context) {
@@ -181,20 +183,22 @@ public class PrefCache {
         return pref.getBoolean("matrix-contacts", false);
     }
 
-    public static List<Integer> getResultPopupOrder(@NonNull Context context) {
-        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
-        ContentLoadHelper.OrderedMultiSelectListData data = ContentLoadHelper.generateResultPopupContent(context, pref);
-        List<String> orderedValues = data.getOrderedListValues();
-        ArrayList<Integer> categories = new ArrayList<>(orderedValues.size());
-        for (String orderValue : orderedValues) {
-            String value = PrefOrderedListHelper.getOrderedValueName(orderValue);
-            for (ContentLoadHelper.CategoryItem categoryItem : ContentLoadHelper.RESULT_POPUP_CATEGORIES) {
-                if (categoryItem.value.equals(value)) {
-                    categories.add(categoryItem.textId);
-                    break;
+    public static List<ContentLoadHelper.CategoryItem> getResultPopupOrder(@NonNull Context context) {
+        if (RESULT_POPUP_ORDER == null) {
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+            ContentLoadHelper.OrderedMultiSelectListData data = ContentLoadHelper.generateResultPopupContent(context, pref);
+            List<String> orderedValues = data.getOrderedListValues();
+            RESULT_POPUP_ORDER = new ArrayList<>(orderedValues.size());
+            for (String orderValue : orderedValues) {
+                String value = PrefOrderedListHelper.getOrderedValueName(orderValue);
+                for (ContentLoadHelper.CategoryItem categoryItem : ContentLoadHelper.RESULT_POPUP_CATEGORIES) {
+                    if (categoryItem.value.equals(value)) {
+                        RESULT_POPUP_ORDER.add(categoryItem);
+                        break;
+                    }
                 }
             }
         }
-        return categories;
+        return RESULT_POPUP_ORDER;
     }
 }
