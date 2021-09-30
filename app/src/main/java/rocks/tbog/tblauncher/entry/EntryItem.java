@@ -203,7 +203,7 @@ public abstract class EntryItem {
      *
      * @return an inflated, listener-free PopupMenu
      */
-    ListPopup buildPopupMenu(Context context, LinearAdapter adapter, View parentView, int flags) {
+    protected ListPopup buildPopupMenu(Context context, LinearAdapter adapter, View parentView, int flags) {
         adapter.add(new LinearAdapter.ItemTitle(context, R.string.popup_title_hist_fav));
         adapter.add(new LinearAdapter.Item(context, R.string.menu_remove_history));
         adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_add));

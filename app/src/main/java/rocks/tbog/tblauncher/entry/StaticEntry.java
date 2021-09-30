@@ -14,16 +14,20 @@ import androidx.annotation.WorkerThread;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.graphics.drawable.DrawableCompat;
 
+import java.util.List;
+
 import rocks.tbog.tblauncher.DataHandler;
 import rocks.tbog.tblauncher.IconsHandler;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.dataprovider.ActionProvider;
 import rocks.tbog.tblauncher.dataprovider.FilterProvider;
+import rocks.tbog.tblauncher.preference.ContentLoadHelper;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.DialogHelper;
+import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.Utilities;
 
@@ -38,15 +42,22 @@ public abstract class StaticEntry extends EntryItem {
     }
 
     @Override
-    ListPopup buildPopupMenu(Context context, LinearAdapter adapter, View parentView, int flags) {
+    protected ListPopup buildPopupMenu(Context context, LinearAdapter adapter, View parentView, int flags) {
 
-        adapter.add(new LinearAdapter.ItemTitle(context, R.string.popup_title_hist_fav));
-        adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_add));
-        adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_remove));
+        List<ContentLoadHelper.CategoryItem> categoryTitle = PrefCache.getResultPopupOrder(context);
 
-        adapter.add(new LinearAdapter.ItemTitle(context, R.string.popup_title_customize));
-        adapter.add(new LinearAdapter.Item(context, R.string.menu_action_rename));
-        adapter.add(new LinearAdapter.Item(context, R.string.menu_custom_icon));
+        for (ContentLoadHelper.CategoryItem categoryItem : categoryTitle) {
+            int titleStringId = categoryItem.textId;
+            if (titleStringId == R.string.popup_title_hist_fav) {
+                adapter.add(new LinearAdapter.ItemTitle(context, R.string.popup_title_hist_fav));
+                adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_add));
+                adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_remove));
+            } else if (titleStringId == R.string.popup_title_customize) {
+                adapter.add(new LinearAdapter.ItemTitle(context, R.string.popup_title_customize));
+                adapter.add(new LinearAdapter.Item(context, R.string.menu_action_rename));
+                adapter.add(new LinearAdapter.Item(context, R.string.menu_custom_icon));
+            }
+        }
 
         if (Utilities.checkFlag(flags, LAUNCHED_FROM_QUICK_LIST)) {
             adapter.add(new LinearAdapter.ItemTitle(context, R.string.menu_popup_title_settings));

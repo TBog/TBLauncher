@@ -20,7 +20,7 @@ public class PlaceholderEntry extends StaticEntry {
     }
 
     @Override
-    ListPopup buildPopupMenu(Context context, LinearAdapter adapter, View parentView, int flags) {
+    protected ListPopup buildPopupMenu(Context context, LinearAdapter adapter, View parentView, int flags) {
         if (Utilities.checkFlag(flags, LAUNCHED_FROM_QUICK_LIST)) {
             adapter.add(new LinearAdapter.ItemTitle(context, R.string.menu_popup_title_settings));
             adapter.add(new LinearAdapter.Item(context, R.string.menu_popup_quick_list_customize));
