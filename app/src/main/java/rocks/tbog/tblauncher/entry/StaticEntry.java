@@ -169,6 +169,11 @@ public abstract class StaticEntry extends EntryItem {
         customIcon = false;
     }
 
+
+    public boolean hasCustomIcon() {
+        return customIcon;
+    }
+
     @WorkerThread
     public Drawable getIconDrawable(Context context) {
         if (customIcon) {

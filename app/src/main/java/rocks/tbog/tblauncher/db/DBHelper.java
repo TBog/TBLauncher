@@ -22,6 +22,7 @@ import java.util.Map;
 import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.ShortcutEntry;
+import rocks.tbog.tblauncher.entry.TagEntry;
 import rocks.tbog.tblauncher.utils.PrefCache;
 
 public class DBHelper {
@@ -470,8 +471,24 @@ public class DBHelper {
      * @param newName the new name of the tag
      * @return number of records affected
      */
-    public static int renameTag(Context context, String tagName, String newName) {
+    public static int renameTag(Context context, String tagName, String newName, @Nullable TagEntry tagEntry, @Nullable TagEntry newEntry) {
         SQLiteDatabase db = getDatabase(context);
+
+        if (tagEntry != null && newEntry != null) {
+            String sql = "UPDATE favorites SET record=? WHERE record=?";
+            try {
+                SQLiteStatement statement = db.compileStatement(sql);
+                statement.bindString(1, newEntry.id);
+                statement.bindString(2, tagEntry.id);
+                int count = statement.executeUpdateDelete();
+                if (count != 1) {
+                    Log.e(TAG, "Update icon in rename tag; count = " + count);
+                }
+                statement.close();
+            } catch (Exception e) {
+                Log.e(TAG, "Rename tag (update icon) `" + tagEntry.id + "`", e);
+            }
+        }
 
         ContentValues values = new ContentValues();
         values.put("tag", newName);

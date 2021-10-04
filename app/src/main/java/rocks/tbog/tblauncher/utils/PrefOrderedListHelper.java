@@ -1,6 +1,7 @@
 package rocks.tbog.tblauncher.utils;
 
 import android.content.SharedPreferences;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 
@@ -12,6 +13,8 @@ import java.util.Locale;
 import java.util.Set;
 
 public class PrefOrderedListHelper {
+    private static final String TAG = "Order";
+
     /**
      * Synchronize the toggle list with the order list. Remove toggled off entries and add at the end new ones.
      *
@@ -67,6 +70,22 @@ public class PrefOrderedListHelper {
         int pos = value.indexOf(". ");
         pos = pos >= 0 ? pos + 2 : 0;
         return value.substring(pos);
+    }
+
+    public static int getOrderedValueIndex(String value) {
+        int pos = value.indexOf(". ");
+        int order = 0;
+        if (pos > 0) {
+            String hexOrder = value.substring(0, pos);
+            try {
+                order = Integer.parseInt(hexOrder, 16);
+            } catch (Exception e) {
+                Log.e(TAG, "parse `" + hexOrder + "` in base 16", e);
+            }
+        } else {
+            Log.e(TAG, "invalid ordered value `" + value + "`");
+        }
+        return order;
     }
 
     public static String makeOrderedValue(String name, int position) {

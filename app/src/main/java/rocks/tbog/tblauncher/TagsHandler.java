@@ -20,14 +20,17 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import rocks.tbog.tblauncher.dataprovider.TagsProvider;
 import rocks.tbog.tblauncher.db.DBHelper;
 import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.EntryWithTags;
+import rocks.tbog.tblauncher.entry.TagEntry;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.ui.TagsMenuUtils;
 import rocks.tbog.tblauncher.utils.PrefOrderedListHelper;
@@ -383,6 +386,7 @@ public class TagsHandler {
     }
 
     public boolean renameTag(String tagName, String newName) {
+        // rename tags from mTagsCache
         DataHandler dataHandler = mApplication.getDataHandler();
         for (Map.Entry<String, List<String>> entry : mTagsCache.entrySet()) {
             int pos = entry.getValue().indexOf(tagName);
@@ -393,7 +397,46 @@ public class TagsHandler {
                     ((EntryWithTags) entryItem).setTags(entry.getValue());
             }
         }
-        return DBHelper.renameTag(getContext(), tagName, newName) > 0;
+
+        // rename tags from tags menu
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(getContext());
+        SharedPreferences.Editor editor = pref.edit();
+        HashSet<String> tagsMenuSet = new HashSet<>(pref.getStringSet("tags-menu-list", Collections.emptySet()));
+        if (tagsMenuSet.remove(tagName)) {
+            tagsMenuSet.add(newName);
+            editor.putStringSet("tags-menu-list", tagsMenuSet);
+        }
+        int order = -1;
+        HashSet<String> tagsMenuOrderSet = new HashSet<>(pref.getStringSet("tags-menu-order", Collections.emptySet()));
+        for (Iterator<String> iterator = tagsMenuOrderSet.iterator(); iterator.hasNext(); ) {
+            String orderedValue = iterator.next();
+            String value = PrefOrderedListHelper.getOrderedValueName(orderedValue);
+            if (value.equals(tagName)) {
+                order = PrefOrderedListHelper.getOrderedValueIndex(orderedValue);
+                iterator.remove();
+                break;
+            }
+        }
+        if (order >= 0) {
+            tagsMenuOrderSet.add(PrefOrderedListHelper.makeOrderedValue(newName, order));
+            editor.putStringSet("tags-menu-order", tagsMenuOrderSet);
+        }
+
+        editor.apply();
+
+        // rename tag from favorites
+        TagEntry tagEntry = null;
+        TagEntry newEntry = null;
+        TagsProvider tagsProvider = dataHandler.getTagsProvider();
+        if (tagsProvider != null) {
+            tagEntry = tagsProvider.getTagEntry(tagName);
+            if (tagEntry.hasCustomIcon()) {
+                newEntry = tagsProvider.getTagEntry(newName);
+            }
+        }
+
+        // rename tags from database
+        return DBHelper.renameTag(getContext(), tagName, newName, tagEntry, newEntry) > 0;
     }
 
     /**

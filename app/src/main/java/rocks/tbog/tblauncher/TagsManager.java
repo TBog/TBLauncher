@@ -41,6 +41,7 @@ public class TagsManager {
 
     public void applyChanges(@NonNull Context context) {
         TagsHandler tagsHandler = TBApplication.tagsHandler(context);
+        DataHandler dataHandler = TBApplication.dataHandler(context);
         boolean changesMade = false;
         for (TagInfo tagInfo : mTagList) {
             switch (tagInfo.action) {
@@ -49,16 +50,36 @@ public class TagsManager {
                         changesMade = true;
                     break;
                 case DELETE:
-                    DataHandler dataHandler = TBApplication.dataHandler(context);
                     for (String entryId : tagInfo.entryList)
                         if (tagsHandler.removeTag(dataHandler.getPojo(entryId), tagInfo.tagName))
                             changesMade = true;
                     break;
             }
         }
-//        // make sure we're in sync
-//        if (changesMade)
-//            tagsHandler.loadFromDB();
+        // make sure we're in sync
+        if (changesMade) {
+            afterChangesMade(context);
+        }
+    }
+
+    public static void afterChangesMade(@NonNull Context context) {
+        TBApplication.drawableCache(context).clearCache();
+        DataHandler dataHandler = TBApplication.dataHandler(context);
+
+        // reload tags to regenerate the tag entries
+        TagsProvider tagsProvider = dataHandler.getTagsProvider();
+        if (tagsProvider != null)
+            tagsProvider.reload(true);
+
+        // reload FavProvider to refresh the QuickList
+        FavProvider favProvider = dataHandler.getFavProvider();
+        if (favProvider != null)
+            favProvider.reload(true);
+
+        DataHandler.EXECUTOR_PROVIDERS.submit(() -> {
+            TBApplication.behaviour(context).refreshSearchRecords();
+            TBApplication.quickList(context).onFavoritesChanged();
+        });
     }
 
     public void bindView(@NonNull View view) {

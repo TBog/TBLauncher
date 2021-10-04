@@ -101,6 +101,7 @@ public class QuickListProvider extends DBProvider<EntryItem> {
                 mQuickListFavRecords.put(rec.record, rec);
         }
         setLoaded();
+        Log.d(TAG, "setRecords loaded " + favRecords.size() + " record(s)");
         TBApplication.quickList(context).onFavoritesChanged();
     }
 
