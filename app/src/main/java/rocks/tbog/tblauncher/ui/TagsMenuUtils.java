@@ -194,7 +194,7 @@ public class TagsMenuUtils {
         public int getItemViewType(int position) {
             if (getItem(position) instanceof Divider)
                 return R.layout.popup_divider;
-            return android.R.layout.simple_list_item_1;
+            return R.layout.popup_list_item;
         }
 
         @Override
