@@ -58,13 +58,12 @@ public class TagEntry extends StaticEntry {
             Context ctx = dialog.getContext();
 
             String oldName = getName();
-            // Set new name
-            setName(newName);
 
             TBApplication app = TBApplication.getApplication(ctx);
             app.tagsHandler().renameTag(oldName, newName);
             app.behaviour().refreshSearchRecord(TagEntry.this);
 
+            // update providers and refresh views
             TagsManager.afterChangesMade(ctx);
         })
                 .setTitle(R.string.title_rename_tag)

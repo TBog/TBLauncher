@@ -474,23 +474,18 @@ public class DBHelper {
     public static int renameTag(Context context, String tagName, String newName, @Nullable TagEntry tagEntry, @Nullable TagEntry newEntry) {
         SQLiteDatabase db = getDatabase(context);
 
+        ContentValues values = new ContentValues();
+
         if (tagEntry != null && newEntry != null) {
-            String sql = "UPDATE favorites SET record=? WHERE record=?";
-            try {
-                SQLiteStatement statement = db.compileStatement(sql);
-                statement.bindString(1, newEntry.id);
-                statement.bindString(2, tagEntry.id);
-                int count = statement.executeUpdateDelete();
-                if (count != 1) {
-                    Log.e(TAG, "Update icon in rename tag; count = " + count);
-                }
-                statement.close();
-            } catch (Exception e) {
-                Log.e(TAG, "Rename tag (update icon) `" + tagEntry.id + "`", e);
+            values.put("record", newEntry.id);
+            int count = db.update("favorites", values, "record = ?", new String[]{tagEntry.id});
+            if (count != 1)
+            {
+                Log.e(TAG, "Update favorites in rename tag; count = " + count);
             }
         }
 
-        ContentValues values = new ContentValues();
+        values.clear();
         values.put("tag", newName);
 
         return db.update("tags", values, "tag = ?", new String[]{tagName});

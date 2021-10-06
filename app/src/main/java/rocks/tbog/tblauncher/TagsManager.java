@@ -5,6 +5,7 @@ import android.content.Context;
 import android.graphics.Paint;
 import android.graphics.Typeface;
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
@@ -20,7 +21,10 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
+import rocks.tbog.tblauncher.WorkAsync.RunnableTask;
+import rocks.tbog.tblauncher.WorkAsync.TaskRunner;
 import rocks.tbog.tblauncher.dataprovider.FavProvider;
+import rocks.tbog.tblauncher.dataprovider.QuickListProvider;
 import rocks.tbog.tblauncher.dataprovider.TagsProvider;
 import rocks.tbog.tblauncher.drawable.CodePointDrawable;
 import rocks.tbog.tblauncher.drawable.DrawableUtils;
@@ -34,6 +38,7 @@ import rocks.tbog.tblauncher.utils.ViewHolderAdapter;
 import rocks.tbog.tblauncher.utils.ViewHolderListAdapter;
 
 public class TagsManager {
+    private static final String TAG = "TagMgr";
 
     private final ArrayList<TagInfo> mTagList = new ArrayList<>();
     private ListView mListView;
@@ -76,10 +81,19 @@ public class TagsManager {
         if (favProvider != null)
             favProvider.reload(true);
 
-        DataHandler.EXECUTOR_PROVIDERS.submit(() -> {
-            TBApplication.behaviour(context).refreshSearchRecords();
-            TBApplication.quickList(context).onFavoritesChanged();
-        });
+        // reload QuickList provider
+        QuickListProvider quickListProvider = dataHandler.getQuickListProvider();
+        if (quickListProvider != null)
+            quickListProvider.reload(true);
+
+        RunnableTask afterProviders = TaskRunner.newTask(task -> {
+                },
+                task -> {
+                    Log.d(TAG, "tags and fav providers should have loaded by now");
+                    TBApplication.behaviour(context).refreshSearchRecords();
+                    TBApplication.quickList(context).onFavoritesChanged();
+                });
+        DataHandler.EXECUTOR_PROVIDERS.execute(afterProviders);
     }
 
     public void bindView(@NonNull View view) {
