@@ -144,9 +144,15 @@ class CustomShapePage extends PageAdapter.Page {
             SeekBar seekBar = pageView.findViewById(R.id.scaleBar);
             seekBar.setMax(200);
             seekBar.setProgress((int) (100.f * mScale));
+            final Runnable updateIcons = () -> {
+                mScale = 0.01f * seekBar.getProgress();
+                reshapeIcons(seekBar.getContext());
+            };
             seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
                 @Override
                 public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                    seekBar.removeCallbacks(updateIcons);
+                    seekBar.post(updateIcons);
                 }
 
                 @Override
@@ -156,8 +162,8 @@ class CustomShapePage extends PageAdapter.Page {
 
                 @Override
                 public void onStopTrackingTouch(SeekBar seekBar) {
-                    mScale = 0.01f * seekBar.getProgress();
-                    reshapeIcons(seekBar.getContext());
+                    seekBar.removeCallbacks(updateIcons);
+                    seekBar.post(updateIcons);
                 }
             });
         }
