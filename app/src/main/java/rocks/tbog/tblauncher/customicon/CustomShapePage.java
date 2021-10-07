@@ -34,11 +34,11 @@ import java.util.Objects;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.drawable.CodePointDrawable;
+import rocks.tbog.tblauncher.drawable.DrawableUtils;
 import rocks.tbog.tblauncher.drawable.FourCodePointDrawable;
 import rocks.tbog.tblauncher.drawable.TextDrawable;
 import rocks.tbog.tblauncher.drawable.TwoCodePointDrawable;
 import rocks.tbog.tblauncher.utils.KeyboardDialogBuilder;
-import rocks.tbog.tblauncher.drawable.DrawableUtils;
 import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.UISizes;
 import rocks.tbog.tblauncher.utils.UITheme;
@@ -216,7 +216,6 @@ class CustomShapePage extends PageAdapter.Page {
         generateShapes(context);
     }
 
-
     private void setupToggle(@IdRes int toggleTextView, @IdRes int viewToToggle) {
         TextView textView = pageView.findViewById(toggleTextView);
         textView.setOnClickListener(v -> {
@@ -227,6 +226,7 @@ class CustomShapePage extends PageAdapter.Page {
                 v.setTag("show");
             } else {
                 view.setVisibility(View.VISIBLE);
+                view.requestFocus();
                 ((TextView) v).setCompoundDrawablesWithIntrinsicBounds(0, 0, android.R.drawable.arrow_up_float, 0);
                 v.setTag("hide");
             }
@@ -236,7 +236,6 @@ class CustomShapePage extends PageAdapter.Page {
             textView.performClick();
         }
     }
-
 
     public void addIcon(@NonNull String name, @NonNull Drawable drawable) {
         Context context = pageView.getContext();
