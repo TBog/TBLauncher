@@ -20,6 +20,8 @@ import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 
+import com.google.android.material.textfield.TextInputLayout;
+
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.ui.DialogFragment;
@@ -57,6 +59,14 @@ public class EditTextDialog extends DialogFragment<CharSequence> {
         Bundle args = getArguments() != null ? getArguments() : new Bundle();
         CharSequence initialText = args.getCharSequence("initialText", "");
         CharSequence titleText = args.getCharSequence("titleText", "");
+        CharSequence hintText = args.getCharSequence("hintText", "");
+        //hint
+        if (hintText.length() != 0)
+        {
+            TextInputLayout textInputLayout = view.findViewById(android.R.id.hint);
+            textInputLayout.setHintEnabled(true);
+            textInputLayout.setHint(hintText);
+        }
         // initial text
         {
             EditText textView = view.findViewById(R.id.rename);
@@ -131,6 +141,11 @@ public class EditTextDialog extends DialogFragment<CharSequence> {
 
         public Builder setTitle(@StringRes int titleId) {
             mArgs.putCharSequence("titleText", mContext.getText(titleId));
+            return this;
+        }
+
+        public Builder setHint(@StringRes int hintId) {
+            mArgs.putCharSequence("hintText", mContext.getText(hintId));
             return this;
         }
 

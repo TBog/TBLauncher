@@ -67,6 +67,7 @@ public class TagEntry extends StaticEntry {
             TagsManager.afterChangesMade(ctx);
         })
                 .setTitle(R.string.title_rename_tag)
+                .setHint(R.string.hint_rename_tag)
                 .show();
     }
 }

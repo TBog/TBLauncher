@@ -17,6 +17,7 @@
             android:text="" />
 
     <com.google.android.material.textfield.TextInputLayout
+            android:id="@android:id/hint"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginHorizontal="@dimen/result_margin_horizontal"

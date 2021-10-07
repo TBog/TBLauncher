@@ -83,7 +83,8 @@
     <string name="menu_shortcut_rename">Rename shortcut</string>
     <string name="menu_custom_icon">Change icon</string>
     <string name="title_app_rename">Choose a custom name for this app</string>
-    <string name="title_rename_tag">Choose a different name for this tag</string>
+    <string name="title_rename_tag">Replace everywhere this tag appears</string>
+    <string name="hint_rename_tag">Choose a different name for this tag</string>
     <string name="title_rename_search_engine">Choose a different name for this search engine</string>
     <string name="title_rename_search_hint">Choose a different name for this search hint</string>
     <string name="title_edit_url_search_engine">Choose a different URL for this search engine</string>
