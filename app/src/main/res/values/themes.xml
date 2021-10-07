@@ -112,6 +112,7 @@
         <item name="android:textColorHint">?android:attr/textColorSecondary</item>
         <item name="android:textColorTertiary">@color/undefined</item>
         <item name="android:listDivider">@drawable/list_separator_light</item>
+        <item name="textInputStyle">@style/TextInputLayoutStyle</item>
 
         <item name="resultColor">@android:color/white</item>
         <item name="searchColor">@android:color/white</item>

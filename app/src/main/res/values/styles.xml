@@ -71,4 +71,16 @@
         <item name="android:divider">@drawable/list_separator_dark</item>
     </style>
 
+    <style name="TextInputLayoutStyle" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
+        <item name="materialThemeOverlay">@style/TextInputLayoutOverlay</item>
+    </style>
+
+    <style name="TextInputLayoutOverlay" parent="">
+        <item name="colorPrimary">?android:attr/textColorPrimary</item>      <!-- Activated color-->
+        <item name="colorOnSurface">?android:attr/textColorSecondary</item>  <!-- Normal color-->
+        <item name="colorError">?android:attr/textColorTertiary</item>       <!-- Error color-->
+
+        <item name="editTextStyle">@style/Widget.MaterialComponents.TextInputEditText.OutlinedBox</item>
+    </style>
+
 </resources>
