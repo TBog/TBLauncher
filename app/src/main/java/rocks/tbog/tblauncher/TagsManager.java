@@ -168,6 +168,7 @@ public class TagsManager {
             mAdapter.notifyDataSetChanged();
         })
                 .setTitle(R.string.title_rename_tag)
+                .setHint(R.string.hint_rename_tag)
                 .show();
     }
 

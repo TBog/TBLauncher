@@ -131,6 +131,12 @@ public class OrderListPreferenceDialog extends PreferenceDialogFragmentCompat {
         };
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        KeyboardDialogBuilder.setButtonBarBackground(requireDialog());
+    }
+
     private void generateNewValues(List<ListEntry> list) {
         mNewValues.clear();
         int ord = 0;
