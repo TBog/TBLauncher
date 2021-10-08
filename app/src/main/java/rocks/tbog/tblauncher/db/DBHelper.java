@@ -478,7 +478,7 @@ public class DBHelper {
 
         if (tagEntry != null && newEntry != null) {
             values.put("record", newEntry.id);
-            int count = db.update("favorites", values, "record = ?", new String[]{tagEntry.id});
+            int count = db.updateWithOnConflict("favorites", values, "record = ?", new String[]{tagEntry.id}, SQLiteDatabase.CONFLICT_REPLACE);
             if (count != 1)
             {
                 Log.e(TAG, "Update favorites in rename tag; count = " + count);
