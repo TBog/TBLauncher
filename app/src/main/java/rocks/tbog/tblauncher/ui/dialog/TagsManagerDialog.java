@@ -1,4 +1,4 @@
-package rocks.tbog.tblauncher.ui;
+package rocks.tbog.tblauncher.ui.dialog;
 
 import android.content.Context;
 import android.os.Bundle;
@@ -11,6 +11,7 @@ import androidx.annotation.Nullable;
 
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TagsManager;
+import rocks.tbog.tblauncher.ui.DialogFragment;
 
 public class TagsManagerDialog extends DialogFragment<Void> {
 
@@ -26,7 +27,7 @@ public class TagsManagerDialog extends DialogFragment<Void> {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         Context context = requireDialog().getContext();
 
-        setupDefaultButtons(context);
+        setupDefaultButtonOkCancel(context);
 
         // make sure we use the dialog context
         inflater = inflater.cloneInContext(context);

@@ -156,11 +156,19 @@ public abstract class DialogFragment<Output> extends androidx.fragment.app.Dialo
         return view;
     }
 
-    protected void setupDefaultButtons(Context context) {
+    protected void setupDefaultButtonOkCancel(Context context) {
         Bundle args = getArguments() != null ? getArguments() : new Bundle();
         if (!isStateSaved()) {
             args.putCharSequence("btnPositiveText", context.getText(android.R.string.ok));
             args.putCharSequence("btnNegativeText", context.getText(android.R.string.cancel));
+            setArguments(args);
+        }
+    }
+
+    protected void setupDefaultButtonOk(Context context) {
+        Bundle args = getArguments() != null ? getArguments() : new Bundle();
+        if (!isStateSaved()) {
+            args.putCharSequence("btnPositiveText", context.getText(android.R.string.ok));
             setArguments(args);
         }
     }

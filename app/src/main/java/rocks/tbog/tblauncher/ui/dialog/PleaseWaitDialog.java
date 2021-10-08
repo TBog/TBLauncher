@@ -1,4 +1,4 @@
-package rocks.tbog.tblauncher.ui;
+package rocks.tbog.tblauncher.ui.dialog;
 
 import android.app.Dialog;
 import android.content.Context;
@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.Window;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -15,6 +14,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import rocks.tbog.tblauncher.R;
+import rocks.tbog.tblauncher.ui.DialogFragment;
 import rocks.tbog.tblauncher.utils.UISizes;
 
 public class PleaseWaitDialog extends DialogFragment<Void> {
@@ -55,33 +55,42 @@ public class PleaseWaitDialog extends DialogFragment<Void> {
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        @NonNull
+        Dialog dialog = requireDialog();
+        Context context = dialog.getContext();
+
+        setupDefaultButtonOk(context);
+
         // make sure we use the dialog context
-        inflater = inflater.cloneInContext(requireDialog().getContext());
-        View root = super.onCreateView(inflater, container, savedInstanceState);
-        if (!(root instanceof ViewGroup))
-            return root;
-        Window window = requireDialog().getWindow();
-        if (window != null)
-            window.setBackgroundDrawableResource(R.drawable.dialog_background_dark);
-        Context context = inflater.getContext();
+        inflater = inflater.cloneInContext(context);
+        mView = super.onCreateView(inflater, container, savedInstanceState);
+//        Window window = dialog.getWindow();
+//        if (window != null)
+//            window.setBackgroundDrawableResource(R.drawable.dialog_background_dark);
+
         // add progress indicator
-        {
+        if (mView instanceof ViewGroup) {
             ImageView loading = new ImageView(context);
             loading.setImageResource(R.drawable.ic_loading_arrows);
             if (loading.getDrawable() instanceof Animatable)
                 ((Animatable) loading.getDrawable()).start();
             //loading.setImageDrawable(DrawableUtils.getProgressBarIndeterminate(context));
             loading.setId(android.R.id.progress);
-            ((ViewGroup) root).addView(loading);
+
+            // add progress bar before the button panel
+            {
+                View buttonPanel = mView.findViewById(R.id.buttonPanel);
+                int index = ((ViewGroup) mView).indexOfChild(buttonPanel);
+                ((ViewGroup) mView).addView(loading, index);
+            }
+
             ViewGroup.LayoutParams params = loading.getLayoutParams();
             params.width = ViewGroup.LayoutParams.MATCH_PARENT;
             params.height = UISizes.getResultIconSize(context) * 2;
             loading.setLayoutParams(params);
         }
-        // add button bar, just like the preferences dialog
-        mView = inflater.inflate(R.layout.ok_cancel_button_bar, (ViewGroup) root, true);
+
         // while we wait, we wait, not cancel
-        Dialog dialog = requireDialog();
         dialog.setCanceledOnTouchOutside(false);
         dialog.setCancelable(false);
         return mView;
@@ -115,18 +124,9 @@ public class PleaseWaitDialog extends DialogFragment<Void> {
 
         // OK button
         {
+            setOnPositiveClickListener((dialog, button) -> onConfirm(null));
             View button = view.findViewById(android.R.id.button1);
-            button.setOnClickListener(v -> {
-                onConfirm(null);
-                dismiss();
-            });
             button.setEnabled(false);
-        }
-
-        // CANCEL button
-        {
-            View button = view.findViewById(android.R.id.button2);
-            button.setVisibility(View.GONE);
         }
     }
 

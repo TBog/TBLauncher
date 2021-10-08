@@ -66,7 +66,7 @@ import rocks.tbog.tblauncher.ui.DialogFragment;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.ui.RecyclerList;
-import rocks.tbog.tblauncher.ui.TagsManagerDialog;
+import rocks.tbog.tblauncher.ui.dialog.TagsManagerDialog;
 import rocks.tbog.tblauncher.ui.WindowInsetsHelper;
 import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.SystemUiVisibility;

@@ -50,7 +50,7 @@ public class EditTagsDialog extends DialogFragment<Set<String>> {
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         Context context = requireDialog().getContext();
 
-        setupDefaultButtons(context);
+        setupDefaultButtonOkCancel(context);
         Bundle args = getArguments() != null ? getArguments() : new Bundle();
 
         // make sure we use the dialog context
