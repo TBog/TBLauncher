@@ -66,6 +66,7 @@ import rocks.tbog.tblauncher.preference.ContentLoadHelper;
 import rocks.tbog.tblauncher.preference.CustomDialogPreference;
 import rocks.tbog.tblauncher.preference.EditSearchEnginesPreferenceDialog;
 import rocks.tbog.tblauncher.preference.EditSearchHintPreferenceDialog;
+import rocks.tbog.tblauncher.preference.IconListPreferenceDialog;
 import rocks.tbog.tblauncher.preference.OrderListPreferenceDialog;
 import rocks.tbog.tblauncher.preference.QuickListPreferenceDialog;
 import rocks.tbog.tblauncher.preference.SliderDialog;
@@ -635,7 +636,12 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         throw new RuntimeException("CustomDialogPreference \"" + key + "\" has no dialog defined");
                 }
             } else if (preference instanceof ListPreference) {
-                dialogFragment = BaseListPreferenceDialog.newInstance(preference.getKey());
+                String key = preference.getKey();
+                if ("adaptive-shape".equals(key)) {
+                    dialogFragment = IconListPreferenceDialog.newInstance(key);
+                } else {
+                    dialogFragment = BaseListPreferenceDialog.newInstance(key);
+                }
             } else if (preference instanceof MultiSelectListPreference) {
                 String key = preference.getKey();
                 if ("tags-menu-order".equals(key)) {
