@@ -2,13 +2,22 @@ package rocks.tbog.tblauncher.preference;
 
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.res.ColorStateList;
+import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.StateListDrawable;
+import android.os.Build;
 import android.os.Bundle;
+import android.util.StateSet;
+import android.util.TypedValue;
 import android.view.View;
+import android.widget.CheckedTextView;
 import android.widget.TextView;
 
+import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.preference.ListPreference;
@@ -17,9 +26,9 @@ import androidx.preference.PreferenceDialogFragmentCompat;
 import java.util.ArrayList;
 import java.util.List;
 
+import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.drawable.DrawableUtils;
 import rocks.tbog.tblauncher.utils.KeyboardDialogBuilder;
-import rocks.tbog.tblauncher.utils.UISizes;
 import rocks.tbog.tblauncher.utils.ViewHolderAdapter;
 import rocks.tbog.tblauncher.utils.ViewHolderListAdapter;
 
@@ -78,7 +87,7 @@ public class IconListPreferenceDialog extends PreferenceDialogFragmentCompat {
         }
 
         builder.setSingleChoiceItems(
-                new IconAdapter(android.R.layout.select_dialog_singlechoice, list),
+                new IconAdapter(getItemLayout(builder.getContext()), list),
                 mClickedDialogEntryIndex,
                 (dialog, which) -> {
                     mClickedDialogEntryIndex = which;
@@ -101,6 +110,22 @@ public class IconListPreferenceDialog extends PreferenceDialogFragmentCompat {
 
     private ListPreference getListPreference() {
         return (ListPreference) getPreference();
+    }
+
+    @LayoutRes
+    private static int getItemLayout(@NonNull Context context) {
+        @LayoutRes final int layout;
+        final Resources.Theme theme = context.getTheme();
+        TypedValue res = new TypedValue();
+        boolean found = theme.resolveAttribute(R.attr.singleChoiceItemLayout, res, true);
+        if (found && res.resourceId != 0) {
+            layout = res.resourceId;
+        } else {
+            TypedArray a = theme.obtainStyledAttributes(R.style.MaterialAlertDialog_MaterialComponents, new int[]{R.attr.singleChoiceItemLayout});
+            layout = a.getResourceId(0, android.R.layout.simple_list_item_checked);
+            a.recycle();
+        }
+        return layout;
     }
 
     @Override
@@ -131,34 +156,83 @@ public class IconListPreferenceDialog extends PreferenceDialogFragmentCompat {
     }
 
     public static class EntryViewHolder extends ViewHolderAdapter.ViewHolder<IconEntry> {
-        TextView textView;
+        private final static int[] STATE_CHECKED = new int[]{android.R.attr.state_checked};
 
-        protected EntryViewHolder(View view) {
+        final TextView textView;
+        int defaultColor = 0;
+        int checkedColor = 0;
+        int size;
+
+        public EntryViewHolder(View view) {
             super(view);
             textView = view.findViewById(android.R.id.text1);
+
+            final Context context = view.getContext();
+
+            // get color from theme
+            {
+                final Resources.Theme theme = context.getTheme();
+                TypedValue res = new TypedValue();
+                if (theme.resolveAttribute(R.attr.colorControlActivated, res, true)) {
+                    if (res.type >= TypedValue.TYPE_FIRST_COLOR_INT && res.type <= TypedValue.TYPE_LAST_COLOR_INT) {
+                        checkedColor = res.data;
+                    }
+                }
+                if (theme.resolveAttribute(R.attr.colorControlNormal, res, true)) {
+                    if (res.type >= TypedValue.TYPE_FIRST_COLOR_INT && res.type <= TypedValue.TYPE_LAST_COLOR_INT) {
+                        defaultColor = res.data;
+                    }
+                }
+            }
+
+            if (defaultColor == 0 || checkedColor == 0) {
+                ColorStateList textColorList = null;
+                if (textView instanceof CheckedTextView) {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                        textColorList = ((CheckedTextView) textView).getCheckMarkTintList();
+                    }
+                }
+                if (textColorList == null)
+                    textColorList = textView.getTextColors();
+                defaultColor = textColorList.getDefaultColor();
+                checkedColor = textColorList.getColorForState(STATE_CHECKED, defaultColor);
+            }
+
+            size = context.getResources().getDimensionPixelSize(R.dimen.color_preview_size);
         }
 
         @Override
         protected void setContent(IconEntry content, int position, @NonNull ViewHolderAdapter<IconEntry, ? extends ViewHolderAdapter.ViewHolder<IconEntry>> adapter) {
             Context context = textView.getContext();
-            Drawable drawable = new ColorDrawable(0xFF7f7f7f);
+
+            Drawable drawable = new ColorDrawable(defaultColor);
             for (int shape : DrawableUtils.SHAPE_LIST) {
-                //String name = DrawableUtils.shapeName(context, shape);
                 if (Integer.toString(shape).equals(content.value.toString())) {
                     Drawable shapedDrawable;
                     if (shape == DrawableUtils.SHAPE_NONE) {
                         shapedDrawable = new ColorDrawable(Color.TRANSPARENT);
                     } else {
-                        shapedDrawable = DrawableUtils.applyIconMaskShape(context, drawable, shape);
+                        StateListDrawable listDrawable = new StateListDrawable();
+                        Drawable checkedDrawable = new ColorDrawable(checkedColor);
+                        listDrawable.addState(STATE_CHECKED, DrawableUtils.applyIconMaskShape(context, checkedDrawable, shape));
+                        listDrawable.addState(StateSet.WILD_CARD, DrawableUtils.applyIconMaskShape(context, drawable, shape));
+
+                        shapedDrawable = listDrawable;
                     }
                     drawable = shapedDrawable;
                     break;
                 }
             }
-            int size = UISizes.getResultIconSize(context);
+
+            // compound drawables need a size
             drawable.setBounds(0, 0, size, size);
-            textView.setCompoundDrawables(drawable, null, null, null);
-            textView.setCompoundDrawablePadding(UISizes.sp2px(context, 5));
+
+            // get relative because that's where the checkmark can be
+            Drawable[] cd = textView.getCompoundDrawablesRelative();
+            // set compound drawable
+            textView.setCompoundDrawablesRelative(cd[0], cd[1], drawable, cd[3]);
+
+            // set text
             textView.setText(content.name);
         }
     }
