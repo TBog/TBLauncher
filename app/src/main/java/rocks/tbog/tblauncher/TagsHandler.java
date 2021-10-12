@@ -200,12 +200,22 @@ public class TagsHandler {
     @NonNull
     public ListPopup getTagsMenu(Context ctx) {
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(ctx);
-
+        ArrayList<String> tagList;
         List<String> tagOrder = PrefOrderedListHelper.getOrderedList(pref, "tags-menu-list", "tags-menu-order");
-        ArrayList<String> tagList = new ArrayList<>(tagOrder.size());
-        for (String orderValue : tagOrder)
-            tagList.add(PrefOrderedListHelper.getOrderedValueName(orderValue));
-
+        if (tagOrder.isEmpty()) {
+            tagList = new ArrayList<>(5);
+            TagsHandler tagsHandler = TBApplication.tagsHandler(ctx);
+            Set<String> validTags = tagsHandler.getValidTags();
+            for (String tagName : validTags) {
+                if (tagList.size() >= 5)
+                    break;
+                tagList.add(tagName);
+            }
+        } else {
+            tagList = new ArrayList<>(tagOrder.size());
+            for (String orderValue : tagOrder)
+                tagList.add(PrefOrderedListHelper.getOrderedValueName(orderValue));
+        }
         return TagsMenuUtils.createTagsMenu(ctx, tagList);
     }
 
