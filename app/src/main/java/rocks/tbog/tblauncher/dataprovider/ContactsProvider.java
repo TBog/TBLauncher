@@ -1,8 +1,11 @@
 package rocks.tbog.tblauncher.dataprovider;
 
+import android.content.SharedPreferences;
 import android.database.ContentObserver;
 import android.provider.ContactsContract;
 import android.util.Log;
+
+import androidx.preference.PreferenceManager;
 
 import rocks.tbog.tblauncher.Permission;
 import rocks.tbog.tblauncher.entry.ContactEntry;
@@ -43,7 +46,12 @@ public class ContactsProvider extends Provider<ContactEntry> {
                     // Great! Reload the contact provider. We're done :)
                     reload(true);
                 }
-                //TODO: try to remove contacts provider onDenied
+
+                @Override
+                public void onDenied() {
+                    SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(ContactsProvider.this);
+                    pref.edit().putBoolean("enable-contacts", false).apply();
+                }
             });
         }
     }
