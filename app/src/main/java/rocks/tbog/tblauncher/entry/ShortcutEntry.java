@@ -60,7 +60,7 @@ public final class ShortcutEntry extends EntryWithTags {
     @Nullable
     public final ShortcutInfo mShortcutInfo;
 
-    protected boolean customIcon;
+    protected int customIcon = 0;
 
     public ShortcutEntry(@NonNull String id, long dbId, @NonNull String packageName, @NonNull String shortcutData) {
         super(id);
@@ -88,6 +88,12 @@ public final class ShortcutEntry extends EntryWithTags {
         return SCHEME + rec.dbId + "/" + rec.packageName.toLowerCase(Locale.ROOT);
     }
 
+    @NonNull
+    @Override
+    public String getIconCacheId() {
+        return id + customIcon;
+    }
+
     /**
      * Oreo shortcuts do not have a real intentUri, instead they have a shortcut id
      * and the Android system is responsible for safekeeping the Intent
@@ -102,7 +108,7 @@ public final class ShortcutEntry extends EntryWithTags {
     }
 
     public Drawable getIcon(@NonNull Context context) {
-        if (customIcon) {
+        if (customIcon > 0) {
             IconsHandler iconsHandler = TBApplication.getApplication(context).iconsHandler();
             Drawable drawable = iconsHandler.getCustomIcon(this);
             if (drawable != null)
@@ -412,11 +418,11 @@ public final class ShortcutEntry extends EntryWithTags {
     }
 
     public void setCustomIcon() {
-        customIcon = true;
+        customIcon += 1;
     }
 
     public void clearCustomIcon() {
-        customIcon = false;
+        customIcon = 0;
     }
 
     public static class AsyncSetEntryIcon extends ResultViewHelper.AsyncSetEntryDrawable {

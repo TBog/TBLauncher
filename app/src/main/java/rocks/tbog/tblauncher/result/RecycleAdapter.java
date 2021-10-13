@@ -170,6 +170,7 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
 
     public void notifyItemChanged(EntryItem result) {
         int position = results.indexOf(result);
+        Log.d(TAG, "notifyItemChanged #" + position + " id=" + result.id);
         if (position >= 0)
             notifyItemChanged(position);
     }

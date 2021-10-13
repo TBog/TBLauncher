@@ -372,7 +372,7 @@ public class IconsHandler {
     }
 
     @WorkerThread
-    public Drawable getCustomIcon(String componentName, long customIcon) {
+    public Drawable getCustomIcon(String componentName) {
         Bitmap bitmap = TBApplication.dataHandler(ctx).getCustomAppIcon(componentName);
         if (bitmap != null)
             return new BitmapDrawable(ctx.getResources(), bitmap);

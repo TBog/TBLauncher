@@ -10,6 +10,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 
 import java.util.ArrayList;
+import java.util.Objects;
 
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
@@ -104,6 +105,21 @@ public abstract class EntryItem {
         this.id = id;
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o)
+            return true;
+        if (!(o instanceof EntryItem))
+            return false;
+        EntryItem entryItem = (EntryItem) o;
+        return id.equals(entryItem.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
+    }
+
     @NonNull
     public String getName() {
         return name;
@@ -173,6 +189,11 @@ public abstract class EntryItem {
     public abstract int getResultLayout(int drawFlags);
 
     public abstract void displayResult(@NonNull View view, int drawFlags);
+
+    @NonNull
+    public String getIconCacheId() {
+        return id;
+    }
 
     public static class RelevanceComparator implements java.util.Comparator<EntryItem> {
         @Override

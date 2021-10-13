@@ -34,11 +34,17 @@ import rocks.tbog.tblauncher.utils.Utilities;
 public abstract class StaticEntry extends EntryItem {
     @DrawableRes
     protected int iconResource;
-    protected boolean customIcon;
+    protected int customIcon;
 
     public StaticEntry(@NonNull String id, @DrawableRes int icon) {
         super(id);
         iconResource = icon;
+    }
+
+    @NonNull
+    @Override
+    public String getIconCacheId() {
+        return id + customIcon;
     }
 
     @Override
@@ -162,21 +168,21 @@ public abstract class StaticEntry extends EntryItem {
     }
 
     public void setCustomIcon() {
-        customIcon = true;
+        customIcon += 1;
     }
 
     public void clearCustomIcon() {
-        customIcon = false;
+        customIcon = 0;
     }
 
 
     public boolean hasCustomIcon() {
-        return customIcon;
+        return customIcon > 0;
     }
 
     @WorkerThread
     public Drawable getIconDrawable(Context context) {
-        if (customIcon) {
+        if (hasCustomIcon()) {
             IconsHandler iconsHandler = TBApplication.getApplication(context).iconsHandler();
             Drawable drawable = iconsHandler.getCustomIcon(this);
             if (drawable != null)
@@ -200,7 +206,7 @@ public abstract class StaticEntry extends EntryItem {
         public Drawable getDrawable(Context context) {
             StaticEntry entry = (StaticEntry) entryItem;
             Drawable drawable = entry.getIconDrawable(context);
-            if (!entry.customIcon) {
+            if (!entry.hasCustomIcon()) {
                 drawable = DrawableCompat.wrap(drawable);
                 int color = Utilities.checkFlag(drawFlags, FLAG_DRAW_WHITE_BG) ? Color.BLACK : Color.WHITE;
                 DrawableCompat.setTint(drawable, color);

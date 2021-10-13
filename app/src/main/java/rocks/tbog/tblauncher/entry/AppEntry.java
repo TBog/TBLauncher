@@ -58,6 +58,7 @@ public final class AppEntry extends EntryWithTags {
     private final UserHandleCompat userHandle;
 
     private long customIcon = 0;
+    private int cacheIconId = 0;
     private boolean hiddenByUser = false;
     private boolean excludedFromHistory = false;
 
@@ -68,6 +69,12 @@ public final class AppEntry extends EntryWithTags {
         }
         this.componentName = new ComponentName(packageName, className);
         this.userHandle = userHandle;
+    }
+
+    @NonNull
+    @Override
+    public String getIconCacheId() {
+        return id + cacheIconId;
     }
 
     public String getUserComponentName() {
@@ -107,7 +114,7 @@ public final class AppEntry extends EntryWithTags {
     public Drawable getIconDrawable(Context context) {
         IconsHandler iconsHandler = TBApplication.getApplication(context).iconsHandler();
         if (customIcon != 0) {
-            Drawable drawable = iconsHandler.getCustomIcon(getUserComponentName(), customIcon);
+            Drawable drawable = iconsHandler.getCustomIcon(getUserComponentName());
             if (drawable != null)
                 return drawable;
             else
@@ -123,10 +130,12 @@ public final class AppEntry extends EntryWithTags {
 
     public void setCustomIcon(long dbId) {
         customIcon = dbId;
+        cacheIconId += 1;
     }
 
     public void clearCustomIcon() {
         customIcon = 0;
+        cacheIconId = 0;
     }
 
     public long getCustomIcon() {

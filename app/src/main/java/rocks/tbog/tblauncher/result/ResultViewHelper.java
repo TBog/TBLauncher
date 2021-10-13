@@ -117,16 +117,17 @@ public final class ResultViewHelper {
     }
 
     public static void setIconAsync(int drawFlags, @NonNull EntryItem entry, @NonNull ImageView appIcon, @NonNull Class<? extends AsyncSetEntryDrawable> asyncSetEntryIconClass) {
-        if (entry.id.equals(appIcon.getTag(R.id.tag_cacheId)) && !Utilities.checkFlag(drawFlags, EntryItem.FLAG_RELOAD))
+        String cacheId = entry.getIconCacheId();
+        if (cacheId.equals(appIcon.getTag(R.id.tag_cacheId)) && !Utilities.checkFlag(drawFlags, EntryItem.FLAG_RELOAD))
             return;
 
         if (!Utilities.checkFlag(drawFlags, EntryItem.FLAG_DRAW_NO_CACHE)) {
             Drawable cache = TBApplication.drawableCache(appIcon.getContext()).getCachedDrawable(entry.id);
             if (cache != null) {
-                Log.d(TAG, "cache found, view=" + Integer.toHexString(appIcon.hashCode()) + " entry=" + entry.getName() + " cacheId=" + entry.id);
+                Log.d(TAG, "cache found, view=" + Integer.toHexString(appIcon.hashCode()) + " entry=" + entry.getName() + " cacheId=" + cacheId);
                 // found the icon in cache
                 appIcon.setImageDrawable(cache);
-                appIcon.setTag(R.id.tag_cacheId, entry.id);
+                appIcon.setTag(R.id.tag_cacheId, cacheId);
                 appIcon.setTag(R.id.tag_iconTask, null);
                 // continue to run the async task only if FLAG_RELOAD set
                 if (!Utilities.checkFlag(drawFlags, EntryItem.FLAG_RELOAD))
@@ -215,7 +216,7 @@ public final class ResultViewHelper {
 
         public AsyncSetEntryDrawable(@NonNull ImageView image, int drawFlags, @NonNull EntryItem entryItem) {
             super();
-            cacheId = entryItem.id;
+            cacheId = entryItem.getIconCacheId();
 
             Object tag_cacheId = image.getTag(R.id.tag_cacheId);
             Object tag_iconTask = image.getTag(R.id.tag_iconTask);

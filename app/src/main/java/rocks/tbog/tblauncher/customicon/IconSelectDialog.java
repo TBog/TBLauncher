@@ -303,7 +303,7 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
 
         // Preview
         initPreviewIcon(mPreviewLabel, ctx -> {
-            Drawable drawable = customIcon != 0 ? iconsHandler.getCustomIcon(name, customIcon) : null;
+            Drawable drawable = customIcon != 0 ? iconsHandler.getCustomIcon(name) : null;
             if (drawable == null)
                 drawable = iconsHandler.getDrawableIconForPackage(cn, userHandle);
             return drawable;
