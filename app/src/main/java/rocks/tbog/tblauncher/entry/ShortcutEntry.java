@@ -305,11 +305,13 @@ public final class ShortcutEntry extends EntryWithTags {
     boolean popupMenuClickHandler(@NonNull View view, @NonNull LinearAdapter.MenuItem item, int stringId, View parentView) {
         Context ctx = view.getContext();
         switch (stringId) {
-            case R.string.menu_remove_shortcut:
-                TBApplication.dataHandler(ctx).removeShortcut(this);
-                //TODO: update the adapter now, don't wait for the shortcut reload to finish
-                Toast.makeText(ctx, "Shortcut `" + getName() + "` removed.\nPlease wait for the action to propagate", Toast.LENGTH_LONG).show();
+            case R.string.menu_remove_shortcut: {
+                TBApplication app = TBApplication.getApplication(ctx);
+                app.getDataHandler().removeShortcut(this);
+                app.behaviour().removeResult(this);
+                //Toast.makeText(ctx, "Shortcut `" + getName() + "` removed.", Toast.LENGTH_LONG).show();
                 return true;
+            }
             case R.string.menu_tags_add:
             case R.string.menu_tags_edit:
                 TBApplication.behaviour(ctx).launchEditTagsDialog(this);
