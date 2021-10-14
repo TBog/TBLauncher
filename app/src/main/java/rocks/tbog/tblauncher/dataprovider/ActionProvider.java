@@ -13,12 +13,13 @@ import rocks.tbog.tblauncher.entry.ActionEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.searcher.HistorySearcher;
 import rocks.tbog.tblauncher.searcher.TagSearcher;
+import rocks.tbog.tblauncher.ui.ListPopup;
 
 public class ActionProvider extends DBProvider<ActionEntry> {
 
-    private static final ActionEntry[] s_entries = new ActionEntry[12];
+    private static final ActionEntry[] s_entries = new ActionEntry[13];
     @StringRes
-    private static final int[] s_names = new int[12];
+    private static final int[] s_names = new int[13];
 
     static {
         int cnt = 0;
@@ -159,6 +160,19 @@ public class ActionProvider extends DBProvider<ActionEntry> {
                 TBApplication.quickList(ctx).toggleSearch(v, "", TagSearcher.class);
             });
             s_names[cnt] = R.string.action_show_untagged;
+            s_entries[cnt++] = actionEntry;
+        }
+        {
+            String id = ActionEntry.SCHEME + "show/tags/menu";
+            ActionEntry actionEntry = new ActionEntry(id, R.drawable.ic_tags);
+            actionEntry.setAction((v, flags) -> {
+                Context ctx = v.getContext();
+                TBApplication app = TBApplication.getApplication(ctx);
+                ListPopup menu = app.tagsHandler().getTagsMenu(ctx);
+                app.behaviour().registerPopup(menu);
+                menu.show(v);
+            });
+            s_names[cnt] = R.string.show_tags_menu;
             s_entries[cnt++] = actionEntry;
         }
         //noinspection ConstantConditions
