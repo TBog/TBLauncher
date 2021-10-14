@@ -76,4 +76,13 @@ public class FilterProvider extends DBProvider<FilterEntry> {
     public boolean mayFindById(@NonNull String id) {
         return id.startsWith(FilterEntry.SCHEME);
     }
+
+    @NonNull
+    public String getDefaultName(@NonNull String id) {
+        for (int idx = 0; idx < s_entries.length; idx += 1) {
+            if (id.equals(s_entries[idx].id))
+                return context.getString(s_names[idx]);
+        }
+        return "null";
+    }
 }

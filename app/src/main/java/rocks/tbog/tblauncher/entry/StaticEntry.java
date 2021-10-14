@@ -107,7 +107,6 @@ public abstract class StaticEntry extends EntryItem {
                     TBApplication app = TBApplication.getApplication(ctx);
                     DataHandler dataHandler = app.getDataHandler();
                     dataHandler.renameStaticEntry(id, null);
-                    app.behaviour().refreshSearchRecord(StaticEntry.this);
 
                     String name = null;
 
@@ -115,15 +114,16 @@ public abstract class StaticEntry extends EntryItem {
                     {
                         ActionProvider actionProvider = dataHandler.getActionProvider();
                         if (actionProvider != null && actionProvider.mayFindById(id))
-                            name = new ActionProvider(ctx).findById(id).getName();
+                            name = actionProvider.getDefaultName(id);
                     }
                     {
                         FilterProvider filterProvider = dataHandler.getFilterProvider();
                         if (filterProvider != null && filterProvider.mayFindById(id))
-                            name = new FilterProvider(ctx).findById(id).getName();
+                            name = filterProvider.getDefaultName(id);
                     }
                     if (name != null) {
                         setName(name);
+                        app.behaviour().refreshSearchRecord(StaticEntry.this);
 
                         // Show toast message
                         String msg = ctx.getString(R.string.app_rename_confirmation, getName());
