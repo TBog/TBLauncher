@@ -12,14 +12,14 @@ import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.entry.ActionEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.searcher.HistorySearcher;
-import rocks.tbog.tblauncher.searcher.TagSearcher;
+import rocks.tbog.tblauncher.searcher.TagList;
 import rocks.tbog.tblauncher.ui.ListPopup;
 
 public class ActionProvider extends DBProvider<ActionEntry> {
 
-    private static final ActionEntry[] s_entries = new ActionEntry[13];
+    private static final ActionEntry[] s_entries = new ActionEntry[15];
     @StringRes
-    private static final int[] s_names = new int[13];
+    private static final int[] s_names = new int[15];
 
     static {
         int cnt = 0;
@@ -157,7 +157,7 @@ public class ActionProvider extends DBProvider<ActionEntry> {
             ActionEntry actionEntry = new ActionEntry(id, R.drawable.ic_tags);
             actionEntry.setAction((v, flags) -> {
                 Context ctx = v.getContext();
-                TBApplication.quickList(ctx).toggleSearch(v, "", TagSearcher.class);
+                TBApplication.quickList(ctx).toggleSearch(v, "untagged", TagList.class);
             });
             s_names[cnt] = R.string.action_show_untagged;
             s_entries[cnt++] = actionEntry;
@@ -173,6 +173,26 @@ public class ActionProvider extends DBProvider<ActionEntry> {
                 menu.show(v);
             });
             s_names[cnt] = R.string.show_tags_menu;
+            s_entries[cnt++] = actionEntry;
+        }
+        {
+            String id = ActionEntry.SCHEME + "show/tags/list";
+            ActionEntry actionEntry = new ActionEntry(id, R.drawable.ic_tags);
+            actionEntry.setAction((v, flags) -> {
+                Context ctx = v.getContext();
+                TBApplication.quickList(ctx).toggleSearch(v, "list", TagList.class);
+            });
+            s_names[cnt] = R.string.show_tags_list;
+            s_entries[cnt++] = actionEntry;
+        }
+        {
+            String id = ActionEntry.SCHEME + "show/tags/listReversed";
+            ActionEntry actionEntry = new ActionEntry(id, R.drawable.ic_tags);
+            actionEntry.setAction((v, flags) -> {
+                Context ctx = v.getContext();
+                TBApplication.quickList(ctx).toggleSearch(v, "listReversed", TagList.class);
+            });
+            s_names[cnt] = R.string.show_tags_list_reversed;
             s_entries[cnt++] = actionEntry;
         }
         //noinspection ConstantConditions

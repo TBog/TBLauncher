@@ -39,20 +39,10 @@ public class TagSearcher extends Searcher {
         if (activity == null)
             return false;
 
-        if (query.isEmpty()) {
-            for (EntryItem entryItem : pojos) {
-                if (entryItem instanceof EntryWithTags) {
-                    if (((EntryWithTags) entryItem).getTags().isEmpty()) {
-                        addProcessedPojo((EntryWithTags) entryItem);
-                    }
-                }
-            }
-        } else {
-            for (EntryItem entryItem : pojos) {
-                if (entryItem instanceof EntryWithTags) {
-                    if (((EntryWithTags) entryItem).getTags().contains(tagDetails)) {
-                        addProcessedPojo((EntryWithTags) entryItem);
-                    }
+        for (EntryItem entryItem : pojos) {
+            if (entryItem instanceof EntryWithTags) {
+                if (((EntryWithTags) entryItem).getTags().contains(tagDetails)) {
+                    addProcessedPojo((EntryWithTags) entryItem);
                 }
             }
         }
