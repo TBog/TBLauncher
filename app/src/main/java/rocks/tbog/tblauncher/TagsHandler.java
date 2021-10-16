@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.res.Resources;
 import android.os.Build;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -34,10 +35,12 @@ import rocks.tbog.tblauncher.entry.TagEntry;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.ui.TagsMenuUtils;
 import rocks.tbog.tblauncher.utils.PrefOrderedListHelper;
+import rocks.tbog.tblauncher.utils.Timer;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public class TagsHandler {
+    private static final String TAG = TagsHandler.class.getSimpleName();
     private final TBApplication mApplication;
     // HashMap with EntryItem id as key and an ArrayList of tags for each
     private final HashMap<String, List<String>> mTagsCache = new HashMap<>();
@@ -50,9 +53,12 @@ public class TagsHandler {
     }
 
     public void loadFromDB(boolean wait) {
+        Log.d(TAG, "loadFromDB(wait= " + wait + " )");
+
         synchronized (this) {
             mIsLoaded = false;
         }
+        final Timer timer = Timer.startMilli();
         final HashMap<String, List<String>> tags = new HashMap<>();
         final Runnable load = () -> {
             Map<String, List<String>> dbTags = DBHelper.loadTags(getContext());
@@ -71,6 +77,10 @@ public class TagsHandler {
                 mTagsCache.clear();
                 mTagsCache.putAll(tags);
                 mIsLoaded = true;
+
+                timer.stop();
+                Log.d("time", "Time to load all tags: " + timer);
+
                 // run and remove tasks
                 Runnable task;
                 while (null != (task = mAfterLoadedTasks.poll()))

@@ -24,6 +24,7 @@ import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.TagsHandler;
 import rocks.tbog.tblauncher.db.AppRecord;
 import rocks.tbog.tblauncher.entry.AppEntry;
+import rocks.tbog.tblauncher.utils.Timer;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 
 public class LoadAppEntry extends LoadEntryItem<AppEntry> {
@@ -41,15 +42,16 @@ public class LoadAppEntry extends LoadEntryItem<AppEntry> {
     @Override
     protected ArrayList<AppEntry> doInBackground(Void param) {
         SystemAppLoader loader = new SystemAppLoader(context.get());
+        //List<AppEntry> currentApplications = TBApplication.dataHandler(context.get()).getApplications();
 
         // timer start
-        long start = System.nanoTime();
+        Timer timer = Timer.startMilli();
         // function to time
         ArrayList<AppEntry> apps = loader.getAppList();
         // timer end
-        long end = System.nanoTime();
+        timer.stop();
 
-        Log.i("time", Long.toString((end - start) / 1000000) + " milliseconds to list apps");
+        Log.i("time", timer + " to list apps");
         return apps;
     }
 
@@ -139,6 +141,7 @@ public class LoadAppEntry extends LoadEntryItem<AppEntry> {
 
             TagsHandler tagsHandler = TBApplication.tagsHandler(ctx);
             tagsHandler.runWhenLoaded(() -> {
+                Log.d("App", "set " + apps.size() + " app(s) tags");
                 for (AppEntry app : apps)
                     app.setTags(tagsHandler.getTags(app.id));
             });

@@ -150,7 +150,7 @@ public abstract class DBProvider<T extends EntryItem> implements IProvider<T> {
             provider.mLoadTask = null;
 
             provider.mTimer.stop();
-            Log.i("Provider", "Time to load " + provider.getClass().getSimpleName() + ": " + provider.mTimer);
+            Log.i("time", "Time to load " + provider.getClass().getSimpleName() + ": " + provider.mTimer);
 
             Intent i = new Intent(TBLauncherActivity.LOAD_OVER);
             provider.context.sendBroadcast(i);

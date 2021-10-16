@@ -22,6 +22,7 @@ import rocks.tbog.tblauncher.broadcast.PackageAddedRemovedHandler;
 import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.entry.EntryWithTags;
 import rocks.tbog.tblauncher.loader.LoadAppEntry;
+import rocks.tbog.tblauncher.loader.LoadCacheApps;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.searcher.Searcher;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
@@ -29,6 +30,7 @@ import rocks.tbog.tblauncher.utils.UserHandleCompat;
 
 public class AppProvider extends Provider<AppEntry> {
 
+    boolean mInitialLoad = true;
     AppsCallback appsCallback = null;
     final BroadcastReceiver mProfileReceiver = new BroadcastReceiver() {
         @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
@@ -169,8 +171,26 @@ public class AppProvider extends Provider<AppEntry> {
 
     public void reload(boolean cancelCurrentLoadTask) {
         super.reload(cancelCurrentLoadTask);
-        if (!isLoaded() && !isLoading())
-            this.initialize(new LoadAppEntry(this));
+        if (!isLoaded() && !isLoading()) {
+            if (mInitialLoad) {
+                // Use DB cache to speed things up. We'll reload after.
+                this.initialize(new LoadCacheApps(this));
+            } else {
+                this.initialize(new LoadAppEntry(this));
+            }
+        }
+    }
+
+    @Override
+    public void loadOver(ArrayList<AppEntry> results) {
+        super.loadOver(results);
+        if (mInitialLoad) {
+            mInitialLoad = false;
+            // Got DB cache. Do a reload later.
+            TBApplication.dataHandler(this).runAfterLoadOver(() -> {
+                this.reload(false);
+            });
+        }
     }
 
     /**

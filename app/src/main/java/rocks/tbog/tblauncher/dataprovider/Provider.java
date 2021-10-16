@@ -28,7 +28,7 @@ public abstract class Provider<T extends EntryItem> extends Service implements I
     /**
      * Storage for search items used by this provider
      */
-    List<T> pojos = new ArrayList<>();
+    protected List<T> pojos = Collections.emptyList();
     private boolean loaded = false;
     private LoadEntryItem<T> loader = null;
     /**
