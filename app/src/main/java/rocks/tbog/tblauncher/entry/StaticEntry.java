@@ -54,11 +54,7 @@ public abstract class StaticEntry extends EntryItem {
 
         for (ContentLoadHelper.CategoryItem categoryItem : categoryTitle) {
             int titleStringId = categoryItem.textId;
-            if (titleStringId == R.string.popup_title_hist_fav) {
-                adapter.add(new LinearAdapter.ItemTitle(context, R.string.popup_title_hist_fav));
-                adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_add));
-                adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_remove));
-            } else if (titleStringId == R.string.popup_title_customize) {
+            if (titleStringId == R.string.popup_title_customize) {
                 adapter.add(new LinearAdapter.ItemTitle(context, R.string.popup_title_customize));
                 adapter.add(new LinearAdapter.Item(context, R.string.menu_action_rename));
                 adapter.add(new LinearAdapter.Item(context, R.string.menu_custom_icon));
@@ -67,6 +63,7 @@ public abstract class StaticEntry extends EntryItem {
 
         if (Utilities.checkFlag(flags, LAUNCHED_FROM_QUICK_LIST)) {
             adapter.add(new LinearAdapter.ItemTitle(context, R.string.menu_popup_title_settings));
+            adapter.add(new LinearAdapter.Item(context, R.string.menu_quick_list_remove));
             adapter.add(new LinearAdapter.Item(context, R.string.menu_popup_quick_list_customize));
         }
 

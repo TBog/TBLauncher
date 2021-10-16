@@ -78,7 +78,7 @@ public final class SearchEngineEntry extends SearchEntry {
     }
 
     @Override
-    public void doLaunch(View v, int flags) {
+    public void doLaunch(@NonNull View v, int flags) {
         Context context = v.getContext();
         if (isGoogleSearch(url)) {
             try {

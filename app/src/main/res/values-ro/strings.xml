@@ -311,9 +311,7 @@
     <string name="menu_exclude">Exclude…</string>
     <string name="permission_denied">Acordă mai întâi această permisiune</string>
     <string name="stub_app_tag">lista de etichete a aplicației</string>
-    <string name="menu_favorites_remove">Elimină din favorite</string>
     <string name="menu_remove_history">Elimină din istoric</string>
-    <string name="menu_favorites_add">Adaugă la favorite</string>
     <string name="toast_favorites_removed">%s eliminat din favorite</string>
     <string name="toast_favorites_added">%s adăugat la favorite</string>
     <string name="cant_save_shortcuts">Nu s-au putut adăuga comenzi rapide. TinyBit este lansatorul dvs. implicit\?</string>

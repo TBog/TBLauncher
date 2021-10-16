@@ -238,7 +238,7 @@ public class IconsHandler {
                 Log.w(TAG, "icon pack `" + mIconPack.getPackPackageName() + "` not loaded, wait");
                 try {
                     mLoadIconsPackTask.wait();
-                } catch (InterruptedException ignored) {
+                } catch (Exception ignored) {
                 }
                 if (!mIconPack.isLoaded()) {
                     Log.e(TAG, "icon pack `" + mIconPack.getPackPackageName() + "` waiting failed to load");

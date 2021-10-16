@@ -14,9 +14,9 @@
     <string name="cant_save_shortcuts">Could not add shortcuts. Is TinyBit your default launcher?</string>
     <string name="toast_favorites_added">%s added to favorites</string>
     <string name="toast_favorites_removed">%s removed from favorites</string>
-    <string name="menu_favorites_add">Add to favorites</string>
+    <string name="menu_quick_list_add">Add to Quick List</string>
+    <string name="menu_quick_list_remove">Remove from Quick List</string>
     <string name="menu_remove_history">Remove from history</string>
-    <string name="menu_favorites_remove">Remove favorite</string>
     <string name="stub_application">App name</string>
     <string name="stub_app_tag">app tag list</string>
     <string name="permission_denied">Grant this permission first</string>
@@ -212,7 +212,7 @@
     <string name="result_text2_color">Secondary text color</string>
     <string name="search_bar_text_color">Text color</string>
     <string name="search_bar_icon_color">Icons color</string>
-    <string name="menu_popup_quick_list_customize">Make your quick list</string>
+    <string name="menu_popup_quick_list_customize">Edit quick list</string>
     <string name="result_text_size">Text size</string>
     <string name="result_text2_size">Secondary text size</string>
     <string name="invalid_rename_tag">There is already a \"%s\" tag</string>

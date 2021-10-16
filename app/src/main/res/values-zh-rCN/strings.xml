@@ -82,7 +82,5 @@
     <string name="permission_denied">先要授予权限</string>
     <string name="stub_app_tag">标签列表</string>
     <string name="stub_application">软件名</string>
-    <string name="menu_favorites_remove">取消收藏</string>
     <string name="menu_remove_history">删除历史记录</string>
-    <string name="menu_favorites_add">加入收藏夹</string>
 </resources>

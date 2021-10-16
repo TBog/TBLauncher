@@ -9,12 +9,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 
-import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
-import rocks.tbog.tblauncher.db.FavRecord;
+import rocks.tbog.tblauncher.dataprovider.QuickListProvider;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.result.ResultHelper;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
@@ -227,8 +228,7 @@ public abstract class EntryItem {
     protected ListPopup buildPopupMenu(Context context, LinearAdapter adapter, View parentView, int flags) {
         adapter.add(new LinearAdapter.ItemTitle(context, R.string.popup_title_hist_fav));
         adapter.add(new LinearAdapter.Item(context, R.string.menu_remove_history));
-        adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_add));
-        adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_remove));
+        adapter.add(new LinearAdapter.Item(context, R.string.menu_quick_list_add));
         if (Utilities.checkFlag(flags, LAUNCHED_FROM_QUICK_LIST)) {
             adapter.add(new LinearAdapter.ItemTitle(context, R.string.menu_popup_title_settings));
             adapter.add(new LinearAdapter.Item(context, R.string.menu_popup_quick_list_customize));
@@ -239,29 +239,35 @@ public abstract class EntryItem {
     ListPopup inflatePopupMenu(@NonNull Context context, @NonNull LinearAdapter adapter) {
         ListPopup menu = ListPopup.create(context, adapter);
 
-        // If app already pinned, do not display the "add to favorite" option
-        // otherwise don't show the "remove favorite button"
-        boolean foundInFavorites = false;
-        ArrayList<FavRecord> favRecords = TBApplication.dataHandler(context).getFavorites();
-        for (FavRecord fav : favRecords) {
-            if (id.equals(fav.record)) {
-                foundInFavorites = true;
-                break;
-            }
-        }
-        if (foundInFavorites) {
+//        boolean foundInQuickList = false;
+//        ArrayList<FavRecord> favRecords = TBApplication.dataHandler(context).getFavorites();
+//        for (FavRecord fav : favRecords) {
+//            if (id.equals(fav.record) && fav.isInQuickList()) {
+//                foundInQuickList = true;
+//                break;
+//            }
+//        }
+        QuickListProvider provider = TBApplication.dataHandler(context).getQuickListProvider();
+
+        // get current Quick List content
+        List<? extends EntryItem> list = provider != null ? provider.getPojos() : Collections.emptyList();
+        boolean foundInQuickList = list.contains(this);
+
+        if (foundInQuickList) {
+            // if already in quick list, remove the "Add to QuickList" option
             for (int i = 0; i < adapter.getCount(); i += 1) {
                 LinearAdapter.MenuItem item = adapter.getItem(i);
                 if (item instanceof LinearAdapter.Item) {
-                    if (((LinearAdapter.Item) item).stringId == R.string.menu_favorites_add)
+                    if (((LinearAdapter.Item) item).stringId == R.string.menu_quick_list_add)
                         adapter.remove(item);
                 }
             }
         } else {
+            // if not in quick list, remove the "Remove from QuickList" option
             for (int i = 0; i < adapter.getCount(); i += 1) {
                 LinearAdapter.MenuItem item = adapter.getItem(i);
                 if (item instanceof LinearAdapter.Item) {
-                    if (((LinearAdapter.Item) item).stringId == R.string.menu_favorites_remove)
+                    if (((LinearAdapter.Item) item).stringId == R.string.menu_quick_list_remove)
                         adapter.remove(item);
                 }
             }
@@ -312,20 +318,18 @@ public abstract class EntryItem {
     @CallSuper
     boolean popupMenuClickHandler(@NonNull View view, @NonNull LinearAdapter.MenuItem item, @StringRes int stringId, View parentView) {
         Context context = parentView.getContext();
-        switch (stringId) {
-            case R.string.menu_remove_history:
-                ResultHelper.removeFromResultsAndHistory(this, context);
-                return true;
-            case R.string.menu_favorites_add:
-                ResultHelper.launchAddToFavorites(context, this);
-                return true;
-            case R.string.menu_favorites_remove:
-                ResultHelper.launchRemoveFromFavorites(context, this);
-                TBApplication.quickList(context).onFavoritesChanged();
-                return true;
-            case R.string.menu_popup_quick_list_customize:
-                TBApplication.behaviour(context).launchEditQuickListDialog();
-                return true;
+        if (R.string.menu_remove_history == stringId) {
+            ResultHelper.removeFromResultsAndHistory(this, context);
+            return true;
+        } else if (R.string.menu_quick_list_add == stringId) {
+            ResultHelper.launchAddToQuickList(context, this);
+            return true;
+        } else if (R.string.menu_quick_list_remove == stringId) {
+            ResultHelper.launchRemoveFromQuickList(context, this);
+            return true;
+        } else if (R.string.menu_popup_quick_list_customize == stringId) {
+            TBApplication.behaviour(context).launchEditQuickListDialog();
+            return true;
         }
 
 //        FullscreenActivity mainActivity = (FullscreenActivity) context;

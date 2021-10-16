@@ -258,10 +258,6 @@ public final class AppEntry extends EntryWithTags {
 
     @Override
     protected ListPopup buildPopupMenu(Context context, LinearAdapter adapter, View parentView, int flags) {
-//        if (!(context instanceof TBLauncherActivity) || ((TBLauncherActivity) context).isViewingSearchResults()) {
-//            adapter.add(new ListPopup.Item(context, R.string.menu_remove));
-//        }
-
         List<ContentLoadHelper.CategoryItem> categoryTitle = PrefCache.getResultPopupOrder(context);
 
         for (ContentLoadHelper.CategoryItem categoryItem : categoryTitle) {
@@ -270,8 +266,8 @@ public final class AppEntry extends EntryWithTags {
                 adapter.add(new LinearAdapter.ItemTitle(context, R.string.popup_title_hist_fav));
                 //adapter.add(new LinearAdapter.Item(context, R.string.menu_exclude));
                 adapter.add(new LinearAdapter.Item(context, R.string.menu_remove_history));
-                adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_add));
-                adapter.add(new LinearAdapter.Item(context, R.string.menu_favorites_remove));
+                adapter.add(new LinearAdapter.Item(context, R.string.menu_quick_list_add));
+                adapter.add(new LinearAdapter.Item(context, R.string.menu_quick_list_remove));
                 if (isHiddenByUser())
                     adapter.add(new LinearAdapter.Item(context, R.string.menu_show));
                 else

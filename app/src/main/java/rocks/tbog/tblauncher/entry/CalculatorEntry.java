@@ -77,7 +77,7 @@ public final class CalculatorEntry extends SearchEntry {
     }
 
     @Override
-    public void doLaunch(View v, int flags) {
+    public void doLaunch(@NonNull View v, int flags) {
         String text = getName();
         if (!text.isEmpty()) {
             String result = text.substring(text.indexOf("=") + 1).trim();

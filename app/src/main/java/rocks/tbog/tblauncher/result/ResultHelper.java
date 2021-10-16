@@ -1,5 +1,8 @@
 package rocks.tbog.tblauncher.result;
 
+import static rocks.tbog.tblauncher.entry.EntryItem.LAUNCHED_FROM_QUICK_LIST;
+import static rocks.tbog.tblauncher.entry.EntryItem.LAUNCHED_FROM_RESULT_LIST;
+
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
@@ -11,11 +14,17 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+
 import rocks.tbog.tblauncher.Behaviour;
 import rocks.tbog.tblauncher.BuildConfig;
+import rocks.tbog.tblauncher.DataHandler;
 import rocks.tbog.tblauncher.Permission;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
+import rocks.tbog.tblauncher.dataprovider.QuickListProvider;
 import rocks.tbog.tblauncher.db.DBHelper;
 import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.entry.ContactEntry;
@@ -25,9 +34,6 @@ import rocks.tbog.tblauncher.entry.SearchEntry;
 import rocks.tbog.tblauncher.entry.ShortcutEntry;
 import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.utils.Utilities;
-
-import static rocks.tbog.tblauncher.entry.EntryItem.LAUNCHED_FROM_QUICK_LIST;
-import static rocks.tbog.tblauncher.entry.EntryItem.LAUNCHED_FROM_RESULT_LIST;
 
 public class ResultHelper {
     private ResultHelper() {
@@ -55,8 +61,8 @@ public class ResultHelper {
      * How to launch a result. Most probably, will fire an intent.
      * This function will record history and then call EntryItem.doLaunch
      *
-     * @param view {@link View} that was touched
-     * @param pojo the {@link EntryItem} that the user is launching
+     * @param view         {@link View} that was touched
+     * @param pojo         the {@link EntryItem} that the user is launching
      * @param launchedFrom is the view from QuickList, ResultList, Gesture?
      */
     public static void launch(@NonNull View view, @NonNull EntryItem pojo, int launchedFrom) {
@@ -109,16 +115,40 @@ public class ResultHelper {
         DBHelper.removeFromHistory(context, pojo.id);
     }
 
-    public static void launchAddToFavorites(@NonNull Context context, EntryItem pojo) {
-        String msg = context.getResources().getString(R.string.toast_favorites_added);
-        TBApplication.getApplication(context).getDataHandler().addToFavorites(pojo);
-        Toast.makeText(context, String.format(msg, pojo.getName()), Toast.LENGTH_SHORT).show();
+    public static void launchAddToQuickList(@NonNull Context context, EntryItem pojo) {
+        final DataHandler dataHandler = TBApplication.dataHandler(context);
+        QuickListProvider provider = dataHandler.getQuickListProvider();
+
+        // get current Quick List content
+        List<? extends EntryItem> list = provider != null ? provider.getPojos() : Collections.emptyList();
+        final ArrayList<String> idList = new ArrayList<>(list.size());
+        for (EntryItem entryItem : list) {
+            idList.add(entryItem.id);
+        }
+
+        // add the new entry
+        idList.add(pojo.id);
+
+        // save Quick List
+        dataHandler.setQuickList(idList);
     }
 
-    public static void launchRemoveFromFavorites(@NonNull Context context, EntryItem pojo) {
-        String msg = context.getResources().getString(R.string.toast_favorites_removed);
-        TBApplication.getApplication(context).getDataHandler().removeFromFavorites(pojo);
-        Toast.makeText(context, String.format(msg, pojo.getName()), Toast.LENGTH_SHORT).show();
+    public static void launchRemoveFromQuickList(@NonNull Context context, EntryItem pojo) {
+        final DataHandler dataHandler = TBApplication.dataHandler(context);
+        QuickListProvider provider = dataHandler.getQuickListProvider();
+
+        // get current Quick List content
+        List<? extends EntryItem> list = provider != null ? provider.getPojos() : Collections.emptyList();
+        final ArrayList<String> idList = new ArrayList<>(list.size());
+        for (EntryItem entryItem : list) {
+            idList.add(entryItem.id);
+        }
+
+        // remove the entry
+        idList.remove(pojo.id);
+
+        // save Quick List
+        dataHandler.setQuickList(idList);
     }
 
     public static void launchMessaging(ContactEntry contactPojo, View v) {

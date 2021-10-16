@@ -3,4 +3,4 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@android:id/text1"
     style="@style/ListPopupItem"
-    tools:text="@string/menu_favorites_add" />
+    tools:text="@string/menu_quick_list_add" />

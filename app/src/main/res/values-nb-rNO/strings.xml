@@ -36,8 +36,6 @@
     <string name="menu_app_details">Programinfo</string>
     <string name="menu_exclude">Ekskluder …</string>
     <string name="permission_denied">Tilgang nektet</string>
-    <string name="menu_favorites_remove">Fjern favoritt</string>
-    <string name="menu_favorites_add">Legg til i favoritter</string>
     <string name="toast_favorites_removed">%s ble fjernet fra favoritter</string>
     <string name="toast_favorites_added">%s ble lagt til i favoritter</string>
     <string name="removed_item">Fjernet %s</string>
