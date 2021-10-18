@@ -610,7 +610,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "exit-app":
                     case "reset-default-launcher":
                     case "export-tags":
-                    case "export-favs":
+                    case "export-modifications":
                     case "export-apps":
                     case "export-interface":
                     case "export-widgets":

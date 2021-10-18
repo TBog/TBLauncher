@@ -103,8 +103,8 @@ public class ConfirmDialog extends BasePreferenceDialog {
             case "export-tags":
                 FileUtils.sendSettingsFile(requireActivity(), "tags");
                 break;
-            case "export-favs":
-                FileUtils.sendSettingsFile(requireActivity(), "favorites");
+            case "export-modifications":
+                FileUtils.sendSettingsFile(requireActivity(), "modifications");
                 break;
             case "export-apps":
                 FileUtils.sendSettingsFile(requireActivity(), "applications");
@@ -163,7 +163,7 @@ public class ConfirmDialog extends BasePreferenceDialog {
                 ((TextView) view.findViewById(android.R.id.text2)).setText(R.string.reset_default_launcher_description);
                 break;
             case "export-tags":
-            case "export-favs":
+            case "export-modifications":
             case "export-apps":
             case "export-interface":
             case "export-widgets":
