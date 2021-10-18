@@ -36,10 +36,10 @@ import rocks.tbog.tblauncher.dataprovider.QuickListProvider;
 import rocks.tbog.tblauncher.dataprovider.TagsProvider;
 import rocks.tbog.tblauncher.db.FavRecord;
 import rocks.tbog.tblauncher.entry.EntryItem;
-import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.entry.TagEntry;
 import rocks.tbog.tblauncher.result.EntryAdapter;
 import rocks.tbog.tblauncher.result.LoadDataForAdapter;
+import rocks.tbog.tblauncher.utils.DebugInfo;
 
 public class EditQuickList {
 
@@ -143,12 +143,11 @@ public class EditQuickList {
         new LoadDataForAdapter(adapter, () -> {
             Context ctx = gridView.getContext();
             DataHandler dataHandler = TBApplication.dataHandler(ctx);
-            ArrayList<FavRecord> favRecords = dataHandler.getFavorites();
+            List<FavRecord> favRecords = dataHandler.getFavorites();
             ArrayList<EntryItem> data = new ArrayList<>(favRecords.size());
             for (FavRecord fav : favRecords) {
                 EntryItem entry = dataHandler.getPojo(fav.record);
-                // we have a separate section for StaticEntry (filters and actions), don't duplicate
-                if (entry != null && !(entry instanceof StaticEntry))
+                if (entry != null)
                     data.add(entry);
             }
             return data;
@@ -179,17 +178,19 @@ public class EditQuickList {
             ArrayList<Pair<String, View>> pages = new ArrayList<>();
             LayoutInflater inflater = LayoutInflater.from(context);
 
-            // filters
-            addFilters(inflater, pages);
-
             // actions
             addActions(inflater, pages);
+
+            // filters
+            addFilters(inflater, pages);
 
             // tags
             addTags(inflater, pages);
 
-            // favorites
-            addFavorites(inflater, pages);
+            if (DebugInfo.enableFavorites(context)) {
+                // favorites
+                addFavorites(inflater, pages);
+            }
 
             pages.trimToSize();
             mViewPager.setAdapter(new ViewPagerAdapter(pages));

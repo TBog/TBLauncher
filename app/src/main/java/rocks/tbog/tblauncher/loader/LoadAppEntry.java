@@ -75,7 +75,7 @@ public class LoadAppEntry extends LoadEntryItem<AppEntry> {
 
             DataHandler dataHandler = TBApplication.getApplication(ctx).getDataHandler();
 
-            dbApps = dataHandler.getCachedApps();
+            dbApps = dataHandler.getCachedApps(ctx);
             pendingChanges = new ArrayList<>(0);
 
             if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {

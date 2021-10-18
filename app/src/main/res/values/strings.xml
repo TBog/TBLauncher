@@ -264,8 +264,8 @@
     <string name="export_xml">Export as XML</string>
     <string name="export_tags">Export tags</string>
     <string name="export_tags_summary">Export tag associations, no icons</string>
-    <string name="export_favs">Export favorites</string>
-    <string name="export_favs_summary">Quick list, favorites and custom icons, tag icons</string>
+    <string name="export_modifications">Export customizations</string>
+    <string name="export_modifications_summary">Quick list, custom icons and names</string>
     <string name="export_apps">Export apps</string>
     <string name="export_apps_summary">New names for apps, hidden and custom icons</string>
     <string name="import_settings_section">Import settings</string>
@@ -409,7 +409,7 @@
     <string name="loading_icon">Loading icon</string>
     <string name="keyboard_section">Keyboard</string>
     <string name="debug_ksh_touch">Keyboard-scroll hider</string>
-    <string name="debug_ksh_touch_summary">Show touches</string>
+    <string name="debug_ksh_touch_summary">Show state as background color</string>
     <string name="lwp_scroll_pages">Pages</string>
 
     <string name="lwp_page_count_vertical">↕ pages</string>
@@ -430,6 +430,8 @@
     <string name="tags_menu_untagged">Show untagged</string>
     <string name="result_popup_order">Long touch category order</string>
     <string name="result_popup_order_summary">Category order for long touch popup items</string>
+    <string name="debug_favorites">Favorites</string>
+    <string name="debug_favorites_summary">Show entries from DB table `favorites`</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>

@@ -72,7 +72,7 @@ public class TagsProvider extends DBProvider<TagEntry> {
         @Override
         List<TagEntry> getEntryItems(DataHandler dataHandler) {
             ArrayList<TagEntry> tagList = new ArrayList<>();
-            ArrayList<FavRecord> favorites = dataHandler.getFavorites();
+            List<FavRecord> favorites = dataHandler.getFavorites();
             // get TagEntry from FavRecord
             for (FavRecord fav : favorites) {
                 TagEntry entry = newTagEntryCheckId(fav.record);

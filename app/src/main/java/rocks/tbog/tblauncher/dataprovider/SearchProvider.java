@@ -78,10 +78,10 @@ public class SearchProvider extends SimpleProvider<SearchEntry> {
         return url;
     }
 
-    public SearchProvider(Context context) {
+    public SearchProvider(Context context, SharedPreferences sharedPreferences) {
         super();
         this.context = context.getApplicationContext();
-        this.prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        this.prefs = sharedPreferences;
         reload(false);
     }
 

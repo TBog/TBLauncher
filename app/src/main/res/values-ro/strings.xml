@@ -74,8 +74,8 @@
     <string name="import_settings_section">Importă setări</string>
     <string name="export_apps_summary">Nume noi pentru aplicații, pictograme ascunse și personalizate</string>
     <string name="export_apps">Exportați aplicații</string>
-    <string name="export_favs_summary">Lista rapidă, pictogramele favorite și personalizate, pictogramele etichetei</string>
-    <string name="export_favs">Exportați favorite</string>
+    <string name="export_modifications_summary">Lista rapidă, pictograme și etichete personalizate</string>
+    <string name="export_modifications">Exportați personalizări</string>
     <string name="export_tags_summary">Exportați asociații de etichete, fără pictograme</string>
     <string name="export_tags">Exportați etichete</string>
     <string name="export_xml">Exportați ca XML</string>

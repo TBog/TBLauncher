@@ -6,7 +6,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.StringRes;
 
 import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 
+import rocks.tbog.tblauncher.DataHandler;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.entry.ActionEntry;
@@ -14,6 +17,7 @@ import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.searcher.HistorySearcher;
 import rocks.tbog.tblauncher.searcher.TagList;
 import rocks.tbog.tblauncher.ui.ListPopup;
+import rocks.tbog.tblauncher.utils.DebugInfo;
 
 public class ActionProvider extends DBProvider<ActionEntry> {
 
@@ -206,7 +210,22 @@ public class ActionProvider extends DBProvider<ActionEntry> {
 
     @Override
     protected DBLoader<ActionEntry> newLoadTask() {
-        return new UpdateFromFavoritesLoader<>(this, s_entries, s_names);
+        return new UpdateFromFavoritesLoader<ActionEntry>(this, s_entries, s_names) {
+            @Override
+            public List<ActionEntry> getEntryItems(DataHandler dataHandler) {
+                List<ActionEntry> entries = super.getEntryItems(dataHandler);
+                Context context = dataHandler.getContext();
+                if (context == null || !DebugInfo.enableFavorites(context)) {
+                    // remove debug entry
+                    for (Iterator<ActionEntry> iterator = entries.iterator(); iterator.hasNext(); ) {
+                        ActionEntry entry = iterator.next();
+                        if (entry.id.endsWith("show/favorites/byName"))
+                            iterator.remove();
+                    }
+                }
+                return entries;
+            }
+        };
     }
 
     @Override

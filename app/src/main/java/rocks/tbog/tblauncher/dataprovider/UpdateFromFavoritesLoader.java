@@ -34,7 +34,7 @@ public class UpdateFromFavoritesLoader<T extends StaticEntry> extends DBProvider
             output.add(entry);
         }
 
-        ArrayList<FavRecord> favorites = dataHandler.getFavorites();
+        List<FavRecord> favorites = dataHandler.getFavorites();
         // update custom settings from favorites
         for (FavRecord fav : favorites) {
             T entry = null;

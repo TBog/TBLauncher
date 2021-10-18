@@ -105,7 +105,7 @@ public class XmlImport {
         private static final String XTN_TAG_LIST = "taglist";
         private static final String XTN_TAG_LIST_ITEM = "tag";
         private static final String XTN_TAG_LIST_ITEM_ID = "item";
-        private static final String XTN_FAV_LIST = "favlist";
+        private static final String XTN_FAV_LIST = "favlist";   // modification list
         private static final String XTN_FAV_LIST_ITEM = "favorite";
         private static final String XTN_FAV_LIST_ITEM_ID = "id";
         private static final String XTN_APP_LIST = "applist";
@@ -822,7 +822,7 @@ public class XmlImport {
             if (!bAppListLoaded)
                 return;
 
-            Map<String, AppRecord> cachedApps = TBApplication.dataHandler(context).getCachedApps();
+            Map<String, AppRecord> cachedApps = TBApplication.dataHandler(context).getCachedApps(context);
             if (method == Method.OVERWRITE || method == Method.SET) {
                 // make sure the validate flag is off
                 for (AppRecord rec : cachedApps.values())

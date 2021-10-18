@@ -57,19 +57,19 @@ public class XmlExport {
         sx.endTag("taglist");
     }
 
-    public static void favoritesXml(@NonNull Context context, @NonNull Writer writer) throws IOException {
+    public static void modificationsXml(@NonNull Context context, @NonNull Writer writer) throws IOException {
         SimpleXmlWriter sx = SimpleXmlWriter.getNewInstance();
         sx.setOutput(writer);
 
         sx.setIndentation(true);
         sx.startDocument();
 
-        favoritesXml(context, sx);
+        modificationsXml(context, sx);
 
         sx.endDocument();
     }
 
-    public static void favoritesXml(@NonNull Context context, @NonNull SimpleXmlWriter sx) throws IOException {
+    public static void modificationsXml(@NonNull Context context, @NonNull SimpleXmlWriter sx) throws IOException {
         sx.startTag("favlist").attribute("version", "1");
 
         List<FavRecord> favRecords = TBApplication.dataHandler(context).getFavorites();
@@ -122,7 +122,7 @@ public class XmlExport {
     public static void applicationsXml(@NonNull Context context, @NonNull SimpleXmlWriter sx) throws IOException {
         sx.startTag("applist").attribute("version", "1");
 
-        Map<String, AppRecord> cachedApps = TBApplication.dataHandler(context).getCachedApps();
+        Map<String, AppRecord> cachedApps = TBApplication.dataHandler(context).getCachedApps(context);
         for (AppRecord app : cachedApps.values()) {
             // if there is no custom settings, skip this app
             if (app.getFlagsDB() == AppRecord.FLAG_DEFAULT_NAME)
@@ -298,7 +298,7 @@ public class XmlExport {
         sx.startTag("backup");
 
         tagsXml(context, sx);
-        favoritesXml(context, sx);
+        modificationsXml(context, sx);
         applicationsXml(context, sx);
         preferencesXml(rootPref, sx);
         widgetsXml(context, sx);

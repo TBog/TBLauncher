@@ -426,6 +426,12 @@
                 android:summary="@string/debug_ksh_touch_summary"
                 android:title="@string/debug_ksh_touch" />
 
+        <androidx.preference.SwitchPreference
+                android:defaultValue="false"
+                android:key="debug-favorites"
+                android:summary="@string/debug_favorites_summary"
+                android:title="@string/debug_favorites" />
+
     </androidx.preference.PreferenceCategory>
 
 </androidx.preference.PreferenceScreen>

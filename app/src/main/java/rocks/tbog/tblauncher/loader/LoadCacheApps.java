@@ -51,7 +51,7 @@ public class LoadCacheApps extends LoadEntryItem<AppEntry> {
     @NonNull
     private static ArrayList<AppEntry> getApps(@NonNull Context context) {
         TBApplication app = TBApplication.getApplication(context);
-        HashMap<String, AppRecord> apps = app.getDataHandler().getCachedApps();
+        HashMap<String, AppRecord> apps = app.getDataHandler().getCachedApps(context);
 
         final ArrayList<AppEntry> appEntries = new ArrayList<>(apps.size());
 

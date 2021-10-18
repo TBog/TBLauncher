@@ -7,6 +7,7 @@ import android.util.Log;
 
 import androidx.annotation.CallSuper;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 
 import java.lang.ref.WeakReference;
@@ -47,6 +48,12 @@ public abstract class Searcher extends AsyncTask<Void, Void> {
         processedPojos = getPojoProcessor(activity);
         tagsEnabled = PrefCache.getFuzzySearchTags(activity.getContext());
         maxResults = getMaxResultCount(activity.getContext());
+    }
+
+    @Nullable
+    public Context getContext() {
+        ISearchActivity activity = activityWeakReference.get();
+        return activity != null ? activity.getContext() : null;
     }
 
     @NonNull

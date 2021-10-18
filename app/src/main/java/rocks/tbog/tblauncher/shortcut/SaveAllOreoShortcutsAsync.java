@@ -45,6 +45,8 @@ public class SaveAllOreoShortcutsAsync extends AsyncTask<Void, Integer, Boolean>
             return null;
         }
 
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+
         List<ShortcutInfo> shortcuts;
         try {
             // Fetch list of all shortcuts
@@ -56,7 +58,6 @@ public class SaveAllOreoShortcutsAsync extends AsyncTask<Void, Integer, Boolean>
             publishProgress(-1);
 
             // Set flag to true, so we can rerun this class
-            SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
             prefs.edit().putBoolean("first-run-shortcuts", true).apply();
 
             cancel(true);
@@ -69,7 +70,7 @@ public class SaveAllOreoShortcutsAsync extends AsyncTask<Void, Integer, Boolean>
             return null;
         }
 
-        Set<String> excludedAppList = dataHandler.getExcluded();
+        Set<String> excludedAppList = dataHandler.getExcluded(prefs);
         UserManager manager = (UserManager) context.getSystemService(Context.USER_SERVICE);
 
         for (ShortcutInfo shortcutInfo : shortcuts) {

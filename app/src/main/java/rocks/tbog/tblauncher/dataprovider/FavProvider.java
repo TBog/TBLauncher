@@ -30,7 +30,7 @@ public class FavProvider extends DBProvider<EntryItem> {
 
         @Override
         List<EntryItem> getEntryItems(DataHandler dataHandler) {
-            ArrayList<FavRecord> list = dataHandler.getFavorites();
+            List<FavRecord> list = dataHandler.getFavorites();
             ArrayList<EntryItem> favList = new ArrayList<>(list.size());
             // get EntryItem from FavRecord
             for (FavRecord fav : list) {

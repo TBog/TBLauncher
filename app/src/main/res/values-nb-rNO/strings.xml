@@ -96,7 +96,6 @@
     <string name="import_settings_set">Sett importerte innstillinger</string>
     <string name="import_settings_section">Importer innstillinger</string>
     <string name="export_apps">Eksporter programmer</string>
-    <string name="export_favs">Eksporter favoritter</string>
     <string name="export_tags">Eksporter etiketter</string>
     <string name="export_xml">Eksporter som XML</string>
     <string name="gesture_click">Trykk</string>

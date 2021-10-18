@@ -209,8 +209,8 @@ public class ConfirmDialog extends BasePreferenceDialog {
 
         switch (key) {
             case "device-admin": {
-                if (!DeviceAdmin.isAdminActive(getContext())) {
-                    ((AlertDialog) getDialog()).getButton(DialogInterface.BUTTON_POSITIVE).performClick();
+                if (!DeviceAdmin.isAdminActive(requireContext())) {
+                    ((AlertDialog) requireDialog()).getButton(DialogInterface.BUTTON_POSITIVE).performClick();
                 }
                 break;
             }
@@ -221,11 +221,11 @@ public class ConfirmDialog extends BasePreferenceDialog {
                         FileUtils.writeSettingsFile(activity, "tags", w -> XmlExport.tagsXml(activity, w));
                 };
                 break;
-            case "export-favs":
+            case "export-modifications":
                 asyncWrite = t -> {
                     final Activity activity = Utilities.getActivity(getContext());
                     if (activity != null)
-                        FileUtils.writeSettingsFile(activity, "favorites", w -> XmlExport.favoritesXml(activity, w));
+                        FileUtils.writeSettingsFile(activity, "modifications", w -> XmlExport.modificationsXml(activity, w));
                 };
                 break;
             case "export-apps":

@@ -26,4 +26,9 @@ public class DebugInfo {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         return prefs.getBoolean("debug-ksh-touch", false);
     }
+
+    public static boolean enableFavorites(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getBoolean("debug-favorites", false);
+    }
 }
