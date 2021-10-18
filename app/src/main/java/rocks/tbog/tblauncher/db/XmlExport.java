@@ -42,19 +42,19 @@ public class XmlExport {
     }
 
     public static void tagsXml(@NonNull Context context, @NonNull SimpleXmlWriter sx) throws IOException {
-        sx.startTag("taglist").attribute("version", "1");
+        sx.startTag(ExportedData.XTN_TAG_LIST).attribute("version", "1");
 
         TagsHandler tagsHandler = TBApplication.tagsHandler(context);
         Set<String> tags = tagsHandler.getAllTags();
         for (String tagName : tags) {
-            sx.startTag("tag").attribute("name", tagName);
+            sx.startTag(ExportedData.XTN_TAG_LIST_ITEM).attribute("name", tagName);
             for (String idName : tagsHandler.getAllEntryIds(tagName)) {
-                sx.startTag("item").content(idName).endTag("item");
+                sx.startTag(ExportedData.XTN_TAG_LIST_ITEM_ID).content(idName).endTag(ExportedData.XTN_TAG_LIST_ITEM_ID);
             }
-            sx.endTag("tag");
+            sx.endTag(ExportedData.XTN_TAG_LIST_ITEM);
         }
 
-        sx.endTag("taglist");
+        sx.endTag(ExportedData.XTN_TAG_LIST);
     }
 
     public static void modificationsXml(@NonNull Context context, @NonNull Writer writer) throws IOException {
@@ -70,12 +70,12 @@ public class XmlExport {
     }
 
     public static void modificationsXml(@NonNull Context context, @NonNull SimpleXmlWriter sx) throws IOException {
-        sx.startTag("favlist").attribute("version", "1");
+        sx.startTag(ExportedData.XTN_MOD_LIST).attribute("version", "1");
 
         List<FavRecord> favRecords = TBApplication.dataHandler(context).getFavorites();
         for (FavRecord fav : favRecords) {
-            sx.startTag("favorite")
-                    .startTag("id").content(fav.record).endTag("id")
+            sx.startTag(ExportedData.XTN_MOD_LIST_ITEM)
+                    .startTag(ExportedData.XTN_MOD_LIST_ITEM_ID).content(fav.record).endTag(ExportedData.XTN_MOD_LIST_ITEM_ID)
                     .startTag("flags").content(fav.getFlagsDB()).endTag("flags");
 
             if (fav.hasCustomName() && fav.displayName != null) {
@@ -101,10 +101,10 @@ public class XmlExport {
                         .endTag("quicklist");
             }
 
-            sx.endTag("favorite");
+            sx.endTag(ExportedData.XTN_MOD_LIST_ITEM);
         }
 
-        sx.endTag("favlist");
+        sx.endTag(ExportedData.XTN_MOD_LIST);
     }
 
     public static void applicationsXml(@NonNull Context context, @NonNull Writer writer) throws IOException {
@@ -120,7 +120,7 @@ public class XmlExport {
     }
 
     public static void applicationsXml(@NonNull Context context, @NonNull SimpleXmlWriter sx) throws IOException {
-        sx.startTag("applist").attribute("version", "1");
+        sx.startTag(ExportedData.XTN_APP_LIST).attribute("version", "1");
 
         Map<String, AppRecord> cachedApps = TBApplication.dataHandler(context).getCachedApps(context);
         for (AppRecord app : cachedApps.values()) {
@@ -128,8 +128,8 @@ public class XmlExport {
             if (app.getFlagsDB() == AppRecord.FLAG_DEFAULT_NAME)
                 continue;
 
-            sx.startTag("app")
-                    .startTag("component").content(app.componentName).endTag("component")
+            sx.startTag(ExportedData.XTN_APP_LIST_ITEM)
+                    .startTag(ExportedData.XTN_APP_LIST_ITEM_ID).content(app.componentName).endTag(ExportedData.XTN_APP_LIST_ITEM_ID)
                     .startTag("flags").content(app.getFlagsDB()).endTag("flags");
 
             if (app.displayName != null && !app.displayName.isEmpty()) {
@@ -149,10 +149,10 @@ public class XmlExport {
                 }
             }
 
-            sx.endTag("app");
+            sx.endTag(ExportedData.XTN_APP_LIST_ITEM);
         }
 
-        sx.endTag("applist");
+        sx.endTag(ExportedData.XTN_APP_LIST);
     }
 
     public static void interfaceXml(@NonNull PreferenceGroup rootPref, @NonNull Writer writer) throws IOException {
@@ -168,7 +168,7 @@ public class XmlExport {
     }
 
     public static void interfaceXml(@NonNull PreferenceGroup rootPref, @NonNull SimpleXmlWriter sx) throws IOException {
-        sx.startTag("interface").attribute("version", "1");
+        sx.startTag(ExportedData.XTN_UI_LIST).attribute("version", "1");
 
         // we remove the key from the map after it's exported to avoid duplicates
         Map<String, ?> prefMap = new HashMap<>(rootPref.getSharedPreferences().getAll());
@@ -197,18 +197,18 @@ public class XmlExport {
         if ((pref instanceof PreferenceGroup))
             recursiveWritePreferences(sx, (PreferenceGroup) pref, prefMap);
 
-        sx.endTag("interface");
+        sx.endTag(ExportedData.XTN_UI_LIST);
     }
 
     public static void preferencesXml(@NonNull PreferenceGroup rootPref, @NonNull SimpleXmlWriter sx) throws IOException {
-        sx.startTag("preferences").attribute("version", "1");
+        sx.startTag(ExportedData.XTN_PREF_LIST).attribute("version", "1");
 
         // we remove the key from the map after it's exported to avoid duplicates
         Map<String, ?> prefMap = new HashMap<>(rootPref.getSharedPreferences().getAll());
 
         recursiveWritePreferences(sx, rootPref, prefMap);
 
-        sx.endTag("preferences");
+        sx.endTag(ExportedData.XTN_PREF_LIST);
 
         for (Map.Entry<String, ?> entry : prefMap.entrySet()) {
             Log.w(TAG, "not saved pref `" + entry.getKey() + "` with value " + entry.getValue());
@@ -228,14 +228,14 @@ public class XmlExport {
     }
 
     public static void widgetsXml(@NonNull Context context, @NonNull SimpleXmlWriter sx) throws IOException {
-        sx.startTag("widgets").attribute("version", "2");
+        sx.startTag(ExportedData.XTN_WIDGET_LIST).attribute("version", "2");
 
         //TBApplication.widgetManager(context).
 
         List<WidgetRecord> widgets = DBHelper.getWidgets(context);
         for (WidgetRecord widget : widgets) {
             AppWidgetProviderInfo appWidgetProviderInfo = WidgetManager.getWidgetProviderInfo(context, widget.appWidgetId);
-            sx.startTag("widget").attribute("id", widget.appWidgetId);
+            sx.startTag(ExportedData.XTN_WIDGET_LIST_ITEM).attribute("id", widget.appWidgetId);
             // we use PlaceholderWidgetRecord because it has the info we need to restore
             PlaceholderWidgetRecord widgetRecord = new PlaceholderWidgetRecord();
             widgetRecord.copyFrom(widget);
@@ -250,10 +250,10 @@ public class XmlExport {
                 widgetRecord.writeProperties(sx, false);
                 sx.endTag("properties");
             }
-            sx.endTag("widget");
+            sx.endTag(ExportedData.XTN_WIDGET_LIST_ITEM);
         }
 
-        sx.endTag("widgets");
+        sx.endTag(ExportedData.XTN_WIDGET_LIST);
     }
 
     public static void historyXml(@NonNull Context context, @NonNull Writer writer) throws IOException {
@@ -269,22 +269,22 @@ public class XmlExport {
     }
 
     public static void historyXml(@NonNull Context context, @NonNull SimpleXmlWriter sx) throws IOException {
-        sx.startTag("history").attribute("version", "1");
+        sx.startTag(ExportedData.XTN_HISTORY_LIST).attribute("version", "1");
 
         List<ValuedHistoryRecord> history = DBHelper.getHistoryRaw(context);
         for (ValuedHistoryRecord historyRecord : history) {
             String query = historyRecord.name;
-            sx.startTag("item").attribute("time", historyRecord.value);
+            sx.startTag(ExportedData.XTN_HISTORY_LIST_ITEM).attribute("time", historyRecord.value);
 
             sx.startTag("id").content(historyRecord.record).endTag("id");
 
             if (query != null)
                 sx.startTag("query").content(historyRecord.name).endTag("query");
 
-            sx.endTag("item");
+            sx.endTag(ExportedData.XTN_HISTORY_LIST_ITEM);
         }
 
-        sx.endTag("history");
+        sx.endTag(ExportedData.XTN_HISTORY_LIST);
     }
 
     public static void backupXml(@NonNull PreferenceGroup rootPref, @NonNull Writer writer) throws IOException {
@@ -328,12 +328,12 @@ public class XmlExport {
         if (value == null) {
             // skip this as we don't have a value
         } else if (value instanceof String)
-            sx.startTag("preference")
+            sx.startTag(ExportedData.XTN_PREF_LIST_ITEM)
                     .attribute("key", key)
                     .attribute("value", (String) value)
-                    .endTag("preference");
+                    .endTag(ExportedData.XTN_PREF_LIST_ITEM);
         else if (value instanceof Integer) {
-            sx.startTag("preference")
+            sx.startTag(ExportedData.XTN_PREF_LIST_ITEM)
                     .attribute("key", key);
             if (key.contains("-color"))
                 sx.attribute("color", String.format("#%06x", ((Integer) value) & 0xffffff));
@@ -341,12 +341,12 @@ public class XmlExport {
                 sx.attribute("argb", String.format("#%08x", (Integer) value));
             else
                 sx.attribute("int", ((Integer) value).toString());
-            sx.endTag("preference");
+            sx.endTag(ExportedData.XTN_PREF_LIST_ITEM);
         } else if (value instanceof Boolean)
-            sx.startTag("preference")
+            sx.startTag(ExportedData.XTN_PREF_LIST_ITEM)
                     .attribute("key", key)
                     .attribute("bool", ((Boolean) value).toString())
-                    .endTag("preference");
+                    .endTag(ExportedData.XTN_PREF_LIST_ITEM);
         else if (value instanceof Set) {
             Set<?> set = (Set<?>) value;
             // find contained object type
@@ -359,7 +359,7 @@ public class XmlExport {
                         type = "string";
                 }
             }
-            sx.startTag("preference")
+            sx.startTag(ExportedData.XTN_PREF_LIST_ITEM)
                     .attribute("key", key)
                     .attribute("set", type);
             for (Object item : set) {
@@ -367,7 +367,7 @@ public class XmlExport {
                         .content(item.toString())
                         .endTag("item");
             }
-            sx.endTag("preference");
+            sx.endTag(ExportedData.XTN_PREF_LIST_ITEM);
         } else {
             Log.d(TAG, "skipped pref `" + key + "` with value " + value);
         }

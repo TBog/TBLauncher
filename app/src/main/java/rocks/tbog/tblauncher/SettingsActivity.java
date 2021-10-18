@@ -50,6 +50,7 @@ import java.util.Arrays;
 import java.util.List;
 
 import rocks.tbog.tblauncher.dataprovider.FavProvider;
+import rocks.tbog.tblauncher.db.ExportedData;
 import rocks.tbog.tblauncher.db.XmlImport;
 import rocks.tbog.tblauncher.drawable.SizeWrappedDrawable;
 import rocks.tbog.tblauncher.entry.ActionEntry;
@@ -240,16 +241,16 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 Toast.makeText(this, "Failed!", Toast.LENGTH_SHORT).show();
             }
         } else if (resultCode == RESULT_OK) {
-            XmlImport.SettingsData.Method method = null;
+            ExportedData.Method method = null;
             switch (requestCode) {
                 case FILE_SELECT_XML_APPEND:
-                    method = XmlImport.SettingsData.Method.APPEND;
+                    method = ExportedData.Method.APPEND;
                     break;
                 case FILE_SELECT_XML_OVERWRITE:
-                    method = XmlImport.SettingsData.Method.OVERWRITE;
+                    method = ExportedData.Method.OVERWRITE;
                     break;
                 case FILE_SELECT_XML_SET:
-                    method = XmlImport.SettingsData.Method.SET;
+                    method = ExportedData.Method.SET;
                     break;
             }
             if (method != null) {
@@ -264,7 +265,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         args.putString(PleaseWaitDialog.ARG_DESCRIPTION, getString(R.string.import_dialog_description));
                         dialog.setArguments(args);
                     }
-                    final XmlImport.SettingsData.Method importMethod = method;
+                    final ExportedData.Method importMethod = method;
                     dialog.setWork(() -> {
                         Activity activity = Utilities.getActivity(dialog.getContext());
                         if (activity != null) {
