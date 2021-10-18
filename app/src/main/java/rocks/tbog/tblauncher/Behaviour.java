@@ -1080,7 +1080,7 @@ public class Behaviour implements ISearchActivity {
                 app.iconsHandler().changeIcon(appEntry, drawable);
             // force a result refresh to update the icon in the view
             refreshSearchRecord(appEntry);
-            app.quickList().onFavoritesChanged();
+            app.quickList().reload();
         });
         dialog.show(mTBLauncherActivity.getSupportFragmentManager(), DIALOG_CUSTOM_ICON);
     }
@@ -1117,7 +1117,7 @@ public class Behaviour implements ISearchActivity {
             }
             // force a result refresh to update the icon in the view
             refreshSearchRecord(shortcutEntry);
-            TBApplication.quickList(mTBLauncherActivity).onFavoritesChanged();
+            TBApplication.quickList(mTBLauncherActivity).reload();
         });
         dialog.show(mTBLauncherActivity.getSupportFragmentManager(), DIALOG_CUSTOM_ICON);
     }
@@ -1149,7 +1149,7 @@ public class Behaviour implements ISearchActivity {
                 app.iconsHandler().changeIcon(staticEntry, drawable);
             // force a result refresh to update the icon in the view
             refreshSearchRecord(staticEntry);
-            TBApplication.quickList(mTBLauncherActivity).onFavoritesChanged();
+            TBApplication.quickList(mTBLauncherActivity).reload();
         });
         dialog.show(mTBLauncherActivity.getSupportFragmentManager(), DIALOG_CUSTOM_ICON);
     }

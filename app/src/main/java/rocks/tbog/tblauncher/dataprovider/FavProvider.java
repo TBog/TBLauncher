@@ -54,7 +54,7 @@ public class FavProvider extends DBProvider<EntryItem> {
             super.onPostExecute(entryItems);
             DBProvider<EntryItem> provider = weakProvider.get();
             if (provider != null)
-                TBApplication.quickList(provider.context).onFavoritesChanged();
+                TBApplication.quickList(provider.context).reload();
         }
     }
 }

@@ -87,7 +87,7 @@ public class QuickList {
         mListDirty = true;
     }
 
-    public void onFavoritesChanged() {
+    public void reload() {
         mListDirty = true;
         if (mQuickList == null)
             return;

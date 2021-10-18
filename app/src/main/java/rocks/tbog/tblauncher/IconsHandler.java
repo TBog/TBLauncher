@@ -154,7 +154,7 @@ public class IconsHandler {
                     mLoadIconsPackTask = null;
                     TBApplication app = TBApplication.getApplication(ctx);
                     app.behaviour().refreshSearchRecords();
-                    app.quickList().onFavoritesChanged();
+                    app.quickList().reload();
                 }
             });
         }

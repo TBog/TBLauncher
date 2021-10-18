@@ -82,7 +82,7 @@ public class ConfirmDialog extends BasePreferenceDialog {
                 PreferenceManager.setDefaultValues(context, R.xml.preferences, true);
                 TBApplication.drawableCache(context).clearCache();
                 TBApplication.behaviour(context).refreshSearchRecords();
-                TBApplication.quickList(context).onFavoritesChanged();
+                TBApplication.quickList(context).reload();
                 break;
             }
             case "reset-preferences":

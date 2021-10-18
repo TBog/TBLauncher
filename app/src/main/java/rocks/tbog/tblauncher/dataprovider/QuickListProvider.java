@@ -102,7 +102,7 @@ public class QuickListProvider extends DBProvider<EntryItem> {
         }
         setLoaded();
         Log.d(TAG, "setRecords loaded " + favRecords.size() + " record(s)");
-        TBApplication.quickList(context).onFavoritesChanged();
+        TBApplication.quickList(context).reload();
     }
 
     @Override
@@ -189,7 +189,7 @@ public class QuickListProvider extends DBProvider<EntryItem> {
             super.onPostExecute(entryItems);
             DBProvider<EntryItem> provider = weakProvider.get();
             if (provider != null) {
-                TBApplication.quickList(provider.context).onFavoritesChanged();
+                TBApplication.quickList(provider.context).reload();
             }
         }
     }

@@ -91,7 +91,7 @@ public class TagsProvider extends DBProvider<TagEntry> {
             super.onPostExecute(entryItems);
             DBProvider<TagEntry> provider = weakProvider.get();
             if (provider != null)
-                TBApplication.quickList(provider.context).onFavoritesChanged();
+                TBApplication.quickList(provider.context).reload();
         }
     }
 }
