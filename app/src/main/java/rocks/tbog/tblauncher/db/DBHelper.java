@@ -864,14 +864,12 @@ public class DBHelper {
             statement.bindString(2, entryId);
             int count = statement.executeUpdateDelete();
             if (count != 1) {
-                Log.e(TAG, "Reset icon; count = " + count);
+                Log.e(TAG, "Reset `" + entryId + "` icon; count = " + count);
             }
             statement.close();
         } catch (Exception e) {
-            Log.e(TAG, "Insert or Update custom app name", e);
+            Log.e(TAG, "Reset custom entry `" + entryId + "` icon", e);
         }
-
-        //return getFavRecord(db, entryId);
     }
 
     public static void removeCustomStaticEntryName(Context context, String entryId) {
@@ -879,18 +877,16 @@ public class DBHelper {
         String sql = "UPDATE favorites SET custom_flags=custom_flags&~?, name=NULL WHERE record=?";
         try {
             SQLiteStatement statement = db.compileStatement(sql);
-            statement.bindLong(1, FavRecord.FLAG_CUSTOM_ICON);
+            statement.bindLong(1, FavRecord.FLAG_CUSTOM_NAME);
             statement.bindString(2, entryId);
             int count = statement.executeUpdateDelete();
             if (count != 1) {
-                Log.e(TAG, "Reset icon; count = " + count);
+                Log.e(TAG, "Reset `" + entryId + "` name; count = " + count);
             }
             statement.close();
         } catch (Exception e) {
-            Log.e(TAG, "Insert or Update custom app name", e);
+            Log.e(TAG, "Reset custom entry `" + entryId + "` name", e);
         }
-
-        //return getFavRecord(db, entryId);
     }
 
     @Nullable

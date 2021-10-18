@@ -91,6 +91,7 @@
     <string name="title_shortcut_rename">Choose a custom name for this shortcut</string>
     <string name="app_rename_confirmation">The app name is now %s</string>
     <string name="shortcut_rename_confirmation">The shortcut name is now \"%s\"</string>
+    <string name="entry_rename_confirmation">The name is now \"%s\"</string>
     <string name="hint_custom_icon">Filter by name</string>
     <string name="default_icon">default icon</string>
     <string name="default_static_icon">%s default icon</string>

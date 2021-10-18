@@ -103,11 +103,11 @@ public abstract class StaticEntry extends EntryItem {
                     Context ctx = dialog.getContext();
                     TBApplication app = TBApplication.getApplication(ctx);
                     DataHandler dataHandler = app.getDataHandler();
+                    // restore default name
                     dataHandler.renameStaticEntry(id, null);
 
                     String name = null;
 
-                    //TODO: get the original name by recreating the StaticProvider
                     {
                         ActionProvider actionProvider = dataHandler.getActionProvider();
                         if (actionProvider != null && actionProvider.mayFindById(id))
@@ -118,12 +118,13 @@ public abstract class StaticEntry extends EntryItem {
                         if (filterProvider != null && filterProvider.mayFindById(id))
                             name = filterProvider.getDefaultName(id);
                     }
+
                     if (name != null) {
                         setName(name);
                         app.behaviour().refreshSearchRecord(StaticEntry.this);
 
                         // Show toast message
-                        String msg = ctx.getString(R.string.app_rename_confirmation, getName());
+                        String msg = ctx.getString(R.string.entry_rename_confirmation, getName());
                         Toast.makeText(ctx, msg, Toast.LENGTH_SHORT).show();
                     } else {
                         // can't find the default name. Reload providers and hope to get the name
