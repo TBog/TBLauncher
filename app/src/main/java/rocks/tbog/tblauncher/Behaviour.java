@@ -567,7 +567,7 @@ public class Behaviour implements ISearchActivity {
                     mLauncherButton.postDelayed(() ->
                                     TBApplication.dataHandler(getContext()).runAfterLoadOver(() -> {
                                         if (!TBApplication.state().isResultListVisible())
-                                            executeAction(openResult, null);
+                                            executeAction(openResult, "dm-search-open-result");
                                     }),
                             KEYBOARD_ANIMATION_DELAY);
                 }

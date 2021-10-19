@@ -98,7 +98,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             "button-home",
             "dm-empty-back",
             "dm-search-back",
-            "dm-widget-back"
+            "dm-widget-back",
+            "dm-search-open-result"
     ));
 
     private static final int FILE_SELECT_XML_SET = 63;

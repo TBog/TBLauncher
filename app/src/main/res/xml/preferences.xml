@@ -744,6 +744,10 @@
                     android:entryValues="@array/resultValues"
                     android:key="dm-search-open-result"
                     android:title="@string/dm_search_open_result" />
+                <ListPreference
+                        android:key="dm-search-open-result-entry-to-show"
+                        android:title="@string/action_entry_to_show"
+                        app:isPreferenceVisible="false" />
 
             </PreferenceScreen>
 

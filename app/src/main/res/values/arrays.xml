@@ -141,6 +141,7 @@
         <item>@string/action_show_history_frequency</item>
         <item>@string/action_show_history_frecency</item>
         <item>@string/action_show_history_adaptive</item>
+        <item>Show tag…</item>
     </string-array>
     <array name="resultValues" translatable="false">
         <item>none</item>
@@ -154,6 +155,7 @@
         <item>showHistoryByFrequency</item>
         <item>showHistoryByFrecency</item>
         <item>showHistoryByAdaptive</item>
+        <item>showEntry</item>
     </array>
 
     <string-array name="desktopEntries">
