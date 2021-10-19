@@ -637,6 +637,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 String key = preference.getKey();
                 if ("adaptive-shape".equals(key)) {
                     dialogFragment = IconListPreferenceDialog.newInstance(key);
+                } else if ("icons-pack".equals(key)) {
+                    dialogFragment = IconListPreferenceDialog.newInstance(key);
                 } else {
                     dialogFragment = BaseListPreferenceDialog.newInstance(key);
                 }

@@ -14,7 +14,9 @@ import android.os.Bundle;
 import android.util.StateSet;
 import android.util.TypedValue;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.CheckedTextView;
+import android.widget.ListAdapter;
 import android.widget.TextView;
 
 import androidx.annotation.LayoutRes;
@@ -29,6 +31,7 @@ import java.util.List;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.drawable.DrawableUtils;
 import rocks.tbog.tblauncher.utils.KeyboardDialogBuilder;
+import rocks.tbog.tblauncher.utils.Utilities;
 import rocks.tbog.tblauncher.utils.ViewHolderAdapter;
 import rocks.tbog.tblauncher.utils.ViewHolderListAdapter;
 
@@ -86,8 +89,21 @@ public class IconListPreferenceDialog extends PreferenceDialogFragmentCompat {
             list.add(new IconEntry(mEntries[i], mEntryValues[i]));
         }
 
+        final ListAdapter listAdapter;
+        {
+            final Bundle args = getArguments();
+            String key = args != null ? args.getString(ARG_KEY) : null;
+            final int listItemLayout = getItemLayout(builder.getContext());
+            if ("adaptive-shape".equals(key))
+                listAdapter = new IconAdapter(ShapeViewHolder.class, listItemLayout, list);
+            else if ("icons-pack".equals(key))
+                listAdapter = new IconAdapter(PackViewHolder.class, listItemLayout, list);
+            else
+                listAdapter = new ArrayAdapter<>(getContext(), listItemLayout, list);
+        }
+
         builder.setSingleChoiceItems(
-                new IconAdapter(getItemLayout(builder.getContext()), list),
+                listAdapter,
                 mClickedDialogEntryIndex,
                 (dialog, which) -> {
                     mClickedDialogEntryIndex = which;
@@ -149,13 +165,13 @@ public class IconListPreferenceDialog extends PreferenceDialogFragmentCompat {
         }
     }
 
-    private static class IconAdapter extends ViewHolderListAdapter<IconEntry, EntryViewHolder> {
-        protected IconAdapter(int listItemLayout, @NonNull List<IconEntry> list) {
-            super(EntryViewHolder.class, listItemLayout, list);
+    private static class IconAdapter extends ViewHolderListAdapter<IconEntry, ViewHolderAdapter.ViewHolder<IconEntry>> {
+        protected IconAdapter(@NonNull Class<? extends ViewHolder<IconEntry>> viewHolderClass, int listItemLayout, @NonNull List<IconEntry> list) {
+            super(viewHolderClass, listItemLayout, list);
         }
     }
 
-    public static class EntryViewHolder extends ViewHolderAdapter.ViewHolder<IconEntry> {
+    public static class ShapeViewHolder extends ViewHolderAdapter.ViewHolder<IconEntry> {
         private final static int[] STATE_CHECKED = new int[]{android.R.attr.state_checked};
 
         final TextView textView;
@@ -163,7 +179,7 @@ public class IconListPreferenceDialog extends PreferenceDialogFragmentCompat {
         int checkedColor = 0;
         int size;
 
-        public EntryViewHolder(View view) {
+        public ShapeViewHolder(View view) {
             super(view);
             textView = view.findViewById(android.R.id.text1);
 
@@ -203,34 +219,79 @@ public class IconListPreferenceDialog extends PreferenceDialogFragmentCompat {
 
         @Override
         protected void setContent(IconEntry content, int position, @NonNull ViewHolderAdapter<IconEntry, ? extends ViewHolderAdapter.ViewHolder<IconEntry>> adapter) {
-            Context context = textView.getContext();
+            // set icon async
+            Utilities.setViewAsync(textView,
+                    context -> {
+                        Drawable drawable = new ColorDrawable(defaultColor);
+                        for (int shape : DrawableUtils.SHAPE_LIST) {
+                            if (Integer.toString(shape).equals(content.value.toString())) {
+                                Drawable shapedDrawable;
+                                if (shape == DrawableUtils.SHAPE_NONE) {
+                                    shapedDrawable = new ColorDrawable(Color.TRANSPARENT);
+                                } else {
+                                    StateListDrawable listDrawable = new StateListDrawable();
+                                    Drawable checkedDrawable = new ColorDrawable(checkedColor);
+                                    listDrawable.addState(STATE_CHECKED, DrawableUtils.applyIconMaskShape(context, checkedDrawable, shape));
+                                    listDrawable.addState(StateSet.WILD_CARD, DrawableUtils.applyIconMaskShape(context, drawable, shape));
 
-            Drawable drawable = new ColorDrawable(defaultColor);
-            for (int shape : DrawableUtils.SHAPE_LIST) {
-                if (Integer.toString(shape).equals(content.value.toString())) {
-                    Drawable shapedDrawable;
-                    if (shape == DrawableUtils.SHAPE_NONE) {
-                        shapedDrawable = new ColorDrawable(Color.TRANSPARENT);
-                    } else {
-                        StateListDrawable listDrawable = new StateListDrawable();
-                        Drawable checkedDrawable = new ColorDrawable(checkedColor);
-                        listDrawable.addState(STATE_CHECKED, DrawableUtils.applyIconMaskShape(context, checkedDrawable, shape));
-                        listDrawable.addState(StateSet.WILD_CARD, DrawableUtils.applyIconMaskShape(context, drawable, shape));
+                                    shapedDrawable = listDrawable;
+                                }
+                                drawable = shapedDrawable;
+                                break;
+                            }
+                        }
+                        return drawable;
+                    }, (view, drawable) -> {
+                        if (!(view instanceof TextView))
+                            return;
+                        TextView textView = (TextView) view;
 
-                        shapedDrawable = listDrawable;
-                    }
-                    drawable = shapedDrawable;
-                    break;
-                }
-            }
+                        // compound drawables need a size
+                        drawable.setBounds(0, 0, size, size);
 
-            // compound drawables need a size
-            drawable.setBounds(0, 0, size, size);
+                        // get relative because that's where the checkmark can be
+                        Drawable[] cd = textView.getCompoundDrawablesRelative();
+                        // set compound drawable
+                        textView.setCompoundDrawablesRelative(cd[0], cd[1], drawable, cd[3]);
+                    });
 
-            // get relative because that's where the checkmark can be
-            Drawable[] cd = textView.getCompoundDrawablesRelative();
-            // set compound drawable
-            textView.setCompoundDrawablesRelative(cd[0], cd[1], drawable, cd[3]);
+            // set text
+            textView.setText(content.name);
+        }
+    }
+
+    public static class PackViewHolder extends ViewHolderAdapter.ViewHolder<IconEntry> {
+        final TextView textView;
+        int size;
+
+        public PackViewHolder(View view) {
+            super(view);
+            textView = view.findViewById(android.R.id.text1);
+            final Context context = view.getContext();
+            size = context.getResources().getDimensionPixelSize(R.dimen.color_preview_size);
+        }
+
+        @Override
+        protected void setContent(IconEntry content, int position, @NonNull ViewHolderAdapter<IconEntry, ? extends ViewHolderAdapter.ViewHolder<IconEntry>> adapter) {
+            // set icon async
+            Utilities.setViewAsync(textView,
+                    ctx -> {
+                        try {
+                            return ctx.getPackageManager().getApplicationIcon(content.value.toString());
+                        } catch (Exception ignored) {
+                        }
+                        return new ColorDrawable(Color.TRANSPARENT);
+                    },
+                    (view, drawable) -> {
+                        if (!(view instanceof TextView))
+                            return;
+                        drawable.setBounds(0, 0, size, size);
+                        TextView textView = (TextView) view;
+                        // get relative because that's where the checkmark can be
+                        Drawable[] cd = textView.getCompoundDrawablesRelative();
+                        // set compound drawable
+                        textView.setCompoundDrawablesRelative(cd[0], cd[1], drawable, cd[3]);
+                    });
 
             // set text
             textView.setText(content.name);
