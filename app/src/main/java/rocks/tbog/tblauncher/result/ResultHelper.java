@@ -94,6 +94,8 @@ public class ResultHelper {
      * @param context android context
      */
     public static void recordLaunch(@NonNull EntryItem pojo, @NonNull Context context) {
+        if (pojo instanceof StaticEntry)
+            return;
         // Save in history
         TBApplication.getApplication(context).getDataHandler().addToHistory(pojo.getHistoryId());
     }
