@@ -2,13 +2,20 @@ package rocks.tbog.tblauncher.preference;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.graphics.drawable.Drawable;
+import android.text.SpannableString;
+import android.text.Spanned;
+import android.text.style.ImageSpan;
 import android.util.Log;
+import android.util.Pair;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
+import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.preference.MultiSelectListPreference;
 import androidx.preference.Preference;
+import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,7 +29,13 @@ import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.SettingsActivity;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.TagsHandler;
+import rocks.tbog.tblauncher.entry.ActionEntry;
+import rocks.tbog.tblauncher.entry.FilterEntry;
+import rocks.tbog.tblauncher.entry.StaticEntry;
+import rocks.tbog.tblauncher.entry.TagEntry;
 import rocks.tbog.tblauncher.utils.PrefOrderedListHelper;
+import rocks.tbog.tblauncher.utils.UIColors;
+import rocks.tbog.tblauncher.utils.UISizes;
 
 public class ContentLoadHelper {
     public static final CategoryItem[] RESULT_POPUP_CATEGORIES = {
@@ -113,6 +126,51 @@ public class ContentLoadHelper {
         return new OrderedMultiSelectListData(entries, entryValues, defaultValues, orderedValues);
     }
 
+    public static Pair<CharSequence[], CharSequence[]> generateStaticEntryList(@NonNull Context context, @NonNull List<StaticEntry> entryToShowList) {
+        final int size = entryToShowList.size();
+        final CharSequence[] entries = new CharSequence[size];
+        final CharSequence[] entryValues = new CharSequence[size];
+        boolean iconTagLoaded = false;
+        VectorDrawableCompat iconTag = null;
+        int iconSize = UISizes.getTextAppearanceTextSize(context, android.R.attr.textAppearanceMedium);
+        int tintColor = UIColors.getThemeColor(context, R.attr.colorAccent);
+
+        for (int idx = 0; idx < size; idx++) {
+            StaticEntry entry = entryToShowList.get(idx);
+            if (entry instanceof TagEntry) {
+                if (!iconTagLoaded) {
+                    iconTagLoaded = true;
+                    iconTag = VectorDrawableCompat.create(context.getResources(), R.drawable.ic_tags, null);
+                    if (iconTag != null) {
+                        iconTag.setTint(tintColor);
+                        iconTag.setBounds(0, 0, iconSize, iconSize);
+                    }
+                }
+                if (iconTag == null) {
+                    entries[idx] = entry.getName();
+                } else {
+                    SpannableString name = new SpannableString("# " + entry.getName());
+                    name.setSpan(new ImageSpan(iconTag), 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+                    entries[idx] = name;
+                }
+            } else if (entry instanceof ActionEntry || entry instanceof FilterEntry) {
+                Drawable iconAction = entry.getDefaultDrawable(context);
+                DrawableCompat.setTint(iconAction, tintColor);
+                iconAction.setBounds(0, 0, iconSize, iconSize);
+
+                SpannableString name = new SpannableString("# " + entry.getName());
+                name.setSpan(new ImageSpan(iconAction), 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+
+                entries[idx] = name;
+            } else {
+                entries[idx] = entry.getName();
+            }
+            entryValues[idx] = entry.id;
+        }
+        return new Pair<>(entries, entryValues);
+    }
+
     public static class CategoryItem {
         /**
          * String resource used when inflating the popup menu.
@@ -138,6 +196,7 @@ public class ContentLoadHelper {
 
         /**
          * Using context generate the string for the preference menu
+         *
          * @param context so we can get the string from the resource id
          */
         public void updateText(@NonNull Context context) {

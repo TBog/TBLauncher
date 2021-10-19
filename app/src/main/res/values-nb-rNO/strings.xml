@@ -318,7 +318,7 @@
     <string name="stub_app_tag">programetikettliste</string>
     <string name="action_app_to_run">Program å kjøre</string>
     <string name="quick_list_animation">Animer skjul/vis</string>
-    <string name="no_favorites">Ingen favoritter satt</string>
+    <string name="no_tags">Ingen tagger funnet</string>
     <string name="action_entry_to_show">Favoritt å vise</string>
     <string name="back_device_key">Tilbake-knapp</string>
     <string name="search_bar_cursor_argb">Pekerfarge</string>

@@ -392,7 +392,7 @@
     <string name="dm_search_open_result">Initial result list</string>
     <string name="action_app_to_run">App to run</string>
     <string name="action_entry_to_show">Tags to show</string>
-    <string name="no_favorites">No favorites set</string>
+    <string name="no_tags">No tags found</string>
     <string name="quick_list_animation">Animate show/hide</string>
     <string name="initial_desktop">Initial desktop</string>
     <string name="behaviour_summary">Gestures and behaviour</string>

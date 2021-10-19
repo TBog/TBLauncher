@@ -14,7 +14,6 @@ import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
-import android.text.style.ImageSpan;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Menu;
@@ -42,7 +41,6 @@ import androidx.preference.PreferenceGroup;
 import androidx.preference.PreferenceManager;
 import androidx.preference.PreferenceScreen;
 import androidx.preference.SwitchPreference;
-import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -54,10 +52,7 @@ import rocks.tbog.tblauncher.dataprovider.TagsProvider;
 import rocks.tbog.tblauncher.db.ExportedData;
 import rocks.tbog.tblauncher.db.XmlImport;
 import rocks.tbog.tblauncher.drawable.SizeWrappedDrawable;
-import rocks.tbog.tblauncher.entry.ActionEntry;
 import rocks.tbog.tblauncher.entry.AppEntry;
-import rocks.tbog.tblauncher.entry.EntryItem;
-import rocks.tbog.tblauncher.entry.FilterEntry;
 import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.entry.TagEntry;
 import rocks.tbog.tblauncher.preference.BaseListPreferenceDialog;
@@ -669,7 +664,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
         private static Pair<CharSequence[], CharSequence[]> generateAppToRunListContent(@NonNull Context context) {
             List<AppEntry> appEntryList = TBApplication.dataHandler(context).getApplications();
-            final int appCount = appEntryList.size();
+            final int appCount = appEntryList != null ? appEntryList.size() : 0;
             CharSequence[] entries = new CharSequence[appCount];
             CharSequence[] entryValues = new CharSequence[appCount];
             for (int idx = 0; idx < appCount; idx++) {
@@ -681,12 +676,10 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         }
 
         private static Pair<CharSequence[], CharSequence[]> generateEntryToShowListContent(@NonNull Context context) {
-//            ModProvider modProvider = TBApplication.dataHandler(context).getModProvider();
-//            List<EntryItem> modList = modProvider != null ? modProvider.getPojos() : Collections.emptyList();
-            List<EntryItem> tagList;
+            final List<StaticEntry> tagList;
 
-            TBApplication app = TBApplication.getApplication(context);
-            TagsProvider tagsProvider = app.getDataHandler().getTagsProvider();
+            final TBApplication app = TBApplication.getApplication(context);
+            final TagsProvider tagsProvider = app.getDataHandler().getTagsProvider();
             if (tagsProvider != null) {
                 ArrayList<String> tagNames = new ArrayList<>(app.tagsHandler().getValidTags());
                 Collections.sort(tagNames);
@@ -702,48 +695,10 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             final CharSequence[] entries;
             final CharSequence[] entryValues;
             if (tagList.isEmpty()) {
-                entries = new CharSequence[]{context.getString(R.string.no_favorites)};
+                entries = new CharSequence[]{context.getString(R.string.no_tags)};
                 entryValues = new CharSequence[]{""};
             } else {
-                int iconSize = UISizes.getTextAppearanceTextSize(context, android.R.attr.textAppearanceMedium);
-                int tintColor = UIColors.getThemeColor(context, R.attr.colorAccent);
-                VectorDrawableCompat iconTag = VectorDrawableCompat.create(context.getResources(), R.drawable.ic_tags, null);
-                if (iconTag != null) {
-                    iconTag.setTint(tintColor);
-                    iconTag.setBounds(0, 0, iconSize, iconSize);
-                }
-                ArrayList<StaticEntry> entryToShowList = new ArrayList<>(tagList.size());
-                for (EntryItem entryItem : tagList)
-                    if (entryItem instanceof StaticEntry)
-                        entryToShowList.add((StaticEntry) entryItem);
-                final int size = entryToShowList.size();
-                entries = new CharSequence[size];
-                entryValues = new CharSequence[size];
-                for (int idx = 0; idx < size; idx++) {
-                    StaticEntry entry = entryToShowList.get(idx);
-                    if (entry instanceof TagEntry) {
-                        if (iconTag == null) {
-                            entries[idx] = entry.getName();
-                        } else {
-                            SpannableString name = new SpannableString("# " + entry.getName());
-                            name.setSpan(new ImageSpan(iconTag), 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-                            entries[idx] = name;
-                        }
-                    } else if (entry instanceof ActionEntry || entry instanceof FilterEntry) {
-                        Drawable iconAction = entry.getDefaultDrawable(context);
-                        DrawableCompat.setTint(iconAction, tintColor);
-                        iconAction.setBounds(0, 0, iconSize, iconSize);
-
-                        SpannableString name = new SpannableString("# " + entry.getName());
-                        name.setSpan(new ImageSpan(iconAction), 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-                        entries[idx] = name;
-                    } else {
-                        entries[idx] = entry.getName();
-                    }
-                    entryValues[idx] = entry.id;
-                }
+                return ContentLoadHelper.generateStaticEntryList(context, tagList);
             }
             return new Pair<>(entries, entryValues);
         }
