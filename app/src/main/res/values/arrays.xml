@@ -95,7 +95,6 @@
         <item>@string/action_show_contacts_reversed</item>
         <item>@string/action_show_shortcuts</item>
         <item>@string/action_show_shortcuts_reversed</item>
-        <item>@string/action_show_favorites</item>
         <item>@string/action_show_history_recency</item>
         <item>@string/action_show_history_frequency</item>
         <item>@string/action_show_history_frecency</item>
@@ -121,7 +120,6 @@
         <item>showContactsZA</item>
         <item>showShortcutsAZ</item>
         <item>showShortcutsZA</item>
-        <item>showFavorites</item>
         <item>showHistoryByRecency</item>
         <item>showHistoryByFrequency</item>
         <item>showHistoryByFrecency</item>
@@ -139,7 +137,6 @@
         <item>@string/action_show_contacts_reversed</item>
         <item>@string/action_show_shortcuts</item>
         <item>@string/action_show_shortcuts_reversed</item>
-        <item>@string/action_show_favorites</item>
         <item>@string/action_show_history_recency</item>
         <item>@string/action_show_history_frequency</item>
         <item>@string/action_show_history_frecency</item>
@@ -153,7 +150,6 @@
         <item>showContactsZA</item>
         <item>showShortcutsAZ</item>
         <item>showShortcutsZA</item>
-        <item>showFavorites</item>
         <item>showHistoryByRecency</item>
         <item>showHistoryByFrequency</item>
         <item>showHistoryByFrecency</item>
