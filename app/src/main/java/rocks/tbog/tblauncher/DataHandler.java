@@ -1240,23 +1240,20 @@ public class DataHandler extends BroadcastReceiver
             pos += 11;
         }
 
-        TagsProvider tagsProvider = getTagsProvider();
-
+        // keep only entries that have mods and remove from quick list flag from oldFav
         for (FavRecord favRecord : oldFav) {
             if (favRecord.isInQuickList()) {
                 favRecord.clearFlags(FavRecord.FLAG_SHOW_IN_QUICK_LIST);
-                DBHelper.setFavorite(context, favRecord);
-            }
-            // keep custom icons
-            if (!favRecord.hasCustomIcon()) {
-                // don't keep tags as favorites
-                if (tagsProvider != null && tagsProvider.mayFindById(favRecord.record)) {
+                if (favRecord.canBeCulled())
                     DBHelper.removeFavorite(context, favRecord.record);
-                }
+                else
+                    DBHelper.setFavorite(context, favRecord);
+            } else if (favRecord.canBeCulled()) {
+                DBHelper.removeFavorite(context, favRecord.record);
             }
         }
 
-        // refresh Favorites provider
+        // refresh relevant providers
         {
             IProvider<?> provider = getFavProvider();
             if (provider != null)

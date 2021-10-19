@@ -27,4 +27,8 @@ public class FavRecord extends FlagsRecord {
     public boolean hasCustomIcon() {
         return (flags & FLAG_CUSTOM_ICON) == FLAG_CUSTOM_ICON;
     }
+
+    public boolean canBeCulled() {
+        return getFlagsDB() == 0;
+    }
 }
