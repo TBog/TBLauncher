@@ -51,13 +51,13 @@ public class ExportedData {
     // HashMap with tag name as key and an ArrayList of records for each
     private final HashMap<String, List<String>> mTags = new HashMap<>();
     private final HashMap<String, Object> mPreferences = new HashMap<>();
-    private final ArrayList<FavRecord> mFavorites = new ArrayList<>();
+    private final ArrayList<ModRecord> mMods = new ArrayList<>();
     private final ArrayList<AppRecord> mApplications = new ArrayList<>();
     private final ArrayList<PlaceholderWidgetRecord> mWidgets = new ArrayList<>();
     private final HashMap<FlagsRecord, byte[]> mIcons = new HashMap<>();
     private final ArrayList<ValuedHistoryRecord> mHistory = new ArrayList<>();
     private boolean bTagListLoaded = false;
-    private boolean bFavListLoaded = false;
+    private boolean bModListLoaded = false;
     private boolean bAppListLoaded = false;
     private boolean bPrefListLoaded = false;
     private boolean bWidgetListLoaded = false;
@@ -123,7 +123,7 @@ public class ExportedData {
     }
 
     public void parseFavorites(XmlPullParser xpp, int eventType) throws IOException, XmlPullParserException {
-        FavRecord currentFav = null;
+        ModRecord currentFav = null;
         boolean bFavListFinished = false;
         String lastTag = null;
         String iconEncoding = null;
@@ -133,7 +133,7 @@ public class ExportedData {
                     int attrCount = xpp.getAttributeCount();
                     switch (xpp.getName()) {
                         case XTN_MOD_LIST_ITEM:
-                            currentFav = new FavRecord();
+                            currentFav = new ModRecord();
                             lastTag = null;
                             break;
                         case XTN_MOD_LIST_ITEM_ID:
@@ -171,7 +171,7 @@ public class ExportedData {
                     switch (xpp.getName()) {
                         case XTN_MOD_LIST_ITEM:
                             if (currentFav != null && currentFav.record != null)
-                                mFavorites.add(currentFav);
+                                mMods.add(currentFav);
                             currentFav = null;
                             // fall-through
                         case XTN_MOD_LIST_ITEM_ID:
@@ -218,7 +218,7 @@ public class ExportedData {
                 break;
             eventType = xpp.next();
         }
-        bFavListLoaded = true;
+        bModListLoaded = true;
     }
 
     public void parseApplications(XmlPullParser xpp, int eventType) throws IOException, XmlPullParserException {
@@ -693,7 +693,7 @@ public class ExportedData {
 
     public void saveToDB(@NonNull Context context, @NonNull Method method) {
         saveTags(context, method);
-        saveFavorites(context, method);
+        saveMods(context, method);
         saveApplications(context, method);
         savePreferences(context, method);
         restoreWidgets(context, method);
@@ -730,21 +730,21 @@ public class ExportedData {
         TBApplication.tagsHandler(context).loadFromDB(true);
     }
 
-    private void saveFavorites(Context context, Method method) {
-        if (!bFavListLoaded)
+    private void saveMods(Context context, Method method) {
+        if (!bModListLoaded)
             return;
-        HashMap<String, Pair<FavRecord, byte[]>> favs = new HashMap<>();
+        HashMap<String, Pair<ModRecord, byte[]>> mods = new HashMap<>();
         if (method == Method.OVERWRITE || method == Method.APPEND) {
-            List<FavRecord> favDB = DBHelper.getFavorites(context);
-            for (FavRecord rec : favDB)
-                favs.put(rec.record, new Pair<>(rec, mIcons.get(rec)));
+            List<ModRecord> modDB = DBHelper.getMods(context);
+            for (ModRecord rec : modDB)
+                mods.put(rec.record, new Pair<>(rec, mIcons.get(rec)));
         }
-        for (FavRecord fav : mFavorites) {
-            if (method == Method.APPEND && favs.containsKey(fav.record))
+        for (ModRecord modRecord : mMods) {
+            if (method == Method.APPEND && mods.containsKey(modRecord.record))
                 continue;
-            favs.put(fav.record, new Pair<>(fav, mIcons.get(fav)));
+            mods.put(modRecord.record, new Pair<>(modRecord, mIcons.get(modRecord)));
         }
-        DBHelper.setFavorites(context, favs.values());
+        DBHelper.setMods(context, mods.values());
     }
 
     private void saveApplications(Context context, Method method) {

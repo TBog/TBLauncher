@@ -27,7 +27,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -44,9 +43,9 @@ import rocks.tbog.tblauncher.dataprovider.AppCacheProvider;
 import rocks.tbog.tblauncher.dataprovider.AppProvider;
 import rocks.tbog.tblauncher.dataprovider.CalculatorProvider;
 import rocks.tbog.tblauncher.dataprovider.ContactsProvider;
-import rocks.tbog.tblauncher.dataprovider.FavProvider;
 import rocks.tbog.tblauncher.dataprovider.FilterProvider;
 import rocks.tbog.tblauncher.dataprovider.IProvider;
+import rocks.tbog.tblauncher.dataprovider.ModProvider;
 import rocks.tbog.tblauncher.dataprovider.Provider;
 import rocks.tbog.tblauncher.dataprovider.QuickListProvider;
 import rocks.tbog.tblauncher.dataprovider.SearchProvider;
@@ -54,7 +53,7 @@ import rocks.tbog.tblauncher.dataprovider.ShortcutsProvider;
 import rocks.tbog.tblauncher.dataprovider.TagsProvider;
 import rocks.tbog.tblauncher.db.AppRecord;
 import rocks.tbog.tblauncher.db.DBHelper;
-import rocks.tbog.tblauncher.db.FavRecord;
+import rocks.tbog.tblauncher.db.ModRecord;
 import rocks.tbog.tblauncher.db.ShortcutRecord;
 import rocks.tbog.tblauncher.db.ValuedHistoryRecord;
 import rocks.tbog.tblauncher.entry.AppEntry;
@@ -64,7 +63,6 @@ import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.searcher.Searcher;
 import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
 import rocks.tbog.tblauncher.utils.Timer;
-import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public class DataHandler extends BroadcastReceiver
@@ -171,8 +169,8 @@ public class DataHandler extends BroadcastReceiver
         // Favorites
         {
             ProviderEntry providerEntry = new ProviderEntry();
-            providerEntry.provider = new FavProvider(context);
-            providers.put("favorites", providerEntry);
+            providerEntry.provider = new ModProvider(context);
+            providers.put("mods", providerEntry);
         }
 
         // QuickList
@@ -654,8 +652,8 @@ public class DataHandler extends BroadcastReceiver
         if (context == null)
             return;
 
-        // Also remove shortcut from favorites
-        removeFromFavorites(shortcut);
+        // Also remove shortcut from mods
+        removeFromMods(shortcut);
         DBHelper.removeShortcut(context, shortcut);
 
         if (shortcut.mShortcutInfo != null) {
@@ -676,13 +674,13 @@ public class DataHandler extends BroadcastReceiver
             return;
         }
 
-        // Remove all shortcuts from favorites for given package name
+        // Remove all shortcuts from mods for given package name
         List<ShortcutRecord> shortcutsList = DBHelper.getShortcutsNoIcons(context, packageName);
         for (ShortcutRecord shortcut : shortcutsList) {
             String id = ShortcutEntry.generateShortcutId(shortcut);
             EntryItem entry = getPojo(id);
             if (entry != null)
-                removeFromFavorites(entry);
+                removeFromMods(entry);
         }
 
         DBHelper.removeShortcuts(context, packageName);
@@ -692,36 +690,34 @@ public class DataHandler extends BroadcastReceiver
         }
     }
 
-    @NonNull
-    public Set<String> getExcludedFromHistory(@NonNull SharedPreferences prefs) {
-        Set<String> excluded = prefs.getStringSet("excluded-apps-from-history", null);
-        if (excluded == null) {
-            excluded = new HashSet<>();
-            final Context context = this.getContext();
-            if (context != null)
-                excluded.add(context.getPackageName());
-        }
-        return excluded;
-    }
+//    @NonNull
+//    public Set<String> getExcludedFromHistory(@NonNull SharedPreferences prefs) {
+//        Set<String> excluded = prefs.getStringSet("excluded-apps-from-history", null);
+//        if (excluded == null) {
+//            excluded = new HashSet<>();
+//            final Context context = this.getContext();
+//            if (context != null)
+//                excluded.add(context.getPackageName());
+//        }
+//        return excluded;
+//    }
 
-    @NonNull
-    public Set<String> getExcluded(@NonNull SharedPreferences prefs) {
-        Set<String> excluded = prefs.getStringSet("excluded-apps", null);
-        if (excluded == null) {
-            excluded = new HashSet<>();
-            final Context context = this.getContext();
-            if (context != null)
-                excluded.add(context.getPackageName());
-        }
-        return excluded;
-    }
+//    @NonNull
+//    public Set<String> getExcluded(@NonNull SharedPreferences prefs) {
+//        Set<String> excluded = prefs.getStringSet("excluded-apps", null);
+//        if (excluded == null) {
+//            excluded = new HashSet<>();
+//            final Context context = this.getContext();
+//            if (context != null)
+//                excluded.add(context.getPackageName());
+//        }
+//        return excluded;
+//    }
 
     public boolean addToHidden(AppEntry entry) {
         final Context context = this.getContext();
         if (context == null)
             return false;
-        // if it's hidden it shouldn't be a favorite, right?
-        removeFromFavorites(entry);
         return DBHelper.setAppHidden(context, entry.getUserComponentName());
     }
 
@@ -732,43 +728,43 @@ public class DataHandler extends BroadcastReceiver
         return DBHelper.removeAppHidden(context, entry.getUserComponentName());
     }
 
-    public void removeFromExcluded(String packageName) {
-        final Context context = this.getContext();
-        if (context == null)
-            return;
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        Set<String> excluded = getExcluded(prefs);
-        Set<String> newExcluded = new HashSet<>();
-        for (String excludedItem : excluded) {
-            if (!excludedItem.contains(packageName + "/")) {
-                newExcluded.add(excludedItem);
-            }
-        }
-
-        prefs.edit().putStringSet("excluded-apps", newExcluded).apply();
-    }
-
-    public void removeFromExcluded(UserHandleCompat user) {
-        // This is only intended for apps from foreign-profiles
-        if (user.isCurrentUser()) {
-            return;
-        }
-
-        final Context context = this.getContext();
-        if (context == null)
-            return;
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-
-        Set<String> excluded = getExcluded(prefs);
-        Set<String> newExcluded = new HashSet<>();
-        for (String excludedItem : excluded) {
-            if (!user.hasStringUserSuffix(excludedItem, '#')) {
-                newExcluded.add(excludedItem);
-            }
-        }
-
-        prefs.edit().putStringSet("excluded-apps", newExcluded).apply();
-    }
+//    public void removeFromExcluded(String packageName) {
+//        final Context context = this.getContext();
+//        if (context == null)
+//            return;
+//        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+//        Set<String> excluded = getExcluded(prefs);
+//        Set<String> newExcluded = new HashSet<>();
+//        for (String excludedItem : excluded) {
+//            if (!excludedItem.contains(packageName + "/")) {
+//                newExcluded.add(excludedItem);
+//            }
+//        }
+//
+//        prefs.edit().putStringSet("excluded-apps", newExcluded).apply();
+//    }
+//
+//    public void removeFromExcluded(UserHandleCompat user) {
+//        // This is only intended for apps from foreign-profiles
+//        if (user.isCurrentUser()) {
+//            return;
+//        }
+//
+//        final Context context = this.getContext();
+//        if (context == null)
+//            return;
+//        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+//
+//        Set<String> excluded = getExcluded(prefs);
+//        Set<String> newExcluded = new HashSet<>();
+//        for (String excludedItem : excluded) {
+//            if (!user.hasStringUserSuffix(excludedItem, '#')) {
+//                newExcluded.add(excludedItem);
+//            }
+//        }
+//
+//        prefs.edit().putStringSet("excluded-apps", newExcluded).apply();
+//    }
 
     /**
      * Return all applications (including excluded)
@@ -811,9 +807,9 @@ public class DataHandler extends BroadcastReceiver
     }
 
     @Nullable
-    public FavProvider getFavProvider() {
-        ProviderEntry entry = this.providers.get("favorites");
-        return (entry != null) ? ((FavProvider) entry.provider) : null;
+    public ModProvider getModProvider() {
+        ProviderEntry entry = this.providers.get("mods");
+        return (entry != null) ? ((ModProvider) entry.provider) : null;
     }
 
     @Nullable
@@ -847,16 +843,16 @@ public class DataHandler extends BroadcastReceiver
 //    }
 
     /**
-     * Return a list of records that the user marked as favorite
+     * Return a list of records that have modifications (custom icon, name or flags)
      *
-     * @return list of {@link FavRecord}
+     * @return list of {@link ModRecord}
      */
     @NonNull
-    public List<FavRecord> getFavorites() {
+    public List<ModRecord> getMods() {
         final Context context = this.getContext();
         if (context == null)
             return Collections.emptyList();
-        return DBHelper.getFavorites(context);
+        return DBHelper.getMods(context);
     }
 
 //    @NonNull
@@ -899,56 +895,56 @@ public class DataHandler extends BroadcastReceiver
 //        //context.onFavoriteChange();
 //    }
 
-    public void addToFavorites(EntryItem entry) {
+    public void addToMods(EntryItem entry) {
         final Context context = this.getContext();
         if (context == null)
             return;
 
-        FavRecord record = new FavRecord();
+        ModRecord record = new ModRecord();
         record.record = entry.id;
         record.position = "0";
-        DBHelper.setFavorite(context, record);
-        FavProvider favProvider = getFavProvider();
-        if (favProvider != null)
-            favProvider.reload(true);
+        DBHelper.setMod(context, record);
+        ModProvider modProvider = getModProvider();
+        if (modProvider != null)
+            modProvider.reload(true);
     }
 
-    public void removeFromFavorites(EntryItem entry) {
+    public void removeFromMods(EntryItem entry) {
         final Context context = this.getContext();
         if (context == null)
             return;
 
-        if (DBHelper.removeFavorite(context, entry.id)) {
-            FavProvider favProvider = getFavProvider();
-            if (favProvider != null)
-                favProvider.reload(true);
+        if (DBHelper.removeMod(context, entry.id)) {
+            ModProvider modProvider = getModProvider();
+            if (modProvider != null)
+                modProvider.reload(true);
         }
     }
 
-    @SuppressWarnings("StringSplitter")
-    public void removeFromFavorites(UserHandleCompat user) {
-        // This is only intended for apps from foreign-profiles
-        if (user.isCurrentUser()) {
-            return;
-        }
-
-        final Context context = this.getContext();
-        if (context == null)
-            return;
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-
-        String[] favAppList = prefs.getString("favorite-apps-list", "").split(";");
-
-        StringBuilder favApps = new StringBuilder();
-        for (String favAppID : favAppList) {
-            if (!favAppID.startsWith("app://") || !user.hasStringUserSuffix(favAppID, '/')) {
-                favApps.append(favAppID);
-                favApps.append(";");
-            }
-        }
-
-        prefs.edit().putString("favorite-apps-list", favApps.toString()).apply();
-    }
+//    @SuppressWarnings("StringSplitter")
+//    public void removeFromMods(UserHandleCompat user) {
+//        // This is only intended for apps from foreign-profiles
+//        if (user.isCurrentUser()) {
+//            return;
+//        }
+//
+//        final Context context = this.getContext();
+//        if (context == null)
+//            return;
+//        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+//
+//        String[] favAppList = prefs.getString("favorite-apps-list", "").split(";");
+//
+//        StringBuilder favApps = new StringBuilder();
+//        for (String favAppID : favAppList) {
+//            if (!favAppID.startsWith("app://") || !user.hasStringUserSuffix(favAppID, '/')) {
+//                favApps.append(favAppID);
+//                favApps.append(";");
+//            }
+//        }
+//
+//        prefs.edit().putString("favorite-apps-list", favApps.toString()).apply();
+//    }
 
     /**
      * Insert specified ID (probably a pojo.id) into history
@@ -963,15 +959,16 @@ public class DataHandler extends BroadcastReceiver
         if (context == null)
             return;
 
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-
-        boolean frozen = prefs.getBoolean("freeze-history", false);
-
-        Set<String> excludedFromHistory = getExcludedFromHistory(prefs);
-
-        if (!frozen && !excludedFromHistory.contains(id)) {
-            DBHelper.insertHistory(context, currentQuery, id);
-        }
+//        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+//
+//        boolean frozen = prefs.getBoolean("freeze-history", false);
+//
+//        Set<String> excludedFromHistory = getExcludedFromHistory(prefs);
+//
+//        if (frozen || excludedFromHistory.contains(id)) {
+//            return;
+//        }
+        DBHelper.insertHistory(context, currentQuery, id);
     }
 
     @Nullable
@@ -1071,9 +1068,9 @@ public class DataHandler extends BroadcastReceiver
         if (array != null) {
             DBHelper.setCustomStaticEntryIcon(context, entryId, array);
             // reload provider to make sure we're up to date
-            FavProvider favProvider = getFavProvider();
-            if (favProvider != null)
-                favProvider.reload(true);
+            ModProvider modProvider = getModProvider();
+            if (modProvider != null)
+                modProvider.reload(true);
         }
     }
 
@@ -1209,7 +1206,7 @@ public class DataHandler extends BroadcastReceiver
 
 //    @NonNull
 //    public List<? extends EntryItem> getQuickList() {
-//        FavProvider favProvider = getFavProvider();
+//        ModProvider favProvider = getFavProvider();
 //        if (favProvider == null)
 //            return Collections.emptyList();
 //        return favProvider.getQuickList();
@@ -1220,42 +1217,42 @@ public class DataHandler extends BroadcastReceiver
         if (context == null)
             return;
 
-        List<FavRecord> oldFav = getFavorites();
+        List<ModRecord> oldFav = getMods();
         int pos = 1;
         for (String record : records) {
             // remove from oldFav the current record
-            for (Iterator<FavRecord> iterator = oldFav.iterator(); iterator.hasNext(); ) {
-                FavRecord favRecord = iterator.next();
-                if (favRecord.record.equals(record))
+            for (Iterator<ModRecord> iterator = oldFav.iterator(); iterator.hasNext(); ) {
+                ModRecord modRecord = iterator.next();
+                if (modRecord.record.equals(record))
                     iterator.remove();
             }
             String position = String.format("%08x", pos);
             if (!DBHelper.updateQuickListPosition(context, record, position)) {
-                FavRecord favRecord = new FavRecord();
-                favRecord.record = record;
-                favRecord.addFlags(FavRecord.FLAG_SHOW_IN_QUICK_LIST);
-                favRecord.position = position;
-                DBHelper.setFavorite(context, favRecord);
+                ModRecord modRecord = new ModRecord();
+                modRecord.record = record;
+                modRecord.addFlags(ModRecord.FLAG_SHOW_IN_QUICK_LIST);
+                modRecord.position = position;
+                DBHelper.setMod(context, modRecord);
             }
             pos += 11;
         }
 
         // keep only entries that have mods and remove from quick list flag from oldFav
-        for (FavRecord favRecord : oldFav) {
-            if (favRecord.isInQuickList()) {
-                favRecord.clearFlags(FavRecord.FLAG_SHOW_IN_QUICK_LIST);
-                if (favRecord.canBeCulled())
-                    DBHelper.removeFavorite(context, favRecord.record);
+        for (ModRecord modRecord : oldFav) {
+            if (modRecord.isInQuickList()) {
+                modRecord.clearFlags(ModRecord.FLAG_SHOW_IN_QUICK_LIST);
+                if (modRecord.canBeCulled())
+                    DBHelper.removeMod(context, modRecord.record);
                 else
-                    DBHelper.setFavorite(context, favRecord);
-            } else if (favRecord.canBeCulled()) {
-                DBHelper.removeFavorite(context, favRecord.record);
+                    DBHelper.setMod(context, modRecord);
+            } else if (modRecord.canBeCulled()) {
+                DBHelper.removeMod(context, modRecord.record);
             }
         }
 
         // refresh relevant providers
         {
-            IProvider<?> provider = getFavProvider();
+            IProvider<?> provider = getModProvider();
             if (provider != null)
                 provider.reload(true);
         }

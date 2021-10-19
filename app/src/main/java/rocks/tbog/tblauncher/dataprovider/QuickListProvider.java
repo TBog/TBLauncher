@@ -15,14 +15,14 @@ import rocks.tbog.tblauncher.DataHandler;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.WorkAsync.AsyncTask;
 import rocks.tbog.tblauncher.db.DBHelper;
-import rocks.tbog.tblauncher.db.FavRecord;
+import rocks.tbog.tblauncher.db.ModRecord;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.PlaceholderEntry;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public class QuickListProvider extends DBProvider<EntryItem> {
     private final static String TAG = QuickListProvider.class.getSimpleName();
-    private final HashMap<String, FavRecord> mQuickListFavRecords = new HashMap<>();
+    private final HashMap<String, ModRecord> mQuickListFavRecords = new HashMap<>();
     private QuickListRecordLoader mQuickListRecordLoadTask;
 
     public QuickListProvider(Context context) {
@@ -37,7 +37,7 @@ public class QuickListProvider extends DBProvider<EntryItem> {
     public List<EntryItem> getPojos() {
         boolean needsSorting = false;
 
-        Collection<FavRecord> recordIds = mQuickListFavRecords.values();
+        Collection<ModRecord> recordIds = mQuickListFavRecords.values();
         boolean remakeEntries = false;
         if (entryList.size() == recordIds.size()) {
             for (EntryItem entryItem : entryList) {
@@ -55,7 +55,7 @@ public class QuickListProvider extends DBProvider<EntryItem> {
             needsSorting = true;
             entryList.clear();
             // make them all placeholders, we'll replace later
-            for (FavRecord fav : recordIds) {
+            for (ModRecord fav : recordIds) {
                 PlaceholderEntry entry = new PlaceholderEntry(fav.record);
                 entry.setName(fav.displayName);
                 if (fav.hasCustomIcon())
@@ -84,8 +84,8 @@ public class QuickListProvider extends DBProvider<EntryItem> {
         if (needsSorting) {
             // sort entryList
             Collections.sort(entryList, (o1, o2) -> {
-                FavRecord p1 = mQuickListFavRecords.get(o1.id);
-                FavRecord p2 = mQuickListFavRecords.get(o2.id);
+                ModRecord p1 = mQuickListFavRecords.get(o1.id);
+                ModRecord p2 = mQuickListFavRecords.get(o2.id);
                 if (p1 == null || p1.position == null || p2 == null || p2.position == null)
                     return 0;
                 return p1.position.compareTo(p2.position);
@@ -94,14 +94,14 @@ public class QuickListProvider extends DBProvider<EntryItem> {
         return super.getPojos();
     }
 
-    private void setRecords(ArrayList<FavRecord> favRecords) {
+    private void setRecords(ArrayList<ModRecord> modRecords) {
         synchronized (mQuickListFavRecords) {
             mQuickListFavRecords.clear();
-            for (FavRecord rec : favRecords)
+            for (ModRecord rec : modRecords)
                 mQuickListFavRecords.put(rec.record, rec);
         }
         setLoaded();
-        Log.d(TAG, "setRecords loaded " + favRecords.size() + " record(s)");
+        Log.d(TAG, "setRecords loaded " + modRecords.size() + " record(s)");
         TBApplication.quickList(context).reload();
     }
 
@@ -117,7 +117,7 @@ public class QuickListProvider extends DBProvider<EntryItem> {
         super.reload(cancelCurrentLoadTask);
     }
 
-    private static class QuickListRecordLoader extends AsyncTask<Void, ArrayList<FavRecord>> {
+    private static class QuickListRecordLoader extends AsyncTask<Void, ArrayList<ModRecord>> {
         private final WeakReference<QuickListProvider> weakProvider;
 
         protected QuickListRecordLoader(QuickListProvider quickListProvider) {
@@ -126,14 +126,14 @@ public class QuickListProvider extends DBProvider<EntryItem> {
         }
 
         @Override
-        protected ArrayList<FavRecord> doInBackground(Void input) {
+        protected ArrayList<ModRecord> doInBackground(Void input) {
             QuickListProvider provider = weakProvider.get();
             if (provider == null)
                 return null;
-            ArrayList<FavRecord> records = DBHelper.getFavorites(provider.context);
+            ArrayList<ModRecord> records = DBHelper.getMods(provider.context);
             // keep only items in the QuickList
-            for (Iterator<FavRecord> iterator = records.iterator(); iterator.hasNext(); ) {
-                FavRecord rec = iterator.next();
+            for (Iterator<ModRecord> iterator = records.iterator(); iterator.hasNext(); ) {
+                ModRecord rec = iterator.next();
                 if (!rec.isInQuickList())
                     iterator.remove();
             }
@@ -142,7 +142,7 @@ public class QuickListProvider extends DBProvider<EntryItem> {
         }
 
         @Override
-        protected void onPostExecute(ArrayList<FavRecord> output) {
+        protected void onPostExecute(ArrayList<ModRecord> output) {
             QuickListProvider provider = weakProvider.get();
             if (provider == null || output == null || provider.mQuickListRecordLoadTask != this)
                 return;
@@ -161,7 +161,7 @@ public class QuickListProvider extends DBProvider<EntryItem> {
             DBProvider<EntryItem> provider = weakProvider.get();
             if (!(provider instanceof QuickListProvider))
                 return null;
-            ArrayList<FavRecord> records = null;
+            ArrayList<ModRecord> records = null;
             try {
                 records = ((QuickListProvider) provider).mQuickListRecordLoadTask.get();
             } catch (Throwable throwable) {
@@ -170,8 +170,8 @@ public class QuickListProvider extends DBProvider<EntryItem> {
             if (records == null)
                 return null;
             ArrayList<EntryItem> quickList = new ArrayList<>(records.size());
-            // get EntryItem from FavRecord
-            for (FavRecord fav : records) {
+            // get EntryItem from ModRecord
+            for (ModRecord fav : records) {
                 if (!fav.isInQuickList())
                     continue;
                 PlaceholderEntry entry = new PlaceholderEntry(fav.record);

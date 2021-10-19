@@ -34,7 +34,7 @@ import rocks.tbog.tblauncher.dataprovider.ActionProvider;
 import rocks.tbog.tblauncher.dataprovider.FilterProvider;
 import rocks.tbog.tblauncher.dataprovider.QuickListProvider;
 import rocks.tbog.tblauncher.dataprovider.TagsProvider;
-import rocks.tbog.tblauncher.db.FavRecord;
+import rocks.tbog.tblauncher.db.ModRecord;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.TagEntry;
 import rocks.tbog.tblauncher.result.EntryAdapter;
@@ -143,9 +143,9 @@ public class EditQuickList {
         new LoadDataForAdapter(adapter, () -> {
             Context ctx = gridView.getContext();
             DataHandler dataHandler = TBApplication.dataHandler(ctx);
-            List<FavRecord> favRecords = dataHandler.getFavorites();
-            ArrayList<EntryItem> data = new ArrayList<>(favRecords.size());
-            for (FavRecord fav : favRecords) {
+            List<ModRecord> modRecords = dataHandler.getMods();
+            ArrayList<EntryItem> data = new ArrayList<>(modRecords.size());
+            for (ModRecord fav : modRecords) {
                 EntryItem entry = dataHandler.getPojo(fav.record);
                 if (entry != null)
                     data.add(entry);

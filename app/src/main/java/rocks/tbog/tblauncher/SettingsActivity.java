@@ -47,9 +47,10 @@ import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
-import rocks.tbog.tblauncher.dataprovider.FavProvider;
+import rocks.tbog.tblauncher.dataprovider.TagsProvider;
 import rocks.tbog.tblauncher.db.ExportedData;
 import rocks.tbog.tblauncher.db.XmlImport;
 import rocks.tbog.tblauncher.drawable.SizeWrappedDrawable;
@@ -680,22 +681,39 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         }
 
         private static Pair<CharSequence[], CharSequence[]> generateEntryToShowListContent(@NonNull Context context) {
-            FavProvider favProvider = TBApplication.dataHandler(context).getFavProvider();
+//            ModProvider modProvider = TBApplication.dataHandler(context).getModProvider();
+//            List<EntryItem> modList = modProvider != null ? modProvider.getPojos() : Collections.emptyList();
+            List<EntryItem> tagList;
+
+            TBApplication app = TBApplication.getApplication(context);
+            TagsProvider tagsProvider = app.getDataHandler().getTagsProvider();
+            if (tagsProvider != null) {
+                ArrayList<String> tagNames = new ArrayList<>(app.tagsHandler().getValidTags());
+                Collections.sort(tagNames);
+                tagList = new ArrayList<>(tagNames.size());
+                for (String tagName : tagNames) {
+                    TagEntry tagEntry = tagsProvider.getTagEntry(tagName);
+                    tagList.add(tagEntry);
+                }
+            } else {
+                tagList = Collections.emptyList();
+            }
+
             final CharSequence[] entries;
             final CharSequence[] entryValues;
-            if (favProvider == null || favProvider.getPojos().isEmpty()) {
+            if (tagList.isEmpty()) {
                 entries = new CharSequence[]{context.getString(R.string.no_favorites)};
                 entryValues = new CharSequence[]{""};
             } else {
                 int iconSize = UISizes.getTextAppearanceTextSize(context, android.R.attr.textAppearanceMedium);
                 int tintColor = UIColors.getThemeColor(context, R.attr.colorAccent);
                 VectorDrawableCompat iconTag = VectorDrawableCompat.create(context.getResources(), R.drawable.ic_tags, null);
-                iconTag.setTint(tintColor);
-                iconTag.setBounds(0, 0, iconSize, iconSize);
-
-                List<EntryItem> favList = favProvider.getPojos();
-                ArrayList<StaticEntry> entryToShowList = new ArrayList<>(favList.size());
-                for (EntryItem entryItem : favList)
+                if (iconTag != null) {
+                    iconTag.setTint(tintColor);
+                    iconTag.setBounds(0, 0, iconSize, iconSize);
+                }
+                ArrayList<StaticEntry> entryToShowList = new ArrayList<>(tagList.size());
+                for (EntryItem entryItem : tagList)
                     if (entryItem instanceof StaticEntry)
                         entryToShowList.add((StaticEntry) entryItem);
                 final int size = entryToShowList.size();
@@ -704,10 +722,14 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 for (int idx = 0; idx < size; idx++) {
                     StaticEntry entry = entryToShowList.get(idx);
                     if (entry instanceof TagEntry) {
-                        SpannableString name = new SpannableString("# " + entry.getName());
-                        name.setSpan(new ImageSpan(iconTag), 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+                        if (iconTag == null) {
+                            entries[idx] = entry.getName();
+                        } else {
+                            SpannableString name = new SpannableString("# " + entry.getName());
+                            name.setSpan(new ImageSpan(iconTag), 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
 
-                        entries[idx] = name;
+                            entries[idx] = name;
+                        }
                     } else if (entry instanceof ActionEntry || entry instanceof FilterEntry) {
                         Drawable iconAction = entry.getDefaultDrawable(context);
                         DrawableCompat.setTint(iconAction, tintColor);

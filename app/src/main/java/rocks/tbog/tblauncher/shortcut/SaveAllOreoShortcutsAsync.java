@@ -6,23 +6,20 @@ import android.content.SharedPreferences;
 import android.content.pm.ShortcutInfo;
 import android.os.AsyncTask;
 import android.os.Build;
-import android.os.UserManager;
-import androidx.preference.PreferenceManager;
 import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.preference.PreferenceManager;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
-import java.util.Set;
 
 import rocks.tbog.tblauncher.DataHandler;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.dataprovider.ShortcutsProvider;
 import rocks.tbog.tblauncher.db.ShortcutRecord;
-import rocks.tbog.tblauncher.utils.UserHandleCompat;
 
 @TargetApi(Build.VERSION_CODES.O)
 public class SaveAllOreoShortcutsAsync extends AsyncTask<Void, Integer, Boolean> {
@@ -70,19 +67,19 @@ public class SaveAllOreoShortcutsAsync extends AsyncTask<Void, Integer, Boolean>
             return null;
         }
 
-        Set<String> excludedAppList = dataHandler.getExcluded(prefs);
-        UserManager manager = (UserManager) context.getSystemService(Context.USER_SERVICE);
+//        Set<String> excludedAppList = dataHandler.getExcluded(prefs);
+//        UserManager manager = (UserManager) context.getSystemService(Context.USER_SERVICE);
 
         for (ShortcutInfo shortcutInfo : shortcuts) {
 
-            UserHandleCompat user = new UserHandleCompat(manager.getSerialNumberForUser(shortcutInfo.getUserHandle()), shortcutInfo.getUserHandle());
-            boolean isExcluded = excludedAppList.contains(user.getUserComponentName(shortcutInfo.getPackage(), shortcutInfo.getActivity().getClassName()));
-
-            // Skip shortcut if app is excluded
-            if (!excludedAppList.isEmpty() &&
-                    isExcluded) {
-                continue;
-            }
+//            UserHandleCompat user = new UserHandleCompat(manager.getSerialNumberForUser(shortcutInfo.getUserHandle()), shortcutInfo.getUserHandle());
+//            boolean isExcluded = excludedAppList.contains(user.getUserComponentName(shortcutInfo.getPackage(), shortcutInfo.getActivity().getClassName()));
+//
+//            // Skip shortcut if app is excluded
+//            if (!excludedAppList.isEmpty() &&
+//                    isExcluded) {
+//                continue;
+//            }
 
             // Create Pojo
             ShortcutRecord record = ShortcutUtil.createShortcutRecord(context, shortcutInfo, !shortcutInfo.isPinned());

@@ -12,7 +12,7 @@ import java.util.Set;
 import rocks.tbog.tblauncher.DataHandler;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.db.DBHelper;
-import rocks.tbog.tblauncher.db.FavRecord;
+import rocks.tbog.tblauncher.db.ModRecord;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.Utilities;
@@ -57,7 +57,7 @@ public class HistorySearcher extends Searcher {
         // exclude favorites
         {
             exclude = new HashSet<>();
-            for (FavRecord rec : dataHandler.getFavorites()) {
+            for (ModRecord rec : dataHandler.getMods()) {
                 if (rec.isInQuickList())
                     exclude.add(rec.record);
             }

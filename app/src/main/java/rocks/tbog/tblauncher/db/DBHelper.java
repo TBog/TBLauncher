@@ -31,8 +31,8 @@ public class DBHelper {
     private static final String[] TABLE_COLUMNS_APPS = new String[]{"_id", "display_name", "component_name", "custom_flags"};//, "custom_icon"};
     private static final String[] TABLE_APPS_CUSTOM_ICON = new String[]{"custom_icon"};
     private static final String[] TABLE_APPS_CACHED_ICON = new String[]{"cached_icon"};
-    private static final String[] TABLE_FAVORITES_CUSTOM_ICON = new String[]{"custom_icon"};
-    private static final String[] TABLE_COLUMNS_FAVORITES = new String[]{"record", "position", "custom_flags", "name"};//, "custom_icon"};
+    private static final String[] TABLE_MODS_CUSTOM_ICON = new String[]{"custom_icon"};
+    private static final String[] TABLE_COLUMNS_MODS = new String[]{"record", "position", "custom_flags", "name"};//, "custom_icon"};
     private static final String[] TABLE_COLUMNS_SHORTCUTS = new String[]{"_id", "name", "package", "info_data", "icon_png", "custom_flags"};
     private static final String[] TABLE_COLUMNS_SHORTCUTS_NO_ICON = new String[]{"_id", "name", "package", "info_data", "custom_flags"};
 
@@ -728,7 +728,7 @@ public class DBHelper {
         try {
             SQLiteStatement statement = db.compileStatement(sql);
             statement.bindString(1, newName);
-            statement.bindLong(2, FavRecord.FLAG_CUSTOM_NAME);
+            statement.bindLong(2, ModRecord.FLAG_CUSTOM_NAME);
             statement.bindString(3, entryId);
             int count = statement.executeUpdateDelete();
             if (count != 1) {
@@ -821,7 +821,7 @@ public class DBHelper {
         String sql = "UPDATE favorites SET custom_flags=custom_flags|?, custom_icon=? WHERE record=?";
         try {
             SQLiteStatement statement = db.compileStatement(sql);
-            statement.bindLong(1, FavRecord.FLAG_CUSTOM_ICON);
+            statement.bindLong(1, ModRecord.FLAG_CUSTOM_ICON);
             statement.bindBlob(2, icon);
             statement.bindString(3, entryId);
             int count = statement.executeUpdateDelete();
@@ -860,7 +860,7 @@ public class DBHelper {
         String sql = "UPDATE favorites SET custom_flags=custom_flags&~?, custom_icon=NULL WHERE record=?";
         try {
             SQLiteStatement statement = db.compileStatement(sql);
-            statement.bindLong(1, FavRecord.FLAG_CUSTOM_ICON);
+            statement.bindLong(1, ModRecord.FLAG_CUSTOM_ICON);
             statement.bindString(2, entryId);
             int count = statement.executeUpdateDelete();
             if (count != 1) {
@@ -877,7 +877,7 @@ public class DBHelper {
         String sql = "UPDATE favorites SET custom_flags=custom_flags&~?, name=NULL WHERE record=?";
         try {
             SQLiteStatement statement = db.compileStatement(sql);
-            statement.bindLong(1, FavRecord.FLAG_CUSTOM_NAME);
+            statement.bindLong(1, ModRecord.FLAG_CUSTOM_NAME);
             statement.bindString(2, entryId);
             int count = statement.executeUpdateDelete();
             if (count != 1) {
@@ -916,7 +916,7 @@ public class DBHelper {
     public static byte[] getCustomFavIcon(Context context, String record) {
         SQLiteDatabase db = getDatabase(context);
         String[] selArgs = new String[]{record};
-        try (Cursor cursor = db.query("favorites", TABLE_FAVORITES_CUSTOM_ICON,
+        try (Cursor cursor = db.query("favorites", TABLE_MODS_CUSTOM_ICON,
                 "record=?", selArgs, null, null, null)) {
             if (cursor.moveToNext()) {
                 return cursor.getBlob(0);
@@ -925,7 +925,7 @@ public class DBHelper {
         return null;
     }
 
-    public static void setFavorite(Context context, FavRecord fav) {
+    public static void setMod(Context context, ModRecord fav) {
         SQLiteDatabase db = getDatabase(context);
 
         ContentValues values = new ContentValues();
@@ -943,7 +943,7 @@ public class DBHelper {
 //        }
     }
 
-    public static void setFavorites(Context context, Collection<Pair<FavRecord, byte[]>> favRecords) {
+    public static void setMods(Context context, Collection<Pair<ModRecord, byte[]>> favRecords) {
         SQLiteDatabase db = getDatabase(context);
         db.beginTransaction();
         try {
@@ -951,13 +951,13 @@ public class DBHelper {
             database.createFavoritesTable(db, false);
 
             ContentValues values = new ContentValues();
-            for (Pair<FavRecord, byte[]> pair : favRecords) {
-                FavRecord fav = pair.first;
+            for (Pair<ModRecord, byte[]> pair : favRecords) {
+                ModRecord fav = pair.first;
                 byte[] icon = pair.second;
                 values.put("record", fav.record);
                 values.put("position", fav.position == null ? "" : fav.position);
                 values.put("custom_flags", fav.getFlagsDB());
-                values.put(TABLE_FAVORITES_CUSTOM_ICON[0], icon);
+                values.put(TABLE_MODS_CUSTOM_ICON[0], icon);
                 db.insertWithOnConflict("favorites", null, values, SQLiteDatabase.CONFLICT_REPLACE);
             }
 
@@ -967,7 +967,7 @@ public class DBHelper {
         }
     }
 
-    public static boolean removeFavorite(Context context, String record) {
+    public static boolean removeMod(Context context, String record) {
         SQLiteDatabase db = getDatabase(context);
 
         if (0 == db.delete("favorites", "record=?", new String[]{record})) {
@@ -978,13 +978,13 @@ public class DBHelper {
     }
 
     @NonNull
-    public static ArrayList<FavRecord> getFavorites(@NonNull Context context) {
-        ArrayList<FavRecord> list;
+    public static ArrayList<ModRecord> getMods(@NonNull Context context) {
+        ArrayList<ModRecord> list;
         SQLiteDatabase db = getDatabase(context);
-        try (Cursor c = db.query("favorites", TABLE_COLUMNS_FAVORITES, null, null, null, null, "position")) {
+        try (Cursor c = db.query("favorites", TABLE_COLUMNS_MODS, null, null, null, null, "position")) {
             list = new ArrayList<>(c.getCount());
             while (c.moveToNext()) {
-                FavRecord fav = new FavRecord();
+                ModRecord fav = new ModRecord();
                 fav.record = c.getString(0);
                 fav.position = c.getString(1);
                 fav.setFlags(c.getInt(2));
@@ -1000,7 +1000,7 @@ public class DBHelper {
         String sql = "UPDATE \"favorites\" SET \"custom_flags\"=(\"custom_flags\"|?), \"position\"=? WHERE \"record\"=?";
         try {
             SQLiteStatement statement = db.compileStatement(sql);
-            statement.bindLong(1, FavRecord.FLAG_SHOW_IN_QUICK_LIST);
+            statement.bindLong(1, ModRecord.FLAG_SHOW_IN_QUICK_LIST);
             statement.bindString(2, position);
             statement.bindString(3, record);
             int count = statement.executeUpdateDelete();

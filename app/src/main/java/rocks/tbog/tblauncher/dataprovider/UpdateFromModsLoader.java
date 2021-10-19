@@ -6,14 +6,14 @@ import java.util.ArrayList;
 import java.util.List;
 
 import rocks.tbog.tblauncher.DataHandler;
-import rocks.tbog.tblauncher.db.FavRecord;
+import rocks.tbog.tblauncher.db.ModRecord;
 import rocks.tbog.tblauncher.entry.StaticEntry;
 
-public class UpdateFromFavoritesLoader<T extends StaticEntry> extends DBProvider.DBLoader<T> {
+public class UpdateFromModsLoader<T extends StaticEntry> extends DBProvider.DBLoader<T> {
     private final T[] mEntries;
     private final int[] mNames;
 
-    public UpdateFromFavoritesLoader(DBProvider<T> provider, T[] entries, int[] names) {
+    public UpdateFromModsLoader(DBProvider<T> provider, T[] entries, int[] names) {
         super(provider);
         this.mEntries = entries;
         this.mNames = names;
@@ -34,22 +34,22 @@ public class UpdateFromFavoritesLoader<T extends StaticEntry> extends DBProvider
             output.add(entry);
         }
 
-        List<FavRecord> favorites = dataHandler.getFavorites();
+        List<ModRecord> mods = dataHandler.getMods();
         // update custom settings from favorites
-        for (FavRecord fav : favorites) {
+        for (ModRecord mod : mods) {
             T entry = null;
-            if (provider.mayFindById(fav.record)) {
+            if (provider.mayFindById(mod.record)) {
                 for (T e : output) {
-                    if (e.id.equals(fav.record)) {
+                    if (e.id.equals(mod.record)) {
                         entry = e;
                         break;
                     }
                 }
             }
             if (entry != null) {
-                if (fav.hasCustomName())
-                    entry.setName(fav.displayName);
-                if (fav.hasCustomIcon())
+                if (mod.hasCustomName())
+                    entry.setName(mod.displayName);
+                if (mod.hasCustomIcon())
                     entry.setCustomIcon();
             }
         }

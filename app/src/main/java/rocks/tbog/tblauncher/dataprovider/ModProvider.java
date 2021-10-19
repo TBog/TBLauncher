@@ -7,13 +7,13 @@ import java.util.List;
 
 import rocks.tbog.tblauncher.DataHandler;
 import rocks.tbog.tblauncher.TBApplication;
-import rocks.tbog.tblauncher.db.FavRecord;
+import rocks.tbog.tblauncher.db.ModRecord;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.StaticEntry;
 
-public class FavProvider extends DBProvider<EntryItem> {
+public class ModProvider extends DBProvider<EntryItem> {
 
-    public FavProvider(Context context) {
+    public ModProvider(Context context) {
         super(context);
     }
 
@@ -30,10 +30,10 @@ public class FavProvider extends DBProvider<EntryItem> {
 
         @Override
         List<EntryItem> getEntryItems(DataHandler dataHandler) {
-            List<FavRecord> list = dataHandler.getFavorites();
+            List<ModRecord> list = dataHandler.getMods();
             ArrayList<EntryItem> favList = new ArrayList<>(list.size());
-            // get EntryItem from FavRecord
-            for (FavRecord fav : list) {
+            // get EntryItem from ModRecord
+            for (ModRecord fav : list) {
                 EntryItem entry = dataHandler.getPojo(fav.record);
                 if (entry == null)
                     continue;

@@ -23,7 +23,7 @@ import java.util.Objects;
 
 import rocks.tbog.tblauncher.WorkAsync.RunnableTask;
 import rocks.tbog.tblauncher.WorkAsync.TaskRunner;
-import rocks.tbog.tblauncher.dataprovider.FavProvider;
+import rocks.tbog.tblauncher.dataprovider.ModProvider;
 import rocks.tbog.tblauncher.dataprovider.QuickListProvider;
 import rocks.tbog.tblauncher.dataprovider.TagsProvider;
 import rocks.tbog.tblauncher.drawable.CodePointDrawable;
@@ -76,10 +76,10 @@ public class TagsManager {
         if (tagsProvider != null)
             tagsProvider.reload(true);
 
-        // reload FavProvider to refresh the QuickList
-        FavProvider favProvider = dataHandler.getFavProvider();
-        if (favProvider != null)
-            favProvider.reload(true);
+        // reload ModProvider to refresh the QuickList
+        ModProvider modProvider = dataHandler.getModProvider();
+        if (modProvider != null)
+            modProvider.reload(true);
 
         // reload QuickList provider
         QuickListProvider quickListProvider = dataHandler.getQuickListProvider();
@@ -182,11 +182,11 @@ public class TagsManager {
         // add this tag to the provider before launchCustomIconDialog, in case it isn't already
         tagsProvider.addTagEntry(tagEntry);
 
-        FavProvider favProvider = dh.getFavProvider();
-        if (favProvider != null) {
-            EntryItem item = favProvider.findById(tagEntry.id);
+        ModProvider modProvider = dh.getModProvider();
+        if (modProvider != null) {
+            EntryItem item = modProvider.findById(tagEntry.id);
             if (item == null)
-                dh.addToFavorites(tagEntry);
+                dh.addToMods(tagEntry);
         }
         TBApplication.behaviour(ctx).launchCustomIconDialog(tagEntry);
     }

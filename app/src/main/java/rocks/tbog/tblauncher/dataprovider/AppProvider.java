@@ -45,9 +45,9 @@ public class AppProvider extends Provider<AppEntry> {
                 assert manager != null;
                 UserHandleCompat user = new UserHandleCompat(manager.getSerialNumberForUser(profile), profile);
 
-                DataHandler dataHandler = TBApplication.getApplication(context).getDataHandler();
-                dataHandler.removeFromExcluded(user);
-                dataHandler.removeFromFavorites(user);
+//                DataHandler dataHandler = TBApplication.getApplication(context).getDataHandler();
+//                dataHandler.removeFromExcluded(user);
+//                dataHandler.removeFromMods(user);
                 AppProvider.this.reload(true);
             }
         }

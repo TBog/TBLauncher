@@ -240,8 +240,8 @@ public abstract class EntryItem {
         ListPopup menu = ListPopup.create(context, adapter);
 
 //        boolean foundInQuickList = false;
-//        ArrayList<FavRecord> favRecords = TBApplication.dataHandler(context).getFavorites();
-//        for (FavRecord fav : favRecords) {
+//        ArrayList<ModRecord> favRecords = TBApplication.dataHandler(context).getFavorites();
+//        for (ModRecord fav : favRecords) {
 //            if (id.equals(fav.record) && fav.isInQuickList()) {
 //                foundInQuickList = true;
 //                break;

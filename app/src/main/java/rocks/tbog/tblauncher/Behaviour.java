@@ -45,7 +45,8 @@ import java.util.Random;
 import java.util.Set;
 
 import rocks.tbog.tblauncher.customicon.IconSelectDialog;
-import rocks.tbog.tblauncher.dataprovider.FavProvider;
+import rocks.tbog.tblauncher.dataprovider.ModProvider;
+import rocks.tbog.tblauncher.dataprovider.TagsProvider;
 import rocks.tbog.tblauncher.drawable.LoadingDrawable;
 import rocks.tbog.tblauncher.entry.ActionEntry;
 import rocks.tbog.tblauncher.entry.AppEntry;
@@ -66,8 +67,8 @@ import rocks.tbog.tblauncher.ui.DialogFragment;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.ui.RecyclerList;
-import rocks.tbog.tblauncher.ui.dialog.TagsManagerDialog;
 import rocks.tbog.tblauncher.ui.WindowInsetsHelper;
+import rocks.tbog.tblauncher.ui.dialog.TagsManagerDialog;
 import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.SystemUiVisibility;
 import rocks.tbog.tblauncher.utils.UISizes;
@@ -1107,11 +1108,11 @@ public class Behaviour implements ISearchActivity {
                 EntryItem favItem = null;
                 // if the shortcut is not in the favorites, add it before changing the icon
                 {
-                    FavProvider favProvider = dh.getFavProvider();
-                    if (favProvider != null)
-                        favItem = favProvider.findById(shortcutEntry.id);
+                    ModProvider modProvider = dh.getModProvider();
+                    if (modProvider != null)
+                        favItem = modProvider.findById(shortcutEntry.id);
                     if (favItem == null)
-                        dh.addToFavorites(shortcutEntry);
+                        dh.addToMods(shortcutEntry);
                 }
                 app.iconsHandler().changeIcon(shortcutEntry, drawable);
             }
@@ -1240,7 +1241,7 @@ public class Behaviour implements ISearchActivity {
             if (tag != null && tag.equals(mFragmentDialog.getTag())) {
                 mFragmentDialog.dismiss();
                 return true;
-            } else if ( tag == null) {
+            } else if (tag == null) {
                 mFragmentDialog.dismiss();
                 return true;
             }
@@ -1319,7 +1320,11 @@ public class Behaviour implements ISearchActivity {
 
     private boolean launchStaticEntry(@NonNull String entryId) {
         Context ctx = getContext();
-        EntryItem item = TBApplication.dataHandler(ctx).getPojo(entryId);
+        DataHandler dataHandler = TBApplication.dataHandler(ctx);
+        EntryItem item = dataHandler.getPojo(entryId);
+        if (item == null) {
+            item = TagsProvider.newTagEntryCheckId(entryId);
+        }
         if (item instanceof StaticEntry) {
             if (TBApplication.state().getDesktop() != LauncherState.Desktop.SEARCH) {
                 // TODO: switchToDesktop might show the result list, we may need to prevent this as an optimization

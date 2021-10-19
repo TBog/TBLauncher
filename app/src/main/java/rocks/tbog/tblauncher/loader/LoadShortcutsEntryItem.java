@@ -17,7 +17,7 @@ import java.util.List;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.TagsHandler;
 import rocks.tbog.tblauncher.db.DBHelper;
-import rocks.tbog.tblauncher.db.FavRecord;
+import rocks.tbog.tblauncher.db.ModRecord;
 import rocks.tbog.tblauncher.db.ShortcutRecord;
 import rocks.tbog.tblauncher.entry.ShortcutEntry;
 
@@ -49,11 +49,11 @@ public class LoadShortcutsEntryItem extends LoadEntryItem<ShortcutEntry> {
             return new ArrayList<>();
         }
 
-        final HashMap<String, FavRecord> favorites;
+        final HashMap<String, ModRecord> favorites;
         {
-            ArrayList<FavRecord> favList = DBHelper.getFavorites(ctx);
+            ArrayList<ModRecord> favList = DBHelper.getMods(ctx);
             favorites = new HashMap<>();
-            for (FavRecord fav : favList)
+            for (ModRecord fav : favList)
                 favorites.put(fav.record, fav);
         }
 
@@ -73,8 +73,8 @@ public class LoadShortcutsEntryItem extends LoadEntryItem<ShortcutEntry> {
 
             pojo.setName(shortcutRecord.displayName);
 
-            FavRecord favRecord = favorites.get(pojo.id);
-            if (favRecord != null && favRecord.hasCustomIcon())
+            ModRecord modRecord = favorites.get(pojo.id);
+            if (modRecord != null && modRecord.hasCustomIcon())
                 pojo.setCustomIcon();
 
             pojos.add(pojo);
@@ -103,8 +103,8 @@ public class LoadShortcutsEntryItem extends LoadEntryItem<ShortcutEntry> {
                 ShortcutEntry pojo = new ShortcutEntry(dbId, shortcutInfo);
                 pojo.setName(name);
 
-                FavRecord favRecord = favorites.get(pojo.id);
-                if (favRecord != null && favRecord.hasCustomIcon())
+                ModRecord modRecord = favorites.get(pojo.id);
+                if (modRecord != null && modRecord.hasCustomIcon())
                     pojo.setCustomIcon();
 
                 pojos.add(pojo);

@@ -98,13 +98,13 @@ public class ActionProvider extends DBProvider<ActionEntry> {
             s_names[cnt] = R.string.action_show_shortcuts_reversed;
             s_entries[cnt++] = actionEntry;
         }
-        // show favorites sorted by name
+        // show favorites sorted by name (removed by load task if not enabled)
         {
             String id = ActionEntry.SCHEME + "show/favorites/byName";
             ActionEntry actionEntry = new ActionEntry(id, R.drawable.ic_favorites);
             actionEntry.setAction((v, flags) -> {
                 Context ctx = v.getContext();
-                FavProvider provider = TBApplication.dataHandler(ctx).getFavProvider();
+                ModProvider provider = TBApplication.dataHandler(ctx).getModProvider();
                 TBApplication.quickList(ctx).toggleProvider(v, provider, EntryItem.NAME_COMPARATOR);
             });
             s_names[cnt] = R.string.action_show_favorites;
@@ -210,7 +210,7 @@ public class ActionProvider extends DBProvider<ActionEntry> {
 
     @Override
     protected DBLoader<ActionEntry> newLoadTask() {
-        return new UpdateFromFavoritesLoader<ActionEntry>(this, s_entries, s_names) {
+        return new UpdateFromModsLoader<ActionEntry>(this, s_entries, s_names) {
             @Override
             public List<ActionEntry> getEntryItems(DataHandler dataHandler) {
                 List<ActionEntry> entries = super.getEntryItems(dataHandler);

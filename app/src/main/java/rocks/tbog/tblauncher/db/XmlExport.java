@@ -72,8 +72,8 @@ public class XmlExport {
     public static void modificationsXml(@NonNull Context context, @NonNull SimpleXmlWriter sx) throws IOException {
         sx.startTag(ExportedData.XTN_MOD_LIST).attribute("version", "1");
 
-        List<FavRecord> favRecords = TBApplication.dataHandler(context).getFavorites();
-        for (FavRecord fav : favRecords) {
+        List<ModRecord> modRecords = TBApplication.dataHandler(context).getMods();
+        for (ModRecord fav : modRecords) {
             sx.startTag(ExportedData.XTN_MOD_LIST_ITEM)
                     .startTag(ExportedData.XTN_MOD_LIST_ITEM_ID).content(fav.record).endTag(ExportedData.XTN_MOD_LIST_ITEM_ID)
                     .startTag("flags").content(fav.getFlagsDB()).endTag("flags");

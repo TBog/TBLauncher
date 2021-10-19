@@ -56,7 +56,6 @@ public class FilterProvider extends DBProvider<FilterEntry> {
             s_names[cnt] = R.string.filter_shortcuts;
             s_entries[cnt++] = filter;
         }
-        // TODO: somehow enable filtering for the favorites, right now we can only show them
 
         //noinspection ConstantConditions
         if (cnt != s_entries.length || cnt != s_names.length)
@@ -69,7 +68,7 @@ public class FilterProvider extends DBProvider<FilterEntry> {
 
     @Override
     protected DBLoader<FilterEntry> newLoadTask() {
-        return new UpdateFromFavoritesLoader<>(this, s_entries, s_names);
+        return new UpdateFromModsLoader<>(this, s_entries, s_names);
     }
 
     @Override

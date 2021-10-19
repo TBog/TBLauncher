@@ -102,7 +102,7 @@
         <item>@string/action_show_history_adaptive</item>
         <item>@string/show_tags_menu</item>
         <item>Run app…</item>
-        <item>Show favorite…</item>
+        <item>Show tag…</item>
     </string-array>
     <array name="gestureValues" translatable="false">
         <item>none</item>

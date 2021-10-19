@@ -60,19 +60,19 @@ class DB extends SQLiteOpenHelper {
         {
             values.put("record", FilterEntry.SCHEME + "applications");
             values.put("position", "0");
-            values.put("custom_flags", FavRecord.FLAG_SHOW_IN_QUICK_LIST);
+            values.put("custom_flags", ModRecord.FLAG_SHOW_IN_QUICK_LIST);
             db.insertWithOnConflict("favorites", null, values, SQLiteDatabase.CONFLICT_IGNORE);
         }
         {
             values.put("record", FilterEntry.SCHEME + "contacts");
             values.put("position", "1");
-            values.put("custom_flags", FavRecord.FLAG_SHOW_IN_QUICK_LIST);
+            values.put("custom_flags", ModRecord.FLAG_SHOW_IN_QUICK_LIST);
             db.insertWithOnConflict("favorites", null, values, SQLiteDatabase.CONFLICT_IGNORE);
         }
         {
             values.put("record", FilterEntry.SCHEME + "shortcuts");
             values.put("position", "2");
-            values.put("custom_flags", FavRecord.FLAG_SHOW_IN_QUICK_LIST);
+            values.put("custom_flags", ModRecord.FLAG_SHOW_IN_QUICK_LIST);
             db.insertWithOnConflict("favorites", null, values, SQLiteDatabase.CONFLICT_IGNORE);
         }
     }

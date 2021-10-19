@@ -10,7 +10,7 @@ import java.util.List;
 
 import rocks.tbog.tblauncher.DataHandler;
 import rocks.tbog.tblauncher.TBApplication;
-import rocks.tbog.tblauncher.db.FavRecord;
+import rocks.tbog.tblauncher.db.ModRecord;
 import rocks.tbog.tblauncher.entry.TagEntry;
 
 public class TagsProvider extends DBProvider<TagEntry> {
@@ -25,7 +25,7 @@ public class TagsProvider extends DBProvider<TagEntry> {
     }
 
     @Nullable
-    private static TagEntry newTagEntryCheckId(String id) {
+    public static TagEntry newTagEntryCheckId(String id) {
         if (id.startsWith(TagEntry.SCHEME)) {
             TagEntry tagEntry = new TagEntry(id);
             String tagName = id.substring(TagEntry.SCHEME.length());
@@ -72,13 +72,13 @@ public class TagsProvider extends DBProvider<TagEntry> {
         @Override
         List<TagEntry> getEntryItems(DataHandler dataHandler) {
             ArrayList<TagEntry> tagList = new ArrayList<>();
-            List<FavRecord> favorites = dataHandler.getFavorites();
-            // get TagEntry from FavRecord
-            for (FavRecord fav : favorites) {
-                TagEntry entry = newTagEntryCheckId(fav.record);
+            List<ModRecord> mods = dataHandler.getMods();
+            // get TagEntry from ModRecord
+            for (ModRecord mod : mods) {
+                TagEntry entry = newTagEntryCheckId(mod.record);
                 if (entry == null)
                     continue;
-                if (fav.hasCustomIcon())
+                if (mod.hasCustomIcon())
                     entry.setCustomIcon();
                 tagList.add(entry);
             }

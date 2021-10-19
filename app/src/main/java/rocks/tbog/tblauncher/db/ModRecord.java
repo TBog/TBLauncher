@@ -1,6 +1,6 @@
 package rocks.tbog.tblauncher.db;
 
-public class FavRecord extends FlagsRecord {
+public class ModRecord extends FlagsRecord {
     public static final int FLAG_SHOW_IN_QUICK_LIST = 1;
     public static final int FLAG_CUSTOM_NAME = 1 << 1;
     public static final int FLAG_CUSTOM_ICON = 1 << 2;

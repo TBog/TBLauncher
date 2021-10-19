@@ -3,10 +3,9 @@ package rocks.tbog.tblauncher.broadcast;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
 import androidx.preference.PreferenceManager;
-
-import android.util.Log;
 
 import rocks.tbog.tblauncher.DataHandler;
 import rocks.tbog.tblauncher.TBApplication;
@@ -49,7 +48,7 @@ public class PackageAddedRemovedHandler extends BroadcastReceiver {
         if ("android.intent.action.PACKAGE_REMOVED".equals(action) && !replacing) {
             // Remove all installed shortcuts
             dataHandler.removeShortcuts(packageName);
-            dataHandler.removeFromExcluded(packageName);
+//            dataHandler.removeFromExcluded(packageName);
         }
 
         // This may be an icon pack, reload packs
