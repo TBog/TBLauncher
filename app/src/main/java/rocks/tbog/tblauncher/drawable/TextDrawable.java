@@ -7,18 +7,23 @@ import android.graphics.PointF;
 import android.graphics.Rect;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 public abstract class TextDrawable extends SquareDrawable {
-    PointF[] cachedLinePos = null;
-    float[] cachedLineSize = null;
-    char[][] cachedText = null;
-    int mTextColor = Color.WHITE;
+
+    protected PointF[] cachedLinePos = null;
+    protected float[] cachedLineSize = null;
+    protected char[][] cachedText = null;
+    protected int mTextColor = Color.WHITE;
 
     public TextDrawable() {
-        super();
         mPaint.setTextAlign(Paint.Align.LEFT);
         mPaint.setAntiAlias(true);
     }
+
+    @Nullable
+    @Override
+    public abstract ConstantState getConstantState();
 
     public void setTextColor(int color) {
         mTextColor = color;
