@@ -26,6 +26,17 @@ public class TagEntry extends StaticEntry {
     }
 
     @Override
+    public void setName(String name) {
+        if (name != null) {
+            if (!id.endsWith(name))
+                throw new IllegalStateException("tags can't have the display name different from the tag name");
+            super.setName(name);
+        } else {
+            super.setName(id.substring(SCHEME.length()));
+        }
+    }
+
+    @Override
     boolean popupMenuClickHandler(@NonNull View view, @NonNull LinearAdapter.MenuItem item, int stringId, View parentView) {
         if (stringId == R.string.menu_action_rename) {
             Context ctx = view.getContext();
