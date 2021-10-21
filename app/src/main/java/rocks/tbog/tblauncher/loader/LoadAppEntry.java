@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.Semaphore;
 
 import rocks.tbog.tblauncher.DataHandler;
 import rocks.tbog.tblauncher.TBApplication;
@@ -139,12 +140,23 @@ public class LoadAppEntry extends LoadEntryItem<AppEntry> {
             pendingChanges = null;
             dbApps = null;
 
+            final Semaphore semaphore = new Semaphore(0);
             TagsHandler tagsHandler = TBApplication.tagsHandler(ctx);
             tagsHandler.runWhenLoaded(() -> {
                 Log.d("App", "set " + apps.size() + " app(s) tags");
                 for (AppEntry app : apps)
                     app.setTags(tagsHandler.getTags(app.id));
+
+                // notify that the tags are loaded
+                semaphore.release();
             });
+
+            // TODO: I don't like this hack. We should have a `Handler` class for app entries.
+            // wait for the tags to load
+            try {
+                semaphore.acquire();
+            } catch (InterruptedException ignored) {
+            }
 
             return apps;
         }
