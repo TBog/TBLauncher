@@ -111,6 +111,10 @@ public abstract class TextDrawable extends SquareDrawable {
 
     @Override
     public void draw(@NonNull Canvas canvas) {
+        // precacheTextPosAndSize may not be called before the first draw
+        if (cachedText == null)
+            return;
+
         final int lineCount = getLineCount();
         for (int line = 0; line < lineCount; line += 1) {
             char[] text = cachedText[line];

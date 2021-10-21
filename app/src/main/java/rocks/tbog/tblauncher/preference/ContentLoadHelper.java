@@ -29,6 +29,7 @@ import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.SettingsActivity;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.TagsHandler;
+import rocks.tbog.tblauncher.dataprovider.TagsProvider;
 import rocks.tbog.tblauncher.entry.ActionEntry;
 import rocks.tbog.tblauncher.entry.FilterEntry;
 import rocks.tbog.tblauncher.entry.StaticEntry;
@@ -36,6 +37,7 @@ import rocks.tbog.tblauncher.entry.TagEntry;
 import rocks.tbog.tblauncher.utils.PrefOrderedListHelper;
 import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.UISizes;
+import rocks.tbog.tblauncher.utils.Utilities;
 
 public class ContentLoadHelper {
     public static final CategoryItem[] RESULT_POPUP_CATEGORIES = {
@@ -99,6 +101,8 @@ public class ContentLoadHelper {
         TagsHandler tagsHandler = TBApplication.tagsHandler(context);
         Set<String> validTags = tagsHandler.getValidTags();
 
+        TagsProvider tagsProvider = TBApplication.dataHandler(context).getTagsProvider();
+
         Set<String> tagsMenuListValues = sharedPreferences.getStringSet("tags-menu-list", Collections.emptySet());
 
         ArrayList<String> prefEntries = new ArrayList<>(validTags);
@@ -110,9 +114,29 @@ public class ContentLoadHelper {
         // sort entries
         Collections.sort(prefEntries, String.CASE_INSENSITIVE_ORDER);
 
-        // set preference entries and values
-        CharSequence[] entries = prefEntries.toArray(new String[0]);
+        int layoutDirection = context.getResources().getConfiguration().getLayoutDirection();
+        int size = context.getResources().getDimensionPixelSize(R.dimen.icon_preview_size);
+
+        // set preference entries
+        int count = prefEntries.size();
+        CharSequence[] entries = new CharSequence[count];
+        for (int idx = 0; idx < count; idx += 1) {
+            String tagName = prefEntries.get(idx);
+            if (tagsProvider != null) {
+                TagEntry tagEntry = tagsProvider.getTagEntry(tagName);
+                Drawable tagIcon = tagEntry.getIconDrawable(context);
+                tagIcon.setBounds(0, 0, size, size);
+
+                SpannableString name = Utilities.addDrawableInString(tagName, tagIcon, layoutDirection);
+                entries[idx] = name;
+            } else {
+                entries[idx] = tagName;
+            }
+        }
+
+        // set preference values
         CharSequence[] entryValues = prefEntries.toArray(new String[0]);
+
 
         // set default values if we need them
         HashSet<String> defaultValues = new HashSet<>();
@@ -132,6 +156,7 @@ public class ContentLoadHelper {
         final CharSequence[] entryValues = new CharSequence[size];
         boolean iconTagLoaded = false;
         VectorDrawableCompat iconTag = null;
+        int layoutDirection = context.getResources().getConfiguration().getLayoutDirection();
         int iconSize = UISizes.getTextAppearanceTextSize(context, android.R.attr.textAppearanceMedium);
         int tintColor = UIColors.getThemeColor(context, R.attr.colorAccent);
 
@@ -149,20 +174,20 @@ public class ContentLoadHelper {
                 if (iconTag == null) {
                     entries[idx] = entry.getName();
                 } else {
-                    SpannableString name = new SpannableString("# " + entry.getName());
-                    name.setSpan(new ImageSpan(iconTag), 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-
+                    SpannableString name = Utilities.addDrawableInString(entry.getName(), iconTag, layoutDirection);
                     entries[idx] = name;
                 }
             } else if (entry instanceof ActionEntry || entry instanceof FilterEntry) {
                 Drawable iconAction = entry.getDefaultDrawable(context);
-                DrawableCompat.setTint(iconAction, tintColor);
-                iconAction.setBounds(0, 0, iconSize, iconSize);
+                if (iconAction == null) {
+                    entries[idx] = entry.getName();
+                } else {
+                    DrawableCompat.setTint(iconAction, tintColor);
+                    iconAction.setBounds(0, 0, iconSize, iconSize);
 
-                SpannableString name = new SpannableString("# " + entry.getName());
-                name.setSpan(new ImageSpan(iconAction), 0, 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-
-                entries[idx] = name;
+                    SpannableString name = Utilities.addDrawableInString(entry.getName(), iconAction, layoutDirection);
+                    entries[idx] = name;
+                }
             } else {
                 entries[idx] = entry.getName();
             }

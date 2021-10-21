@@ -3,7 +3,9 @@ package rocks.tbog.tblauncher.preference;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.ListAdapter;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -29,8 +31,6 @@ import rocks.tbog.tblauncher.utils.ViewHolderListAdapter;
 
 public class OrderListPreferenceDialog extends PreferenceDialogFragmentCompat {
 
-    protected static final String ARG_TAG_ICONS = "showTagIcons";
-
     private static final String SAVE_STATE_VALUES = "OrderListPreferenceDialogFragment.values";
     private static final String SAVE_STATE_CHANGED = "OrderListPreferenceDialogFragment.changed";
     private static final String SAVE_STATE_ENTRIES = "OrderListPreferenceDialogFragment.entries";
@@ -41,11 +41,10 @@ public class OrderListPreferenceDialog extends PreferenceDialogFragmentCompat {
     private CharSequence[] mEntries;
     private CharSequence[] mEntryValues;
 
-    public static OrderListPreferenceDialog newInstance(String key, boolean showTagIcons) {
+    public static OrderListPreferenceDialog newInstance(String key) {
         final OrderListPreferenceDialog fragment = new OrderListPreferenceDialog();
         final Bundle b = new Bundle(2);
         b.putString(ARG_KEY, key);
-        b.putBoolean(ARG_TAG_ICONS, showTagIcons);
         fragment.setArguments(b);
         return fragment;
     }
@@ -101,13 +100,11 @@ public class OrderListPreferenceDialog extends PreferenceDialogFragmentCompat {
         final int entryCount = mEntryValues.length;
         ArrayList<ListEntry> entryArrayList = new ArrayList<>(entryCount);
         for (int i = 0; i < entryCount; i += 1) {
-            ListEntry listEntry = new ListEntry(mEntries[i].toString(), mEntryValues[i].toString());
+            ListEntry listEntry = new ListEntry(mEntries[i], mEntryValues[i].toString());
             entryArrayList.add(listEntry);
         }
 
-        final Bundle args = getArguments();
-        boolean tagIcons = args != null && args.getBoolean(ARG_TAG_ICONS, false);
-        EntryAdapter entryAdapter = new EntryAdapter(tagIcons ? TagEntryViewHolder.class : EntryViewHolder.class, entryArrayList);
+        EntryAdapter entryAdapter = new EntryAdapter(EntryViewHolder.class, entryArrayList);
         builder.setAdapter(entryAdapter, null);
 
         entryAdapter.mOnMoveUpListener = (adapter, view, position) -> {
@@ -159,10 +156,10 @@ public class OrderListPreferenceDialog extends PreferenceDialogFragmentCompat {
     }
 
     public static class ListEntry {
-        final String name;
+        final CharSequence name;
         final String value;
 
-        public ListEntry(@NonNull String name, @NonNull String value) {
+        public ListEntry(@NonNull CharSequence name, @NonNull String value) {
             this.name = name;
             this.value = value;
         }
@@ -237,27 +234,27 @@ public class OrderListPreferenceDialog extends PreferenceDialogFragmentCompat {
         }
     }
 
-    public static class TagEntryViewHolder extends EntryViewHolder {
-        ImageView icon;
-
-        protected TagEntryViewHolder(View view) {
-            super(view);
-            icon = view.findViewById(android.R.id.icon);
-        }
-
-        @Override
-        protected void setContent(ListEntry content, int position, @NonNull ViewHolderAdapter<ListEntry, ? extends ViewHolderAdapter.ViewHolder<ListEntry>> adapter) {
-            super.setContent(content, position, adapter);
-            if (icon == null)
-                return;
-
-            icon.setVisibility(View.VISIBLE);
-            TagsProvider tagsProvider = TBApplication.dataHandler(icon.getContext()).getTagsProvider();
-            TagEntry tagEntry = tagsProvider != null ? tagsProvider.getTagEntry(content.name) : null;
-            if (tagEntry != null)
-                Utilities.setIconAsync(icon, tagEntry::getIconDrawable);
-            else
-                icon.setImageDrawable(null);
-        }
-    }
+//    public static class TagEntryViewHolder extends EntryViewHolder {
+//        ImageView icon;
+//
+//        protected TagEntryViewHolder(View view) {
+//            super(view);
+//            icon = view.findViewById(android.R.id.icon);
+//        }
+//
+//        @Override
+//        protected void setContent(ListEntry content, int position, @NonNull ViewHolderAdapter<ListEntry, ? extends ViewHolderAdapter.ViewHolder<ListEntry>> adapter) {
+//            super.setContent(content, position, adapter);
+//            if (icon == null)
+//                return;
+//
+//            icon.setVisibility(View.VISIBLE);
+//            TagsProvider tagsProvider = TBApplication.dataHandler(icon.getContext()).getTagsProvider();
+//            TagEntry tagEntry = tagsProvider != null ? tagsProvider.getTagEntry(content.value) : null;
+//            if (tagEntry != null)
+//                Utilities.setIconAsync(icon, tagEntry::getIconDrawable);
+//            else
+//                icon.setImageDrawable(null);
+//        }
+//    }
 }

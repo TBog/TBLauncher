@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <dimen name="icon_size">32dp</dimen>
+    <dimen name="icon_preview_size">24dp</dimen>
     <dimen name="color_preview_size">16dp</dimen>
-    <dimen name="color_preview_radius">5dp</dimen>
+    <dimen name="color_preview_radius">4dp</dimen>
 
     <dimen name="icon_margin_left">0dp</dimen>
     <dimen name="icon_margin_right">10dp</dimen>

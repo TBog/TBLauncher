@@ -94,7 +94,7 @@ public class IconListPreferenceDialog extends PreferenceDialogFragmentCompat {
             final Bundle args = getArguments();
             String key = args != null ? args.getString(ARG_KEY) : null;
             final int listItemLayout = getItemLayout(builder.getContext());
-            if ("adaptive-shape".equals(key))
+            if (key != null && key.endsWith("-shape"))
                 listAdapter = new IconAdapter(ShapeViewHolder.class, listItemLayout, list);
             else if ("icons-pack".equals(key))
                 listAdapter = new IconAdapter(PackViewHolder.class, listItemLayout, list);
@@ -155,7 +155,7 @@ public class IconListPreferenceDialog extends PreferenceDialogFragmentCompat {
         }
     }
 
-    public static class IconEntry {
+    private static class IconEntry {
         private final CharSequence name;
         private final CharSequence value;
 
@@ -214,7 +214,7 @@ public class IconListPreferenceDialog extends PreferenceDialogFragmentCompat {
                 checkedColor = textColorList.getColorForState(STATE_CHECKED, defaultColor);
             }
 
-            size = context.getResources().getDimensionPixelSize(R.dimen.color_preview_size);
+            size = context.getResources().getDimensionPixelSize(R.dimen.icon_preview_size);
         }
 
         @Override
@@ -268,7 +268,7 @@ public class IconListPreferenceDialog extends PreferenceDialogFragmentCompat {
             super(view);
             textView = view.findViewById(android.R.id.text1);
             final Context context = view.getContext();
-            size = context.getResources().getDimensionPixelSize(R.dimen.color_preview_size);
+            size = context.getResources().getDimensionPixelSize(R.dimen.icon_preview_size);
         }
 
         @Override

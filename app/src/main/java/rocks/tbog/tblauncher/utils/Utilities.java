@@ -22,6 +22,8 @@ import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RectShape;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.SpannableString;
+import android.text.Spanned;
 import android.util.Base64;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -56,6 +58,7 @@ import rocks.tbog.tblauncher.WorkAsync.AsyncTask;
 import rocks.tbog.tblauncher.WorkAsync.RunnableTask;
 import rocks.tbog.tblauncher.WorkAsync.TaskRunner;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
+import rocks.tbog.tblauncher.ui.CenteredImageSpan;
 import rocks.tbog.tblauncher.ui.CutoutFactory;
 import rocks.tbog.tblauncher.ui.ICutout;
 
@@ -709,6 +712,26 @@ public class Utilities {
                 }
             });
         }
+    }
+
+    /**
+     * @param text            text we add the icon to
+     * @param icon            drawable to use as an icon
+     * @param layoutDirection will be either View.LAYOUT_DIRECTION_LTR or View.LAYOUT_DIRECTION_RTL.
+     * @return SpannableString with an ImageSpan at the beginning
+     */
+    public static SpannableString addDrawableInString(@NonNull String text, @NonNull Drawable icon, int layoutDirection) {
+        final SpannableString name;
+        final int pos;
+        if (layoutDirection == View.LAYOUT_DIRECTION_RTL) {
+            name = new SpannableString(text + " #");
+            pos = name.length() - 1;
+        } else {
+            name = new SpannableString("# " + text);
+            pos = 0;
+        }
+        name.setSpan(new CenteredImageSpan(icon), pos, pos + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+        return name;
     }
 
     public interface GetDrawable {

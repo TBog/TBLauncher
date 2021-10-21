@@ -635,19 +635,21 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 }
             } else if (preference instanceof ListPreference) {
                 String key = preference.getKey();
-                if ("adaptive-shape".equals(key)) {
-                    dialogFragment = IconListPreferenceDialog.newInstance(key);
-                } else if ("icons-pack".equals(key)) {
-                    dialogFragment = IconListPreferenceDialog.newInstance(key);
-                } else {
-                    dialogFragment = BaseListPreferenceDialog.newInstance(key);
+                switch (key) {
+                    case "adaptive-shape":
+                    case "contacts-shape":
+                    case "shortcut-shape":
+                    case "icons-pack":
+                        dialogFragment = IconListPreferenceDialog.newInstance(key);
+                        break;
+                    default:
+                        dialogFragment = BaseListPreferenceDialog.newInstance(key);
+                        break;
                 }
             } else if (preference instanceof MultiSelectListPreference) {
                 String key = preference.getKey();
-                if ("tags-menu-order".equals(key)) {
-                    dialogFragment = OrderListPreferenceDialog.newInstance(key, true);
-                } else if ("result-popup-order".equals(key)) {
-                    dialogFragment = OrderListPreferenceDialog.newInstance(key, false);
+                if ("tags-menu-order".equals(key) || "result-popup-order".equals(key)) {
+                    dialogFragment = OrderListPreferenceDialog.newInstance(key);
                 } else {
                     dialogFragment = BaseMultiSelectListPreferenceDialog.newInstance(key);
                 }
