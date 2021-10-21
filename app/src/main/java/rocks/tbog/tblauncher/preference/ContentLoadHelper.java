@@ -4,8 +4,6 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.drawable.Drawable;
 import android.text.SpannableString;
-import android.text.Spanned;
-import android.text.style.ImageSpan;
 import android.util.Log;
 import android.util.Pair;
 
@@ -15,7 +13,6 @@ import androidx.annotation.StringRes;
 import androidx.core.graphics.drawable.DrawableCompat;
 import androidx.preference.MultiSelectListPreference;
 import androidx.preference.Preference;
-import androidx.vectordrawable.graphics.drawable.VectorDrawableCompat;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -30,13 +27,13 @@ import rocks.tbog.tblauncher.SettingsActivity;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.TagsHandler;
 import rocks.tbog.tblauncher.dataprovider.TagsProvider;
+import rocks.tbog.tblauncher.drawable.TextDrawable;
 import rocks.tbog.tblauncher.entry.ActionEntry;
 import rocks.tbog.tblauncher.entry.FilterEntry;
 import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.entry.TagEntry;
 import rocks.tbog.tblauncher.utils.PrefOrderedListHelper;
 import rocks.tbog.tblauncher.utils.UIColors;
-import rocks.tbog.tblauncher.utils.UISizes;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public class ContentLoadHelper {
@@ -154,29 +151,20 @@ public class ContentLoadHelper {
         final int size = entryToShowList.size();
         final CharSequence[] entries = new CharSequence[size];
         final CharSequence[] entryValues = new CharSequence[size];
-        boolean iconTagLoaded = false;
-        VectorDrawableCompat iconTag = null;
+
         int layoutDirection = context.getResources().getConfiguration().getLayoutDirection();
-        int iconSize = UISizes.getTextAppearanceTextSize(context, android.R.attr.textAppearanceMedium);
+        int iconSize = context.getResources().getDimensionPixelSize(R.dimen.icon_preview_size);
         int tintColor = UIColors.getThemeColor(context, R.attr.colorAccent);
 
         for (int idx = 0; idx < size; idx++) {
             StaticEntry entry = entryToShowList.get(idx);
             if (entry instanceof TagEntry) {
-                if (!iconTagLoaded) {
-                    iconTagLoaded = true;
-                    iconTag = VectorDrawableCompat.create(context.getResources(), R.drawable.ic_tags, null);
-                    if (iconTag != null) {
-                        iconTag.setTint(tintColor);
-                        iconTag.setBounds(0, 0, iconSize, iconSize);
-                    }
-                }
-                if (iconTag == null) {
-                    entries[idx] = entry.getName();
-                } else {
-                    SpannableString name = Utilities.addDrawableInString(entry.getName(), iconTag, layoutDirection);
-                    entries[idx] = name;
-                }
+                Drawable tagIcon = entry.getIconDrawable(context);
+                if (tagIcon instanceof TextDrawable)
+                    ((TextDrawable) tagIcon).setTextColor(tintColor);
+                tagIcon.setBounds(0, 0, iconSize, iconSize);
+                SpannableString name = Utilities.addDrawableInString(entry.getName(), tagIcon, layoutDirection);
+                entries[idx] = name;
             } else if (entry instanceof ActionEntry || entry instanceof FilterEntry) {
                 Drawable iconAction = entry.getDefaultDrawable(context);
                 if (iconAction == null) {

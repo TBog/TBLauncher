@@ -101,6 +101,13 @@ public final class UISizes {
         return CACHED_RADIUS_POPUP_CORNER;
     }
 
+    /**
+     * Example usage: `int size = UISizes.getTextAppearanceTextSize(context, android.R.attr.textAppearanceMedium);`
+     *
+     * @param context        we need the context to get the theme
+     * @param textAppearance text size of what attribute
+     * @return text size
+     */
     public static int getTextAppearanceTextSize(Context context, @AttrRes int textAppearance) {
         int size = 0;
         TypedValue appearance = new TypedValue();
