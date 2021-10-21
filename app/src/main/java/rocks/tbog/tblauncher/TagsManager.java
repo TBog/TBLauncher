@@ -188,7 +188,17 @@ public class TagsManager {
             if (item == null)
                 dh.addToMods(tagEntry);
         }
-        TBApplication.behaviour(ctx).launchCustomIconDialog(tagEntry);
+        TBApplication.behaviour(ctx).launchCustomIconDialog(tagEntry, () -> {
+            int pos = mTagList.indexOf(info);
+            if (pos == -1)
+                return;
+            TagInfo tagInfo = new TagInfo(tagEntry);
+            tagInfo.name = info.name;
+            tagInfo.action = info.action;
+            tagInfo.entryList = info.entryList;
+            mTagList.set(pos, tagInfo);
+            mAdapter.notifyDataSetChanged();
+        });
     }
 
     public void onStart() {

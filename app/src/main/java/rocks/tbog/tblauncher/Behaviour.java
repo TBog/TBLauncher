@@ -1124,7 +1124,11 @@ public class Behaviour implements ISearchActivity {
         dialog.show(mTBLauncherActivity.getSupportFragmentManager(), DIALOG_CUSTOM_ICON);
     }
 
-    public void launchCustomIconDialog(StaticEntry staticEntry) {
+    public void launchCustomIconDialog(@NonNull StaticEntry staticEntry) {
+        launchCustomIconDialog(staticEntry, null);
+    }
+
+    public void launchCustomIconDialog(@NonNull StaticEntry staticEntry, @Nullable Runnable afterConfirmation) {
         IconSelectDialog dialog = new IconSelectDialog();
         openFragmentDialog(dialog, DIALOG_CUSTOM_ICON);
 
@@ -1151,7 +1155,9 @@ public class Behaviour implements ISearchActivity {
                 app.iconsHandler().changeIcon(staticEntry, drawable);
             // force a result refresh to update the icon in the view
             refreshSearchRecord(staticEntry);
-            TBApplication.quickList(mTBLauncherActivity).reload();
+            app.quickList().reload();
+            if (afterConfirmation != null)
+                afterConfirmation.run();
         });
         dialog.show(mTBLauncherActivity.getSupportFragmentManager(), DIALOG_CUSTOM_ICON);
     }
