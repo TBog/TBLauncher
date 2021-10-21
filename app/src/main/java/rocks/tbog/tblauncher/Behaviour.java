@@ -517,7 +517,8 @@ public class Behaviour implements ISearchActivity {
         Log.d(TAG, "desktop changed " + currentMode + " -> " + mode);
         if (mode.equals(currentMode)) {
             // no change, maybe refresh?
-            //showDesktop(mode);
+            if (TBApplication.state().isResultListVisible() && mResultAdapter.getCount() == 0)
+                showDesktop(mode);
             return;
         }
 
