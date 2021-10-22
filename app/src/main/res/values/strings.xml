@@ -388,7 +388,7 @@
     <string name="search_bar_ripple_color">Touch color</string>
     <string name="search_bar_cursor_argb">Cursor color</string>
     <string name="back_device_key">Back button</string>
-    <string name="action_show_untagged">Un-tagged</string>
+    <string name="action_show_untagged">Untagged</string>
     <string name="dm_search_open_result">Initial result list</string>
     <string name="action_app_to_run">App to run</string>
     <string name="action_entry_to_show">Tags to show</string>
