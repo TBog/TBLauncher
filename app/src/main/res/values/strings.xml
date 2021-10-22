@@ -14,8 +14,8 @@
     <string name="cant_save_shortcuts">Could not add shortcuts. Is TinyBit your default launcher?</string>
     <string name="toast_favorites_added">%s added to favorites</string>
     <string name="toast_favorites_removed">%s removed from favorites</string>
-    <string name="menu_quick_list_add">Add to Quick List</string>
-    <string name="menu_quick_list_remove">Remove from Quick List</string>
+    <string name="menu_quick_list_add">Add to dock</string>
+    <string name="menu_quick_list_remove">Remove from dock</string>
     <string name="menu_remove_history">Remove from history</string>
     <string name="stub_application">App name</string>
     <string name="stub_app_tag">app tag list</string>
@@ -106,9 +106,9 @@
     <string name="hint_new_tag">add tag</string>
     <string name="title_features">Features</string>
     <string name="features_summary">Toggle and customize app features</string>
-    <string name="quick_list_section">Quick list</string>
-    <string name="quick_list_enabled">Use quick list</string>
-    <string name="quick_list_size">Bar height</string>
+    <string name="quick_list_section">Dock</string>
+    <string name="quick_list_enabled">Use dock</string>
+    <string name="quick_list_size">Dock height</string>
     <string name="tags_section">Tags</string>
     <string name="fuzzy_search_tags">Fuzzy-search tags</string>
     <string name="fuzzy_search_tags_summary">When searching include tags as possible match candidates</string>
@@ -149,7 +149,7 @@
     <string name="edit_quick_list_tab_actions">Actions</string>
     <string name="edit_quick_list_tab_favorites">Favorites</string>
     <string name="edit_quick_list_tab_tags">Tags</string>
-    <string name="quick_list_icons_visible">Show Quick List icons</string>
+    <string name="quick_list_icons_visible">Show dock icons</string>
     <string name="quick_list_text_visible">Show names</string>
     <string name="cache_drawable">Cache icons</string>
     <string name="screen_off_cache_clear">Release cache often</string>
@@ -200,7 +200,7 @@
     <string name="shortcut_pin_auto_confirm">Auto-confirm shortcut</string>
     <string name="shortcut_show_badge">Show app badge</string>
     <string name="shortcut_show_badge_summary">Display app icon that created the shortcut</string>
-    <string name="quick_list_show_badge">Show \"Quick List\" shortcut badge</string>
+    <string name="quick_list_show_badge">Show shortcut badge in dock</string>
     <string name="result_list_color">Background color</string>
     <string name="result_list_alpha">Background opacity</string>
     <string name="result_highlight_color">Highlight color</string>
@@ -213,7 +213,7 @@
     <string name="result_text2_color">Secondary text color</string>
     <string name="search_bar_text_color">Text color</string>
     <string name="search_bar_icon_color">Icons color</string>
-    <string name="menu_popup_quick_list_customize">Edit quick list</string>
+    <string name="menu_popup_quick_list_customize">Edit dock</string>
     <string name="result_text_size">Text size</string>
     <string name="result_text2_size">Secondary text size</string>
     <string name="invalid_rename_tag">There is already a \"%s\" tag</string>
@@ -266,7 +266,7 @@
     <string name="export_tags">Export tags</string>
     <string name="export_tags_summary">Export tag associations, no icons</string>
     <string name="export_modifications">Export customizations</string>
-    <string name="export_modifications_summary">Quick list, custom icons and names</string>
+    <string name="export_modifications_summary">Dock, custom icons and names</string>
     <string name="export_apps">Export apps</string>
     <string name="export_apps_summary">New names for apps, hidden and custom icons</string>
     <string name="import_settings_section">Import settings</string>
@@ -374,9 +374,9 @@
     <string name="behaviour_link_keyboard_search_bar">Link keyboard to search bar visibility</string>
     <string name="behaviour_widget_after_launch">Widget mode after launch</string>
     <string name="behaviour_clear_search_after_launch">Clear search bar after launch</string>
-    <string name="dm_empty_quick_list">Show quick list</string>
-    <string name="dm_search_quick_list">Show quick list</string>
-    <string name="dm_widget_quick_list">Show quick list</string>
+    <string name="dm_empty_quick_list">Show dock</string>
+    <string name="dm_search_quick_list">Show dock</string>
+    <string name="dm_widget_quick_list">Show dock</string>
     <string name="dm_empty_fullscreen">Fullscreen</string>
     <string name="dm_search_fullscreen">Fullscreen</string>
     <string name="dm_search_fullscreen_summary">Only when keyboard is closed</string>

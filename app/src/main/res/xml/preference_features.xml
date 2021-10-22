@@ -11,7 +11,7 @@
             android:summary="@string/root_mode_summary"
             android:title="@string/root_mode" />
 
-    <!-- Quick List -->
+    <!-- Dock / Quick List -->
     <androidx.preference.PreferenceCategory
             android:icon="@drawable/ic_quick"
             android:key="quick-list-section"

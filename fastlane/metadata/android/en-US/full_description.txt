@@ -15,7 +15,7 @@ New Features:
 ⦿ Adaptive icon shapes
 ⦾ Cache icons for fast result display
 ⦿ Tags to better organize apps
-⦾ Quick list items to filter results
+⦾ Dock items to filter results
 ⦿ Preference color preview
 ⦾ Shortcuts for apps, contacts, etc.
 

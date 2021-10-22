@@ -374,7 +374,7 @@
 
         </PreferenceCategory>
 
-        <!-- Quick list -->
+        <!-- Dock / Quick List -->
         <PreferenceCategory
             android:icon="@drawable/ic_quick"
             android:key="quick-list-section"
