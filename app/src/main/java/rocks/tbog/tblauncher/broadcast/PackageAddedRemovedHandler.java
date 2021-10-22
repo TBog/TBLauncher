@@ -48,6 +48,7 @@ public class PackageAddedRemovedHandler extends BroadcastReceiver {
         if ("android.intent.action.PACKAGE_REMOVED".equals(action) && !replacing) {
             // Remove all installed shortcuts
             dataHandler.removeShortcuts(packageName);
+            TBApplication.behaviour(ctx).handleRemoveApp(packageName);
 //            dataHandler.removeFromExcluded(packageName);
         }
 

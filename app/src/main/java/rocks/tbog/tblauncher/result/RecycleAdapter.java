@@ -119,6 +119,10 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
         return results.size();
     }
 
+    public EntryItem getItem(int index) {
+        return results.get(index);
+    }
+
     public void onClick(int index, View anyView) {
         final EntryItem result;
         try {
@@ -146,10 +150,6 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
         }
 
         return false;
-    }
-
-    public int getCount() {
-        return getItemCount();
     }
 
     public void clear() {

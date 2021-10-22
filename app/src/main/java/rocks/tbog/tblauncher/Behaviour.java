@@ -517,7 +517,7 @@ public class Behaviour implements ISearchActivity {
         Log.d(TAG, "desktop changed " + currentMode + " -> " + mode);
         if (mode.equals(currentMode)) {
             // no change, maybe refresh?
-            if (TBApplication.state().isResultListVisible() && mResultAdapter.getCount() == 0)
+            if (TBApplication.state().isResultListVisible() && mResultAdapter.getItemCount() == 0)
                 showDesktop(mode);
             return;
         }
@@ -846,6 +846,16 @@ public class Behaviour implements ISearchActivity {
     @Override
     public void filterResults(String text) {
         mResultAdapter.getFilter().filter(text);
+    }
+
+    public void handleRemoveApp(String packageName) {
+        int count = mResultAdapter.getItemCount();
+        for (int idx = count - 1; idx >= 0; idx -= 1)
+        {
+            EntryItem entryItem = mResultAdapter.getItem(idx);
+            if (entryItem.id.contains(packageName))
+                removeResult(entryItem);
+        }
     }
 
     public void runSearcher(@NonNull String query, @NonNull Class<? extends Searcher> searcherClass) {
