@@ -100,8 +100,10 @@
         <item>@string/action_show_history_frecency</item>
         <item>@string/action_show_history_adaptive</item>
         <item>@string/show_tags_menu</item>
+        <item>@string/show_tags_list</item>
+        <item>@string/show_tags_list_reversed</item>
         <item>Run app…</item>
-        <item>Show tag…</item>
+        <item>Show tagged…</item>
     </string-array>
     <array name="gestureValues" translatable="false">
         <item>none</item>
@@ -125,6 +127,8 @@
         <item>showHistoryByFrecency</item>
         <item>showHistoryByAdaptive</item>
         <item>showTagsMenu</item>
+        <item>showTagsList</item>
+        <item>showTagsListReversed</item>
         <item>runApp</item>
         <item>showEntry</item>
     </array>
@@ -141,7 +145,7 @@
         <item>@string/action_show_history_frequency</item>
         <item>@string/action_show_history_frecency</item>
         <item>@string/action_show_history_adaptive</item>
-        <item>Show tag…</item>
+        <item>Show tagged…</item>
     </string-array>
     <array name="resultValues" translatable="false">
         <item>none</item>

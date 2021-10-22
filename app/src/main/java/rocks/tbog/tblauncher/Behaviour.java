@@ -1441,6 +1441,10 @@ public class Behaviour implements ISearchActivity {
                 return launchActionEntry("show/history/adaptive");
             case "showUntagged":
                 return launchActionEntry("show/untagged");
+            case "showTagsList":
+                return launchActionEntry("show/tags/list");
+            case "showTagsListReversed":
+                return launchActionEntry("show/tags/listReversed");
             case "showTagsMenu": {
                 View anchor = null;
                 if ("button-launcher".equals(source))
