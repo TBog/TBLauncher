@@ -147,9 +147,10 @@ public abstract class StaticEntry extends EntryItem {
     public void displayResult(@NonNull View view, int drawFlags) {
         TextView nameView = view.findViewById(android.R.id.text1);
         nameView.setTextColor(UIColors.getResultTextColor(view.getContext()));
-        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_NAME))
+        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_NAME)) {
             nameView.setText(getName());
-        else
+            nameView.setVisibility(View.VISIBLE);
+        } else
             nameView.setVisibility(View.GONE);
 
         ImageView appIcon = view.findViewById(android.R.id.icon);

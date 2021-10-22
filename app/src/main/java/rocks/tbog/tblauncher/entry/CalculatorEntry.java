@@ -59,6 +59,7 @@ public final class CalculatorEntry extends SearchEntry {
             } else {
                 nameView.setText(text);
             }
+            nameView.setVisibility(View.VISIBLE);
         } else {
             nameView.setVisibility(View.GONE);
         }

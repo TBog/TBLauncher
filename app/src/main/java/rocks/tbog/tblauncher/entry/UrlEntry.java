@@ -65,6 +65,7 @@ public final class UrlEntry extends SearchEntry {
             } else {
                 nameView.setText(text);
             }
+            nameView.setVisibility(View.VISIBLE);
         } else {
             nameView.setVisibility(View.GONE);
         }

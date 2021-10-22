@@ -150,9 +150,10 @@ public final class ShortcutEntry extends EntryWithTags {
         drawFlags |= FLAG_RELOAD;
         TextView nameView = view.findViewById(android.R.id.text1);
         nameView.setTextColor(UIColors.getResultTextColor(context));
-        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_NAME))
+        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_NAME)) {
             ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, nameView);
-        else
+            nameView.setVisibility(View.VISIBLE);
+        } else
             nameView.setVisibility(View.GONE);
 
         ImageView icon1 = view.findViewById(android.R.id.icon1);

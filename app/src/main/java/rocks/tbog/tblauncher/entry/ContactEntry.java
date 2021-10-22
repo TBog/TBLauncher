@@ -115,9 +115,10 @@ public final class ContactEntry extends EntryItem {
         // Contact name
         TextView nameView = view.findViewById(android.R.id.text1);
         nameView.setTextColor(UIColors.getResultTextColor(context));
-        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_NAME))
+        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_NAME)) {
             ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, nameView);
-        else
+            nameView.setVisibility(View.VISIBLE);
+        } else
             nameView.setVisibility(View.GONE);
 
         // Contact photo

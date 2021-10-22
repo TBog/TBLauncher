@@ -164,9 +164,10 @@ public final class AppEntry extends EntryWithTags {
 
     private void displayGridResult(@NonNull View view, int drawFlags) {
         TextView nameView = view.findViewById(android.R.id.text1);
-        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_NAME))
+        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_NAME)) {
             ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, nameView);
-        else
+            nameView.setVisibility(View.VISIBLE);
+        } else
             nameView.setVisibility(View.GONE);
 
         ImageView appIcon = view.findViewById(android.R.id.icon);
