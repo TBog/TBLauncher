@@ -1,4 +1,4 @@
-package rocks.tbog.tblauncher;
+package rocks.tbog.tblauncher.handler;
 
 import android.app.KeyguardManager;
 import android.content.BroadcastReceiver;
@@ -38,6 +38,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import rocks.tbog.tblauncher.TBApplication;
+import rocks.tbog.tblauncher.TBLauncherActivity;
 import rocks.tbog.tblauncher.dataprovider.ActionProvider;
 import rocks.tbog.tblauncher.dataprovider.AppCacheProvider;
 import rocks.tbog.tblauncher.dataprovider.AppProvider;
@@ -487,7 +489,7 @@ public class DataHandler extends BroadcastReceiver
                 Context context = searcher.getContext();
                 // if the apps provider has not finished yet, return the cached ones
                 if ("app".equals(setEntry.getKey()) && context != null)
-                    provider = new AppCacheProvider(context, getCachedApps(context));
+                    provider = TBApplication.appsHandler(context).getCacheProvider();
                 else
                     continue;
             }
@@ -981,29 +983,6 @@ public class DataHandler extends BroadcastReceiver
         }
 
         return null;
-    }
-
-    @NonNull
-    public HashMap<String, AppRecord> getCachedApps(@NonNull Context context) {
-        return DBHelper.getAppsData(context);
-    }
-
-    public void updateAppCache(ArrayList<AppRecord> appRecords) {
-        final Context context = this.getContext();
-        if (context == null)
-            return;
-
-        if (appRecords.size() > 0)
-            DBHelper.insertOrUpdateApps(context, appRecords);
-    }
-
-    public void removeAppCache(ArrayList<AppRecord> appRecords) {
-        final Context context = this.getContext();
-        if (context == null)
-            return;
-
-        if (appRecords.size() > 0)
-            DBHelper.deleteApps(context, appRecords);
     }
 
     public void renameApp(String componentName, String newName) {

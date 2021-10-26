@@ -6,6 +6,7 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.Activity;
 import android.content.ActivityNotFoundException;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -54,6 +55,7 @@ import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.EntryWithTags;
 import rocks.tbog.tblauncher.entry.ShortcutEntry;
 import rocks.tbog.tblauncher.entry.StaticEntry;
+import rocks.tbog.tblauncher.handler.DataHandler;
 import rocks.tbog.tblauncher.quicklist.EditQuickListDialog;
 import rocks.tbog.tblauncher.result.CustomRecycleLayoutManager;
 import rocks.tbog.tblauncher.result.RecycleAdapter;
@@ -72,6 +74,7 @@ import rocks.tbog.tblauncher.ui.dialog.TagsManagerDialog;
 import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.SystemUiVisibility;
 import rocks.tbog.tblauncher.utils.UISizes;
+import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 /**
@@ -850,8 +853,7 @@ public class Behaviour implements ISearchActivity {
 
     public void handleRemoveApp(String packageName) {
         int count = mResultAdapter.getItemCount();
-        for (int idx = count - 1; idx >= 0; idx -= 1)
-        {
+        for (int idx = count - 1; idx >= 0; idx -= 1) {
             EntryItem entryItem = mResultAdapter.getItem(idx);
             if (entryItem.id.contains(packageName))
                 removeResult(entryItem);
@@ -1362,9 +1364,12 @@ public class Behaviour implements ISearchActivity {
         return launchStaticEntry(ActionEntry.SCHEME + action);
     }
 
-    private boolean launchAppEntry(@NonNull String appId) {
+    private boolean launchAppEntry(@NonNull String userComponentName) {
         Context ctx = getContext();
-        EntryItem item = TBApplication.dataHandler(ctx).getPojo(AppEntry.SCHEME + appId);
+        UserHandleCompat user = UserHandleCompat.fromComponentName(ctx, userComponentName);
+        ComponentName component = UserHandleCompat.unflattenComponentName(userComponentName);
+        String appId = AppEntry.generateAppId(component, user);
+        EntryItem item = TBApplication.dataHandler(ctx).getPojo(appId);
         if (item instanceof AppEntry) {
             ResultHelper.launch(mLauncherButton, item, LAUNCHED_FROM_GESTURE);
             return true;

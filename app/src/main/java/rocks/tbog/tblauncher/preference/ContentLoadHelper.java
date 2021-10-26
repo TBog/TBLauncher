@@ -25,7 +25,7 @@ import java.util.Set;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.SettingsActivity;
 import rocks.tbog.tblauncher.TBApplication;
-import rocks.tbog.tblauncher.TagsHandler;
+import rocks.tbog.tblauncher.handler.TagsHandler;
 import rocks.tbog.tblauncher.dataprovider.TagsProvider;
 import rocks.tbog.tblauncher.drawable.TextDrawable;
 import rocks.tbog.tblauncher.entry.ActionEntry;

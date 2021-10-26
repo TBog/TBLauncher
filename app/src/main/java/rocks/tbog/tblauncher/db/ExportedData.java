@@ -751,7 +751,7 @@ public class ExportedData {
         if (!bAppListLoaded)
             return;
 
-        Map<String, AppRecord> cachedApps = TBApplication.dataHandler(context).getCachedApps(context);
+        Map<String, AppRecord> cachedApps = TBApplication.appsHandler(context).getAppRecords(context);
         if (method == Method.OVERWRITE || method == Method.SET) {
             // make sure the validate flag is off
             for (AppRecord rec : cachedApps.values())

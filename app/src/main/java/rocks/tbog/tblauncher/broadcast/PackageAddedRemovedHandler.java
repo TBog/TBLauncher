@@ -7,11 +7,11 @@ import android.util.Log;
 
 import androidx.preference.PreferenceManager;
 
-import rocks.tbog.tblauncher.DataHandler;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.dataprovider.AppProvider;
 import rocks.tbog.tblauncher.dataprovider.ShortcutsProvider;
 import rocks.tbog.tblauncher.entry.AppEntry;
+import rocks.tbog.tblauncher.handler.DataHandler;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 
 /**
@@ -39,9 +39,8 @@ public class PackageAddedRemovedHandler extends BroadcastReceiver {
                     return;
                 }
 
-                String pojoID = AppEntry.SCHEME + user.getUserComponentName(launchIntent.getComponent());
-
-                dataHandler.addToHistory(pojoID);
+                final String appId = AppEntry.generateAppId(launchIntent.getComponent(), user);
+                dataHandler.addToHistory(appId);
             }
         }
 

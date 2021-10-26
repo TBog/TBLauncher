@@ -104,7 +104,7 @@ public class UserHandleCompat {
     }
 
     public String getUserComponentName(ComponentName component) {
-        return addUserSuffixToString(component.getPackageName() + "/" + component.getClassName(), '#');
+        return getUserComponentName(component.getPackageName(), component.getClassName());
     }
 
     public String getUserComponentName(String packageName, String activityName) {

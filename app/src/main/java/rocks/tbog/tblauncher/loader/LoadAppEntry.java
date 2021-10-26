@@ -15,16 +15,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Semaphore;
 
-import rocks.tbog.tblauncher.DataHandler;
 import rocks.tbog.tblauncher.TBApplication;
-import rocks.tbog.tblauncher.TagsHandler;
 import rocks.tbog.tblauncher.db.AppRecord;
 import rocks.tbog.tblauncher.entry.AppEntry;
+import rocks.tbog.tblauncher.handler.AppsHandler;
 import rocks.tbog.tblauncher.utils.Timer;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 
@@ -57,7 +54,7 @@ public class LoadAppEntry extends LoadEntryItem<AppEntry> {
     }
 
     public static class SystemAppLoader {
-        private HashMap<String, AppRecord> dbApps = null;
+        private Map<String, AppRecord> dbApps = null;
         private ArrayList<AppRecord> pendingChanges = null;
         @Nullable
         private final Context ctx;
@@ -74,9 +71,9 @@ public class LoadAppEntry extends LoadEntryItem<AppEntry> {
                 return apps;
             }
 
-            DataHandler dataHandler = TBApplication.getApplication(ctx).getDataHandler();
+            AppsHandler appsHandler = TBApplication.appsHandler(ctx);
 
-            dbApps = dataHandler.getCachedApps(ctx);
+            dbApps = appsHandler.getAppRecords(ctx);
             pendingChanges = new ArrayList<>(0);
 
             if (android.os.Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -125,7 +122,7 @@ public class LoadAppEntry extends LoadEntryItem<AppEntry> {
             Log.i("App", "LoadAppPojos found " + apps.size() + " app(s)");
 
             // add new apps to database
-            dataHandler.updateAppCache(pendingChanges);
+            appsHandler.updateAppCache(pendingChanges, null);
             pendingChanges.clear();
 
             for (Map.Entry<String, AppRecord> entry : dbApps.entrySet()) {
@@ -136,27 +133,11 @@ public class LoadAppEntry extends LoadEntryItem<AppEntry> {
             }
 
             // remove apps from database
-            dataHandler.removeAppCache(pendingChanges);
+            appsHandler.updateAppCache(null, pendingChanges);
             pendingChanges = null;
             dbApps = null;
 
-            final Semaphore semaphore = new Semaphore(0);
-            TagsHandler tagsHandler = TBApplication.tagsHandler(ctx);
-            tagsHandler.runWhenLoaded(() -> {
-                Log.d("App", "set " + apps.size() + " app(s) tags");
-                for (AppEntry app : apps)
-                    app.setTags(tagsHandler.getTags(app.id));
-
-                // notify that the tags are loaded
-                semaphore.release();
-            });
-
-            // TODO: I don't like this hack. We should have a `Handler` class for app entries.
-            // wait for the tags to load
-            try {
-                semaphore.acquire();
-            } catch (InterruptedException ignored) {
-            }
+            AppsHandler.setTagsForApps(apps, TBApplication.tagsHandler(ctx));
 
             return apps;
         }
@@ -178,10 +159,7 @@ public class LoadAppEntry extends LoadEntryItem<AppEntry> {
 
             rec.addFlags(AppRecord.FLAG_VALIDATED);
 
-            String id = AppEntry.SCHEME + componentName;
-//        boolean isExcluded = excludedAppList.contains(componentName);
-//        boolean isExcludedFromHistory = excludedFromHistoryAppList.contains(id);
-            AppEntry app = new AppEntry(id, packageName, activityName, user);
+            AppEntry app = new AppEntry(packageName, activityName, user);
 
             if (rec.hasCustomName())
                 app.setName(rec.displayName);

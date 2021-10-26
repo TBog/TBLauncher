@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Set;
 
 import rocks.tbog.tblauncher.TBApplication;
-import rocks.tbog.tblauncher.TagsHandler;
+import rocks.tbog.tblauncher.handler.TagsHandler;
 import rocks.tbog.tblauncher.WidgetManager;
 import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
 import rocks.tbog.tblauncher.utils.SimpleXmlWriter;
@@ -122,7 +122,7 @@ public class XmlExport {
     public static void applicationsXml(@NonNull Context context, @NonNull SimpleXmlWriter sx) throws IOException {
         sx.startTag(ExportedData.XTN_APP_LIST).attribute("version", "1");
 
-        Map<String, AppRecord> cachedApps = TBApplication.dataHandler(context).getCachedApps(context);
+        Map<String, AppRecord> cachedApps = TBApplication.appsHandler(context).getAppRecords(context);
         for (AppRecord app : cachedApps.values()) {
             // if there is no custom settings, skip this app
             if (app.getFlagsDB() == AppRecord.FLAG_DEFAULT_NAME)

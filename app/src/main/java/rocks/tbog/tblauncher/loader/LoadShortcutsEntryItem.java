@@ -15,7 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import rocks.tbog.tblauncher.TBApplication;
-import rocks.tbog.tblauncher.TagsHandler;
+import rocks.tbog.tblauncher.handler.TagsHandler;
 import rocks.tbog.tblauncher.db.DBHelper;
 import rocks.tbog.tblauncher.db.ModRecord;
 import rocks.tbog.tblauncher.db.ShortcutRecord;

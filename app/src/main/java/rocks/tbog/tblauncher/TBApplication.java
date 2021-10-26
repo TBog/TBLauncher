@@ -13,6 +13,10 @@ import android.database.sqlite.SQLiteDatabase;
 import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 
+import rocks.tbog.tblauncher.handler.AppsHandler;
+import rocks.tbog.tblauncher.handler.DataHandler;
+import rocks.tbog.tblauncher.handler.IconsHandler;
+import rocks.tbog.tblauncher.handler.TagsHandler;
 import rocks.tbog.tblauncher.icons.IconPackCache;
 import rocks.tbog.tblauncher.quicklist.QuickList;
 import rocks.tbog.tblauncher.searcher.Searcher;
@@ -25,9 +29,10 @@ public class TBApplication extends Application {
      */
     @NonNull
     private static final LauncherState mState = new LauncherState();
-    private DataHandler dataHandler;
-    private IconsHandler iconsPackHandler;
+    private DataHandler dataHandler = null;
+    private IconsHandler iconsPackHandler = null;
     private TagsHandler tagsHandler = null;
+    private AppsHandler appsHandler = null;
     private boolean bLayoutUpdateRequired = false;
     private SharedPreferences mSharedPreferences = null;
     /**
@@ -106,6 +111,11 @@ public class TBApplication extends Application {
     @NonNull
     public static TagsHandler tagsHandler(Context context) {
         return getApplication(context).tagsHandler();
+    }
+
+    @NonNull
+    public static AppsHandler appsHandler(Context context) {
+        return getApplication(context).appsHandler();
     }
 
     @NonNull
@@ -229,6 +239,13 @@ public class TBApplication extends Application {
         if (tagsHandler == null)
             tagsHandler = new TagsHandler(this);
         return tagsHandler;
+    }
+
+    @NonNull
+    public AppsHandler appsHandler() {
+        if (appsHandler == null)
+            appsHandler = new AppsHandler(this);
+        return appsHandler;
     }
 
     @NonNull

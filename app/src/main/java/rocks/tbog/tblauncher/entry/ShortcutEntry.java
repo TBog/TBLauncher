@@ -31,7 +31,7 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Locale;
 
-import rocks.tbog.tblauncher.IconsHandler;
+import rocks.tbog.tblauncher.handler.IconsHandler;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.db.ShortcutRecord;

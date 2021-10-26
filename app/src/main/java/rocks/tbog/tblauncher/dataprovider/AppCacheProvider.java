@@ -1,31 +1,26 @@
 package rocks.tbog.tblauncher.dataprovider;
 
-import android.content.ComponentName;
-import android.content.Context;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.CountDownLatch;
 
-import rocks.tbog.tblauncher.db.AppRecord;
 import rocks.tbog.tblauncher.entry.AppEntry;
-import rocks.tbog.tblauncher.entry.EntryItem;
+import rocks.tbog.tblauncher.handler.AppsHandler;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.searcher.Searcher;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
-import rocks.tbog.tblauncher.utils.UserHandleCompat;
 
 public class AppCacheProvider implements IProvider<AppEntry> {
+    final static String TAG = "AppCP";
+    final private AppsHandler appsHandler;
 
-    final private Context context;
-    final private HashMap<String, AppRecord> apps;
-
-    public AppCacheProvider(Context context, HashMap<String, AppRecord> cachedApps) {
-        this.context = context;
-        apps = cachedApps;
+    public AppCacheProvider(@NonNull AppsHandler handler) {
+        appsHandler = handler;
     }
 
     @WorkerThread
@@ -37,32 +32,21 @@ public class AppCacheProvider implements IProvider<AppEntry> {
             return;
         }
 
-        //FuzzyScore fuzzyScore = new FuzzyScore(queryNormalized.codePoints);
-        //FuzzyScore.MatchInfo matchInfo;
-        //boolean match;
-
-        ArrayList<AppEntry> pojos = new ArrayList<>(apps.size());
-
-        // convert from AppRecord to AppEntry
-        for (AppRecord rec : apps.values()) {
-            UserHandleCompat user = UserHandleCompat.fromComponentName(context, rec.componentName);
-            String id = AppEntry.SCHEME + rec.componentName;
-            ComponentName cn = UserHandleCompat.unflattenComponentName(rec.componentName);
-            AppEntry app = new AppEntry(id, cn.getPackageName(), cn.getClassName(), user);
-            pojos.add(app);
-
-            if (rec.hasCustomName())
-                app.setName(rec.displayName);
-            else
-                app.setName(user.getBadgedLabelForUser(context, rec.displayName));
-            if (rec.hasCustomIcon())
-                app.setCustomIcon(rec.dbId);
-            //app.setTags(tagsHandler.getTags(app.id));
+        final CountDownLatch latch = new CountDownLatch(1);
+        // notify that the tags are loaded
+        appsHandler.runWhenLoaded(latch::countDown);
+        // wait for the tags to load
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            Log.e(TAG, "waiting for TagsHandler", e);
         }
+
+        final Collection<AppEntry> entries = appsHandler.getAllApps();
 
         FuzzyScore fuzzyScore = new FuzzyScore(queryNormalized.codePoints);
 
-        AppProvider.checkAppResults(pojos, fuzzyScore, searcher);
+        AppProvider.checkAppResults(entries, fuzzyScore, searcher);
     }
 
     public void reload(boolean cancelCurrentLoadTask) {

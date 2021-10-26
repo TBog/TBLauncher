@@ -55,6 +55,7 @@ import rocks.tbog.tblauncher.drawable.SizeWrappedDrawable;
 import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.entry.TagEntry;
+import rocks.tbog.tblauncher.handler.IconsHandler;
 import rocks.tbog.tblauncher.preference.BaseListPreferenceDialog;
 import rocks.tbog.tblauncher.preference.BaseMultiSelectListPreferenceDialog;
 import rocks.tbog.tblauncher.preference.ChooseColorDialog;

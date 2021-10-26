@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.Set;
 
 import rocks.tbog.tblauncher.entry.EntryItem;
+import rocks.tbog.tblauncher.handler.TagsHandler;
 import rocks.tbog.tblauncher.ui.DialogFragment;
 import rocks.tbog.tblauncher.ui.DialogWrapper;
 

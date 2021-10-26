@@ -20,7 +20,6 @@ import java.util.List;
 
 import rocks.tbog.tblauncher.Behaviour;
 import rocks.tbog.tblauncher.BuildConfig;
-import rocks.tbog.tblauncher.DataHandler;
 import rocks.tbog.tblauncher.Permission;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
@@ -33,6 +32,7 @@ import rocks.tbog.tblauncher.entry.FilterEntry;
 import rocks.tbog.tblauncher.entry.SearchEntry;
 import rocks.tbog.tblauncher.entry.ShortcutEntry;
 import rocks.tbog.tblauncher.entry.StaticEntry;
+import rocks.tbog.tblauncher.handler.DataHandler;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public class ResultHelper {
@@ -94,7 +94,7 @@ public class ResultHelper {
      * @param context android context
      */
     public static void recordLaunch(@NonNull EntryItem pojo, @NonNull Context context) {
-        if (pojo instanceof StaticEntry)
+        if (pojo.isExcludedFromHistory())
             return;
         // Save in history
         TBApplication.getApplication(context).getDataHandler().addToHistory(pojo.getHistoryId());

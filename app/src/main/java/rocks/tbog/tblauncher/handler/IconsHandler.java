@@ -1,4 +1,4 @@
-package rocks.tbog.tblauncher;
+package rocks.tbog.tblauncher.handler;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -29,6 +29,8 @@ import androidx.preference.PreferenceManager;
 import java.util.HashMap;
 import java.util.List;
 
+import rocks.tbog.tblauncher.R;
+import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.WorkAsync.RunnableTask;
 import rocks.tbog.tblauncher.db.AppRecord;
 import rocks.tbog.tblauncher.drawable.DrawableUtils;

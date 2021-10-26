@@ -27,7 +27,7 @@ import java.util.List;
 
 import kotlin.Pair;
 import rocks.tbog.tblauncher.CustomizeUI;
-import rocks.tbog.tblauncher.DataHandler;
+import rocks.tbog.tblauncher.handler.DataHandler;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.dataprovider.ActionProvider;

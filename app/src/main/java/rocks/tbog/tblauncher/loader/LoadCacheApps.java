@@ -1,25 +1,28 @@
 package rocks.tbog.tblauncher.loader;
 
-import android.content.ComponentName;
 import android.content.Context;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.concurrent.Semaphore;
+import java.util.Collection;
+import java.util.concurrent.CountDownLatch;
 
 import rocks.tbog.tblauncher.TBApplication;
-import rocks.tbog.tblauncher.TagsHandler;
-import rocks.tbog.tblauncher.db.AppRecord;
 import rocks.tbog.tblauncher.entry.AppEntry;
+import rocks.tbog.tblauncher.handler.AppsHandler;
 import rocks.tbog.tblauncher.utils.Timer;
-import rocks.tbog.tblauncher.utils.UserHandleCompat;
 
 public class LoadCacheApps extends LoadEntryItem<AppEntry> {
+    private final static String TAG = "LCApps";
+    private final AppsHandler appsHandler;
+
     public LoadCacheApps(Context context) {
         super(context);
+        TBApplication app = TBApplication.getApplication(context);
+        // call this here in case the AppsHandler is not yet loaded
+        appsHandler = app.appsHandler();
     }
 
     @NonNull
@@ -30,14 +33,25 @@ public class LoadCacheApps extends LoadEntryItem<AppEntry> {
 
     @Override
     protected ArrayList<AppEntry> doInBackground(Void param) {
+        Log.d(TAG, "doInBackground");
         final Context context = this.context.get();
         // timer start
         Timer timer = Timer.startMilli();
 
+        final CountDownLatch latch = new CountDownLatch(1);
+        // notify that the tags are loaded
+        appsHandler.runWhenLoaded(latch::countDown);
+        // wait for the tags to load
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            Log.e(TAG, "waiting for TagsHandler", e);
+        }
+
         // function to time
         final ArrayList<AppEntry> pojos;
         if (context != null)
-            pojos = getApps(context);
+            pojos = getApps(context, appsHandler);
         else
             pojos = new ArrayList<>(0);
 
@@ -49,47 +63,14 @@ public class LoadCacheApps extends LoadEntryItem<AppEntry> {
     }
 
     @NonNull
-    private static ArrayList<AppEntry> getApps(@NonNull Context context) {
-        TBApplication app = TBApplication.getApplication(context);
-        HashMap<String, AppRecord> apps = app.getDataHandler().getCachedApps(context);
-
-        final ArrayList<AppEntry> appEntries = new ArrayList<>(apps.size());
-
-        // convert from AppRecord to AppEntry
-        for (AppRecord rec : apps.values()) {
-            UserHandleCompat user = UserHandleCompat.fromComponentName(context, rec.componentName);
-            String id = AppEntry.SCHEME + rec.componentName;
-            ComponentName cn = UserHandleCompat.unflattenComponentName(rec.componentName);
-            AppEntry appEntry = new AppEntry(id, cn.getPackageName(), cn.getClassName(), user);
-            appEntries.add(appEntry);
-
-            if (rec.hasCustomName())
-                appEntry.setName(rec.displayName);
-            else
-                appEntry.setName(user.getBadgedLabelForUser(context, rec.displayName));
-            if (rec.hasCustomIcon())
-                appEntry.setCustomIcon(rec.dbId);
-            //app.setTags(tagsHandler.getTags(app.id));
+    private static ArrayList<AppEntry> getApps(@NonNull Context context, @NonNull AppsHandler appsHandler) {
+        Collection<AppEntry> appEntries = appsHandler.getAllApps();
+        Log.d(TAG, "appsHandler.getAllApps.size=" + appEntries.size());
+        if (appEntries.isEmpty()) {
+            // cache is empty, load system apps now
+            LoadAppEntry.SystemAppLoader loader = new LoadAppEntry.SystemAppLoader(context);
+            return loader.getAppList();
         }
-
-        final Semaphore semaphore = new Semaphore(0);
-        final TagsHandler tagsHandler = app.tagsHandler();
-        tagsHandler.runWhenLoaded(() -> {
-            Log.d("App", "set " + appEntries.size() + " cached app(s) tags");
-            for (AppEntry appEntry : appEntries)
-                appEntry.setTags(tagsHandler.getTags(appEntry.id));
-
-            // notify that the tags are loaded
-            semaphore.release();
-        });
-
-        // TODO: I don't like this hack. We should have a `Handler` class for app entries.
-        // wait for the tags to load
-        try {
-            semaphore.acquire();
-        } catch (InterruptedException ignored) {
-        }
-
-        return appEntries;
+        return new ArrayList<>(appEntries);
     }
 }

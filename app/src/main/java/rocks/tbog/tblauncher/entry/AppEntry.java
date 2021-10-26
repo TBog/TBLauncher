@@ -35,9 +35,9 @@ import java.util.List;
 
 import rocks.tbog.tblauncher.Behaviour;
 import rocks.tbog.tblauncher.BuildConfig;
-import rocks.tbog.tblauncher.IconsHandler;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
+import rocks.tbog.tblauncher.handler.IconsHandler;
 import rocks.tbog.tblauncher.preference.ContentLoadHelper;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
@@ -62,13 +62,31 @@ public final class AppEntry extends EntryWithTags {
     private boolean hiddenByUser = false;
     private boolean excludedFromHistory = false;
 
-    public AppEntry(@NonNull String id, @NonNull String packageName, @NonNull String className, @NonNull UserHandleCompat userHandle) {
-        super(id);
-        if (BuildConfig.DEBUG && !id.startsWith(SCHEME)) {
-            throw new IllegalStateException("Invalid " + AppEntry.class.getSimpleName() + " id `" + id + "`");
-        }
-        this.componentName = new ComponentName(packageName, className);
-        this.userHandle = userHandle;
+    public AppEntry(@NonNull ComponentName component, @NonNull UserHandleCompat user) {
+        this(component.getPackageName(), component.getClassName(), user);
+    }
+
+    public AppEntry(@NonNull String packageName, @NonNull String activityName, @NonNull UserHandleCompat user) {
+        super(generateAppId(packageName, activityName, user));
+        componentName = new ComponentName(packageName, activityName);
+        userHandle = user;
+    }
+
+    /**
+     * Generate a unique {@link AppEntry} id from {@link ComponentName} and {@link UserHandleCompat}
+     *
+     * @param component component {@link ComponentName}
+     * @param user      user handle
+     * @return unique id with SCHEME prefix
+     */
+    @NonNull
+    public static String generateAppId(@NonNull ComponentName component, @NonNull UserHandleCompat user) {
+        return SCHEME + user.getUserComponentName(component);
+    }
+
+    @NonNull
+    public static String generateAppId(@NonNull String packageName, @NonNull String activityName, @NonNull UserHandleCompat user) {
+        return SCHEME + user.getUserComponentName(packageName, activityName);
     }
 
     @NonNull
@@ -93,6 +111,7 @@ public final class AppEntry extends EntryWithTags {
         this.hiddenByUser = hiddenByUser;
     }
 
+    @Override
     public boolean isExcludedFromHistory() {
         return excludedFromHistory;
     }

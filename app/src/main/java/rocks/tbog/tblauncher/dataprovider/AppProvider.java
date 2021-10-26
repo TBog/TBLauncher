@@ -16,7 +16,6 @@ import androidx.annotation.WorkerThread;
 import java.util.ArrayList;
 import java.util.Objects;
 
-import rocks.tbog.tblauncher.DataHandler;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.broadcast.PackageAddedRemovedHandler;
 import rocks.tbog.tblauncher.entry.AppEntry;

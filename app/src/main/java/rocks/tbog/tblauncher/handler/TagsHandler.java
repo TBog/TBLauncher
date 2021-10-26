@@ -1,4 +1,4 @@
-package rocks.tbog.tblauncher;
+package rocks.tbog.tblauncher.handler;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -26,6 +26,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import rocks.tbog.tblauncher.R;
+import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.dataprovider.TagsProvider;
 import rocks.tbog.tblauncher.db.DBHelper;
 import rocks.tbog.tblauncher.entry.AppEntry;
@@ -47,11 +49,12 @@ public class TagsHandler {
     private boolean mIsLoaded = false;
     private final ArrayDeque<Runnable> mAfterLoadedTasks = new ArrayDeque<>(2);
 
-    TagsHandler(TBApplication application) {
+    public TagsHandler(TBApplication application) {
         mApplication = application;
         loadFromDB(false);
     }
 
+    @Nullable
     public void loadFromDB(boolean wait) {
         Log.d(TAG, "loadFromDB(wait= " + wait + " )");
 
@@ -90,8 +93,11 @@ public class TagsHandler {
         if (wait) {
             load.run();
             apply.run();
-        } else
-            Utilities.runAsync((t) -> load.run(), (t) -> apply.run());
+        } else {
+            Utilities.runAsync(
+                    (t) -> load.run(),
+                    (t) -> apply.run());
+        }
     }
 
     public void runWhenLoaded(@NonNull Runnable task) {
@@ -328,7 +334,7 @@ public class TagsHandler {
             String className = list.get(0).activityInfo.name;
 
             UserHandleCompat user = UserHandleCompat.CURRENT_USER;
-            return AppEntry.SCHEME + user.getUserComponentName(packageName, className);
+            return AppEntry.generateAppId(packageName, className, user);
         }
     }
 
@@ -368,7 +374,7 @@ public class TagsHandler {
                 pm.getActivityInfo(cn, PackageManager.GET_META_DATA);
                 alarmClockIntent.setComponent(cn);
 
-                return AppEntry.SCHEME + user.getUserComponentName(cn);
+                return AppEntry.generateAppId(cn, user);
             } catch (PackageManager.NameNotFoundException ignored) {
                 // Try next suggestion, this one does not exists on the phone.
             }

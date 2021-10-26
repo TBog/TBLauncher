@@ -21,7 +21,7 @@ import androidx.collection.ArraySet;
 import java.util.ArrayList;
 import java.util.List;
 
-import rocks.tbog.tblauncher.IconsHandler;
+import rocks.tbog.tblauncher.handler.IconsHandler;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.icons.IconPackXML;
