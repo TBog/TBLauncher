@@ -3,6 +3,7 @@ package rocks.tbog.tblauncher.quicklist;
 import android.content.ClipData;
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.os.Build;
 import android.util.Log;
 import android.view.DragEvent;
 import android.view.LayoutInflater;
@@ -27,7 +28,6 @@ import java.util.List;
 
 import kotlin.Pair;
 import rocks.tbog.tblauncher.CustomizeUI;
-import rocks.tbog.tblauncher.handler.DataHandler;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.dataprovider.ActionProvider;
@@ -37,6 +37,7 @@ import rocks.tbog.tblauncher.dataprovider.TagsProvider;
 import rocks.tbog.tblauncher.db.ModRecord;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.TagEntry;
+import rocks.tbog.tblauncher.handler.DataHandler;
 import rocks.tbog.tblauncher.result.EntryAdapter;
 import rocks.tbog.tblauncher.result.LoadDataForAdapter;
 import rocks.tbog.tblauncher.utils.DebugInfo;
@@ -218,7 +219,16 @@ public class EditQuickList {
         ClipData clipData = ClipData.newPlainText(Integer.toString(idx), dragDropInfo.draggedEntry.id);
         View.DragShadowBuilder shadow = new View.DragShadowBuilder(v);
         v.setVisibility(View.INVISIBLE);
-        return v.startDrag(clipData, shadow, dragDropInfo, 0);
+        return startDragAndDrop(v, clipData, shadow, dragDropInfo);
+    }
+
+    @SuppressWarnings("deprecation")
+    private static boolean startDragAndDrop(@NonNull View v, ClipData clipData, View.DragShadowBuilder shadow, DragAndDropInfo dragDropInfo) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            return v.startDragAndDrop(clipData, shadow, dragDropInfo, 0);
+        } else {
+            return v.startDrag(clipData, shadow, dragDropInfo, 0);
+        }
     }
 
     protected static void repositionViews(@NonNull ViewGroup quickList, int resetUntilIdx, int moveRightUntilIdx, int moveLeftUntilIdx) {

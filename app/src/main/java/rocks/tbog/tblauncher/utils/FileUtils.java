@@ -92,7 +92,7 @@ public class FileUtils {
                 type = "text/plain";
             }
 
-            Intent intent = ShareCompat.IntentBuilder.from(activity)
+            Intent intent = new ShareCompat.IntentBuilder(activity)
                     .setType(type)
                     .setSubject(title)
                     .setStream(uri)

@@ -1,6 +1,7 @@
 package rocks.tbog.tblauncher.utils;
 
 import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.util.Log;
@@ -187,7 +188,7 @@ public final class EdgeGlowHelper {
                 final Drawable mEdge = (Drawable) EDGE_GLOW_FIELD_EDGE.get(edgeEffect);
                 final Drawable mGlow = (Drawable) EDGE_GLOW_FIELD_GLOW.get(edgeEffect);
                 for (Drawable drawable : Arrays.asList(mEdge, mGlow)) {
-                    drawable.setColorFilter(color, PorterDuff.Mode.SRC_IN);
+                    drawable.setColorFilter(new PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN));
                     drawable.setCallback(null); // free up any references
                 }
             } catch (Exception e) {

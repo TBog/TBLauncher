@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.Build;
@@ -481,7 +482,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     int size = UISizes.getResultIconSize(preference.getContext());
                     icon = new SizeWrappedDrawable(icon, size);
                 }
-                icon.setColorFilter(color, PorterDuff.Mode.MULTIPLY);
+                icon.setColorFilter(new PorterDuffColorFilter(color, PorterDuff.Mode.MULTIPLY));
                 preference.setIcon(icon);
             }
             if (preference instanceof PreferenceGroup) {
@@ -792,6 +793,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         }
     }
 
+    @SuppressWarnings("deprecation")
     private static void setActionBarTextColor(Activity activity, int color) {
         ActionBar actionBar = activity instanceof AppCompatActivity
                 ? ((AppCompatActivity) activity).getSupportActionBar()

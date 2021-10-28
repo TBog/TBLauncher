@@ -420,7 +420,7 @@ public class ExportedData {
                     break;
                 case XmlPullParser.TEXT:
                     if (addTextToValueSet) {
-                        //noinspection unchecked
+                        @SuppressWarnings("unchecked")
                         ArraySet<String> set = (ArraySet<String>) prefValue;
                         set.add(xpp.getText());
                     } else if (prefName != null)
@@ -831,7 +831,7 @@ public class ExportedData {
             else if (value instanceof Boolean)
                 editor.putBoolean(entry.getKey(), (Boolean) value);
             else if (value instanceof ArraySet) {
-                //noinspection unchecked
+                @SuppressWarnings("unchecked")
                 ArraySet<String> set = (ArraySet<String>) value;
                 editor.putStringSet(entry.getKey(), set);
             }

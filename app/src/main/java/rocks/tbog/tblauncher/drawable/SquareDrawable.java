@@ -48,6 +48,7 @@ public abstract class SquareDrawable extends Drawable {
         mPaint.setColorFilter(colorFilter);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public int getOpacity() {
         return PixelFormat.TRANSLUCENT;

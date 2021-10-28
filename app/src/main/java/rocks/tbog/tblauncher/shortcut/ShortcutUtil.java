@@ -50,13 +50,6 @@ public class ShortcutUtil {
     }
 
     /**
-     * Save all oreo shortcuts to DB
-     */
-    public static void addAllShortcuts(Context context) {
-        new SaveAllOreoShortcutsAsync(context).execute();
-    }
-
-    /**
      * Save single shortcut to DB via pin request
      */
     @TargetApi(Build.VERSION_CODES.O)

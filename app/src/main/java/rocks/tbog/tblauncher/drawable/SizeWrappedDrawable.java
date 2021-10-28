@@ -39,6 +39,7 @@ public class SizeWrappedDrawable extends Drawable {
         mDrawable.setColorFilter(colorFilter);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public int getOpacity() {
         return mDrawable.getOpacity();

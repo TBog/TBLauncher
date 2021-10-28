@@ -5,7 +5,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.LauncherApps;
 import android.content.pm.ShortcutInfo;
-import android.os.AsyncTask;
 import android.os.Build;
 import android.util.Log;
 import android.widget.Toast;
@@ -14,14 +13,16 @@ import androidx.annotation.NonNull;
 
 import java.lang.ref.WeakReference;
 
-import rocks.tbog.tblauncher.handler.DataHandler;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
+import rocks.tbog.tblauncher.WorkAsync.AsyncTask;
 import rocks.tbog.tblauncher.dataprovider.ShortcutsProvider;
 import rocks.tbog.tblauncher.db.ShortcutRecord;
+import rocks.tbog.tblauncher.handler.DataHandler;
+import rocks.tbog.tblauncher.utils.Utilities;
 
 @TargetApi(Build.VERSION_CODES.O)
-public class SaveSingleOreoShortcutAsync extends AsyncTask<Void, Integer, Boolean> {
+public class SaveSingleOreoShortcutAsync extends AsyncTask<Void, Boolean> {// AsyncTask<Void, Integer, Boolean> {
 
     private static final String TAG = "OreoShortcutAsync";
     private final WeakReference<Context> context;
@@ -36,7 +37,7 @@ public class SaveSingleOreoShortcutAsync extends AsyncTask<Void, Integer, Boolea
 
 
     @Override
-    protected Boolean doInBackground(Void... voids) {
+    protected Boolean doInBackground(Void v) {
 
         final LauncherApps.PinItemRequest pinItemRequest = intent.getParcelableExtra(LauncherApps.EXTRA_PIN_ITEM_REQUEST);
         final ShortcutInfo shortcutInfo = pinItemRequest != null ? pinItemRequest.getShortcutInfo() : null;
@@ -76,14 +77,13 @@ public class SaveSingleOreoShortcutAsync extends AsyncTask<Void, Integer, Boolea
     }
 
     @Override
-    protected void onProgressUpdate(Integer... progress) {
-        if (progress[0] == -1) {
-            Toast.makeText(context.get(), R.string.cant_pin_shortcut, Toast.LENGTH_LONG).show();
+    protected void onPostExecute(Boolean success) {
+        if (success == null || isCancelled()) {
+            Context ctx = context.get();
+            if (ctx != null)
+                Toast.makeText(ctx, R.string.cant_pin_shortcut, Toast.LENGTH_LONG).show();
+            return;
         }
-    }
-
-    @Override
-    protected void onPostExecute(@NonNull Boolean success) {
         if (success) {
             Log.i(TAG, "Shortcut added to KISS");
 
@@ -96,4 +96,7 @@ public class SaveSingleOreoShortcutAsync extends AsyncTask<Void, Integer, Boolea
         }
     }
 
+    public void execute() {
+        Utilities.executeAsync(this);
+    }
 }

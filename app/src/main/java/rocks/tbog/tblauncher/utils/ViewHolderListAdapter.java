@@ -65,6 +65,7 @@ public abstract class ViewHolderListAdapter<T, VH extends ViewHolderAdapter.View
             super(adapter, loadInBackground);
         }
 
+        @SuppressWarnings("unchecked")
         @Override
         protected void onDataLoadFinished(@NonNull ViewHolderAdapter<T, ? extends ViewHolder<T>> adapter, @NonNull Collection<T> data) {
             ViewHolderListAdapter<T, ? extends ViewHolder<T>> listAdapter;

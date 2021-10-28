@@ -3,6 +3,7 @@ package rocks.tbog.tblauncher.ui;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.PorterDuff;
+import android.graphics.PorterDuffColorFilter;
 import android.graphics.drawable.Drawable;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -163,7 +164,7 @@ public class LinearAdapter extends BaseAdapter {
             if (drawable == null)
                 drawable = divider.getBackground();
             if (drawable != null) {
-                drawable.setColorFilter(color, PorterDuff.Mode.MULTIPLY);
+                drawable.setColorFilter(new PorterDuffColorFilter(color, PorterDuff.Mode.MULTIPLY));
                 divider.setBackground(drawable);
             }
         }

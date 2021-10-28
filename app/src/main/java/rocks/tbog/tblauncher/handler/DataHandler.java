@@ -14,6 +14,7 @@ import android.graphics.BitmapFactory;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.Looper;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
@@ -313,10 +314,10 @@ public class DataHandler extends BroadcastReceiver
                     // If yes, we can't start background services yet, so we'll need to wait until we get ACTION_USER_PRESENT
                     KeyguardManager myKM = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
                     assert myKM != null;
-                    boolean isPhoneLocked = myKM.inKeyguardRestrictedInputMode();
+                    boolean isPhoneLocked = myKM.isKeyguardLocked();
                     if (!isPhoneLocked) {
                         context.unregisterReceiver(this);
-                        final Handler handler = new Handler();
+                        final Handler handler = new Handler(Looper.getMainLooper());
                         // Even when all the stars are aligned,
                         // starting the service needs to be slightly delayed because the Intent is fired *before* the app is considered in the foreground.
                         // Each new release of Android manages to make the developer life harder.

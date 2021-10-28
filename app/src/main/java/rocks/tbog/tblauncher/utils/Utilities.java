@@ -273,31 +273,31 @@ public class Utilities {
         return null;
     }
 
-    public static void positionToast(@NonNull Toast toast, @NonNull View anchor, int offsetX, int offsetY) {
-        // toasts are positioned relatively to decor view, views relatively to their parents, we have to gather additional data to have a common coordinate system
-        Rect rect = new Rect();
-        anchor.getWindowVisibleDisplayFrame(rect);
-
-        // covert anchor view absolute position to a position which is relative to decor view
-        int[] viewLocation = new int[2];
-        anchor.getLocationOnScreen(viewLocation);
-        int viewLeft = viewLocation[0] - rect.left;
-        int viewTop = viewLocation[1] - rect.top;
-
-        // measure toast to center it relatively to the anchor view
-        DisplayMetrics metrics = new DisplayMetrics();
-        anchor.getDisplay().getMetrics(metrics);
-        int widthMeasureSpec = View.MeasureSpec.makeMeasureSpec(metrics.widthPixels, View.MeasureSpec.UNSPECIFIED);
-        int heightMeasureSpec = View.MeasureSpec.makeMeasureSpec(metrics.heightPixels, View.MeasureSpec.UNSPECIFIED);
-        toast.getView().measure(widthMeasureSpec, heightMeasureSpec);
-        int toastWidth = toast.getView().getMeasuredWidth();
-
-        // compute toast offsets
-        int toastX = viewLeft + (anchor.getWidth() - toastWidth) / 2 + offsetX;
-        int toastY = viewTop + anchor.getHeight() + offsetY;
-
-        toast.setGravity(Gravity.START | Gravity.TOP, toastX, toastY);
-    }
+//    public static void positionToast(@NonNull Toast toast, @NonNull View anchor, int offsetX, int offsetY) {
+//        // toasts are positioned relatively to decor view, views relatively to their parents, we have to gather additional data to have a common coordinate system
+//        Rect rect = new Rect();
+//        anchor.getWindowVisibleDisplayFrame(rect);
+//
+//        // covert anchor view absolute position to a position which is relative to decor view
+//        int[] viewLocation = new int[2];
+//        anchor.getLocationOnScreen(viewLocation);
+//        int viewLeft = viewLocation[0] - rect.left;
+//        int viewTop = viewLocation[1] - rect.top;
+//
+//        // measure toast to center it relatively to the anchor view
+//        DisplayMetrics metrics = new DisplayMetrics();
+//        anchor.getDisplay().getMetrics(metrics);
+//        int widthMeasureSpec = View.MeasureSpec.makeMeasureSpec(metrics.widthPixels, View.MeasureSpec.UNSPECIFIED);
+//        int heightMeasureSpec = View.MeasureSpec.makeMeasureSpec(metrics.heightPixels, View.MeasureSpec.UNSPECIFIED);
+//        toast.getView().measure(widthMeasureSpec, heightMeasureSpec);
+//        int toastWidth = toast.getView().getMeasuredWidth();
+//
+//        // compute toast offsets
+//        int toastX = viewLeft + (anchor.getWidth() - toastWidth) / 2 + offsetX;
+//        int toastY = viewTop + anchor.getHeight() + offsetY;
+//
+//        toast.setGravity(Gravity.START | Gravity.TOP, toastX, toastY);
+//    }
 
     public static RunnableTask runAsync(@NonNull Lifecycle lifecycle, @NonNull TaskRunner.AsyncRunnable background, @NonNull TaskRunner.AsyncRunnable after) {
         RunnableTask task = TaskRunner.newTask(lifecycle, background, after);
@@ -527,7 +527,7 @@ public class Utilities {
             ((ShapeDrawable) drawable).setIntrinsicWidth(UISizes.dp2px(ctx, 2));
             ((ShapeDrawable) drawable).getPaint().setColor(color);
         }
-        drawable.setColorFilter(color, PorterDuff.Mode.SRC_IN);
+        drawable.setColorFilter(new PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN));
         setTextCursorDrawable(editText, drawable);
     }
 
@@ -603,9 +603,10 @@ public class Utilities {
             drawableRight = new ColorDrawable(color);
         if (drawableCenter == null)
             drawableCenter = new ColorDrawable(color);
-        drawableLeft.setColorFilter(color, PorterDuff.Mode.SRC_IN);
-        drawableRight.setColorFilter(color, PorterDuff.Mode.SRC_IN);
-        drawableCenter.setColorFilter(color, PorterDuff.Mode.SRC_IN);
+        PorterDuffColorFilter porterDuffColorFilter = new PorterDuffColorFilter(color, PorterDuff.Mode.SRC_IN);
+        drawableLeft.setColorFilter(porterDuffColorFilter);
+        drawableRight.setColorFilter(porterDuffColorFilter);
+        drawableCenter.setColorFilter(porterDuffColorFilter);
         setTextSelectHandle(editText, drawableLeft, drawableRight, drawableCenter);
     }
 
