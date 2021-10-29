@@ -26,6 +26,7 @@ import androidx.core.content.pm.PackageInfoCompat;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.preference.PreferenceManager;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -181,13 +182,8 @@ public class IconsHandler {
             return;
         }
 
+        Collection<AppEntry> appEntries = TBApplication.appsHandler(ctx).getAllApps();
         DataHandler dataHandler = TBApplication.dataHandler(ctx);
-        List<AppEntry> appEntries = dataHandler.getApplications();
-        if (appEntries == null) {
-            Log.w(TAG, "Can't build icon cache. dataHandler.getApplications() == null");
-            return;
-        }
-
         // build the cache
         for (AppEntry appEntry : appEntries) {
             Drawable drawable = getDrawableIconForPackage(appEntry.componentName, UserHandleCompat.CURRENT_USER);

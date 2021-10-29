@@ -670,8 +670,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         }
 
         private static Pair<CharSequence[], CharSequence[]> generateAppToRunListContent(@NonNull Context context) {
-            List<AppEntry> appEntryList = TBApplication.dataHandler(context).getApplications();
-            final int appCount = appEntryList != null ? appEntryList.size() : 0;
+            List<AppEntry> appEntryList = TBApplication.appsHandler(context).getApplications();
+            Collections.sort(appEntryList, AppEntry.NAME_COMPARATOR);
+            final int appCount = appEntryList.size();
             CharSequence[] entries = new CharSequence[appCount];
             CharSequence[] entryValues = new CharSequence[appCount];
             for (int idx = 0; idx < appCount; idx++) {

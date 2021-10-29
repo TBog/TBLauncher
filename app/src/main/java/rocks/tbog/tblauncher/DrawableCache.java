@@ -9,7 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.collection.LruCache;
 
-import java.util.List;
+import java.util.Collection;
 
 public class DrawableCache {
     private static final String TAG = "DrawCache";
@@ -60,8 +60,8 @@ public class DrawableCache {
             clearCache();
         }
         boolean halfSize = pref.getBoolean("cache-half-apps", true);
-        List<?> apps = TBApplication.dataHandler(ctx).getApplications();
-        int size = apps == null ? 0 : apps.size();
+        Collection<?> apps = TBApplication.appsHandler(ctx).getAllApps();
+        int size = apps.size();
         size = size < 16 ? 16 : halfSize ? (size / 2) : (size * 115 / 100);
         Log.i(TAG, "Cache size: " + size);
         mCache.resize(size);

@@ -120,13 +120,36 @@ public class AppsHandler {
         return mApplication;
     }
 
+    /**
+     * Get an unmodifiable collection with the applications
+     * @return an empty list if not loaded yet
+     */
     @NonNull
     public Collection<AppEntry> getAllApps() {
         synchronized (AppsHandler.this) {
             if (!mIsLoaded)
                 return Collections.emptyList();
+            return Collections.unmodifiableCollection(mAppsCache.values());
         }
-        return Collections.unmodifiableCollection(mAppsCache.values());
+    }
+
+    /**
+     * Get an ArrayList of the application collection.
+     * `AppEntry.resetRelevance` is called before returning list
+     * @return a new instance of ArrayList with all apps
+     */
+    @NonNull
+    public ArrayList<AppEntry> getApplications() {
+        ArrayList<AppEntry> records = new ArrayList<>(mAppsCache.size());
+        synchronized (AppsHandler.this) {
+            if (mIsLoaded) {
+                for (AppEntry appEntry : mAppsCache.values()) {
+                    appEntry.resetRelevance();
+                    records.add(appEntry);
+                }
+            }
+        }
+        return records;
     }
 
     public AppCacheProvider getCacheProvider() {
@@ -139,9 +162,22 @@ public class AppsHandler {
     }
 
     public void updateAppCache(@Nullable ArrayList<AppRecord> insertOrUpdate, @Nullable ArrayList<AppRecord> remove) {
-        if (insertOrUpdate != null && insertOrUpdate.size() > 0)
+        if (insertOrUpdate != null && insertOrUpdate.size() > 0) {
             DBHelper.insertOrUpdateApps(getContext(), insertOrUpdate);
-        if (remove != null && remove.size() > 0)
+        }
+        if (remove != null && remove.size() > 0) {
             DBHelper.deleteApps(getContext(), remove);
+        }
+    }
+
+    public void setAppCache(@Nullable ArrayList<AppEntry> list) {
+        if (list == null || list.isEmpty())
+            return;
+        synchronized (AppsHandler.this) {
+            mIsLoaded = true;
+            mAppsCache.clear();
+            for (AppEntry appEntry : list)
+                mAppsCache.put(appEntry.id, appEntry);
+        }
     }
 }

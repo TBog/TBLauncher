@@ -22,12 +22,10 @@ import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import androidx.preference.PreferenceManager;
 
-import java.lang.ref.WeakReference;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -42,7 +40,6 @@ import java.util.concurrent.TimeUnit;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.TBLauncherActivity;
 import rocks.tbog.tblauncher.dataprovider.ActionProvider;
-import rocks.tbog.tblauncher.dataprovider.AppCacheProvider;
 import rocks.tbog.tblauncher.dataprovider.AppProvider;
 import rocks.tbog.tblauncher.dataprovider.CalculatorProvider;
 import rocks.tbog.tblauncher.dataprovider.ContactsProvider;
@@ -103,7 +100,7 @@ public class DataHandler extends BroadcastReceiver
             , "shortcuts"
     );
 
-    final private WeakReference<Context> context;
+    private final Context context;
     private String currentQuery;
     private final Map<String, ProviderEntry> providers = new LinkedHashMap<>(); // preserve insert order
     private boolean mFullLoadOverSent = false;
@@ -113,12 +110,12 @@ public class DataHandler extends BroadcastReceiver
     /**
      * Initialize all providers
      */
-    public DataHandler(Context context) {
-        final Context ctx = context.getApplicationContext();
+    public DataHandler(Context ctx) {
         // Make sure we are in the context of the main application
         // (otherwise we might receive an exception about broadcast listeners not being able
         //  to bind to services)
-        this.context = new WeakReference<>(ctx);
+        context = ctx.getApplicationContext();
+        ;
 
         mTimer.start();
 
@@ -189,7 +186,7 @@ public class DataHandler extends BroadcastReceiver
 
     @Nullable
     public Context getContext() {
-        return context.get();
+        return context;
     }
 
     private void toggleableProviders(SharedPreferences prefs) {
@@ -769,28 +766,6 @@ public class DataHandler extends BroadcastReceiver
 //        prefs.edit().putStringSet("excluded-apps", newExcluded).apply();
 //    }
 
-    /**
-     * Return all applications (including excluded)
-     *
-     * @return pojos for all applications
-     */
-    @Nullable
-    public List<AppEntry> getApplications() {
-        AppProvider appProvider = getAppProvider();
-        return appProvider != null ? appProvider.getAllApps() : null;
-    }
-
-    /**
-     * Return all applications
-     *
-     * @return pojos for all applications
-     */
-    @Nullable
-    public List<AppEntry> getApplicationsWithoutHidden() {
-        AppProvider appProvider = getAppProvider();
-        return appProvider != null ? appProvider.getAllAppsWithoutHidden() : null;
-    }
-
     @Nullable
     public ContactsProvider getContactsProvider() {
         ProviderEntry entry = this.providers.get("contacts");
@@ -1139,6 +1114,36 @@ public class DataHandler extends BroadcastReceiver
         }
     }
 
+    /**
+     * Reload all providers with load step equal or greater
+     *
+     * @param loadStep to compare
+     */
+    public void reloadProviders(int loadStep) {
+        mFullLoadOverSent = false;
+
+        final Context context = this.getContext();
+        if (context == null)
+            return;
+
+        mTimer.start();
+
+        IntentFilter intentFilter = new IntentFilter(TBLauncherActivity.LOAD_OVER);
+        context.registerReceiver(this, intentFilter);
+
+        Intent i = new Intent(TBLauncherActivity.START_LOAD);
+        context.sendBroadcast(i);
+
+        for (int step : IProvider.LOAD_STEPS) {
+            if (step < loadStep)
+                continue;
+            for (ProviderEntry entry : providers.values()) {
+                if (entry.provider != null && step == entry.provider.getLoadStep())
+                    entry.provider.reload(true);
+            }
+        }
+    }
+
     public void reloadProviders() {
         mFullLoadOverSent = false;
 
@@ -1263,6 +1268,7 @@ public class DataHandler extends BroadcastReceiver
 
     public void executeAfterLoadOverTasks() {
         synchronized (this) {
+            checkServices();
             if (!mFullLoadOverSent) {
                 Log.e(TAG, "executeAfterLoadOverTasks called before mFullLoadOverSent==true");
                 return;

@@ -8,10 +8,9 @@ import androidx.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 
-import rocks.tbog.tblauncher.handler.DataHandler;
-import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.db.ModRecord;
 import rocks.tbog.tblauncher.entry.TagEntry;
+import rocks.tbog.tblauncher.handler.DataHandler;
 
 public class TagsProvider extends DBProvider<TagEntry> {
 
@@ -85,64 +84,5 @@ public class TagsProvider extends DBProvider<TagEntry> {
 
             return tagList;
         }
-
-        @Override
-        protected void onPostExecute(List<TagEntry> entryItems) {
-            super.onPostExecute(entryItems);
-            DBProvider<TagEntry> provider = weakProvider.get();
-            if (provider != null)
-                TBApplication.quickList(provider.context).reload();
-        }
     }
 }
-
-//public class TagsProvider extends StaticProvider<TagEntry> {
-//    final Context context;
-//
-//    public TagsProvider(Context context) {
-//        super(new ArrayList<>(0));
-//        this.context = context;
-//    }
-//
-//    @Override
-//    public boolean mayFindById(@NonNull String id) {
-//        return id.startsWith(TagEntry.SCHEME);
-//    }
-//
-//    @Override
-//    public EntryItem findById(@NonNull String id) {
-//        EntryItem entryItem = super.findById(id);
-//        if (entryItem == null) {
-//            Set<String> cachedTags = TBApplication.tagsHandler(context).getAllTagsAsSet();
-//            String tagName = id.substring(TagEntry.SCHEME.length());
-//            if (cachedTags.contains(tagName)) {
-//                entryItem = new TagEntry(id);
-//                entryItem.setName(tagName);
-//                pojos.add((TagEntry) entryItem);
-//            }
-//        }
-//        return entryItem;
-//    }
-//
-//    private static TagEntry newTagEntry(String tagName)
-//    {
-//        TagEntry tagEntry = new TagEntry(TagEntry.SCHEME + tagName);
-//        tagEntry.setName(tagName);
-//    }
-//
-//    @Override
-//    public List<? extends EntryItem> getPojos() {
-//        Set<String> cachedTags = TBApplication.tagsHandler(context).getAllTagsAsSet();
-//        ArrayList<? extends EntryItem> list = new ArrayList<>(pojos.size());
-//        for(String tag : cachedTags) {
-//            String id = TagEntry.SCHEME + tag;
-//            EntryItem entryItem = super.findById(id);
-//            if (entryItem == null)
-//        }
-//
-//        if (BuildConfig.DEBUG)
-//            return Collections.unmodifiableList(pojos);
-//        return pojos;
-//    }
-//
-//}

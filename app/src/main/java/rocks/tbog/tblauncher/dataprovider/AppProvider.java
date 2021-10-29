@@ -38,11 +38,11 @@ public class AppProvider extends Provider<AppEntry> {
             if (Objects.equals(intent.getAction(), Intent.ACTION_MANAGED_PROFILE_ADDED)) {
                 AppProvider.this.reload(true);
             } else if (Objects.equals(intent.getAction(), Intent.ACTION_MANAGED_PROFILE_REMOVED)) {
-                android.os.UserHandle profile = intent.getParcelableExtra(Intent.EXTRA_USER);
+//                android.os.UserHandle profile = intent.getParcelableExtra(Intent.EXTRA_USER);
 
-                final UserManager manager = (UserManager) AppProvider.this.getSystemService(Context.USER_SERVICE);
-                assert manager != null;
-                UserHandleCompat user = new UserHandleCompat(manager.getSerialNumberForUser(profile), profile);
+//                final UserManager manager = (UserManager) AppProvider.this.getSystemService(Context.USER_SERVICE);
+//                assert manager != null;
+//                UserHandleCompat user = new UserHandleCompat(manager.getSerialNumberForUser(profile), profile);
 
 //                DataHandler dataHandler = TBApplication.getApplication(context).getDataHandler();
 //                dataHandler.removeFromExcluded(user);
@@ -189,6 +189,8 @@ public class AppProvider extends Provider<AppEntry> {
             TBApplication.dataHandler(this).runAfterLoadOver(() -> {
                 this.reload(false);
             });
+        } else {
+            TBApplication.appsHandler(this).setAppCache(results);
         }
     }
 
@@ -258,28 +260,5 @@ public class AppProvider extends Provider<AppEntry> {
         }
 
         return null;
-    }
-
-    public ArrayList<AppEntry> getAllApps() {
-        ArrayList<AppEntry> records = new ArrayList<>(pojos.size());
-
-        for (AppEntry pojo : pojos) {
-            pojo.resetRelevance();
-            records.add(pojo);
-        }
-        return records;
-    }
-
-    public ArrayList<AppEntry> getAllAppsWithoutHidden() {
-        ArrayList<AppEntry> records = new ArrayList<>(pojos.size());
-
-        for (AppEntry pojo : pojos) {
-            if (pojo.isHiddenByUser())
-                continue;
-
-            pojo.resetRelevance();
-            records.add(pojo);
-        }
-        return records;
     }
 }

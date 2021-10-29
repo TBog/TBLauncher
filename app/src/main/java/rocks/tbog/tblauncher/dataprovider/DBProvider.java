@@ -4,8 +4,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.util.Log;
 
+import androidx.annotation.MainThread;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -123,6 +125,7 @@ public abstract class DBProvider<T extends EntryItem> implements IProvider<T> {
             return provider != null ? provider.context : null;
         }
 
+        @WorkerThread
         @Override
         protected List<T> doInBackground(Void param) {
             Context ctx = getContext();
@@ -134,8 +137,10 @@ public abstract class DBProvider<T extends EntryItem> implements IProvider<T> {
             return getEntryItems(dataHandler);
         }
 
+        @WorkerThread
         abstract List<T> getEntryItems(DataHandler dataHandler);
 
+        @MainThread
         @Override
         protected void onPostExecute(List<T> entryItems) {
             DBProvider<T> provider = weakProvider.get();

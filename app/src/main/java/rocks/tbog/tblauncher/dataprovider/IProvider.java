@@ -14,7 +14,8 @@ import rocks.tbog.tblauncher.searcher.Searcher;
 public interface IProvider<T extends EntryItem> {
     int LOAD_STEP_1 = 0;
     int LOAD_STEP_2 = 1;
-    int[] LOAD_STEPS = new int[] {LOAD_STEP_1, LOAD_STEP_2};
+    int LOAD_STEP_3 = 2;
+    int[] LOAD_STEPS = new int[] {LOAD_STEP_1, LOAD_STEP_2, LOAD_STEP_3};
 
     /**
      * Post search results for the given query string to the searcher

@@ -5,16 +5,20 @@ import android.content.Context;
 import java.util.ArrayList;
 import java.util.List;
 
-import rocks.tbog.tblauncher.handler.DataHandler;
-import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.db.ModRecord;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.StaticEntry;
+import rocks.tbog.tblauncher.handler.DataHandler;
 
 public class ModProvider extends DBProvider<EntryItem> {
 
     public ModProvider(Context context) {
         super(context);
+    }
+
+    @Override
+    public int getLoadStep() {
+        return LOAD_STEP_3;
     }
 
     @Override
@@ -47,14 +51,6 @@ public class ModProvider extends DBProvider<EntryItem> {
             }
 
             return favList;
-        }
-
-        @Override
-        protected void onPostExecute(List<EntryItem> entryItems) {
-            super.onPostExecute(entryItems);
-            DBProvider<EntryItem> provider = weakProvider.get();
-            if (provider != null)
-                TBApplication.quickList(provider.context).reload();
         }
     }
 }

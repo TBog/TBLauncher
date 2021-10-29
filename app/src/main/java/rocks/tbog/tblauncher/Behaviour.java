@@ -1327,10 +1327,12 @@ public class Behaviour implements ISearchActivity {
                     // UI_ANIMATION_DURATION should be the exact time the full-screen animation ends
                     mSearchEditText.postDelayed(this::showKeyboard, UI_ANIMATION_DURATION);
                 }
-                if (TBApplication.state().isResultListVisible()) {
-                    //updateSearchRecords();
+                if (TBApplication.state().isResultListVisible() && mResultAdapter.getItemCount() == 0)
+                    showDesktop(TBApplication.state().getDesktop());
+                else if (TBApplication.state().isResultListVisible()) {
                     showResultList(false);
-                }
+                } else
+                    hideResultList(true);
             } else {
                 if (state.getDesktop() == LauncherState.Desktop.WIDGET) {
                     hideKeyboard();

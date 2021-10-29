@@ -43,6 +43,9 @@ import rocks.tbog.tblauncher.searcher.Searcher;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.UIColors;
 
+/**
+ * Dock
+ */
 public class QuickList {
     private TBLauncherActivity mTBLauncherActivity;
     private boolean mOnlyForResults = false;
@@ -85,6 +88,7 @@ public class QuickList {
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mTBLauncherActivity);
         mQuickList = mTBLauncherActivity.findViewById(R.id.quickList);
         mListDirty = true;
+        runCleanList.run();
     }
 
     public void reload() {
