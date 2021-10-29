@@ -1296,6 +1296,8 @@ public class Behaviour implements ISearchActivity {
     }
 
     public void onNewIntent() {
+        if (mTBLauncherActivity == null)
+            return;
         LauncherState state = TBApplication.state();
         Log.i(TAG, "onNewIntent desktop=" + state.getDesktop());
 
@@ -1380,11 +1382,14 @@ public class Behaviour implements ISearchActivity {
     }
 
     private void executeButtonAction(@Nullable String button) {
-        executeAction(mPref.getString(button, null), button);
+        if (mPref != null)
+            executeAction(mPref.getString(button, null), button);
     }
 
     private boolean executeGestureAction(@Nullable String gesture) {
-        return executeAction(mPref.getString(gesture, null), gesture);
+        if (mPref != null)
+            return executeAction(mPref.getString(gesture, null), gesture);
+        return false;
     }
 
     private boolean executeAction(@Nullable String action, @Nullable String source) {

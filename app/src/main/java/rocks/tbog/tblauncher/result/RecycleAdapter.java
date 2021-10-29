@@ -127,7 +127,7 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
         final EntryItem result;
         try {
             result = results.get(index);
-        } catch (ArrayIndexOutOfBoundsException e) {
+        } catch (IndexOutOfBoundsException e) {
             Log.e(TAG, "pos=" + index + " size=" + results.size(), e);
             return;
         }
