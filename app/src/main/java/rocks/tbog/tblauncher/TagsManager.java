@@ -23,14 +23,15 @@ import java.util.Objects;
 
 import rocks.tbog.tblauncher.WorkAsync.RunnableTask;
 import rocks.tbog.tblauncher.WorkAsync.TaskRunner;
+import rocks.tbog.tblauncher.dataprovider.IProvider;
 import rocks.tbog.tblauncher.dataprovider.ModProvider;
-import rocks.tbog.tblauncher.dataprovider.QuickListProvider;
 import rocks.tbog.tblauncher.dataprovider.TagsProvider;
 import rocks.tbog.tblauncher.drawable.CodePointDrawable;
 import rocks.tbog.tblauncher.drawable.DrawableUtils;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.entry.TagEntry;
+import rocks.tbog.tblauncher.handler.AppsHandler;
 import rocks.tbog.tblauncher.handler.DataHandler;
 import rocks.tbog.tblauncher.handler.TagsHandler;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
@@ -73,27 +74,17 @@ public class TagsManager {
         TBApplication.drawableCache(context).clearCache();
         DataHandler dataHandler = TBApplication.dataHandler(context);
 
-        // reload tags to regenerate the tag entries
-        TagsProvider tagsProvider = dataHandler.getTagsProvider();
-        if (tagsProvider != null)
-            tagsProvider.reload(true);
-
-        // reload ModProvider to refresh the QuickList
-        ModProvider modProvider = dataHandler.getModProvider();
-        if (modProvider != null)
-            modProvider.reload(true);
-
-        // reload QuickList provider
-        QuickListProvider quickListProvider = dataHandler.getQuickListProvider();
-        if (quickListProvider != null)
-            quickListProvider.reload(true);
+        dataHandler.reloadProviders(IProvider.LOAD_STEP_2);
 
         RunnableTask afterProviders = TaskRunner.newTask(task -> {
+                    TBApplication app = TBApplication.getApplication(context);
+                    AppsHandler.setTagsForApps(app.appsHandler().getAllApps(), app.tagsHandler());
                 },
                 task -> {
                     Log.d(TAG, "tags and fav providers should have loaded by now");
-                    TBApplication.behaviour(context).refreshSearchRecords();
-                    TBApplication.quickList(context).reload();
+                    TBApplication app = TBApplication.getApplication(context);
+                    app.behaviour().refreshSearchRecords();
+                    app.quickList().reload();
                 });
         DataHandler.EXECUTOR_PROVIDERS.execute(afterProviders);
     }
