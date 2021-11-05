@@ -61,6 +61,7 @@
             android:clearTaskOnLaunch="true"
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:excludeFromRecents="true"
+            android:exported="true"
             android:label="@string/app_name"
             android:launchMode="singleTask"
             android:resizeableActivity="true"
@@ -81,6 +82,7 @@
         <activity
             android:name=".SettingsActivity"
             android:allowTaskReparenting="true"
+            android:exported="true"
             android:label="@string/menu_popup_launcher_settings"
             android:launchMode="singleTop"
             android:parentActivityName=".TBLauncherActivity"
@@ -115,7 +117,8 @@
 
         <activity
             android:name=".DummyLauncherActivity"
-            android:enabled="false">
+            android:enabled="false"
+            android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -145,6 +148,7 @@
 
         <receiver
             android:name=".DeviceAdmin"
+            android:exported="true"
             android:permission="android.permission.BIND_DEVICE_ADMIN">
             <meta-data
                 android:name="android.app.device_admin"
