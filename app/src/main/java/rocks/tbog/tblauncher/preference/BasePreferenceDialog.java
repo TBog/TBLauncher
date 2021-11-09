@@ -4,7 +4,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleOwner;
 import androidx.preference.PreferenceDialogFragmentCompat;
 
 import rocks.tbog.tblauncher.utils.KeyboardDialogBuilder;
@@ -43,6 +46,12 @@ public abstract class BasePreferenceDialog extends PreferenceDialogFragmentCompa
             parent = parent.getParent();
         }
 
-        KeyboardDialogBuilder.setButtonBarBackground(getDialog());
+        KeyboardDialogBuilder.setButtonBarBackground(requireDialog());
+    }
+
+    @Override
+    public void onDestroyView() {
+        mDialogView = null;
+        super.onDestroyView();
     }
 }

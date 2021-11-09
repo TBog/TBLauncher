@@ -1,5 +1,7 @@
 package rocks.tbog.tblauncher;
 
+import android.app.Application;
+import android.app.Dialog;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Paint;
@@ -7,9 +9,11 @@ import android.graphics.Typeface;
 import android.os.Build;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
+import android.text.TextUtils;
 import android.text.style.UnderlineSpan;
 import android.view.ContextThemeWrapper;
 import android.view.View;
+import android.widget.Adapter;
 import android.widget.ArrayAdapter;
 import android.widget.CheckedTextView;
 import android.widget.EditText;
@@ -20,9 +24,14 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 import androidx.collection.ArraySet;
+import androidx.lifecycle.AndroidViewModel;
+import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.LiveData;
+import androidx.lifecycle.MutableLiveData;
 import androidx.preference.PreferenceManager;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Objects;
 import java.util.Set;
@@ -30,18 +39,84 @@ import java.util.Set;
 import rocks.tbog.tblauncher.dataprovider.SearchProvider;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.DialogHelper;
+import rocks.tbog.tblauncher.utils.SimpleTextWatcher;
 import rocks.tbog.tblauncher.utils.ViewHolderAdapter;
 import rocks.tbog.tblauncher.utils.ViewHolderListAdapter;
 
-public class EditSearchEngines {
+public class EditSearchEngines extends AndroidViewModel {
+    private final MutableLiveData<ArrayList<SearchEngineInfo>> searchEngineInfoList = new MutableLiveData<>();
+    private final MutableLiveData<String> defaultProviderName = new MutableLiveData<>();
+    private final MutableLiveData<String> addSearchEngineName = new MutableLiveData<>();
+    private final MutableLiveData<String> addSearchEngineUrl = new MutableLiveData<>();
 
-    private final ArrayList<SearchEngineInfo> mSearchEngineList = new ArrayList<>();
-    private ListView mListView = null;
-    private SearchEngineAdapter mAdapter = null;
-    private EditText mAddName = null;
-    private EditText mAddUrl = null;
-    @NonNull
-    String defaultProviderName = "";
+    public EditSearchEngines(@NonNull Application application) {
+        super(application);
+    }
+
+    public LiveData<ArrayList<SearchEngineInfo>> getSearchEngineInfoList() {
+        return searchEngineInfoList;
+    }
+
+    public MutableLiveData<String> getDefaultProviderName() {
+        return defaultProviderName;
+    }
+
+    public void setSearchEngineInfoList(ArrayList<SearchEngineInfo> list) {
+        searchEngineInfoList.setValue(list);
+    }
+
+    public void setDefaultProviderName(String name) {
+        defaultProviderName.setValue(name);
+    }
+
+    public void updateSearchEngineInfoList(SearchEngineInfo info) {
+        ArrayList<SearchEngineInfo> arrayList = searchEngineInfoList.getValue();
+        if (arrayList == null || arrayList.contains(info))
+            setSearchEngineInfoList(arrayList);
+    }
+
+    public void loadDefaults(@NonNull Context context) {
+        Set<String> defaultSearchProviders = SearchProvider.getDefaultSearchProviders(context);
+        ArrayList<SearchEngineInfo> list = new ArrayList<>(defaultSearchProviders.size());
+        for (String searchProvider : defaultSearchProviders) {
+            SearchEngineInfo searchEngineInfo = new SearchEngineInfo(searchProvider);
+            searchEngineInfo.selected = true;
+            list.add(searchEngineInfo);
+        }
+        Collections.sort(list, (lhs, rhs) -> lhs.provider.compareTo(rhs.provider));
+
+        setSearchEngineInfoList(list);
+        setDefaultProviderName("Google");
+    }
+
+    public void loadData(@NonNull Context context, @NonNull SharedPreferences prefs) {
+        ArrayList<SearchEngineInfo> list;
+
+        // load search engines
+        {
+            Set<String> availableSearchProviders = SearchProvider.getAvailableSearchProviders(context, prefs);
+            Set<String> selectedProviderNames = SearchProvider.getSelectedProviderNames(context, prefs);
+
+            list = new ArrayList<>(availableSearchProviders.size());
+
+            for (String searchProvider : availableSearchProviders) {
+                SearchEngineInfo searchEngineInfo = new SearchEngineInfo(searchProvider);
+                searchEngineInfo.selected = selectedProviderNames.contains(searchEngineInfo.name);
+                list.add(searchEngineInfo);
+            }
+            Collections.sort(list, (lhs, rhs) -> lhs.provider.compareTo(rhs.provider));
+            setSearchEngineInfoList(list);
+        }
+
+        // get default search engine name
+        {
+            String providerName = prefs.getString("default-search-provider", null);
+            if (providerName == null || providerName.isEmpty())
+                setDefaultProviderName(list.isEmpty() ? "" : list.get(0).name);
+            else
+                setDefaultProviderName(providerName);
+        }
+    }
 
     public void applyChanges(@NonNull Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
@@ -49,9 +124,11 @@ public class EditSearchEngines {
         Set<String> availableProviders = new ArraySet<>();
         Set<String> selectedProviderNames = new ArraySet<>();
 
-        if (mAddName != null && mAddUrl != null) {
-            String name = SearchProvider.sanitizeProviderName(mAddName.getText().toString()).trim();
-            String url = SearchProvider.sanitizeProviderUrl(mAddUrl.getText().toString()).trim();
+        String addName = addSearchEngineName.getValue();
+        String addUrl = addSearchEngineUrl.getValue();
+        if (addName != null && addUrl != null) {
+            String name = SearchProvider.sanitizeProviderName(addName).trim();
+            String url = SearchProvider.sanitizeProviderUrl(addUrl).trim();
             if (!name.isEmpty() && !url.isEmpty()) {
                 String searchProvider = SearchProvider.makeProvider(name, url);
                 availableProviders.add(searchProvider);
@@ -59,70 +136,73 @@ public class EditSearchEngines {
             }
         }
 
-        for (SearchEngineInfo searchEngineInfo : mSearchEngineList) {
-            if (searchEngineInfo.action == SearchEngineInfo.Action.DELETE)
-                continue;
-            availableProviders.add(SearchProvider.makeProvider(searchEngineInfo.name, searchEngineInfo.url));
-            if (searchEngineInfo.selected)
-                selectedProviderNames.add(searchEngineInfo.name);
+        ArrayList<SearchEngineInfo> searchEngineList = getSearchEngineInfoList().getValue();
+        if (searchEngineList != null) {
+            for (SearchEngineInfo searchEngineInfo : searchEngineList) {
+                if (searchEngineInfo.action == SearchEngineInfo.Action.DELETE)
+                    continue;
+                availableProviders.add(SearchProvider.makeProvider(searchEngineInfo.name, searchEngineInfo.url));
+                if (searchEngineInfo.selected)
+                    selectedProviderNames.add(searchEngineInfo.name);
+            }
         }
 
         prefs.edit()
-                .putStringSet("available-search-providers", availableProviders)
-                .putStringSet("selected-search-provider-names", selectedProviderNames)
-                .putString("default-search-provider", defaultProviderName)
-                .apply();
+            .putStringSet("available-search-providers", availableProviders)
+            .putStringSet("selected-search-provider-names", selectedProviderNames)
+            .putString("default-search-provider", getDefaultProviderName().getValue())
+            .apply();
 
         TBApplication.dataHandler(context).reloadProviders();
     }
 
     public void bindEditView(@NonNull View view) {
-        final Context context = view.getContext();
-        mListView = view.findViewById(android.R.id.list);
+        ListView listView = view.findViewById(android.R.id.list);
 
-        // prepare the grid with all the tags
-        mAdapter = new SearchEngineAdapter(mSearchEngineList);
+        listView.setOnItemClickListener((list, itemView, position, id) -> {
+            Adapter adapter = list.getAdapter();
+            if (adapter instanceof SearchEngineAdapter) {
+                SearchEngineAdapter searchEngineAdapter = (SearchEngineAdapter) adapter;
 
-        mListView.setOnItemClickListener((listView, itemView, position, id) -> {
-            SearchEngineInfo info = mAdapter.getItem(position);
-            info.selected = !info.selected;
-            mAdapter.notifyDataSetChanged();
+                SearchEngineInfo info = searchEngineAdapter.getItem(position);
+                info.selected = !info.selected;
+                updateSearchEngineInfoList(info);
+            }
         });
 
-        mListView.setOnItemLongClickListener((listView, itemView, position, id) -> {
-            SearchEngineInfo info = mAdapter.getItem(position);
+        listView.setOnItemLongClickListener((list, itemView, position, id) -> {
+            Adapter adapter = list.getAdapter();
+            if (!(adapter instanceof SearchEngineAdapter))
+                return false;
+            SearchEngineAdapter searchEngineAdapter = (SearchEngineAdapter) adapter;
+            SearchEngineInfo info = searchEngineAdapter.getItem(position);
             if (info.action == SearchEngineInfo.Action.DELETE) {
                 String provider = SearchProvider.makeProvider(info.name, info.url);
                 info.action = info.provider.equals(provider) ? SearchEngineInfo.Action.NONE : SearchEngineInfo.Action.RENAME;
-                mAdapter.notifyDataSetChanged();
+                updateSearchEngineInfoList(info);
             } else {
-                Context ctx = listView.getContext();
-                ArrayAdapter<ListPopup.Item> adapter = new ArrayAdapter<>(ctx, android.R.layout.simple_list_item_1);
-                ListPopup popup = ListPopup.create(ctx, adapter);
-                if (!info.name.equals(defaultProviderName) && info.selected)
-                    adapter.add(new ListPopup.Item(ctx, R.string.search_engine_set_default));
-                adapter.add(new ListPopup.Item(ctx, R.string.menu_action_rename));
-                adapter.add(new ListPopup.Item(ctx, R.string.search_engine_edit_url));
-                adapter.add(new ListPopup.Item(ctx, R.string.menu_action_delete));
+                Context ctx = list.getContext();
+                ArrayAdapter<ListPopup.Item> arrayAdapter = new ArrayAdapter<>(ctx, android.R.layout.simple_list_item_1);
+                ListPopup popup = ListPopup.create(ctx, arrayAdapter);
+                if (!info.name.equals(getDefaultProviderName().getValue()) && info.selected)
+                    arrayAdapter.add(new ListPopup.Item(ctx, R.string.search_engine_set_default));
+                arrayAdapter.add(new ListPopup.Item(ctx, R.string.menu_action_rename));
+                arrayAdapter.add(new ListPopup.Item(ctx, R.string.search_engine_edit_url));
+                arrayAdapter.add(new ListPopup.Item(ctx, R.string.menu_action_delete));
                 popup.setOnItemClickListener((popupAdapter, popupItemView, popupPosition) -> {
                     Object object = popupAdapter.getItem(popupPosition);
                     if (!(object instanceof ListPopup.Item))
                         return;
                     ListPopup.Item item = (ListPopup.Item) object;
-                    switch (item.stringId) {
-                        case R.string.search_engine_set_default:
-                            defaultProviderName = info.name;
-                            break;
-                        case R.string.menu_action_rename:
-                            launchRenameDialog(ctx, info);
-                            break;
-                        case R.string.search_engine_edit_url:
-                            launchEditUrlDialog(ctx, info);
-                            break;
-                        case R.string.menu_action_delete: {
-                            info.action = SearchEngineInfo.Action.DELETE;
-                            mAdapter.notifyDataSetChanged();
-                        }
+                    if (item.stringId == R.string.search_engine_set_default) {
+                        setDefaultProviderName(info.name);
+                    } else if (item.stringId == R.string.menu_action_rename) {
+                        launchRenameDialog(ctx, info);
+                    } else if (item.stringId == R.string.search_engine_edit_url) {
+                        launchEditUrlDialog(ctx, info);
+                    } else if (item.stringId == R.string.menu_action_delete) {
+                        info.action = SearchEngineInfo.Action.DELETE;
+                        updateSearchEngineInfoList(info);
                     }
                 });
                 popup.setModal(true);
@@ -134,20 +214,46 @@ public class EditSearchEngines {
     }
 
     public void bindAddView(@NonNull View view) {
-        mAddName = view.findViewById(android.R.id.text1);
-        mAddUrl = view.findViewById(android.R.id.text2);
+        EditText editText;
+        {
+            String name = addSearchEngineName.getValue();
+            editText = view.findViewById(android.R.id.text1);
+            if (!TextUtils.isEmpty(name))
+                editText.setText(name);
+            editText.addTextChangedListener(new SimpleTextWatcher() {
+                @Override
+                public void onTextChanged(String newValue) {
+                    addSearchEngineName.setValue(name);
+                }
+            });
+        }
+        {
+            String urlValue = addSearchEngineUrl.getValue();
+            editText = view.findViewById(android.R.id.text2);
+            if (!TextUtils.isEmpty(urlValue))
+                editText.setText(urlValue);
+            editText.addTextChangedListener(new SimpleTextWatcher() {
+                @Override
+                public void onTextChanged(String newValue) {
+                    addSearchEngineUrl.setValue(urlValue);
+                }
+            });
+        }
     }
 
     private void launchRenameDialog(Context ctx, SearchEngineInfo info) {
         DialogHelper.makeRenameDialog(ctx, info.name, (dialog, name) -> {
             String newName = SearchProvider.sanitizeProviderName(name).trim();
             boolean isValid = !newName.isEmpty();
-            for (SearchEngineInfo searchEngineInfo : mSearchEngineList) {
-                if (searchEngineInfo == info)
-                    continue;
-                if (SearchProvider.getProviderName(searchEngineInfo.provider).equals(newName) || searchEngineInfo.name.equals(newName)) {
-                    isValid = false;
-                    break;
+            ArrayList<SearchEngineInfo> searchEngineList = getSearchEngineInfoList().getValue();
+            if (searchEngineList != null) {
+                for (SearchEngineInfo searchEngineInfo : searchEngineList) {
+                    if (searchEngineInfo == info)
+                        continue;
+                    if (SearchProvider.getProviderName(searchEngineInfo.provider).equals(newName) || searchEngineInfo.name.equals(newName)) {
+                        isValid = false;
+                        break;
+                    }
                 }
             }
             if (!isValid) {
@@ -156,15 +262,14 @@ public class EditSearchEngines {
             }
 
             // Set new name
-            if (defaultProviderName.equals(info.name))
-                defaultProviderName = newName;
+            if (TextUtils.equals(defaultProviderName.getValue(), info.name))
+                defaultProviderName.setValue(newName);
             info.name = newName;
             info.action = SearchProvider.getProviderName(info.provider).equals(info.name) ? SearchEngineInfo.Action.NONE : SearchEngineInfo.Action.RENAME;
-
-            mAdapter.notifyDataSetChanged();
+            updateSearchEngineInfoList(info);
         })
-                .setTitle(R.string.title_rename_search_engine)
-                .show();
+            .setTitle(R.string.title_rename_search_engine)
+            .show();
     }
 
     private void launchEditUrlDialog(Context ctx, SearchEngineInfo info) {
@@ -191,12 +296,10 @@ public class EditSearchEngines {
                 info.action = SearchEngineInfo.Action.RENAME;
             }
 
-            mAdapter.notifyDataSetChanged();
+            updateSearchEngineInfoList(info);
 
             dialog.dismiss();
-        }).setNegativeButton(android.R.string.cancel, (dialog, which) -> {
-            dialog.cancel();
-        });
+        }).setNegativeButton(android.R.string.cancel, (dialog, which) -> dialog.cancel());
 
         AlertDialog dialog = builder.create();
         dialog.show();
@@ -207,52 +310,22 @@ public class EditSearchEngines {
         nameView.requestFocus();
     }
 
-    public void onStart() {
-        // Set list adapter after the view inflated
-        // This is a workaround to fix listview items not having the correct width
-        if (mListView != null)
-            mListView.post(() -> mListView.setAdapter(mAdapter));
-    }
-
-    public void loadData(@NonNull Context context, @NonNull SharedPreferences prefs) {
-        // load search engines
-        {
-            Set<String> availableSearchProviders = SearchProvider.getAvailableSearchProviders(context, prefs);
-            Set<String> selectedProviderNames = SearchProvider.getSelectedProviderNames(context, prefs);
-
-            for (String searchProvider : availableSearchProviders) {
-                SearchEngineInfo searchEngineInfo = new SearchEngineInfo(searchProvider);
-                searchEngineInfo.selected = selectedProviderNames.contains(searchEngineInfo.name);
-                mSearchEngineList.add(searchEngineInfo);
-            }
-            Collections.sort(mSearchEngineList, (lhs, rhs) -> lhs.provider.compareTo(rhs.provider));
+    public void onStartLifecycle(@NonNull Dialog dialog, @NonNull LifecycleOwner viewLifecycleOwner) {
+        ListView listView = dialog.findViewById(android.R.id.list);
+        if (listView != null) {
+            ArrayList<SearchEngineInfo> list = getSearchEngineInfoList().getValue();
+            if (list == null)
+                list = new ArrayList<>();
+            SearchEngineAdapter adapter = new SearchEngineAdapter(list);
+            listView.setAdapter(adapter);
+            getSearchEngineInfoList().observe(viewLifecycleOwner, adapter::replaceItems);
         }
-
-        // get default search engine name
-        {
-            String providerName = prefs.getString("default-search-provider", null);
-            if (providerName == null || providerName.isEmpty())
-                defaultProviderName = mSearchEngineList.isEmpty() ? "" : mSearchEngineList.get(0).name;
-            else
-                defaultProviderName = providerName;
-        }
-    }
-
-    public void loadDefaults(@NonNull Context context) {
-        Set<String> defaultSearchProviders = SearchProvider.getDefaultSearchProviders(context);
-        for (String searchProvider : defaultSearchProviders) {
-            SearchEngineInfo searchEngineInfo = new SearchEngineInfo(searchProvider);
-            searchEngineInfo.selected = true;
-            mSearchEngineList.add(searchEngineInfo);
-        }
-        Collections.sort(mSearchEngineList, (lhs, rhs) -> lhs.provider.compareTo(rhs.provider));
-        defaultProviderName = "Google";
     }
 
     static class SearchEngineAdapter extends ViewHolderListAdapter<SearchEngineInfo, TagViewHolder> {
 
-        SearchEngineAdapter(@NonNull ArrayList<SearchEngineInfo> tags) {
-            super(TagViewHolder.class, android.R.layout.simple_list_item_checked, tags);
+        SearchEngineAdapter(@NonNull ArrayList<SearchEngineInfo> list) {
+            super(TagViewHolder.class, android.R.layout.simple_list_item_checked, list);
         }
 
         @Override
@@ -269,6 +342,14 @@ public class EditSearchEngines {
         public int getViewTypeCount() {
             return 2;
         }
+
+        public void replaceItems(Collection<? extends SearchEngineInfo> list) {
+            if (list != mList) {
+                mList.clear();
+                mList.addAll(list);
+            }
+            notifyDataSetChanged();
+        }
     }
 
     public static class TagViewHolder extends ViewHolderAdapter.ViewHolder<SearchEngineInfo> {
@@ -284,11 +365,11 @@ public class EditSearchEngines {
         protected void setContent(SearchEngineInfo content, int position, @NonNull ViewHolderAdapter<SearchEngineInfo, ? extends ViewHolderAdapter.ViewHolder<SearchEngineInfo>> adapter) {
             SpannableStringBuilder enhancedText = new SpannableStringBuilder();
             enhancedText
-                    .append(content.name)
-                    .setSpan(new UnderlineSpan(), 0, content.name.length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
+                .append(content.name)
+                .setSpan(new UnderlineSpan(), 0, content.name.length(), Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
             enhancedText
-                    .append("\n")
-                    .append(content.url);
+                .append("\n")
+                .append(content.url);
             text1View.setText(enhancedText);
             text1View.setTypeface(null, content.action == SearchEngineInfo.Action.RENAME ? Typeface.BOLD : Typeface.NORMAL);
             if (text1View instanceof CheckedTextView)
@@ -299,7 +380,7 @@ public class EditSearchEngines {
         }
     }
 
-    static class SearchEngineInfo {
+    public static class SearchEngineInfo {
         @NonNull
         final String provider;
         String name;
@@ -317,14 +398,16 @@ public class EditSearchEngines {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o)
+                return true;
+            if (o == null || getClass() != o.getClass())
+                return false;
             SearchEngineInfo that = (SearchEngineInfo) o;
             return selected == that.selected &&
-                    provider.equals(that.provider) &&
-                    Objects.equals(name, that.name) &&
-                    Objects.equals(url, that.url) &&
-                    action == that.action;
+                provider.equals(that.provider) &&
+                Objects.equals(name, that.name) &&
+                Objects.equals(url, that.url) &&
+                action == that.action;
         }
 
         @Override
