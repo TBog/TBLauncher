@@ -40,6 +40,7 @@ import rocks.tbog.tblauncher.dataprovider.SearchProvider;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.DialogHelper;
 import rocks.tbog.tblauncher.utils.SimpleTextWatcher;
+import rocks.tbog.tblauncher.utils.Utilities;
 import rocks.tbog.tblauncher.utils.ViewHolderAdapter;
 import rocks.tbog.tblauncher.utils.ViewHolderListAdapter;
 
@@ -57,12 +58,8 @@ public class EditSearchEngines extends AndroidViewModel {
         return searchEngineInfoList;
     }
 
-    public MutableLiveData<String> getDefaultProviderName() {
+    public LiveData<String> getDefaultProviderName() {
         return defaultProviderName;
-    }
-
-    public void setSearchEngineInfoList(ArrayList<SearchEngineInfo> list) {
-        searchEngineInfoList.setValue(list);
     }
 
     public void setDefaultProviderName(String name) {
@@ -72,32 +69,34 @@ public class EditSearchEngines extends AndroidViewModel {
     public void updateSearchEngineInfoList(SearchEngineInfo info) {
         ArrayList<SearchEngineInfo> arrayList = searchEngineInfoList.getValue();
         if (arrayList == null || arrayList.contains(info))
-            setSearchEngineInfoList(arrayList);
+            searchEngineInfoList.setValue(arrayList);
     }
 
     public void loadDefaults(@NonNull Context context) {
-        Set<String> defaultSearchProviders = SearchProvider.getDefaultSearchProviders(context);
-        ArrayList<SearchEngineInfo> list = new ArrayList<>(defaultSearchProviders.size());
-        for (String searchProvider : defaultSearchProviders) {
-            SearchEngineInfo searchEngineInfo = new SearchEngineInfo(searchProvider);
-            searchEngineInfo.selected = true;
-            list.add(searchEngineInfo);
-        }
-        Collections.sort(list, (lhs, rhs) -> lhs.provider.compareTo(rhs.provider));
+        final ArrayList<SearchEngineInfo> list = new ArrayList<>(0);
+        Utilities.runAsync(() -> {
+            Set<String> defaultSearchProviders = SearchProvider.getDefaultSearchProviders(context);
+            list.ensureCapacity(defaultSearchProviders.size());
+            for (String searchProvider : defaultSearchProviders) {
+                SearchEngineInfo searchEngineInfo = new SearchEngineInfo(searchProvider);
+                searchEngineInfo.selected = true;
+                list.add(searchEngineInfo);
+            }
+            Collections.sort(list, (lhs, rhs) -> lhs.provider.compareTo(rhs.provider));
 
-        setSearchEngineInfoList(list);
-        setDefaultProviderName("Google");
+            searchEngineInfoList.postValue(list);
+            defaultProviderName.postValue("Google");
+        });
     }
 
     public void loadData(@NonNull Context context, @NonNull SharedPreferences prefs) {
-        ArrayList<SearchEngineInfo> list;
-
-        // load search engines
-        {
+        final ArrayList<SearchEngineInfo> list = new ArrayList<>(0);
+        Utilities.runAsync(() -> {
+            // load search engines
             Set<String> availableSearchProviders = SearchProvider.getAvailableSearchProviders(context, prefs);
             Set<String> selectedProviderNames = SearchProvider.getSelectedProviderNames(context, prefs);
 
-            list = new ArrayList<>(availableSearchProviders.size());
+            list.ensureCapacity(availableSearchProviders.size());
 
             for (String searchProvider : availableSearchProviders) {
                 SearchEngineInfo searchEngineInfo = new SearchEngineInfo(searchProvider);
@@ -105,17 +104,15 @@ public class EditSearchEngines extends AndroidViewModel {
                 list.add(searchEngineInfo);
             }
             Collections.sort(list, (lhs, rhs) -> lhs.provider.compareTo(rhs.provider));
-            setSearchEngineInfoList(list);
-        }
+            searchEngineInfoList.postValue(list);
 
-        // get default search engine name
-        {
+            // get default search engine name
             String providerName = prefs.getString("default-search-provider", null);
             if (providerName == null || providerName.isEmpty())
-                setDefaultProviderName(list.isEmpty() ? "" : list.get(0).name);
+                defaultProviderName.postValue(list.isEmpty() ? "" : list.get(0).name);
             else
-                setDefaultProviderName(providerName);
-        }
+                defaultProviderName.postValue(providerName);
+        });
     }
 
     public void applyChanges(@NonNull Context context) {
@@ -263,7 +260,7 @@ public class EditSearchEngines extends AndroidViewModel {
 
             // Set new name
             if (TextUtils.equals(defaultProviderName.getValue(), info.name))
-                defaultProviderName.setValue(newName);
+                setDefaultProviderName(newName);
             info.name = newName;
             info.action = SearchProvider.getProviderName(info.provider).equals(info.name) ? SearchEngineInfo.Action.NONE : SearchEngineInfo.Action.RENAME;
             updateSearchEngineInfoList(info);
