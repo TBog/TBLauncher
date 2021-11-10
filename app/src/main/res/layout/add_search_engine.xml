@@ -22,7 +22,8 @@
             android:layout_height="wrap_content"
             android:hint="@string/label_search_engine_name"
             android:importantForAutofill="no"
-            android:inputType="textAutoCorrect" />
+            android:inputType="textAutoCorrect"
+            android:textAppearance="?android:attr/textAppearance" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -32,25 +33,35 @@
         android:layout_marginTop="10dp"
         android:layout_marginBottom="10dp"
         android:background="?android:attr/windowBackground"
-        android:orientation="vertical"
-        android:padding="5dp">
+        android:orientation="vertical">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_margin="5dp"
             android:text="@string/label_search_engine_url" />
 
-        <EditText
-            android:id="@android:id/text2"
+        <com.google.android.material.textfield.TextInputLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="@string/hint_add_search_engine_url"
-            android:importantForAutofill="no"
-            android:inputType="textUri" />
+            android:layout_marginTop="10dp"
+            android:layout_marginBottom="10dp"
+            android:background="?android:attr/windowBackground"
+            android:padding="5dp">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@android:id/text2"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="@string/hint_add_search_engine_url"
+                android:importantForAutofill="no"
+                android:inputType="textUri" />
+        </com.google.android.material.textfield.TextInputLayout>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_margin="5dp"
             android:text="@string/search_engine_url_help" />
 
     </LinearLayout>

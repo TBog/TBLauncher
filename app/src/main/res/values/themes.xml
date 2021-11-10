@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:android="http://schemas.android.com/apk/res/android" xmlns:aapt="http://schemas.android.com/aapt">
+<resources xmlns:android="http://schemas.android.com/apk/res/android">
 
     <style name="BaseThemeLight" parent="Theme.MaterialComponents.Light.NoActionBar">
         <item name="alertDialogTheme">@style/NoTitleDialogTheme</item>
@@ -140,26 +140,6 @@
         <item name="tabLayoutStyle">@style/TabLayout.Dialog</item>
     </style>
 
-    <style name="EditTextViewStyle" parent="Widget.AppCompat.EditText">
-        <item name="android:textSelectHandle">@drawable/abc_text_select_handle_middle_mtrl_dark
-        </item>
-        <item name="android:textSelectHandleLeft">@drawable/abc_text_select_handle_left_mtrl_dark
-        </item>
-        <item name="android:textSelectHandleRight">
-            @drawable/abc_text_select_handle_right_mtrl_dark
-        </item>
-    </style>
-
-    <style name="EditTextViewStyle.White">
-        <item name="android:textSelectHandle">@drawable/abc_text_select_handle_middle_mtrl_light
-        </item>
-        <item name="android:textSelectHandleLeft">@drawable/abc_text_select_handle_left_mtrl_light
-        </item>
-        <item name="android:textSelectHandleRight">
-            @drawable/abc_text_select_handle_right_mtrl_light
-        </item>
-    </style>
-
     <style name="AutoCompleteTextViewStyle" parent="Widget.AppCompat.AutoCompleteTextView">
         <item name="android:popupBackground">@drawable/dialog_background</item>
     </style>
@@ -244,7 +224,6 @@
 
         <item name="android:textColorHighlight">?android:attr/textColorSecondary</item>
         <item name="autoCompleteTextViewStyle">@style/AutoCompleteTextViewStyle</item>
-        <item name="editTextStyle">@style/EditTextViewStyle</item>
     </style>
 
     <style name="SettingsDialogTheme.White">
@@ -271,7 +250,6 @@
         <item name="buttonBarPositiveButtonStyle">@style/GradientBorderlessButton.White</item>
 
         <item name="autoCompleteTextViewStyle">@style/AutoCompleteTextViewStyle.White</item>
-        <item name="editTextStyle">@style/EditTextViewStyle.White</item>
     </style>
 
     <style name="SettingsDialogTheme.Black">
@@ -408,6 +386,9 @@
 
         <item name="actionOverflowMenuStyle">@style/OptionsMenu</item>
         <item name="android:itemBackground">@drawable/dialog_background</item>
+
+        <item name="textInputStyle">@style/TextInputLayoutStyle</item>
+        <item name="editTextStyle">@style/TextInputLayoutStyle</item>
 
         <item name="android:listPreferredItemHeight">64dp</item>
         <item name="android:listPreferredItemHeightSmall">48dp</item>
