@@ -1,39 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_margin="0dp"
-        android:orientation="vertical"
-        tools:background="@drawable/dialog_background_dark"
-        tools:theme="@style/TitleDialogTheme">
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:layout_margin="0dp"
+    android:orientation="vertical"
+    tools:background="@drawable/dialog_background_dark"
+    tools:theme="@style/TitleDialogTheme">
 
     <TextView
-            android:id="@android:id/title"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/result_margin_horizontal"
-            android:layout_marginVertical="@dimen/result_margin_vertical"
-            android:text="" />
+        android:id="@android:id/title"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/result_margin_horizontal"
+        android:layout_marginVertical="@dimen/result_margin_vertical"
+        android:text=""
+        android:textAppearance="?android:attr/textAppearanceMedium" />
 
     <com.google.android.material.textfield.TextInputLayout
-            android:id="@android:id/hint"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="@dimen/result_margin_horizontal"
-            android:layout_marginVertical="@dimen/result_margin_vertical">
+        android:id="@android:id/hint"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/result_margin_horizontal"
+        android:layout_marginVertical="@dimen/result_margin_vertical">
 
         <com.google.android.material.textfield.TextInputEditText
-                android:id="@+id/rename"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:autofillHints="application,name"
-                android:inputType="textAutoCorrect"
-                tools:ignore="LabelFor" />
+            android:id="@+id/rename"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autofillHints="application,name"
+            android:inputType="textAutoCorrect"
+            tools:ignore="LabelFor" />
 
     </com.google.android.material.textfield.TextInputLayout>
 
     <!-- Alert dialog style buttons along the bottom. Automatically added if not present -->
-<!--    <include layout="@layout/abc_alert_dialog_button_bar_material" />-->
+    <!--    <include layout="@layout/abc_alert_dialog_button_bar_material" />-->
 
 </LinearLayout>

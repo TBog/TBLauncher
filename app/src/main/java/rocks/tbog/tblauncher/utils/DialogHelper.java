@@ -22,12 +22,12 @@ public class DialogHelper {
 //        // get activity theme for this dialog
 //        Context themeWrapper = UITheme.getDialogThemedContext(ctx);
         EditTextDialog.Builder builder = new EditTextDialog.Builder(ctx)
-                .setInitialText(currentName)
-                .setPositiveButton(R.string.menu_action_rename, (dialog, button) -> {
-                    EditText input = dialog.findViewById(R.id.rename);
-                    dialog.onConfirm(input != null ? input.getText() : null);
-                })
-                .setNegativeButton(android.R.string.cancel, null);
+            .setInitialText(currentName)
+            .setPositiveButton(R.string.menu_action_rename, (dialog, button) -> {
+                EditText input = dialog.findViewById(R.id.rename);
+                dialog.onConfirm(input != null ? input.getText() : null);
+            })
+            .setNegativeButton(android.R.string.cancel, null);
 
         EditTextDialog dialog = builder.getDialog();
         dialog.setOnConfirmListener(newName -> {
@@ -49,13 +49,4 @@ public class DialogHelper {
 //                    Utilities.setTextSelectHandleColor(nameView, color);
 //                });
     }
-
-//    public static void showKeyboard(@NonNull Dialog dialog, @NonNull TextView textView) {
-//        Log.i(TAG, "Keyboard - SHOW");
-//        textView.requestFocus();
-//
-//        InputMethodManager mgr = (InputMethodManager) dialog.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);
-//        assert mgr != null;
-//        mgr.showSoftInput(textView, InputMethodManager.SHOW_IMPLICIT);
-//    }
 }

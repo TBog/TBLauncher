@@ -6,12 +6,10 @@ import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Paint;
 import android.graphics.Typeface;
-import android.os.Build;
 import android.text.Spannable;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
 import android.text.style.UnderlineSpan;
-import android.view.ContextThemeWrapper;
 import android.view.View;
 import android.widget.Adapter;
 import android.widget.ArrayAdapter;
@@ -22,7 +20,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
-import androidx.appcompat.app.AlertDialog;
 import androidx.collection.ArraySet;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LifecycleOwner;
@@ -38,7 +35,7 @@ import java.util.Set;
 
 import rocks.tbog.tblauncher.dataprovider.SearchProvider;
 import rocks.tbog.tblauncher.ui.ListPopup;
-import rocks.tbog.tblauncher.utils.DialogHelper;
+import rocks.tbog.tblauncher.ui.dialog.EditTextDialog;
 import rocks.tbog.tblauncher.utils.SimpleTextWatcher;
 import rocks.tbog.tblauncher.utils.Utilities;
 import rocks.tbog.tblauncher.utils.ViewHolderAdapter;
@@ -194,9 +191,9 @@ public class EditSearchEngines extends AndroidViewModel {
                     if (item.stringId == R.string.search_engine_set_default) {
                         setDefaultProviderName(info.name);
                     } else if (item.stringId == R.string.menu_action_rename) {
-                        launchRenameDialog(ctx, info);
+                        launchRenameDialog(listView.getContext(), info);
                     } else if (item.stringId == R.string.search_engine_edit_url) {
-                        launchEditUrlDialog(ctx, info);
+                        launchEditUrlDialog(listView.getContext(), info);
                     } else if (item.stringId == R.string.menu_action_delete) {
                         info.action = SearchEngineInfo.Action.DELETE;
                         updateSearchEngineInfoList(info);
@@ -239,72 +236,59 @@ public class EditSearchEngines extends AndroidViewModel {
     }
 
     private void launchRenameDialog(Context ctx, SearchEngineInfo info) {
-        DialogHelper.makeRenameDialog(ctx, info.name, (dialog, name) -> {
-            String newName = SearchProvider.sanitizeProviderName(name).trim();
-            boolean isValid = !newName.isEmpty();
-            ArrayList<SearchEngineInfo> searchEngineList = getSearchEngineInfoList().getValue();
-            if (searchEngineList != null) {
-                for (SearchEngineInfo searchEngineInfo : searchEngineList) {
-                    if (searchEngineInfo == info)
-                        continue;
-                    if (SearchProvider.getProviderName(searchEngineInfo.provider).equals(newName) || searchEngineInfo.name.equals(newName)) {
-                        isValid = false;
-                        break;
+        new EditTextDialog.Builder(ctx)
+            .setTitle(R.string.title_rename_search_engine)
+            .setInitialText(info.name)
+            .setConfirmListener(R.string.menu_action_rename, name -> {
+                String newName = name != null ? SearchProvider.sanitizeProviderName(name.toString()).trim() : null;
+                boolean isValid = !TextUtils.isEmpty(newName);
+                ArrayList<SearchEngineInfo> searchEngineList = getSearchEngineInfoList().getValue();
+                if (isValid && searchEngineList != null) {
+                    for (SearchEngineInfo searchEngineInfo : searchEngineList) {
+                        if (searchEngineInfo == info)
+                            continue;
+                        if (SearchProvider.getProviderName(searchEngineInfo.provider).equals(newName) || searchEngineInfo.name.equals(newName)) {
+                            isValid = false;
+                            break;
+                        }
                     }
                 }
-            }
-            if (!isValid) {
-                Toast.makeText(ctx, ctx.getString(R.string.invalid_rename_search_engine, newName), Toast.LENGTH_LONG).show();
-                return;
-            }
+                if (!isValid) {
+                    Toast.makeText(ctx, ctx.getString(R.string.invalid_rename_search_engine, newName), Toast.LENGTH_LONG).show();
+                    return;
+                }
 
-            // Set new name
-            if (TextUtils.equals(defaultProviderName.getValue(), info.name))
-                setDefaultProviderName(newName);
-            info.name = newName;
-            info.action = SearchProvider.getProviderName(info.provider).equals(info.name) ? SearchEngineInfo.Action.NONE : SearchEngineInfo.Action.RENAME;
-            updateSearchEngineInfoList(info);
-        })
-            .setTitle(R.string.title_rename_search_engine)
+                // Set new name
+                if (TextUtils.equals(defaultProviderName.getValue(), info.name))
+                    setDefaultProviderName(newName);
+                info.name = newName;
+                info.action = SearchProvider.getProviderName(info.provider).equals(info.name) ? SearchEngineInfo.Action.NONE : SearchEngineInfo.Action.RENAME;
+                updateSearchEngineInfoList(info);
+            })
+            .setNegativeButton(android.R.string.cancel, null)
             .show();
     }
 
     private void launchEditUrlDialog(Context ctx, SearchEngineInfo info) {
-        ContextThemeWrapper context = new ContextThemeWrapper(ctx, R.style.NoTitleDialogTheme);
-        AlertDialog.Builder builder = new AlertDialog.Builder(context);
-        builder.setTitle(context.getResources().getString(R.string.title_edit_url_search_engine));
+        new EditTextDialog.Builder(ctx)
+            .setTitle(R.string.title_edit_url_search_engine)
+            .setHint(info.name)
+            .setInitialText(info.url)
+            .setConfirmListener(R.string.confirm_edit_url_search_engine, (newName) -> {
+                if (newName == null)
+                    return;
+                // Set new name
+                info.url = SearchProvider.sanitizeProviderUrl(newName.toString()).trim();
+                if (info.url.equals(SearchProvider.getProviderUrl(info.provider))) {
+                    info.action = SearchProvider.getProviderName(info.provider).equals(info.name) ? SearchEngineInfo.Action.NONE : SearchEngineInfo.Action.RENAME;
+                } else {
+                    info.action = SearchEngineInfo.Action.RENAME;
+                }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            builder.setView(R.layout.dialog_rename);
-        } else {
-            builder.setView(View.inflate(context, R.layout.dialog_rename, null));
-        }
-
-        builder.setPositiveButton(R.string.confirm_edit_url_search_engine, (dialog, which) -> {
-            EditText input = ((AlertDialog) dialog).findViewById(R.id.rename);
-            if (input == null)
-                return;
-
-            // Set new name
-            info.url = SearchProvider.sanitizeProviderUrl(input.getText().toString()).trim();
-            if (info.url.equals(SearchProvider.getProviderUrl(info.provider))) {
-                info.action = SearchProvider.getProviderName(info.provider).equals(info.name) ? SearchEngineInfo.Action.NONE : SearchEngineInfo.Action.RENAME;
-            } else {
-                info.action = SearchEngineInfo.Action.RENAME;
-            }
-
-            updateSearchEngineInfoList(info);
-
-            dialog.dismiss();
-        }).setNegativeButton(android.R.string.cancel, (dialog, which) -> dialog.cancel());
-
-        AlertDialog dialog = builder.create();
-        dialog.show();
-        // call after dialog got inflated (show call)
-        TextView nameView = dialog.findViewById(R.id.rename);
-        assert nameView != null;
-        nameView.setText(info.url);
-        nameView.requestFocus();
+                updateSearchEngineInfoList(info);
+            })
+            .setNegativeButton(android.R.string.cancel, null)
+            .show();
     }
 
     public void onStartLifecycle(@NonNull Dialog dialog, @NonNull LifecycleOwner viewLifecycleOwner) {

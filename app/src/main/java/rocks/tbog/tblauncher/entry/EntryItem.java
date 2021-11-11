@@ -332,7 +332,7 @@ public abstract class EntryItem {
             ResultHelper.launchRemoveFromQuickList(context, this);
             return true;
         } else if (R.string.menu_popup_quick_list_customize == stringId) {
-            TBApplication.behaviour(context).launchEditQuickListDialog();
+            TBApplication.behaviour(context).launchEditQuickListDialog(context);
             return true;
         }
 

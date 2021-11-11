@@ -22,8 +22,8 @@ import androidx.core.view.WindowInsetsControllerCompat;
 
 import com.google.android.material.textfield.TextInputLayout;
 
+import rocks.tbog.tblauncher.Behaviour;
 import rocks.tbog.tblauncher.R;
-import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.ui.DialogFragment;
 import rocks.tbog.tblauncher.ui.DialogWrapper;
 
@@ -61,8 +61,7 @@ public class EditTextDialog extends DialogFragment<CharSequence> {
         CharSequence titleText = args.getCharSequence("titleText", "");
         CharSequence hintText = args.getCharSequence("hintText", "");
         //hint
-        if (hintText.length() != 0)
-        {
+        if (hintText.length() != 0) {
             TextInputLayout textInputLayout = view.findViewById(android.R.id.hint);
             textInputLayout.setHintEnabled(true);
             textInputLayout.setHint(hintText);
@@ -128,6 +127,7 @@ public class EditTextDialog extends DialogFragment<CharSequence> {
         private OnButtonClickListener<CharSequence> mClickPositive = null;
         private OnButtonClickListener<CharSequence> mClickNegative = null;
         private OnButtonClickListener<CharSequence> mClickNeutral = null;
+        private OnConfirmListener<CharSequence> mOnConfirm = null;
 
         public Builder(@NonNull Context context) {
             super();
@@ -144,9 +144,13 @@ public class EditTextDialog extends DialogFragment<CharSequence> {
             return this;
         }
 
-        public Builder setHint(@StringRes int hintId) {
-            mArgs.putCharSequence("hintText", mContext.getText(hintId));
+        public Builder setHint(@Nullable CharSequence hint) {
+            mArgs.putCharSequence("hintText", hint);
             return this;
+        }
+
+        public Builder setHint(@StringRes int hintId) {
+            return setHint(mContext.getText(hintId));
         }
 
         public Builder setInitialText(@Nullable CharSequence text) {
@@ -172,6 +176,16 @@ public class EditTextDialog extends DialogFragment<CharSequence> {
             return this;
         }
 
+        public Builder setConfirmListener(@StringRes int positiveTextId, OnConfirmListener<CharSequence> onConfirm) {
+            mArgs.putCharSequence("btnPositiveText", mContext.getText(positiveTextId));
+            mClickPositive = (dialog, button) -> {
+                EditText input = dialog.findViewById(R.id.rename);
+                dialog.onConfirm(input != null ? input.getText() : null);
+            };
+            mOnConfirm = onConfirm;
+            return this;
+        }
+
         @NonNull
         public EditTextDialog getDialog() {
             return mDialog;
@@ -182,7 +196,8 @@ public class EditTextDialog extends DialogFragment<CharSequence> {
             mDialog.setOnPositiveClickListener(mClickPositive);
             mDialog.setOnNegativeClickListener(mClickNegative);
             mDialog.setOnNeutralClickListener(mClickNeutral);
-            TBApplication.behaviour(mContext).showDialog(mDialog, "dialog_rename");
+            mDialog.setOnConfirmListener(mOnConfirm);
+            Behaviour.showDialog(mContext, mDialog, "dialog_rename");
         }
     }
 }
