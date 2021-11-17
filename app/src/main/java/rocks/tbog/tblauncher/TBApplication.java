@@ -60,6 +60,10 @@ public class TBApplication extends Application {
      */
     private IconPackCache mIconPackCache = new IconPackCache();
     /**
+     * We store a number of icon packs so we don't have to parse the XML
+     */
+    private MimeTypeCache mMimeTypeCache = new MimeTypeCache();
+    /**
      * Manage live wallpaper interaction
      */
     private LiveWallpaper mLiveWallpaper = new LiveWallpaper();
@@ -96,6 +100,11 @@ public class TBApplication extends Application {
     @NonNull
     public static IconPackCache iconPackCache(Context context) {
         return getApplication(context).mIconPackCache;
+    }
+
+    @NonNull
+    public static MimeTypeCache mimeTypeCache(Context context) {
+        return getApplication(context).mMimeTypeCache;
     }
 
     @NonNull
@@ -322,6 +331,7 @@ public class TBApplication extends Application {
             mIconPackCache.clearCache(this);
             if (mSharedPreferences.getBoolean("screen-off-cache-clear", false))
                 mDrawableCache.clearCache();
+            mMimeTypeCache.clearCache();
         }
     }
 }
