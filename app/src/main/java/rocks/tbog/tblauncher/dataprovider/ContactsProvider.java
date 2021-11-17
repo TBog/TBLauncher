@@ -88,7 +88,7 @@ public class ContactsProvider extends Provider<ContactEntry> {
                 }
             }
 
-            if (!match && queryNormalized.length() > 2) {
+            if (!match && pojo.normalizedPhone != null && queryNormalized.length() > 2) {
                 // search for the phone number
                 matchInfo = fuzzyScore.match(pojo.normalizedPhone.codePoints);
                 match = matchInfo.match;

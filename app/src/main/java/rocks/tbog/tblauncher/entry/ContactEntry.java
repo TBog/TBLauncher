@@ -1,5 +1,6 @@
 package rocks.tbog.tblauncher.entry;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
@@ -22,11 +23,14 @@ import java.io.InputStream;
 import rocks.tbog.tblauncher.BuildConfig;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
+import rocks.tbog.tblauncher.handler.IconsHandler;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.result.ResultHelper;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
+import rocks.tbog.tblauncher.utils.PackageManagerUtils;
 import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.UIColors;
+import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public final class ContactEntry extends EntryItem {
@@ -54,9 +58,11 @@ public final class ContactEntry extends EntryItem {
 
     private String nickname = "";
 
-    public ContactEntry(String id, String lookupKey, String phone, StringNormalizer.Result normalizedPhone,
-                        Uri iconUri, Boolean primary, int timesContacted, Boolean starred,
-                        Boolean homeNumber) {
+    private ImData imData;
+
+    public ContactEntry(String id, String lookupKey, String phone,
+                        StringNormalizer.Result normalizedPhone, Uri iconUri, Boolean primary,
+                        int timesContacted, Boolean starred, Boolean homeNumber) {
         super(id);
         if (BuildConfig.DEBUG && !id.startsWith(SCHEME)) {
             throw new IllegalStateException("Invalid " + ContactEntry.class.getSimpleName() + " id `" + id + "`");
@@ -71,8 +77,34 @@ public final class ContactEntry extends EntryItem {
         this.homeNumber = homeNumber;
     }
 
+    public ContactEntry(String id, String lookupKey, Uri iconUri, Boolean primary,
+                        int timesContacted, Boolean starred, Boolean homeNumber) {
+        super(id);
+        if (BuildConfig.DEBUG && !id.startsWith(SCHEME)) {
+            throw new IllegalStateException("Invalid " + ContactEntry.class.getSimpleName() + " id `" + id + "`");
+        }
+        this.lookupKey = lookupKey;
+        this.phone = null;
+        this.normalizedPhone = null;
+        this.iconUri = iconUri;
+        this.primary = primary;
+        this.timesContacted = timesContacted;
+        this.starred = starred;
+        this.homeNumber = homeNumber;
+    }
+
+    public static ContactEntry newPhoneContact(long contactId, String phone, StringNormalizer.Result normalizedPhone, String lookupKey, Uri icon, boolean primary, boolean starred) {
+        String entryId = SCHEME + contactId + '/' + phone;
+        return new ContactEntry(entryId, lookupKey, phone, normalizedPhone, icon, primary, 0, starred, false);
+    }
+
+    public static ContactEntry newGenericContact(long contactId, String shortMimeType, long id, String lookupKey, Uri icon, boolean primary, boolean starred) {
+        String entryId = SCHEME + contactId + '/' + shortMimeType + '/' + id;
+        return new ContactEntry(entryId, lookupKey, icon, primary, 0, starred, false);
+    }
+
     public String getNickname() {
-        return nickname;
+        return nickname == null ? "" : nickname;
     }
 
     public void setNickname(String nickname) {
@@ -90,6 +122,18 @@ public final class ContactEntry extends EntryItem {
         return primary;
     }
 
+    public void setIm(ImData imData) {
+        this.imData = imData;
+    }
+
+    public ImData getImData() {
+        return imData;
+    }
+
+    public boolean isHomeNumber() {
+        return homeNumber;
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Result methods
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -97,8 +141,8 @@ public final class ContactEntry extends EntryItem {
     @Override
     public int getResultLayout(int drawFlags) {
         return Utilities.checkFlag(drawFlags, FLAG_DRAW_LIST) ? R.layout.item_contact :
-                (Utilities.checkFlag(drawFlags, FLAG_DRAW_GRID) ? R.layout.item_grid :
-                        R.layout.item_quick_list);
+            (Utilities.checkFlag(drawFlags, FLAG_DRAW_GRID) ? R.layout.item_grid :
+                R.layout.item_quick_list);
     }
 
     @Override
@@ -129,7 +173,7 @@ public final class ContactEntry extends EntryItem {
             else
                 ResultViewHelper.removeIconColorFilter(contactIcon);
             contactIcon.setVisibility(View.VISIBLE);
-            ResultViewHelper.setIconAsync(drawFlags, this, contactIcon, AsyncSetEntryIcon.class);
+            ResultViewHelper.setIconAsync(drawFlags, this, contactIcon, SetContactIconAsync.class);
         } else {
             contactIcon.setImageDrawable(null);
             contactIcon.setVisibility(View.GONE);
@@ -147,8 +191,13 @@ public final class ContactEntry extends EntryItem {
 
         // Contact phone
         TextView contactPhone = view.findViewById(R.id.item_contact_phone);
-        contactPhone.setTextColor(UIColors.getResultText2Color(context));
-        ResultViewHelper.displayHighlighted(relevanceSource, normalizedPhone, phone, relevance, contactPhone);
+        if (phone != null) {
+            contactPhone.setVisibility(View.VISIBLE);
+            contactPhone.setTextColor(UIColors.getResultText2Color(context));
+            ResultViewHelper.displayHighlighted(relevanceSource, normalizedPhone, phone, relevance, contactPhone);
+        } else {
+            contactPhone.setVisibility(View.GONE);
+        }
 
         // Contact nickname
         TextView contactNickname = view.findViewById(R.id.item_contact_nickname);
@@ -156,6 +205,7 @@ public final class ContactEntry extends EntryItem {
         if (getNickname().isEmpty()) {
             contactNickname.setVisibility(View.GONE);
         } else {
+            contactNickname.setVisibility(View.VISIBLE);
             ResultViewHelper.displayHighlighted(relevanceSource, normalizedNickname, getNickname(), relevance, contactNickname);
         }
 
@@ -168,7 +218,7 @@ public final class ContactEntry extends EntryItem {
             else
                 ResultViewHelper.removeIconColorFilter(contactIcon);
             contactIcon.setVisibility(View.VISIBLE);
-            ResultViewHelper.setIconAsync(drawFlags, this, contactIcon, AsyncSetEntryIcon.class);
+            ResultViewHelper.setIconAsync(drawFlags, this, contactIcon, SetContactIconAsync.class);
         } else {
             contactIcon.setImageDrawable(null);
             contactIcon.setVisibility(View.GONE);
@@ -186,36 +236,85 @@ public final class ContactEntry extends EntryItem {
 //        });
 
         int contactActionColor = UIColors.getContactActionColor(context);
+        PackageManager pm = context.getPackageManager();
+        boolean hasPhone = phone != null && pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
+
         // Phone action
         ImageButton phoneButton = view.findViewById(R.id.item_contact_action_phone);
         phoneButton.setColorFilter(contactActionColor, PorterDuff.Mode.MULTIPLY);
+
+        if (hasPhone) {
+            phoneButton.setVisibility(View.VISIBLE);
+            phoneButton.setOnClickListener(v -> {
+//                launchCall(v.getContext(), v, contactPojo.phone);
+//                recordLaunch(context, queryInterface);
+                ResultHelper.recordLaunch(this, context);
+                ResultHelper.launchCall(v.getContext(), v, phone);
+            });
+        } else {
+            phoneButton.setVisibility(View.GONE);
+        }
+
         // Message action
         ImageButton messageButton = view.findViewById(R.id.item_contact_action_message);
         messageButton.setColorFilter(contactActionColor, PorterDuff.Mode.MULTIPLY);
 
-        PackageManager pm = context.getPackageManager();
-
-        if (pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
-            phoneButton.setVisibility(View.VISIBLE);
+        if (getImData() != null) {
             messageButton.setVisibility(View.VISIBLE);
-            phoneButton.setOnClickListener(v -> {
-                ResultHelper.recordLaunch(this, context);
-                ResultHelper.launchCall(v.getContext(), v, phone);
-            });
-
             messageButton.setOnClickListener(v -> {
+//                launchIm(v.getContext(), v);
+//                recordLaunch(context, queryInterface);
+                ResultHelper.recordLaunch(this, context);
+                ResultHelper.launchMessaging(this, v);
+            });
+        } else if (hasPhone) {
+            messageButton.setVisibility(View.VISIBLE);
+            messageButton.setOnClickListener(v -> {
+//                launchMessaging(v.getContext());
+//                recordLaunch(context, queryInterface);
                 ResultHelper.recordLaunch(this, context);
                 ResultHelper.launchMessaging(this, v);
             });
 
-            if (homeNumber)
+            if (isHomeNumber()) {
                 messageButton.setVisibility(View.INVISIBLE);
-            else
+            } else {
                 messageButton.setVisibility(View.VISIBLE);
-
+            }
         } else {
-            phoneButton.setVisibility(View.INVISIBLE);
             messageButton.setVisibility(View.INVISIBLE);
+        }
+
+//        if (pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
+//            phoneButton.setVisibility(View.VISIBLE);
+//            messageButton.setVisibility(View.VISIBLE);
+//            phoneButton.setOnClickListener(v -> {
+//                ResultHelper.recordLaunch(this, context);
+//                ResultHelper.launchCall(v.getContext(), v, phone);
+//            });
+//
+//            messageButton.setOnClickListener(v -> {
+//                ResultHelper.recordLaunch(this, context);
+//                ResultHelper.launchMessaging(this, v);
+//            });
+//
+//            if (homeNumber)
+//                messageButton.setVisibility(View.INVISIBLE);
+//            else
+//                messageButton.setVisibility(View.VISIBLE);
+//
+//        } else {
+//            phoneButton.setVisibility(View.INVISIBLE);
+//            messageButton.setVisibility(View.INVISIBLE);
+//        }
+
+        // App icon
+        final ImageView appIcon = view.findViewById(android.R.id.icon2);
+        if (getImData() != null) {
+            appIcon.setVisibility(View.VISIBLE);
+            ResultViewHelper.setIconAsync(drawFlags, this, appIcon, SetAppIconAsync.class);
+        } else {
+            appIcon.setVisibility(View.GONE);
         }
 
         ResultViewHelper.applyPreferences(drawFlags, contactName, contactPhone, contactIcon);
@@ -234,8 +333,8 @@ public final class ContactEntry extends EntryItem {
         }
     }
 
-    public static class AsyncSetEntryIcon extends ResultViewHelper.AsyncSetEntryDrawable {
-        public AsyncSetEntryIcon(@NonNull ImageView image, int drawFlags, @NonNull EntryItem entryItem) {
+    public static class SetContactIconAsync extends ResultViewHelper.AsyncSetEntryDrawable {
+        public SetContactIconAsync(@NonNull ImageView image, int drawFlags, @NonNull EntryItem entryItem) {
             super(image, drawFlags, entryItem);
         }
 
@@ -258,4 +357,66 @@ public final class ContactEntry extends EntryItem {
         }
     }
 
+    public static class SetAppIconAsync extends ResultViewHelper.AsyncSetEntryDrawable {
+        public SetAppIconAsync(@NonNull ImageView image, int drawFlags, @NonNull EntryItem entryItem) {
+            super(image, drawFlags, entryItem);
+        }
+
+        @Override
+        protected Drawable getDrawable(Context context) {
+            IconsHandler iconsHandler = TBApplication.iconsHandler(context);
+            ImData imData = ((ContactEntry) entryItem).getImData();
+            Drawable appDrawable;
+            ComponentName componentName = TBApplication.mimeTypeCache(context).getComponentName(context, imData.getMimeType());
+            if (componentName != null) {
+                appDrawable = iconsHandler.getDrawableIconForPackage(PackageManagerUtils.getLaunchingComponent(context, componentName), UserHandleCompat.CURRENT_USER);
+            } else {
+                // This should never happen, let's just return the generic activity icon
+                appDrawable = context.getPackageManager().getDefaultActivityIcon();
+            }
+            return appDrawable;
+        }
+    }
+
+    // TODO: move to separate class, which package?
+    public static class ImData {
+        private final long id;
+        private final String mimeType;
+
+        private String identifier;
+        // IM name without special characters
+        private StringNormalizer.Result normalizedIdentifier;
+
+        public ImData(String mimeType, long id) {
+            this.mimeType = mimeType;
+            this.id = id;
+        }
+
+        public String getIdentifier() {
+            return identifier;
+        }
+
+        public void setIdentifier(String identifier) {
+            if (identifier != null) {
+                // Set the actual user-friendly name
+                this.identifier = identifier;
+                this.normalizedIdentifier = StringNormalizer.normalizeWithResult(this.identifier, false);
+            } else {
+                this.identifier = null;
+                this.normalizedIdentifier = null;
+            }
+        }
+
+        public String getMimeType() {
+            return mimeType;
+        }
+
+        public long getId() {
+            return id;
+        }
+
+        public StringNormalizer.Result getNormalizedIdentifier() {
+            return normalizedIdentifier;
+        }
+    }
 }
