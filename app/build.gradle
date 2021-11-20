@@ -9,8 +9,8 @@ android {
         applicationId "rocks.tbog.tblauncher"
         minSdkVersion 19
         targetSdkVersion 31
-        versionCode 29
-        versionName "6.7"
+        versionCode 30
+        versionName "6.8"
         vectorDrawables.useSupportLibrary = true
     }
 
