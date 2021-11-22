@@ -33,6 +33,7 @@ import rocks.tbog.tblauncher.entry.SearchEntry;
 import rocks.tbog.tblauncher.entry.ShortcutEntry;
 import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.handler.DataHandler;
+import rocks.tbog.tblauncher.utils.MimeTypeUtils;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public class ResultHelper {
@@ -166,13 +167,27 @@ public class ResultHelper {
         TBApplication.behaviour(context).afterLaunchOccurred();
     }
 
+    public static void launchIm(ContactEntry.ImData imData, View v) {
+        Context context = v.getContext();
+
+        Intent intent = MimeTypeUtils.getRegisteredIntentByMimeType(context, imData.getMimeType(), imData.getId(), imData.getIdentifier());
+        if (intent != null) {
+            TBApplication.behaviour(context).beforeLaunchOccurred();
+
+            Utilities.setIntentSourceBounds(intent, v);
+            context.startActivity(intent);
+
+            TBApplication.behaviour(context).afterLaunchOccurred();
+        }
+    }
+
     public static void launchContactView(ContactEntry contactPojo, Context context, View v) {
         TBApplication.behaviour(context).beforeLaunchOccurred();
 
         Intent action = new Intent(Intent.ACTION_VIEW);
 
         action.setData(Uri.withAppendedPath(ContactsContract.Contacts.CONTENT_LOOKUP_URI,
-                String.valueOf(contactPojo.lookupKey)));
+            String.valueOf(contactPojo.lookupKey)));
         Utilities.setIntentSourceBounds(action, v);
 
         action.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
