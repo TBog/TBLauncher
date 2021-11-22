@@ -94,6 +94,9 @@ public class LoadContactsEntry extends LoadEntryItem<ContactEntry> {
             nickCursor.close();
         }
 
+        // get mime type labels
+        Map<String, String> mimeLabels = TBApplication.mimeTypeCache(ctx).getUniqueLabels(ctx, mimeTypes);
+
         // Query all mime types
         for (String mimeType : mimeTypes) {
             Timer timerMimeType = Timer.startNano();
@@ -101,7 +104,8 @@ public class LoadContactsEntry extends LoadEntryItem<ContactEntry> {
             if (ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE.equals(mimeType)) {
                 contacts.addAll(createPhoneContacts(contentResolver, basicContacts, basicRawContacts));
             } else {
-                contacts.addAll(createGenericContacts(mimeType, basicContacts, basicRawContacts));
+                String mimeLabel = mimeLabels.get(mimeType);
+                contacts.addAll(createGenericContacts(mimeType, basicContacts, basicRawContacts, mimeLabel));
             }
             int sizeAfter = contacts.size();
             Log.i("time", timerMimeType + " to list " + (sizeAfter - sizeBefore) + " contact(s) for " + mimeType);
@@ -240,7 +244,7 @@ public class LoadContactsEntry extends LoadEntryItem<ContactEntry> {
         return getFilteredContacts(mapContacts, contact -> contact.normalizedPhone.toString());
     }
 
-    private ArrayList<ContactEntry> createGenericContacts(String mimeType, Map<String, BasicContact> basicContacts, Map<Long, BasicRawContact> basicRawContacts) {
+    private ArrayList<ContactEntry> createGenericContacts(String mimeType, Map<String, BasicContact> basicContacts, Map<Long, BasicRawContact> basicRawContacts, String mimeLabel) {
         final MimeTypeCache mimeTypeCache = TBApplication.mimeTypeCache(context.get());
         // Prevent duplicates by keeping in memory encountered contacts.
         Map<String, Set<ContactEntry>> mapContacts = new HashMap<>();
@@ -295,7 +299,7 @@ public class LoadContactsEntry extends LoadEntryItem<ContactEntry> {
 
                         contact.setName(basicContact.getDisplayName());
                         contact.setNickname(basicContact.getNickName());
-                        ContactEntry.ImData imData = new ContactEntry.ImData(mimeType, id);
+                        ContactEntry.ImData imData = new ContactEntry.ImData(mimeType, id, mimeLabel);
                         imData.setIdentifier(label);
                         contact.setIm(imData);
 
@@ -378,6 +382,7 @@ public class LoadContactsEntry extends LoadEntryItem<ContactEntry> {
         private final String photoId;
         private final String photoUri;
         private String nickName;
+        private String mimeTypeLabel;
 
         private BasicContact(String lookupKey, long contactId, String displayName, String photoId, String photoUri) {
             this.lookupKey = lookupKey;
@@ -405,6 +410,10 @@ public class LoadContactsEntry extends LoadEntryItem<ContactEntry> {
 
         public void setNickName(String nickName) {
             this.nickName = nickName;
+        }
+
+        public void setLabel(String label) {
+            mimeTypeLabel = label;
         }
 
         public Uri getIcon() {

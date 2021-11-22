@@ -195,6 +195,10 @@ public final class ContactEntry extends EntryItem {
             contactPhone.setVisibility(View.VISIBLE);
             contactPhone.setTextColor(UIColors.getResultText2Color(context));
             ResultViewHelper.displayHighlighted(relevanceSource, normalizedPhone, phone, relevance, contactPhone);
+        } else if (getImData() != null && getImData().label != null) {
+            contactPhone.setVisibility(View.VISIBLE);
+            contactPhone.setTextColor(UIColors.getResultText2Color(context));
+            contactPhone.setText(getImData().label);
         } else {
             contactPhone.setVisibility(View.GONE);
         }
@@ -262,16 +266,12 @@ public final class ContactEntry extends EntryItem {
         if (getImData() != null) {
             messageButton.setVisibility(View.VISIBLE);
             messageButton.setOnClickListener(v -> {
-//                launchIm(v.getContext(), v);
-//                recordLaunch(context, queryInterface);
                 ResultHelper.recordLaunch(this, context);
-                ResultHelper.launchMessaging(this, v);
+                ResultHelper.launchIm(getImData(), v);
             });
         } else if (hasPhone) {
             messageButton.setVisibility(View.VISIBLE);
             messageButton.setOnClickListener(v -> {
-//                launchMessaging(v.getContext());
-//                recordLaunch(context, queryInterface);
                 ResultHelper.recordLaunch(this, context);
                 ResultHelper.launchMessaging(this, v);
             });
@@ -284,29 +284,6 @@ public final class ContactEntry extends EntryItem {
         } else {
             messageButton.setVisibility(View.INVISIBLE);
         }
-
-//        if (pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
-//            phoneButton.setVisibility(View.VISIBLE);
-//            messageButton.setVisibility(View.VISIBLE);
-//            phoneButton.setOnClickListener(v -> {
-//                ResultHelper.recordLaunch(this, context);
-//                ResultHelper.launchCall(v.getContext(), v, phone);
-//            });
-//
-//            messageButton.setOnClickListener(v -> {
-//                ResultHelper.recordLaunch(this, context);
-//                ResultHelper.launchMessaging(this, v);
-//            });
-//
-//            if (homeNumber)
-//                messageButton.setVisibility(View.INVISIBLE);
-//            else
-//                messageButton.setVisibility(View.VISIBLE);
-//
-//        } else {
-//            phoneButton.setVisibility(View.INVISIBLE);
-//            messageButton.setVisibility(View.INVISIBLE);
-//        }
 
         // App icon
         final ImageView appIcon = view.findViewById(android.R.id.icon2);
@@ -327,7 +304,10 @@ public final class ContactEntry extends EntryItem {
         boolean callContactOnClick = settingPrefs.getBoolean("call-contact-on-click", false);
 
         if (callContactOnClick) {
-            ResultHelper.launchCall(context, v, phone);
+            if (phone != null)
+                ResultHelper.launchCall(context, v, phone);
+            else if (getImData() != null)
+                ResultHelper.launchIm(getImData(), v);
         } else {
             ResultHelper.launchContactView(this, context, v);
         }
@@ -382,14 +362,16 @@ public final class ContactEntry extends EntryItem {
     public static class ImData {
         private final long id;
         private final String mimeType;
+        private final String label;
 
         private String identifier;
         // IM name without special characters
         private StringNormalizer.Result normalizedIdentifier;
 
-        public ImData(String mimeType, long id) {
+        public ImData(String mimeType, long id, String label) {
             this.mimeType = mimeType;
             this.id = id;
+            this.label = label;
         }
 
         public String getIdentifier() {
