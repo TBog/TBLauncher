@@ -995,6 +995,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case "enable-url":
             case "enable-calculator":
             case "enable-contacts":
+            case "selected-contact-mime-types":
                 TBApplication.dataHandler(context).reloadProviders();
                 break;
             case "root-mode":
