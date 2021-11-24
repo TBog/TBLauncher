@@ -737,6 +737,18 @@ public class Utilities {
         return addDrawableBeforeString(text, icon, dir);
     }
 
+    public static String appendString(@NonNull String textA, @Nullable String glue, @NonNull String textB, int layoutDirection) {
+        int expectedLength = textA.length() + textB.length();
+        if (glue != null)
+            expectedLength += glue.length();
+        StringBuilder builder = new StringBuilder(expectedLength);
+        builder.append(layoutDirection == View.LAYOUT_DIRECTION_RTL ? textB : textA);
+        if (glue != null)
+            builder.append(glue);
+        builder.append(layoutDirection == View.LAYOUT_DIRECTION_RTL ? textA : textB);
+        return builder.toString();
+    }
+
     public interface GetDrawable {
         @Nullable
         Drawable getDrawable(@NonNull Context context);
