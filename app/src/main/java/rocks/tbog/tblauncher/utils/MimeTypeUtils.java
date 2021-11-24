@@ -105,7 +105,7 @@ public class MimeTypeUtils {
         Set<String> selectedMimeTypes = prefs.getStringSet("selected-contact-mime-types", getDefaultMimeTypes());
         Set<String> supportedMimeTypes = getSupportedMimeTypes(context);
 
-        //supportedMimeTypes.retainAll(selectedMimeTypes);
+        supportedMimeTypes.retainAll(selectedMimeTypes);
 
         Log.i("time", timer + " to load " + supportedMimeTypes.size() + " active mime types");
 

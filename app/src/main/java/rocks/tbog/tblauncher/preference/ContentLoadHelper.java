@@ -184,6 +184,16 @@ public class ContentLoadHelper {
         return new Pair<>(entries, entryValues);
     }
 
+    public static void setMultiListValues(@Nullable Preference preference, @NonNull Pair<CharSequence[], CharSequence[]> values, @Nullable Set<String> selected) {
+        if (!(preference instanceof MultiSelectListPreference))
+            return;
+        MultiSelectListPreference multiSelectList = (MultiSelectListPreference) preference;
+        multiSelectList.setEntryValues(values.first);
+        multiSelectList.setEntries(values.second);
+        if (selected != null)
+            multiSelectList.setValues(selected);
+    }
+
     public static class CategoryItem {
         /**
          * String resource used when inflating the popup menu.
