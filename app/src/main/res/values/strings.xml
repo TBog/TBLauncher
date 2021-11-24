@@ -225,6 +225,8 @@
     <string name="enable_calculator">Calculator</string>
     <string name="enable_contacts">Phone contacts</string>
 
+    <string name="selected_contact_mime_types">Select contacts to be shown</string>
+
     <string name="edit_search_engines">Edit search engines</string>
     <string name="edit_search_engines_summary">Toggle and edit search providers</string>
     <string name="reset_search_engines">Reset search engines</string>

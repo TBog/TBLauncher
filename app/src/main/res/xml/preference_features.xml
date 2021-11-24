@@ -370,26 +370,32 @@
 
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:dependency="enable-search"
-                android:dialogLayout="@layout/add_search_engine"
-                android:key="add-search-engine"
-                android:title="@string/add_search_engine" />
+            android:dialogLayout="@layout/add_search_engine"
+            android:key="add-search-engine"
+            android:title="@string/add_search_engine" />
 
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:dependency="enable-search"
-                android:dialogLayout="@layout/edit_search_engines"
-                android:key="reset-search-engines"
-                android:summary="@string/reset_search_engines_summary"
-                android:title="@string/reset_search_engines" />
+            android:dependency="enable-search"
+            android:dialogLayout="@layout/edit_search_engines"
+            android:key="reset-search-engines"
+            android:summary="@string/reset_search_engines_summary"
+            android:title="@string/reset_search_engines" />
+
+        <MultiSelectListPreference
+            android:defaultValue="@array/defaultContactMimeTypes"
+            android:dependency="enable-contacts"
+            android:key="selected-contact-mime-types"
+            android:title="@string/selected_contact_mime_types" />
 
         <!-- This is here just to set the default value and be saved in backup, not visible for user -->
         <MultiSelectListPreference
-                android:defaultValue="@array/defaultSearchProviders"
-                android:key="available-search-providers"
-                app:isPreferenceVisible="false" />
+            android:defaultValue="@array/defaultSearchProviders"
+            android:key="available-search-providers"
+            app:isPreferenceVisible="false" />
 
         <!-- This is here just to set the default value and be saved in backup, not visible for user -->
         <MultiSelectListPreference
-                android:key="selected-search-provider-names"
+            android:key="selected-search-provider-names"
                 app:isPreferenceVisible="false" />
 
         <!-- This is here just to set the default value and be saved in backup, not visible for user -->

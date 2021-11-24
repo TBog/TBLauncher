@@ -48,6 +48,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import rocks.tbog.tblauncher.dataprovider.TagsProvider;
 import rocks.tbog.tblauncher.db.ExportedData;
@@ -72,6 +74,7 @@ import rocks.tbog.tblauncher.preference.SliderDialog;
 import rocks.tbog.tblauncher.preference.TagOrderListPreferenceDialog;
 import rocks.tbog.tblauncher.ui.dialog.PleaseWaitDialog;
 import rocks.tbog.tblauncher.utils.FileUtils;
+import rocks.tbog.tblauncher.utils.MimeTypeUtils;
 import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.PrefOrderedListHelper;
 import rocks.tbog.tblauncher.utils.SystemUiVisibility;
@@ -293,6 +296,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         private static Pair<CharSequence[], CharSequence[]> EntryToShowListContent = null;
         private static ContentLoadHelper.OrderedMultiSelectListData TagsMenuContent = null;
         private static ContentLoadHelper.OrderedMultiSelectListData ResultPopupContent = null;
+        private static Pair<CharSequence[], CharSequence[]> MimeTypeListContent = null;
 
         public SettingsFragment() {
             super();
@@ -363,6 +367,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 initEntryToShowLists(context, sharedPreferences);
                 initTagsMenuList(context, sharedPreferences);
                 initResultPopupList(context, sharedPreferences);
+                initMimeTypes(context, sharedPreferences);
             } else {
                 synchronized (SettingsFragment.this) {
                     if (AppToRunListContent == null)
@@ -373,6 +378,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         TagsMenuContent = ContentLoadHelper.generateTagsMenuContent(context, sharedPreferences);
                     if (ResultPopupContent == null)
                         ResultPopupContent = ContentLoadHelper.generateResultPopupContent(context, sharedPreferences);
+                    if (MimeTypeListContent == null)
+                        MimeTypeListContent = generateMimeTypeListContent(context);
                 }
                 for (String gesturePref : PREF_LISTS_WITH_DEPENDENCY) {
                     updateAppToRunList(sharedPreferences, gesturePref);
@@ -381,6 +388,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 TagsMenuContent.setMultiListValues(findPreference("tags-menu-list"));
                 TagsMenuContent.setOrderedListValues(findPreference("tags-menu-order"));
                 ResultPopupContent.setOrderedListValues(findPreference("result-popup-order"));
+                ContentLoadHelper.setMultiListValues(findPreference("selected-contact-mime-types"), MimeTypeListContent, null);
             }
 
             final ListPreference iconsPack = findPreference("icons-pack");
@@ -472,6 +480,25 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 }, t -> setResultPopupValues.run());
             } else {
                 setResultPopupValues.run();
+            }
+        }
+
+        private void initMimeTypes(@NonNull Context context, @NonNull SharedPreferences sharedPreferences) {
+            // get all supported mime types
+            final Runnable setMimeTypeValues = () -> {
+                ContentLoadHelper.setMultiListValues(findPreference("selected-contact-mime-types"), MimeTypeListContent, null);
+            };
+
+            if (MimeTypeListContent == null) {
+                Utilities.runAsync(getLifecycle(), t -> {
+                    Pair<CharSequence[], CharSequence[]> content = generateMimeTypeListContent(context);
+                    synchronized (SettingsFragment.this) {
+                        if (MimeTypeListContent == null)
+                            MimeTypeListContent = content;
+                    }
+                }, t -> setMimeTypeValues.run());
+            } else {
+                setMimeTypeValues.run();
             }
         }
 
@@ -712,6 +739,20 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 return ContentLoadHelper.generateStaticEntryList(context, tagList);
             }
             return new Pair<>(entries, entryValues);
+        }
+
+        private static Pair<CharSequence[], CharSequence[]> generateMimeTypeListContent(@NonNull Context context) {
+            Set<String> supportedMimeTypes = MimeTypeUtils.getSupportedMimeTypes(context);
+            Map<String, String> labels = TBApplication.mimeTypeCache(context).getUniqueLabels(context, supportedMimeTypes);
+
+            String[] mimeTypes = labels.keySet().toArray(new String[0]);
+            Arrays.sort(mimeTypes);
+
+            CharSequence[] mimeLabels = new CharSequence[mimeTypes.length];
+            for (int index = 0; index < mimeTypes.length; index += 1) {
+                mimeLabels[index] = labels.get(mimeTypes[index]);
+            }
+            return new Pair<>(mimeTypes, mimeLabels);
         }
 
         private void updateListPrefDependency(@NonNull String dependOnKey, @Nullable String dependOnValue, @NonNull String enableValue, @NonNull String listKey, @Nullable Pair<CharSequence[], CharSequence[]> listContent) {
