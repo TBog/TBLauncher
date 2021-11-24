@@ -18,6 +18,7 @@ import android.widget.TextView;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.UiThread;
 import androidx.annotation.WorkerThread;
 
 import java.lang.ref.WeakReference;
@@ -273,6 +274,13 @@ public final class ResultViewHelper {
         @WorkerThread
         protected abstract Drawable getDrawable(Context context);
 
+        @UiThread
+        protected void setDrawable(ImageView image, Drawable drawable) {
+            image.setImageDrawable(drawable);
+            image.setTag(R.id.tag_iconTask, null);
+            Utilities.startAnimatable(image);
+        }
+
         @Override
         protected void onPostExecute(Drawable drawable) {
             ImageView image = getImageView();
@@ -312,9 +320,7 @@ public final class ResultViewHelper {
                 weakImage.clear();
                 return;
             }
-            image.setImageDrawable(drawable);
-            image.setTag(R.id.tag_iconTask, null);
-            Utilities.startAnimatable(image);
+            setDrawable(image, drawable);
         }
 
         @Override

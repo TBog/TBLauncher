@@ -81,15 +81,18 @@
         android:shadowRadius="?attr/textShadowRadius"
         android:textColor="?android:attr/textColorSecondary"
         android:textSize="@dimen/result_small_size"
+        app:layout_constraintEnd_toStartOf="@id/item_contact_nickname"
         app:layout_constraintBottom_toBottomOf="@android:id/icon"
         app:layout_constraintStart_toStartOf="@id/item_contact_name"
         app:layout_constraintTop_toBottomOf="@id/item_contact_name"
+        app:layout_constraintHorizontal_bias="0"
+        app:layout_constraintHorizontal_chainStyle="packed"
         tools:ignore="RtlSymmetry"
         tools:text="+1 330 1234 5678" />
 
     <TextView
         android:id="@+id/item_contact_nickname"
-        android:layout_width="wrap_content"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_marginStart="5dp"
         android:ellipsize="end"
@@ -101,6 +104,8 @@
         android:singleLine="true"
         android:textColor="?android:attr/textColorSecondary"
         android:textSize="@dimen/result_title_size"
+        android:maxLines="1"
+        app:layout_constraintEnd_toStartOf="@+id/item_contact_action_message"
         app:layout_constraintBaseline_toBaselineOf="@id/item_contact_phone"
         app:layout_constraintStart_toEndOf="@+id/item_contact_phone"
         tools:ignore="RtlSymmetry"
@@ -124,8 +129,20 @@
         android:background="?attr/appSelectableItemBackground"
         android:contentDescription="@string/cd_item_contact_call"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/item_contact_action_open"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/ic_phone" />
+
+    <ImageButton
+        android:id="@+id/item_contact_action_open"
+        android:layout_width="@dimen/icon_size"
+        android:layout_height="@dimen/icon_size"
+        android:background="?attr/appSelectableItemBackground"
+        android:contentDescription="@string/cd_item_contact_open"
+        android:visibility="gone"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/ic_send" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

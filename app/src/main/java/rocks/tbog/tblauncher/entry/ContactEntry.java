@@ -8,6 +8,7 @@ import android.graphics.PorterDuff;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -51,7 +52,7 @@ public final class ContactEntry extends EntryItem {
     // Is this contact starred ?
     public final Boolean starred;
 
-    // Is this number a home (local) number ?
+    // Is this number a home (local / landline) number? We can't send messages to this.
     public final Boolean homeNumber;
 
     public StringNormalizer.Result normalizedNickname = null;
@@ -101,10 +102,6 @@ public final class ContactEntry extends EntryItem {
     public static ContactEntry newGenericContact(long contactId, String shortMimeType, long id, String lookupKey, Uri icon, boolean primary, boolean starred) {
         String entryId = SCHEME + contactId + '/' + shortMimeType + '/' + id;
         return new ContactEntry(entryId, lookupKey, icon, primary, 0, starred, false);
-    }
-
-    public String getNickname() {
-        return nickname == null ? "" : nickname;
     }
 
     public void setNickname(String nickname) {
@@ -204,18 +201,19 @@ public final class ContactEntry extends EntryItem {
         }
 
         // Contact nickname
-        TextView contactNickname = view.findViewById(R.id.item_contact_nickname);
-        contactNickname.setTextColor(UIColors.getResultTextColor(context));
-        if (getNickname().isEmpty()) {
-            contactNickname.setVisibility(View.GONE);
-        } else {
-            contactNickname.setVisibility(View.VISIBLE);
-            ResultViewHelper.displayHighlighted(relevanceSource, normalizedNickname, getNickname(), relevance, contactNickname);
+        {
+            TextView contactNickname = view.findViewById(R.id.item_contact_nickname);
+            contactNickname.setTextColor(UIColors.getResultTextColor(context));
+            if (TextUtils.isEmpty(nickname)) {
+                contactNickname.setVisibility(View.GONE);
+            } else {
+                contactNickname.setVisibility(View.VISIBLE);
+                ResultViewHelper.displayHighlighted(relevanceSource, normalizedNickname, nickname, relevance, contactNickname);
+            }
         }
 
         // Contact photo
         ImageView contactIcon = view.findViewById(android.R.id.icon);
-
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
             if (PrefCache.modulateContactIcons(context))
                 ResultViewHelper.setIconColorFilter(contactIcon, drawFlags);
@@ -228,70 +226,64 @@ public final class ContactEntry extends EntryItem {
             contactIcon.setVisibility(View.GONE);
         }
 
-//        contactIcon.assignContactUri(Uri.withAppendedPath(
-//                ContactsContract.Contacts.CONTENT_LOOKUP_URI,
-//                String.valueOf(contactPojo.lookupKey)));
-//        contactIcon.setExtraOnClickListener(new View.OnClickListener() {
-//
-//            @Override
-//            public void onClick(View v) {
-//                recordLaunch(v.getContext(), queryInterface);
-//            }
-//        });
-
-        int contactActionColor = UIColors.getContactActionColor(context);
-        PackageManager pm = context.getPackageManager();
+        final int contactActionColor = UIColors.getContactActionColor(context);
+        final PackageManager pm = context.getPackageManager();
         boolean hasPhone = phone != null && pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
 
         // Phone action
-        ImageButton phoneButton = view.findViewById(R.id.item_contact_action_phone);
-        phoneButton.setColorFilter(contactActionColor, PorterDuff.Mode.MULTIPLY);
-
-        if (hasPhone) {
-            phoneButton.setVisibility(View.VISIBLE);
-            phoneButton.setOnClickListener(v -> {
-//                launchCall(v.getContext(), v, contactPojo.phone);
-//                recordLaunch(context, queryInterface);
-                ResultHelper.recordLaunch(this, context);
-                ResultHelper.launchCall(v.getContext(), v, phone);
-            });
-        } else {
-            phoneButton.setVisibility(View.GONE);
+        {
+            ImageButton phoneButton = view.findViewById(R.id.item_contact_action_phone);
+            if (hasPhone) {
+                phoneButton.setVisibility(View.VISIBLE);
+                phoneButton.setColorFilter(contactActionColor, PorterDuff.Mode.MULTIPLY);
+                phoneButton.setOnClickListener(v -> {
+                    ResultHelper.recordLaunch(this, context);
+                    ResultHelper.launchCall(v.getContext(), v, phone);
+                });
+            } else {
+                phoneButton.setVisibility(View.GONE);
+            }
         }
 
         // Message action
-        ImageButton messageButton = view.findViewById(R.id.item_contact_action_message);
-        messageButton.setColorFilter(contactActionColor, PorterDuff.Mode.MULTIPLY);
-
-        if (getImData() != null) {
-            messageButton.setVisibility(View.VISIBLE);
-            messageButton.setOnClickListener(v -> {
-                ResultHelper.recordLaunch(this, context);
-                ResultHelper.launchIm(getImData(), v);
-            });
-        } else if (hasPhone) {
-            messageButton.setVisibility(View.VISIBLE);
-            messageButton.setOnClickListener(v -> {
-                ResultHelper.recordLaunch(this, context);
-                ResultHelper.launchMessaging(this, v);
-            });
-
-            if (isHomeNumber()) {
-                messageButton.setVisibility(View.INVISIBLE);
-            } else {
+        {
+            ImageButton messageButton = view.findViewById(R.id.item_contact_action_message);
+            if (hasPhone && !isHomeNumber()) {
                 messageButton.setVisibility(View.VISIBLE);
+                messageButton.setColorFilter(contactActionColor, PorterDuff.Mode.MULTIPLY);
+                messageButton.setOnClickListener(v -> {
+                    ResultHelper.recordLaunch(this, context);
+                    ResultHelper.launchMessaging(this, v);
+                });
+            } else {
+                messageButton.setVisibility(View.GONE);
             }
-        } else {
-            messageButton.setVisibility(View.INVISIBLE);
+        }
+
+        // Open action
+        {
+            ImageButton openButton = view.findViewById(R.id.item_contact_action_open);
+            if (getImData() != null) {
+                openButton.setVisibility(View.VISIBLE);
+                openButton.setColorFilter(contactActionColor, PorterDuff.Mode.MULTIPLY);
+                openButton.setOnClickListener(v -> {
+                    ResultHelper.recordLaunch(this, context);
+                    ResultHelper.launchIm(getImData(), v);
+                });
+            } else {
+                openButton.setVisibility(View.GONE);
+            }
         }
 
         // App icon
-        final ImageView appIcon = view.findViewById(android.R.id.icon2);
-        if (getImData() != null) {
-            appIcon.setVisibility(View.VISIBLE);
-            ResultViewHelper.setIconAsync(drawFlags, this, appIcon, SetAppIconAsync.class);
-        } else {
-            appIcon.setVisibility(View.GONE);
+        {
+            final ImageView appIcon = view.findViewById(android.R.id.icon2);
+            if (getImData() != null) {
+                appIcon.setVisibility(View.VISIBLE);
+                ResultViewHelper.setIconAsync(drawFlags, this, appIcon, SetAppIconAsync.class);
+            } else {
+                appIcon.setVisibility(View.GONE);
+            }
         }
 
         ResultViewHelper.applyPreferences(drawFlags, contactName, contactPhone, contactIcon);
