@@ -61,6 +61,7 @@
     <string name="cd_show_all_apps">Show all apps</string>
     <string name="cd_item_contact_message">Message</string>
     <string name="cd_item_contact_call">Call</string>
+    <string name="cd_item_contact_open">Open</string>
     <string name="cd_add_tag">Add tag</string>
     <string name="cd_undo_remove_tag">Undo remove tag</string>
     <string name="cd_remove_tag">Remove tag</string>
