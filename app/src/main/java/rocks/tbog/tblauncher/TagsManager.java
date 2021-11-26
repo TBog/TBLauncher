@@ -290,7 +290,7 @@ public class TagsManager {
 
             if (content.staticEntry instanceof ActionEntry) {
                 // this is the untagged entry
-                removeBtnView.setVisibility(View.INVISIBLE);
+                removeBtnView.setVisibility(View.GONE);
                 Context context = text1View.getContext();
                 Drawable untagged = AppCompatResources.getDrawable(context, R.drawable.ic_untagged);
                 if (untagged != null) {
@@ -317,7 +317,13 @@ public class TagsManager {
             }
 
             int count = content.entryCount;
-            text2View.setText(text2View.getResources().getQuantityString(R.plurals.tag_entry_count, count, count));
+            if (count >= 0) {
+                text2View.setVisibility(View.VISIBLE);
+                text2View.setText(text2View.getResources().getQuantityString(R.plurals.tag_entry_count, count, count));
+            } else {
+                // we can't have a negative count
+                text2View.setVisibility(View.GONE);
+            }
 
             if (content.staticEntry != null) {
                 int drawFlags = EntryItem.FLAG_DRAW_ICON | EntryItem.FLAG_DRAW_NO_CACHE;
