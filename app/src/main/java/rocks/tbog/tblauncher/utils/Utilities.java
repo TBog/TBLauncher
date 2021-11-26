@@ -25,14 +25,11 @@ import android.os.Bundle;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.util.Base64;
-import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
@@ -721,7 +718,7 @@ public class Utilities {
      * @param layoutDirection will be either View.LAYOUT_DIRECTION_LTR or View.LAYOUT_DIRECTION_RTL.
      * @return SpannableString with an ImageSpan at the beginning
      */
-    public static SpannableString addDrawableInString(@NonNull String text, @NonNull Drawable icon, int layoutDirection) {
+    public static SpannableString addDrawableBeforeString(@NonNull String text, @NonNull Drawable icon, int layoutDirection) {
         final SpannableString name;
         final int pos;
         if (layoutDirection == View.LAYOUT_DIRECTION_RTL) {
@@ -733,6 +730,11 @@ public class Utilities {
         }
         name.setSpan(new CenteredImageSpan(icon), pos, pos + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
         return name;
+    }
+
+    public static SpannableString addDrawableAfterString(@NonNull String text, @NonNull Drawable icon, int layoutDirection) {
+        int dir = layoutDirection != View.LAYOUT_DIRECTION_RTL ? View.LAYOUT_DIRECTION_RTL : View.LAYOUT_DIRECTION_LTR;
+        return addDrawableBeforeString(text, icon, dir);
     }
 
     public interface GetDrawable {

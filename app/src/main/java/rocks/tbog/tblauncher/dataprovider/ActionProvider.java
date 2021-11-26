@@ -9,11 +9,11 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
-import rocks.tbog.tblauncher.handler.DataHandler;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.entry.ActionEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
+import rocks.tbog.tblauncher.handler.DataHandler;
 import rocks.tbog.tblauncher.searcher.HistorySearcher;
 import rocks.tbog.tblauncher.searcher.TagList;
 import rocks.tbog.tblauncher.ui.ListPopup;
@@ -158,7 +158,7 @@ public class ActionProvider extends DBProvider<ActionEntry> {
         }
         {
             String id = ActionEntry.SCHEME + "show/untagged";
-            ActionEntry actionEntry = new ActionEntry(id, R.drawable.ic_tags);
+            ActionEntry actionEntry = new ActionEntry(id, R.drawable.ic_untagged);
             actionEntry.setAction((v, flags) -> {
                 Context ctx = v.getContext();
                 TBApplication.quickList(ctx).toggleSearch(v, "untagged", TagList.class);

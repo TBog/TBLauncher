@@ -137,10 +137,11 @@ public class TagsHandler {
         return changesMade;
     }
 
-    public boolean removeTag(@Nullable EntryItem entry, String tag) {
-        if (entry instanceof EntryWithTags) {
+    public boolean removeTag(String tag) {
+        List<EntryWithTags> entries = getEntries(tag);
+        for (EntryWithTags entry : entries) {
             if (removeTag(entry.id, tag)) {
-                ((EntryWithTags) entry).setTags(getTags(entry.id));
+                entry.setTags(getTags(entry.id));
                 return true;
             }
         }
@@ -211,6 +212,20 @@ public class TagsHandler {
                 ids.add(entry.getKey());
         }
         return ids;
+    }
+
+    @NonNull
+    public List<EntryWithTags> getEntries(String tagName) {
+        ArrayList<EntryWithTags> entries = new ArrayList<>();
+        DataHandler dataHandler = TBApplication.dataHandler(getContext());
+        for (Map.Entry<String, List<String>> mapEntry : mTagsCache.entrySet()) {
+            if (mapEntry.getValue().contains(tagName)) {
+                EntryItem entryItem = dataHandler.getPojo(mapEntry.getKey());
+                if (entryItem instanceof EntryWithTags)
+                    entries.add((EntryWithTags) entryItem);
+            }
+        }
+        return entries;
     }
 
     @NonNull

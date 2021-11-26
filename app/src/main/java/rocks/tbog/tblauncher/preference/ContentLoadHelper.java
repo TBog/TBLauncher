@@ -124,7 +124,7 @@ public class ContentLoadHelper {
                 Drawable tagIcon = tagEntry.getIconDrawable(context);
                 tagIcon.setBounds(0, 0, size, size);
 
-                SpannableString name = Utilities.addDrawableInString(tagName, tagIcon, layoutDirection);
+                SpannableString name = Utilities.addDrawableBeforeString(tagName, tagIcon, layoutDirection);
                 entries[idx] = name;
             } else {
                 entries[idx] = tagName;
@@ -163,7 +163,7 @@ public class ContentLoadHelper {
                 if (tagIcon instanceof TextDrawable)
                     ((TextDrawable) tagIcon).setTextColor(tintColor);
                 tagIcon.setBounds(0, 0, iconSize, iconSize);
-                SpannableString name = Utilities.addDrawableInString(entry.getName(), tagIcon, layoutDirection);
+                SpannableString name = Utilities.addDrawableBeforeString(entry.getName(), tagIcon, layoutDirection);
                 entries[idx] = name;
             } else if (entry instanceof ActionEntry || entry instanceof FilterEntry) {
                 Drawable iconAction = entry.getDefaultDrawable(context);
@@ -173,7 +173,7 @@ public class ContentLoadHelper {
                     DrawableCompat.setTint(iconAction, tintColor);
                     iconAction.setBounds(0, 0, iconSize, iconSize);
 
-                    SpannableString name = Utilities.addDrawableInString(entry.getName(), iconAction, layoutDirection);
+                    SpannableString name = Utilities.addDrawableBeforeString(entry.getName(), iconAction, layoutDirection);
                     entries[idx] = name;
                 }
             } else {
