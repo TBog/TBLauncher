@@ -52,15 +52,22 @@ public class TagsManager {
         TagsHandler tagsHandler = TBApplication.tagsHandler(context);
         boolean changesMade = false;
         for (TagInfo tagInfo : mTagList) {
-            switch (tagInfo.action) {
-                case RENAME:
-                    if (tagsHandler.renameTag(tagInfo.tagName, tagInfo.name))
-                        changesMade = true;
-                    break;
-                case DELETE:
-                    if (tagsHandler.removeTag(tagInfo.tagName))
-                        changesMade = true;
-                    break;
+            if (tagInfo.staticEntry instanceof ActionEntry) {
+                if (tagInfo.action == TagInfo.Action.RENAME) {
+                    TBApplication.dataHandler(context).renameStaticEntry(tagInfo.staticEntry, tagInfo.name);
+                    changesMade = true;
+                }
+            } else {
+                switch (tagInfo.action) {
+                    case RENAME:
+                        if (tagsHandler.renameTag(tagInfo.tagName, tagInfo.name))
+                            changesMade = true;
+                        break;
+                    case DELETE:
+                        if (tagsHandler.removeTag(tagInfo.tagName))
+                            changesMade = true;
+                        break;
+                }
             }
         }
         // make sure we're in sync
@@ -189,12 +196,6 @@ public class TagsManager {
             staticEntry = tagEntry;
         }
 
-        ModProvider modProvider = dh.getModProvider();
-        if (modProvider != null) {
-            EntryItem item = modProvider.findById(staticEntry.id);
-            if (item == null)
-                dh.addToMods(staticEntry);
-        }
         TBApplication.behaviour(ctx).launchCustomIconDialog(staticEntry, () -> {
             int pos = mTagList.indexOf(info);
             if (pos == -1)

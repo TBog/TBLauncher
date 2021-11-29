@@ -123,7 +123,7 @@ public class EditTextDialog extends DialogFragment<CharSequence> {
     public static class Builder {
         private final Context mContext;
         private final Bundle mArgs = new Bundle();
-        private final EditTextDialog mDialog = new EditTextDialog();
+        private EditTextDialog mDialog = null;
         private OnButtonClickListener<CharSequence> mClickPositive = null;
         private OnButtonClickListener<CharSequence> mClickNegative = null;
         private OnButtonClickListener<CharSequence> mClickNeutral = null;
@@ -188,16 +188,20 @@ public class EditTextDialog extends DialogFragment<CharSequence> {
 
         @NonNull
         public EditTextDialog getDialog() {
+            if (mDialog == null) {
+                mDialog = new EditTextDialog();
+                mDialog.setArguments(mArgs);
+                mDialog.setOnPositiveClickListener(mClickPositive);
+                mDialog.setOnNegativeClickListener(mClickNegative);
+                mDialog.setOnNeutralClickListener(mClickNeutral);
+                mDialog.setOnConfirmListener(mOnConfirm);
+            }
             return mDialog;
         }
 
         public void show() {
-            mDialog.setArguments(mArgs);
-            mDialog.setOnPositiveClickListener(mClickPositive);
-            mDialog.setOnNegativeClickListener(mClickNegative);
-            mDialog.setOnNeutralClickListener(mClickNeutral);
-            mDialog.setOnConfirmListener(mOnConfirm);
-            Behaviour.showDialog(mContext, mDialog, "dialog_rename");
+            EditTextDialog dialog = getDialog();
+            Behaviour.showDialog(mContext, dialog, "dialog_rename");
         }
     }
 }

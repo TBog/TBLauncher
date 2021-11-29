@@ -18,8 +18,6 @@ import java.util.List;
 
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
-import rocks.tbog.tblauncher.dataprovider.ActionProvider;
-import rocks.tbog.tblauncher.dataprovider.FilterProvider;
 import rocks.tbog.tblauncher.handler.DataHandler;
 import rocks.tbog.tblauncher.handler.IconsHandler;
 import rocks.tbog.tblauncher.preference.ContentLoadHelper;
@@ -91,11 +89,11 @@ public abstract class StaticEntry extends EntryItem {
             // Set new name
             setName(newName);
             TBApplication app = TBApplication.getApplication(ctx);
-            app.getDataHandler().renameStaticEntry(id, newName);
+            app.getDataHandler().renameStaticEntry(this, newName);
             app.behaviour().refreshSearchRecord(StaticEntry.this);
 
             // Show toast message
-            String msg = ctx.getString(R.string.app_rename_confirmation, getName());
+            String msg = ctx.getString(R.string.entry_rename_confirmation, getName());
             Toast.makeText(ctx, msg, Toast.LENGTH_SHORT).show();
         })
                 .setTitle(R.string.title_static_rename)
@@ -104,31 +102,14 @@ public abstract class StaticEntry extends EntryItem {
                     TBApplication app = TBApplication.getApplication(ctx);
                     DataHandler dataHandler = app.getDataHandler();
                     // restore default name
-                    dataHandler.renameStaticEntry(id, null);
-
-                    String name = null;
-
-                    {
-                        ActionProvider actionProvider = dataHandler.getActionProvider();
-                        if (actionProvider != null && actionProvider.mayFindById(id))
-                            name = actionProvider.getDefaultName(id);
-                    }
-                    {
-                        FilterProvider filterProvider = dataHandler.getFilterProvider();
-                        if (filterProvider != null && filterProvider.mayFindById(id))
-                            name = filterProvider.getDefaultName(id);
-                    }
+                    String name = dataHandler.renameStaticEntry(this, null);
 
                     if (name != null) {
-                        setName(name);
                         app.behaviour().refreshSearchRecord(StaticEntry.this);
 
                         // Show toast message
                         String msg = ctx.getString(R.string.entry_rename_confirmation, getName());
                         Toast.makeText(ctx, msg, Toast.LENGTH_SHORT).show();
-                    } else {
-                        // can't find the default name. Reload providers and hope to get the name
-                        dataHandler.reloadProviders();
                     }
 
                     dialog.dismiss();

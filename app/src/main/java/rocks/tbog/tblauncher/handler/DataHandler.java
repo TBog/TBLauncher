@@ -873,19 +873,19 @@ public class DataHandler extends BroadcastReceiver
 //        //context.onFavoriteChange();
 //    }
 
-    public void addToMods(EntryItem entry) {
-        final Context context = this.getContext();
-        if (context == null)
-            return;
-
-        ModRecord record = new ModRecord();
-        record.record = entry.id;
-        record.position = "0";
-        DBHelper.setMod(context, record);
-        ModProvider modProvider = getModProvider();
-        if (modProvider != null)
-            modProvider.reload(true);
-    }
+//    public void addToMods(EntryItem entry) {
+//        final Context context = this.getContext();
+//        if (context == null)
+//            return;
+//
+//        ModRecord record = new ModRecord();
+//        record.record = entry.id;
+//        record.position = "0";
+//        DBHelper.setMod(context, record);
+//        ModProvider modProvider = getModProvider();
+//        if (modProvider != null)
+//            modProvider.reload(true);
+//    }
 
     public void removeFromMods(EntryItem entry) {
         final Context context = this.getContext();
@@ -969,15 +969,48 @@ public class DataHandler extends BroadcastReceiver
         DBHelper.setCustomAppName(context, componentName, newName);
     }
 
-    public void renameStaticEntry(@NonNull String entryId, @Nullable String newName) {
+    /**
+     * Rename an action or a tag in the DB, refresh providers, update {@link EntryItem}
+     *
+     * @param entry   static entry to operate on
+     * @param newName new name or null to restore default
+     * @return The name after we rename or null in case of error
+     */
+    @Nullable
+    public String renameStaticEntry(@NonNull StaticEntry entry, @Nullable String newName) {
         final Context context = this.getContext();
         if (context == null)
-            return;
+            return null;
 
-        if (newName == null)
+        final String entryId = entry.id;
+        if (newName == null) {
+            // we need to restore the default name
             DBHelper.removeCustomStaticEntryName(context, entryId);
-        else
+            String name = null;
+
+            {
+                ActionProvider actionProvider = getActionProvider();
+                if (actionProvider != null && actionProvider.mayFindById(entryId))
+                    name = actionProvider.getDefaultName(entryId);
+            }
+            {
+                FilterProvider filterProvider = getFilterProvider();
+                if (filterProvider != null && filterProvider.mayFindById(entryId))
+                    name = filterProvider.getDefaultName(entryId);
+            }
+
+            if (name != null) {
+                entry.setName(name);
+            } else {
+                // can't find the default name. Reload providers and hope to get the name
+                reloadProviders();
+            }
+
+            return name;
+        } else {
             DBHelper.setCustomStaticEntryName(context, entryId, newName);
+            return newName;
+        }
     }
 
     public void removeRenameApp(String componentName, String defaultName) {
