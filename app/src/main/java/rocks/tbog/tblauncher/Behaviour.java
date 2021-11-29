@@ -47,7 +47,6 @@ import java.util.Random;
 import java.util.Set;
 
 import rocks.tbog.tblauncher.customicon.IconSelectDialog;
-import rocks.tbog.tblauncher.dataprovider.ModProvider;
 import rocks.tbog.tblauncher.dataprovider.TagsProvider;
 import rocks.tbog.tblauncher.drawable.LoadingDrawable;
 import rocks.tbog.tblauncher.entry.ActionEntry;
@@ -1104,6 +1103,14 @@ public class Behaviour implements ISearchActivity {
         IconSelectDialog dialog = new IconSelectDialog();
         openFragmentDialog(dialog, DIALOG_CUSTOM_ICON);
 
+        // If mResultLayout is visible
+        boolean bResultListVisible = TBApplication.state().isResultListVisible();
+        if (bResultListVisible) {
+            mResultLayout.setVisibility(View.INVISIBLE);
+            // OnDismiss: We restore mResultLayout visibility
+            dialog.setOnDismissListener(dlg -> mResultLayout.setVisibility(View.VISIBLE));
+        }
+
         // set args
         {
             Bundle args = new Bundle();
@@ -1117,22 +1124,11 @@ public class Behaviour implements ISearchActivity {
             final TBApplication app = TBApplication.getApplication(mTBLauncherActivity);
             if (drawable == null)
                 app.iconsHandler().restoreDefaultIcon(shortcutEntry);
-            else {
-                final DataHandler dh = app.getDataHandler();
-                EntryItem favItem = null;
-                // if the shortcut is not in the favorites, add it before changing the icon
-                {
-                    ModProvider modProvider = dh.getModProvider();
-                    if (modProvider != null)
-                        favItem = modProvider.findById(shortcutEntry.id);
-                    if (favItem == null)
-                        dh.addToMods(shortcutEntry);
-                }
+            else
                 app.iconsHandler().changeIcon(shortcutEntry, drawable);
-            }
             // force a result refresh to update the icon in the view
             refreshSearchRecord(shortcutEntry);
-            TBApplication.quickList(mTBLauncherActivity).reload();
+            app.quickList().reload();
         });
         dialog.show(mTBLauncherActivity.getSupportFragmentManager(), DIALOG_CUSTOM_ICON);
     }
@@ -1147,8 +1143,11 @@ public class Behaviour implements ISearchActivity {
 
         // If mResultLayout is visible
         boolean bResultListVisible = TBApplication.state().isResultListVisible();
-        if (bResultListVisible)
+        if (bResultListVisible) {
             mResultLayout.setVisibility(View.INVISIBLE);
+            // OnDismiss: We restore mResultLayout visibility
+            dialog.setOnDismissListener(dlg -> mResultLayout.setVisibility(View.VISIBLE));
+        }
 
         // set args
         {
@@ -1156,9 +1155,6 @@ public class Behaviour implements ISearchActivity {
             args.putString("entryId", staticEntry.id);
             dialog.setArguments(args);
         }
-        // OnDismiss: We restore mResultLayout visibility
-        if (bResultListVisible)
-            dialog.setOnDismissListener(dlg -> mResultLayout.setVisibility(View.VISIBLE));
 
         dialog.setOnConfirmListener(drawable -> {
             final TBApplication app = TBApplication.getApplication(mTBLauncherActivity);

@@ -724,19 +724,29 @@ public class DBHelper {
 
     public static void setCustomStaticEntryName(Context context, String entryId, String newName) {
         SQLiteDatabase db = getDatabase(context);
+        int count;
         String sql = "UPDATE favorites SET name=?,custom_flags=custom_flags|? WHERE record=?";
         try {
             SQLiteStatement statement = db.compileStatement(sql);
             statement.bindString(1, newName);
             statement.bindLong(2, ModRecord.FLAG_CUSTOM_NAME);
             statement.bindString(3, entryId);
-            int count = statement.executeUpdateDelete();
+            count = statement.executeUpdateDelete();
             if (count != 1) {
-                Log.e(TAG, "Update name; count = " + count);
+                Log.e(TAG, "Update name for `" + entryId + "`; count = " + count);
             }
             statement.close();
         } catch (Exception e) {
-            Log.e(TAG, "Insert or Update custom fav name", e);
+            Log.e(TAG, "Update custom static entry name for `" + entryId + "`", e);
+            count = -1;
+        }
+        if (count < 1) {
+            ContentValues values = new ContentValues();
+            values.put("record", entryId);
+            values.put("position", "");
+            values.put("name", newName);
+            values.put("custom_flags", ModRecord.FLAG_CUSTOM_NAME);
+            db.insertWithOnConflict("favorites", null, values, SQLiteDatabase.CONFLICT_REPLACE);
         }
     }
 
@@ -818,22 +828,31 @@ public class DBHelper {
 
     public static void setCustomStaticEntryIcon(Context context, String entryId, byte[] icon) {
         SQLiteDatabase db = getDatabase(context);
+        int count;
         String sql = "UPDATE favorites SET custom_flags=custom_flags|?, custom_icon=? WHERE record=?";
         try {
             SQLiteStatement statement = db.compileStatement(sql);
             statement.bindLong(1, ModRecord.FLAG_CUSTOM_ICON);
             statement.bindBlob(2, icon);
             statement.bindString(3, entryId);
-            int count = statement.executeUpdateDelete();
+            count = statement.executeUpdateDelete();
             if (count != 1) {
-                Log.e(TAG, "Update icon; count = " + count);
+                Log.w(TAG, "Update icon for `" + entryId + "`; count = " + count);
             }
             statement.close();
         } catch (Exception e) {
-            Log.e(TAG, "Insert or Update custom fav icon `" + entryId + "`", e);
+            Log.e(TAG, "Update custom fav icon `" + entryId + "`", e);
+            count = -1;
         }
 
-        //return getAppRecord(db, componentName);
+        if (count < 1) {
+            ContentValues values = new ContentValues();
+            values.put("record", entryId);
+            values.put("position", "");
+            values.put("custom_icon", icon);
+            values.put("custom_flags", ModRecord.FLAG_CUSTOM_ICON);
+            db.insertWithOnConflict("favorites", null, values, SQLiteDatabase.CONFLICT_REPLACE);
+        }
     }
 
     public static AppRecord removeCustomAppIcon(Context context, String componentName) {
