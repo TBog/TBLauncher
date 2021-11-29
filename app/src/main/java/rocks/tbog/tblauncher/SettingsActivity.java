@@ -69,6 +69,7 @@ import rocks.tbog.tblauncher.preference.IconListPreferenceDialog;
 import rocks.tbog.tblauncher.preference.OrderListPreferenceDialog;
 import rocks.tbog.tblauncher.preference.QuickListPreferenceDialog;
 import rocks.tbog.tblauncher.preference.SliderDialog;
+import rocks.tbog.tblauncher.preference.TagOrderListPreferenceDialog;
 import rocks.tbog.tblauncher.ui.dialog.PleaseWaitDialog;
 import rocks.tbog.tblauncher.utils.FileUtils;
 import rocks.tbog.tblauncher.utils.PrefCache;
@@ -650,7 +651,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 }
             } else if (preference instanceof MultiSelectListPreference) {
                 String key = preference.getKey();
-                if ("tags-menu-order".equals(key) || "result-popup-order".equals(key)) {
+                if ("tags-menu-order".equals(key)) {
+                    dialogFragment = TagOrderListPreferenceDialog.newInstance(key);
+                } else if ("result-popup-order".equals(key)) {
                     dialogFragment = OrderListPreferenceDialog.newInstance(key);
                 } else {
                     dialogFragment = BaseMultiSelectListPreferenceDialog.newInstance(key);

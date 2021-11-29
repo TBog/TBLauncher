@@ -220,20 +220,26 @@
         <androidx.preference.SwitchPreference
                 android:defaultValue="false"
                 android:key="tags-menu-icons"
-                android:title="@string/tags_menu_icons" />
+            android:title="@string/tags_menu_icons" />
 
         <MultiSelectListPreference
-                android:key="tags-menu-list"
-                android:title="@string/tags_menu_list" />
+            android:key="tags-menu-list"
+            android:title="@string/tags_menu_list" />
 
         <androidx.preference.SwitchPreference
-                android:defaultValue="false"
-                android:key="tags-menu-untagged"
-                android:title="@string/tags_menu_untagged"/>
+            android:defaultValue="false"
+            android:key="tags-menu-untagged"
+            android:title="@string/tags_menu_untagged" />
+
+        <!-- This is here just to set the default value and be saved in backup, not visible for user -->
+        <EditTextPreference
+            android:defaultValue="0"
+            android:key="tags-menu-untagged-index"
+            app:isPreferenceVisible="false" />
 
         <MultiSelectListPreference
-                android:key="tags-menu-order"
-                android:title="@string/tags_menu_order"/>
+            android:key="tags-menu-order"
+            android:title="@string/tags_menu_order" />
 
     </PreferenceCategory>
 
