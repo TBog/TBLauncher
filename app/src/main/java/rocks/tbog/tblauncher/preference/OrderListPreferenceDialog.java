@@ -3,9 +3,6 @@ package rocks.tbog.tblauncher.preference;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.ArrayAdapter;
-import android.widget.ImageView;
-import android.widget.ListAdapter;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -20,12 +17,8 @@ import java.util.List;
 import java.util.Objects;
 
 import rocks.tbog.tblauncher.R;
-import rocks.tbog.tblauncher.TBApplication;
-import rocks.tbog.tblauncher.dataprovider.TagsProvider;
-import rocks.tbog.tblauncher.entry.TagEntry;
 import rocks.tbog.tblauncher.utils.KeyboardDialogBuilder;
 import rocks.tbog.tblauncher.utils.PrefOrderedListHelper;
-import rocks.tbog.tblauncher.utils.Utilities;
 import rocks.tbog.tblauncher.utils.ViewHolderAdapter;
 import rocks.tbog.tblauncher.utils.ViewHolderListAdapter;
 
@@ -36,10 +29,10 @@ public class OrderListPreferenceDialog extends PreferenceDialogFragmentCompat {
     private static final String SAVE_STATE_ENTRIES = "OrderListPreferenceDialogFragment.entries";
     private static final String SAVE_STATE_ENTRY_VALUES = "OrderListPreferenceDialogFragment.entryValues";
 
-    private final HashSet<String> mNewValues = new HashSet<>();
+    protected final HashSet<String> mNewValues = new HashSet<>();
     boolean mPreferenceChanged;
-    private CharSequence[] mEntries;
-    private CharSequence[] mEntryValues;
+    protected CharSequence[] mEntries;
+    protected CharSequence[] mEntryValues;
 
     public static OrderListPreferenceDialog newInstance(String key) {
         final OrderListPreferenceDialog fragment = new OrderListPreferenceDialog();
@@ -89,6 +82,16 @@ public class OrderListPreferenceDialog extends PreferenceDialogFragmentCompat {
         return (MultiSelectListPreference) getPreference();
     }
 
+    protected ArrayList<ListEntry> generateEntryList() {
+        final int entryCount = mEntryValues.length;
+        ArrayList<ListEntry> entryArrayList = new ArrayList<>(entryCount);
+        for (int i = 0; i < entryCount; i += 1) {
+            ListEntry listEntry = new ListEntry(mEntries[i], mEntryValues[i].toString());
+            entryArrayList.add(listEntry);
+        }
+        return entryArrayList;
+    }
+
     @Override
     protected void onPrepareDialogBuilder(AlertDialog.Builder builder) {
         super.onPrepareDialogBuilder(builder);
@@ -97,13 +100,7 @@ public class OrderListPreferenceDialog extends PreferenceDialogFragmentCompat {
         if (mEntryValues.length != mEntries.length)
             throw new IllegalStateException("mEntryValues.length=" + mEntryValues.length + " mEntries.length=" + mEntries.length);
 
-        final int entryCount = mEntryValues.length;
-        ArrayList<ListEntry> entryArrayList = new ArrayList<>(entryCount);
-        for (int i = 0; i < entryCount; i += 1) {
-            ListEntry listEntry = new ListEntry(mEntries[i], mEntryValues[i].toString());
-            entryArrayList.add(listEntry);
-        }
-
+        ArrayList<ListEntry> entryArrayList = generateEntryList();
         EntryAdapter entryAdapter = new EntryAdapter(EntryViewHolder.class, entryArrayList);
         builder.setAdapter(entryAdapter, null);
 
@@ -113,7 +110,6 @@ public class OrderListPreferenceDialog extends PreferenceDialogFragmentCompat {
             list.add(position - 1, entry);
             adapter.notifyDataSetChanged();
 
-            mPreferenceChanged = true;
             generateNewValues(list);
         };
 
@@ -123,7 +119,6 @@ public class OrderListPreferenceDialog extends PreferenceDialogFragmentCompat {
             list.add(position + 1, entry);
             adapter.notifyDataSetChanged();
 
-            mPreferenceChanged = true;
             generateNewValues(list);
         };
     }
@@ -134,7 +129,8 @@ public class OrderListPreferenceDialog extends PreferenceDialogFragmentCompat {
         KeyboardDialogBuilder.setButtonBarBackground(requireDialog());
     }
 
-    private void generateNewValues(List<ListEntry> list) {
+    protected void generateNewValues(List<ListEntry> list) {
+        mPreferenceChanged = true;
         mNewValues.clear();
         int ord = 0;
         for (ListEntry entry : list) {

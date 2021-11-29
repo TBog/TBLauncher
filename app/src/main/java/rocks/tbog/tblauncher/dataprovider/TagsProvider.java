@@ -35,9 +35,12 @@ public class TagsProvider extends DBProvider<TagEntry> {
     }
 
     @NonNull
-    private static TagEntry newTagEntry(@Nullable String id, @NonNull String tagName) {
-        if (id == null)
-            id = TagEntry.SCHEME + tagName;
+    public static String getTagId(@NonNull String tagName) {
+        return TagEntry.SCHEME + tagName;
+    }
+
+    @NonNull
+    private static TagEntry newTagEntry(@NonNull String id, @NonNull String tagName) {
         TagEntry tagEntry = new TagEntry(id);
         tagEntry.setName(tagName);
         return tagEntry;
@@ -50,7 +53,7 @@ public class TagsProvider extends DBProvider<TagEntry> {
 
     @NonNull
     public TagEntry getTagEntry(String tagName) {
-        String id = TagEntry.SCHEME + tagName;
+        String id = getTagId(tagName);
         TagEntry entryItem = findById(id);
         if (entryItem == null)
             return newTagEntry(id, tagName);
