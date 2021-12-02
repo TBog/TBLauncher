@@ -200,17 +200,7 @@ public final class ContactEntry extends EntryItem {
             contactPhone.setVisibility(View.GONE);
         }
 
-        // Contact nickname
-        {
-            TextView contactNickname = view.findViewById(R.id.item_contact_nickname);
-            contactNickname.setTextColor(UIColors.getResultTextColor(context));
-            if (TextUtils.isEmpty(nickname)) {
-                contactNickname.setVisibility(View.GONE);
-            } else {
-                contactNickname.setVisibility(View.VISIBLE);
-                ResultViewHelper.displayHighlighted(relevanceSource, normalizedNickname, nickname, relevance, contactNickname);
-            }
-        }
+        displayNickname(view);
 
         // Contact photo
         ImageView contactIcon = view.findViewById(android.R.id.icon);
@@ -226,13 +216,43 @@ public final class ContactEntry extends EntryItem {
             contactIcon.setVisibility(View.GONE);
         }
 
-        final int contactActionColor = UIColors.getContactActionColor(context);
         final PackageManager pm = context.getPackageManager();
         boolean hasPhone = phone != null && pm.hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
+        displayActions(view, hasPhone);
 
+        // App icon
+        {
+            final ImageView appIcon = view.findViewById(android.R.id.icon2);
+            if (getImData() != null) {
+                appIcon.setVisibility(View.VISIBLE);
+                ResultViewHelper.setIconAsync(drawFlags, this, appIcon, SetAppIconAsync.class);
+            } else {
+                appIcon.setVisibility(View.GONE);
+            }
+        }
+
+        ResultViewHelper.applyPreferences(drawFlags, contactName, contactPhone, contactIcon);
+    }
+
+    private void displayNickname(View root) {
+        Context context = root.getContext();
+        // Contact nickname
+        TextView contactNickname = root.findViewById(R.id.item_contact_nickname);
+        contactNickname.setTextColor(UIColors.getResultTextColor(context));
+        if (TextUtils.isEmpty(nickname)) {
+            contactNickname.setVisibility(View.GONE);
+        } else {
+            contactNickname.setVisibility(View.VISIBLE);
+            ResultViewHelper.displayHighlighted(relevanceSource, normalizedNickname, nickname, relevance, contactNickname);
+        }
+    }
+
+    private void displayActions(View root, boolean hasPhone) {
+        Context context = root.getContext();
+        final int contactActionColor = UIColors.getContactActionColor(context);
         // Phone action
         {
-            ImageButton phoneButton = view.findViewById(R.id.item_contact_action_phone);
+            ImageButton phoneButton = root.findViewById(R.id.item_contact_action_phone);
             if (hasPhone) {
                 phoneButton.setVisibility(View.VISIBLE);
                 phoneButton.setColorFilter(contactActionColor, PorterDuff.Mode.MULTIPLY);
@@ -247,7 +267,7 @@ public final class ContactEntry extends EntryItem {
 
         // Message action
         {
-            ImageButton messageButton = view.findViewById(R.id.item_contact_action_message);
+            ImageButton messageButton = root.findViewById(R.id.item_contact_action_message);
             if (hasPhone && !isHomeNumber()) {
                 messageButton.setVisibility(View.VISIBLE);
                 messageButton.setColorFilter(contactActionColor, PorterDuff.Mode.MULTIPLY);
@@ -262,7 +282,7 @@ public final class ContactEntry extends EntryItem {
 
         // Open action
         {
-            ImageButton openButton = view.findViewById(R.id.item_contact_action_open);
+            ImageButton openButton = root.findViewById(R.id.item_contact_action_open);
             if (getImData() != null) {
                 openButton.setVisibility(View.VISIBLE);
                 openButton.setColorFilter(contactActionColor, PorterDuff.Mode.MULTIPLY);
@@ -274,19 +294,6 @@ public final class ContactEntry extends EntryItem {
                 openButton.setVisibility(View.GONE);
             }
         }
-
-        // App icon
-        {
-            final ImageView appIcon = view.findViewById(android.R.id.icon2);
-            if (getImData() != null) {
-                appIcon.setVisibility(View.VISIBLE);
-                ResultViewHelper.setIconAsync(drawFlags, this, appIcon, SetAppIconAsync.class);
-            } else {
-                appIcon.setVisibility(View.GONE);
-            }
-        }
-
-        ResultViewHelper.applyPreferences(drawFlags, contactName, contactPhone, contactIcon);
     }
 
     @Override

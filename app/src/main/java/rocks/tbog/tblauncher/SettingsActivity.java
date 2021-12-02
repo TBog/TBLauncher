@@ -362,12 +362,16 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 }
             }
 
+            onCreateAsyncLoad(context, sharedPreferences, savedInstanceState);
+        }
+
+        private void onCreateAsyncLoad(@NonNull Context context, @NonNull SharedPreferences sharedPreferences, @Nullable Bundle savedInstanceState) {
             if (savedInstanceState == null) {
                 initAppToRunLists(context, sharedPreferences);
                 initEntryToShowLists(context, sharedPreferences);
                 initTagsMenuList(context, sharedPreferences);
                 initResultPopupList(context, sharedPreferences);
-                initMimeTypes(context, sharedPreferences);
+                initMimeTypes(context);
             } else {
                 synchronized (SettingsFragment.this) {
                     if (AppToRunListContent == null)
@@ -398,8 +402,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 if (savedInstanceState == null) {
                     // Run asynchronously to open settings fast
                     Utilities.runAsync(getLifecycle(),
-                            t -> SettingsFragment.this.setListPreferenceIconsPacksData(iconsPack),
-                            t -> iconsPack.setEnabled(true));
+                        t -> SettingsFragment.this.setListPreferenceIconsPacksData(iconsPack),
+                        t -> iconsPack.setEnabled(true));
                 } else {
                     // Run synchronously to ensure preferences can be restored from state
                     SettingsFragment.this.setListPreferenceIconsPacksData(iconsPack);
@@ -483,7 +487,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             }
         }
 
-        private void initMimeTypes(@NonNull Context context, @NonNull SharedPreferences sharedPreferences) {
+        private void initMimeTypes(@NonNull Context context) {
             // get all supported mime types
             final Runnable setMimeTypeValues = () -> {
                 ContentLoadHelper.setMultiListValues(findPreference("selected-contact-mime-types"), MimeTypeListContent, null);
