@@ -95,6 +95,8 @@ public class TagOrderListPreferenceDialog extends OrderListPreferenceDialog {
                 } catch (Exception ignored) {
                     idx = 0;
                 }
+                if (idx > entryArrayList.size())
+                    idx = entryArrayList.size();
                 int size = context.getResources().getDimensionPixelSize(R.dimen.icon_preview_size);
                 Drawable icon = ((ActionEntry) untaggedEntry).getIconDrawable(context);
                 icon.setBounds(0, 0, size, size);
