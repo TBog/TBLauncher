@@ -908,6 +908,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case "tags-menu-icons":
             case "loading-icon":
             case "tags-menu-untagged":
+            case "tags-menu-untagged-index":
             case "result-popup-order":
                 PrefCache.resetCache();
                 break;

@@ -18,6 +18,9 @@ import java.util.ArrayList;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.dataprovider.TagsProvider;
+import rocks.tbog.tblauncher.entry.ActionEntry;
+import rocks.tbog.tblauncher.entry.EntryItem;
+import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.entry.TagEntry;
 import rocks.tbog.tblauncher.searcher.TagSearcher;
 import rocks.tbog.tblauncher.utils.PrefCache;
@@ -30,43 +33,47 @@ public class TagsMenuUtils {
         MenuTagAdapter adapter = new MenuTagAdapter();
         for (String tagName : tagNames) {
             TagEntry tagEntry = tagsProvider != null ? tagsProvider.getTagEntry(tagName) : null;
-            MenuTagAdapter.Tag menuItem = tagEntry != null ? new MenuTagAdapter.Tag(tagEntry) : new MenuTagAdapter.Tag(tagName);
+            MenuTagAdapter.MenuItem menuItem = tagEntry != null ? new MenuTagAdapter.MenuItem(tagEntry) : new MenuTagAdapter.MenuItem(tagName);
             adapter.addItem(menuItem);
         }
-        if (PrefCache.showTagsMenuUntagged(ctx)) {
-            adapter.addItem(new MenuTagAdapter.Divider());
-            adapter.addItem(new MenuTagAdapter.Untagged(ctx.getString(R.string.action_show_untagged)));
+        EntryItem untaggedEntry;
+        boolean bAddUntagged = PrefCache.showTagsMenuUntagged(ctx);
+        if (bAddUntagged) {
+            untaggedEntry = TBApplication.dataHandler(ctx).getPojo(ActionEntry.SCHEME + "show/untagged");
+            if (untaggedEntry instanceof ActionEntry) {
+                int idx = PrefCache.getTagsMenuUntaggedIndex(ctx);
+                adapter.addItem(idx, new MenuTagAdapter.MenuItem((ActionEntry) untaggedEntry));
+            }
         }
         return ListPopup.create(ctx, adapter)
-                .setOnItemClickListener((a, v, pos) -> {
-                    MenuTagAdapter.Item item = (MenuTagAdapter.Item) a.getItem(pos);
-                    if (item instanceof MenuTagAdapter.Tag) {
-                        TagEntry tagEntry = ((MenuTagAdapter.Tag) item).tagEntry;
-                        if (tagEntry != null) {
-                            tagEntry.doLaunch(v, LAUNCHED_FROM_GESTURE);
-                            return;
-                        }
-                    } else if (item instanceof MenuTagAdapter.Untagged) {
-                        TBApplication.behaviour(ctx).showUntagged();
-                        return;
-                    }
-                    TBApplication.quickList(ctx).toggleSearch(v, item.toString(), TagSearcher.class);
-                });
+            .setOnItemClickListener((a, v, pos) -> {
+                MenuTagAdapter.MenuItem item = (MenuTagAdapter.MenuItem) a.getItem(pos);
+                if (item == null)
+                    return;
+                if (item.staticEntry != null) {
+                    item.staticEntry.doLaunch(v, LAUNCHED_FROM_GESTURE);
+                    return;
+                }
+                TBApplication.quickList(ctx).toggleSearch(v, item.toString(), TagSearcher.class);
+            });
     }
 
     private static class MenuTagAdapter extends BaseAdapter {
 
-        private final ArrayList<Item> mList = new ArrayList<>();
+        private final ArrayList<MenuItem> mList = new ArrayList<>();
 
-        private static class Item {
+        private static class MenuItem {
             final String text;
+            final private StaticEntry staticEntry;
 
-            public Item(String text) {
-                this.text = text;
+            public MenuItem(@NonNull String tagName) {
+                text = tagName;
+                staticEntry = null;
             }
 
-            public boolean isEnabled() {
-                return true;
+            public MenuItem(@NonNull StaticEntry entry) {
+                text = entry.getName();
+                staticEntry = entry;
             }
 
             @NonNull
@@ -74,47 +81,9 @@ public class TagsMenuUtils {
             public String toString() {
                 return text;
             }
-        }
-
-        private static class Divider extends Item {
-
-            public Divider() {
-                super(null);
-            }
-
-            public boolean isEnabled() {
-                return false;
-            }
-
-            @NonNull
-            @Override
-            public String toString() {
-                return "-";
-            }
-        }
-
-        private static class Untagged extends Item {
-
-            public Untagged(String text) {
-                super(text);
-            }
-        }
-
-        private static class Tag extends Item {
-            final TagEntry tagEntry;
-
-            public Tag(@NonNull String tagName) {
-                super(tagName);
-                tagEntry = null;
-            }
-
-            public Tag(@NonNull TagEntry entry) {
-                super(entry.getName());
-                tagEntry = entry;
-            }
 
             public void setIcon(TextView textView) {
-                if (tagEntry == null) {
+                if (staticEntry == null) {
                     // this is not likely to happen
                     return;
                 }
@@ -131,14 +100,14 @@ public class TagsMenuUtils {
 
                 // async load and show the icon
                 Utilities.setViewAsync(textView,
-                        tagEntry::getIconDrawable,
-                        (view, drawable) -> {
-                            if (view instanceof TextView) {
-                                drawable.setBounds(0, 0, size, size);
-                                TextView v = (TextView) view;
-                                v.setCompoundDrawables(drawable, null, null, null);
-                            }
-                        });
+                    staticEntry::getIconDrawable,
+                    (view, drawable) -> {
+                        if (view instanceof TextView) {
+                            drawable.setBounds(0, 0, size, size);
+                            TextView v = (TextView) view;
+                            v.setCompoundDrawables(drawable, null, null, null);
+                        }
+                    });
             }
         }
 
@@ -146,8 +115,13 @@ public class TagsMenuUtils {
             super();
         }
 
-        public void addItem(Item item) {
+        public void addItem(MenuItem item) {
             mList.add(item);
+            notifyDataSetChanged();
+        }
+
+        public void addItem(int index, MenuItem item) {
+            mList.add(index, item);
             notifyDataSetChanged();
         }
 
@@ -157,7 +131,7 @@ public class TagsMenuUtils {
         }
 
         @Override
-        public Item getItem(int position) {
+        public MenuItem getItem(int position) {
             return mList.get(position);
         }
 
@@ -177,13 +151,12 @@ public class TagsMenuUtils {
             final View view;
             view = LayoutInflater.from(parent.getContext()).inflate(getItemViewType(position), parent, false);
 
-            final Item item = getItem(position);
+            final MenuItem item = getItem(position);
             if (view instanceof TextView) {
                 TextView textView = (TextView) view;
 
                 textView.setText(item.toString());
-                if (item instanceof Tag)
-                    ((Tag) item).setIcon(textView);
+                item.setIcon(textView);
             }
 
 
@@ -192,19 +165,7 @@ public class TagsMenuUtils {
 
         @Override
         public int getItemViewType(int position) {
-            if (getItem(position) instanceof Divider)
-                return R.layout.popup_divider;
             return R.layout.popup_list_item;
-        }
-
-        @Override
-        public boolean areAllItemsEnabled() {
-            return false;
-        }
-
-        @Override
-        public boolean isEnabled(int position) {
-            return getItem(position).isEnabled();
         }
     }
 }
