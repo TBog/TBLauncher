@@ -42,6 +42,8 @@ public class TagsMenuUtils {
             untaggedEntry = TBApplication.dataHandler(ctx).getPojo(ActionEntry.SCHEME + "show/untagged");
             if (untaggedEntry instanceof ActionEntry) {
                 int idx = PrefCache.getTagsMenuUntaggedIndex(ctx);
+                if (idx > adapter.getCount())
+                    idx = adapter.getCount();
                 adapter.addItem(idx, new MenuTagAdapter.MenuItem((ActionEntry) untaggedEntry));
             }
         }
