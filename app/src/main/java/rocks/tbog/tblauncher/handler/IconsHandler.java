@@ -391,46 +391,54 @@ public class IconsHandler {
         Bitmap bitmap = getIconBitmap(ctx, drawable);
         TBApplication app = TBApplication.getApplication(ctx);
         AppRecord appRecord = app.getDataHandler().setCustomAppIcon(appEntry.getUserComponentName(), bitmap);
-        //storeDrawable(customIconFileName(appRecord.componentName, appRecord.dbId), drawable);
+
+        app.drawableCache().cacheDrawable(appEntry.getIconCacheId(), null);
         appEntry.setCustomIcon(appRecord.dbId);
-        app.drawableCache().cacheDrawable(appEntry.id, drawable);
+        app.drawableCache().cacheDrawable(appEntry.getIconCacheId(), drawable);
     }
 
     public void changeIcon(ShortcutEntry shortcutEntry, Drawable drawable) {
         Bitmap bitmap = getIconBitmap(ctx, drawable);
         TBApplication app = TBApplication.getApplication(ctx);
         app.getDataHandler().setCustomStaticEntryIcon(shortcutEntry.id, bitmap);
+
+        app.drawableCache().cacheDrawable(shortcutEntry.getIconCacheId(), null);
         shortcutEntry.setCustomIcon();
-        app.drawableCache().cacheDrawable(shortcutEntry.id, drawable);
+        app.drawableCache().cacheDrawable(shortcutEntry.getIconCacheId(), drawable);
     }
 
     public void changeIcon(StaticEntry staticEntry, Drawable drawable) {
         Bitmap bitmap = getIconBitmap(ctx, drawable);
         TBApplication app = TBApplication.getApplication(ctx);
         app.getDataHandler().setCustomStaticEntryIcon(staticEntry.id, bitmap);
+
+        app.drawableCache().cacheDrawable(staticEntry.getIconCacheId(), null);
         staticEntry.setCustomIcon();
-        app.drawableCache().cacheDrawable(staticEntry.id, drawable);
+        app.drawableCache().cacheDrawable(staticEntry.getIconCacheId(), drawable);
     }
 
     public void restoreDefaultIcon(AppEntry appEntry) {
         TBApplication app = TBApplication.getApplication(ctx);
-        AppRecord appRecord = app.getDataHandler().removeCustomAppIcon(appEntry.getUserComponentName());
+        app.getDataHandler().removeCustomAppIcon(appEntry.getUserComponentName());
+
+        app.drawableCache().cacheDrawable(appEntry.getIconCacheId(), null);
         appEntry.clearCustomIcon();
-        app.drawableCache().cacheDrawable(appEntry.id, null);
     }
 
     public void restoreDefaultIcon(ShortcutEntry shortcutEntry) {
         TBApplication app = TBApplication.getApplication(ctx);
         app.getDataHandler().removeCustomStaticEntryIcon(shortcutEntry.id);
+
+        app.drawableCache().cacheDrawable(shortcutEntry.getIconCacheId(), null);
         shortcutEntry.clearCustomIcon();
-        app.drawableCache().cacheDrawable(shortcutEntry.id, null);
     }
 
     public void restoreDefaultIcon(StaticEntry staticEntry) {
         TBApplication app = TBApplication.getApplication(ctx);
         app.getDataHandler().removeCustomStaticEntryIcon(staticEntry.id);
+
+        app.drawableCache().cacheDrawable(staticEntry.getIconCacheId(), null);
         staticEntry.clearCustomIcon();
-        app.drawableCache().cacheDrawable(staticEntry.id, null);
     }
 
     public Drawable applyContactMask(@NonNull Context ctx, @NonNull Drawable drawable) {
