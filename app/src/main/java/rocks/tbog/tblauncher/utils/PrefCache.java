@@ -26,6 +26,7 @@ public class PrefCache {
     private static Boolean FUZZY_SEARCH_TAGS = null;
     private static Boolean TAGS_MENU_ICONS = null;
     private static Boolean TAGS_MENU_UNTAGGED = null;
+    private static int TAGS_MENU_UNTAGGED_IDX = -1;
     private static List<ContentLoadHelper.CategoryItem> RESULT_POPUP_ORDER = null;
 
     private PrefCache() {
@@ -39,6 +40,7 @@ public class PrefCache {
         FUZZY_SEARCH_TAGS = null;
         TAGS_MENU_ICONS = null;
         TAGS_MENU_UNTAGGED = null;
+        TAGS_MENU_UNTAGGED_IDX = -1;
         RESULT_POPUP_ORDER = null;
     }
 
@@ -92,8 +94,23 @@ public class PrefCache {
         if (TAGS_MENU_UNTAGGED == null) {
             SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
             TAGS_MENU_UNTAGGED = pref.getBoolean("tags-menu-untagged", false);
+            try {
+                TAGS_MENU_UNTAGGED_IDX = Integer.parseInt(pref.getString("tags-menu-untagged-index", "0"));
+            } catch (Exception ignored) {
+            }
         }
         return TAGS_MENU_UNTAGGED;
+    }
+
+    public static int getTagsMenuUntaggedIndex(Context context) {
+        if (TAGS_MENU_UNTAGGED_IDX == -1) {
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+            try {
+                TAGS_MENU_UNTAGGED_IDX = Integer.parseInt(pref.getString("tags-menu-untagged-index", "0"));
+            } catch (Exception ignored) {
+            }
+        }
+        return TAGS_MENU_UNTAGGED_IDX;
     }
 
     public static int getResultSearcherCap(Context context) {

@@ -8,16 +8,18 @@ import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 import androidx.preference.PreferenceManager;
 
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.PriorityQueue;
 
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.dataprovider.TagsProvider;
+import rocks.tbog.tblauncher.entry.ActionEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.EntryWithTags;
 import rocks.tbog.tblauncher.entry.TagEntry;
+import rocks.tbog.tblauncher.handler.DataHandler;
+import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.PrefOrderedListHelper;
 import rocks.tbog.tblauncher.utils.Utilities;
 
@@ -75,21 +77,23 @@ public class TagList extends Searcher {
         if (context == null)
             return null;
 
-        TBApplication app = TBApplication.getApplication(context);
+        DataHandler dh = TBApplication.dataHandler(context);
 
         // Request results via "addResult"
         if ("untagged".equals(query))
-            app.getDataHandler().requestAllRecords(this);
+            dh.requestAllRecords(this);
         else if ("list".equals(query) || "listReversed".equals(query))
         {
-            TagsProvider tagsProvider = app.getDataHandler().getTagsProvider();
+            TagsProvider tagsProvider = dh.getTagsProvider();
             boolean reversed = query.endsWith("Reversed");
+
+            // add tags from the tags menu list
             if (tagsProvider != null) {
                 SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
                 List<String> tagOrder = PrefOrderedListHelper.getOrderedList(pref, "tags-menu-list", "tags-menu-order");
                 for (String orderValue : tagOrder) {
                     String tagName = PrefOrderedListHelper.getOrderedValueName(orderValue);
-                    int order = PrefOrderedListHelper.getOrderedValueIndex(orderValue);
+                    int order = 10 * PrefOrderedListHelper.getOrderedValueIndex(orderValue);
 
                     TagEntry tagEntry = tagsProvider.getTagEntry(tagName);
                     tagEntry.setRelevance(tagEntry.normalizedName, null);
@@ -97,7 +101,21 @@ public class TagList extends Searcher {
                     addProcessedPojo(tagEntry);
                 }
             }
+
+            // add the show untagged action to the result list
+            EntryItem untaggedEntry;
+            boolean bAddUntagged = PrefCache.showTagsMenuUntagged(context);
+            if (bAddUntagged) {
+                untaggedEntry = TBApplication.dataHandler(context).getPojo(ActionEntry.SCHEME + "show/untagged");
+                if (untaggedEntry instanceof ActionEntry) {
+                    int idx = -1 + 10 * PrefCache.getTagsMenuUntaggedIndex(context);
+
+                    untaggedEntry.setRelevance(untaggedEntry.normalizedName, null);
+                    untaggedEntry.boostRelevance(reversed ? idx : -idx);
+                    addProcessedPojo(untaggedEntry);
+                }
+            }
         }
-            return null;
+        return null;
     }
 }
