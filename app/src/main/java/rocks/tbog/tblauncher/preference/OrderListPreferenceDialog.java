@@ -105,6 +105,9 @@ public class OrderListPreferenceDialog extends PreferenceDialogFragmentCompat {
         builder.setAdapter(entryAdapter, null);
 
         entryAdapter.mOnMoveUpListener = (adapter, view, position) -> {
+            if (position <= 0)
+                return;
+
             List<ListEntry> list = adapter.getList();
             ListEntry entry = list.remove(position);
             list.add(position - 1, entry);
@@ -114,6 +117,9 @@ public class OrderListPreferenceDialog extends PreferenceDialogFragmentCompat {
         };
 
         entryAdapter.mOnMoveDownListener = (adapter, view, position) -> {
+            if ((position + 1) >= adapter.getCount())
+                return;
+
             List<ListEntry> list = adapter.getList();
             ListEntry entry = list.remove(position);
             list.add(position + 1, entry);
@@ -212,45 +218,31 @@ public class OrderListPreferenceDialog extends PreferenceDialogFragmentCompat {
 
             textView.setText(content.name);
 
-            btnUp.setOnClickListener(v -> {
-                if (entryAdapter.mOnMoveUpListener == null)
-                    return;
-                int pos = entryAdapter.getList().indexOf(content);
-                if (pos != -1)
-                    entryAdapter.mOnMoveUpListener.onClick(entryAdapter, v, pos);
-            });
+            if (position == 0)
+                btnUp.setVisibility(View.INVISIBLE);
+            else {
+                btnUp.setVisibility(View.VISIBLE);
+                btnUp.setOnClickListener(v -> {
+                    if (entryAdapter.mOnMoveUpListener == null)
+                        return;
+                    int pos = entryAdapter.getList().indexOf(content);
+                    if (pos != -1)
+                        entryAdapter.mOnMoveUpListener.onClick(entryAdapter, v, pos);
+                });
+            }
 
-            btnDown.setOnClickListener(v -> {
-                if (entryAdapter.mOnMoveDownListener == null)
-                    return;
-                int pos = entryAdapter.getList().indexOf(content);
-                if (pos != -1)
-                    entryAdapter.mOnMoveDownListener.onClick(entryAdapter, v, pos);
-            });
+            if (position == (adapter.getCount() - 1))
+                btnDown.setVisibility(View.INVISIBLE);
+            else {
+                btnDown.setVisibility(View.VISIBLE);
+                btnDown.setOnClickListener(v -> {
+                    if (entryAdapter.mOnMoveDownListener == null)
+                        return;
+                    int pos = entryAdapter.getList().indexOf(content);
+                    if (pos != -1)
+                        entryAdapter.mOnMoveDownListener.onClick(entryAdapter, v, pos);
+                });
+            }
         }
     }
-
-//    public static class TagEntryViewHolder extends EntryViewHolder {
-//        ImageView icon;
-//
-//        protected TagEntryViewHolder(View view) {
-//            super(view);
-//            icon = view.findViewById(android.R.id.icon);
-//        }
-//
-//        @Override
-//        protected void setContent(ListEntry content, int position, @NonNull ViewHolderAdapter<ListEntry, ? extends ViewHolderAdapter.ViewHolder<ListEntry>> adapter) {
-//            super.setContent(content, position, adapter);
-//            if (icon == null)
-//                return;
-//
-//            icon.setVisibility(View.VISIBLE);
-//            TagsProvider tagsProvider = TBApplication.dataHandler(icon.getContext()).getTagsProvider();
-//            TagEntry tagEntry = tagsProvider != null ? tagsProvider.getTagEntry(content.value) : null;
-//            if (tagEntry != null)
-//                Utilities.setIconAsync(icon, tagEntry::getIconDrawable);
-//            else
-//                icon.setImageDrawable(null);
-//        }
-//    }
 }
