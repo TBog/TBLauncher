@@ -85,6 +85,8 @@ import rocks.tbog.tblauncher.utils.Utilities;
 
 public class SettingsActivity extends AppCompatActivity implements PreferenceFragmentCompat.OnPreferenceStartScreenCallback/*, PreferenceFragmentCompat.OnPreferenceStartFragmentCallback*/ {
 
+    private final static String INTENT_EXTRA_BACK_STACK_TAGS = "backStackTagList";
+
     private final static ArraySet<String> PREF_THAT_REQUIRE_LAYOUT_UPDATE = new ArraySet<>(Arrays.asList(
             "result-list-color", "result-list-alpha", "result-ripple-color", "result-list-rounded",
             "notification-bar-color", "notification-bar-alpha", "notification-bar-gradient", "black-notification-icons",
@@ -128,16 +130,41 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             if (fragment == null) {
                 fragment = new SettingsFragment();
             }
+
             getSupportFragmentManager()
-                    .beginTransaction()
-                    .replace(R.id.settings_container, fragment, SettingsFragment.FRAGMENT_TAG)
-                    .commit();
+                .beginTransaction()
+                .replace(R.id.settings_container, fragment, SettingsFragment.FRAGMENT_TAG)
+                .commit();
+
+            restoreBackStack();
         }
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
+    }
+
+    private void restoreBackStack() {
+        Intent intent = getIntent();
+        if (intent == null)
+            return;
+        ArrayList<String> backStackEntryList = intent.getStringArrayListExtra(INTENT_EXTRA_BACK_STACK_TAGS);
+        if (backStackEntryList != null)
+            for (String key : backStackEntryList)
+                if (key != null)
+                    addToBackStack(key);
+    }
+
+    private void addToBackStack(@NonNull String key) {
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        SettingsFragment fragment = new SettingsFragment();
+        Bundle args = new Bundle();
+        args.putString(PreferenceFragmentCompat.ARG_PREFERENCE_ROOT, key);
+        fragment.setArguments(args);
+        ft.replace(R.id.settings_container, fragment, key);
+        ft.addToBackStack(key);
+        ft.commit();
     }
 
     @Override
@@ -171,8 +198,31 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     }
 
     private void restart() {
+        // save backstack
+        FragmentManager fm = getSupportFragmentManager();
+        int backStackEntryCount = fm.getBackStackEntryCount();
+        ArrayList<String> backStackTags = null;
+        if (backStackEntryCount > 0) {
+            backStackTags = new ArrayList<>(backStackEntryCount);
+            for (int idx = 0; idx < backStackEntryCount; idx += 1) {
+                FragmentManager.BackStackEntry entry = fm.getBackStackEntryAt(idx);
+                String tag = entry.getName();
+                backStackTags.add(tag);
+            }
+        }
+
+        // close current activity
         finish();
-        startActivity(new Intent(this, getClass()));
+
+        // start new activity
+        Intent activityIntent = new Intent(this, getClass());
+        if (backStackTags != null) {
+            // remember the back stack pages so we can restore them
+            activityIntent.putStringArrayListExtra(INTENT_EXTRA_BACK_STACK_TAGS, backStackTags);
+        }
+        startActivity(activityIntent);
+
+        // set transition animation
         overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
     }
 
@@ -203,36 +253,10 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         return super.onSupportNavigateUp();
     }
 
-//    @Override
-//    public boolean onPreferenceStartFragment(PreferenceFragmentCompat caller, Preference pref) {
-//        // Instantiate the new Fragment
-//        final Bundle args = pref.getExtras();
-//        final Fragment fragment = getSupportFragmentManager().getFragmentFactory().instantiate(
-//                getClassLoader(),
-//                pref.getFragment());
-//        fragment.setArguments(args);
-//        fragment.setTargetFragment(caller, 0);
-//        // Replace the existing Fragment with the new Fragment
-//        getSupportFragmentManager().beginTransaction()
-//                .replace(R.id.settings_container, fragment)
-//                .addToBackStack(null)
-//                .commit();
-//        return true;
-//    }
-
     @Override
     public boolean onPreferenceStartScreen(PreferenceFragmentCompat caller, PreferenceScreen preferenceScreen) {
         final String key = preferenceScreen.getKey();
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        SettingsFragment fragment = new SettingsFragment();
-        Bundle args = new Bundle();
-        args.putString(PreferenceFragmentCompat.ARG_PREFERENCE_ROOT, key);
-        fragment.setArguments(args);
-        ft.replace(R.id.settings_container, fragment, key);
-        ft.addToBackStack(key);
-        ft.commit();
-
-        setTitle(preferenceScreen.getTitle());
+        addToBackStack(key);
         return true;
     }
 
@@ -315,13 +339,18 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                 removePreference("pin-auto-confirm");
             }
-            ActionBar actionBar = ((SettingsActivity) requireActivity()).getSupportActionBar();
+
+            final Activity activity = requireActivity();
+
+            // set activity title as the preference screen title
+            activity.setTitle(getPreferenceScreen().getTitle());
+
+            ActionBar actionBar = ((SettingsActivity) activity).getSupportActionBar();
             if (actionBar != null) {
                 // we can change the theme from the options menu
                 removePreference("settings-theme");
             }
 
-            final Activity activity = requireActivity();
             // import settings
             {
                 Preference pref = findPreference("import-settings-set");
