@@ -30,7 +30,7 @@ import java.util.List;
 
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.drawable.DrawableUtils;
-import rocks.tbog.tblauncher.utils.KeyboardDialogBuilder;
+import rocks.tbog.tblauncher.utils.DialogHelper;
 import rocks.tbog.tblauncher.utils.Utilities;
 import rocks.tbog.tblauncher.utils.ViewHolderAdapter;
 import rocks.tbog.tblauncher.utils.ViewHolderListAdapter;
@@ -115,13 +115,13 @@ public class IconListPreferenceDialog extends PreferenceDialogFragmentCompat {
                 });
 
         builder.setPositiveButton(null, null);
-        KeyboardDialogBuilder.setCustomTitle(builder, getPreference().getDialogTitle());
+        DialogHelper.setCustomTitle(builder, getPreference().getDialogTitle());
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        KeyboardDialogBuilder.setButtonBarBackground(requireDialog());
+        DialogHelper.setButtonBarBackground(requireDialog());
     }
 
     private ListPreference getListPreference() {

@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Objects;
 
 import rocks.tbog.tblauncher.R;
-import rocks.tbog.tblauncher.utils.KeyboardDialogBuilder;
+import rocks.tbog.tblauncher.utils.DialogHelper;
 import rocks.tbog.tblauncher.utils.PrefOrderedListHelper;
 import rocks.tbog.tblauncher.utils.ViewHolderAdapter;
 import rocks.tbog.tblauncher.utils.ViewHolderListAdapter;
@@ -95,7 +95,7 @@ public class OrderListPreferenceDialog extends PreferenceDialogFragmentCompat {
     @Override
     protected void onPrepareDialogBuilder(AlertDialog.Builder builder) {
         super.onPrepareDialogBuilder(builder);
-        KeyboardDialogBuilder.setCustomTitle(builder, getPreference().getDialogTitle());
+        DialogHelper.setCustomTitle(builder, getPreference().getDialogTitle());
 
         if (mEntryValues.length != mEntries.length)
             throw new IllegalStateException("mEntryValues.length=" + mEntryValues.length + " mEntries.length=" + mEntries.length);
@@ -132,7 +132,7 @@ public class OrderListPreferenceDialog extends PreferenceDialogFragmentCompat {
     @Override
     public void onStart() {
         super.onStart();
-        KeyboardDialogBuilder.setButtonBarBackground(requireDialog());
+        DialogHelper.setButtonBarBackground(requireDialog());
     }
 
     protected void generateNewValues(List<ListEntry> list) {

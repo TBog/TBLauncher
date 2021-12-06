@@ -38,7 +38,7 @@ import rocks.tbog.tblauncher.drawable.DrawableUtils;
 import rocks.tbog.tblauncher.drawable.FourCodePointDrawable;
 import rocks.tbog.tblauncher.drawable.TextDrawable;
 import rocks.tbog.tblauncher.drawable.TwoCodePointDrawable;
-import rocks.tbog.tblauncher.utils.KeyboardDialogBuilder;
+import rocks.tbog.tblauncher.utils.DialogHelper;
 import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.UISizes;
 import rocks.tbog.tblauncher.utils.UITheme;
@@ -366,7 +366,7 @@ class CustomShapePage extends PageAdapter.Page {
                 .setPositiveButton(android.R.string.ok, buttonListener)
                 .setNegativeButton(android.R.string.cancel, buttonListener);
         builder.setView(dialogView);
-        KeyboardDialogBuilder.setButtonBarBackground(builder.show());
+        DialogHelper.setButtonBarBackground(builder.show());
     }
 
     static class LetterIconInfo extends NamedIconInfo {

@@ -4,13 +4,10 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
-import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.LifecycleOwner;
 import androidx.preference.PreferenceDialogFragmentCompat;
 
-import rocks.tbog.tblauncher.utils.KeyboardDialogBuilder;
+import rocks.tbog.tblauncher.utils.DialogHelper;
 
 public abstract class BasePreferenceDialog extends PreferenceDialogFragmentCompat {
     private View mDialogView = null;
@@ -24,7 +21,7 @@ public abstract class BasePreferenceDialog extends PreferenceDialogFragmentCompa
     @Override
     protected void onPrepareDialogBuilder(AlertDialog.Builder builder) {
         super.onPrepareDialogBuilder(builder);
-        KeyboardDialogBuilder.setCustomTitle(builder, getPreference().getDialogTitle());
+        DialogHelper.setCustomTitle(builder, getPreference().getDialogTitle());
     }
 
     @Override
@@ -46,7 +43,7 @@ public abstract class BasePreferenceDialog extends PreferenceDialogFragmentCompa
             parent = parent.getParent();
         }
 
-        KeyboardDialogBuilder.setButtonBarBackground(requireDialog());
+        DialogHelper.setButtonBarBackground(requireDialog());
     }
 
     @Override

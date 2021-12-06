@@ -5,7 +5,7 @@ import android.os.Bundle;
 import androidx.appcompat.app.AlertDialog;
 import androidx.preference.MultiSelectListPreferenceDialogFragmentCompat;
 
-import rocks.tbog.tblauncher.utils.KeyboardDialogBuilder;
+import rocks.tbog.tblauncher.utils.DialogHelper;
 
 public class BaseMultiSelectListPreferenceDialog extends MultiSelectListPreferenceDialogFragmentCompat {
 
@@ -20,12 +20,12 @@ public class BaseMultiSelectListPreferenceDialog extends MultiSelectListPreferen
     @Override
     protected void onPrepareDialogBuilder(AlertDialog.Builder builder) {
         super.onPrepareDialogBuilder(builder);
-        KeyboardDialogBuilder.setCustomTitle(builder, getPreference().getDialogTitle());
+        DialogHelper.setCustomTitle(builder, getPreference().getDialogTitle());
     }
 
     @Override
     public void onStart() {
         super.onStart();
-        KeyboardDialogBuilder.setButtonBarBackground(requireDialog());
+        DialogHelper.setButtonBarBackground(requireDialog());
     }
 }
