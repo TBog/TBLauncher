@@ -136,10 +136,12 @@ public class OrderListPreferenceDialog extends PreferenceDialogFragmentCompat {
     }
 
     protected void generateNewValues(List<ListEntry> list) {
-        mPreferenceChanged = true;
+        mPreferenceChanged = mEntryValues.length != list.size();
         mNewValues.clear();
         int ord = 0;
         for (ListEntry entry : list) {
+            if ((ord >= mEntryValues.length) || !mEntryValues[ord].equals(entry.value))
+                mPreferenceChanged = true;
             mNewValues.add(PrefOrderedListHelper.makeOrderedValue(entry.value, ord++));
         }
     }

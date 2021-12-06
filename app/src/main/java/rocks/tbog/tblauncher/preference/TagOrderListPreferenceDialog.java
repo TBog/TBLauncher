@@ -5,6 +5,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.preference.DialogPreference;
 import androidx.preference.EditTextPreference;
 import androidx.preference.Preference;
@@ -59,6 +60,7 @@ public class TagOrderListPreferenceDialog extends OrderListPreferenceDialog {
         outState.putInt(SAVE_STATE_UNTAGGED_IDX, mUntaggedIndex);
     }
 
+    @Nullable
     private EditTextPreference getUntaggedIndexPreference() {
         final DialogPreference.TargetFragment fragment = (DialogPreference.TargetFragment) getTargetFragment();
         if (fragment == null)
