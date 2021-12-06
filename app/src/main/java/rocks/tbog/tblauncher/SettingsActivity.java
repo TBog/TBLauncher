@@ -351,6 +351,30 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 removePreference("settings-theme");
             }
 
+            setupButtonActions(activity);
+
+            final Context context = requireContext();
+
+            tintPreferenceIcons(getPreferenceScreen(), UIColors.getThemeColor(context, R.attr.colorAccent));
+
+            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+
+            // quick-list
+            {
+                Preference pref = findPreference("quick-list-enabled");
+                // if we don't have the toggle in this screen we need to apply dependency by hand
+                if (pref == null) {
+                    // only show the category if we use the quick list
+                    Preference section = findPreference("quick-list-section");
+                    if (section != null)
+                        section.setVisible(sharedPreferences.getBoolean("quick-list-enabled", true));
+                }
+            }
+
+            onCreateAsyncLoad(context, sharedPreferences, savedInstanceState);
+        }
+
+        private void setupButtonActions(@NonNull Activity activity) {
             // import settings
             {
                 Preference pref = findPreference("import-settings-set");
@@ -372,26 +396,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         return true;
                     });
             }
-
-            final Context context = requireContext();
-
-            tintPreferenceIcons(getPreferenceScreen(), UIColors.getThemeColor(context, R.attr.colorAccent));
-
-            SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
-
-            // quick-list
-            {
-                Preference pref = findPreference("quick-list-enabled");
-                // if we don't have the toggle in this screen we need to apply dependency by hand
-                if (pref == null) {
-                    // only show the category if we use the quick list
-                    Preference section = findPreference("quick-list-section");
-                    if (section != null)
-                        section.setVisible(sharedPreferences.getBoolean("quick-list-enabled", true));
-                }
-            }
-
-            onCreateAsyncLoad(context, sharedPreferences, savedInstanceState);
         }
 
         private void onCreateAsyncLoad(@NonNull Context context, @NonNull SharedPreferences sharedPreferences, @Nullable Bundle savedInstanceState) {
@@ -617,6 +621,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 String key = preference.getKey();
                 Log.d(TAG, "onDisplayPreferenceDialog " + key);
                 switch (key) {
+                    case "primary-color":
+                    case "secondary-color":
                     case "icon-background-argb":
                     case "notification-bar-color":
                     case "search-bar-color":
@@ -664,6 +670,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "popup-corner-radius":
                         dialogFragment = SliderDialog.newInstance(key);
                         break;
+                    case "generate-theme":
                     case "device-admin":
                     case "reset-matrix":
                     case "reset-preferences":

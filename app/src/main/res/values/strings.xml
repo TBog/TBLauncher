@@ -46,6 +46,8 @@
     <string name="menu_popup_tags_manager">Tag manager</string>
     <string name="menu_popup_tags_menu">Tags menu</string>
     <string name="rate_the_app">Rate the app</string>
+    <string name="presets_summary">Preset and generation of colors</string>
+    <string name="title_presets">Color preset</string>
     <string name="user_interface_summary">Themes, transparency and colors</string>
     <string name="title_ui">User interface</string>
     <string name="notification_bar_section">Notification bar</string>
@@ -343,6 +345,8 @@
     <string name="reset_preferences_description">All settings will be reset</string>
     <string name="reset_cached_app_icons_confirm">Reset icon pack cache?</string>
     <string name="reset_cached_app_icons_description">Resets cached icon pack name and version.</string>
+    <string name="generate_theme_confirm">Set generated colors?</string>
+    <string name="generate_theme_description">Resets all colors and apply generated colors based on the primary and secondary colors</string>
     <string name="reset_matrix_confirm">Set default values?</string>
     <string name="reset_matrix_description">Resets all icon settings on this screen</string>
     <string name="popup_section">Popup</string>

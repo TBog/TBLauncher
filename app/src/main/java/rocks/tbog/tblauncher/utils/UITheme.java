@@ -51,4 +51,78 @@ public class UITheme {
             return context;
         return new ContextThemeWrapper(context, theme);
     }
+
+    public static void generateAndApplyColors(Context context) {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+        int colorBg = UIColors.getColor(pref, "primary-color");
+        int colorFg = UIColors.getColor(pref, "secondary-color");
+        int colorBgContrast = UIColors.getTextContrastColor(colorBg);
+        float lumBg = UIColors.luminance(colorBg);
+        int colorFg2 = UIColors.modulateColorLightness(colorFg, lumBg > .5f ? 0f : 2f);
+
+        String[] background = {
+            "icon-background-argb",
+            "notification-bar-color",
+            "search-bar-color",
+            "result-list-color",
+            "quick-list-color",
+            "popup-background-argb",
+        };
+
+        String[] highlight = {
+            "search-bar-ripple-color",
+            "search-bar-cursor-argb",
+            "result-ripple-color",
+            "result-highlight-color",
+            "quick-list-toggle-color",
+            "quick-list-ripple-color",
+            "popup-border-argb",
+            "popup-ripple-color",
+        };
+
+        String[] foreground = {
+            "search-bar-text-color",
+            "search-bar-icon-color",
+            "contact-action-color",
+            "result-text-color",
+            "popup-text-color",
+            "popup-title-color",
+        };
+
+        String[] foreground2 = {
+            "result-text2-color",
+        };
+
+        String[] alpha = {
+            "notification-bar-alpha",
+            "search-bar-alpha",
+            "result-list-alpha",
+            "quick-list-alpha",
+        };
+
+        SharedPreferences.Editor editor = pref.edit();
+
+        for (String prefAlpha : alpha) {
+            editor.putInt(prefAlpha, 0xFF);
+        }
+
+        setColor(editor, background, colorBg);
+        setColor(editor, highlight, colorBgContrast);
+        setColor(editor, foreground, colorFg);
+        setColor(editor, foreground2, colorFg2);
+
+        editor.apply();
+    }
+
+    private static void setColor(@NonNull SharedPreferences.Editor editor, String[] colorList, int color) {
+        for (String prefColor : colorList) {
+            final int argb;
+            if (prefColor.endsWith("-argb")) {
+                argb = UIColors.setAlpha(color, 0xFF);
+            } else {
+                argb = UIColors.setAlpha(color, 0);
+            }
+            editor.putInt(prefColor, argb);
+        }
+    }
 }

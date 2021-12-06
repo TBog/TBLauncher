@@ -27,6 +27,7 @@ import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.WorkAsync.TaskRunner;
 import rocks.tbog.tblauncher.db.XmlExport;
 import rocks.tbog.tblauncher.utils.FileUtils;
+import rocks.tbog.tblauncher.utils.UITheme;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public class ConfirmDialog extends BasePreferenceDialog {
@@ -61,6 +62,10 @@ public class ConfirmDialog extends BasePreferenceDialog {
                     intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, getString(R.string.device_admin_explanation));
                     startActivityForResult(intent, SettingsActivity.ENABLE_DEVICE_ADMIN);
                 }
+                break;
+            }
+            case "generate-theme": {
+                UITheme.generateAndApplyColors(requireContext());
                 break;
             }
             case "reset-matrix": {
@@ -141,6 +146,10 @@ public class ConfirmDialog extends BasePreferenceDialog {
             case "device-admin":
                 ((TextView) view.findViewById(android.R.id.text1)).setText(R.string.device_admin_disable);
                 ((TextView) view.findViewById(android.R.id.text2)).setVisibility(View.GONE);
+                break;
+            case "generate-theme":
+                ((TextView) view.findViewById(android.R.id.text1)).setText(R.string.generate_theme_confirm);
+                ((TextView) view.findViewById(android.R.id.text2)).setText(R.string.generate_theme_description);
                 break;
             case "reset-matrix":
                 ((TextView) view.findViewById(android.R.id.text1)).setText(R.string.reset_matrix_confirm);

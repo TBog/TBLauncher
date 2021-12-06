@@ -9,6 +9,30 @@
     tools:showIn="@layout/activity_settings">
 
     <PreferenceScreen
+        android:key="ui-presets"
+        android:summary="@string/presets_summary"
+        android:title="@string/title_presets">
+
+        <rocks.tbog.tblauncher.preference.CustomDialogPreference
+            android:defaultValue="@integer/default_color"
+            android:key="primary-color"
+            android:title="Primary color"
+            android:widgetLayout="@layout/pref_color_preview" />
+
+        <rocks.tbog.tblauncher.preference.CustomDialogPreference
+            android:defaultValue="@integer/default_color_text"
+            android:key="secondary-color"
+            android:title="Secondary color"
+            android:widgetLayout="@layout/pref_color_preview" />
+
+        <rocks.tbog.tblauncher.preference.CustomDialogPreference
+            android:dialogLayout="@layout/pref_confirm"
+            android:key="generate-theme"
+            android:title="Generate theme" />
+
+    </PreferenceScreen>
+
+    <PreferenceScreen
         android:icon="@drawable/ic_phone_ui"
         android:key="ui-holder"
         android:summary="@string/user_interface_summary"
