@@ -225,7 +225,8 @@ public final class ContactEntry extends EntryItem {
             final ImageView appIcon = view.findViewById(android.R.id.icon2);
             if (getImData() != null) {
                 appIcon.setVisibility(View.VISIBLE);
-                ResultViewHelper.setIconAsync(drawFlags, this, appIcon, SetAppIconAsync.class);
+                // bypass cache or else the app icon is cached as the contact icon
+                ResultViewHelper.setIconAsync(drawFlags | FLAG_RELOAD | FLAG_DRAW_NO_CACHE, this, appIcon, SetAppIconAsync.class);
             } else {
                 appIcon.setVisibility(View.GONE);
             }
