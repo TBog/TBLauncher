@@ -670,7 +670,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "popup-corner-radius":
                         dialogFragment = SliderDialog.newInstance(key);
                         break;
-                    case "generate-theme":
+                    case "generate-theme-simple":
+                    case "generate-theme-highlight":
                     case "device-admin":
                     case "reset-matrix":
                     case "reset-preferences":

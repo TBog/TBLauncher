@@ -64,8 +64,12 @@ public class ConfirmDialog extends BasePreferenceDialog {
                 }
                 break;
             }
-            case "generate-theme": {
-                UITheme.generateAndApplyColors(requireContext());
+            case "generate-theme-simple": {
+                UITheme.applyColorsThemeSimple(requireContext());
+                break;
+            }
+            case "generate-theme-highlight": {
+                UITheme.applyColorsThemeHighlight(requireContext());
                 break;
             }
             case "reset-matrix": {
@@ -147,7 +151,8 @@ public class ConfirmDialog extends BasePreferenceDialog {
                 ((TextView) view.findViewById(android.R.id.text1)).setText(R.string.device_admin_disable);
                 ((TextView) view.findViewById(android.R.id.text2)).setVisibility(View.GONE);
                 break;
-            case "generate-theme":
+            case "generate-theme-simple":
+            case "generate-theme-highlight":
                 ((TextView) view.findViewById(android.R.id.text1)).setText(R.string.generate_theme_confirm);
                 ((TextView) view.findViewById(android.R.id.text2)).setText(R.string.generate_theme_description);
                 break;

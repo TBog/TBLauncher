@@ -46,8 +46,6 @@
     <string name="menu_popup_tags_manager">Tag manager</string>
     <string name="menu_popup_tags_menu">Tags menu</string>
     <string name="rate_the_app">Rate the app</string>
-    <string name="presets_summary">Preset and generation of colors</string>
-    <string name="title_presets">Color preset</string>
     <string name="user_interface_summary">Themes, transparency and colors</string>
     <string name="title_ui">User interface</string>
     <string name="notification_bar_section">Notification bar</string>
@@ -440,6 +438,15 @@
     <string name="result_popup_order_summary">Category order for long touch popup items</string>
     <string name="debug_favorites">Favorites</string>
     <string name="debug_favorites_summary">Show entries from DB table `favorites`</string>
+
+    <string name="title_presets">Color preset</string>
+    <string name="summary_presets">Preset and generation of colors</string>
+    <string name="primary_color">Primary color</string>
+    <string name="secondary_color">Secondary color</string>
+    <string name="generate_theme_simple">Simple theme</string>
+    <string name="generate_theme_simple_summary">Use primary for background and secondary for text</string>
+    <string name="generate_theme_highlight">Highlight theme</string>
+    <string name="generate_theme_highlight_summary">Use primary for background and secondary for highlight</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>

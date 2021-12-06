@@ -68,8 +68,8 @@
         android:layout_marginStart="@dimen/icon_margin_right"
         android:ellipsize="end"
         android:maxLines="1"
-        android:paddingEnd="2dp"
-        android:paddingBottom="3dp"
+        android:paddingEnd="2px"
+        android:paddingBottom="4px"
         android:shadowColor="?attr/resultShadowColor"
         android:shadowDx="1"
         android:shadowDy="2"
@@ -80,7 +80,7 @@
         app:layout_constraintStart_toEndOf="@android:id/icon"
         app:layout_constraintTop_toTopOf="parent"
         app:layout_constraintVertical_chainStyle="packed"
-        tools:ignore="RtlSymmetry"
+        tools:ignore="PxUsage,RtlSymmetry"
         tools:text="@string/stub_application" />
 
     <TextView
@@ -88,7 +88,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:ellipsize="end"
-        android:paddingEnd="2dp"
+        android:paddingEnd="2px"
+        android:paddingBottom="4px"
         android:shadowColor="?attr/resultShadowColor"
         android:shadowDx="1"
         android:shadowDy="2"
@@ -98,7 +99,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="@id/item_app_name"
         app:layout_constraintTop_toBottomOf="@id/item_app_name"
-        tools:ignore="RtlSymmetry"
+        tools:ignore="PxUsage,RtlSymmetry"
         tools:text="@string/stub_app_tag" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

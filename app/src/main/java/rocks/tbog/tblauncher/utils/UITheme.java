@@ -15,6 +15,46 @@ public class UITheme {
     @AnyRes
     public static final int ID_NULL = 0;
 
+    private static final String[] PREF_BACKGROUND = {
+        "icon-background-argb",
+        "notification-bar-color",
+        "search-bar-color",
+        "result-list-color",
+        "quick-list-color",
+        "popup-background-argb",
+    };
+
+    private static final String[] PREF_HIGHLIGHT = {
+        "search-bar-ripple-color",
+        "search-bar-cursor-argb",
+        "result-ripple-color",
+        "result-highlight-color",
+        "quick-list-toggle-color",
+        "quick-list-ripple-color",
+        "popup-border-argb",
+        "popup-ripple-color",
+    };
+
+    private static final String[] PREF_FOREGROUND = {
+        "search-bar-text-color",
+        "search-bar-icon-color",
+        "contact-action-color",
+        "result-text-color",
+        "popup-text-color",
+        "popup-title-color",
+    };
+
+    private static final String[] PREF_FOREGROUND2 = {
+        "result-text2-color",
+    };
+
+    private static final String[] PREF_ALPHA = {
+        "notification-bar-alpha",
+        "search-bar-alpha",
+        "result-list-alpha",
+        "quick-list-alpha",
+    };
+
     private UITheme() {
     }
 
@@ -52,77 +92,68 @@ public class UITheme {
         return new ContextThemeWrapper(context, theme);
     }
 
-    public static void generateAndApplyColors(Context context) {
+    public static void applyColorsThemeSimple(Context context) {
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
-        int colorBg = UIColors.getColor(pref, "primary-color");
-        int colorFg = UIColors.getColor(pref, "secondary-color");
-        int colorBgContrast = UIColors.getTextContrastColor(colorBg);
-        float lumBg = UIColors.luminance(colorBg);
-        int colorFg2 = UIColors.modulateColorLightness(colorFg, lumBg > .5f ? 0f : 2f);
-
-        String[] background = {
-            "icon-background-argb",
-            "notification-bar-color",
-            "search-bar-color",
-            "result-list-color",
-            "quick-list-color",
-            "popup-background-argb",
-        };
-
-        String[] highlight = {
-            "search-bar-ripple-color",
-            "search-bar-cursor-argb",
-            "result-ripple-color",
-            "result-highlight-color",
-            "quick-list-toggle-color",
-            "quick-list-ripple-color",
-            "popup-border-argb",
-            "popup-ripple-color",
-        };
-
-        String[] foreground = {
-            "search-bar-text-color",
-            "search-bar-icon-color",
-            "contact-action-color",
-            "result-text-color",
-            "popup-text-color",
-            "popup-title-color",
-        };
-
-        String[] foreground2 = {
-            "result-text2-color",
-        };
-
-        String[] alpha = {
-            "notification-bar-alpha",
-            "search-bar-alpha",
-            "result-list-alpha",
-            "quick-list-alpha",
-        };
+        final int colorBg = UIColors.getColor(pref, "primary-color");
+        final int colorFg = UIColors.getColor(pref, "secondary-color");
+        final int colorHl = UIColors.getTextContrastColor(colorBg);
+        final float lumBg = UIColors.luminance(colorBg);
+        final float lumFg = UIColors.luminance(colorFg);
+        final int colorFg2;
+        if (lumBg > .5f && lumFg > .5f)
+            colorFg2 = UIColors.modulateColorLightness(colorFg, .2f);
+        else if (lumBg > .5f)
+            colorFg2 = UIColors.modulateColorLightness(colorFg, 2.f * (1.f - lumFg));
+        else if (lumFg > .5f)
+            colorFg2 = UIColors.modulateColorLightness(colorFg, 1.9f);
+        else
+            colorFg2 = UIColors.getTextContrastColor(colorBg);
 
         SharedPreferences.Editor editor = pref.edit();
 
-        for (String prefAlpha : alpha) {
+        for (String prefAlpha : PREF_ALPHA) {
             editor.putInt(prefAlpha, 0xFF);
         }
 
-        setColor(editor, background, colorBg);
-        setColor(editor, highlight, colorBgContrast);
-        setColor(editor, foreground, colorFg);
-        setColor(editor, foreground2, colorFg2);
+        setColor(editor, PREF_BACKGROUND, colorBg, 0xCD);
+        setColor(editor, PREF_HIGHLIGHT, colorHl, 0xFF);
+        setColor(editor, PREF_FOREGROUND, colorFg, 0xFF);
+        setColor(editor, PREF_FOREGROUND2, colorFg2, 0xFF);
 
         editor.apply();
     }
 
-    private static void setColor(@NonNull SharedPreferences.Editor editor, String[] colorList, int color) {
-        for (String prefColor : colorList) {
-            final int argb;
-            if (prefColor.endsWith("-argb")) {
-                argb = UIColors.setAlpha(color, 0xFF);
+    public static void applyColorsThemeHighlight(Context context) {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+        final int colorBg = UIColors.getColor(pref, "primary-color");
+        final int colorHl = UIColors.getColor(pref, "secondary-color");
+        final int colorFg = UIColors.getTextContrastColor(colorBg);
+        final float lumFg = UIColors.luminance(colorFg);
+        final int colorFg2 = UIColors.modulateColorLightness(colorFg, 2.f * (1.f - lumFg));
+
+        SharedPreferences.Editor editor = pref.edit();
+
+        for (String prefAlpha : PREF_ALPHA) {
+            editor.putInt(prefAlpha, 0xCD);
+        }
+
+        setColor(editor, PREF_BACKGROUND, colorBg, 0xCD);
+        setColor(editor, PREF_HIGHLIGHT, colorHl, 0xFF);
+        setColor(editor, PREF_FOREGROUND, colorFg, 0xFF);
+        setColor(editor, PREF_FOREGROUND2, colorFg2, 0xFF);
+
+        editor.apply();
+    }
+
+    private static void setColor(@NonNull SharedPreferences.Editor editor, String[] colorList, int color, int alpha) {
+        for (String prefName : colorList) {
+            final int prefColor;
+            if (prefName.endsWith("-argb")) {
+                prefColor = UIColors.setAlpha(color, alpha);
             } else {
-                argb = UIColors.setAlpha(color, 0);
+                prefColor = UIColors.setAlpha(color, 0);
             }
-            editor.putInt(prefColor, argb);
+            editor.putInt(prefName, prefColor);
         }
     }
 }

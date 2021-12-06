@@ -148,7 +148,7 @@ public final class UIColors {
     }
 
     /**
-     * Darken or lighten the color. For amount 2 the result is white, for 1 color is unchanged, for 0 result is balck
+     * Darken or lighten the color. For amount 2 the result is white, for 1 color is unchanged, for 0 result is black
      *
      * @param color  color to be changed
      * @param amount [0..2] - less than 1 to darken and grater to lighten
@@ -161,7 +161,7 @@ public final class UIColors {
         else {
             final float ratio = amount - 1f;
             final float inverseRatio = 1f - ratio;
-            hsl[2] = Math.min(1f, hsl[2] * inverseRatio + 1f * ratio);
+            hsl[2] = Math.min(1f, hsl[2] * inverseRatio + ratio);
         }
         return ColorUtils.HSLToColor(hsl);
     }
