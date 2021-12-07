@@ -347,6 +347,11 @@
 
         <androidx.preference.SwitchPreference
                 android:defaultValue="true"
+                android:key="enable-dial"
+                android:title="@string/enable_dial" />
+
+        <androidx.preference.SwitchPreference
+                android:defaultValue="true"
                 android:key="enable-contacts"
                 android:title="@string/enable_contacts" />
 

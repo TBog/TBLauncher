@@ -94,6 +94,11 @@ public final class ContactEntry extends EntryItem {
         this.homeNumber = homeNumber;
     }
 
+    public static ContactEntry newDialContact(String phone, StringNormalizer.Result normalizedPhone) {
+        String entryId = SCHEME + "dial" + '/' + phone;
+        return new ContactEntry(entryId, phone, phone, normalizedPhone, null, true, 0, false, true);
+    }
+
     public static ContactEntry newPhoneContact(long contactId, String phone, StringNormalizer.Result normalizedPhone, String lookupKey, Uri icon, boolean primary, boolean starred) {
         String entryId = SCHEME + contactId + '/' + phone;
         return new ContactEntry(entryId, lookupKey, phone, normalizedPhone, icon, primary, 0, starred, false);

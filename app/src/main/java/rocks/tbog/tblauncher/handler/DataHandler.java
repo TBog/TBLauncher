@@ -43,6 +43,7 @@ import rocks.tbog.tblauncher.dataprovider.ActionProvider;
 import rocks.tbog.tblauncher.dataprovider.AppProvider;
 import rocks.tbog.tblauncher.dataprovider.CalculatorProvider;
 import rocks.tbog.tblauncher.dataprovider.ContactsProvider;
+import rocks.tbog.tblauncher.dataprovider.DialProvider;
 import rocks.tbog.tblauncher.dataprovider.FilterProvider;
 import rocks.tbog.tblauncher.dataprovider.IProvider;
 import rocks.tbog.tblauncher.dataprovider.ModProvider;
@@ -92,7 +93,7 @@ public class DataHandler extends BroadcastReceiver
      */
     final static private String PROVIDER_PREFIX = IProvider.class.getPackage().getName() + ".";
     /**
-     * List all known providers
+     * List all known complex providers, that are defined as Android services
      */
     final static private List<String> PROVIDER_NAMES = Arrays.asList(
             "app"
@@ -212,6 +213,18 @@ public class DataHandler extends BroadcastReceiver
             if (prefs.getBoolean("enable-" + providerName, true)) {
                 ProviderEntry providerEntry = new ProviderEntry();
                 providerEntry.provider = new CalculatorProvider();
+                providers.put(providerName, providerEntry);
+            } else {
+                providers.remove(providerName);
+            }
+        }
+
+        // Dial phone provider, may be toggled by preference
+        {
+            String providerName = "dial";
+            if (prefs.getBoolean("enable-" + providerName, true)) {
+                ProviderEntry providerEntry = new ProviderEntry();
+                providerEntry.provider = new DialProvider();
                 providers.put(providerName, providerEntry);
             } else {
                 providers.remove(providerName);
