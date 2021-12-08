@@ -123,8 +123,8 @@ public class QuickList {
         //Log.d("QL", "oldList.length=" + oldList.length + " getChildCount=" + mQuickList.getChildCount());
 
         // clean the QuickList
-        mQuickList.removeAllViews();
         if (!isQuickListEnabled()) {
+            mQuickList.removeAllViews();
             mQuickListItems.clear();
             mQuickList.setVisibility(View.GONE);
             return;
@@ -165,7 +165,9 @@ public class QuickList {
 
         // clear old items before we add the new ones
         mQuickListItems.clear();
-        for (EntryItem entry : list) {
+        int listSize = list.size();
+        for (int idx = 0; idx < listSize; idx++) {
+            EntryItem entry = list.get(idx);
             if (entry instanceof PlaceholderEntry)
                 mListDirty = true;
             View view;
@@ -179,7 +181,13 @@ public class QuickList {
                 view = inflater.inflate(entry.getResultLayout(drawFlags), mQuickList, false);
             }
             entry.displayResult(view, drawFlags);
-            mQuickList.addView(view);
+
+            int childIdx = mQuickList.indexOfChild(view);
+            if (childIdx != idx) {
+                if (childIdx != -1)
+                    mQuickList.removeViewAt(childIdx);
+                mQuickList.addView(view, idx);
+            }
             mQuickListItems.add(entry);
 
 //            view.setScaleX(0f);
@@ -216,6 +224,7 @@ public class QuickList {
             Drawable selector = CustomizeUI.getSelectorDrawable(view, color, true);
             view.setBackground(selector);
         }
+        mQuickList.removeViews(listSize, mQuickList.getChildCount() - listSize);
         //mQuickList.setVisibility(mQuickList.getChildCount() == 0 ? View.GONE : View.VISIBLE);
         mQuickList.requestLayout();
     }
