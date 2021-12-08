@@ -59,7 +59,14 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
     public Holder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
         Context context = parent.getContext();
 
-        final int drawFlags = getDrawFlags(context);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        int drawFlags = EntryItem.FLAG_DRAW_NAME | EntryItem.FLAG_DRAW_LIST;
+        if (prefs.getBoolean("tags-enabled", true))
+            drawFlags |= EntryItem.FLAG_DRAW_TAGS;
+        if (prefs.getBoolean("icons-visible", true))
+            drawFlags |= EntryItem.FLAG_DRAW_ICON;
+        if (prefs.getBoolean("shortcut-show-badge", true))
+            drawFlags |= EntryItem.FLAG_DRAW_ICON_BADGE;
 
         // TODO: use a cache for the layout res
         @LayoutRes
@@ -81,19 +88,7 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
             itemView.setBackground(selectorBackground);
         }
 
-        return new Holder(itemView);
-    }
-
-    private int getDrawFlags(@NonNull Context context) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        int drawFlags = EntryItem.FLAG_DRAW_NAME | EntryItem.FLAG_DRAW_LIST;
-        if (prefs.getBoolean("tags-enabled", true))
-            drawFlags |= EntryItem.FLAG_DRAW_TAGS;
-        if (prefs.getBoolean("icons-visible", true))
-            drawFlags |= EntryItem.FLAG_DRAW_ICON;
-        if (prefs.getBoolean("shortcut-show-badge", true))
-            drawFlags |= EntryItem.FLAG_DRAW_ICON_BADGE;
-        return drawFlags;
+        return new Holder(itemView, drawFlags);
     }
 
     @Override
@@ -106,12 +101,10 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
             return;
         }
 
-        int drawFlags = getDrawFlags(holder.itemView.getContext());
-
         holder.setOnClickListener(view -> onClick(result, view));
         holder.setOnLongClickListener(view -> onLongClick(result, view));
 
-        results.get(position).displayResult(holder.itemView, drawFlags);
+        results.get(position).displayResult(holder.itemView, holder.mDrawFlags);
     }
 
     @Override
@@ -189,10 +182,12 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
     }
 
     public static class Holder extends RecyclerView.ViewHolder {
+        private final int mDrawFlags;
 
-        public Holder(@NonNull View itemView) {
+        public Holder(@NonNull View itemView, int drawFlags) {
             super(itemView);
             itemView.setTag(this);
+            mDrawFlags = drawFlags;
         }
 
         public void setOnClickListener(@Nullable View.OnClickListener listener) {
