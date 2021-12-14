@@ -37,6 +37,7 @@ import androidx.appcompat.app.ActionBar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.FragmentActivity;
 import androidx.preference.PreferenceManager;
+import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.lang.reflect.Constructor;
@@ -194,19 +195,17 @@ public class Behaviour implements ISearchActivity {
         if (mResultList == null)
             throw new IllegalStateException("mResultList==null");
 
-        RecyclerView.LayoutManager layoutManager;
         RecycleScrollListener recycleScrollListener;
-
-        layoutManager = new CustomRecycleLayoutManager();
         recycleScrollListener = new RecycleScrollListener(mKeyboardHandler);
 
         mResultAdapter = new RecycleAdapter(getContext(), new ArrayList<>());
 
         mResultList.setHasFixedSize(true);
-        mResultList.setLayoutManager(layoutManager);
         mResultList.setAdapter(mResultAdapter);
         mResultList.addOnScrollListener(recycleScrollListener);
 //        mResultList.addOnLayoutChangeListener(recycleScrollListener);
+
+        setListLayout();
     }
 
     private void initSearchBarContainer() {
@@ -1023,6 +1022,26 @@ public class Behaviour implements ISearchActivity {
         mMenuButton.performClick();
     }
 
+    public void setListLayout() {
+        showSearchBar();
+        RecyclerView.LayoutManager layoutManager;
+        layoutManager = new CustomRecycleLayoutManager();
+        mResultList.setLayoutManager(layoutManager);
+        mResultAdapter.setGridLayout(getContext(), false);
+    }
+
+    public void setGridLayout() {
+        hideSearchBar();
+        RecyclerView.LayoutManager layoutManager;
+        layoutManager = new GridLayoutManager(mResultList.getContext(), 4, RecyclerView.VERTICAL, false);
+        mResultList.setLayoutManager(layoutManager);
+        mResultAdapter.setGridLayout(getContext(), true);
+    }
+
+    public boolean isGridLayout() {
+        return mResultList.getLayoutManager() instanceof GridLayoutManager;
+    }
+
     /**
      * Handle the back button press. Returns true if action handled.
      *
@@ -1536,9 +1555,5 @@ public class Behaviour implements ISearchActivity {
 
     public boolean onDoubleClick() {
         return executeGestureAction("gesture-double-click");
-    }
-
-    public void showUntagged() {
-        executeAction("showUntagged", null);
     }
 }

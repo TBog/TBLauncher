@@ -9,8 +9,10 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
+import rocks.tbog.tblauncher.Behaviour;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
+import rocks.tbog.tblauncher.drawable.LoadingDrawable;
 import rocks.tbog.tblauncher.entry.ActionEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.handler.DataHandler;
@@ -21,12 +23,32 @@ import rocks.tbog.tblauncher.utils.DebugInfo;
 
 public class ActionProvider extends DBProvider<ActionEntry> {
 
-    private static final ActionEntry[] s_entries = new ActionEntry[15];
+    private static final ActionEntry[] s_entries = new ActionEntry[17];
     @StringRes
-    private static final int[] s_names = new int[15];
+    private static final int[] s_names = new int[17];
 
     static {
         int cnt = 0;
+        {
+            String id = ActionEntry.SCHEME + "toggle/grid";
+            ActionEntry actionEntry = new ActionEntry(id, new LoadingDrawable());
+            actionEntry.setAction((v, flags) -> {
+                Context ctx = v.getContext();
+                Behaviour behaviour = TBApplication.behaviour(ctx);
+
+                // toggle grid/list layout
+                if (behaviour.isGridLayout())
+                    behaviour.setListLayout();
+                else
+                    behaviour.setGridLayout();
+
+                // show app list
+//                Provider<? extends EntryItem> provider = TBApplication.dataHandler(ctx).getAppProvider();
+//                TBApplication.quickList(ctx).toggleProvider(v, provider, EntryItem.NAME_COMPARATOR);
+            });
+            s_names[cnt] = R.string.action_show_grid;
+            s_entries[cnt++] = actionEntry;
+        }
         {
             String id = ActionEntry.SCHEME + "show/apps/byName";
             ActionEntry actionEntry = new ActionEntry(id, R.drawable.ic_apps_az);
@@ -199,6 +221,17 @@ public class ActionProvider extends DBProvider<ActionEntry> {
             s_names[cnt] = R.string.show_tags_list_reversed;
             s_entries[cnt++] = actionEntry;
         }
+        {
+            String id = ActionEntry.SCHEME + "reload/providers";
+            ActionEntry actionEntry = new ActionEntry(id, R.drawable.ic_loading_arrows);
+            actionEntry.setAction((v, flags) -> {
+                Context ctx = v.getContext();
+                TBApplication.dataHandler(ctx).reloadProviders();
+            });
+            s_names[cnt] = R.string.action_reload;
+            s_entries[cnt++] = actionEntry;
+        }
+
         //noinspection ConstantConditions
         if (cnt != s_entries.length || cnt != s_names.length)
             throw new IllegalStateException("ActionEntry static list size");
