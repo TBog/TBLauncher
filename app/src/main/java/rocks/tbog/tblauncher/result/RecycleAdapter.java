@@ -10,7 +10,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Filter;
 
-import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.preference.PreferenceManager;
@@ -36,17 +35,19 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
     @Nullable
     private ArrayList<EntryItem> resultsOriginal = null;
 
+    private int mDrawFlags;
+
     private Filter mFilter = new RecycleAdapter.FilterById();
 
-    public RecycleAdapter(@NonNull ArrayList<EntryItem> results) {
+    public RecycleAdapter(@NonNull Context context, @NonNull ArrayList<EntryItem> results) {
         this.results = results;
         setHasStableIds(true);
+        setGridLayout(context, false);
     }
 
     @Override
     public int getItemViewType(int position) {
-        //TODO: cache a Pair<itemType, layoutRes> to be used in `onCreateViewHolder`
-        return ResultHelper.getItemViewType(results.get(position));
+        return ResultHelper.getItemViewType(results.get(position), mDrawFlags);
     }
 
     @Override
@@ -57,38 +58,31 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
     @NonNull
     @Override
     public Holder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        Context context = parent.getContext();
+        final Context context = parent.getContext();
+        final int layoutRes = ResultHelper.getItemViewLayout(viewType);
 
+        LayoutInflater inflater = LayoutInflater.from(context);
+        View itemView = inflater.inflate(layoutRes, parent, false);
+
+        return new Holder(itemView, mDrawFlags);
+    }
+
+    public void setGridLayout(@NonNull Context context, boolean bGridLayout) {
+        clear();
+        mDrawFlags = getDrawFlags(context);
+        mDrawFlags |= bGridLayout ? EntryItem.FLAG_DRAW_GRID : EntryItem.FLAG_DRAW_LIST;
+    }
+
+    private int getDrawFlags(@NonNull Context context) {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-        int drawFlags = EntryItem.FLAG_DRAW_NAME | EntryItem.FLAG_DRAW_LIST;
+        int drawFlags = EntryItem.FLAG_DRAW_NAME;
         if (prefs.getBoolean("tags-enabled", true))
             drawFlags |= EntryItem.FLAG_DRAW_TAGS;
         if (prefs.getBoolean("icons-visible", true))
             drawFlags |= EntryItem.FLAG_DRAW_ICON;
         if (prefs.getBoolean("shortcut-show-badge", true))
             drawFlags |= EntryItem.FLAG_DRAW_ICON_BADGE;
-
-        // TODO: use a cache for the layout res
-        @LayoutRes
-        int layoutRes = 0;
-        for (EntryItem result : results) {
-            if (ResultHelper.getItemViewType(result) == viewType) {
-                layoutRes = result.getResultLayout(drawFlags);
-                break;
-            }
-        }
-
-        LayoutInflater inflater = LayoutInflater.from(context);
-        View itemView = inflater.inflate(layoutRes, parent, false);
-
-        {
-            // TODO: move selector background setup outside of adapter
-            int touchColor = UIColors.getResultListRipple(itemView.getContext());
-            Drawable selectorBackground = CustomizeUI.getSelectorDrawable(itemView, touchColor, false);
-            itemView.setBackground(selectorBackground);
-        }
-
-        return new Holder(itemView, drawFlags);
+        return drawFlags;
     }
 
     @Override
@@ -188,6 +182,11 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
             super(itemView);
             itemView.setTag(this);
             mDrawFlags = drawFlags;
+
+            // we set background selector here to do it only once
+            int touchColor = UIColors.getResultListRipple(itemView.getContext());
+            Drawable selectorBackground = CustomizeUI.getSelectorDrawable(itemView, touchColor, false);
+            itemView.setBackground(selectorBackground);
         }
 
         public void setOnClickListener(@Nullable View.OnClickListener listener) {

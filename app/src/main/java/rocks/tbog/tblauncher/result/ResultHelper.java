@@ -12,14 +12,16 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
+import androidx.collection.ArraySet;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 import rocks.tbog.tblauncher.Behaviour;
-import rocks.tbog.tblauncher.BuildConfig;
 import rocks.tbog.tblauncher.Permission;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
@@ -28,7 +30,6 @@ import rocks.tbog.tblauncher.db.DBHelper;
 import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.entry.ContactEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
-import rocks.tbog.tblauncher.entry.FilterEntry;
 import rocks.tbog.tblauncher.entry.SearchEntry;
 import rocks.tbog.tblauncher.entry.ShortcutEntry;
 import rocks.tbog.tblauncher.entry.StaticEntry;
@@ -37,6 +38,54 @@ import rocks.tbog.tblauncher.utils.MimeTypeUtils;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public class ResultHelper {
+
+    static final class ViewTypeKey {
+        @NonNull
+        final Class<? extends EntryItem> aClass;
+        final int drawFlags;
+
+        ViewTypeKey(@NonNull Class<? extends EntryItem> aClass, int drawFlags) {
+            this.aClass = aClass;
+            this.drawFlags = drawFlags;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o)
+                return true;
+            if (o == null || getClass() != o.getClass())
+                return false;
+            ViewTypeKey that = (ViewTypeKey) o;
+            return drawFlags == that.drawFlags && aClass.equals(that.aClass);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(aClass, drawFlags);
+        }
+    }
+
+    /**
+     * Use index as view type
+     * Value is the layout id
+     */
+    @NonNull
+    static final private ArraySet<Integer> sEntryViewType = new ArraySet<>(8);
+
+    static {
+        addViewTypes(AppEntry.getResultLayout());
+        addViewTypes(ContactEntry.getResultLayout());
+        addViewTypes(StaticEntry.getResultLayout());
+        addViewTypes(ShortcutEntry.getResultLayout());
+        addViewTypes(SearchEntry.getResultLayout());
+        Log.i("log", "result view type count=" + sEntryViewType.size());
+    }
+
+    private static void addViewTypes(int[] viewTypes) {
+        for (int viewType : viewTypes)
+            sEntryViewType.add(viewType);
+    }
+
     private ResultHelper() {
         // this is a static class
     }
@@ -231,24 +280,40 @@ public class ResultHelper {
     }
 
     public static int getItemViewTypeCount() {
-        return 7;
+        return sEntryViewType.size();
     }
 
-    public static int getItemViewType(EntryItem item) {
-        if (item instanceof AppEntry)
-            return 1;
-        if (item instanceof ContactEntry)
-            return 2;
-        if (item instanceof FilterEntry)
-            return 3;
-        if (item instanceof ShortcutEntry)
-            return 4;
-        if (item instanceof StaticEntry)
-            return 5;
-        if (item instanceof SearchEntry)
-            return 6;
-        if (BuildConfig.DEBUG)
-            throw new IllegalStateException("view type not set for adapter");
-        return 0;
+    @LayoutRes
+    public static int getItemViewLayout(int viewType) {
+        if (viewType < 0 || viewType >= sEntryViewType.size())
+            throw new IllegalStateException("view type " + viewType + " out of range");
+        Integer layout = sEntryViewType.valueAt(viewType);
+        if (layout == null || layout == 0)
+            throw new IllegalStateException("view type " + viewType + " has invalid layout");
+        return layout;
+    }
+
+    public static int getItemViewType(EntryItem item, int drawFlags) {
+        int layout = item.getResultLayout(drawFlags);
+        int viewType = sEntryViewType.indexOf(layout);
+        if (viewType < 0)
+            throw new IllegalStateException("no view type for " + item.getClass().getName() + " drawFlags=" + drawFlags);
+        return viewType;
+
+//        if (item instanceof AppEntry)
+//            return 1;
+//        if (item instanceof ContactEntry)
+//            return 2;
+//        if (item instanceof FilterEntry)
+//            return 3;
+//        if (item instanceof ShortcutEntry)
+//            return 4;
+//        if (item instanceof StaticEntry)
+//            return 5;
+//        if (item instanceof SearchEntry)
+//            return 6;
+//        if (BuildConfig.DEBUG)
+//            throw new IllegalStateException("view type not set for adapter");
+//        return 0;
     }
 }

@@ -16,6 +16,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 
 import rocks.tbog.tblauncher.R;
+import rocks.tbog.tblauncher.result.ResultHelper;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.Utilities;
@@ -35,13 +36,6 @@ public final class UrlEntry extends SearchEntry {
     public String getHistoryId() {
         // Search POJO should not appear in history
         return "";
-    }
-
-    @Override
-    public int getResultLayout(int drawFlags) {
-        return Utilities.checkFlag(drawFlags, FLAG_DRAW_LIST) ? R.layout.item_builtin :
-                (Utilities.checkFlag(drawFlags, FLAG_DRAW_GRID) ? R.layout.item_grid :
-                        R.layout.item_quick_list);
     }
 
     @Override

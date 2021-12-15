@@ -200,7 +200,7 @@ public class Behaviour implements ISearchActivity {
         layoutManager = new CustomRecycleLayoutManager();
         recycleScrollListener = new RecycleScrollListener(mKeyboardHandler);
 
-        mResultAdapter = new RecycleAdapter(new ArrayList<>());
+        mResultAdapter = new RecycleAdapter(getContext(), new ArrayList<>());
 
         mResultList.setHasFixedSize(true);
         mResultList.setLayoutManager(layoutManager);

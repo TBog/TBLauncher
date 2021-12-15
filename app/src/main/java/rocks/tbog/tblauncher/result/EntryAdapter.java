@@ -39,7 +39,7 @@ public class EntryAdapter extends BaseAdapter {
 
     @Override
     public int getItemViewType(int position) {
-        return ResultHelper.getItemViewType(mItems.get(position));
+        return ResultHelper.getItemViewType(mItems.get(position), mDrawFlags);
     }
 
     @Override

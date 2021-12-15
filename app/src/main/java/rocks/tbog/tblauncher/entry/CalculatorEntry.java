@@ -32,13 +32,6 @@ public final class CalculatorEntry extends SearchEntry {
     }
 
     @Override
-    public int getResultLayout(int drawFlags) {
-        return Utilities.checkFlag(drawFlags, FLAG_DRAW_LIST) ? R.layout.item_builtin :
-                (Utilities.checkFlag(drawFlags, FLAG_DRAW_GRID) ? R.layout.item_grid :
-                        R.layout.item_quick_list);
-    }
-
-    @Override
     public void displayResult(@NonNull View view, int drawFlags) {
         Context context = view.getContext();
         TextView nameView = view.findViewById(android.R.id.text1);

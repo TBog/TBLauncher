@@ -31,10 +31,10 @@ import java.net.URISyntaxException;
 import java.util.List;
 import java.util.Locale;
 
-import rocks.tbog.tblauncher.handler.IconsHandler;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.db.ShortcutRecord;
+import rocks.tbog.tblauncher.handler.IconsHandler;
 import rocks.tbog.tblauncher.preference.ContentLoadHelper;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
@@ -127,12 +127,17 @@ public final class ShortcutEntry extends EntryWithTags {
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Result methods
     ///////////////////////////////////////////////////////////////////////////////////////////////
+    private static final int[] RESULT_LAYOUT = {R.layout.item_shortcut, R.layout.item_grid_shortcut, R.layout.item_quick_list_shortcut};
+
+    public static int[] getResultLayout() {
+        return RESULT_LAYOUT;
+    }
 
     @Override
     public int getResultLayout(int drawFlags) {
-        return Utilities.checkFlag(drawFlags, FLAG_DRAW_LIST) ? R.layout.item_shortcut :
-                (Utilities.checkFlag(drawFlags, FLAG_DRAW_GRID) ? R.layout.item_grid_shortcut :
-                        R.layout.item_quick_list_shortcut);
+        return Utilities.checkFlag(drawFlags, FLAG_DRAW_LIST) ? RESULT_LAYOUT[0] :
+            (Utilities.checkFlag(drawFlags, FLAG_DRAW_GRID) ? RESULT_LAYOUT[1] :
+                RESULT_LAYOUT[2]);
     }
 
     @Override

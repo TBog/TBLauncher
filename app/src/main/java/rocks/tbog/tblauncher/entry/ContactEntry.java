@@ -139,12 +139,17 @@ public final class ContactEntry extends EntryItem {
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Result methods
     ///////////////////////////////////////////////////////////////////////////////////////////////
+    private static final int[] RESULT_LAYOUT = {R.layout.item_contact, R.layout.item_grid, R.layout.item_quick_list};
+
+    public static int[] getResultLayout() {
+        return RESULT_LAYOUT;
+    }
 
     @Override
     public int getResultLayout(int drawFlags) {
-        return Utilities.checkFlag(drawFlags, FLAG_DRAW_LIST) ? R.layout.item_contact :
-            (Utilities.checkFlag(drawFlags, FLAG_DRAW_GRID) ? R.layout.item_grid :
-                R.layout.item_quick_list);
+        return Utilities.checkFlag(drawFlags, FLAG_DRAW_LIST) ? RESULT_LAYOUT[0] :
+            (Utilities.checkFlag(drawFlags, FLAG_DRAW_GRID) ? RESULT_LAYOUT[1] :
+                RESULT_LAYOUT[2]);
     }
 
     @Override
