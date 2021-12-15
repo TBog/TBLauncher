@@ -68,9 +68,13 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
     }
 
     public void setGridLayout(@NonNull Context context, boolean bGridLayout) {
-        clear();
+        final int oldFlags = mDrawFlags;
+        // get new flags
         mDrawFlags = getDrawFlags(context);
         mDrawFlags |= bGridLayout ? EntryItem.FLAG_DRAW_GRID : EntryItem.FLAG_DRAW_LIST;
+        // refresh items if flags changed
+        if (oldFlags != mDrawFlags)
+            refresh();
     }
 
     private int getDrawFlags(@NonNull Context context) {
@@ -98,7 +102,7 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
         holder.setOnClickListener(view -> onClick(result, view));
         holder.setOnLongClickListener(view -> onLongClick(result, view));
 
-        results.get(position).displayResult(holder.itemView, holder.mDrawFlags);
+        results.get(position).displayResult(holder.itemView, mDrawFlags);
     }
 
     @Override
@@ -146,6 +150,11 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
         notifyItemRangeRemoved(0, itemCount);
     }
 
+    public void refresh() {
+        final int itemCount = results.size();
+        notifyItemRangeChanged(0, itemCount);
+    }
+
     @SuppressLint("NotifyDataSetChanged")
     public void updateResults(Collection<? extends EntryItem> results) {
         resultsOriginal = null;
@@ -176,12 +185,10 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
     }
 
     public static class Holder extends RecyclerView.ViewHolder {
-        private final int mDrawFlags;
 
         public Holder(@NonNull View itemView, int drawFlags) {
             super(itemView);
             itemView.setTag(this);
-            mDrawFlags = drawFlags;
 
             // we set background selector here to do it only once
             int touchColor = UIColors.getResultListRipple(itemView.getContext());

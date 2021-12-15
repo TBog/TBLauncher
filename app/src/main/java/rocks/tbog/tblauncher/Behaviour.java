@@ -897,11 +897,13 @@ public class Behaviour implements ISearchActivity {
     }
 
     public void refreshSearchRecords() {
-        if (mResultList == null || mResultList.getLayoutManager() == null) {
-            Log.e(TAG, "refreshSearchRecords called with null layout manager");
-            return;
+        if (mResultList != null) {
+            mResultList.getRecycledViewPool().clear();
         }
-        mResultList.getLayoutManager().onItemsUpdated(mResultList, 0, mResultAdapter.getItemCount());
+        if (mResultAdapter != null) {
+            mResultAdapter.setGridLayout(getContext(), false);
+            mResultAdapter.refresh();
+        }
     }
 
     public void refreshSearchRecord(EntryItem entry) {
