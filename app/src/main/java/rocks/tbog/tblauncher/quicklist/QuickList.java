@@ -8,6 +8,7 @@ import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.PaintDrawable;
 import android.os.Build;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -38,6 +39,7 @@ import rocks.tbog.tblauncher.entry.FilterEntry;
 import rocks.tbog.tblauncher.entry.PlaceholderEntry;
 import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.entry.TagEntry;
+import rocks.tbog.tblauncher.handler.DataHandler;
 import rocks.tbog.tblauncher.result.ResultHelper;
 import rocks.tbog.tblauncher.searcher.Searcher;
 import rocks.tbog.tblauncher.ui.ListPopup;
@@ -47,9 +49,13 @@ import rocks.tbog.tblauncher.utils.UIColors;
  * Dock
  */
 public class QuickList {
+    private static final String TAG = "Dock";
+    private static final int RETRY_COUNT = 3;
+
     private TBLauncherActivity mTBLauncherActivity;
     private boolean mOnlyForResults = false;
     private boolean mListDirty = true;
+    private int mRetryCountdown;
     private LinearLayout mQuickList;
     private final ArrayList<EntryItem> mQuickListItems = new ArrayList<>(0);
     private SharedPreferences mSharedPreferences = null;
@@ -71,7 +77,14 @@ public class QuickList {
         public void run() {
             if (mListDirty && TBApplication.state().isQuickListVisible()) {
                 QuickList.this.populateList();
-                TBApplication.dataHandler(mQuickList.getContext()).runAfterLoadOver(() -> {
+                DataHandler dataHandler = TBApplication.dataHandler(mQuickList.getContext());
+                if (mListDirty && dataHandler.fullLoadOverSent()) {
+                    if (--mRetryCountdown <= 0) {
+                        Log.w(TAG, "Can't load all entries");
+                        return;
+                    }
+                }
+                dataHandler.runAfterLoadOver(() -> {
                     if (mListDirty)
                         mQuickList.postDelayed(this, 500);
                 });
@@ -87,11 +100,14 @@ public class QuickList {
         mTBLauncherActivity = tbLauncherActivity;
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mTBLauncherActivity);
         mQuickList = mTBLauncherActivity.findViewById(R.id.quickList);
+
+        mRetryCountdown = RETRY_COUNT;
         mListDirty = true;
         runCleanList.run();
     }
 
     public void reload() {
+        mRetryCountdown = RETRY_COUNT;
         mListDirty = true;
         if (mQuickList == null)
             return;
