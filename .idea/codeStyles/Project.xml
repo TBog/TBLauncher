@@ -3,7 +3,8 @@
     <codeStyleSettings language="JAVA">
       <option name="KEEP_CONTROL_STATEMENT_IN_ONE_LINE" value="false" />
       <indentOptions>
-        <option name="CONTINUATION_INDENT_SIZE" value="4" />
+        <option name="CONTINUATION_INDENT_SIZE" value="0" />
+        <option name="USE_RELATIVE_INDENTS" value="true" />
       </indentOptions>
     </codeStyleSettings>
     <codeStyleSettings language="XML">
