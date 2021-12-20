@@ -37,7 +37,6 @@ import androidx.appcompat.app.ActionBar;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.fragment.app.FragmentActivity;
 import androidx.preference.PreferenceManager;
-import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.lang.reflect.Constructor;
@@ -900,7 +899,7 @@ public class Behaviour implements ISearchActivity {
             mResultList.getRecycledViewPool().clear();
         }
         if (mResultAdapter != null) {
-            mResultAdapter.setGridLayout(getContext(), false);
+            mResultAdapter.setGridLayout(getContext(), isGridLayout());
             mResultAdapter.refresh();
         }
     }
@@ -1023,23 +1022,34 @@ public class Behaviour implements ISearchActivity {
     }
 
     public void setListLayout() {
-        showSearchBar();
-        RecyclerView.LayoutManager layoutManager;
-        layoutManager = new CustomRecycleLayoutManager();
-        mResultList.setLayoutManager(layoutManager);
+//        showSearchBar();
+
+        RecyclerView.LayoutManager layoutManager = mResultList.getLayoutManager();
+        if (layoutManager == null)
+            mResultList.setLayoutManager(layoutManager = new CustomRecycleLayoutManager());
+        if (layoutManager instanceof CustomRecycleLayoutManager)
+            ((CustomRecycleLayoutManager) layoutManager).setColumns(1, false);
+
         mResultAdapter.setGridLayout(getContext(), false);
     }
 
     public void setGridLayout() {
-        hideSearchBar();
-        RecyclerView.LayoutManager layoutManager;
-        layoutManager = new GridLayoutManager(mResultList.getContext(), 4, RecyclerView.VERTICAL, false);
-        mResultList.setLayoutManager(layoutManager);
+//        hideSearchBar();
+
+        RecyclerView.LayoutManager layoutManager = mResultList.getLayoutManager();
+        if (layoutManager == null)
+            mResultList.setLayoutManager(layoutManager = new CustomRecycleLayoutManager());
+        if (layoutManager instanceof CustomRecycleLayoutManager)
+            ((CustomRecycleLayoutManager) layoutManager).setColumns(3, false);
+
         mResultAdapter.setGridLayout(getContext(), true);
     }
 
     public boolean isGridLayout() {
-        return mResultList.getLayoutManager() instanceof GridLayoutManager;
+        RecyclerView.LayoutManager layoutManager = mResultList.getLayoutManager();
+        if (layoutManager instanceof CustomRecycleLayoutManager)
+            return ((CustomRecycleLayoutManager) layoutManager).getColumnCount() > 1;
+        return false;
     }
 
     /**
