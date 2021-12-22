@@ -11,6 +11,9 @@ import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import rocks.tbog.tblauncher.BuildConfig;
 import rocks.tbog.tblauncher.R;
 
@@ -26,11 +29,12 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
     /* Number of visible adapter items. It is computed when the size changes but may also increase when layout occurs */
     private int mVisibleCount;
     /* Consistent size applied to all child views */
-    private int mDecoratedChildWidth;
-    private int mDecoratedChildHeight;
+    private int mDecoratedChildWidth = 0;
+
+    private final ArrayList<RowInfo> mRowInfo = new ArrayList<>(0);
 
     /* Used for starting the layout from the bottom. If true the first item is places at the bottom */
-    private boolean mFirstAtBottom;
+    private boolean mBottomToTop;
     /* Used for starting the layout from the right. If true the first item of each row is places at the right */
     private boolean mRightToLeft;
     /* Used for reversing adapter order */
@@ -45,23 +49,31 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
     // Reusable array. This should only be used used transiently and should not be used to retain any state over time.
     private SparseArray<View> mViewCache = null;
 
+    private static class RowInfo {
+        /**
+         * sum of all row heights up to this row
+         */
+        int pos = 0;
+        int height = 0;
+    }
+
     public CustomRecycleLayoutManager() {
         this(true, false, false);
     }
 
     public CustomRecycleLayoutManager(boolean firstAtBottom, boolean rightToLeft, boolean reverseAdapter) {
         super();
-        mFirstAtBottom = firstAtBottom;
+        mBottomToTop = firstAtBottom;
         mRightToLeft = rightToLeft;
         mReverseAdapter = reverseAdapter;
     }
 
     public void setFirstAtBottom(boolean firstAtBottom) {
         assertNotInLayoutOrScroll(null);
-        if (mFirstAtBottom == firstAtBottom) {
+        if (mBottomToTop == firstAtBottom) {
             return;
         }
-        mFirstAtBottom = firstAtBottom;
+        mBottomToTop = firstAtBottom;
         requestLayout();
     }
 
@@ -99,6 +111,13 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
         assertNotInLayoutOrScroll(null);
         mColCount = columnCount <= 0 ? 1 : columnCount;
         mAutoColumn = autoFill;
+
+        // make sure we are using recycled views
+        mRefreshViews = true;
+
+        // reset expected child size
+        mRowInfo.clear();
+
         requestLayout();
     }
 
@@ -117,16 +136,48 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
 
     @Override
     public int computeVerticalScrollOffset(@NonNull RecyclerView.State state) {
-        if (getChildCount() <= 1)
+        if (getChildCount() <= 1 || mRowInfo.isEmpty())
             return 0;
-        View view = findBottomVisibleItemView();
-        int aboveCount = Math.abs(topAdapterItemIdx() - adapterPosition(view));
-        return getPaddingTop() - view.getBottom() + (aboveCount + 1) / mColCount * mDecoratedChildHeight;
+
+        int offset;
+        View child = getChildAt(0);
+        if (child != null) {
+            offset = getDecoratedTop(child) - getRowPosition(getRowIdx(adapterPosition(child)));
+            offset -= getPaddingTop();
+            if (mBottomToTop) {
+                // invert scroll direction
+                offset = -mRowInfo.get(mRowInfo.size() - 1).pos - offset - getVerticalSpace();
+            }
+        } else {
+            final View view = findBottomVisibleItemView();
+            final int topRow = getRowIdx(topAdapterItemIdx());
+            final int bottomRow = getRowIdx(adapterPosition(view));
+
+            final int topRowPos = mRowInfo.get(topRow).pos;
+            final int bottomRowPos = mRowInfo.get(bottomRow).pos;
+
+            int topRowsHeight = bottomRowPos - topRowPos;
+            topRowsHeight += getRowHeight(bottomRow);
+
+            offset = getPaddingTop() - getDecoratedBottom(view) + topRowsHeight;
+        }
+
+        return offset;
     }
 
     @Override
     public int computeVerticalScrollRange(@NonNull RecyclerView.State state) {
-        return state.getItemCount() / mColCount * mDecoratedChildHeight;
+        int scrollRange = 0;
+        if (!mRowInfo.isEmpty()) {
+            if (mBottomToTop) {
+                scrollRange = -mRowInfo.get(mRowInfo.size() - 1).pos;
+            } else {
+                RowInfo rowInfo = mRowInfo.get(mRowInfo.size() - 1);
+                scrollRange = rowInfo.pos + rowInfo.height;
+            }
+        }
+
+        return scrollRange;
     }
 
 
@@ -154,6 +205,7 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
     public void onItemsRemoved(@NonNull RecyclerView recyclerView, int positionStart, int itemCount) {
         logDebug("onItemsRemoved start=" + positionStart + " count=" + itemCount);
         mRefreshViews = true;
+        mRowInfo.clear();
     }
 
     /**
@@ -168,12 +220,13 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
         mRefreshViews = true;
         if (mFirstVisiblePosition > getItemCount()) {
             int oldValue = mFirstVisiblePosition;
-            int newValue = mFirstAtBottom ? bottomAdapterItemIdx() : topAdapterItemIdx();
+            int newValue = mBottomToTop ? bottomAdapterItemIdx() : topAdapterItemIdx();
             logDebug("onItemsChanged mFirstVisiblePosition changed from " + oldValue + " to " + newValue);
             mFirstVisiblePosition = newValue;
         } else {
             logDebug("onItemsChanged");
         }
+        mRowInfo.clear();
     }
 
     @Override
@@ -186,6 +239,7 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
     public void onAdapterChanged(@Nullable RecyclerView.Adapter oldAdapter, @Nullable RecyclerView.Adapter newAdapter) {
         logDebug("onAdapterChanged");
         mRefreshViews = true;
+        mRowInfo.clear();
     }
 
     @Override
@@ -238,27 +292,47 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
             return;
         }
 
-        if (getChildCount() == 0) { //First or empty layout
-            mFirstVisiblePosition = mFirstAtBottom ? bottomAdapterItemIdx() : topAdapterItemIdx();
-
-            //Scrap measure one child
-            View scrap = recycler.getViewForPosition(mFirstVisiblePosition);
-            addView(scrap);
-            measureChildWithMargins(scrap, 0, 0);
-
-            /*
-             * We make some assumptions in this code based on every child
-             * view being the same size (i.e. a uniform grid). This allows
-             * us to compute the following values up front because they
-             * won't change.
-             */
-            mDecoratedChildWidth = getDecoratedMeasuredWidth(scrap);
-            mDecoratedChildHeight = getDecoratedMeasuredHeight(scrap);
-
-            detachAndScrapView(scrap, recycler);
+        if (getChildCount() == 0) {
+            // First or empty layout
+            mFirstVisiblePosition = mBottomToTop ? bottomAdapterItemIdx() : topAdapterItemIdx();
         }
 
-        //Always update the visible row/column counts
+        if (getChildCount() == 0 || mRowInfo.isEmpty()) {
+            final int decoratedChildHeight;
+            if (getChildCount() == 0) {
+                // Scrap measure one child
+                View scrap = recycler.getViewForPosition(mFirstVisiblePosition);
+                addView(scrap);
+                measureChildWithMargins(scrap, 0, 0);
+                mDecoratedChildWidth = getDecoratedMeasuredWidth(scrap);
+                decoratedChildHeight = getDecoratedMeasuredHeight(scrap);
+
+                detachAndScrapView(scrap, recycler);
+            } else {
+                View child = getChildAt(0);
+                if (child == null)
+                    throw new IllegalStateException("null child at idx 0 when childCount=" + getChildCount());
+
+                mDecoratedChildWidth = getDecoratedMeasuredWidth(child);
+                decoratedChildHeight = getDecoratedMeasuredHeight(child);
+            }
+
+            final int itemCount = getItemCount();
+            int rowCount = itemCount / mColCount + (itemCount % mColCount == 0 ? 0 : 1);
+            mRowInfo.clear();
+            mRowInfo.ensureCapacity(rowCount);
+            for (int rowIdx = 0; rowIdx < rowCount; rowIdx++) {
+                RowInfo rowInfo = new RowInfo();
+                rowInfo.height = decoratedChildHeight;
+                if (mBottomToTop)
+                    rowInfo.pos = -decoratedChildHeight * (rowIdx + 1);
+                else
+                    rowInfo.pos = decoratedChildHeight * rowIdx;
+                mRowInfo.add(rowInfo);
+            }
+        }
+
+        // Always update the visible row/column counts
         updateSizing();
 
         logDebug("onLayoutChildren" +
@@ -267,7 +341,6 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
                  " columns=" + mColCount +
                  " visible rows=" + getVisibleRows() +
                  " mDecoratedChildWidth=" + mDecoratedChildWidth +
-                 " mDecoratedChildHeight=" + mDecoratedChildHeight +
                  (state.isPreLayout() ? " preLayout" : "") +
                  (state.didStructureChange() ? " structureChanged" : "") +
                  " stateItemCount=" + state.getItemCount());
@@ -278,18 +351,18 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
     @Override
     public void onLayoutCompleted(RecyclerView.State state) {
         super.onLayoutCompleted(state);
-        //mPendingSavedState = null; // we don't need this anymore
 
         if (getChildCount() > 0) {
             // check if this was a resize that requires a forced scroll
-            if (mFirstAtBottom && mAutoScrollBottom) {
+            if (mBottomToTop && mAutoScrollBottom) {
                 View bottomView = getBottomView();
-                int bottomDelta = getPaddingTop() + getVerticalSpace() - bottomView.getBottom();
+                int childHeight = getDecoratedMeasuredHeight(bottomView);
+                int bottomDelta = getPaddingTop() + getVerticalSpace() - getDecoratedBottom(bottomView);
                 if (bottomDelta > 0) {
                     // the last view is too high
                     offsetChildrenVertical(bottomDelta);
                     logDebug("(1) auto-scroll (" + getDebugName(bottomView) + ") bottom amount=" + bottomDelta);
-                } else if (bottomDelta > (-mDecoratedChildHeight * 3 / 5) && bottomAdapterItemIdx() == mFirstVisiblePosition) {
+                } else if (bottomDelta > (-childHeight * 3 / 5) && bottomAdapterItemIdx() == mFirstVisiblePosition) {
                     // the first visible item (at the bottom) is hidden by a small amount, scroll it into view smoothly
                     //TODO: detect if this occurred because of a user scroll so we can skip this if so
                     logDebug("(2) smooth auto-scroll (" + getDebugName(bottomView) + ") bottom amount=" + bottomDelta);
@@ -308,38 +381,156 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
         }
     }
 
-    private void layoutChildren(RecyclerView.Recycler recycler) {
-        // find start offset
-        int posX = getPaddingLeft() + (mRightToLeft ? (getHorizontalSpace() - mDecoratedChildWidth) : 0);
-        int posY = getPaddingTop() + (mFirstAtBottom ? (getVerticalSpace() - mDecoratedChildHeight) : 0);
-
-        layoutChildren(recycler, posX, posY);
+    /**
+     * Compute scroll offset based on mViewCache
+     *
+     * @return difference between child top position and initial layout position
+     */
+    private int findScrollOffset() {
+        if (mViewCache.size() > 0) {
+            int adapterPos = mViewCache.keyAt(0);
+            int rowIdx = getRowIdx(adapterPos);
+            int rowPosition = getRowPosition(rowIdx);
+            View child = mViewCache.valueAt(0);
+            return getDecoratedTop(child) - rowPosition;
+        }
+        return 0;
     }
 
-    /**
-     * Compute y position for first visible child based on mViewCache
-     *
-     * @return top value for first visible
-     */
-    private int smartGetFirstVisibleTop() {
-        if (mViewCache.size() > 0) {
-            int missing = 0;
-            for (int i = 0; i < mVisibleCount; i += mColCount) {
-                int adapterPos = adapterPosition(i);
-                View child = mViewCache.get(adapterPos);
-                if (child == null) {
-                    missing += 1;
-                } else {
-                    return child.getTop() - (mFirstAtBottom ? -mDecoratedChildHeight : mDecoratedChildHeight) * missing;
+    private class LayoutRowHelper {
+        public final RecyclerView.Recycler recycler;
+        @NonNull
+        public final View[] viewRow;
+        public int layoutHeight;
+        public int mTop;
+        public int mBottom;
+        public int nextLeftPosDelta;
+
+        private LayoutRowHelper(RecyclerView.Recycler recycler, int columnCount) {
+            this.recycler = recycler;
+            viewRow = new View[columnCount];
+        }
+
+        public void setPositionIncrement(int nextLeft) {
+            nextLeftPosDelta = nextLeft;
+        }
+
+        public boolean layoutRow(int childIdx, int posX, int posY) {
+            boolean inCache = true;
+            int count = viewRow.length;
+            layoutHeight = 0;
+            mTop = Integer.MAX_VALUE;
+            mBottom = Integer.MIN_VALUE;
+
+            for (int i = 0; i < count; i += 1) {
+                final int leftPos = posX + nextLeftPosDelta * i;
+                final int adapterPos = adapterPosition(childIdx + i);
+
+                inCache = inCache && mViewCache.indexOfKey(adapterPos) >= 0;
+                View child = layoutView(adapterPos, leftPos, posY);
+
+                // child may be null if row is incomplete
+                viewRow[i] = child;
+                if (child == null)
+                    continue;
+
+                mTop = Math.min(mTop, getDecoratedTop(child));
+                mBottom = Math.max(mBottom, getDecoratedBottom(child));
+
+                // update row height
+                int measuredHeight = getDecoratedMeasuredHeight(child);
+                layoutHeight = Math.max(layoutHeight, measuredHeight);
+            }
+
+            // make all views in this row the same height
+            for (View child : viewRow) {
+                if (child != null) {
+                    // set bottom; we expect the top to not change
+                    child.setBottom(mBottom - getBottomDecorationHeight(child));
                 }
             }
+
+            return inCache;
         }
-        return getPaddingTop() + (mFirstAtBottom ? (getVerticalSpace() - mDecoratedChildHeight) : 0);
+
+        @Nullable
+        private View layoutView(int adapterPos, int leftPos, int topPos) {
+            if (adapterPos < 0 || adapterPos >= getItemCount())
+                return null;
+            return layoutAdapterPos(recycler, adapterPos, leftPos, topPos);
+        }
+
+        public void offsetVertical(int offsetY) {
+            for (View child : viewRow) {
+                if (child == null)
+                    continue;
+                child.offsetTopAndBottom(offsetY);
+
+                int childIdx = indexOfChild(child);
+                int position = adapterPosition(child);
+                logDebug("move #" + childIdx + " pos=" + position +
+                         " (" + child.getLeft() + " " + child.getTop() + " " + child.getRight() + " " + child.getBottom() + ")" +
+                         " " + getDebugInfo(child) + " " + getDebugName(child));
+            }
+            mTop += offsetY;
+            mBottom += offsetY;
+        }
+
+        public void initRow() {
+            Arrays.fill(viewRow, null);
+        }
+
+        public int getTop() {
+            return mTop;
+        }
+
+        public int getBottom() {
+            return mBottom;
+        }
     }
 
-    private void layoutChildren(RecyclerView.Recycler recycler, final int posX, final int posY) {
-        logDebug("layoutChildren mFirstVisiblePosition=" + mFirstVisiblePosition + " startX=" + posX + " startY=" + posY);
-        View child;
+    private int getRowPosition(int rowIdx) {
+        if (rowIdx < 0 || rowIdx >= mRowInfo.size()) {
+            Log.e(TAG, "getRowPosition(" + rowIdx + "); rowInfo.size=" + mRowInfo.size());
+            return 0;
+        }
+
+        int pos = getPaddingTop();
+        if (mBottomToTop)
+            pos += getVerticalSpace();
+        pos += mRowInfo.get(rowIdx).pos;
+        return pos;
+    }
+
+    private int getRowHeight(int rowIdx) {
+        if (rowIdx < 0 || rowIdx >= mRowInfo.size()) {
+            Log.e(TAG, "getRowHeight(" + rowIdx + "); rowInfo.size=" + mRowInfo.size());
+            return 0;
+        }
+        return mRowInfo.get(rowIdx).height;
+    }
+
+    private void updateRowHeight(int rowIdx, int newHeight) {
+        if (rowIdx < 0 || rowIdx >= mRowInfo.size()) {
+            Log.e(TAG, "getRowHeight(" + rowIdx + "); rowInfo.size=" + mRowInfo.size());
+            return;
+        }
+        RowInfo rowInfo = mRowInfo.get(rowIdx);
+        if (mBottomToTop)
+            rowInfo.pos -= newHeight - rowInfo.height;
+        rowInfo.height = newHeight;
+        for (int row = rowIdx + 1, rowCount = mRowInfo.size(); row < rowCount; row += 1) {
+            RowInfo rowIt = mRowInfo.get(row);
+            if (mBottomToTop)
+                rowIt.pos = rowInfo.pos - rowIt.height;
+            else
+                rowIt.pos = rowInfo.pos + rowInfo.height;
+
+            rowInfo = rowIt;
+        }
+    }
+
+    private void layoutChildren(RecyclerView.Recycler recycler) {
         /*
          * Detach all existing views from the layout.
          * detachView() is a lightweight operation that we can use to
@@ -352,8 +543,14 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
 
         cacheChildren();
 
-        // compute start position after we populate `mViewCache`
-        final int firstTopPos = smartGetFirstVisibleTop();
+        // compute scroll position after we populate `mViewCache`
+        final int scrollOffset = findScrollOffset();
+
+        logDebug("layoutChildren" +
+                 " mFirstVisiblePosition=" + mFirstVisiblePosition +
+                 " scrollOffset=" + scrollOffset +
+                 " paddingTop=" + getPaddingTop() +
+                 " verticalSpace=" + getVerticalSpace());
 
         if (mRefreshViews) {
             logDebug("detachAndScrapAttachedViews");
@@ -365,7 +562,7 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
             logDebug("detachViews");
             // Temporarily detach all views. We do this to easily reorder them.
             for (int i = 0; i < mViewCache.size(); i++) {
-                child = mViewCache.valueAt(i);
+                View child = mViewCache.valueAt(i);
                 // When an update is in order, scrap the view and let the recycler rebind it
                 if (viewNeedsUpdate(child)) {
                     detachAndScrapView(child, recycler);
@@ -376,31 +573,56 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
             }
         }
 
+        final int posX = getPaddingLeft() + (mRightToLeft ? (getHorizontalSpace() - mDecoratedChildWidth) : 0);
         final int nextLeftPosDelta = mRightToLeft ? -mDecoratedChildWidth : mDecoratedChildWidth;
-        final int nextTopPosDelta = mFirstAtBottom ? -mDecoratedChildHeight : mDecoratedChildHeight;
         int childIdx = 0;
+        LayoutRowHelper rowHelper = new LayoutRowHelper(recycler, mColCount);
+        rowHelper.setPositionIncrement(nextLeftPosDelta);
+
+        //TODO: start laying out children from the ones we have in cache;
+        // this way there is less chance of moving already cached children
 
         // layout
         while (childIdx < mVisibleCount) {
+            rowHelper.initRow();
             int adapterPos = adapterPosition(childIdx);
             if (adapterPos < 0 || adapterPos >= getItemCount()) {
                 Log.w(TAG, "! child #" + childIdx + " missing adapter pos=" + adapterPos + " itemCount=" + getItemCount() + " mVisibleCount=" + mVisibleCount);
                 childIdx += 1;
                 continue;
             }
+            int rowIdx = getRowIdx(adapterPos);
+            int rowHeight = getRowHeight(rowIdx);
+            int rowPosition = getRowPosition(rowIdx);
 
-            final int topPos = firstTopPos + childIdx / mColCount * nextTopPosDelta;
-            final int leftPos = posX + childIdx % mColCount * nextLeftPosDelta;
+            logDebug("row #" + rowIdx + " before layout" +
+                     " rowHeight=" + rowHeight +
+                     " rowPosition=" + rowPosition);
 
-            //Layout this position
-            child = layoutAdapterPos(recycler, adapterPos, leftPos, topPos);
+            boolean rowCached = rowHelper.layoutRow(childIdx, posX, scrollOffset + rowPosition);
 
-            childIdx += 1;
-            if (childIdx == mVisibleCount) {
-                boolean needsMoreChildren = mFirstAtBottom ? (child.getTop() > 0) : (child.getBottom() < getHeight());
+            final int heightDelta = rowHeight - rowHelper.layoutHeight;
+            if (heightDelta != 0)
+                updateRowHeight(rowIdx, rowHelper.layoutHeight);
+
+            logDebug("row #" + rowIdx + " after layout" +
+                     " layoutHeight=" + rowHelper.layoutHeight +
+                     " heightDelta=" + heightDelta +
+                     " rowCached=" + rowCached +
+                     " rowPosition=" + getRowPosition(rowIdx));
+
+            if (heightDelta != 0 && mBottomToTop) {
+                rowHelper.offsetVertical(heightDelta);
+            }
+
+            childIdx += mColCount;
+
+            // if this is the last visible row, check if we could show more
+            if (childIdx >= mVisibleCount) {
+                boolean needsMoreChildren = mBottomToTop ? (rowHelper.getTop() > 0) : (rowHelper.getBottom() < getHeight());
                 if (needsMoreChildren) {
                     // force-show more views
-                    mVisibleCount += 1;
+                    mVisibleCount += mColCount;
                 }
             }
         }
@@ -445,20 +667,32 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
              * We don't have to do this for views we are just re-arranging.
              */
             measureChildWithMargins(child, (mColCount - 1) * mDecoratedChildWidth, 0);
-            layoutChildView(child, leftPos, topPos);
-            logDebug("child #" + indexOfChild(child) + " pos=" + adapterPos + " (" + child.getLeft() + " " + child.getTop() + " " + child.getRight() + " " + child.getBottom() + ") " + getDebugInfo(child) + " " + getDebugName(child));
+
+            int decoratedChildHeight = getDecoratedMeasuredHeight(child);
+            layoutChildView(child, leftPos, topPos, mDecoratedChildWidth, decoratedChildHeight);
+
+            logDebug("child #" + indexOfChild(child) + " pos=" + adapterPos +
+                     " (" + child.getLeft() + " " + child.getTop() + " " + child.getRight() + " " + child.getBottom() + ")" +
+                     " " + getDebugInfo(child) + " " + getDebugName(child));
         } else {
             attachView(child);
-            logDebug("cache #" + indexOfChild(child) + " pos=" + adapterPos + " (" + child.getLeft() + " " + child.getTop() + " " + child.getRight() + " " + child.getBottom() + ") top=" + topPos + " " + getDebugInfo(child) + " " + getDebugName(child));
+            logDebug("cache #" + indexOfChild(child) + " pos=" + adapterPos +
+                     " (" + child.getLeft() + " " + child.getTop() + " " + child.getRight() + " " + child.getBottom() + ")" +
+                     " top=" + topPos +
+                     " " + getDebugInfo(child) + " " + getDebugName(child));
             mViewCache.remove(adapterPos);
         }
         return child;
     }
 
-    private void layoutChildView(View view, int left, int top) {
+    private void layoutChildView(View view, int left, int top, int width, int height) {
         layoutDecorated(view, left, top,
-                left + mDecoratedChildWidth,
-                top + mDecoratedChildHeight);
+        left + width,
+        top + height);
+    }
+
+    private void layoutChildView(View view, int left, int top) {
+        layoutChildView(view, left, top, mDecoratedChildWidth, getDecoratedMeasuredHeight(view));
     }
 
     /**
@@ -489,10 +723,19 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
         if (visibleCols <= 0)
             visibleCols = 1;
 
+        int averageChildHeight;
+        if (mBottomToTop) {
+            averageChildHeight = -mRowInfo.get(mRowInfo.size() - 1).pos;
+        } else {
+            RowInfo rowInfo = mRowInfo.get(mRowInfo.size() - 1);
+            averageChildHeight = rowInfo.pos + rowInfo.height;
+        }
+        averageChildHeight /= mRowInfo.size();
+
         // we use getHeight instead of `getVerticalSpace` because we can scroll vertically
         int visibleHeight = getHeight();
-        int visibleRows = (visibleHeight / mDecoratedChildHeight) + 1;
-        if (visibleHeight % mDecoratedChildHeight > 0) {
+        int visibleRows = (visibleHeight / averageChildHeight) + 1;
+        if (visibleHeight % averageChildHeight > 0) {
             visibleRows++;
         }
 
@@ -500,9 +743,10 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
         mVisibleCount = visibleRows * visibleCols;
         mDecoratedChildWidth = visibleWidth / visibleCols;
 
+        final int itemCount = getItemCount();
         //Allow minimum value for small data sets
-        if (mVisibleCount > getItemCount()) {
-            mVisibleCount = getItemCount();
+        if (mVisibleCount > itemCount) {
+            mVisibleCount = itemCount;
         }
     }
 
@@ -516,8 +760,13 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
      */
     @Override
     public boolean canScrollVertically() {
-        //We do allow scrolling
-        return mDecoratedChildHeight * getVisibleRows() > getVerticalSpace();
+        if (getChildCount() > 0) {
+            //We do allow scrolling
+            if (getDecoratedTop(getTopView()) < getPaddingTop())
+                return true;
+            return getDecoratedBottom(getBottomView()) > (getPaddingTop() + getVerticalSpace());
+        }
+        return false;
     }
 
     private int indexOfChild(View child) {
@@ -539,6 +788,18 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
         return mFirstVisiblePosition + idx;
     }
 
+    private int getColIdx(int adapterPos) {
+        if (mReverseAdapter)
+            return (getItemCount() - 1 - adapterPos) % mColCount;
+        return adapterPos % mColCount;
+    }
+
+    private int getRowIdx(int adapterPos) {
+        if (mReverseAdapter)
+            return (getItemCount() - 1 - adapterPos) / mColCount;
+        return adapterPos / mColCount;
+    }
+
     /**
      * Return top child view on screen (may not be visible)
      *
@@ -546,7 +807,7 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
      */
     @NonNull
     private View getTopView() {
-        final int topChildIdx = mFirstAtBottom ? (getChildCount() - 1) : 0;
+        final int topChildIdx = mBottomToTop ? (getChildCount() - 1) : 0;
         View child = getChildAt(topChildIdx);
         if (child == null)
             throw new IllegalStateException("null child when count=" + getChildCount() + " and topChildIdx=" + topChildIdx);
@@ -560,7 +821,7 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
      */
     @NonNull
     private View getBottomView() {
-        final int bottomChildIdx = mFirstAtBottom ? 0 : (getChildCount() - 1);
+        final int bottomChildIdx = mBottomToTop ? 0 : (getChildCount() - 1);
         View child = getChildAt(bottomChildIdx);
         if (child == null)
             throw new IllegalStateException("null child when count=" + getChildCount() + " and bottomChildIdx=" + bottomChildIdx);
@@ -570,12 +831,12 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
     @NonNull
     private View findBottomVisibleItemView() {
         final int childCount = getChildCount();
-        int botChildIdx = mFirstAtBottom ? 0 : (childCount - 1);
+        int botChildIdx = mBottomToTop ? 0 : (childCount - 1);
         View child = getChildAt(botChildIdx);
         if (child == null)
             throw new IllegalStateException("null child when count=" + childCount + " and bottomChildIdx=" + botChildIdx);
-        while (child.getTop() > getHeight()) {
-            botChildIdx += mFirstAtBottom ? 1 : -1;
+        while (getDecoratedTop(child) > getHeight()) {
+            botChildIdx += mBottomToTop ? 1 : -1;
             if (botChildIdx < 0 || botChildIdx >= childCount)
                 return child;
             child = getChildAt(botChildIdx);
@@ -587,14 +848,14 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
 
     public int findLastVisibleItemPosition() {
         final int childCount = getChildCount();
-        int botChildIdx = mFirstAtBottom ? 0 : (childCount - 1);
+        int botChildIdx = mBottomToTop ? 0 : (childCount - 1);
         if (botChildIdx < 0 || botChildIdx >= childCount)
             return -1;
         View child = getChildAt(botChildIdx);
         if (child == null)
             throw new IllegalStateException("null child when count=" + childCount + " and bottomChildIdx=" + botChildIdx);
-        while (child.getTop() > getHeight()) {
-            botChildIdx += mFirstAtBottom ? 1 : -1;
+        while (getDecoratedTop(child) > getHeight()) {
+            botChildIdx += mBottomToTop ? 1 : -1;
             if (botChildIdx < 0 || botChildIdx >= childCount)
                 return adapterPosition(child);
             child = getChildAt(botChildIdx);
@@ -610,7 +871,7 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
      * @return index from adapter
      */
     private int topAdapterItemIdx() {
-        return (mFirstAtBottom ^ mReverseAdapter) ? (getItemCount() - 1) : 0;
+        return (mBottomToTop ^ mReverseAdapter) ? (getItemCount() - 1) : 0;
     }
 
     /**
@@ -619,7 +880,7 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
      * @return index from adapter
      */
     private int bottomAdapterItemIdx() {
-        return (mFirstAtBottom ^ mReverseAdapter) ? 0 : (getItemCount() - 1);
+        return (mBottomToTop ^ mReverseAdapter) ? 0 : (getItemCount() - 1);
     }
 
     private int aboveAdapterItemIdx(int idx) {
@@ -627,7 +888,7 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
     }
 
     private int belowAdapterItemIdx(int idx) {
-        return idx + ((mFirstAtBottom ^ mReverseAdapter) ? -mColCount : mColCount);
+        return idx + ((mBottomToTop ^ mReverseAdapter) ? -mColCount : mColCount);
     }
 
     /*
@@ -704,11 +965,11 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
             if (checkTop) {
                 adapterPosition = aboveAdapterItemIdx(adapterPosition);
                 newFirstVisible = aboveAdapterItemIdx(newFirstVisible);
-                top -= mDecoratedChildHeight;
+                top -= getRowHeight(getRowIdx(adapterPosition));
             } else {
+                top += getRowHeight(getRowIdx(adapterPosition));
                 adapterPosition = belowAdapterItemIdx(adapterPosition);
                 newFirstVisible = belowAdapterItemIdx(newFirstVisible);
-                top += mDecoratedChildHeight;
             }
         }
         changeFirstVisible(recycler, newFirstVisible);
@@ -723,7 +984,10 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
     private boolean needsVisibilityChange(int adapterPosition, int top, boolean checkTop) {
         if (adapterPosition <= 0 || adapterPosition >= (getItemCount() - 1))
             return false;
-        return checkTop ? (top > 0) : ((top + mDecoratedChildHeight) < getHeight());
+        if (checkTop)
+            return top > 0;
+        int rowHeight = getRowHeight(getRowIdx(adapterPosition));
+        return (top + rowHeight) < getHeight();
     }
 
     private void changeFirstVisible(RecyclerView.Recycler recycler, int value) {
