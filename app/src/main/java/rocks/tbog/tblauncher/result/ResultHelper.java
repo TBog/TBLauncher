@@ -19,7 +19,6 @@ import androidx.collection.ArraySet;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 
 import rocks.tbog.tblauncher.Behaviour;
 import rocks.tbog.tblauncher.Permission;
@@ -39,32 +38,6 @@ import rocks.tbog.tblauncher.utils.Utilities;
 
 public class ResultHelper {
 
-    static final class ViewTypeKey {
-        @NonNull
-        final Class<? extends EntryItem> aClass;
-        final int drawFlags;
-
-        ViewTypeKey(@NonNull Class<? extends EntryItem> aClass, int drawFlags) {
-            this.aClass = aClass;
-            this.drawFlags = drawFlags;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o)
-                return true;
-            if (o == null || getClass() != o.getClass())
-                return false;
-            ViewTypeKey that = (ViewTypeKey) o;
-            return drawFlags == that.drawFlags && aClass.equals(that.aClass);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(aClass, drawFlags);
-        }
-    }
-
     /**
      * Use index as view type
      * Value is the layout id
@@ -81,13 +54,13 @@ public class ResultHelper {
         Log.i("log", "result view type count=" + sEntryViewType.size());
     }
 
+    private ResultHelper() {
+        // this is a static class
+    }
+
     private static void addViewTypes(int[] viewTypes) {
         for (int viewType : viewTypes)
             sEntryViewType.add(viewType);
-    }
-
-    private ResultHelper() {
-        // this is a static class
     }
 
     /**

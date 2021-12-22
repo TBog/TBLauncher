@@ -38,6 +38,8 @@ import rocks.tbog.tblauncher.utils.Utilities;
 
 public class ContactEntry extends EntryItem {
     public static final String SCHEME = "contact://";
+    private static final int[] RESULT_LAYOUT = {R.layout.item_contact, R.layout.item_grid, R.layout.item_quick_list};
+
     public String lookupKey;
 
     protected String phone;
@@ -108,7 +110,6 @@ public class ContactEntry extends EntryItem {
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Result methods
     ///////////////////////////////////////////////////////////////////////////////////////////////
-    private static final int[] RESULT_LAYOUT = {R.layout.item_contact, R.layout.item_grid, R.layout.item_quick_list};
 
     public static int[] getResultLayout() {
         return RESULT_LAYOUT;

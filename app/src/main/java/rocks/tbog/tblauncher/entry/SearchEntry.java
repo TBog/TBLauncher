@@ -20,6 +20,7 @@ import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public abstract class SearchEntry extends EntryItem {
+
     private static final int[] RESULT_LAYOUT = {R.layout.item_builtin, R.layout.item_grid, R.layout.item_quick_list};
 
     protected String query;
