@@ -14,6 +14,9 @@ import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public abstract class SearchEntry extends EntryItem {
+
+    private static final int[] RESULT_LAYOUT = {R.layout.item_builtin, R.layout.item_grid, R.layout.item_quick_list};
+
     protected String query;
 
     public SearchEntry(String id) {
@@ -33,7 +36,6 @@ public abstract class SearchEntry extends EntryItem {
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Result methods
     ///////////////////////////////////////////////////////////////////////////////////////////////
-    private static final int[] RESULT_LAYOUT = {R.layout.item_builtin, R.layout.item_grid, R.layout.item_quick_list};
 
     public static int[] getResultLayout() {
         return RESULT_LAYOUT;

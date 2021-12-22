@@ -16,7 +16,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 
 import rocks.tbog.tblauncher.R;
-import rocks.tbog.tblauncher.result.ResultHelper;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.Utilities;

@@ -30,6 +30,9 @@ import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public abstract class StaticEntry extends EntryItem {
+
+    private static final int[] RESULT_LAYOUT = {R.layout.item_builtin, R.layout.item_grid, R.layout.item_quick_list};
+
     @DrawableRes
     protected int iconResource;
     protected int customIcon;
@@ -120,7 +123,6 @@ public abstract class StaticEntry extends EntryItem {
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Result methods
     ///////////////////////////////////////////////////////////////////////////////////////////////
-    private static final int[] RESULT_LAYOUT = {R.layout.item_builtin, R.layout.item_grid, R.layout.item_quick_list};
 
     public static int[] getResultLayout() {
         return RESULT_LAYOUT;

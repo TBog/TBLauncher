@@ -634,8 +634,7 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
              */
             measureChildWithMargins(child, (mColCount - 1) * mDecoratedChildWidth, 0);
 
-            int decoratedChildHeight = getDecoratedMeasuredHeight(child);
-            layoutChildView(child, leftPos, topPos, mDecoratedChildWidth, decoratedChildHeight);
+            layoutChildView(child, leftPos, topPos);
 
             logDebug("child #" + indexOfChild(child) + " pos=" + adapterPos +
                      " (" + child.getLeft() + " " + child.getTop() + " " + child.getRight() + " " + child.getBottom() + ")" +
@@ -651,14 +650,14 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
         return child;
     }
 
+    private void layoutChildView(View view, int left, int top) {
+        layoutChildView(view, left, top, mDecoratedChildWidth, getDecoratedMeasuredHeight(view));
+    }
+
     private void layoutChildView(View view, int left, int top, int width, int height) {
         layoutDecorated(view, left, top,
         left + width,
         top + height);
-    }
-
-    private void layoutChildView(View view, int left, int top) {
-        layoutChildView(view, left, top, mDecoratedChildWidth, getDecoratedMeasuredHeight(view));
     }
 
     /**
@@ -787,12 +786,6 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
         if (mReverseAdapter)
             idx = -idx;
         return mFirstVisiblePosition + idx;
-    }
-
-    private int getColIdx(int adapterPos) {
-        if (mReverseAdapter)
-            return (getItemCount() - 1 - adapterPos) % mColCount;
-        return adapterPos % mColCount;
     }
 
     private int getRowIdx(int adapterPos) {
