@@ -167,17 +167,11 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
 
     @Override
     public int computeVerticalScrollRange(@NonNull RecyclerView.State state) {
-        int scrollRange = 0;
         if (!mRowInfo.isEmpty()) {
-            if (mBottomToTop) {
-                scrollRange = -mRowInfo.get(mRowInfo.size() - 1).pos;
-            } else {
-                RowInfo rowInfo = mRowInfo.get(mRowInfo.size() - 1);
-                scrollRange = rowInfo.pos + rowInfo.height;
-            }
+            RowInfo rowInfo = mRowInfo.get(mRowInfo.size() - 1);
+            return mBottomToTop ? -rowInfo.pos : (rowInfo.pos + rowInfo.height);
         }
-
-        return scrollRange;
+        return 0;
     }
 
 

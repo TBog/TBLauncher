@@ -1022,25 +1022,30 @@ public class Behaviour implements ISearchActivity {
     }
 
     public void setListLayout() {
-//        showSearchBar();
         mResultAdapter.setGridLayout(getContext(), false);
 
         RecyclerView.LayoutManager layoutManager = mResultList.getLayoutManager();
         if (layoutManager == null)
             mResultList.setLayoutManager(layoutManager = new CustomRecycleLayoutManager());
-        if (layoutManager instanceof CustomRecycleLayoutManager)
-            ((CustomRecycleLayoutManager) layoutManager).setColumns(1, false);
+
+        if (layoutManager instanceof CustomRecycleLayoutManager) {
+            CustomRecycleLayoutManager lm = (CustomRecycleLayoutManager) layoutManager;
+            lm.setColumns(1, false);
+        }
     }
 
     public void setGridLayout() {
-//        hideSearchBar();
         mResultAdapter.setGridLayout(getContext(), true);
 
         RecyclerView.LayoutManager layoutManager = mResultList.getLayoutManager();
         if (layoutManager == null)
             mResultList.setLayoutManager(layoutManager = new CustomRecycleLayoutManager());
-        if (layoutManager instanceof CustomRecycleLayoutManager)
-            ((CustomRecycleLayoutManager) layoutManager).setColumns(3, false);
+
+        if (layoutManager instanceof CustomRecycleLayoutManager) {
+            CustomRecycleLayoutManager lm = (CustomRecycleLayoutManager) layoutManager;
+            lm.setColumns(3, false);
+            lm.setRightToLeft(true);
+        }
     }
 
     public boolean isGridLayout() {
