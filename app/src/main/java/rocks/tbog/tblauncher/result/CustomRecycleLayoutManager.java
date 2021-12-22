@@ -115,7 +115,7 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
         // make sure we are using recycled views
         mRefreshViews = true;
 
-        // reset expected child size
+        // reset row info
         mRowInfo.clear();
 
         requestLayout();
@@ -226,7 +226,8 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
         } else {
             logDebug("onItemsChanged");
         }
-        mRowInfo.clear();
+        if (mRowInfo.size() != computeRowCount(getItemCount()))
+            mRowInfo.clear();
     }
 
     @Override
@@ -317,19 +318,7 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
                 decoratedChildHeight = getDecoratedMeasuredHeight(child);
             }
 
-            final int itemCount = getItemCount();
-            int rowCount = itemCount / mColCount + (itemCount % mColCount == 0 ? 0 : 1);
-            mRowInfo.clear();
-            mRowInfo.ensureCapacity(rowCount);
-            for (int rowIdx = 0; rowIdx < rowCount; rowIdx++) {
-                RowInfo rowInfo = new RowInfo();
-                rowInfo.height = decoratedChildHeight;
-                if (mBottomToTop)
-                    rowInfo.pos = -decoratedChildHeight * (rowIdx + 1);
-                else
-                    rowInfo.pos = decoratedChildHeight * rowIdx;
-                mRowInfo.add(rowInfo);
-            }
+            updateRowInfo(decoratedChildHeight);
         }
 
         // Always update the visible row/column counts
@@ -339,7 +328,6 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
                  " childCount=" + getChildCount() +
                  " itemCount=" + getItemCount() +
                  " columns=" + mColCount +
-                 " visible rows=" + getVisibleRows() +
                  " mDecoratedChildWidth=" + mDecoratedChildWidth +
                  (state.isPreLayout() ? " preLayout" : "") +
                  (state.didStructureChange() ? " structureChanged" : "") +
@@ -386,7 +374,7 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
      *
      * @return difference between child top position and initial layout position
      */
-    private int findScrollOffset() {
+    private int computeScrollOffset() {
         if (mViewCache.size() > 0) {
             int adapterPos = mViewCache.keyAt(0);
             int rowIdx = getRowIdx(adapterPos);
@@ -395,6 +383,10 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
             return getDecoratedTop(child) - rowPosition;
         }
         return 0;
+    }
+
+    private int computeRowCount(int itemCount) {
+        return itemCount / mColCount + (itemCount % mColCount == 0 ? 0 : 1);
     }
 
     private class LayoutRowHelper {
@@ -510,26 +502,6 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
         return mRowInfo.get(rowIdx).height;
     }
 
-    private void updateRowHeight(int rowIdx, int newHeight) {
-        if (rowIdx < 0 || rowIdx >= mRowInfo.size()) {
-            Log.e(TAG, "getRowHeight(" + rowIdx + "); rowInfo.size=" + mRowInfo.size());
-            return;
-        }
-        RowInfo rowInfo = mRowInfo.get(rowIdx);
-        if (mBottomToTop)
-            rowInfo.pos -= newHeight - rowInfo.height;
-        rowInfo.height = newHeight;
-        for (int row = rowIdx + 1, rowCount = mRowInfo.size(); row < rowCount; row += 1) {
-            RowInfo rowIt = mRowInfo.get(row);
-            if (mBottomToTop)
-                rowIt.pos = rowInfo.pos - rowIt.height;
-            else
-                rowIt.pos = rowInfo.pos + rowInfo.height;
-
-            rowInfo = rowIt;
-        }
-    }
-
     private void layoutChildren(RecyclerView.Recycler recycler) {
         /*
          * Detach all existing views from the layout.
@@ -544,7 +516,7 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
         cacheChildren();
 
         // compute scroll position after we populate `mViewCache`
-        final int scrollOffset = findScrollOffset();
+        final int scrollOffset = computeScrollOffset();
 
         logDebug("layoutChildren" +
                  " mFirstVisiblePosition=" + mFirstVisiblePosition +
@@ -739,7 +711,11 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
             visibleRows++;
         }
 
-        mColCount = visibleCols;
+        if (mColCount != visibleCols) {
+            mColCount = visibleCols;
+            int rowHeight = getRowHeight(0);
+            updateRowInfo(rowHeight);
+        }
         mVisibleCount = visibleRows * visibleCols;
         mDecoratedChildWidth = visibleWidth / visibleCols;
 
@@ -750,8 +726,39 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
         }
     }
 
-    private int getVisibleRows() {
-        return mVisibleCount / mColCount;
+    private void updateRowInfo(int expectedRowHeight) {
+        final int rowCount = computeRowCount(getItemCount());
+        mRowInfo.clear();
+        mRowInfo.ensureCapacity(rowCount);
+        for (int rowIdx = 0; rowIdx < rowCount; rowIdx++) {
+            RowInfo rowInfo = new RowInfo();
+            rowInfo.height = expectedRowHeight;
+            if (mBottomToTop)
+                rowInfo.pos = -expectedRowHeight * (rowIdx + 1);
+            else
+                rowInfo.pos = expectedRowHeight * rowIdx;
+            mRowInfo.add(rowInfo);
+        }
+    }
+
+    private void updateRowHeight(int rowIdx, int newHeight) {
+        if (rowIdx < 0 || rowIdx >= mRowInfo.size()) {
+            Log.e(TAG, "updateRowHeight(" + rowIdx + "); rowInfo.size=" + mRowInfo.size());
+            return;
+        }
+        RowInfo rowInfo = mRowInfo.get(rowIdx);
+        if (mBottomToTop)
+            rowInfo.pos -= newHeight - rowInfo.height;
+        rowInfo.height = newHeight;
+        for (int row = rowIdx + 1, rowCount = mRowInfo.size(); row < rowCount; row += 1) {
+            RowInfo rowIt = mRowInfo.get(row);
+            if (mBottomToTop)
+                rowIt.pos = rowInfo.pos - rowIt.height;
+            else
+                rowIt.pos = rowInfo.pos + rowInfo.height;
+
+            rowInfo = rowIt;
+        }
     }
 
     /*
