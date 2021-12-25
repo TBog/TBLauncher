@@ -1038,30 +1038,32 @@ public class Behaviour implements ISearchActivity {
     }
 
     public void setListLayout() {
+        // update adapter draw flags
         mResultAdapter.setGridLayout(getContext(), false);
 
+        // get layout manager
         RecyclerView.LayoutManager layoutManager = mResultList.getLayoutManager();
-        if (layoutManager == null)
+        if (!(layoutManager instanceof CustomRecycleLayoutManager))
             mResultList.setLayoutManager(layoutManager = new CustomRecycleLayoutManager());
 
-        if (layoutManager instanceof CustomRecycleLayoutManager) {
-            CustomRecycleLayoutManager lm = (CustomRecycleLayoutManager) layoutManager;
-            lm.setColumns(1, false);
-        }
+        CustomRecycleLayoutManager lm = (CustomRecycleLayoutManager) layoutManager;
+        lm.setFirstAtBottom(true);
+        lm.setColumns(1, false);
     }
 
     public void setGridLayout() {
+        // update adapter draw flags
         mResultAdapter.setGridLayout(getContext(), true);
 
+        // get layout manager
         RecyclerView.LayoutManager layoutManager = mResultList.getLayoutManager();
-        if (layoutManager == null)
+        if (!(layoutManager instanceof CustomRecycleLayoutManager))
             mResultList.setLayoutManager(layoutManager = new CustomRecycleLayoutManager());
 
-        if (layoutManager instanceof CustomRecycleLayoutManager) {
-            CustomRecycleLayoutManager lm = (CustomRecycleLayoutManager) layoutManager;
-            lm.setColumns(3, false);
-            lm.setRightToLeft(true);
-        }
+        CustomRecycleLayoutManager lm = (CustomRecycleLayoutManager) layoutManager;
+        lm.setFirstAtBottom(true);
+        lm.setRightToLeft(true);
+        lm.setColumns(3, false);
     }
 
     public boolean isGridLayout() {
