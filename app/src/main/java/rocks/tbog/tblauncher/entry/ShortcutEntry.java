@@ -51,7 +51,7 @@ public final class ShortcutEntry extends EntryWithTags {
 
     public static final String SCHEME = "shortcut://";
     private static final String TAG = "shortcut";
-    private static final int[] RESULT_LAYOUT = {R.layout.item_shortcut, R.layout.item_grid_shortcut, R.layout.item_quick_list_shortcut};
+    private static final int[] RESULT_LAYOUT = {R.layout.item_shortcut, R.layout.item_grid_shortcut, R.layout.item_dock_shortcut};
 
     private final long dbId;
     @NonNull

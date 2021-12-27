@@ -38,7 +38,7 @@ import rocks.tbog.tblauncher.utils.Utilities;
 
 public class ContactEntry extends EntryItem {
     public static final String SCHEME = "contact://";
-    private static final int[] RESULT_LAYOUT = {R.layout.item_contact, R.layout.item_grid, R.layout.item_quick_list};
+    private static final int[] RESULT_LAYOUT = {R.layout.item_contact, R.layout.item_grid, R.layout.item_dock};
 
     public String lookupKey;
 
