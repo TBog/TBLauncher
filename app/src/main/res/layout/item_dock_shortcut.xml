@@ -10,10 +10,10 @@
     tools:layout_height="80dp"
     tools:layout_width="80dp"
     tools:theme="@style/AppThemeTransparent">
-    <!--    android:background="@color/Chocolate"-->
+    <!--    android:background="@color/Crimson"-->
 
     <ImageView
-        android:id="@android:id/icon"
+        android:id="@android:id/icon1"
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:importantForAccessibility="no"
@@ -24,18 +24,22 @@
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0"
+        app:layout_constraintVertical_chainStyle="packed"
         app:layout_constraintWidth_max="@dimen/icon_size"
+        tools:layout_height="@dimen/icon_size"
+        tools:layout_width="@dimen/icon_size"
         tools:src="@drawable/ic_android" />
 
     <View
         android:id="@+id/dummyGuide"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        app:layout_constraintBottom_toBottomOf="@android:id/icon"
+        app:layout_constraintBottom_toBottomOf="@android:id/icon1"
         app:layout_constraintHorizontal_weight="2"
-        app:layout_constraintLeft_toLeftOf="@android:id/icon"
+        app:layout_constraintLeft_toLeftOf="@android:id/icon1"
         app:layout_constraintRight_toLeftOf="@android:id/icon2"
-        app:layout_constraintTop_toTopOf="@android:id/icon" />
+        app:layout_constraintTop_toTopOf="@android:id/icon1" />
 
     <ImageView
         android:id="@android:id/icon2"
@@ -43,11 +47,11 @@
         android:layout_height="0dp"
         android:importantForAccessibility="no"
         android:scaleType="fitXY"
-        app:layout_constraintBottom_toBottomOf="@android:id/icon"
+        app:layout_constraintBottom_toBottomOf="@android:id/icon1"
         app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintHorizontal_weight="1"
         app:layout_constraintLeft_toRightOf="@id/dummyGuide"
-        app:layout_constraintRight_toRightOf="@android:id/icon"
+        app:layout_constraintRight_toRightOf="@android:id/icon1"
         tools:src="@drawable/ic_android"
         tools:tint="#9acd32" />
 
@@ -56,17 +60,20 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:gravity="top|center_horizontal"
+        android:maxLines="3"
         android:paddingHorizontal="2dp"
         android:shadowColor="?attr/resultShadowColor"
         android:shadowDx="1"
         android:shadowDy="2"
         android:shadowRadius="?attr/textShadowRadius"
+        android:textAlignment="center"
         android:textColor="?android:attr/textColorSecondary"
         android:textSize="@dimen/result_small_size"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toBottomOf="@android:id/icon1"
         tools:ignore="RtlSymmetry"
-        tools:text="Apps for fun" />
+        tools:text="Shortcut for apps" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

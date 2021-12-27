@@ -51,7 +51,7 @@ import rocks.tbog.tblauncher.utils.Utilities;
 public final class AppEntry extends EntryWithTags {
 
     public static final String SCHEME = "app://";
-    private static final int[] RESULT_LAYOUT = {R.layout.item_app, R.layout.item_grid, R.layout.item_quick_list};
+    private static final int[] RESULT_LAYOUT = {R.layout.item_app, R.layout.item_grid, R.layout.item_dock};
 
     @NonNull
     public final ComponentName componentName;
