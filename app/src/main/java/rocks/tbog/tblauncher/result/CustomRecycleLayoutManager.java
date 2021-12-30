@@ -584,6 +584,7 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
                 //TODO: if (mBottomToTop==true) and we scroll up (thumb goes up) the rows should
                 // update in reverse (starting from current row to 0)
                 updateRowHeight(rowIdx, rowHelper.getDecoratedHeight());
+                rowHelper.offsetVertical(rowHeight - rowHelper.getDecoratedHeight());
             }
 
             visibleRowIdx += 1;
@@ -730,6 +731,10 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
         final int rowCount = computeRowCount(getItemCount());
         mRowInfo.clear();
         mRowInfo.ensureCapacity(rowCount);
+        logDebug("updateRowInfo" +
+                 " height=" + expectedRowHeight +
+                 " rowCount=" + rowCount);
+
         for (int rowIdx = 0; rowIdx < rowCount; rowIdx++) {
             RowInfo rowInfo = new RowInfo();
             rowInfo.height = expectedRowHeight;
@@ -751,13 +756,24 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
      */
     private void updateRowHeight(int rowIdx, int newHeight) {
         if (rowIdx < 0 || rowIdx >= mRowInfo.size()) {
-            Log.e(TAG, "updateRowHeight(" + rowIdx + "); rowInfo.size=" + mRowInfo.size());
+            Log.e(TAG, "updateRowHeight(" + rowIdx + ")" +
+                       " rowInfo.size=" + mRowInfo.size());
             return;
         }
         RowInfo rowInfo = mRowInfo.get(rowIdx);
+
+        final int oldPos = rowInfo.pos;
+        final int oldHeight = rowInfo.height;
+
         if (mBottomToTop)
             rowInfo.pos -= newHeight - rowInfo.height;
         rowInfo.height = newHeight;
+
+        logDebug("updateRowHeight" +
+                 " row #" + rowIdx +
+                 " posY changed from " + oldPos + " to " + rowInfo.pos +
+                 " height changed from " + oldHeight + " to " + rowInfo.height);
+
         for (int row = rowIdx + 1, rowCount = mRowInfo.size(); row < rowCount; row += 1) {
             RowInfo rowIt = mRowInfo.get(row);
             if (mBottomToTop)
