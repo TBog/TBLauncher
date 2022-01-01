@@ -1530,6 +1530,8 @@ public class Behaviour implements ISearchActivity {
     }
 
     public boolean hasDoubleClick() {
+        if (mPref == null)
+            return false;
         String action = mPref.getString("gesture-double-click", null);
         return action != null && !action.isEmpty() && !action.equals("none");
     }
