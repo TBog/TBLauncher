@@ -138,7 +138,7 @@
     <string name="filter_contacts">Contact filter</string>
     <string name="filter_shortcuts">Shortcuts filter</string>
     <string name="action_reload">Reload</string>
-    <string name="action_show_grid">Grid</string>
+    <string name="action_toggle_grid">Toggle grid</string>
     <string name="action_show_apps">Apps A→Z</string>
     <string name="action_show_apps_reversed">Apps Z→A</string>
     <string name="action_show_contacts">Contacts A→Z</string>
@@ -452,6 +452,9 @@
     <string name="generate_theme_simple_summary">Use primary for background and secondary for text</string>
     <string name="generate_theme_highlight">Highlight theme</string>
     <string name="generate_theme_highlight_summary">Use primary for background and secondary for highlight</string>
+    <string name="result_first_at_bottom">First at bottom</string>
+    <string name="result_right_to_left">Right to left</string>
+    <string name="result_right_to_left_summary">Layout grid row from right to left</string>
     <string name="debug_provider_status">Provider status</string>
 
     <plurals name="tag_entry_count">

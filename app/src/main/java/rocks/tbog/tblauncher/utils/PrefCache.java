@@ -218,4 +218,12 @@ public class PrefCache {
         }
         return RESULT_POPUP_ORDER;
     }
+
+    public static boolean firstAtBottom(SharedPreferences preferences) {
+        return preferences.getBoolean("result-first-at-bottom", true);
+    }
+
+    public static boolean rightToLeft(SharedPreferences preferences) {
+        return preferences.getBoolean("result-right-to-left", true);
+    }
 }

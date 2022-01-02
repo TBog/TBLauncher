@@ -63,6 +63,7 @@ import rocks.tbog.tblauncher.result.CustomRecycleLayoutManager;
 import rocks.tbog.tblauncher.result.RecycleAdapter;
 import rocks.tbog.tblauncher.result.RecycleScrollListener;
 import rocks.tbog.tblauncher.result.ResultHelper;
+import rocks.tbog.tblauncher.result.ResultItemDecoration;
 import rocks.tbog.tblauncher.searcher.ISearchActivity;
 import rocks.tbog.tblauncher.searcher.QuerySearcher;
 import rocks.tbog.tblauncher.searcher.Searcher;
@@ -205,6 +206,9 @@ public class Behaviour implements ISearchActivity {
         mResultList.setAdapter(mResultAdapter);
         mResultList.addOnScrollListener(recycleScrollListener);
 //        mResultList.addOnLayoutChangeListener(recycleScrollListener);
+
+        int vertical = getContext().getResources().getDimensionPixelSize(R.dimen.result_margin_vertical);
+        mResultList.addItemDecoration(new ResultItemDecoration(0, vertical, true));
 
         setListLayout();
     }
@@ -1047,11 +1051,15 @@ public class Behaviour implements ISearchActivity {
             mResultList.setLayoutManager(layoutManager = new CustomRecycleLayoutManager());
 
         CustomRecycleLayoutManager lm = (CustomRecycleLayoutManager) layoutManager;
-        lm.setFirstAtBottom(true);
+        lm.setBottomToTop(PrefCache.firstAtBottom(mPref));
         lm.setColumns(1, false);
     }
 
     public void setGridLayout() {
+        setGridLayout(3);
+    }
+
+    public void setGridLayout(int columnCount) {
         // update adapter draw flags
         mResultAdapter.setGridLayout(getContext(), true);
 
@@ -1061,9 +1069,9 @@ public class Behaviour implements ISearchActivity {
             mResultList.setLayoutManager(layoutManager = new CustomRecycleLayoutManager());
 
         CustomRecycleLayoutManager lm = (CustomRecycleLayoutManager) layoutManager;
-        lm.setFirstAtBottom(true);
-        lm.setRightToLeft(true);
-        lm.setColumns(3, false);
+        lm.setBottomToTop(PrefCache.firstAtBottom(mPref));
+        lm.setRightToLeft(PrefCache.rightToLeft(mPref));
+        lm.setColumns(columnCount, false);
     }
 
     public boolean isGridLayout() {

@@ -12,8 +12,6 @@ import java.util.List;
 import rocks.tbog.tblauncher.Behaviour;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
-import rocks.tbog.tblauncher.TBLauncherActivity;
-import rocks.tbog.tblauncher.drawable.LoadingDrawable;
 import rocks.tbog.tblauncher.entry.ActionEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.handler.DataHandler;
@@ -32,7 +30,7 @@ public class ActionProvider extends DBProvider<ActionEntry> {
         int cnt = 0;
         {
             String id = ActionEntry.SCHEME + "toggle/grid";
-            ActionEntry actionEntry = new ActionEntry(id, new LoadingDrawable());
+            ActionEntry actionEntry = new ActionEntry(id, R.drawable.ic_grid);
             actionEntry.setAction((v, flags) -> {
                 Context ctx = v.getContext();
                 Behaviour behaviour = TBApplication.behaviour(ctx);
@@ -42,12 +40,8 @@ public class ActionProvider extends DBProvider<ActionEntry> {
                     behaviour.setListLayout();
                 else
                     behaviour.setGridLayout();
-
-                // show app list
-//                Provider<? extends EntryItem> provider = TBApplication.dataHandler(ctx).getAppProvider();
-//                TBApplication.quickList(ctx).toggleProvider(v, provider, EntryItem.NAME_COMPARATOR);
             });
-            s_names[cnt] = R.string.action_show_grid;
+            s_names[cnt] = R.string.action_toggle_grid;
             s_entries[cnt++] = actionEntry;
         }
         {
@@ -224,7 +218,7 @@ public class ActionProvider extends DBProvider<ActionEntry> {
         }
         {
             String id = ActionEntry.SCHEME + "reload/providers";
-            ActionEntry actionEntry = new ActionEntry(id, R.drawable.ic_loading_arrows);
+            ActionEntry actionEntry = new ActionEntry(id, R.drawable.ic_refresh);
             actionEntry.setAction((v, flags) -> {
                 Context ctx = v.getContext();
                 TBApplication.dataHandler(ctx).reloadProviders();

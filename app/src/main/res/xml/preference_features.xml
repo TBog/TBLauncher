@@ -1,225 +1,236 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:key="feature-holder"
-        android:summary="@string/features_summary"
-        android:title="@string/title_features">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:key="feature-holder"
+    android:summary="@string/features_summary"
+    android:title="@string/title_features">
 
     <androidx.preference.SwitchPreference
-            android:defaultValue="false"
-            android:key="root-mode"
-            android:summary="@string/root_mode_summary"
-            android:title="@string/root_mode" />
+        android:defaultValue="false"
+        android:key="root-mode"
+        android:summary="@string/root_mode_summary"
+        android:title="@string/root_mode" />
 
     <!-- Dock / Quick List -->
     <androidx.preference.PreferenceCategory
-            android:icon="@drawable/ic_quick"
-            android:key="quick-list-section"
-            android:title="@string/quick_list_section">
+        android:icon="@drawable/ic_quick"
+        android:key="quick-list-section"
+        android:title="@string/quick_list_section">
 
         <androidx.preference.SwitchPreference
-                android:defaultValue="true"
-                android:key="quick-list-enabled"
-                android:title="@string/quick_list_enabled" />
+            android:defaultValue="true"
+            android:key="quick-list-enabled"
+            android:title="@string/quick_list_enabled" />
 
         <androidx.preference.SwitchPreference
-                android:defaultValue="false"
-                android:dependency="quick-list-enabled"
-                android:key="quick-list-only-for-results"
-                android:summary="@string/quick_list_only_for_results_summary"
-                android:title="@string/quick_list_only_for_results" />
+            android:defaultValue="false"
+            android:dependency="quick-list-enabled"
+            android:key="quick-list-only-for-results"
+            android:summary="@string/quick_list_only_for_results_summary"
+            android:title="@string/quick_list_only_for_results" />
 
         <androidx.preference.SwitchPreference
-                android:defaultValue="false"
-                android:dependency="quick-list-enabled"
-                android:key="quick-list-text-visible"
-                android:title="@string/quick_list_text_visible" />
+            android:defaultValue="false"
+            android:dependency="quick-list-enabled"
+            android:key="quick-list-text-visible"
+            android:title="@string/quick_list_text_visible" />
 
         <androidx.preference.SwitchPreference
-                android:defaultValue="true"
-                android:dependency="quick-list-enabled"
-                android:key="quick-list-animation"
-                android:title="@string/quick_list_animation" />
+            android:defaultValue="true"
+            android:dependency="quick-list-enabled"
+            android:key="quick-list-animation"
+            android:title="@string/quick_list_animation" />
 
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:defaultValue="@integer/default_bar_size"
-                android:dependency="quick-list-enabled"
-                android:dialogLayout="@layout/pref_slider"
-                android:key="quick-list-size"
-                android:title="@string/quick_list_size"
-                android:widgetLayout="@layout/pref_size_preview" />
+            android:defaultValue="@integer/default_bar_size"
+            android:dependency="quick-list-enabled"
+            android:dialogLayout="@layout/pref_slider"
+            android:key="quick-list-size"
+            android:title="@string/quick_list_size"
+            android:widgetLayout="@layout/pref_size_preview" />
 
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:dependency="quick-list-enabled"
-                android:dialogLayout="@layout/quick_list_editor"
-                android:key="quick-list-content"
-                android:summary="@string/quick_list_content_summary"
-                android:title="@string/quick_list_content" />
+            android:dependency="quick-list-enabled"
+            android:dialogLayout="@layout/quick_list_editor"
+            android:key="quick-list-content"
+            android:summary="@string/quick_list_content_summary"
+            android:title="@string/quick_list_content" />
 
     </androidx.preference.PreferenceCategory>
 
     <!-- Search bar -->
     <PreferenceCategory
-            android:icon="@drawable/ic_search_bar"
-            android:key="search-bar-section"
-            android:title="@string/search_bar_section">
+        android:icon="@drawable/ic_search_bar"
+        android:key="search-bar-section"
+        android:title="@string/search_bar_section">
 
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:defaultValue="@integer/default_bar_size"
-                android:dialogLayout="@layout/pref_slider"
-                android:key="search-bar-size"
-                android:title="@string/search_bar_size"
-                android:widgetLayout="@layout/pref_size_preview" />
+            android:defaultValue="@integer/default_bar_size"
+            android:dialogLayout="@layout/pref_slider"
+            android:key="search-bar-size"
+            android:title="@string/search_bar_size"
+            android:widgetLayout="@layout/pref_size_preview" />
 
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:dialogLayout="@layout/edit_search_engines"
-                android:key="edit-search-hint"
-                android:summary="@string/edit_search_hint_summary"
-                android:title="@string/edit_search_hint" />
+            android:dialogLayout="@layout/edit_search_engines"
+            android:key="edit-search-hint"
+            android:summary="@string/edit_search_hint_summary"
+            android:title="@string/edit_search_hint" />
 
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:dialogLayout="@layout/add_search_hint"
-                android:key="add-search-hint"
-                android:title="@string/add_search_hint" />
+            android:dialogLayout="@layout/add_search_hint"
+            android:key="add-search-hint"
+            android:title="@string/add_search_hint" />
 
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:dialogLayout="@layout/edit_search_engines"
-                android:key="reset-search-hint"
-                android:summary="@string/reset_search_hint_summary"
-                android:title="@string/reset_search_hint" />
+            android:dialogLayout="@layout/edit_search_engines"
+            android:key="reset-search-hint"
+            android:summary="@string/reset_search_hint_summary"
+            android:title="@string/reset_search_hint" />
 
         <androidx.preference.SwitchPreference
-                android:defaultValue="true"
-                android:key="search-bar-at-bottom"
-                android:title="@string/search_bar_at_bottom" />
+            android:defaultValue="true"
+            android:key="search-bar-at-bottom"
+            android:title="@string/search_bar_at_bottom" />
 
         <!-- This is here just to set the default value and be saved in backup, not visible for user -->
         <MultiSelectListPreference
-                android:defaultValue="@array/defaultSearchHints"
-                android:key="selected-search-hints"
-                app:isPreferenceVisible="false" />
+            android:defaultValue="@array/defaultSearchHints"
+            android:key="selected-search-hints"
+            app:isPreferenceVisible="false" />
 
         <!-- This is here just to set the default value and be saved in backup, not visible for user -->
         <MultiSelectListPreference
-                android:defaultValue="@array/defaultSearchHints"
-                android:key="available-search-hints"
-                app:isPreferenceVisible="false" />
+            android:defaultValue="@array/defaultSearchHints"
+            android:key="available-search-hints"
+            app:isPreferenceVisible="false" />
 
     </PreferenceCategory>
 
     <!-- Result list -->
     <PreferenceCategory
-            android:icon="@drawable/ic_list"
-            android:key="result-list-section"
-            android:title="@string/result_list_section">
+        android:icon="@drawable/ic_list"
+        android:key="result-list-section"
+        android:title="@string/result_list_section">
+
+        <androidx.preference.SwitchPreference
+            android:defaultValue="true"
+            android:key="result-first-at-bottom"
+            android:title="@string/result_first_at_bottom" />
+
+        <androidx.preference.SwitchPreference
+            android:defaultValue="true"
+            android:key="result-right-to-left"
+            android:summary="@string/result_right_to_left_summary"
+            android:title="@string/result_right_to_left" />
 
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:defaultValue="@integer/default_result_history_size"
-                android:dialogLayout="@layout/pref_slider"
-                android:key="result-history-size"
-                android:summary="@string/result_history_size_summary"
-                android:title="@string/result_history_size"
-                android:widgetLayout="@layout/pref_size_preview" />
+            android:defaultValue="@integer/default_result_history_size"
+            android:dialogLayout="@layout/pref_slider"
+            android:key="result-history-size"
+            android:summary="@string/result_history_size_summary"
+            android:title="@string/result_history_size"
+            android:widgetLayout="@layout/pref_size_preview" />
 
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:defaultValue="@integer/default_result_history_adaptive"
-                android:dialogLayout="@layout/pref_slider"
-                android:key="result-history-adaptive"
-                android:summary="@string/result_history_adaptive_summary"
-                android:title="@string/result_history_adaptive"
-                android:widgetLayout="@layout/pref_size_preview" />
+            android:defaultValue="@integer/default_result_history_adaptive"
+            android:dialogLayout="@layout/pref_slider"
+            android:key="result-history-adaptive"
+            android:summary="@string/result_history_adaptive_summary"
+            android:title="@string/result_history_adaptive"
+            android:widgetLayout="@layout/pref_size_preview" />
 
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:defaultValue="@integer/default_result_searcher_cap"
-                android:dialogLayout="@layout/pref_slider"
-                android:key="result-search-cap"
-                android:title="@string/result_search_cap"
-                android:widgetLayout="@layout/pref_size_preview" />
+            android:defaultValue="@integer/default_result_searcher_cap"
+            android:dialogLayout="@layout/pref_slider"
+            android:key="result-search-cap"
+            android:title="@string/result_search_cap"
+            android:widgetLayout="@layout/pref_size_preview" />
 
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:dialogLayout="@layout/pref_confirm"
-                android:key="unlimited-search-cap"
-                android:summary="@string/unlimited_search_cap_summary"
-                android:title="@string/unlimited_search_cap" />
+            android:dialogLayout="@layout/pref_confirm"
+            android:key="unlimited-search-cap"
+            android:summary="@string/unlimited_search_cap_summary"
+            android:title="@string/unlimited_search_cap" />
 
         <MultiSelectListPreference
-                android:key="result-popup-order"
-                android:summary="@string/result_popup_order_summary"
-                android:title="@string/result_popup_order"/>
+            android:key="result-popup-order"
+            android:summary="@string/result_popup_order_summary"
+            android:title="@string/result_popup_order" />
 
     </PreferenceCategory>
 
     <!-- Icons -->
     <androidx.preference.PreferenceCategory
-            android:key="icons-section"
-            android:title="@string/icons_section">
+        android:key="icons-section"
+        android:title="@string/icons_section">
 
         <androidx.preference.SwitchPreference
-                android:defaultValue="true"
-                android:key="icons-visible"
-                android:title="@string/icons_visible" />
+            android:defaultValue="true"
+            android:key="icons-visible"
+            android:title="@string/icons_visible" />
 
         <androidx.preference.SwitchPreference
-                android:defaultValue="true"
-                android:dependency="quick-list-enabled"
-                android:key="quick-list-icons-visible"
-                android:title="@string/quick_list_icons_visible" />
+            android:defaultValue="true"
+            android:dependency="quick-list-enabled"
+            android:key="quick-list-icons-visible"
+            android:title="@string/quick_list_icons_visible" />
 
         <androidx.preference.SwitchPreference
-                android:defaultValue="true"
-                android:dependency="quick-list-icons-visible"
-                android:key="quick-list-show-badge"
-                android:title="@string/quick_list_show_badge" />
+            android:defaultValue="true"
+            android:dependency="quick-list-icons-visible"
+            android:key="quick-list-show-badge"
+            android:title="@string/quick_list_show_badge" />
 
     </androidx.preference.PreferenceCategory>
 
     <!-- Shortcut -->
     <androidx.preference.PreferenceCategory
-            android:icon="@drawable/ic_shortcuts"
-            android:key="shortcut-section"
-            android:title="@string/shortcut_section">
+        android:icon="@drawable/ic_shortcuts"
+        android:key="shortcut-section"
+        android:title="@string/shortcut_section">
 
         <androidx.preference.SwitchPreference
-                android:defaultValue="false"
-                android:key="pin-auto-confirm"
-                android:title="@string/shortcut_pin_auto_confirm" />
+            android:defaultValue="false"
+            android:key="pin-auto-confirm"
+            android:title="@string/shortcut_pin_auto_confirm" />
 
         <androidx.preference.SwitchPreference
-                android:defaultValue="true"
-                android:key="shortcut-show-badge"
-                android:summary="@string/shortcut_show_badge_summary"
-                android:title="@string/shortcut_show_badge" />
+            android:defaultValue="true"
+            android:key="shortcut-show-badge"
+            android:summary="@string/shortcut_show_badge_summary"
+            android:title="@string/shortcut_show_badge" />
 
     </androidx.preference.PreferenceCategory>
 
     <!-- Tags -->
     <androidx.preference.PreferenceCategory
-            android:icon="@drawable/ic_tags"
-            android:key="tags-section"
-            android:title="@string/tags_section">
+        android:icon="@drawable/ic_tags"
+        android:key="tags-section"
+        android:title="@string/tags_section">
 
         <androidx.preference.SwitchPreference
-                android:defaultValue="true"
-                android:key="tags-enabled"
-                android:summary="@string/tags_enabled_summary"
-                android:title="@string/tags_enabled" />
+            android:defaultValue="true"
+            android:key="tags-enabled"
+            android:summary="@string/tags_enabled_summary"
+            android:title="@string/tags_enabled" />
         <androidx.preference.SwitchPreference
-                android:defaultValue="true"
-                android:dependency="tags-enabled"
-                android:key="fuzzy-search-tags"
-                android:summary="@string/fuzzy_search_tags_summary"
-                android:title="@string/fuzzy_search_tags" />
+            android:defaultValue="true"
+            android:dependency="tags-enabled"
+            android:key="fuzzy-search-tags"
+            android:summary="@string/fuzzy_search_tags_summary"
+            android:title="@string/fuzzy_search_tags" />
 
     </androidx.preference.PreferenceCategory>
 
     <!-- Tags Menu -->
     <PreferenceCategory
-            android:key="tags-menu-section"
-            android:title="@string/tags_menu_section">
+        android:key="tags-menu-section"
+        android:title="@string/tags_menu_section">
 
         <androidx.preference.SwitchPreference
-                android:defaultValue="false"
-                android:key="tags-menu-icons"
+            android:defaultValue="false"
+            android:key="tags-menu-icons"
             android:title="@string/tags_menu_icons" />
 
         <MultiSelectListPreference
@@ -245,136 +256,136 @@
 
     <!-- Wallpaper / LWP - LiveWallpaper -->
     <PreferenceCategory
-            android:icon="@drawable/ic_wallpaper"
-            android:key="wallpaper-holder"
-            android:title="@string/title_wallpaper">
+        android:icon="@drawable/ic_wallpaper"
+        android:key="wallpaper-holder"
+        android:title="@string/title_wallpaper">
         <SwitchPreference
-                android:defaultValue="true"
-                android:key="lwp-scroll-pages"
-                android:title="@string/lwp_scroll_pages" />
+            android:defaultValue="true"
+            android:key="lwp-scroll-pages"
+            android:title="@string/lwp_scroll_pages" />
         <ListPreference
-                android:defaultValue="1"
-                android:dependency="lwp-scroll-pages"
-                android:entries="@array/lwpPageCountVerticalEntries"
-                android:entryValues="@array/lwpPageCountVerticalValues"
-                android:key="lwp-page-count-vertical"
-                android:title="@string/lwp_page_count_vertical" />
+            android:defaultValue="1"
+            android:dependency="lwp-scroll-pages"
+            android:entries="@array/lwpPageCountVerticalEntries"
+            android:entryValues="@array/lwpPageCountVerticalValues"
+            android:key="lwp-page-count-vertical"
+            android:title="@string/lwp_page_count_vertical" />
         <ListPreference
-                android:defaultValue="3"
-                android:dependency="lwp-scroll-pages"
-                android:entries="@array/lwpPageCountHorizontalEntries"
-                android:entryValues="@array/lwpPageCountHorizontalValues"
-                android:key="lwp-page-count-horizontal"
-                android:title="@string/lwp_page_count_horizontal" />
+            android:defaultValue="3"
+            android:dependency="lwp-scroll-pages"
+            android:entries="@array/lwpPageCountHorizontalEntries"
+            android:entryValues="@array/lwpPageCountHorizontalValues"
+            android:key="lwp-page-count-horizontal"
+            android:title="@string/lwp_page_count_horizontal" />
         <SwitchPreference
-                android:defaultValue="true"
-                android:key="lwp-touch"
-                android:title="@string/lwp_touch" />
+            android:defaultValue="true"
+            android:key="lwp-touch"
+            android:title="@string/lwp_touch" />
         <SwitchPreference
-                android:defaultValue="false"
-                android:key="lwp-drag"
-                android:summary="@string/lwp_drag_desc"
-                android:title="@string/lwp_drag" />
+            android:defaultValue="false"
+            android:key="lwp-drag"
+            android:summary="@string/lwp_drag_desc"
+            android:title="@string/lwp_drag" />
         <SwitchPreference
-                android:defaultValue="false"
-                android:key="wp-drag-animate"
-                android:summary="@string/wp_drag_animate_desc"
-                android:title="@string/wp_drag_animate" />
+            android:defaultValue="false"
+            android:key="wp-drag-animate"
+            android:summary="@string/wp_drag_animate_desc"
+            android:title="@string/wp_drag_animate" />
         <SwitchPreference
-                android:defaultValue="true"
-                android:dependency="wp-drag-animate"
-                android:key="wp-animate-center"
-                android:summary="@string/wp_animate_center_desc"
-                android:title="@string/wp_animate_center" />
+            android:defaultValue="true"
+            android:dependency="wp-drag-animate"
+            android:key="wp-animate-center"
+            android:summary="@string/wp_animate_center_desc"
+            android:title="@string/wp_animate_center" />
         <SwitchPreference
-                android:defaultValue="false"
-                android:dependency="wp-drag-animate"
-                android:key="wp-animate-sides"
-                android:summary="@string/wp_animate_sides_desc"
-                android:title="@string/wp_animate_sides" />
+            android:defaultValue="false"
+            android:dependency="wp-drag-animate"
+            android:key="wp-animate-sides"
+            android:summary="@string/wp_animate_sides_desc"
+            android:title="@string/wp_animate_sides" />
         <SwitchPreference
-                android:defaultValue="true"
-                android:key="lock-portrait"
-                android:title="@string/lock_portrait" />
+            android:defaultValue="true"
+            android:key="lock-portrait"
+            android:title="@string/lock_portrait" />
         <SwitchPreference
-                android:defaultValue="true"
-                android:key="sensor-orientation"
-                android:title="@string/sensor_orientation" />
+            android:defaultValue="true"
+            android:key="sensor-orientation"
+            android:title="@string/sensor_orientation" />
     </PreferenceCategory>
 
     <!-- Memory -->
     <androidx.preference.PreferenceCategory
-            android:icon="@drawable/ic_memory"
-            android:key="memory-section"
-            android:title="@string/memory_section">
+        android:icon="@drawable/ic_memory"
+        android:key="memory-section"
+        android:title="@string/memory_section">
 
         <androidx.preference.SwitchPreference
-                android:defaultValue="true"
-                android:key="cache-drawable"
-                android:title="@string/cache_drawable" />
+            android:defaultValue="true"
+            android:key="cache-drawable"
+            android:title="@string/cache_drawable" />
 
         <androidx.preference.SwitchPreference
-                android:defaultValue="true"
-                android:dependency="cache-drawable"
-                android:key="cache-half-apps"
-                android:summary="@string/cache_half_apps_summary"
-                android:title="@string/cache_half_apps" />
+            android:defaultValue="true"
+            android:dependency="cache-drawable"
+            android:key="cache-half-apps"
+            android:summary="@string/cache_half_apps_summary"
+            android:title="@string/cache_half_apps" />
 
         <androidx.preference.SwitchPreference
-                android:defaultValue="false"
-                android:dependency="cache-drawable"
-                android:key="screen-off-cache-clear"
-                android:summary="@string/screen_off_cache_clear_summary"
-                android:title="@string/screen_off_cache_clear" />
+            android:defaultValue="false"
+            android:dependency="cache-drawable"
+            android:key="screen-off-cache-clear"
+            android:summary="@string/screen_off_cache_clear_summary"
+            android:title="@string/screen_off_cache_clear" />
 
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:dialogLayout="@layout/pref_confirm"
-                android:key="reset-cached-app-icons"
-                android:title="@string/reset_cached_app_icons" />
+            android:dialogLayout="@layout/pref_confirm"
+            android:key="reset-cached-app-icons"
+            android:title="@string/reset_cached_app_icons" />
 
     </androidx.preference.PreferenceCategory>
 
     <!-- Providers -->
     <androidx.preference.PreferenceCategory
-            android:key="provider-section"
-            android:title="@string/provider_section"
-            app:initialExpandedChildrenCount="4">
+        android:key="provider-section"
+        android:title="@string/provider_section"
+        app:initialExpandedChildrenCount="4">
 
         <androidx.preference.SwitchPreference
-                android:defaultValue="true"
-                android:key="enable-calculator"
-                android:title="@string/enable_calculator" />
+            android:defaultValue="true"
+            android:key="enable-calculator"
+            android:title="@string/enable_calculator" />
 
         <androidx.preference.SwitchPreference
-                android:defaultValue="true"
-                android:key="enable-dial"
-                android:title="@string/enable_dial" />
+            android:defaultValue="true"
+            android:key="enable-dial"
+            android:title="@string/enable_dial" />
 
         <androidx.preference.SwitchPreference
-                android:defaultValue="true"
-                android:key="enable-contacts"
-                android:title="@string/enable_contacts" />
+            android:defaultValue="true"
+            android:key="enable-contacts"
+            android:title="@string/enable_contacts" />
 
         <androidx.preference.SwitchPreference
-                android:defaultValue="true"
-                android:dependency="enable-search"
-                android:key="enable-url"
-                android:title="@string/enable_url" />
+            android:defaultValue="true"
+            android:dependency="enable-search"
+            android:key="enable-url"
+            android:title="@string/enable_url" />
 
         <androidx.preference.SwitchPreference
-                android:defaultValue="true"
-                android:key="enable-search"
-                android:title="@string/enable_search" />
+            android:defaultValue="true"
+            android:key="enable-search"
+            android:title="@string/enable_search" />
 
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:dependency="enable-search"
-                android:dialogLayout="@layout/edit_search_engines"
-                android:key="edit-search-engines"
-                android:summary="@string/edit_search_engines_summary"
-                android:title="@string/edit_search_engines" />
+            android:dependency="enable-search"
+            android:dialogLayout="@layout/edit_search_engines"
+            android:key="edit-search-engines"
+            android:summary="@string/edit_search_engines_summary"
+            android:title="@string/edit_search_engines" />
 
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:dependency="enable-search"
+            android:dependency="enable-search"
             android:dialogLayout="@layout/add_search_engine"
             android:key="add-search-engine"
             android:title="@string/add_search_engine" />
@@ -401,53 +412,53 @@
         <!-- This is here just to set the default value and be saved in backup, not visible for user -->
         <MultiSelectListPreference
             android:key="selected-search-provider-names"
-                app:isPreferenceVisible="false" />
+            app:isPreferenceVisible="false" />
 
         <!-- This is here just to set the default value and be saved in backup, not visible for user -->
         <Preference
-                android:key="default-search-provider"
-                app:isPreferenceVisible="false" />
+            android:key="default-search-provider"
+            app:isPreferenceVisible="false" />
 
     </androidx.preference.PreferenceCategory>
 
     <!-- Debug -->
     <androidx.preference.PreferenceCategory
-            android:icon="@drawable/ic_bug"
-            android:key="debug-section"
-            android:title="@string/debug_section"
-            app:initialExpandedChildrenCount="0">
+        android:icon="@drawable/ic_bug"
+        android:key="debug-section"
+        android:title="@string/debug_section"
+        app:initialExpandedChildrenCount="0">
 
         <androidx.preference.SwitchPreference
-                android:defaultValue="false"
-                android:key="debug-provider-status"
-                android:title="@string/debug_provider_status" />
+            android:defaultValue="false"
+            android:key="debug-provider-status"
+            android:title="@string/debug_provider_status" />
 
         <androidx.preference.SwitchPreference
-                android:defaultValue="false"
-                android:key="debug-widget-add-info"
-                android:title="@string/debug_widget_add_info" />
+            android:defaultValue="false"
+            android:key="debug-widget-add-info"
+            android:title="@string/debug_widget_add_info" />
 
         <androidx.preference.SwitchPreference
-                android:defaultValue="false"
-                android:key="debug-widget-info"
-                android:title="@string/debug_widget_info" />
+            android:defaultValue="false"
+            android:key="debug-widget-info"
+            android:title="@string/debug_widget_info" />
 
         <androidx.preference.SwitchPreference
-                android:defaultValue="false"
-                android:key="debug-item-relevance"
-                android:title="@string/debug_item_relevance" />
+            android:defaultValue="false"
+            android:key="debug-item-relevance"
+            android:title="@string/debug_item_relevance" />
 
         <androidx.preference.SwitchPreference
-                android:defaultValue="false"
-                android:key="debug-ksh-touch"
-                android:summary="@string/debug_ksh_touch_summary"
-                android:title="@string/debug_ksh_touch" />
+            android:defaultValue="false"
+            android:key="debug-ksh-touch"
+            android:summary="@string/debug_ksh_touch_summary"
+            android:title="@string/debug_ksh_touch" />
 
         <androidx.preference.SwitchPreference
-                android:defaultValue="false"
-                android:key="debug-favorites"
-                android:summary="@string/debug_favorites_summary"
-                android:title="@string/debug_favorites" />
+            android:defaultValue="false"
+            android:key="debug-favorites"
+            android:summary="@string/debug_favorites_summary"
+            android:title="@string/debug_favorites" />
 
     </androidx.preference.PreferenceCategory>
 
