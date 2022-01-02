@@ -61,6 +61,7 @@ import rocks.tbog.tblauncher.result.CustomRecycleLayoutManager;
 import rocks.tbog.tblauncher.result.RecycleAdapter;
 import rocks.tbog.tblauncher.result.RecycleScrollListener;
 import rocks.tbog.tblauncher.result.ResultHelper;
+import rocks.tbog.tblauncher.result.ResultItemDecoration;
 import rocks.tbog.tblauncher.searcher.ISearchActivity;
 import rocks.tbog.tblauncher.searcher.QuerySearcher;
 import rocks.tbog.tblauncher.searcher.Searcher;
@@ -203,6 +204,9 @@ public class Behaviour implements ISearchActivity {
         mResultList.setAdapter(mResultAdapter);
         mResultList.addOnScrollListener(recycleScrollListener);
 //        mResultList.addOnLayoutChangeListener(recycleScrollListener);
+
+        int vertical = getContext().getResources().getDimensionPixelSize(R.dimen.result_margin_vertical);
+        mResultList.addItemDecoration(new ResultItemDecoration(0, vertical, true));
 
         setListLayout();
     }
@@ -567,11 +571,11 @@ public class Behaviour implements ISearchActivity {
                 } else {
                     // try to execute the action
                     mLauncherButton.postDelayed(() ->
-                            TBApplication.dataHandler(getContext()).runAfterLoadOver(() -> {
-                                if (!TBApplication.state().isResultListVisible())
-                                    executeAction(openResult, "dm-search-open-result");
-                            }),
-                        KEYBOARD_ANIMATION_DELAY);
+                                                TBApplication.dataHandler(getContext()).runAfterLoadOver(() -> {
+                                                    if (!TBApplication.state().isResultListVisible())
+                                                        executeAction(openResult, "dm-search-open-result");
+                                                }),
+                    KEYBOARD_ANIMATION_DELAY);
                 }
                 break;
             case WIDGET:
@@ -622,22 +626,22 @@ public class Behaviour implements ISearchActivity {
             mNotificationBackground.animate().cancel();
         if (animate) {
             mNotificationBackground.animate()
-                .translationY(-statusHeight)
-                .setStartDelay(startDelay)
-                .setDuration(UI_ANIMATION_DURATION)
-                .setInterpolator(new AccelerateInterpolator())
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationStart(Animator animation) {
-                        TBApplication.state().setNotificationBar(LauncherState.AnimatedVisibility.ANIM_TO_HIDDEN);
-                    }
+            .translationY(-statusHeight)
+            .setStartDelay(startDelay)
+            .setDuration(UI_ANIMATION_DURATION)
+            .setInterpolator(new AccelerateInterpolator())
+            .setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    TBApplication.state().setNotificationBar(LauncherState.AnimatedVisibility.ANIM_TO_HIDDEN);
+                }
 
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        TBApplication.state().setNotificationBar(LauncherState.AnimatedVisibility.HIDDEN);
-                    }
-                })
-                .start();
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    TBApplication.state().setNotificationBar(LauncherState.AnimatedVisibility.HIDDEN);
+                }
+            })
+            .start();
         } else {
             TBApplication.state().setNotificationBar(LauncherState.AnimatedVisibility.HIDDEN);
             mNotificationBackground.setTranslationY(-statusHeight);
@@ -662,22 +666,22 @@ public class Behaviour implements ISearchActivity {
             mNotificationBackground.animate().cancel();
         if (animate) {
             mNotificationBackground.animate()
-                .translationY(0f)
-                .setStartDelay(0)
-                .setDuration(UI_ANIMATION_DURATION)
-                .setInterpolator(new LinearInterpolator())
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationStart(Animator animation) {
-                        TBApplication.state().setNotificationBar(LauncherState.AnimatedVisibility.ANIM_TO_VISIBLE);
-                    }
+            .translationY(0f)
+            .setStartDelay(0)
+            .setDuration(UI_ANIMATION_DURATION)
+            .setInterpolator(new LinearInterpolator())
+            .setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    TBApplication.state().setNotificationBar(LauncherState.AnimatedVisibility.ANIM_TO_VISIBLE);
+                }
 
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        TBApplication.state().setNotificationBar(LauncherState.AnimatedVisibility.VISIBLE);
-                    }
-                })
-                .start();
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    TBApplication.state().setNotificationBar(LauncherState.AnimatedVisibility.VISIBLE);
+                }
+            })
+            .start();
         } else {
             TBApplication.state().setNotificationBar(LauncherState.AnimatedVisibility.VISIBLE);
             mNotificationBackground.setTranslationY(0f);
@@ -690,25 +694,25 @@ public class Behaviour implements ISearchActivity {
         mSearchBarContainer.animate().cancel();
         mSearchBarContainer.setVisibility(View.VISIBLE);
         mSearchBarContainer.animate()
-            .setStartDelay(0)
-            .alpha(1f)
-            .translationY(0f)
-            .setDuration(UI_ANIMATION_DURATION)
-            .setInterpolator(new DecelerateInterpolator())
-            .setListener(new AnimatorListenerAdapter() {
-                @Override
-                public void onAnimationStart(Animator animation) {
-                    TBApplication.state().setSearchBar(LauncherState.AnimatedVisibility.ANIM_TO_VISIBLE);
-                }
+        .setStartDelay(0)
+        .alpha(1f)
+        .translationY(0f)
+        .setDuration(UI_ANIMATION_DURATION)
+        .setInterpolator(new DecelerateInterpolator())
+        .setListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                TBApplication.state().setSearchBar(LauncherState.AnimatedVisibility.ANIM_TO_VISIBLE);
+            }
 
-                @Override
-                public void onAnimationEnd(Animator animation) {
-                    TBApplication.state().setSearchBar(LauncherState.AnimatedVisibility.VISIBLE);
-                    if (PrefCache.linkKeyboardAndSearchBar(mPref))
-                        showKeyboard();
-                }
-            })
-            .start();
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                TBApplication.state().setSearchBar(LauncherState.AnimatedVisibility.VISIBLE);
+                if (PrefCache.linkKeyboardAndSearchBar(mPref))
+                    showKeyboard();
+            }
+        })
+        .start();
 
         mSearchEditText.requestFocus();
     }
@@ -737,24 +741,24 @@ public class Behaviour implements ISearchActivity {
         mSearchBarContainer.animate().cancel();
         if (animate) {
             mSearchBarContainer.animate()
-                .setStartDelay(startDelay)
-                .alpha(0f)
-                .translationY(translationY)
-                .setDuration(UI_ANIMATION_DURATION)
-                .setInterpolator(new AccelerateInterpolator())
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationStart(Animator animation) {
-                        TBApplication.state().setSearchBar(LauncherState.AnimatedVisibility.ANIM_TO_HIDDEN);
-                    }
+            .setStartDelay(startDelay)
+            .alpha(0f)
+            .translationY(translationY)
+            .setDuration(UI_ANIMATION_DURATION)
+            .setInterpolator(new AccelerateInterpolator())
+            .setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationStart(Animator animation) {
+                    TBApplication.state().setSearchBar(LauncherState.AnimatedVisibility.ANIM_TO_HIDDEN);
+                }
 
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        TBApplication.state().setSearchBar(LauncherState.AnimatedVisibility.HIDDEN);
-                        mSearchBarContainer.setVisibility(View.GONE);
-                    }
-                })
-                .start();
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    TBApplication.state().setSearchBar(LauncherState.AnimatedVisibility.HIDDEN);
+                    mSearchBarContainer.setVisibility(View.GONE);
+                }
+            })
+            .start();
         } else {
             TBApplication.state().setSearchBar(LauncherState.AnimatedVisibility.HIDDEN);
             mSearchBarContainer.setAlpha(0f);
@@ -920,15 +924,15 @@ public class Behaviour implements ISearchActivity {
             TBApplication.state().setResultList(LauncherState.AnimatedVisibility.ANIM_TO_VISIBLE);
             mResultLayout.setAlpha(0f);
             mResultLayout.animate()
-                .alpha(1f)
-                .setDuration(UI_ANIMATION_DURATION)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        TBApplication.state().setResultList(LauncherState.AnimatedVisibility.VISIBLE);
-                    }
-                })
-                .start();
+            .alpha(1f)
+            .setDuration(UI_ANIMATION_DURATION)
+            .setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    TBApplication.state().setResultList(LauncherState.AnimatedVisibility.VISIBLE);
+                }
+            })
+            .start();
         } else {
             TBApplication.state().setResultList(LauncherState.AnimatedVisibility.VISIBLE);
             mResultLayout.setAlpha(1f);
@@ -944,17 +948,17 @@ public class Behaviour implements ISearchActivity {
         if (animate) {
             TBApplication.state().setResultList(LauncherState.AnimatedVisibility.ANIM_TO_HIDDEN);
             mResultLayout.animate()
-                .alpha(0f)
-                .setDuration(UI_ANIMATION_DURATION)
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        TBApplication.state().setResultList(LauncherState.AnimatedVisibility.HIDDEN);
-                        Log.d(TAG, "mResultLayout set INVISIBLE");
-                        mResultLayout.setVisibility(View.INVISIBLE);
-                    }
-                })
-                .start();
+            .alpha(0f)
+            .setDuration(UI_ANIMATION_DURATION)
+            .setListener(new AnimatorListenerAdapter() {
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    TBApplication.state().setResultList(LauncherState.AnimatedVisibility.HIDDEN);
+                    Log.d(TAG, "mResultLayout set INVISIBLE");
+                    mResultLayout.setVisibility(View.INVISIBLE);
+                }
+            })
+            .start();
         } else {
             TBApplication.state().setResultList(LauncherState.AnimatedVisibility.HIDDEN);
             Log.d(TAG, "mResultLayout set INVISIBLE");
@@ -1022,8 +1026,9 @@ public class Behaviour implements ISearchActivity {
     }
 
     public void setListLayout() {
+        Context context = getContext();
         // update adapter draw flags
-        mResultAdapter.setGridLayout(getContext(), false);
+        mResultAdapter.setGridLayout(context, false);
 
         // get layout manager
         RecyclerView.LayoutManager layoutManager = mResultList.getLayoutManager();
@@ -1031,11 +1036,15 @@ public class Behaviour implements ISearchActivity {
             mResultList.setLayoutManager(layoutManager = new CustomRecycleLayoutManager());
 
         CustomRecycleLayoutManager lm = (CustomRecycleLayoutManager) layoutManager;
-        lm.setFirstAtBottom(true);
+        lm.setBottomToTop(PrefCache.firstAtBottom(mPref));
         lm.setColumns(1, false);
     }
 
     public void setGridLayout() {
+        setGridLayout(3);
+    }
+
+    public void setGridLayout(int columnCount) {
         // update adapter draw flags
         mResultAdapter.setGridLayout(getContext(), true);
 
@@ -1045,9 +1054,9 @@ public class Behaviour implements ISearchActivity {
             mResultList.setLayoutManager(layoutManager = new CustomRecycleLayoutManager());
 
         CustomRecycleLayoutManager lm = (CustomRecycleLayoutManager) layoutManager;
-        lm.setFirstAtBottom(true);
-        lm.setRightToLeft(true);
-        lm.setColumns(3, false);
+        lm.setBottomToTop(PrefCache.firstAtBottom(mPref));
+        lm.setRightToLeft(PrefCache.rightToLeft(mPref));
+        lm.setColumns(columnCount, false);
     }
 
     public boolean isGridLayout() {

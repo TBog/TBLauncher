@@ -67,13 +67,17 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
         mReverseAdapter = reverseAdapter;
     }
 
-    public void setFirstAtBottom(boolean firstAtBottom) {
+    public void setBottomToTop(boolean bottomToTop) {
         assertNotInLayoutOrScroll(null);
-        if (mBottomToTop == firstAtBottom) {
+        if (mBottomToTop == bottomToTop) {
             return;
         }
-        mBottomToTop = firstAtBottom;
+        mBottomToTop = bottomToTop;
         requestLayout();
+    }
+
+    public boolean isBottomToTop() {
+        return mBottomToTop;
     }
 
     public void setRightToLeft(boolean rightToLeft) {
@@ -83,6 +87,10 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
         }
         mRightToLeft = rightToLeft;
         requestLayout();
+    }
+
+    public boolean isRightToLeft() {
+        return mRightToLeft;
     }
 
     @Override
@@ -141,11 +149,17 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
         int offset;
         View child = getChildAt(0);
         if (child != null) {
-            offset = getDecoratedTop(child) - getRowPosition(getRowIdx(adapterPosition(child)));
-            offset -= getPaddingTop();
+            int rowPosition = getRowPosition(getRowIdx(adapterPosition(child)));
+            rowPosition -= getPaddingTop();
+
+            int childTop = getDecoratedTop(child);
+            childTop -= getPaddingTop();
+
+            offset = rowPosition - childTop;
+
             if (mBottomToTop) {
-                // invert scroll direction
-                offset = -mRowInfo.get(mRowInfo.size() - 1).pos - offset - getVerticalSpace();
+                // align to bottom
+                offset = -mRowInfo.get(mRowInfo.size() - 1).pos + offset - getVerticalSpace();
             }
         } else {
             final View view = findBottomVisibleItemView();
@@ -524,6 +538,7 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
                  " mFirstVisiblePosition=" + mFirstVisiblePosition +
                  " scrollOffset=" + scrollOffset +
                  " paddingTop=" + getPaddingTop() +
+                 " paddingBottom=" + getPaddingBottom() +
                  " verticalSpace=" + getVerticalSpace());
 
         if (mRefreshViews) {
@@ -533,7 +548,7 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
             mViewCache.clear();
             detachAndScrapAttachedViews(recycler);
         } else {
-            logDebug("detachViews"+
+            logDebug("detachViews" +
                      " viewCache.size=" + mViewCache.size());
             // Temporarily detach all views. We do this to easily reorder them.
             for (int i = 0; i < mViewCache.size(); i++) {
@@ -555,6 +570,9 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
 
         //TODO: start laying out children from the ones we have in cache;
         // this way there is less chance of moving already cached children
+
+        //TODO: if (mBottomToTop==true) and we scroll up (thumb goes up) the rows should
+        // update in reverse (starting from current row to 0)
 
         // layout rows
         int visibleRowIdx = 0;
@@ -581,10 +599,9 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
             rowHelper.layoutRow(rowIdx, posX, scrolledRowPosition);
 
             if (rowHeight != rowHelper.getDecoratedHeight()) {
-                //TODO: if (mBottomToTop==true) and we scroll up (thumb goes up) the rows should
-                // update in reverse (starting from current row to 0)
                 updateRowHeight(rowIdx, rowHelper.getDecoratedHeight());
-                rowHelper.offsetVertical(rowHeight - rowHelper.getDecoratedHeight());
+                if (mBottomToTop) // same as (rowPosition != getRowPosition(rowIdx))
+                    rowHelper.offsetVertical(rowHeight - rowHelper.getDecoratedHeight());
             }
 
             visibleRowIdx += 1;
@@ -1066,10 +1083,14 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
             RecyclerView.LayoutParams p = (RecyclerView.LayoutParams) v.getLayoutParams();
             info += "lp" + p.getViewLayoutPosition();
             info += "ap" + p.getViewAdapterPosition();
-            if (p.viewNeedsUpdate()) info += "u";
-            if (p.isItemChanged()) info += "c";
-            if (p.isItemRemoved()) info += "r";
-            if (p.isViewInvalid()) info += "i";
+            if (p.viewNeedsUpdate())
+                info += "u";
+            if (p.isItemChanged())
+                info += "c";
+            if (p.isItemRemoved())
+                info += "r";
+            if (p.isViewInvalid())
+                info += "i";
         }
         return info;
     }
