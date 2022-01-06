@@ -140,7 +140,9 @@
     <string name="action_reload">Reload</string>
     <string name="action_toggle_grid">Toggle grid</string>
     <string name="action_show_apps">Apps A→Z</string>
+    <string name="action_show_apps_grid4">App grid A→Z</string>
     <string name="action_show_apps_reversed">Apps Z→A</string>
+    <string name="action_show_apps_grid4_reversed">App grid Z→A</string>
     <string name="action_show_contacts">Contacts A→Z</string>
     <string name="action_show_contacts_reversed">Contacts Z→A</string>
     <string name="action_show_shortcuts">Shortcuts A→Z</string>
