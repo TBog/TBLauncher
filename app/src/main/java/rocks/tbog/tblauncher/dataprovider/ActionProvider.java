@@ -22,9 +22,9 @@ import rocks.tbog.tblauncher.utils.DebugInfo;
 
 public class ActionProvider extends DBProvider<ActionEntry> {
 
-    private static final ActionEntry[] s_entries = new ActionEntry[17];
+    private static final ActionEntry[] s_entries = new ActionEntry[19];
     @StringRes
-    private static final int[] s_names = new int[17];
+    private static final int[] s_names = new int[19];
 
     static {
         int cnt = 0;
@@ -44,13 +44,15 @@ public class ActionProvider extends DBProvider<ActionEntry> {
             s_names[cnt] = R.string.action_toggle_grid;
             s_entries[cnt++] = actionEntry;
         }
+        // show apps sorted by name
         {
             String id = ActionEntry.SCHEME + "show/apps/byName";
-            ActionEntry actionEntry = new ActionEntry(id, R.drawable.ic_apps_az);
+            ActionEntry actionEntry = new ActionEntry(id, R.drawable.ic_apps_list_az);
             actionEntry.setAction((v, flags) -> {
-                Context ctx = v.getContext();
-                Provider<? extends EntryItem> provider = TBApplication.dataHandler(ctx).getAppProvider();
-                TBApplication.quickList(ctx).toggleProvider(v, provider, EntryItem.NAME_COMPARATOR);
+                TBApplication app = TBApplication.getApplication(v.getContext());
+                Provider<? extends EntryItem> provider = app.getDataHandler().getAppProvider();
+                app.quickList().toggleProvider(v, provider, EntryItem.NAME_COMPARATOR);
+                app.behaviour().setListLayout();
             });
             s_names[cnt] = R.string.action_show_apps;
             s_entries[cnt++] = actionEntry;
@@ -58,15 +60,43 @@ public class ActionProvider extends DBProvider<ActionEntry> {
         // show apps sorted by name in reverse order
         {
             String id = ActionEntry.SCHEME + "show/apps/byNameReversed";
-            ActionEntry actionEntry = new ActionEntry(id, R.drawable.ic_apps_za);
+            ActionEntry actionEntry = new ActionEntry(id, R.drawable.ic_apps_list_za);
             actionEntry.setAction((v, flags) -> {
-                Context ctx = v.getContext();
-                Provider<? extends EntryItem> provider = TBApplication.dataHandler(ctx).getAppProvider();
-                TBApplication.quickList(ctx).toggleProvider(v, provider, Collections.reverseOrder(EntryItem.NAME_COMPARATOR));
+                TBApplication app = TBApplication.getApplication(v.getContext());
+                Provider<? extends EntryItem> provider = app.getDataHandler().getAppProvider();
+                app.quickList().toggleProvider(v, provider, Collections.reverseOrder(EntryItem.NAME_COMPARATOR));
+                app.behaviour().setListLayout();
             });
             s_names[cnt] = R.string.action_show_apps_reversed;
             s_entries[cnt++] = actionEntry;
         }
+        // show apps in a 4 column grid sorted by name
+        {
+            String id = ActionEntry.SCHEME + "show/grid4c/apps/byName";
+            ActionEntry actionEntry = new ActionEntry(id, R.drawable.ic_apps_grid_az);
+            actionEntry.setAction((v, flags) -> {
+                TBApplication app = TBApplication.getApplication(v.getContext());
+                Provider<? extends EntryItem> provider = app.getDataHandler().getAppProvider();
+                app.quickList().toggleProvider(v, provider, EntryItem.NAME_COMPARATOR);
+                app.behaviour().setGridLayout(4);
+            });
+            s_names[cnt] = R.string.action_show_apps_grid4;
+            s_entries[cnt++] = actionEntry;
+        }
+        // show apps in a 4 column grid sorted by name in reverse order
+        {
+            String id = ActionEntry.SCHEME + "show/grid4c/apps/byNameReversed";
+            ActionEntry actionEntry = new ActionEntry(id, R.drawable.ic_apps_grid_za);
+            actionEntry.setAction((v, flags) -> {
+                TBApplication app = TBApplication.getApplication(v.getContext());
+                Provider<? extends EntryItem> provider = app.getDataHandler().getAppProvider();
+                app.quickList().toggleProvider(v, provider, Collections.reverseOrder(EntryItem.NAME_COMPARATOR));
+                app.behaviour().setGridLayout(4);
+            });
+            s_names[cnt] = R.string.action_show_apps_grid4_reversed;
+            s_entries[cnt++] = actionEntry;
+        }
+
         // show contacts sorted by name
         {
             String id = ActionEntry.SCHEME + "show/contacts/byName";
