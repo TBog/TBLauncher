@@ -1,7 +1,6 @@
 package rocks.tbog.tblauncher.result;
 
 import android.util.Log;
-import android.util.SparseArray;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
@@ -16,6 +15,7 @@ import java.util.Arrays;
 
 import rocks.tbog.tblauncher.BuildConfig;
 import rocks.tbog.tblauncher.R;
+import rocks.tbog.tblauncher.utils.SparseArrayWrapper;
 
 public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager implements ReversibleAdapterRecyclerLayoutManager {
 
@@ -47,7 +47,7 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
     private boolean mRefreshViews = false;
 
     // Reusable array. This should only be used used transiently and should not be used to retain any state over time.
-    private SparseArray<View> mViewCache = null;
+    private final SparseArrayWrapper<View> mViewCache = new SparseArrayWrapper<>();
 
     private static class RowInfo {
         /* row alignment offset. When layout is bottom to top the first row has pos==-height */
@@ -524,11 +524,6 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
          * detachView() is a lightweight operation that we can use to
          * quickly reorder views without a full add/remove.
          */
-        if (mViewCache == null)
-            mViewCache = new SparseArray<>(Math.max(mVisibleRows * mColCount, getChildCount()));
-        else
-            mViewCache.clear();
-
         cacheChildren();
 
         // compute scroll position after we populate `mViewCache`
@@ -542,7 +537,8 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
                  " verticalSpace=" + getVerticalSpace());
 
         if (mRefreshViews) {
-            logDebug("detachAndScrapAttachedViews");
+            logDebug("detachAndScrapAttachedViews" +
+                     " viewCache.size=" + mViewCache.size());
             // If we want to refresh all views, just scrap them and let the recycler rebind them
             mRefreshViews = false;
             mViewCache.clear();
@@ -551,16 +547,7 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
             logDebug("detachViews" +
                      " viewCache.size=" + mViewCache.size());
             // Temporarily detach all views. We do this to easily reorder them.
-            for (int i = 0; i < mViewCache.size(); i++) {
-                View child = mViewCache.valueAt(i);
-                // When an update is in order, scrap the view and let the recycler rebind it
-                if (viewNeedsUpdate(child)) {
-                    detachAndScrapView(child, recycler);
-                    mViewCache.removeAt(i--);
-                } else {
-                    detachView(child);
-                }
-            }
+            detachCachedChildren(recycler);
         }
 
         final int posX = getPaddingLeft() + (mRightToLeft ? (getHorizontalSpace() - mDecoratedChildWidth) : 0);
@@ -624,13 +611,31 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
      * Cache all views by their existing position
      */
     private void cacheChildren() {
-        for (int i = 0; i < getChildCount(); i++) {
+        mViewCache.clear();
+
+        int childCount = getChildCount();
+        mViewCache.ensureCapacity(childCount);
+
+        for (int i = 0; i < childCount; i++) {
             View child = getChildAt(i);
             if (child == null)
                 throw new IllegalStateException("null child when count=" + getChildCount() + " and idx=" + i);
             int position = adapterPosition(child);
             mViewCache.put(position, child);
             logDebug("info #" + i + " pos=" + position + " " + getDebugInfo(child) + " " + getDebugName(child));
+        }
+    }
+
+    private void detachCachedChildren(RecyclerView.Recycler recycler) {
+        for (int i = 0; i < mViewCache.size(); i++) {
+            View child = mViewCache.valueAt(i);
+            // When an update is in order, scrap the view and let the recycler rebind it
+            if (viewNeedsUpdate(child)) {
+                detachAndScrapView(child, recycler);
+                mViewCache.removeAt(i--);
+            } else {
+                detachView(child);
+            }
         }
     }
 
