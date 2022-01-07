@@ -1,34 +1,41 @@
 package rocks.tbog.tblauncher.entry;
 
-import android.content.ActivityNotFoundException;
 import android.content.Context;
-import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
-import android.util.Log;
+import android.util.Pair;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
-import rocks.tbog.tblauncher.R;
-import rocks.tbog.tblauncher.result.ResultHelper;
+import java.util.ArrayList;
+
 import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.Utilities;
 
-public final class UrlEntry extends SearchEntry {
-    public static final String SCHEME = "url://";
-    public final String query;
-    public final String url;
+public abstract class UrlEntry extends SearchEntry {
 
-    public UrlEntry(String query, String url) {
-        super(SCHEME + url);
-        this.query = query;
+    public final String url;
+    private static final ArrayList<Pair<String, String>> APP4URL;
+
+    static {
+        APP4URL = new ArrayList<>(5);
+        APP4URL.add(new Pair<>("https://encrypted.google.com", "com.google.android.googlequicksearchbox"));
+        APP4URL.add(new Pair<>("https://play.google.com/store", "com.android.vending"));
+        APP4URL.add(new Pair<>("https://start.duckduckgo.com", "com.duckduckgo.mobile.android"));
+        APP4URL.add(new Pair<>("https://www.google.com/maps", "com.google.android.apps.maps"));
+        APP4URL.add(new Pair<>("https://www.youtube.com", "com.google.android.youtube"));
+    }
+
+    public UrlEntry(@NonNull String id, @NonNull String url) {
+        super(id);
         this.url = url;
     }
 
@@ -38,22 +45,55 @@ public final class UrlEntry extends SearchEntry {
         return "";
     }
 
+    @Nullable
+    protected static Drawable getApplicationIconForUrl(@NonNull Context context, @Nullable String url) {
+        if (url == null || url.isEmpty())
+            return null;
+        for (Pair<String, String> pair : APP4URL) {
+            if (url.startsWith(pair.first)) {
+                try {
+                    return context.getPackageManager().getApplicationIcon(pair.second);
+                } catch (PackageManager.NameNotFoundException ignored) {
+                }
+            }
+
+        }
+        return null;
+    }
+
+    protected static boolean isGoogleSearch(String url) {
+        return url.startsWith("https://encrypted.google.com");
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    // Result methods
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    protected abstract String getResultText(Context context);
+
+    @Override
+    public Drawable getDefaultDrawable(Context context) {
+        Drawable appIcon = getApplicationIconForUrl(context, url);
+        if (appIcon != null)
+            return appIcon;
+        return super.getDefaultDrawable(context);
+    }
+
     @Override
     public void displayResult(@NonNull View view, int drawFlags) {
         Context context = view.getContext();
         TextView nameView = view.findViewById(android.R.id.text1);
         nameView.setTextColor(UIColors.getResultTextColor(view.getContext()));
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_NAME)) {
-            String text = String.format(context.getString(R.string.ui_item_visit), getName());
-            int pos = text.indexOf(query);
+            String text = getResultText(context);
+            int pos = text.lastIndexOf(query);
             if (pos >= 0) {
                 int color = UIColors.getResultHighlightColor(context);
                 SpannableString enriched = new SpannableString(text);
                 enriched.setSpan(
-                        new ForegroundColorSpan(color),
-                        pos,
-                        pos + query.length(),
-                        Spannable.SPAN_INCLUSIVE_EXCLUSIVE
+                    new ForegroundColorSpan(color),
+                    pos,
+                    pos + query.length(),
+                    Spannable.SPAN_INCLUSIVE_EXCLUSIVE
                 );
                 nameView.setText(enriched);
             } else {
@@ -68,12 +108,7 @@ public final class UrlEntry extends SearchEntry {
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
             ResultViewHelper.setIconColorFilter(appIcon, drawFlags);
             appIcon.setVisibility(View.VISIBLE);
-            Drawable icon = getApplicationIconForUrl(context, url);
-            if (icon != null) {
-                appIcon.setImageDrawable(icon);
-            } else {
-                appIcon.setImageResource(R.drawable.ic_search);
-            }
+            ResultViewHelper.setIconAsync(drawFlags, this, appIcon, AsyncSetUrlEntryIcon.class);
         } else {
             appIcon.setImageDrawable(null);
             appIcon.setVisibility(View.GONE);
@@ -82,16 +117,15 @@ public final class UrlEntry extends SearchEntry {
         ResultViewHelper.applyPreferences(drawFlags, nameView, appIcon);
     }
 
-    @Override
-    public void doLaunch(@NonNull View v, int flags) {
-        Context context = v.getContext();
-        Uri uri = Uri.parse(url);
-        Intent search = new Intent(Intent.ACTION_VIEW, uri);
-        search.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-        try {
-            context.startActivity(search);
-        } catch (ActivityNotFoundException e) {
-            Log.w("SearchResult", "Unable to run search for url: " + url);
+    public static class AsyncSetUrlEntryIcon extends ResultViewHelper.AsyncSetEntryDrawable {
+        public AsyncSetUrlEntryIcon(@NonNull ImageView image, int drawFlags, @NonNull EntryItem entryItem) {
+            super(image, drawFlags, entryItem);
+        }
+
+        @Override
+        public Drawable getDrawable(Context context) {
+            UrlEntry urlEntry = (UrlEntry) entryItem;
+            return urlEntry.getIconDrawable(context);
         }
     }
 }

@@ -67,7 +67,7 @@ import rocks.tbog.tblauncher.utils.Timer;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public class DataHandler extends BroadcastReceiver
-        implements SharedPreferences.OnSharedPreferenceChangeListener {
+    implements SharedPreferences.OnSharedPreferenceChangeListener {
     final static private String TAG = "DataHandler";
 
     public static final ExecutorService EXECUTOR_PROVIDERS;
@@ -81,8 +81,8 @@ public class DataHandler extends BroadcastReceiver
          workQueue: the queue used for holding tasks before they are executed. Default choices are SynchronousQueue for multi-threaded pools and LinkedBlockingQueue for single-threaded pools.
         */
         ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(
-                1, 1, 1, TimeUnit.SECONDS,
-                new LinkedBlockingQueue<>());
+            1, 1, 1, TimeUnit.SECONDS,
+            new LinkedBlockingQueue<>());
         threadPoolExecutor.allowCoreThreadTimeOut(true);
 
         EXECUTOR_PROVIDERS = threadPoolExecutor;
@@ -96,9 +96,9 @@ public class DataHandler extends BroadcastReceiver
      * List all known complex providers, that are defined as Android services
      */
     final static private List<String> PROVIDER_NAMES = Arrays.asList(
-            "app"
-            , "contacts"
-            , "shortcuts"
+        "app"
+        , "contacts"
+        , "shortcuts"
     );
 
     private final Context context;
@@ -198,7 +198,8 @@ public class DataHandler extends BroadcastReceiver
         // Search engine provider,
         {
             String providerName = "search";
-            if (prefs.getBoolean("enable-" + providerName, true)) {
+            if (prefs.getBoolean("enable-search", true) ||
+                prefs.getBoolean("enable-url", true)) {
                 ProviderEntry providerEntry = new ProviderEntry();
                 providerEntry.provider = new SearchProvider(context, prefs);
                 providers.put(providerName, providerEntry);
@@ -1109,21 +1110,11 @@ public class DataHandler extends BroadcastReceiver
         DBHelper.removeCustomStaticEntryIcon(context, entryId);
     }
 
-    public Bitmap getCustomStaticEntryIcon(StaticEntry staticEntry) {
+    public Bitmap getCustomEntryIconById(@NonNull String entryId) {
         final Context context = this.getContext();
         if (context == null)
             return null;
-        byte[] bytes = DBHelper.getCustomFavIcon(context, staticEntry.id);
-        if (bytes == null)
-            return null;
-        return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);
-    }
-
-    public Bitmap getCustomShortcutIcon(ShortcutEntry shortcutEntry) {
-        final Context context = this.getContext();
-        if (context == null)
-            return null;
-        byte[] bytes = DBHelper.getCustomFavIcon(context, shortcutEntry.id);
+        byte[] bytes = DBHelper.getCustomFavIcon(context, entryId);
         if (bytes == null)
             return null;
         return BitmapFactory.decodeByteArray(bytes, 0, bytes.length);

@@ -7,7 +7,6 @@ import android.webkit.URLUtil;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.collection.ArraySet;
-import androidx.preference.PreferenceManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,9 +17,9 @@ import java.util.regex.Pattern;
 
 import rocks.tbog.tblauncher.BuildConfig;
 import rocks.tbog.tblauncher.R;
+import rocks.tbog.tblauncher.entry.OpenUrlEntry;
 import rocks.tbog.tblauncher.entry.SearchEngineEntry;
 import rocks.tbog.tblauncher.entry.SearchEntry;
-import rocks.tbog.tblauncher.entry.UrlEntry;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.searcher.Searcher;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
@@ -105,7 +104,15 @@ public class SearchProvider extends SimpleProvider<SearchEntry> {
 
     @Override
     public boolean mayFindById(@NonNull String id) {
-        return false;
+        return id.startsWith(SearchEngineEntry.SCHEME);
+    }
+
+    @Override
+    public SearchEntry findById(@NonNull String id) {
+        for (SearchEngineEntry entry : searchEngines)
+            if (entry.id.equals(id))
+                return entry;
+        return null;
     }
 
     @Override
@@ -148,7 +155,7 @@ public class SearchProvider extends SimpleProvider<SearchEntry> {
                 if (URLUtil.isHttpUrl(guessedUrl))
                     guessedUrl = "https://" + guessedUrl.substring(7);
                 if (URLUtil.isValidUrl(guessedUrl)) {
-                    SearchEntry pojo = new UrlEntry(query, guessedUrl);
+                    SearchEntry pojo = new OpenUrlEntry(query, guessedUrl);
                     pojo.setName(guessedUrl);
                     FuzzyScore.MatchInfo matchInfo = fuzzyScore.match(pojo.normalizedName.codePoints);
                     pojo.setRelevance(pojo.normalizedName, matchInfo);

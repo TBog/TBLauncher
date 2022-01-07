@@ -7,9 +7,13 @@ import java.util.List;
 
 import rocks.tbog.tblauncher.db.ModRecord;
 import rocks.tbog.tblauncher.entry.EntryItem;
+import rocks.tbog.tblauncher.entry.SearchEntry;
 import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.handler.DataHandler;
 
+/**
+ * This provider is loaded last and is responsible for setting custom names and icons
+ */
 public class ModProvider extends DBProvider<EntryItem> {
 
     public ModProvider(Context context) {
@@ -46,6 +50,10 @@ public class ModProvider extends DBProvider<EntryItem> {
                         ((StaticEntry) entry).setCustomIcon();
                     if (fav.hasCustomName())
                         entry.setName(fav.displayName);
+                }
+                else if (entry instanceof SearchEntry) {
+                    if (fav.hasCustomIcon())
+                        ((SearchEntry) entry).setCustomIcon();
                 }
                 favList.add(entry);
             }

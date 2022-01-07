@@ -22,14 +22,15 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
-import rocks.tbog.tblauncher.handler.IconsHandler;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.db.DBHelper;
 import rocks.tbog.tblauncher.db.ShortcutRecord;
 import rocks.tbog.tblauncher.entry.EntryItem;
+import rocks.tbog.tblauncher.entry.SearchEntry;
 import rocks.tbog.tblauncher.entry.ShortcutEntry;
 import rocks.tbog.tblauncher.entry.StaticEntry;
+import rocks.tbog.tblauncher.handler.IconsHandler;
 import rocks.tbog.tblauncher.icons.IconPack;
 import rocks.tbog.tblauncher.ui.DialogFragment;
 import rocks.tbog.tblauncher.ui.DialogWrapper;
@@ -108,7 +109,10 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
                 } else {
                     mCustomShapePage = addShortcutPage(inflater, mViewPager, shortcutRecord, shortcutRecord.displayName);
                 }
-
+            } else if (args.containsKey("searchEntryId")) {
+                String entryName = args.getString("searchName", "");
+                String pageName = context.getString(R.string.tab_search_icon);
+                mCustomShapePage = addSearchEntryPage(inflater, mViewPager, entryName, pageName);
             }
         }
 
@@ -179,7 +183,7 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
             });
         }
     }
-    
+
     private void setFixedHeight(View view) {
         ViewGroup.LayoutParams params = view.getLayoutParams();
         params.height = view.getMeasuredHeight();
@@ -221,6 +225,14 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
         return page;
     }
 
+    public SearchEntryPage addSearchEntryPage(LayoutInflater inflater, ViewPager container, String entryName, String pageName) {
+        View view = inflater.inflate(R.layout.dialog_custom_shape_icon_select_page, container, false);
+        SearchEntryPage page = new SearchEntryPage(pageName, view, entryName);
+        PageAdapter adapter = (PageAdapter) mViewPager.getAdapter();
+        adapter.addPage(page);
+        return page;
+    }
+
     public ShortcutPage addShortcutPage(LayoutInflater inflater, ViewPager container, ShortcutRecord shortcutRecord, String pageName) {
         View view = inflater.inflate(R.layout.dialog_custom_shape_icon_select_page, container, false);
         ShortcutPage page = new ShortcutPage(pageName, view, shortcutRecord);
@@ -238,23 +250,23 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
         adapter.add(new LinearAdapter.Item(ctx, R.string.choose_icon_menu_add2));
 
         return ListPopup.create(ctx, adapter)
-                .setModal(true)
-                .setOnItemClickListener((a, v, pos) -> {
-                    LinearAdapter.MenuItem item = ((LinearAdapter) a).getItem(pos);
-                    @StringRes int stringId = 0;
-                    if (item instanceof LinearAdapter.Item) {
-                        stringId = ((LinearAdapter.Item) a.getItem(pos)).stringId;
-                    }
-                    if (stringId == R.string.choose_icon_menu_add2) {
-                        if (mCustomShapePage != null)
-                            mCustomShapePage.addIcon(iconData.drawableInfo.getDrawableName(), iconData.getIcon());
-                        // set the first page as current
-                        mViewPager.setCurrentItem(0);
-                    } else if (stringId == R.string.choose_icon_menu_add) {
-                        if (mCustomShapePage != null)
-                            mCustomShapePage.addIcon(iconData.drawableInfo.getDrawableName(), iconData.getIcon());
-                    }
-                });
+            .setModal(true)
+            .setOnItemClickListener((a, v, pos) -> {
+                LinearAdapter.MenuItem item = ((LinearAdapter) a).getItem(pos);
+                @StringRes int stringId = 0;
+                if (item instanceof LinearAdapter.Item) {
+                    stringId = ((LinearAdapter.Item) a.getItem(pos)).stringId;
+                }
+                if (stringId == R.string.choose_icon_menu_add2) {
+                    if (mCustomShapePage != null)
+                        mCustomShapePage.addIcon(iconData.drawableInfo.getDrawableName(), iconData.getIcon());
+                    // set the first page as current
+                    mViewPager.setCurrentItem(0);
+                } else if (stringId == R.string.choose_icon_menu_add) {
+                    if (mCustomShapePage != null)
+                        mCustomShapePage.addIcon(iconData.drawableInfo.getDrawableName(), iconData.getIcon());
+                }
+            });
     }
 
     @Override
@@ -268,6 +280,8 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
             customIconStaticEntry(args);
         else if (args.containsKey("shortcutId"))
             customIconShortcut(args);
+        else if (args.containsKey("searchEntryId"))
+            customIconSearchEntry(args);
 
         // OK button
         {
@@ -338,6 +352,22 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
 
         // Preview
         initPreviewIcon(mPreviewLabel, staticEntry::getIconDrawable);
+    }
+
+    private void customIconSearchEntry(Bundle args) {
+        Context context = requireContext();
+
+        String entryId = args.getString("searchEntryId", "");
+        EntryItem entryItem = TBApplication.dataHandler(context).getPojo(entryId);
+        if (!(entryItem instanceof SearchEntry)) {
+            dismiss();
+            Toast.makeText(Utilities.getActivity(context), context.getString(R.string.entry_not_found, entryId), Toast.LENGTH_LONG).show();
+            return;
+        }
+        SearchEntry searchEntry = (SearchEntry) entryItem;
+
+        // Preview
+        initPreviewIcon(mPreviewLabel, searchEntry::getIconDrawable);
     }
 
     private void customIconShortcut(Bundle args) {

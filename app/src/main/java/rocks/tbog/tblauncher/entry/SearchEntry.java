@@ -1,20 +1,29 @@
 package rocks.tbog.tblauncher.entry;
 
 import android.content.Context;
-import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
-import android.util.Pair;
+import android.view.View;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
+import androidx.appcompat.content.res.AppCompatResources;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import rocks.tbog.tblauncher.R;
+import rocks.tbog.tblauncher.TBApplication;
+import rocks.tbog.tblauncher.handler.IconsHandler;
+import rocks.tbog.tblauncher.preference.ContentLoadHelper;
+import rocks.tbog.tblauncher.ui.LinearAdapter;
+import rocks.tbog.tblauncher.ui.ListPopup;
+import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public abstract class SearchEntry extends EntryItem {
+    private static final int[] RESULT_LAYOUT = {R.layout.item_builtin, R.layout.item_grid, R.layout.item_quick_list};
+
     protected String query;
+    private int customIcon;
 
     public SearchEntry(String id) {
         super(id);
@@ -30,10 +39,44 @@ public abstract class SearchEntry extends EntryItem {
         return "";
     }
 
+    @NonNull
+    @Override
+    public String getIconCacheId() {
+        return id + "/ic" + customIcon;
+    }
+
+    public void setCustomIcon() {
+        customIcon += 1;
+    }
+
+    public void clearCustomIcon() {
+        customIcon = 0;
+    }
+
+    public boolean hasCustomIcon() {
+        return customIcon > 0;
+    }
+
     ///////////////////////////////////////////////////////////////////////////////////////////////
     // Result methods
     ///////////////////////////////////////////////////////////////////////////////////////////////
-    private static final int[] RESULT_LAYOUT = {R.layout.item_builtin, R.layout.item_grid, R.layout.item_quick_list};
+
+    @WorkerThread
+    public Drawable getIconDrawable(Context context) {
+        if (hasCustomIcon()) {
+            IconsHandler iconsHandler = TBApplication.getApplication(context).iconsHandler();
+            Drawable drawable = iconsHandler.getCustomIcon(this);
+            if (drawable != null)
+                return drawable;
+            else
+                iconsHandler.restoreDefaultIcon(this);
+        }
+        return getDefaultDrawable(context);
+    }
+
+    public Drawable getDefaultDrawable(Context context) {
+        return AppCompatResources.getDrawable(context, R.drawable.ic_search);
+    }
 
     public static int[] getResultLayout() {
         return RESULT_LAYOUT;
@@ -46,34 +89,32 @@ public abstract class SearchEntry extends EntryItem {
                 RESULT_LAYOUT[2]);
     }
 
-    private static final ArrayList<Pair<String, String>> APP4URL;
+    @Override
+    protected ListPopup buildPopupMenu(Context context, LinearAdapter adapter, View parentView, int flags) {
+        List<ContentLoadHelper.CategoryItem> categoryTitle = PrefCache.getResultPopupOrder(context);
+        for (ContentLoadHelper.CategoryItem categoryItem : categoryTitle) {
+            final int titleStringId = categoryItem.textId;
 
-    static {
-        APP4URL = new ArrayList<>(5);
-        APP4URL.add(new Pair<>("https://encrypted.google.com", "com.google.android.googlequicksearchbox"));
-        APP4URL.add(new Pair<>("https://play.google.com/store", "com.android.vending"));
-        APP4URL.add(new Pair<>("https://start.duckduckgo.com", "com.duckduckgo.mobile.android"));
-        APP4URL.add(new Pair<>("https://www.google.com/maps", "com.google.android.apps.maps"));
-        APP4URL.add(new Pair<>("https://www.youtube.com", "com.google.android.youtube"));
-    }
-
-    @Nullable
-    protected static Drawable getApplicationIconForUrl(@NonNull Context context, @Nullable String url) {
-        if (url == null || url.isEmpty())
-            return null;
-        for (Pair<String, String> pair : APP4URL) {
-            if (url.startsWith(pair.first)) {
-                try {
-                    return context.getPackageManager().getApplicationIcon(pair.second);
-                } catch (PackageManager.NameNotFoundException ignored) {
-                }
+            if (titleStringId == R.string.popup_title_customize) {
+                adapter.add(new LinearAdapter.Item(context, R.string.menu_custom_icon));
             }
-
         }
-        return null;
+
+        if (Utilities.checkFlag(flags, LAUNCHED_FROM_QUICK_LIST)) {
+            adapter.add(new LinearAdapter.ItemTitle(context, R.string.menu_popup_title_settings));
+            adapter.add(new LinearAdapter.Item(context, R.string.menu_popup_quick_list_customize));
+        }
+
+        return inflatePopupMenu(context, adapter);
     }
 
-    protected static boolean isGoogleSearch(String url) {
-        return url.startsWith("https://encrypted.google.com");
+    @Override
+    protected boolean popupMenuClickHandler(@NonNull final View view, @NonNull LinearAdapter.MenuItem item, int stringId, View parentView) {
+        if (stringId == R.string.menu_custom_icon) {
+            Context ctx = view.getContext();
+            TBApplication.behaviour(ctx).launchCustomIconDialog(this, null);
+            return true;
+        }
+        return super.popupMenuClickHandler(view, item, stringId, parentView);
     }
 }
