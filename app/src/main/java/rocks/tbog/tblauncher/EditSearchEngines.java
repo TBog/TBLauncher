@@ -217,7 +217,7 @@ public class EditSearchEngines extends AndroidViewModel {
             editText.addTextChangedListener(new SimpleTextWatcher() {
                 @Override
                 public void onTextChanged(String newValue) {
-                    addSearchEngineName.setValue(name);
+                    addSearchEngineName.setValue(newValue);
                 }
             });
         }
@@ -229,7 +229,7 @@ public class EditSearchEngines extends AndroidViewModel {
             editText.addTextChangedListener(new SimpleTextWatcher() {
                 @Override
                 public void onTextChanged(String newValue) {
-                    addSearchEngineUrl.setValue(urlValue);
+                    addSearchEngineUrl.setValue(newValue);
                 }
             });
         }
