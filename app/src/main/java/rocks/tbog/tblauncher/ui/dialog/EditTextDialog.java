@@ -161,18 +161,24 @@ public class EditTextDialog extends DialogFragment<CharSequence> {
         public Builder setPositiveButton(@StringRes int btnTextId, OnButtonClickListener<CharSequence> onClickListener) {
             mArgs.putCharSequence("btnPositiveText", mContext.getText(btnTextId));
             mClickPositive = onClickListener;
+            if (mDialog != null)
+                mDialog.setOnPositiveClickListener(mClickPositive);
             return this;
         }
 
         public Builder setNegativeButton(@StringRes int btnTextId, OnButtonClickListener<CharSequence> onClickListener) {
             mArgs.putCharSequence("btnNegativeText", mContext.getText(btnTextId));
             mClickNegative = onClickListener;
+            if (mDialog != null)
+                mDialog.setOnNegativeClickListener(mClickNegative);
             return this;
         }
 
         public Builder setNeutralButton(@StringRes int btnTextId, OnButtonClickListener<CharSequence> onClickListener) {
             mArgs.putCharSequence("btnNeutralText", mContext.getText(btnTextId));
             mClickNeutral = onClickListener;
+            if (mDialog != null)
+                mDialog.setOnNeutralClickListener(mClickNeutral);
             return this;
         }
 
@@ -183,6 +189,10 @@ public class EditTextDialog extends DialogFragment<CharSequence> {
                 dialog.onConfirm(input != null ? input.getText() : null);
             };
             mOnConfirm = onConfirm;
+            if (mDialog != null) {
+                mDialog.setOnPositiveClickListener(mClickPositive);
+                mDialog.setOnConfirmListener(mOnConfirm);
+            }
             return this;
         }
 
