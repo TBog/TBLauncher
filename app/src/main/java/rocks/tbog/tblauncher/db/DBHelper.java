@@ -127,30 +127,30 @@ public class DBHelper {
         // frequency = #launches_for_app / #all_launches
         // recency = 1 / position_of_app_in_normal_history
         String sql = "SELECT record, count(*) FROM " +
-                " (" +
-                "   SELECT * FROM history ORDER BY _id DESC " +
-                "   LIMIT " + historyWindowSize + "" +
-                " ) small_history " +
-                " GROUP BY record " +
-                " ORDER BY " +
-                "   count(*) * 1.0 / (select count(*) from history LIMIT " + historyWindowSize + ") / ((SELECT _id FROM history ORDER BY _id DESC LIMIT 1) - max(_id) + 0.001) " +
-                " DESC " +
-                " LIMIT " + limit;
+            " (" +
+            "   SELECT * FROM history ORDER BY _id DESC " +
+            "   LIMIT " + historyWindowSize + "" +
+            " ) small_history " +
+            " GROUP BY record " +
+            " ORDER BY " +
+            "   count(*) * 1.0 / (select count(*) from history LIMIT " + historyWindowSize + ") / ((SELECT _id FROM history ORDER BY _id DESC LIMIT 1) - max(_id) + 0.001) " +
+            " DESC " +
+            " LIMIT " + limit;
         return db.rawQuery(sql, null);
     }
 
     private static Cursor getHistoryByFrequency(SQLiteDatabase db, int limit) {
         // order history based on frequency
         String sql = "SELECT record, count(*) FROM history" +
-                " GROUP BY record " +
-                " ORDER BY count(*) DESC " +
-                " LIMIT " + limit;
+            " GROUP BY record " +
+            " ORDER BY count(*) DESC " +
+            " LIMIT " + limit;
         return db.rawQuery(sql, null);
     }
 
     private static Cursor getHistoryByRecency(SQLiteDatabase db, int limit) {
         return db.query(true, "history", new String[]{"record", "1"}, null, null,
-                null, null, "_id DESC", Integer.toString(limit));
+            null, null, "_id DESC", Integer.toString(limit));
     }
 
     /**
@@ -164,11 +164,11 @@ public class DBHelper {
     private static Cursor getHistoryByAdaptive(SQLiteDatabase db, int hours, int limit) {
         // order history based on frequency
         String sql = "SELECT record, count(*) FROM history " +
-                "WHERE timeStamp >= 0 " +
-                "AND timeStamp >" + (System.currentTimeMillis() - (hours * 3600000)) +
-                " GROUP BY record " +
-                " ORDER BY count(*) DESC " +
-                " LIMIT " + limit;
+            "WHERE timeStamp >= 0 " +
+            "AND timeStamp >" + (System.currentTimeMillis() - (hours * 3600000)) +
+            " GROUP BY record " +
+            " ORDER BY count(*) DESC " +
+            " LIMIT " + limit;
         return db.rawQuery(sql, null);
     }
 
@@ -248,15 +248,16 @@ public class DBHelper {
     public static int getHistoryLength(Context context) {
         SQLiteDatabase db = getDatabase(context);
 
+        int historyLength = 0;
         // Cursor query (boolean distinct, String table, String[] columns,
         // String selection, String[] selectionArgs, String groupBy, String
         // having, String orderBy, String limit)
-        Cursor cursor = db.query(false, "history", new String[]{"COUNT(*)"}, null, null,
-                null, null, null, null);
+        try (Cursor cursor = db.query(false, "history", new String[]{"COUNT(*)"},
+            null, null, null, null, null, null)) {
 
-        cursor.moveToFirst();
-        int historyLength = cursor.getInt(0);
-        cursor.close();
+            cursor.moveToFirst();
+            historyLength = cursor.getInt(0);
+        }
         return historyLength;
     }
 
@@ -275,10 +276,10 @@ public class DBHelper {
         // Cursor query (String table, String[] columns, String selection,
         // String[] selectionArgs, String groupBy, String having, String
         // orderBy)
-        Cursor cursor = db.query("history", new String[]{"record", "COUNT(*) AS count"},
-                "query LIKE ?", new String[]{query + "%"}, "record", null, "COUNT(*) DESC", "10");
-        records = readCursor(cursor);
-        cursor.close();
+        try (Cursor cursor = db.query("history", new String[]{"record", "COUNT(*) AS count"},
+            "query LIKE ?", new String[]{query + "%"}, "record", null, "COUNT(*) DESC", "10")) {
+            records = readCursor(cursor);
+        }
         return records;
     }
 
@@ -295,13 +296,13 @@ public class DBHelper {
     public static boolean insertShortcut(@NonNull Context context, @NonNull ShortcutRecord shortcut) {
         SQLiteDatabase db = getDatabase(context);
         // Do not add duplicate shortcuts
-        Cursor cursor = db.query("shortcuts", new String[]{"package", "info_data"},
-                "package = ? AND info_data = ?", new String[]{shortcut.packageName, shortcut.infoData}, null, null, null, null);
-        // cursor contains duplicates
-        if (cursor.getCount() > 0) {
-            return false;
+        try (Cursor cursor = db.query("shortcuts", new String[]{"package", "info_data"},
+            "package = ? AND info_data = ?", new String[]{shortcut.packageName, shortcut.infoData}, null, null, null, null)) {
+            // cursor contains duplicates
+            if (cursor.getCount() > 0) {
+                return false;
+            }
         }
-        cursor.close();
 
         ContentValues values = new ContentValues();
         values.put("name", shortcut.displayName);
@@ -310,8 +311,7 @@ public class DBHelper {
         values.put("icon_png", shortcut.iconPng);
         values.put("custom_flags", shortcut.getFlagsDB());
 
-        db.insert("shortcuts", null, values);
-        return true;
+        return -1 != db.insert("shortcuts", null, values);
     }
 
     public static void removeShortcut(@NonNull Context context, @NonNull ShortcutEntry shortcut) {
@@ -352,9 +352,9 @@ public class DBHelper {
 
         ArrayList<ShortcutRecord> records;
         try (Cursor cursor = db.query("shortcuts",
-                TABLE_COLUMNS_SHORTCUTS_NO_ICON,
-                "package = ?", new String[]{packageName},
-                null, null, null)) {
+            TABLE_COLUMNS_SHORTCUTS_NO_ICON,
+            "package = ?", new String[]{packageName},
+            null, null, null)) {
 
             records = new ArrayList<>(cursor.getCount());
             while (cursor.moveToNext()) {
@@ -382,8 +382,8 @@ public class DBHelper {
 
         ArrayList<ShortcutRecord> records;
         try (Cursor cursor = db.query("shortcuts",
-                TABLE_COLUMNS_SHORTCUTS_NO_ICON,
-                null, null, null, null, null)) {
+            TABLE_COLUMNS_SHORTCUTS_NO_ICON,
+            null, null, null, null, null)) {
 
             records = new ArrayList<>(cursor.getCount());
             while (cursor.moveToNext()) {
@@ -406,15 +406,15 @@ public class DBHelper {
     public static byte[] getShortcutIcon(@NonNull Context context, long dbId) {
         SQLiteDatabase db = getDatabase(context);
 
-        Cursor cursor = db.query("shortcuts", new String[]{"icon_png"},
-                "_id = ?", new String[]{Long.toString(dbId)},
-                null, null, null);
-
         byte[] iconBlob = null;
-        if (cursor.moveToNext()) {
-            iconBlob = cursor.getBlob(0);
+        try (Cursor cursor = db.query("shortcuts", new String[]{"icon_png"},
+            "_id = ?", new String[]{Long.toString(dbId)},
+            null, null, null)) {
+
+            if (cursor.moveToNext()) {
+                iconBlob = cursor.getBlob(0);
+            }
         }
-        cursor.close();
         return iconBlob;
     }
 
@@ -499,7 +499,7 @@ public class DBHelper {
         Map<String, List<String>> records;
         SQLiteDatabase db = getDatabase(context);
         try (Cursor cursor = db.query("tags", new String[]{"record", "tag"},
-                null, null, null, null, null)) {
+            null, null, null, null, null)) {
             records = new HashMap<>(cursor.getCount());
             while (cursor.moveToNext()) {
                 String id = cursor.getString(0);
@@ -575,7 +575,7 @@ public class DBHelper {
         List<String> tags;
         SQLiteDatabase db = getDatabase(context);
         try (Cursor cursor = db.query("tags", new String[]{"tag"},
-                null, null, "tag", null, null)) {
+            null, null, "tag", null, null)) {
             tags = new ArrayList<>(cursor.getCount());
             while (cursor.moveToNext()) {
                 String tag = cursor.getString(0);
@@ -595,7 +595,7 @@ public class DBHelper {
         List<String> tagList;
         SQLiteDatabase db = getDatabase(context);
         try (Cursor cursor = db.query("tags", new String[]{"tag"},
-                "record=?", new String[]{record}, null, null, null)) {
+            "record=?", new String[]{record}, null, null, null)) {
             tagList = new ArrayList<>(cursor.getCount());
             while (cursor.moveToNext()) {
                 String tag = cursor.getString(0);
@@ -610,7 +610,7 @@ public class DBHelper {
         HashMap<String, AppRecord> records;
         SQLiteDatabase db = getDatabase(context);
         try (Cursor cursor = db.query("apps", TABLE_COLUMNS_APPS,
-                null, null, null, null, null)) {
+            null, null, null, null, null)) {
             records = new HashMap<>(cursor.getCount());
             while (cursor.moveToNext()) {
                 AppRecord entry = new AppRecord();
@@ -772,7 +772,7 @@ public class DBHelper {
     private static AppRecord getAppRecord(SQLiteDatabase db, String componentName) {
         String[] selArgs = new String[]{componentName};
         try (Cursor cursor = db.query("apps", TABLE_COLUMNS_APPS,
-                "component_name=?", selArgs, null, null, null)) {
+            "component_name=?", selArgs, null, null, null)) {
             if (cursor.moveToNext()) {
                 AppRecord entry = new AppRecord();
 
@@ -913,7 +913,7 @@ public class DBHelper {
         SQLiteDatabase db = getDatabase(context);
         String[] selArgs = new String[]{componentName};
         try (Cursor cursor = db.query("apps", dbColumn,
-                "component_name=?", selArgs, null, null, null)) {
+            "component_name=?", selArgs, null, null, null)) {
             if (cursor.moveToNext()) {
                 return cursor.getBlob(0);
             }
@@ -936,7 +936,7 @@ public class DBHelper {
         SQLiteDatabase db = getDatabase(context);
         String[] selArgs = new String[]{record};
         try (Cursor cursor = db.query("favorites", TABLE_MODS_CUSTOM_ICON,
-                "record=?", selArgs, null, null, null)) {
+            "record=?", selArgs, null, null, null)) {
             if (cursor.moveToNext()) {
                 return cursor.getBlob(0);
             }
