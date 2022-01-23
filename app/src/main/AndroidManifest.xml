@@ -3,16 +3,6 @@
     xmlns:tools="http://schemas.android.com/tools"
     package="rocks.tbog.tblauncher">
 
-    <permission
-        android:name="com.android.launcher.permission.INSTALL_SHORTCUT"
-        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
-        android:protectionLevel="normal" />
-
-    <permission
-        android:name="com.android.launcher.permission.UNINSTALL_SHORTCUT"
-        android:permissionGroup="android.permission-group.SYSTEM_TOOLS"
-        android:protectionLevel="normal" />
-
     <!-- Self explanatory -->
     <uses-permission android:name="android.permission.READ_CONTACTS" />
     <!-- To call a phone number directly without displaying the dialer -->
