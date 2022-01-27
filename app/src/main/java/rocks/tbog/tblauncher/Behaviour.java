@@ -311,9 +311,16 @@ public class Behaviour implements ISearchActivity {
 
         // On validate, launch first record
         mSearchEditText.setOnEditorActionListener((view, actionId, event) -> {
-            // if keyboard closed
-            if (actionId == android.R.id.closeButton)
+            // Return true if you have consumed the action, else false.
+
+            // if keyboard close action issued
+            if (actionId == android.R.id.closeButton) {
+                // Fix for #238
+                TBApplication.state().syncKeyboardVisibility(view);
+                if (TBApplication.state().isKeyboardHidden())
+                    return false;
                 return onKeyboardClosed();
+            }
 
             // launch most relevant result
             final int mostRelevantIdx = mResultList.getAdapterFirstItemIdx();
@@ -348,13 +355,12 @@ public class Behaviour implements ISearchActivity {
 
             @Override
             public void hideKeyboard() {
-                Log.i(TAG, "Keyboard - HIDE");
-
                 if (TBApplication.state().isSearchBarVisible() && PrefCache.modeSearchFullscreen(mPref)) {
                     //hideSystemBars();
                     enableFullscreen(0);
                 }
 
+                Log.i(TAG, "Keyboard - HIDE");
                 TBApplication.state().setKeyboard(LauncherState.AnimatedVisibility.HIDDEN);
                 mTBLauncherActivity.dismissPopup();
 
@@ -557,7 +563,7 @@ public class Behaviour implements ISearchActivity {
                 else
                     TBApplication.quickList(getContext()).hideQuickList(false);
                 // enable/disable fullscreen (status and navigation bar)
-                if (!TBApplication.state().isKeyboardVisible()
+                if (TBApplication.state().isKeyboardHidden()
                     && PrefCache.modeSearchFullscreen(mPref))
                     enableFullscreen(UI_ANIMATION_DELAY);
                 else
@@ -706,9 +712,14 @@ public class Behaviour implements ISearchActivity {
 
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    TBApplication.state().setSearchBar(LauncherState.AnimatedVisibility.VISIBLE);
+                    LauncherState state = TBApplication.state();
+                    state.setSearchBar(LauncherState.AnimatedVisibility.VISIBLE);
                     if (PrefCache.linkKeyboardAndSearchBar(mPref))
                         showKeyboard();
+                    else {
+                        // sync keyboard state
+                        state.syncKeyboardVisibility(mSearchEditText);
+                    }
                 }
             })
             .start();
@@ -1057,15 +1068,17 @@ public class Behaviour implements ISearchActivity {
         if (mTBLauncherActivity.dismissPopup())
             return true;
         LauncherState state = TBApplication.state();
-        state.setKeyboard(LauncherState.AnimatedVisibility.HIDDEN);
+
         if (state.isSearchBarVisible() && PrefCache.modeSearchFullscreen(mPref))
             enableFullscreen(0);
         if (PrefCache.linkCloseKeyboardToBackButton(mPref))
             onBackPressed();
-        if (!state.isKeyboardVisible())
-            onBackPressed();
+
         // check if we should hide the keyboard
-        return state.isSearchBarVisible() && PrefCache.linkKeyboardAndSearchBar(mPref);
+        boolean closeKeyboard = state.isSearchBarVisible() && PrefCache.linkKeyboardAndSearchBar(mPref);
+        if (closeKeyboard)
+            state.setKeyboard(LauncherState.AnimatedVisibility.HIDDEN);
+        return closeKeyboard;
     }
 
     public void launchCustomIconDialog(AppEntry appEntry) {

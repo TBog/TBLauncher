@@ -56,6 +56,7 @@ public class WindowInsetsHelper implements KeyboardHandler {
     }
 
     public static boolean isKeyboardVisible(View view) {
+        // On devices running API 20 and below, getRootWindowInsets always returns null.
         WindowInsetsCompat insets = ViewCompat.getRootWindowInsets(view);
         if (insets != null)
             return insets.isVisible(WindowInsetsCompat.Type.ime());

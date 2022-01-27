@@ -1,7 +1,11 @@
 package rocks.tbog.tblauncher;
 
+import android.view.View;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+
+import rocks.tbog.tblauncher.ui.WindowInsetsHelper;
 
 public class LauncherState {
     public enum AnimatedVisibility {
@@ -29,7 +33,7 @@ public class LauncherState {
 
     private static boolean isVisible(AnimatedVisibility state) {
         return state == AnimatedVisibility.ANIM_TO_VISIBLE ||
-                state == AnimatedVisibility.VISIBLE;
+            state == AnimatedVisibility.VISIBLE;
     }
 
     public boolean isQuickListVisible() {
@@ -56,8 +60,15 @@ public class LauncherState {
         return isVisible(clearScreen);
     }
 
-    public boolean isKeyboardVisible() {
-        return isVisible(keyboard);
+    public boolean isKeyboardHidden() {
+        return !isVisible(keyboard);
+    }
+
+    public void syncKeyboardVisibility(View anyView) {
+        if (WindowInsetsHelper.isKeyboardVisible(anyView))
+            setKeyboard(AnimatedVisibility.VISIBLE);
+        else
+            setKeyboard(AnimatedVisibility.HIDDEN);
     }
 
     @Nullable
@@ -97,6 +108,7 @@ public class LauncherState {
     public AnimatedVisibility getResultListVisibility() {
         return resultList;
     }
+
     @NonNull
     public AnimatedVisibility getNotificationBarVisibility() {
         return notificationBar;
