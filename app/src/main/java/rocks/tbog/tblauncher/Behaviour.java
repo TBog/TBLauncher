@@ -51,7 +51,6 @@ import rocks.tbog.tblauncher.dataprovider.TagsProvider;
 import rocks.tbog.tblauncher.drawable.LoadingDrawable;
 import rocks.tbog.tblauncher.entry.ActionEntry;
 import rocks.tbog.tblauncher.entry.AppEntry;
-import rocks.tbog.tblauncher.entry.ContactEntry;
 import rocks.tbog.tblauncher.entry.DialContactEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.EntryWithTags;
@@ -696,6 +695,7 @@ public class Behaviour implements ISearchActivity {
     }
 
     private void showSearchBar() {
+        mSearchEditText.setEnabled(true);
         setSearchHint();
 
         mSearchBarContainer.animate().cancel();
@@ -780,6 +780,8 @@ public class Behaviour implements ISearchActivity {
 
         if (PrefCache.linkKeyboardAndSearchBar(mPref))
             hideKeyboard();
+        // disabling mSearchEditText will most probably also close the keyboard
+        mSearchEditText.setEnabled(false);
     }
 
     private void showWidgets() {
@@ -1226,6 +1228,7 @@ public class Behaviour implements ISearchActivity {
 
     /**
      * Change the icon for the "Dial" contact
+     *
      * @param dialEntry
      */
     public void launchCustomIconDialog(@NonNull DialContactEntry dialEntry) {
