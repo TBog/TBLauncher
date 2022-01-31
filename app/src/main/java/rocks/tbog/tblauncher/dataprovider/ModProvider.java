@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import rocks.tbog.tblauncher.db.ModRecord;
+import rocks.tbog.tblauncher.entry.DialContactEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.SearchEntry;
 import rocks.tbog.tblauncher.entry.StaticEntry;
@@ -54,6 +55,9 @@ public class ModProvider extends DBProvider<EntryItem> {
                 else if (entry instanceof SearchEntry) {
                     if (fav.hasCustomIcon())
                         ((SearchEntry) entry).setCustomIcon();
+                } else if (entry instanceof DialContactEntry) {
+                    if (fav.hasCustomIcon())
+                        ((DialContactEntry) entry).setCustomIcon();
                 }
                 favList.add(entry);
             }

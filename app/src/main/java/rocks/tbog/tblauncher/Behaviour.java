@@ -51,6 +51,8 @@ import rocks.tbog.tblauncher.dataprovider.TagsProvider;
 import rocks.tbog.tblauncher.drawable.LoadingDrawable;
 import rocks.tbog.tblauncher.entry.ActionEntry;
 import rocks.tbog.tblauncher.entry.AppEntry;
+import rocks.tbog.tblauncher.entry.ContactEntry;
+import rocks.tbog.tblauncher.entry.DialContactEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.EntryWithTags;
 import rocks.tbog.tblauncher.entry.SearchEntry;
@@ -1218,6 +1220,43 @@ public class Behaviour implements ISearchActivity {
             app.quickList().reload();
             if (afterConfirmation != null)
                 afterConfirmation.run();
+        });
+        dialog.show(mTBLauncherActivity.getSupportFragmentManager(), DIALOG_CUSTOM_ICON);
+    }
+
+    /**
+     * Change the icon for the "Dial" contact
+     * @param dialEntry
+     */
+    public void launchCustomIconDialog(@NonNull DialContactEntry dialEntry) {
+        IconSelectDialog dialog = new IconSelectDialog();
+        openFragmentDialog(dialog, DIALOG_CUSTOM_ICON);
+
+        // If mResultLayout is visible
+        boolean bResultListVisible = TBApplication.state().isResultListVisible();
+        if (bResultListVisible) {
+            mResultLayout.setVisibility(View.INVISIBLE);
+            // OnDismiss: We restore mResultLayout visibility
+            dialog.setOnDismissListener(dlg -> mResultLayout.setVisibility(View.VISIBLE));
+        }
+
+        // set args
+        {
+            Bundle args = new Bundle();
+            args.putString("contactEntryId", dialEntry.id);
+            args.putString("contactName", dialEntry.getName());
+            dialog.setArguments(args);
+        }
+
+        dialog.setOnConfirmListener(drawable -> {
+            final TBApplication app = TBApplication.getApplication(mTBLauncherActivity);
+            if (drawable == null)
+                app.iconsHandler().restoreDefaultIcon(dialEntry);
+            else
+                app.iconsHandler().changeIcon(dialEntry, drawable);
+            // force a result refresh to update the icon in the view
+            refreshSearchRecord(dialEntry);
+            app.quickList().reload();
         });
         dialog.show(mTBLauncherActivity.getSupportFragmentManager(), DIALOG_CUSTOM_ICON);
     }

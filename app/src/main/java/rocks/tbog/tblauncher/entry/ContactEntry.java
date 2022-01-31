@@ -15,6 +15,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.WorkerThread;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.preference.PreferenceManager;
 
@@ -25,6 +26,7 @@ import rocks.tbog.tblauncher.BuildConfig;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.handler.IconsHandler;
+import rocks.tbog.tblauncher.normalizer.PhoneNormalizer;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.result.ResultHelper;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
@@ -34,82 +36,41 @@ import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
 
-public final class ContactEntry extends EntryItem {
+public class ContactEntry extends EntryItem {
     public static final String SCHEME = "contact://";
-    public final String lookupKey;
+    public String lookupKey;
 
-    public final String phone;
+    protected String phone;
     //phone without special characters
-    public final StringNormalizer.Result normalizedPhone;
-    public final Uri iconUri;
+    public StringNormalizer.Result normalizedPhone;
+    protected Uri iconUri = null;
 
     // Is this a primary phone?
-    private final boolean primary;
+    protected boolean primary = false;
 
     // How many times did we phone this contact?
-    public final int timesContacted;
+    protected int timesContacted = 0;
 
     // Is this contact starred ?
-    public final Boolean starred;
+    protected boolean starred = false;
 
     // Is this number a home (local / landline) number? We can't send messages to this.
-    public final Boolean homeNumber;
+    protected boolean homeNumber = false;
 
     public StringNormalizer.Result normalizedNickname = null;
 
-    private String nickname = "";
+    protected String nickname = "";
 
-    private ImData imData;
+    protected ImData imData;
 
-    public ContactEntry(String id, String lookupKey, String phone,
-                        StringNormalizer.Result normalizedPhone, Uri iconUri, Boolean primary,
-                        int timesContacted, Boolean starred, Boolean homeNumber) {
+    public ContactEntry(String id) {
         super(id);
         if (BuildConfig.DEBUG && !id.startsWith(SCHEME)) {
             throw new IllegalStateException("Invalid " + ContactEntry.class.getSimpleName() + " id `" + id + "`");
         }
-        this.lookupKey = lookupKey;
-        this.phone = phone;
-        this.normalizedPhone = normalizedPhone;
-        this.iconUri = iconUri;
-        this.primary = primary;
-        this.timesContacted = timesContacted;
-        this.starred = starred;
-        this.homeNumber = homeNumber;
     }
 
-    public ContactEntry(String id, String lookupKey, Uri iconUri, Boolean primary,
-                        int timesContacted, Boolean starred, Boolean homeNumber) {
-        super(id);
-        if (BuildConfig.DEBUG && !id.startsWith(SCHEME)) {
-            throw new IllegalStateException("Invalid " + ContactEntry.class.getSimpleName() + " id `" + id + "`");
-        }
-        this.lookupKey = lookupKey;
-        this.phone = null;
-        this.normalizedPhone = null;
-        this.iconUri = iconUri;
-        this.primary = primary;
-        this.timesContacted = timesContacted;
-        this.starred = starred;
-        this.homeNumber = homeNumber;
-    }
-
-    public static ContactEntry newDialContact(String phone, StringNormalizer.Result normalizedPhone) {
-        String entryId = SCHEME + "dial" + '/' + phone;
-        return new ContactEntry(entryId, phone, phone, normalizedPhone, null, true, 0, false, true);
-    }
-
-    public static ContactEntry newPhoneContact(long contactId, String phone, StringNormalizer.Result normalizedPhone, String lookupKey, Uri icon, boolean primary, boolean starred) {
-        String entryId = SCHEME + contactId + '/' + phone;
-        return new ContactEntry(entryId, lookupKey, phone, normalizedPhone, icon, primary, 0, starred, false);
-    }
-
-    public static ContactEntry newGenericContact(long contactId, String shortMimeType, long id, String lookupKey, Uri icon, boolean primary, boolean starred) {
-        String entryId = SCHEME + contactId + '/' + shortMimeType + '/' + id;
-        return new ContactEntry(entryId, lookupKey, icon, primary, 0, starred, false);
-    }
-
-    public void setNickname(String nickname) {
+    protected void setNickname(String nickname) {
         if (nickname != null) {
             // Set the actual user-friendly name
             this.nickname = nickname;
@@ -124,8 +85,8 @@ public final class ContactEntry extends EntryItem {
         return primary;
     }
 
-    public void setIm(ImData imData) {
-        this.imData = imData;
+    public boolean isStarred() {
+        return starred;
     }
 
     public ImData getImData() {
@@ -134,6 +95,14 @@ public final class ContactEntry extends EntryItem {
 
     public boolean isHomeNumber() {
         return homeNumber;
+    }
+
+    public int getTimesContacted() {
+        return timesContacted;
+    }
+
+    public String getPhone() {
+        return phone != null ? phone : "";
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -150,6 +119,23 @@ public final class ContactEntry extends EntryItem {
         return Utilities.checkFlag(drawFlags, FLAG_DRAW_LIST) ? RESULT_LAYOUT[0] :
             (Utilities.checkFlag(drawFlags, FLAG_DRAW_GRID) ? RESULT_LAYOUT[1] :
                 RESULT_LAYOUT[2]);
+    }
+
+    @WorkerThread
+    protected Drawable getIconDrawable(Context ctx) {
+        Drawable drawable = null;
+        if (iconUri != null)
+            try {
+                InputStream inputStream = ctx.getContentResolver().openInputStream(iconUri);
+                drawable = Drawable.createFromStream(inputStream, iconUri.toString());
+            } catch (FileNotFoundException ignored) {
+            }
+        if (drawable == null) {
+            drawable = AppCompatResources.getDrawable(ctx, R.drawable.ic_contact_placeholder);
+            if (drawable == null)
+                drawable = new ColorDrawable(UIColors.getDefaultColor(ctx));
+        }
+        return TBApplication.iconsHandler(ctx).applyContactMask(ctx, drawable);
     }
 
     @Override
@@ -330,20 +316,8 @@ public final class ContactEntry extends EntryItem {
 
         @Override
         protected Drawable getDrawable(Context ctx) {
-            Uri iconUri = ((ContactEntry) entryItem).iconUri;
-            Drawable drawable = null;
-            if (iconUri != null)
-                try {
-                    InputStream inputStream = ctx.getContentResolver().openInputStream(iconUri);
-                    drawable = Drawable.createFromStream(inputStream, iconUri.toString());
-                } catch (FileNotFoundException ignored) {
-                }
-            if (drawable == null) {
-                drawable = AppCompatResources.getDrawable(ctx, R.drawable.ic_contact_placeholder);
-                if (drawable == null)
-                    drawable = new ColorDrawable(UIColors.getDefaultColor(ctx));
-            }
-            return TBApplication.iconsHandler(ctx).applyContactMask(ctx, drawable);
+            ContactEntry contactEntry = (ContactEntry) entryItem;
+            return contactEntry.getIconDrawable(ctx);
         }
     }
 
@@ -375,8 +349,6 @@ public final class ContactEntry extends EntryItem {
         private final String label;
 
         private String identifier;
-        // IM name without special characters
-        private StringNormalizer.Result normalizedIdentifier;
 
         public ImData(String mimeType, long id, String label) {
             this.mimeType = mimeType;
@@ -389,14 +361,7 @@ public final class ContactEntry extends EntryItem {
         }
 
         public void setIdentifier(String identifier) {
-            if (identifier != null) {
-                // Set the actual user-friendly name
-                this.identifier = identifier;
-                this.normalizedIdentifier = StringNormalizer.normalizeWithResult(this.identifier, false);
-            } else {
-                this.identifier = null;
-                this.normalizedIdentifier = null;
-            }
+            this.identifier = identifier;
         }
 
         public String getMimeType() {
@@ -406,9 +371,104 @@ public final class ContactEntry extends EntryItem {
         public long getId() {
             return id;
         }
+    }
 
-        public StringNormalizer.Result getNormalizedIdentifier() {
-            return normalizedIdentifier;
+    public static class Builder {
+        private String name = null;
+        private String phone = null;
+        private String nickname = null;
+        private Uri iconUri = null;
+        private ImData imData = null;
+        private String shortMimeType = null;
+        private String lookupKey = null;
+        private boolean primary = false;
+        private boolean starred = false;
+
+        private long contactId = 0;
+        private long contentId = 0;
+
+        public Builder() {
+        }
+
+        public Builder setContactId(long contactId) {
+            this.contactId = contactId;
+            return this;
+        }
+
+        public Builder setPhone(String phone) {
+            this.phone = phone;
+            return this;
+        }
+
+        public Builder setMimeInfo(long contentId, @NonNull String shortMimeType) {
+            this.contentId = contentId;
+            this.shortMimeType = shortMimeType;
+            return this;
+        }
+
+        public Builder setIconUri(Uri iconUri) {
+            this.iconUri = iconUri;
+            return this;
+        }
+
+        public Builder setPrimary(boolean primary) {
+            this.primary = primary;
+            return this;
+        }
+
+        public Builder setStarred(boolean starred) {
+            this.starred = starred;
+            return this;
+        }
+
+        public Builder setLookupKey(String lookupKey) {
+            this.lookupKey = lookupKey;
+            return this;
+        }
+
+        public Builder setName(@NonNull String name) {
+            this.name = name;
+            return this;
+        }
+
+        public Builder setNickname(@NonNull String nickname) {
+            this.nickname = nickname;
+            return this;
+        }
+
+        public Builder setImData(@NonNull ImData imData) {
+            this.imData = imData;
+            return this;
+        }
+
+        public ContactEntry getContact() {
+            final String entryId;
+            if (shortMimeType != null) {
+                // this is a general contact. No phone number.
+                entryId = SCHEME + contactId + '/' + shortMimeType + '/' + contentId;
+                //entry = new ContactEntry(entryId, lookupKey, icon, primary, 0, starred, false);
+            } else {
+                // phone contact
+                entryId = SCHEME + contactId + '/' + phone;
+                //entry = new ContactEntry(entryId, lookupKey, phone, normalizedPhone, icon, primary, 0, starred, false);
+            }
+
+            ContactEntry entry = new ContactEntry(entryId);
+            entry.lookupKey = lookupKey;
+            if (phone != null) {
+                entry.phone = phone;
+                entry.normalizedPhone = PhoneNormalizer.simplifyPhoneNumber(phone);
+            }
+            if (iconUri != null)
+                entry.iconUri = iconUri;
+            entry.primary = primary;
+            entry.starred = starred;
+            entry.setName(name);
+            entry.setNickname(nickname);
+            if (imData != null)
+                entry.imData = imData;
+
+            return entry;
         }
     }
 }

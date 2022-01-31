@@ -1,10 +1,11 @@
 package rocks.tbog.tblauncher.dataprovider;
 
+import androidx.annotation.NonNull;
+
 import java.util.regex.Pattern;
 
 import rocks.tbog.tblauncher.entry.ContactEntry;
-import rocks.tbog.tblauncher.normalizer.PhoneNormalizer;
-import rocks.tbog.tblauncher.normalizer.StringNormalizer;
+import rocks.tbog.tblauncher.entry.DialContactEntry;
 import rocks.tbog.tblauncher.searcher.Searcher;
 
 public class DialProvider extends SimpleProvider<ContactEntry> {
@@ -12,8 +13,23 @@ public class DialProvider extends SimpleProvider<ContactEntry> {
     // See https://github.com/Neamar/KISS/issues/1137
     private final Pattern phonePattern;
 
+    private final DialContactEntry resultEntry;
+
     public DialProvider() {
         phonePattern = Pattern.compile("^[*+0-9# ]{3,}$");
+        resultEntry = new DialContactEntry();
+    }
+
+    @Override
+    public boolean mayFindById(@NonNull String id) {
+        return id.startsWith(DialContactEntry.SCHEME);
+    }
+
+    @Override
+    public DialContactEntry findById(@NonNull String id) {
+        if (resultEntry.id.equals(id))
+            return resultEntry;
+        return null;
     }
 
     @Override
@@ -29,8 +45,8 @@ public class DialProvider extends SimpleProvider<ContactEntry> {
      * @return a result that may have a fake id.
      */
     private ContactEntry getResult(String phoneNumber) {
-        StringNormalizer.Result normalizedPhone = PhoneNormalizer.simplifyPhoneNumber(phoneNumber);
-        ContactEntry pojo = ContactEntry.newDialContact(phoneNumber, normalizedPhone);//new PhonePojo(id, historyId, phoneNumber);
+        DialContactEntry pojo = resultEntry;
+        pojo.setPhone(phoneNumber);
         pojo.setName(phoneNumber, false);
         pojo.setRelevance(pojo.normalizedName, null);
         String phoneNumberAfterFirstCharacter = phoneNumber.substring(1);

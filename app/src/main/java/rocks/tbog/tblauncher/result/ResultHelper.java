@@ -207,7 +207,7 @@ public class ResultHelper {
         Context context = v.getContext();
         TBApplication.behaviour(context).beforeLaunchOccurred();
 
-        String url = "sms:" + Uri.encode(contactPojo.phone);
+        String url = "sms:" + Uri.encode(contactPojo.getPhone());
         Intent i = new Intent(Intent.ACTION_SENDTO, Uri.parse(url));
         Utilities.setIntentSourceBounds(i, v);
         i.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);

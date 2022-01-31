@@ -37,6 +37,8 @@ import rocks.tbog.tblauncher.db.AppRecord;
 import rocks.tbog.tblauncher.drawable.DrawableUtils;
 import rocks.tbog.tblauncher.drawable.TextDrawable;
 import rocks.tbog.tblauncher.entry.AppEntry;
+import rocks.tbog.tblauncher.entry.ContactEntry;
+import rocks.tbog.tblauncher.entry.DialContactEntry;
 import rocks.tbog.tblauncher.entry.SearchEntry;
 import rocks.tbog.tblauncher.entry.ShortcutEntry;
 import rocks.tbog.tblauncher.entry.StaticEntry;
@@ -369,6 +371,15 @@ public class IconsHandler {
         return null;
     }
 
+    public Drawable getCustomIcon(ContactEntry contactEntry) {
+        Bitmap bitmap = TBApplication.dataHandler(ctx).getCustomEntryIconById(contactEntry.id);
+        if (bitmap != null)
+            return new BitmapDrawable(ctx.getResources(), bitmap);
+
+        Log.e(TAG, "Unable to get custom icon for " + contactEntry.id);
+        return null;
+    }
+
     @WorkerThread
     public Drawable getCachedAppIcon(String componentName) {
         Bitmap bitmap = TBApplication.dataHandler(ctx).getCachedAppIcon(componentName);
@@ -437,6 +448,16 @@ public class IconsHandler {
         app.drawableCache().cacheDrawable(searchEntry.getIconCacheId(), drawable);
     }
 
+    public void changeIcon(DialContactEntry dialContactEntry, Drawable drawable) {
+        Bitmap bitmap = getIconBitmap(ctx, drawable);
+        TBApplication app = TBApplication.getApplication(ctx);
+        app.getDataHandler().setCustomStaticEntryIcon(DialContactEntry.SCHEME, bitmap);
+
+        app.drawableCache().cacheDrawable(dialContactEntry.getIconCacheId(), null);
+        dialContactEntry.setCustomIcon();
+        app.drawableCache().cacheDrawable(dialContactEntry.getIconCacheId(), drawable);
+    }
+
     public void restoreDefaultIcon(AppEntry appEntry) {
         TBApplication app = TBApplication.getApplication(ctx);
         app.getDataHandler().removeCustomAppIcon(appEntry.getUserComponentName());
@@ -467,6 +488,14 @@ public class IconsHandler {
 
         app.drawableCache().cacheDrawable(searchEntry.getIconCacheId(), null);
         searchEntry.clearCustomIcon();
+    }
+
+    public void restoreDefaultIcon(DialContactEntry dialContactEntry) {
+        TBApplication app = TBApplication.getApplication(ctx);
+        app.getDataHandler().removeCustomStaticEntryIcon(DialContactEntry.SCHEME);
+
+        app.drawableCache().cacheDrawable(dialContactEntry.getIconCacheId(), null);
+        dialContactEntry.clearCustomIcon();
     }
 
     public Drawable applyContactMask(@NonNull Context ctx, @NonNull Drawable drawable) {
