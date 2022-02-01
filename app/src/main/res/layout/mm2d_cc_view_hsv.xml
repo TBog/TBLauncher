@@ -1,32 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
 <merge
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:parentTag="android.widget.FrameLayout"
+    tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout"
     >
 
-    <LinearLayout
-        android:layout_width="match_parent"
+    <View
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginLeft="@dimen/mm2d_cc_hsv_margin"
-        android:layout_marginRight="@dimen/mm2d_cc_hsv_margin"
-        android:layout_gravity="center_vertical"
-        android:orientation="horizontal"
-        >
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
 
-        <net.mm2d.color.chooser.element.SvView
-            android:id="@+id/sv_view"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            />
+    <net.mm2d.color.chooser.element.SvView
+        android:id="@+id/sv_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="@dimen/mm2d_cc_hsv_margin"
+        android:layout_marginEnd="@dimen/mm2d_cc_hsv_margin"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/hue_view"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
 
-        <net.mm2d.color.chooser.element.HueView
-            android:id="@+id/hue_view"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            />
-    </LinearLayout>
+    <net.mm2d.color.chooser.element.HueView
+        android:id="@+id/hue_view"
+        android:layout_width="wrap_content"
+        android:layout_height="0dp"
+        app:layout_constraintBottom_toBottomOf="@id/sv_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/sv_view"
+        app:layout_constraintTop_toTopOf="@id/sv_view"
+        />
 </merge>

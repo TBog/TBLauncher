@@ -20,13 +20,10 @@ import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.tabs.TabLayout;
 
-import net.mm2d.color.chooser.ViewPagerAdapter;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import kotlin.Pair;
 import rocks.tbog.tblauncher.CustomizeUI;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
@@ -64,9 +61,9 @@ public class EditQuickList {
         TBApplication.dataHandler(context).setQuickList(idList);
     }
 
-    private void addFilters(@NonNull LayoutInflater inflater, @NonNull ArrayList<Pair<String, View>> pages) {
+    private void addFilters(@NonNull LayoutInflater inflater, @NonNull ArrayList<ViewPagerAdapter.PageInfo> pages) {
         GridView gridView = (GridView) inflater.inflate(R.layout.quick_list_editor_page, mViewPager, false);
-        pages.add(new Pair<>(inflater.getContext().getString(R.string.edit_quick_list_tab_filters), gridView));
+        pages.add(new ViewPagerAdapter.PageInfo(inflater.getContext().getString(R.string.edit_quick_list_tab_filters), gridView));
 
         ArrayList<EntryItem> list = new ArrayList<>();
         EntryAdapter adapter = new EntryAdapter(list);
@@ -86,9 +83,9 @@ public class EditQuickList {
         gridView.setOnItemClickListener(mAddToQuickList);
     }
 
-    private void addActions(@NonNull LayoutInflater inflater, @NonNull ArrayList<Pair<String, View>> pages) {
+    private void addActions(@NonNull LayoutInflater inflater, @NonNull ArrayList<ViewPagerAdapter.PageInfo> pages) {
         GridView gridView = (GridView) inflater.inflate(R.layout.quick_list_editor_page, mViewPager, false);
-        pages.add(new Pair<>(inflater.getContext().getString(R.string.edit_quick_list_tab_actions), gridView));
+        pages.add(new ViewPagerAdapter.PageInfo(inflater.getContext().getString(R.string.edit_quick_list_tab_actions), gridView));
 
         ArrayList<EntryItem> list = new ArrayList<>();
         EntryAdapter adapter = new EntryAdapter(list);
@@ -108,9 +105,9 @@ public class EditQuickList {
         gridView.setOnItemClickListener(mAddToQuickList);
     }
 
-    private void addTags(@NonNull LayoutInflater inflater, @NonNull ArrayList<Pair<String, View>> pages) {
+    private void addTags(@NonNull LayoutInflater inflater, @NonNull ArrayList<ViewPagerAdapter.PageInfo> pages) {
         GridView gridView = (GridView) inflater.inflate(R.layout.quick_list_editor_page, mViewPager, false);
-        pages.add(new Pair<>(inflater.getContext().getString(R.string.edit_quick_list_tab_tags), gridView));
+        pages.add(new ViewPagerAdapter.PageInfo(inflater.getContext().getString(R.string.edit_quick_list_tab_tags), gridView));
 
         ArrayList<EntryItem> list = new ArrayList<>();
         EntryAdapter adapter = new EntryAdapter(list);
@@ -134,9 +131,9 @@ public class EditQuickList {
         gridView.setOnItemClickListener(mAddToQuickList);
     }
 
-    private void addFavorites(@NonNull LayoutInflater inflater, @NonNull ArrayList<Pair<String, View>> pages) {
+    private void addFavorites(@NonNull LayoutInflater inflater, @NonNull ArrayList<ViewPagerAdapter.PageInfo> pages) {
         GridView gridView = (GridView) inflater.inflate(R.layout.quick_list_editor_page, mViewPager, false);
-        pages.add(new Pair<>(inflater.getContext().getString(R.string.edit_quick_list_tab_favorites), gridView));
+        pages.add(new ViewPagerAdapter.PageInfo(inflater.getContext().getString(R.string.edit_quick_list_tab_favorites), gridView));
 
         ArrayList<EntryItem> list = new ArrayList<>();
         EntryAdapter adapter = new EntryAdapter(list);
@@ -176,7 +173,7 @@ public class EditQuickList {
             tabLayout.setupWithViewPager(mViewPager);
         }
         {
-            ArrayList<Pair<String, View>> pages = new ArrayList<>();
+            ArrayList<ViewPagerAdapter.PageInfo> pages = new ArrayList<>();
             LayoutInflater inflater = LayoutInflater.from(context);
 
             // actions
@@ -197,8 +194,8 @@ public class EditQuickList {
             mViewPager.setAdapter(new ViewPagerAdapter(pages));
 
             CustomizeUI customizeUI = TBApplication.ui(context);
-            for (Pair<String, View> page : pages) {
-                customizeUI.setResultListPref(page.getSecond());
+            for (ViewPagerAdapter.PageInfo page : pages) {
+                customizeUI.setResultListPref(page.getView());
             }
         }
     }

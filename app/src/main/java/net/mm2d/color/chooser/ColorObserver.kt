@@ -9,4 +9,4 @@ package net.mm2d.color.chooser
 
 import androidx.lifecycle.Observer
 
-interface ColorObserver : Observer<Int>
+internal interface ColorObserver : Observer<Int>

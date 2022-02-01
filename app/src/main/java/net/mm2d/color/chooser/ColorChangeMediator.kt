@@ -9,7 +9,7 @@ package net.mm2d.color.chooser
 
 import android.view.View
 
-interface ColorChangeMediator {
+internal interface ColorChangeMediator {
     fun onChangeColor(color: Int)
 }
 

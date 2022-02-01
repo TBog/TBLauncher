@@ -11,24 +11,22 @@ import android.content.Context
 import android.graphics.Color
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.widget.FrameLayout
+import androidx.constraintlayout.widget.ConstraintLayout
 import net.mm2d.color.chooser.util.ColorUtils
 import rocks.tbog.tblauncher.databinding.Mm2dCcViewHsvBinding
 
-/**
- * @author [大前良介 (OHMAE Ryosuke)](mailto:ryo@mm2d.net)
- */
 internal class HsvView
 @JvmOverloads constructor(
-        context: Context,
-        attrs: AttributeSet? = null,
-        defStyleAttr: Int = 0
-) : FrameLayout(context, attrs, defStyleAttr), ColorObserver {
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0
+) : ConstraintLayout(context, attrs, defStyleAttr), ColorObserver {
     private val colorChangeMediator by lazy {
         findColorChangeMediator()
     }
-    private var binding: Mm2dCcViewHsvBinding = Mm2dCcViewHsvBinding.inflate(LayoutInflater.from(context), this)
     private var color: Int = Color.BLACK
+    private val binding: Mm2dCcViewHsvBinding =
+        Mm2dCcViewHsvBinding.inflate(LayoutInflater.from(context), this)
 
     init {
         binding.svView.onColorChanged = {

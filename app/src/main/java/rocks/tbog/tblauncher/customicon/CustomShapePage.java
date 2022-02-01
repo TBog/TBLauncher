@@ -23,7 +23,7 @@ import androidx.annotation.StringRes;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
-import net.mm2d.color.chooser.DialogView;
+import net.mm2d.color.chooser.ColorChooserDialog;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -349,24 +349,27 @@ class CustomShapePage extends PageAdapter.Page {
         if (!(activity instanceof AppCompatActivity))
             return;
 
-        Context themeWrapper = UITheme.getDialogThemedContext(context);
-        DialogView dialogView = new DialogView(themeWrapper);
+        ColorChooserDialog.INSTANCE.registerListener((AppCompatActivity) activity, "request color", listener::onColorChanged);
+        ColorChooserDialog.INSTANCE.show((AppCompatActivity)activity, "request color", selectedColor, true, ColorChooserDialog.TAB_PALETTE);
 
-        dialogView.init(selectedColor, (AppCompatActivity) activity);
-        dialogView.setWithAlpha(true);
-
-        DialogInterface.OnClickListener buttonListener = (dialog, which) -> {
-            if (which == DialogInterface.BUTTON_POSITIVE) {
-                listener.onColorChanged(dialogView.getColor());
-            }
-            dialog.dismiss();
-        };
-
-        final AlertDialog.Builder builder = new AlertDialog.Builder(themeWrapper)
-                .setPositiveButton(android.R.string.ok, buttonListener)
-                .setNegativeButton(android.R.string.cancel, buttonListener);
-        builder.setView(dialogView);
-        DialogHelper.setButtonBarBackground(builder.show());
+//        Context themeWrapper = UITheme.getDialogThemedContext(context);
+//        DialogView dialogView = new DialogView(themeWrapper);
+//
+//        dialogView.init(selectedColor, (AppCompatActivity) activity);
+//        dialogView.setWithAlpha(true);
+//
+//        DialogInterface.OnClickListener buttonListener = (dialog, which) -> {
+//            if (which == DialogInterface.BUTTON_POSITIVE) {
+//                listener.onColorChanged(dialogView.getColor());
+//            }
+//            dialog.dismiss();
+//        };
+//
+//        final AlertDialog.Builder builder = new AlertDialog.Builder(themeWrapper)
+//                .setPositiveButton(android.R.string.ok, buttonListener)
+//                .setNegativeButton(android.R.string.cancel, buttonListener);
+//        builder.setView(dialogView);
+//        DialogHelper.setButtonBarBackground(builder.show());
     }
 
     static class LetterIconInfo extends NamedIconInfo {

@@ -1,33 +1,44 @@
 <?xml version="1.0" encoding="utf-8"?>
-<merge xmlns:android="http://schemas.android.com/apk/res/android"
+<merge
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:parentTag="android.widget.LinearLayout">
+    tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout"
+    >
 
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tab_layout"
-        style="?attr/tabLayoutStyle"
-        android:layout_width="@dimen/mm2d_cc_dialog_width"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="@dimen/dialog_padding_horizontal"
-        android:layout_marginVertical="@dimen/dialog_padding_vertical" />
+        app:layout_constraintBottom_toTopOf="@id/view_pager"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        />
 
-    <net.mm2d.color.chooser.SwipeDisabledViewPager
+    <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/view_pager"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginHorizontal="@dimen/dialog_padding_horizontal"
-        android:layout_marginVertical="@dimen/dialog_padding_vertical"
-        android:layout_weight="1"
-        app:maxHeight="@dimen/mm2d_cc_panel_height" />
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constrainedHeight="true"
+        app:layout_constraintBottom_toTopOf="@id/control_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_max="@dimen/mm2d_cc_panel_height"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tab_layout"
+        />
 
     <net.mm2d.color.chooser.ControlView
         android:id="@+id/control_view"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="@dimen/mm2d_cc_panel_margin" />
+        android:layout_marginTop="@dimen/mm2d_cc_panel_margin"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/view_pager"
+        />
 </merge>

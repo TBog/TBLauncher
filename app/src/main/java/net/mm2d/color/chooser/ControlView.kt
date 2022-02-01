@@ -15,7 +15,7 @@ import android.text.*
 import android.text.InputFilter.LengthFilter
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.widget.LinearLayout
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.graphics.alpha
 import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
@@ -26,32 +26,29 @@ import rocks.tbog.tblauncher.R
 import rocks.tbog.tblauncher.databinding.Mm2dCcViewControlBinding
 import java.util.*
 
-/**
- * @author [大前良介 (OHMAE Ryosuke)](mailto:ryo@mm2d.net)
- */
 internal class ControlView
 @JvmOverloads constructor(
-        context: Context,
-        attrs: AttributeSet? = null,
-        defStyleAttr: Int = 0
-) : LinearLayout(context, attrs, defStyleAttr), ColorObserver {
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0
+) : ConstraintLayout(context, attrs, defStyleAttr), ColorObserver {
     private val colorChangeMediator by lazy {
         findColorChangeMediator()
     }
-    private var binding: Mm2dCcViewControlBinding = Mm2dCcViewControlBinding.inflate(LayoutInflater.from(context), this)
     private val normalTint =
-            ColorStateList.valueOf(context.resolveColor(R.attr.colorAccent, Color.BLUE))
+        ColorStateList.valueOf(context.resolveColor(R.attr.colorAccent, Color.BLUE))
     private val errorTint =
-            ColorStateList.valueOf(context.resolveColor(R.attr.colorError, Color.RED))
+        ColorStateList.valueOf(context.resolveColor(R.attr.colorError, Color.RED))
     private var changeHexTextByUser = true
     private var hasAlpha: Boolean = true
     private val rgbFilter = arrayOf(HexadecimalFilter(), LengthFilter(6))
     private val argbFilter = arrayOf(HexadecimalFilter(), LengthFilter(8))
+    private val binding: Mm2dCcViewControlBinding =
+        Mm2dCcViewControlBinding.inflate(LayoutInflater.from(context), this)
     var color: Int = Color.BLACK
         private set
 
     init {
-        orientation = VERTICAL
         binding.colorPreview.setColor(color)
         binding.seekAlpha.setValue(color.alpha)
         binding.seekAlpha.onValueChanged = { value, fromUser ->
@@ -94,7 +91,8 @@ internal class ControlView
 
     fun setWithAlpha(withAlpha: Boolean) {
         hasAlpha = withAlpha
-        binding.sectionAlpha.isVisible = withAlpha
+        binding.seekAlpha.isVisible = withAlpha
+        binding.textAlpha.isVisible = withAlpha
         if (withAlpha) {
             binding.editHex.filters = argbFilter
         } else {
@@ -134,11 +132,11 @@ internal class ControlView
 
     private class HexadecimalFilter : InputFilter {
         override fun filter(
-                source: CharSequence?, start: Int, end: Int, dest: Spanned?, dstart: Int, dend: Int
+            source: CharSequence?, start: Int, end: Int, dest: Spanned?, dstart: Int, dend: Int
         ): CharSequence? {
             val converted = source.toString()
-                    .replace("[^0-9a-fA-F]".toRegex(), "")
-                    .uppercase(Locale.ENGLISH)
+                .replace("[^0-9a-fA-F]".toRegex(), "")
+                .uppercase(Locale.ENGLISH)
             if (source.toString() == converted) return null
             if (source !is Spanned) return converted
             return SpannableString(converted).also {

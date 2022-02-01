@@ -24,14 +24,9 @@ class PageAdapter extends androidx.viewpager.widget.PagerAdapter implements View
         return pageList;
     }
 
-    public void setupPageView(Context context, @Nullable Page.OnItemClickListener iconClickListener, @Nullable Page.OnItemClickListener iconLongClickListener) {
+    public void setupPageView(@NonNull Context context, @Nullable Page.OnItemClickListener iconClickListener, @Nullable Page.OnItemClickListener iconLongClickListener) {
         for (Page page : getPageIterable())
             page.setupView(context, iconClickListener, iconLongClickListener);
-    }
-
-    public void loadPageData() {
-        for (Page page : getPageIterable())
-            page.loadData();
     }
 
     @Override

@@ -14,8 +14,6 @@ import kotlin.math.pow
 
 /**
  * HSVやRGBの色空間表現を扱う上でのメソッド
- *
- * @author [大前良介 (OHMAE Ryosuke)](mailto:ryo@mm2d.net)
  */
 internal object ColorUtils {
     /**

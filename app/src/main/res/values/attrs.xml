@@ -22,7 +22,7 @@
 
     <attr name="tabLayoutStyle" format="reference"/>
 
-    <declare-styleable name="SwipeDisabledViewPager">
+    <declare-styleable name="MaxHeightViewPager">
         <attr name="maxHeight" format="dimension"/>
     </declare-styleable>
 
