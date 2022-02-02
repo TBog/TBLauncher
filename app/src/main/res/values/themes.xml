@@ -355,11 +355,12 @@
         <item name="tabMode">fixed</item>
     </style>
 
+    <!-- This is the tab layout of the icon chooser and dock editor -->
     <style name="TabLayout.Dialog">
         <item name="tabGravity">center</item>
         <item name="tabMode">scrollable</item>
-        <item name="tabSelectedTextColor">?android:attr/textColorPrimary</item>
-        <item name="tabTextColor">?android:attr/textColorSecondary</item>
+        <item name="tabSelectedTextColor">?attr/colorControlHighlight</item>
+        <item name="tabTextColor">?android:attr/textColorPrimary</item>
         <item name="tabIndicatorColor">?attr/colorControlHighlight</item>
         <item name="tabBackground">?attr/tabBackground</item>
         <item name="tabTextAppearance">@android:style/TextAppearance.Widget.TabWidget</item>
