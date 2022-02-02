@@ -24,7 +24,6 @@ import java.util.Objects;
 import rocks.tbog.tblauncher.WorkAsync.RunnableTask;
 import rocks.tbog.tblauncher.WorkAsync.TaskRunner;
 import rocks.tbog.tblauncher.dataprovider.IProvider;
-import rocks.tbog.tblauncher.dataprovider.ModProvider;
 import rocks.tbog.tblauncher.dataprovider.TagsProvider;
 import rocks.tbog.tblauncher.drawable.CodePointDrawable;
 import rocks.tbog.tblauncher.drawable.DrawableUtils;
@@ -194,6 +193,13 @@ public class TagsManager {
             tagsProvider.addTagEntry(tagEntry);
 
             staticEntry = tagEntry;
+        }
+
+        // make sure we have the tag in the provider or else IconSelectDialog will not find it
+        if (staticEntry instanceof TagEntry) {
+            TagsProvider tagsProvider = TBApplication.dataHandler(ctx).getTagsProvider();
+            if (tagsProvider != null)
+                tagsProvider.addTagEntry((TagEntry) staticEntry);
         }
 
         TBApplication.behaviour(ctx).launchCustomIconDialog(staticEntry, () -> {
