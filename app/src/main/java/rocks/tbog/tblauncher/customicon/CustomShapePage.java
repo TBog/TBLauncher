@@ -2,7 +2,6 @@ package rocks.tbog.tblauncher.customicon;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.ColorDrawable;
@@ -20,7 +19,6 @@ import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
 import net.mm2d.color.chooser.ColorChooserDialog;
@@ -38,10 +36,8 @@ import rocks.tbog.tblauncher.drawable.DrawableUtils;
 import rocks.tbog.tblauncher.drawable.FourCodePointDrawable;
 import rocks.tbog.tblauncher.drawable.TextDrawable;
 import rocks.tbog.tblauncher.drawable.TwoCodePointDrawable;
-import rocks.tbog.tblauncher.utils.DialogHelper;
 import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.UISizes;
-import rocks.tbog.tblauncher.utils.UITheme;
 import rocks.tbog.tblauncher.utils.Utilities;
 import rocks.tbog.tblauncher.utils.ViewHolderAdapter;
 import rocks.tbog.tblauncher.utils.ViewHolderListAdapter;
@@ -350,7 +346,7 @@ class CustomShapePage extends PageAdapter.Page {
             return;
 
         ColorChooserDialog.INSTANCE.registerListener((AppCompatActivity) activity, "request color", listener::onColorChanged);
-        ColorChooserDialog.INSTANCE.show((AppCompatActivity)activity, "request color", selectedColor, true, ColorChooserDialog.TAB_PALETTE);
+        ColorChooserDialog.INSTANCE.show((AppCompatActivity) activity, "request color", selectedColor, true, ColorChooserDialog.TAB_PALETTE);
 
 //        Context themeWrapper = UITheme.getDialogThemedContext(context);
 //        DialogView dialogView = new DialogView(themeWrapper);
@@ -451,11 +447,13 @@ class CustomShapePage extends PageAdapter.Page {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o)
+                return true;
+            if (o == null || getClass() != o.getClass())
+                return false;
             ShapedIconInfo that = (ShapedIconInfo) o;
             return Objects.equals(iconDrawable, that.iconDrawable) &&
-                    Objects.equals(textId, that.textId);
+                Objects.equals(textId, that.textId);
         }
 
         @Override

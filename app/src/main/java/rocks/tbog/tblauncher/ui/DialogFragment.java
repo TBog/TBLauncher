@@ -127,6 +127,14 @@ public abstract class DialogFragment<Output> extends androidx.fragment.app.Dialo
         return dialog;
     }
 
+    @NonNull
+    public View inflateLayoutRes(@NonNull LayoutInflater inflater, @Nullable ViewGroup container) {
+        //Log.i(TAG, "context=" + getContext());
+        //Log.i(TAG, "dialog.context=" + dialog.getContext());
+        Log.i(TAG, "inflater.context=" + inflater.getContext());
+        return inflater.inflate(layoutRes(), container, false);
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -142,10 +150,7 @@ public abstract class DialogFragment<Output> extends androidx.fragment.app.Dialo
         }
         dialog.setCanceledOnTouchOutside(true);
 
-        //Log.i(TAG, "context=" + getContext());
-        //Log.i(TAG, "dialog.context=" + dialog.getContext());
-        Log.i(TAG, "inflater.context=" + inflater.getContext());
-        View view = inflater.inflate(layoutRes(), container, false);
+        View view = inflateLayoutRes(inflater, container);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             view.setClipToOutline(true);

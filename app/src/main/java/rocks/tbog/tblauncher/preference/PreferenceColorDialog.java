@@ -14,11 +14,11 @@ import net.mm2d.color.chooser.ColorChooserView;
 import rocks.tbog.tblauncher.databinding.Mm2dCcColorChooserBinding;
 import rocks.tbog.tblauncher.utils.UIColors;
 
-public class ChooseColorDialog extends BasePreferenceDialog {
+public class PreferenceColorDialog extends BasePreferenceDialog {
     private ColorChooserView mChooseView = null;
 
-    public static ChooseColorDialog newInstance(String key) {
-        final ChooseColorDialog fragment = new ChooseColorDialog();
+    public static PreferenceColorDialog newInstance(String key) {
+        final PreferenceColorDialog fragment = new PreferenceColorDialog();
         final Bundle b = new Bundle(1);
         b.putString(ARG_KEY, key);
         fragment.setArguments(b);

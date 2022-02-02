@@ -61,7 +61,7 @@ import rocks.tbog.tblauncher.entry.TagEntry;
 import rocks.tbog.tblauncher.handler.IconsHandler;
 import rocks.tbog.tblauncher.preference.BaseListPreferenceDialog;
 import rocks.tbog.tblauncher.preference.BaseMultiSelectListPreferenceDialog;
-import rocks.tbog.tblauncher.preference.ChooseColorDialog;
+import rocks.tbog.tblauncher.preference.PreferenceColorDialog;
 import rocks.tbog.tblauncher.preference.ConfirmDialog;
 import rocks.tbog.tblauncher.preference.ContentLoadHelper;
 import rocks.tbog.tblauncher.preference.CustomDialogPreference;
@@ -644,7 +644,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "popup-ripple-color":
                     case "popup-text-color":
                     case "popup-title-color":
-                        dialogFragment = ChooseColorDialog.newInstance(key);
+                        dialogFragment = PreferenceColorDialog.newInstance(key);
                         break;
                     case "notification-bar-alpha":
                     case "search-bar-alpha":
