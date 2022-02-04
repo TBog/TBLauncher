@@ -1,5 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <string name="app_name">TinyBit launcher</string>
+    <string name="app_name_debug">TinyBit debug launcher</string>
     <string name="hint_ui_search">Search in apps, contacts, …</string>
     <string name="ui_item_search">Search in %1$s for \"%2$s\"?</string>
     <string name="ui_item_visit">Visit \"%1$s\"</string>

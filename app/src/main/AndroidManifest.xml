@@ -42,7 +42,7 @@
         android:allowBackup="true"
         android:fullBackupContent="@xml/backup_descriptor"
         android:icon="@mipmap/ic_launcher"
-        android:label="@string/app_name"
+        android:label="@string/app_name_dynamic"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/BaseThemeLight">
@@ -52,7 +52,6 @@
             android:configChanges="orientation|keyboardHidden|screenSize"
             android:excludeFromRecents="true"
             android:exported="true"
-            android:label="@string/app_name"
             android:launchMode="singleTask"
             android:resizeableActivity="true"
             android:screenOrientation="user"
