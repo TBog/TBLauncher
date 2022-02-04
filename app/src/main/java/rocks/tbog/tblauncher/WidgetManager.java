@@ -388,14 +388,21 @@ public class WidgetManager {
                 return;
 
             int appWidgetId = mAppWidgetHost.allocateAppWidgetId();
-            boolean hasPermission = mAppWidgetManager.bindAppWidgetIdIfAllowed(appWidgetId, provider);
-            if (!hasPermission) {
-                Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_BIND);
-                intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
-                intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, provider);
-                activity.startActivityForResult(intent, REQUEST_PICK_APPWIDGET/*REQUEST_BIND*/);
+            boolean hasPermission;
+            try {
+                hasPermission = mAppWidgetManager.bindAppWidgetIdIfAllowed(appWidgetId, provider);
+            } catch (Throwable ignored) {
+                hasPermission = false;
             }
 
+            Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_BIND);
+            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
+            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, provider);
+            if (hasPermission) {
+                configureWidget(activity, intent);
+            } else {
+                activity.startActivityForResult(intent, REQUEST_PICK_APPWIDGET/*REQUEST_BIND*/);
+            }
             //Toast.makeText(activity, provider.flattenToString(), Toast.LENGTH_SHORT).show();
         });
         placeholder.setOnLongClickListener(placeholderView -> {
