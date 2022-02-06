@@ -15,11 +15,13 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             resValue "string", "app_name_dynamic", "@string/app_name"
         }
         debug {
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             applicationIdSuffix '.debug'
             versionNameSuffix '-dbg'
             resValue "string", "app_name_dynamic", "@string/app_name_debug"
