@@ -1,10 +1,15 @@
 package rocks.tbog.tblauncher.customicon;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.OpenableColumns;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,11 +17,16 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.viewpager.widget.ViewPager;
 
+import com.github.dhaval2404.imagepicker.ImagePicker;
+
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -45,6 +55,67 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
     private ViewPager mViewPager;
     private CustomShapePage mCustomShapePage = null;
     private TextView mPreviewLabel;
+
+    ActivityResultLauncher<Intent> imagePickerResult;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        imagePickerResult =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                Context context = IconSelectDialog.this.requireContext();
+                int resultCode = result.getResultCode();
+                Intent data = result.getData();
+                Uri imageUri = data != null ? data.getData() : null;
+                if (resultCode == Activity.RESULT_OK && imageUri != null) {
+                    Drawable imageDrawable;
+                    try {
+                        InputStream is = context.getContentResolver().openInputStream(imageUri);
+                        imageDrawable = Drawable.createFromStream(is, imageUri.toString());
+                    } catch (Throwable ignore) {
+                        imageDrawable = null;
+                    }
+
+                    String filename = getFileName(context, imageUri);
+
+                    if (imageDrawable != null)
+                        IconSelectDialog.this.addPickedIcon(imageDrawable, filename);
+                } else if (resultCode == ImagePicker.RESULT_ERROR) {
+                    Toast.makeText(context, ImagePicker.getError(data), Toast.LENGTH_SHORT).show();
+                }
+            });
+
+    }
+
+    public static String getFileName(@NonNull Context context, @NonNull Uri uri) {
+        String result = null;
+        if (uri.getScheme().equals("content")) {
+            try (Cursor cursor = context.getContentResolver().query(uri, null, null, null, null)) {
+                if (cursor != null && cursor.moveToFirst()) {
+                    int columnIdx = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                    if (columnIdx != -1)
+                        result = cursor.getString(columnIdx);
+                }
+            }
+        }
+        if (result == null) {
+            result = uri.getPath();
+            int cut = result.lastIndexOf('/');
+            if (cut != -1) {
+                result = result.substring(cut + 1);
+            }
+        }
+        return result;
+    }
+
+    private void addPickedIcon(@NonNull Drawable pickedImage, String filename) {
+        if (!(mViewPager.getAdapter() instanceof PageAdapter))
+            return;
+        PageAdapter pageAdapter = (PageAdapter) mViewPager.getAdapter();
+        for (PageAdapter.Page page : pageAdapter.getPageIterable()) {
+            page.addPickedIcon(pickedImage, filename);
+        }
+    }
 
     @Override
     protected int layoutRes() {
@@ -145,13 +216,17 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
         }
         pageAdapter.notifyDataSetChanged();
 
-        pageAdapter.setupPageView(context, (adapter, v, position) -> {
+        pageAdapter.setupPageView(this, (adapter, v, position) -> {
             if (adapter instanceof IconAdapter) {
                 IconData item = ((IconAdapter) adapter).getItem(position);
                 Drawable icon = item.getIcon();
                 setSelectedDrawable(icon, icon);
             } else if (adapter instanceof CustomShapePage.ShapedIconAdapter) {
                 CustomShapePage.ShapedIconInfo item = ((CustomShapePage.ShapedIconAdapter) adapter).getItem(position);
+                if (item instanceof SystemPage.PickedIconInfo) {
+                    if (((SystemPage.PickedIconInfo) item).launchPicker(IconSelectDialog.this, v))
+                        return;
+                }
                 setSelectedDrawable(item.getIcon(), item.getPreview());
             }
         }, (adapter, v, position) -> {

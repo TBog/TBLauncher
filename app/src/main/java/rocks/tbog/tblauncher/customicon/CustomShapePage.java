@@ -20,6 +20,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.DialogFragment;
 
 import net.mm2d.color.chooser.ColorChooserDialog;
 
@@ -62,7 +63,8 @@ class CustomShapePage extends PageAdapter.Page {
     }
 
     @Override
-    void setupView(@NonNull Context context, @Nullable OnItemClickListener iconClickListener, @Nullable OnItemClickListener iconLongClickListener) {
+    void setupView(@NonNull DialogFragment dialogFragment, @Nullable OnItemClickListener iconClickListener, @Nullable OnItemClickListener iconLongClickListener) {
+        Context context = dialogFragment.getContext();
         mLettersView = pageView.findViewById(R.id.letters);
         mLettersView.addTextChangedListener(new TextWatcher() {
             @Override
@@ -164,9 +166,9 @@ class CustomShapePage extends PageAdapter.Page {
             });
         }
 
-        final float colorPreviewRadius = context.getResources().getDimension(R.dimen.color_preview_radius);
+        final float colorPreviewRadius = dialogFragment.getResources().getDimension(R.dimen.color_preview_radius);
         final int colorPreviewBorder = UISizes.dp2px(context, 1);
-        final int colorPreviewSize = context.getResources().getDimensionPixelSize(R.dimen.color_preview_size);
+        final int colorPreviewSize = dialogFragment.getResources().getDimensionPixelSize(R.dimen.color_preview_size);
 
         // shape background color chooser
         {
@@ -216,6 +218,11 @@ class CustomShapePage extends PageAdapter.Page {
         }
 
         generateShapes(context);
+    }
+
+    @Override
+    public void addPickedIcon(@NonNull Drawable pickedImage, String filename) {
+        mShapedIconAdapter.addItem(new SystemPage.PickedIconInfo(pickedImage, filename));
     }
 
     private void setupToggle(@IdRes int toggleTextView, @IdRes int viewToToggle) {
@@ -375,7 +382,7 @@ class CustomShapePage extends PageAdapter.Page {
         }
 
         @Override
-        ShapedIconInfo reshape(Context context, int shape, float scale, int background) {
+        protected ShapedIconInfo reshape(Context context, int shape, float scale, int background) {
             Drawable drawable = DrawableUtils.applyIconMaskShape(context, originalDrawable, shape, scale, background);
             return new LetterIconInfo(name, drawable, originalDrawable);
         }
@@ -388,7 +395,7 @@ class CustomShapePage extends PageAdapter.Page {
         }
 
         @Override
-        Drawable getIcon() {
+        public Drawable getIcon() {
             return null;
         }
     }
@@ -402,7 +409,7 @@ class CustomShapePage extends PageAdapter.Page {
         }
 
         @Override
-        ShapedIconInfo reshape(Context context, int shape, float scale, int background) {
+        protected ShapedIconInfo reshape(Context context, int shape, float scale, int background) {
             Drawable drawable = DrawableUtils.applyIconMaskShape(context, originalDrawable, shape, scale, background);
             return new NamedIconInfo(name, drawable, originalDrawable);
         }
@@ -414,25 +421,25 @@ class CustomShapePage extends PageAdapter.Page {
         }
     }
 
-    static class ShapedIconInfo {
-        final Drawable originalDrawable;
-        final Drawable iconDrawable;
+    public static class ShapedIconInfo {
+        protected final Drawable originalDrawable;
+        protected final Drawable iconDrawable;
         @StringRes
-        int textId;
+        protected int textId;
 
-        ShapedIconInfo(Drawable icon, Drawable origin) {
+        public ShapedIconInfo(Drawable icon, Drawable origin) {
             iconDrawable = icon;
             originalDrawable = origin;
         }
 
-        ShapedIconInfo reshape(Context context, int shape, float scale, int background) {
+        protected ShapedIconInfo reshape(Context context, int shape, float scale, int background) {
             Drawable drawable = DrawableUtils.applyIconMaskShape(context, originalDrawable, shape, scale, background);
             ShapedIconInfo shapedIconInfo = new ShapedIconInfo(drawable, originalDrawable);
             shapedIconInfo.textId = textId;
             return shapedIconInfo;
         }
 
-        Drawable getIcon() {
+        public Drawable getIcon() {
             return iconDrawable;
         }
 
@@ -487,8 +494,10 @@ class CustomShapePage extends PageAdapter.Page {
             CharSequence text = content.getText();
             if (text != null)
                 text1.setText(text);
-            else
+            else if (content.textId != 0)
                 text1.setText(content.textId);
+            else
+                text1.setText("null");
         }
     }
 

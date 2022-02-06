@@ -1,32 +1,34 @@
 package rocks.tbog.tblauncher.customicon;
 
-import android.content.Context;
+import android.graphics.drawable.Drawable;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Adapter;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.DialogFragment;
 import androidx.viewpager.widget.ViewPager;
 
 import java.util.ArrayList;
 
 class PageAdapter extends androidx.viewpager.widget.PagerAdapter implements ViewPager.OnPageChangeListener {
 
-    private ArrayList<Page> pageList = new ArrayList<>(0);
+    private final ArrayList<Page> pageList = new ArrayList<>(0);
     private int mScrollState = ViewPager.SCROLL_STATE_IDLE;
 
     void addPage(Page page) {
         pageList.add(page);
     }
 
+    @NonNull
     Iterable<Page> getPageIterable() {
         return pageList;
     }
 
-    public void setupPageView(@NonNull Context context, @Nullable Page.OnItemClickListener iconClickListener, @Nullable Page.OnItemClickListener iconLongClickListener) {
+    public void setupPageView(@NonNull DialogFragment dialogFragment, @Nullable Page.OnItemClickListener iconClickListener, @Nullable Page.OnItemClickListener iconLongClickListener) {
         for (Page page : getPageIterable())
-            page.setupView(context, iconClickListener, iconLongClickListener);
+            page.setupView(dialogFragment, iconClickListener, iconLongClickListener);
     }
 
     @Override
@@ -72,7 +74,10 @@ class PageAdapter extends androidx.viewpager.widget.PagerAdapter implements View
             pageView = view;
         }
 
-        abstract void setupView(@NonNull Context context, @Nullable OnItemClickListener iconClickListener, @Nullable OnItemClickListener iconLongClickListener);
+        abstract void setupView(@NonNull DialogFragment dialogFragment, @Nullable OnItemClickListener iconClickListener, @Nullable OnItemClickListener iconLongClickListener);
+
+        public void addPickedIcon(@NonNull Drawable pickedImage, String filename) {
+        }
 
         void loadData() {
             bDataLoaded = true;

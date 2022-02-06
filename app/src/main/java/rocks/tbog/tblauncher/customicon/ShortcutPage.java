@@ -8,6 +8,7 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.DialogFragment;
 
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
@@ -24,16 +25,17 @@ public class ShortcutPage extends CustomShapePage {
     }
 
     @Override
-    void setupView(@NonNull Context context, @Nullable OnItemClickListener iconClickListener, @Nullable OnItemClickListener iconLongClickListener) {
-        super.setupView(context, iconClickListener, iconLongClickListener);
+    void setupView(@NonNull DialogFragment dialogFragment, @Nullable OnItemClickListener iconClickListener, @Nullable OnItemClickListener iconLongClickListener) {
+        Context context = dialogFragment.getContext();
+        super.setupView(dialogFragment, iconClickListener, iconLongClickListener);
 
         final Drawable defaultIcon;
         // default icon
         {
             Bitmap bitmap = ShortcutUtil.getInitialIcon(context, mShortcutRecord.dbId);
-            defaultIcon = new BitmapDrawable(context.getResources(), bitmap);
+            defaultIcon = new BitmapDrawable(dialogFragment.getResources(), bitmap);
             Drawable drawable = TBApplication.iconsHandler(context).applyShortcutMask(context, bitmap);
-            ShapedIconInfo iconInfo = new StaticEntryPage.DefaultIconInfo(context.getString(R.string.default_static_icon, mShortcutRecord.displayName), drawable);
+            ShapedIconInfo iconInfo = new StaticEntryPage.DefaultIconInfo(dialogFragment.getString(R.string.default_static_icon, mShortcutRecord.displayName), drawable);
             iconInfo.textId = R.string.default_icon;
             mShapedIconAdapter.addItem(iconInfo);
         }
