@@ -26,9 +26,32 @@ class PageAdapter extends androidx.viewpager.widget.PagerAdapter implements View
         return pageList;
     }
 
-    public void setupPageView(@NonNull DialogFragment dialogFragment, @Nullable Page.OnItemClickListener iconClickListener, @Nullable Page.OnItemClickListener iconLongClickListener) {
+    public void setupPageView(@NonNull IconSelectDialog iconSelectDialog) {
+        // touch listener
+        Page.OnItemClickListener iconClickListener = (adapter, v, position) -> {
+            if (adapter instanceof IconAdapter) {
+                IconData item = ((IconAdapter) adapter).getItem(position);
+                Drawable icon = item.getIcon();
+                iconSelectDialog.setSelectedDrawable(icon, icon);
+            } else if (adapter instanceof CustomShapePage.ShapedIconAdapter) {
+                CustomShapePage.ShapedIconInfo item = ((CustomShapePage.ShapedIconAdapter) adapter).getItem(position);
+                if (item instanceof SystemPage.PickedIconInfo) {
+                    if (((SystemPage.PickedIconInfo) item).launchPicker(iconSelectDialog, v))
+                        return;
+                }
+                iconSelectDialog.setSelectedDrawable(item.getIcon(), item.getPreview());
+            }
+        };
+        // long touch listener
+        Page.OnItemClickListener iconLongClickListener = (adapter, v, position) -> {
+            if (adapter instanceof IconAdapter) {
+                IconData item = ((IconAdapter) adapter).getItem(position);
+                iconSelectDialog.getIconPackMenu(item).show(v);
+            }
+        };
+        // setup pages
         for (Page page : getPageIterable())
-            page.setupView(dialogFragment, iconClickListener, iconLongClickListener);
+            page.setupView(iconSelectDialog, iconClickListener, iconLongClickListener);
     }
 
     @Override

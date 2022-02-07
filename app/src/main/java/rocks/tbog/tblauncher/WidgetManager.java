@@ -21,6 +21,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
+import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -711,16 +712,16 @@ public class WidgetManager {
         removeWidgetPopup.showCenter(mLayout);
     }
 
-    private boolean canMoveToPage(int from, int to) {
+    private static boolean canMoveToPage(WidgetLayout layout, int from, int to) {
         if (from != WidgetLayout.LayoutParams.PAGE_MIDDLE)
             return to == WidgetLayout.LayoutParams.PAGE_MIDDLE;
-        if (mLayout == null)
+        if (layout == null)
             return false;
 
         boolean ok = false;
-        if (mLayout.getVerticalPageCount() > 1)
+        if (layout.getVerticalPageCount() > 1)
             ok = ok || to == WidgetLayout.LayoutParams.PAGE_UP || to == WidgetLayout.LayoutParams.PAGE_DOWN;
-        if (mLayout.getHorizontalPageCount() > 1)
+        if (layout.getHorizontalPageCount() > 1)
             ok = ok || to == WidgetLayout.LayoutParams.PAGE_LEFT || to == WidgetLayout.LayoutParams.PAGE_RIGHT;
         return ok;
     }
@@ -738,201 +739,207 @@ public class WidgetManager {
 
         WidgetRecord widget = mWidgets.get(appWidgetId);
         if (widget != null) {
-            adapter.add(new LinearAdapter.ItemTitle(getWidgetName(ctx, view.getAppWidgetInfo())));
-            final WidgetLayout.Handle handleType = mLayout.getHandleType(view);
-            if (handleType.isMove()) {
-                adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_move_switch, WidgetOptionItem.Action.MOVE_SWITCH));
-                adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_move_exit, WidgetOptionItem.Action.RESET));
-            } else {
-                adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_move, WidgetOptionItem.Action.MOVE));
-            }
-
-            if (handleType.isResize()) {
-                adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_resize_switch, WidgetOptionItem.Action.RESIZE_SWITCH));
-                adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_resize_exit, WidgetOptionItem.Action.RESET));
-            } else {
-                adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_resize, WidgetOptionItem.Action.RESIZE));
-            }
-
-            if (handleType.isMoveResize()) {
-                adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_move_resize, WidgetOptionItem.Action.MOVE_RESIZE_SWITCH));
-                adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_move_resize_exit, WidgetOptionItem.Action.RESET));
-            } else {
-                adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_move_resize, WidgetOptionItem.Action.MOVE_RESIZE));
-            }
-
-            adapter.add(new LinearAdapter.ItemDivider());
-            final ViewGroup.LayoutParams lp = view.getLayoutParams();
-            if (lp instanceof WidgetLayout.LayoutParams) {
-                final int screenPage = ((WidgetLayout.LayoutParams) lp).screenPage;
-                if (canMoveToPage(screenPage, WidgetLayout.LayoutParams.PAGE_LEFT))
-                    adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_screen_left, WidgetOptionItem.Action.MOVE2SCREEN_LEFT));
-                if (canMoveToPage(screenPage, WidgetLayout.LayoutParams.PAGE_UP))
-                    adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_screen_up, WidgetOptionItem.Action.MOVE2SCREEN_UP));
-                if (canMoveToPage(screenPage, WidgetLayout.LayoutParams.PAGE_MIDDLE))
-                    adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_screen_middle, WidgetOptionItem.Action.MOVE2SCREEN_MIDDLE));
-                if (canMoveToPage(screenPage, WidgetLayout.LayoutParams.PAGE_RIGHT))
-                    adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_screen_right, WidgetOptionItem.Action.MOVE2SCREEN_RIGHT));
-                if (canMoveToPage(screenPage, WidgetLayout.LayoutParams.PAGE_DOWN))
-                    adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_screen_down, WidgetOptionItem.Action.MOVE2SCREEN_DOWN));
-                adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_back, WidgetOptionItem.Action.MOVE_BELOW));
-                adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_front, WidgetOptionItem.Action.MOVE_ABOVE));
-            }
-
-            adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_remove, WidgetOptionItem.Action.REMOVE));
-
-            if (DebugInfo.widgetInfo(view.getContext())) {
-                adapter.add(new LinearAdapter.ItemTitle("Debug info"));
-                adapter.add(new LinearAdapter.ItemString("Name: " + getWidgetName(ctx, view.getAppWidgetInfo())));
-                adapter.add(new LinearAdapter.ItemText(widget.packedProperties()));
-                adapter.add(new LinearAdapter.ItemString("ID: " + widget.appWidgetId));
-            }
+            addConfigPopupItems(mLayout, adapter, view, widget);
         } else {
             adapter.add(new LinearAdapter.ItemString("ERROR: Not found"));
         }
 
         ListPopup menu = ListPopup.create(ctx, adapter);
+        menu.setOnItemClickListener((a, v, position) -> handleConfigPopupItemClick(a, view, position));
+        return menu;
+    }
 
-        menu.setOnItemClickListener((a, v, pos) -> {
-            Object item = a.getItem(pos);
-            if (item instanceof WidgetOptionItem) {
-                switch (((WidgetOptionItem) item).mAction) {
-                    case MOVE:
-                        view.setOnClickListener(v1 -> {
-                            view.setOnClickListener(null);
-                            view.setOnDoubleClickListener(null);
-                            mLayout.disableHandle(view);
-                            saveWidgetProperties(view);
-                        });
-                        view.setOnDoubleClickListener(v1 -> {
-                            if (mLayout.getHandleType(view) == WidgetLayout.Handle.MOVE_FREE) {
-                                mLastMoveType = WidgetLayout.Handle.MOVE_AXIAL;
-                            } else {
-                                mLastMoveType = WidgetLayout.Handle.MOVE_FREE;
-                            }
-                            mLayout.enableHandle(view, mLastMoveType);
-                        });
-                        mLayout.enableHandle(view, mLastMoveType);
-                        break;
-                    case MOVE_SWITCH:
+    private static void addConfigPopupItems(WidgetLayout widgetLayout, LinearAdapter adapter, WidgetView view, WidgetRecord widget) {
+        Context ctx = widgetLayout.getContext();
+        adapter.add(new LinearAdapter.ItemTitle(getWidgetName(ctx, view.getAppWidgetInfo())));
+        final WidgetLayout.Handle handleType = widgetLayout.getHandleType(view);
+        if (handleType.isMove()) {
+            adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_move_switch, WidgetOptionItem.Action.MOVE_SWITCH));
+            adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_move_exit, WidgetOptionItem.Action.RESET));
+        } else {
+            adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_move, WidgetOptionItem.Action.MOVE));
+        }
+
+        if (handleType.isResize()) {
+            adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_resize_switch, WidgetOptionItem.Action.RESIZE_SWITCH));
+            adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_resize_exit, WidgetOptionItem.Action.RESET));
+        } else {
+            adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_resize, WidgetOptionItem.Action.RESIZE));
+        }
+
+        if (handleType.isMoveResize()) {
+            adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_move_resize, WidgetOptionItem.Action.MOVE_RESIZE_SWITCH));
+            adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_move_resize_exit, WidgetOptionItem.Action.RESET));
+        } else {
+            adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_move_resize, WidgetOptionItem.Action.MOVE_RESIZE));
+        }
+
+        adapter.add(new LinearAdapter.ItemDivider());
+        final ViewGroup.LayoutParams lp = view.getLayoutParams();
+        if (lp instanceof WidgetLayout.LayoutParams) {
+            final int screenPage = ((WidgetLayout.LayoutParams) lp).screenPage;
+            if (canMoveToPage(widgetLayout, screenPage, WidgetLayout.LayoutParams.PAGE_LEFT))
+                adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_screen_left, WidgetOptionItem.Action.MOVE2SCREEN_LEFT));
+            if (canMoveToPage(widgetLayout, screenPage, WidgetLayout.LayoutParams.PAGE_UP))
+                adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_screen_up, WidgetOptionItem.Action.MOVE2SCREEN_UP));
+            if (canMoveToPage(widgetLayout, screenPage, WidgetLayout.LayoutParams.PAGE_MIDDLE))
+                adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_screen_middle, WidgetOptionItem.Action.MOVE2SCREEN_MIDDLE));
+            if (canMoveToPage(widgetLayout, screenPage, WidgetLayout.LayoutParams.PAGE_RIGHT))
+                adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_screen_right, WidgetOptionItem.Action.MOVE2SCREEN_RIGHT));
+            if (canMoveToPage(widgetLayout, screenPage, WidgetLayout.LayoutParams.PAGE_DOWN))
+                adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_screen_down, WidgetOptionItem.Action.MOVE2SCREEN_DOWN));
+            adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_back, WidgetOptionItem.Action.MOVE_BELOW));
+            adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_front, WidgetOptionItem.Action.MOVE_ABOVE));
+        }
+
+        adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_remove, WidgetOptionItem.Action.REMOVE));
+
+        if (DebugInfo.widgetInfo(ctx)) {
+            adapter.add(new LinearAdapter.ItemTitle("Debug info"));
+            adapter.add(new LinearAdapter.ItemString("Name: " + getWidgetName(ctx, view.getAppWidgetInfo())));
+            adapter.add(new LinearAdapter.ItemText(widget.packedProperties()));
+            adapter.add(new LinearAdapter.ItemString("ID: " + widget.appWidgetId));
+        }
+    }
+
+    private void handleConfigPopupItemClick(ListAdapter adapter, WidgetView view, int position) {
+        Object item = adapter.getItem(position);
+        if (item instanceof WidgetOptionItem) {
+            switch (((WidgetOptionItem) item).mAction) {
+                case MOVE:
+                    view.setOnClickListener(v1 -> {
+                        view.setOnClickListener(null);
+                        view.setOnDoubleClickListener(null);
+                        mLayout.disableHandle(view);
+                        saveWidgetProperties(view);
+                    });
+                    view.setOnDoubleClickListener(v1 -> {
                         if (mLayout.getHandleType(view) == WidgetLayout.Handle.MOVE_FREE) {
                             mLastMoveType = WidgetLayout.Handle.MOVE_AXIAL;
                         } else {
                             mLastMoveType = WidgetLayout.Handle.MOVE_FREE;
                         }
                         mLayout.enableHandle(view, mLastMoveType);
-                        break;
-                    case RESIZE:
-                        view.setOnClickListener(v1 -> {
-                            view.setOnClickListener(null);
-                            view.setOnDoubleClickListener(null);
-                            mLayout.disableHandle(view);
-                            saveWidgetProperties(view);
-                        });
-                        view.setOnDoubleClickListener(v1 -> {
-                            if (mLayout.getHandleType(view) == WidgetLayout.Handle.RESIZE_DIAGONAL) {
-                                mLastResizeType = WidgetLayout.Handle.RESIZE_AXIAL;
-                            } else {
-                                mLastResizeType = WidgetLayout.Handle.RESIZE_DIAGONAL;
-                            }
-                            mLayout.enableHandle(view, mLastResizeType);
-                        });
-                        mLayout.enableHandle(view, mLastResizeType);
-                        break;
-                    case RESIZE_SWITCH:
+                    });
+                    mLayout.enableHandle(view, mLastMoveType);
+                    break;
+                case MOVE_SWITCH:
+                    if (mLayout.getHandleType(view) == WidgetLayout.Handle.MOVE_FREE) {
+                        mLastMoveType = WidgetLayout.Handle.MOVE_AXIAL;
+                    } else {
+                        mLastMoveType = WidgetLayout.Handle.MOVE_FREE;
+                    }
+                    mLayout.enableHandle(view, mLastMoveType);
+                    break;
+                case RESIZE:
+                    view.setOnClickListener(v1 -> {
+                        view.setOnClickListener(null);
+                        view.setOnDoubleClickListener(null);
+                        mLayout.disableHandle(view);
+                        saveWidgetProperties(view);
+                    });
+                    view.setOnDoubleClickListener(v1 -> {
                         if (mLayout.getHandleType(view) == WidgetLayout.Handle.RESIZE_DIAGONAL) {
                             mLastResizeType = WidgetLayout.Handle.RESIZE_AXIAL;
                         } else {
                             mLastResizeType = WidgetLayout.Handle.RESIZE_DIAGONAL;
                         }
                         mLayout.enableHandle(view, mLastResizeType);
-                        break;
-                    case MOVE_RESIZE:
-                        view.setOnClickListener(v1 -> {
-                            view.setOnClickListener(null);
-                            view.setOnDoubleClickListener(null);
-                            mLayout.disableHandle(view);
-                            saveWidgetProperties(view);
-                        });
-                        view.setOnDoubleClickListener(v1 -> {
-                            if (mLayout.getHandleType(view) == WidgetLayout.Handle.MOVE_FREE_RESIZE_AXIAL) {
-                                mLastMoveResizeType = WidgetLayout.Handle.RESIZE_DIAGONAL_MOVE_AXIAL;
-                            } else {
-                                mLastMoveResizeType = WidgetLayout.Handle.MOVE_FREE_RESIZE_AXIAL;
-                            }
-                            mLayout.enableHandle(view, mLastMoveResizeType);
-                        });
-                        mLayout.enableHandle(view, mLastMoveResizeType);
-                    case MOVE_RESIZE_SWITCH:
+                    });
+                    mLayout.enableHandle(view, mLastResizeType);
+                    break;
+                case RESIZE_SWITCH:
+                    if (mLayout.getHandleType(view) == WidgetLayout.Handle.RESIZE_DIAGONAL) {
+                        mLastResizeType = WidgetLayout.Handle.RESIZE_AXIAL;
+                    } else {
+                        mLastResizeType = WidgetLayout.Handle.RESIZE_DIAGONAL;
+                    }
+                    mLayout.enableHandle(view, mLastResizeType);
+                    break;
+                case MOVE_RESIZE:
+                    view.setOnClickListener(v1 -> {
+                        view.setOnClickListener(null);
+                        view.setOnDoubleClickListener(null);
+                        mLayout.disableHandle(view);
+                        saveWidgetProperties(view);
+                    });
+                    view.setOnDoubleClickListener(v1 -> {
                         if (mLayout.getHandleType(view) == WidgetLayout.Handle.MOVE_FREE_RESIZE_AXIAL) {
                             mLastMoveResizeType = WidgetLayout.Handle.RESIZE_DIAGONAL_MOVE_AXIAL;
                         } else {
                             mLastMoveResizeType = WidgetLayout.Handle.MOVE_FREE_RESIZE_AXIAL;
                         }
                         mLayout.enableHandle(view, mLastMoveResizeType);
-                        break;
-                    case RESET:
-                        view.setOnClickListener(null);
-                        view.setOnDoubleClickListener(null);
-                        mLayout.disableHandle(view);
-                        saveWidgetProperties(view);
-                        break;
-                    case REMOVE:
-                        removeWidget(view);
-                        break;
-                    case MOVE2SCREEN_LEFT: {
-                        final WidgetLayout.LayoutParams lp = (WidgetLayout.LayoutParams) view.getLayoutParams();
-                        lp.screenPage = WidgetLayout.LayoutParams.PAGE_LEFT;
-                        view.setLayoutParams(lp);
-                        saveWidgetProperties(view);
-                        break;
+                    });
+                    mLayout.enableHandle(view, mLastMoveResizeType);
+                case MOVE_RESIZE_SWITCH:
+                    if (mLayout.getHandleType(view) == WidgetLayout.Handle.MOVE_FREE_RESIZE_AXIAL) {
+                        mLastMoveResizeType = WidgetLayout.Handle.RESIZE_DIAGONAL_MOVE_AXIAL;
+                    } else {
+                        mLastMoveResizeType = WidgetLayout.Handle.MOVE_FREE_RESIZE_AXIAL;
                     }
-                    case MOVE2SCREEN_UP: {
-                        final WidgetLayout.LayoutParams lp = (WidgetLayout.LayoutParams) view.getLayoutParams();
-                        lp.screenPage = WidgetLayout.LayoutParams.PAGE_UP;
-                        view.setLayoutParams(lp);
-                        saveWidgetProperties(view);
-                        break;
-                    }
-                    case MOVE2SCREEN_RIGHT: {
-                        final WidgetLayout.LayoutParams lp = (WidgetLayout.LayoutParams) view.getLayoutParams();
-                        lp.screenPage = WidgetLayout.LayoutParams.PAGE_RIGHT;
-                        view.setLayoutParams(lp);
-                        saveWidgetProperties(view);
-                        break;
-                    }
-                    case MOVE2SCREEN_DOWN: {
-                        final WidgetLayout.LayoutParams lp = (WidgetLayout.LayoutParams) view.getLayoutParams();
-                        lp.screenPage = WidgetLayout.LayoutParams.PAGE_DOWN;
-                        view.setLayoutParams(lp);
-                        saveWidgetProperties(view);
-                        break;
-                    }
-                    case MOVE2SCREEN_MIDDLE: {
-                        final WidgetLayout.LayoutParams lp = (WidgetLayout.LayoutParams) view.getLayoutParams();
-                        lp.screenPage = WidgetLayout.LayoutParams.PAGE_MIDDLE;
-                        view.setLayoutParams(lp);
-                        saveWidgetProperties(view);
-                        break;
-                    }
-                    case MOVE_ABOVE: {
-                        int idx = mLayout.indexOfChild(view);
-                        mLayout.removeViewAt(idx);
-                        mLayout.addView(view);
-                        saveWidgetProperties(view);
-                        break;
-                    }
-                    case MOVE_BELOW: {
-                        int idx = mLayout.indexOfChild(view);
-                        mLayout.removeViewAt(idx);
-                        mLayout.addView(view, 0);
-                        saveWidgetProperties(view);
-                        break;
-                    }
+                    mLayout.enableHandle(view, mLastMoveResizeType);
+                    break;
+                case RESET:
+                    view.setOnClickListener(null);
+                    view.setOnDoubleClickListener(null);
+                    mLayout.disableHandle(view);
+                    saveWidgetProperties(view);
+                    break;
+                case REMOVE:
+                    removeWidget(view);
+                    break;
+                case MOVE2SCREEN_LEFT: {
+                    final WidgetLayout.LayoutParams lp = (WidgetLayout.LayoutParams) view.getLayoutParams();
+                    lp.screenPage = WidgetLayout.LayoutParams.PAGE_LEFT;
+                    view.setLayoutParams(lp);
+                    saveWidgetProperties(view);
+                    break;
+                }
+                case MOVE2SCREEN_UP: {
+                    final WidgetLayout.LayoutParams lp = (WidgetLayout.LayoutParams) view.getLayoutParams();
+                    lp.screenPage = WidgetLayout.LayoutParams.PAGE_UP;
+                    view.setLayoutParams(lp);
+                    saveWidgetProperties(view);
+                    break;
+                }
+                case MOVE2SCREEN_RIGHT: {
+                    final WidgetLayout.LayoutParams lp = (WidgetLayout.LayoutParams) view.getLayoutParams();
+                    lp.screenPage = WidgetLayout.LayoutParams.PAGE_RIGHT;
+                    view.setLayoutParams(lp);
+                    saveWidgetProperties(view);
+                    break;
+                }
+                case MOVE2SCREEN_DOWN: {
+                    final WidgetLayout.LayoutParams lp = (WidgetLayout.LayoutParams) view.getLayoutParams();
+                    lp.screenPage = WidgetLayout.LayoutParams.PAGE_DOWN;
+                    view.setLayoutParams(lp);
+                    saveWidgetProperties(view);
+                    break;
+                }
+                case MOVE2SCREEN_MIDDLE: {
+                    final WidgetLayout.LayoutParams lp = (WidgetLayout.LayoutParams) view.getLayoutParams();
+                    lp.screenPage = WidgetLayout.LayoutParams.PAGE_MIDDLE;
+                    view.setLayoutParams(lp);
+                    saveWidgetProperties(view);
+                    break;
+                }
+                case MOVE_ABOVE: {
+                    int idx = mLayout.indexOfChild(view);
+                    mLayout.removeViewAt(idx);
+                    mLayout.addView(view);
+                    saveWidgetProperties(view);
+                    break;
+                }
+                case MOVE_BELOW: {
+                    int idx = mLayout.indexOfChild(view);
+                    mLayout.removeViewAt(idx);
+                    mLayout.addView(view, 0);
+                    saveWidgetProperties(view);
+                    break;
                 }
             }
-        });
-        return menu;
+        }
     }
 
     private void saveWidgetProperties(WidgetView view) {

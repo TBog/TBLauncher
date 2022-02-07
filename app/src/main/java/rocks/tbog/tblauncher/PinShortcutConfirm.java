@@ -69,7 +69,24 @@ public class PinShortcutConfirm extends AppCompatActivity implements OnClickList
         setContentView(R.layout.pin_shortcut_confirm);
 
         mLauncherApps = getSystemService(LauncherApps.class);
+        mRequest = mLauncherApps.getPinItemRequest(getIntent());
+        final ShortcutInfo shortcutInfo = mRequest.getShortcutInfo();
+        if (shortcutInfo == null) {
+            Log.e(TAG, "No shortcut info provided");
+            finish();
+            return;
+        }
 
+        if (prefs.getBoolean("pin-auto-confirm", false)) {
+            acceptShortcut();
+            finish();
+            return;
+        }
+
+        initViews(shortcutInfo);
+    }
+
+    private void initViews(@NonNull ShortcutInfo shortcutInfo) {
         // OK button
         {
             TextView button1 = findViewById(android.R.id.button1);
@@ -91,14 +108,6 @@ public class PinShortcutConfirm extends AppCompatActivity implements OnClickList
                 spacer.setVisibility(View.GONE);
         }
 
-        mRequest = mLauncherApps.getPinItemRequest(getIntent());
-        final ShortcutInfo shortcutInfo = mRequest.getShortcutInfo();
-        if (shortcutInfo == null) {
-            Log.e(TAG, "No shortcut info provided");
-            finish();
-            return;
-        }
-
         // Label
         {
             mShortcutName = findViewById(R.id.shortcutName);
@@ -115,29 +124,23 @@ public class PinShortcutConfirm extends AppCompatActivity implements OnClickList
                 mShortcutName.setText(label);
         }
 
-        if (prefs.getBoolean("pin-auto-confirm", false)) {
-            acceptShortcut();
-            finish();
-            return;
-        }
-
         // Description
         if (DebugInfo.widgetAdd(this)) {
             TextView description = findViewById(R.id.shortcutDetails);
             ComponentName activity = shortcutInfo.getActivity();
             String htmlString = String.format(
-                    "<h1>Shortcut details:</h1>" +
-                            "<b>Long label</b>: %s<br>" +
-                            "<b>Short label</b>: %s<br>" +
-                            "<b>Activity</b>: %s<br>" +
-                            "<b>Publisher</b>: %s<br>" +
-                            "<b>ID</b>: %s",
+                "<h1>Shortcut details:</h1>" +
+                    "<b>Long label</b>: %s<br>" +
+                    "<b>Short label</b>: %s<br>" +
+                    "<b>Activity</b>: %s<br>" +
+                    "<b>Publisher</b>: %s<br>" +
+                    "<b>ID</b>: %s",
 
-                    shortcutInfo.getLongLabel(),
-                    shortcutInfo.getShortLabel(),
-                    activity != null ? activity.flattenToShortString() : null,
-                    shortcutInfo.getPackage(), // publisher app package
-                    shortcutInfo.getId()
+                shortcutInfo.getLongLabel(),
+                shortcutInfo.getShortLabel(),
+                activity != null ? activity.flattenToShortString() : null,
+                shortcutInfo.getPackage(), // publisher app package
+                shortcutInfo.getId()
             );
             description.setText(Html.fromHtml(htmlString, Html.FROM_HTML_MODE_COMPACT));
             description.setVisibility(View.VISIBLE);
@@ -161,6 +164,7 @@ public class PinShortcutConfirm extends AppCompatActivity implements OnClickList
             setIconsAsync(icon1, shortcutInfo, (ctx) -> mLauncherApps.getShortcutBadgedIconDrawable(shortcutInfo, 0));
         }
     }
+
 
     private static void setIconsAsync(ImageView icon, ShortcutInfo shortcutInfo, Utilities.GetDrawable getIcon) {
         new Utilities.AsyncSetDrawable(icon) {

@@ -702,7 +702,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         dialogFragment = EditSearchHintPreferenceDialog.newInstance(key);
                         break;
                     default:
-                        throw new RuntimeException("CustomDialogPreference \"" + key + "\" has no dialog defined");
+                        throw new IllegalArgumentException("CustomDialogPreference \"" + key + "\" has no dialog defined");
                 }
             } else if (preference instanceof ListPreference) {
                 String key = preference.getKey();

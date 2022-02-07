@@ -336,8 +336,8 @@ public class LiveWallpaper {
                     if (isScrollEnabled() && mAnimation.init())
                         mContentView.startAnimation(mAnimation);
                 }
-                //fallthrough
             }
+            // fallthrough
             case MotionEvent.ACTION_CANCEL:
                 if (isScrollEnabled()) {
                     if (mVelocityTracker != null) {

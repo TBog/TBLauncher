@@ -294,6 +294,40 @@ public class DataHandler extends BroadcastReceiver
             return;
         }
 
+        if (!startService(context, intent, name, counter))
+            return;
+
+        final ProviderEntry entry = new ProviderEntry();
+        // Add empty provider object to list of providers
+        this.providers.put(name, entry);
+
+        // Connect and bind to provider service
+        context.bindService(intent, new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName className, IBinder service) {
+                Log.i(TAG, "onServiceConnected " + className);
+
+                // We've bound to LocalService, cast the IBinder and get LocalService instance
+                Provider<?>.LocalBinder binder = (Provider<?>.LocalBinder) service;
+                IProvider<?> provider = binder.getService();
+
+                // Update provider info so that it contains something useful
+                entry.provider = provider;
+                entry.connection = this;
+
+                if (provider.isLoaded()) {
+                    handleProviderLoaded();
+                }
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName arg0) {
+                Log.i(TAG, "onServiceDisconnected " + arg0);
+            }
+        }, Context.BIND_AUTO_CREATE);
+    }
+
+    private boolean startService(Context context, Intent intent, String name, int counter) {
         try {
             // Send "start service" command first so that the service can run independently
             // of the activity
@@ -310,7 +344,7 @@ public class DataHandler extends BroadcastReceiver
 
             if (counter > 20) {
                 Log.e(TAG, "Already tried and failed twenty times to start service. Giving up.");
-                return;
+                return false;
             }
 
             // Add a receiver to get notified next time the screen is on
@@ -345,37 +379,9 @@ public class DataHandler extends BroadcastReceiver
             }, intentFilter);
 
             // Stop here for now, the Receiver will re-trigger the whole flow when services can be started.
-            return;
+            return false;
         }
-
-        final ProviderEntry entry = new ProviderEntry();
-        // Add empty provider object to list of providers
-        this.providers.put(name, entry);
-
-        // Connect and bind to provider service
-        context.bindService(intent, new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName className, IBinder service) {
-                Log.i(TAG, "onServiceConnected " + className);
-
-                // We've bound to LocalService, cast the IBinder and get LocalService instance
-                Provider<?>.LocalBinder binder = (Provider<?>.LocalBinder) service;
-                IProvider<?> provider = binder.getService();
-
-                // Update provider info so that it contains something useful
-                entry.provider = provider;
-                entry.connection = this;
-
-                if (provider.isLoaded()) {
-                    handleProviderLoaded();
-                }
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName arg0) {
-                Log.i(TAG, "onServiceDisconnected " + arg0);
-            }
-        }, Context.BIND_AUTO_CREATE);
+        return true;
     }
 
     /**
