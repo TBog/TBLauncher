@@ -21,6 +21,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.preference.PreferenceManager;
 
+import java.util.LinkedList;
+
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.DeviceUtils;
 
@@ -58,6 +60,8 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
     private BroadcastReceiver mReceiver;
 
     private Permission permissionManager;
+
+    private final LinkedList<Runnable> queueAfterOnCreate = new LinkedList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -128,6 +132,10 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
         TBApplication.quickList(this).onCreateActivity(this);
         TBApplication.liveWallpaper(this).onCreateActivity(this);
         TBApplication.widgetManager(this).onCreateActivity(this);
+
+        // run queued callbacks
+        while (!queueAfterOnCreate.isEmpty())
+            queueAfterOnCreate.removeFirst().run();
     }
 
     @Override
@@ -223,7 +231,13 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
-        TBApplication.behaviour(this).onWindowFocusChanged(hasFocus);
+        TBApplication app = TBApplication.getApplication(this);
+        if (app.behaviour().getContext() == this)
+            app.behaviour().onWindowFocusChanged(hasFocus);
+        else {
+            // this happens when pressing "home" after changing a preference that requires layout update (restart)
+            queueAfterOnCreate.add(() -> TBApplication.behaviour(this).onWindowFocusChanged(hasFocus));
+        }
     }
 
     //    /**
