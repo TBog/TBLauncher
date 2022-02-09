@@ -28,6 +28,7 @@ import rocks.tbog.tblauncher.handler.TagsHandler;
 import rocks.tbog.tblauncher.icons.IconPackCache;
 import rocks.tbog.tblauncher.quicklist.QuickList;
 import rocks.tbog.tblauncher.searcher.Searcher;
+import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.RootHandler;
 import rocks.tbog.tblauncher.utils.Utilities;
 
@@ -44,6 +45,7 @@ public class TBApplication extends Application {
     private AppsHandler appsHandler = null;
     private boolean bLayoutUpdateRequired = false;
     private SharedPreferences mSharedPreferences = null;
+    private ListPopup mPopup = null;
 
     /**
      * List of running launcher activities
@@ -181,7 +183,7 @@ public class TBApplication extends Application {
 
     public static CustomizeUI ui(Context context) {
         TBApplication app = getApplication(context);
-        return app.validateActivity(context).mCustomizeUI;
+        return app.validateActivity(context).customizeUI;
     }
 
     @NonNull
@@ -381,6 +383,27 @@ public class TBApplication extends Application {
 
     public void requireLayoutUpdate() {
         bLayoutUpdateRequired = true;
+    }
+
+    public void registerPopup(ListPopup popup) {
+        if (mPopup == popup)
+            return;
+        dismissPopup();
+        mPopup = popup;
+        popup.setOnDismissListener(() -> mPopup = null);
+    }
+
+    public boolean dismissPopup() {
+        if (mPopup != null) {
+            mPopup.dismiss();
+            return true;
+        }
+        return false;
+    }
+
+    @Nullable
+    public ListPopup getPopup() {
+        return mPopup;
     }
 
     /**

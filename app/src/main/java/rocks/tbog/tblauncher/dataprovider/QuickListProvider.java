@@ -162,7 +162,7 @@ public class QuickListProvider extends DBProvider<EntryItem> {
                     ((QuickListProvider) provider).fixPlaceholders();
                     TBLauncherActivity launcherActivity = TBApplication.launcherActivity(provider.context);
                     if (launcherActivity != null)
-                        launcherActivity.quickList.reload();
+                        launcherActivity.queueDockReload();
                 }
             });
         }

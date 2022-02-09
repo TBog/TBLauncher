@@ -333,7 +333,7 @@ public class WidgetManager {
         hostView.setOnLongClickListener(v -> {
             if (v instanceof WidgetView) {
                 ListPopup menu = getConfigPopup((WidgetView) v);
-                TBApplication.behaviour(v.getContext()).registerPopup(menu);
+                TBApplication.getApplication(v.getContext()).registerPopup(menu);
                 menu.show(v, 0.f);
                 return true;
             }
@@ -663,7 +663,7 @@ public class WidgetManager {
                             if (widgetView == null)
                                 return;
                             ListPopup popup = getConfigPopup((WidgetView) widgetView);
-                            TBApplication.behaviour(mLayout.getContext()).registerPopup(popup);
+                            TBApplication.getApplication(mLayout.getContext()).registerPopup(popup);
                             popup.show(widgetView, 0.f);
                         } else if (item1 instanceof PlaceholderPopupItem) {
                             PlaceholderWidgetRecord placeholder = ((PlaceholderPopupItem) item1).placeholder;
@@ -673,7 +673,7 @@ public class WidgetManager {
                         }
                     });
 
-                    TBApplication.behaviour(activity).registerPopup(configWidgetPopup);
+                    TBApplication.getApplication(activity).registerPopup(configWidgetPopup);
                     configWidgetPopup.showCenter(activity.getWindow().getDecorView());
                     break;
                 }
@@ -708,7 +708,7 @@ public class WidgetManager {
             }
         });
 
-        TBApplication.behaviour(context).registerPopup(removeWidgetPopup);
+        TBApplication.getApplication(context).registerPopup(removeWidgetPopup);
         removeWidgetPopup.showCenter(mLayout);
     }
 

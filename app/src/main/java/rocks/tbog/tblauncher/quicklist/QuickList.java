@@ -225,7 +225,7 @@ public class QuickList {
 
                 // show menu only if it contains elements
                 if (!menu.getAdapter().isEmpty()) {
-                    TBApplication.behaviour(v.getContext()).registerPopup(menu);
+                    TBApplication.getApplication(v.getContext()).registerPopup(menu);
                     menu.show(v);
                     return true;
                 }

@@ -161,8 +161,8 @@ public class IconsHandler {
                     mLoadIconsPackTask = null;
                     TBLauncherActivity activity = TBApplication.launcherActivity(ctx);
                     if (activity != null) {
-                        activity.behaviour.refreshSearchRecords();
-                        activity.quickList.reload();
+                        activity.refreshSearchRecords();
+                        activity.queueDockReload();
                     }
                 }
             });

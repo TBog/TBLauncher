@@ -251,7 +251,7 @@ public class LiveWallpaper {
         view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
         Context ctx = view.getContext();
         ListPopup menu = TBApplication.widgetManager(ctx).getConfigPopup(mTBLauncherActivity);
-        TBApplication.behaviour(ctx).registerPopup(menu);
+        TBApplication.getApplication(getContext()).registerPopup(menu);
         int x = (int) (mLastTouchPos.x + .5f);
         int y = (int) (mLastTouchPos.y + .5f);
         menu.showAtLocation(view, Gravity.START | Gravity.TOP, x, y);

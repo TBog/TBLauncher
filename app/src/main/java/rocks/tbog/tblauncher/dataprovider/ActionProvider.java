@@ -11,6 +11,7 @@ import java.util.List;
 
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
+import rocks.tbog.tblauncher.TBLauncherActivity;
 import rocks.tbog.tblauncher.entry.ActionEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.handler.DataHandler;
@@ -173,7 +174,7 @@ public class ActionProvider extends DBProvider<ActionEntry> {
                 Context ctx = v.getContext();
                 TBApplication app = TBApplication.getApplication(ctx);
                 ListPopup menu = app.tagsHandler().getTagsMenu(ctx);
-                app.behaviour().registerPopup(menu);
+                app.registerPopup(menu);
                 menu.show(v);
             });
             s_names[cnt] = R.string.show_tags_menu;

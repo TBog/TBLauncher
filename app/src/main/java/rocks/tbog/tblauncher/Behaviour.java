@@ -347,7 +347,7 @@ public class Behaviour implements ISearchActivity {
 
                 Log.i(TAG, "Keyboard - SHOW");
                 state.setKeyboard(LauncherState.AnimatedVisibility.VISIBLE);
-                mTBLauncherActivity.dismissPopup();
+                dismissPopup();
 
                 mSearchEditText.requestFocus();
 
@@ -363,7 +363,7 @@ public class Behaviour implements ISearchActivity {
 
                 Log.i(TAG, "Keyboard - HIDE");
                 TBApplication.state().setKeyboard(LauncherState.AnimatedVisibility.HIDDEN);
-                mTBLauncherActivity.dismissPopup();
+                dismissPopup();
 
                 View focus = mTBLauncherActivity.getCurrentFocus();
                 if (focus != null)
@@ -1006,7 +1006,7 @@ public class Behaviour implements ISearchActivity {
         searcher.setRefresh(isRefresh);
 
         resetTask();
-        mTBLauncherActivity.dismissPopup();
+        dismissPopup();
 
         TBApplication.runTask(getContext(), searcher);
         showResultList(true);
@@ -1069,7 +1069,7 @@ public class Behaviour implements ISearchActivity {
     }
 
     boolean onKeyboardClosed() {
-        if (mTBLauncherActivity.dismissPopup())
+        if (dismissPopup())
             return true;
         LauncherState state = TBApplication.state();
 
@@ -1107,14 +1107,14 @@ public class Behaviour implements ISearchActivity {
 //            dialog.setOnDismissListener(dlg -> mResultLayout.setVisibility(View.VISIBLE));
 
         dialog.setOnConfirmListener(drawable -> {
-            TBApplication app = TBApplication.getApplication(mTBLauncherActivity);
+            TBApplication app = TBApplication.getApplication(getContext());
             if (drawable == null)
                 app.iconsHandler().restoreDefaultIcon(appEntry);
             else
                 app.iconsHandler().changeIcon(appEntry, drawable);
             // force a result refresh to update the icon in the view
             refreshSearchRecord(appEntry);
-            mTBLauncherActivity.quickList.reload();
+            mTBLauncherActivity.queueDockReload();
         });
         dialog.show(mTBLauncherActivity.getSupportFragmentManager(), DIALOG_CUSTOM_ICON);
     }
@@ -1148,7 +1148,7 @@ public class Behaviour implements ISearchActivity {
                 app.iconsHandler().changeIcon(shortcutEntry, drawable);
             // force a result refresh to update the icon in the view
             refreshSearchRecord(shortcutEntry);
-            mTBLauncherActivity.quickList.reload();
+            mTBLauncherActivity.queueDockReload();
         });
         dialog.show(mTBLauncherActivity.getSupportFragmentManager(), DIALOG_CUSTOM_ICON);
     }
@@ -1184,7 +1184,7 @@ public class Behaviour implements ISearchActivity {
                 app.iconsHandler().changeIcon(staticEntry, drawable);
             // force a result refresh to update the icon in the view
             refreshSearchRecord(staticEntry);
-            mTBLauncherActivity.quickList.reload();
+            mTBLauncherActivity.queueDockReload();
             if (afterConfirmation != null)
                 afterConfirmation.run();
         });
@@ -1219,7 +1219,7 @@ public class Behaviour implements ISearchActivity {
                 app.iconsHandler().changeIcon(searchEntry, drawable);
             // force a result refresh to update the icon in the view
             refreshSearchRecord(searchEntry);
-            mTBLauncherActivity.quickList.reload();
+            mTBLauncherActivity.queueDockReload();
             if (afterConfirmation != null)
                 afterConfirmation.run();
         });
@@ -1252,14 +1252,14 @@ public class Behaviour implements ISearchActivity {
         }
 
         dialog.setOnConfirmListener(drawable -> {
-            final TBApplication app = TBApplication.getApplication(mTBLauncherActivity);
+            final TBApplication app = TBApplication.getApplication(getContext());
             if (drawable == null)
                 app.iconsHandler().restoreDefaultIcon(dialEntry);
             else
                 app.iconsHandler().changeIcon(dialEntry, drawable);
             // force a result refresh to update the icon in the view
             refreshSearchRecord(dialEntry);
-            mTBLauncherActivity.quickList.reload();
+            mTBLauncherActivity.queueDockReload();
         });
         dialog.show(mTBLauncherActivity.getSupportFragmentManager(), DIALOG_CUSTOM_ICON);
     }
@@ -1277,7 +1277,7 @@ public class Behaviour implements ISearchActivity {
         }
 
         dialog.setOnConfirmListener(newTags -> {
-            TBApplication.tagsHandler(mTBLauncherActivity).setTags(entry, newTags);
+            TBApplication.tagsHandler(getContext()).setTags(entry, newTags);
             refreshSearchRecord(entry);
         });
 
@@ -1333,8 +1333,12 @@ public class Behaviour implements ISearchActivity {
         return false;
     }
 
-    public void registerPopup(ListPopup menu) {
-        mTBLauncherActivity.registerPopup(menu);
+    private void registerPopup(ListPopup menu) {
+        TBApplication.getApplication(getContext()).registerPopup(menu);
+    }
+
+    private boolean dismissPopup() {
+        return TBApplication.getApplication(getContext()).dismissPopup();
     }
 
     public void onResume() {

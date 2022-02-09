@@ -54,8 +54,6 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
     public static final String LOAD_OVER = "fr.neamar.summon.LOAD_OVER";
     public static final String FULL_LOAD_OVER = "fr.neamar.summon.FULL_LOAD_OVER";
 
-    private PopupWindow mPopup;
-
     /**
      * Receive events from providers
      */
@@ -104,7 +102,7 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
     /**
      * Everything that has to do with the UI customization (drawables and colors)
      */
-    public final CustomizeUI mCustomizeUI = new CustomizeUI();
+    public final CustomizeUI customizeUI = new CustomizeUI();
     /**
      * Manage widgets
      */
@@ -156,7 +154,7 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
         Log.d(TAG, "onCreateActivity(" + this + ")");
         // call after all views are set
         behaviour.onCreateActivity(this);
-        mCustomizeUI.onCreateActivity(this);
+        customizeUI.onCreateActivity(this);
         quickList.onCreateActivity(this);
         liveWallpaper.onCreateActivity(this);
         widgetManager.onCreateActivity(this);
@@ -167,7 +165,7 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
         super.onPostCreate(savedInstanceState);
 
         behaviour.onPostCreate();
-        mCustomizeUI.onPostCreate();
+        customizeUI.onPostCreate();
     }
 
     @Override
@@ -268,7 +266,7 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
 
     @Override
     public void onBackPressed() {
-        if (dismissPopup())
+        if (TBApplication.getApplication(this).dismissPopup())
             return;
 
         if (behaviour.onBackPressed())
@@ -292,42 +290,30 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
 //        mHideHandler.postDelayed(mHideRunnable, delayMillis);
 //    }
 
-    public void registerPopup(ListPopup popup) {
-        if (mPopup == popup)
-            return;
-        dismissPopup();
-        mPopup = popup;
-        //popup.setVisibilityHelper(systemUiVisibilityHelper);
-        popup.setOnDismissListener(() -> TBLauncherActivity.this.mPopup = null);
+    public void queueDockReload() {
+        quickList.reload();
     }
 
-    public boolean dismissPopup() {
-        if (mPopup != null) {
-            mPopup.dismiss();
-            return true;
-        }
-        return false;
+    public void refreshSearchRecords() {
+        behaviour.refreshSearchRecords();
     }
 
     @Override
     public boolean dispatchTouchEvent(MotionEvent event) {
         boolean shouldDismissPopup = false;
-        if (mPopup != null) {
+        ListPopup listPopup = TBApplication.getApplication(this).getPopup();
+        if (listPopup != null) {
             int action = event.getActionMasked();
             if (action == MotionEvent.ACTION_DOWN) {
-                if (mPopup instanceof ListPopup) {
-                    // this check is not needed
-                    // we'll not receive the event if it happened inside the popup
-                    int x = (int) (event.getRawX() + .5f);
-                    int y = (int) (event.getRawY() + .5f);
-                    if (!((ListPopup) mPopup).isInsideViewBounds(x, y))
-                        shouldDismissPopup = true;
-                } else {
+                // this check is not needed
+                // we'll not receive the event if it happened inside the popup
+                int x = (int) (event.getRawX() + .5f);
+                int y = (int) (event.getRawY() + .5f);
+                if (!listPopup.isInsideViewBounds(x, y))
                     shouldDismissPopup = true;
-                }
             }
         }
-        if (shouldDismissPopup && dismissPopup())
+        if (shouldDismissPopup && TBApplication.getApplication(this).dismissPopup())
             return true;
         return super.dispatchTouchEvent(event);
     }

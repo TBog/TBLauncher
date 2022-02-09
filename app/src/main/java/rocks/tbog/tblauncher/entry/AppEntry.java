@@ -424,7 +424,7 @@ public final class AppEntry extends EntryWithTags {
                     }
                 });
                 menu.show(parentView);
-                TBApplication.behaviour(ctx).registerPopup(menu);
+                TBApplication.getApplication(ctx).registerPopup(menu);
                 return true;
             }
             case R.string.menu_hide:

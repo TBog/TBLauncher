@@ -957,7 +957,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case "icons-visible":
                 TBApplication.drawableCache(context).clearCache();
                 if (activity != null)
-                    activity.behaviour.refreshSearchRecords();
+                    activity.refreshSearchRecords();
                 // fallthrough
             case "quick-list-color":
             case "quick-list-ripple-color":
@@ -966,7 +966,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case "quick-list-toggle-color":
                 // toggle animation is also caching the color
                 if (activity != null)
-                    activity.quickList.reload();
+                    activity.queueDockReload();
                 // fallthrough
             case "result-list-color":
             case "result-ripple-color":
@@ -1013,7 +1013,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 TBApplication.iconsHandler(context).onPrefChanged(sharedPreferences);
                 TBApplication.drawableCache(context).clearCache();
                 if (activity != null)
-                    activity.quickList.reload();
+                    activity.queueDockReload();
                 break;
             case "tags-enabled": {
                 boolean useTags = sharedPreferences.getBoolean("tags-enabled", true);
@@ -1035,7 +1035,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case "quick-list-icons-visible":
             case "quick-list-show-badge":
                 if (activity != null)
-                    activity.quickList.reload();
+                    activity.queueDockReload();
                 break;
             case "cache-drawable":
             case "cache-half-apps":

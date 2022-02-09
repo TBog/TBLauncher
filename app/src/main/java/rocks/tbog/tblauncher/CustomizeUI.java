@@ -300,8 +300,7 @@ public class CustomizeUI {
     }
 
     @NonNull
-    public Drawable getPopupBackgroundDrawable() {
-        Context ctx = getContext();
+    public static Drawable getPopupBackgroundDrawable(@NonNull Context ctx) {
         int border = UISizes.dp2px(ctx, 1);
         int radius = UISizes.getPopupCornerRadius(ctx);
 

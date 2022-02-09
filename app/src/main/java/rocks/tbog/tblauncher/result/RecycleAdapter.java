@@ -135,7 +135,7 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
 
         // check if menu contains elements and if yes show it
         if (!menu.getAdapter().isEmpty()) {
-            TBApplication.behaviour(v.getContext()).registerPopup(menu);
+            TBApplication.getApplication(v.getContext()).registerPopup(menu);
             menu.show(v);
             return true;
         }
