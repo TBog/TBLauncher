@@ -419,8 +419,8 @@
 
         <androidx.preference.SwitchPreference
                 android:defaultValue="false"
-                android:key="debug-menu-state"
-                android:title="@string/debug_menu_state" />
+                android:key="debug-provider-status"
+                android:title="@string/debug_provider_status" />
 
         <androidx.preference.SwitchPreference
                 android:defaultValue="false"

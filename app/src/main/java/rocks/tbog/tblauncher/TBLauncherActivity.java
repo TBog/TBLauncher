@@ -12,8 +12,10 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
+import android.view.View;
 import android.view.WindowManager;
 import android.widget.PopupWindow;
+import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -24,6 +26,7 @@ import androidx.preference.PreferenceManager;
 import java.util.LinkedList;
 
 import rocks.tbog.tblauncher.ui.ListPopup;
+import rocks.tbog.tblauncher.utils.DebugInfo;
 import rocks.tbog.tblauncher.utils.DeviceUtils;
 
 public class TBLauncherActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback {
@@ -60,6 +63,7 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
     private BroadcastReceiver mReceiver;
 
     private Permission permissionManager;
+    private TextView debugTextView;
 
     private final LinkedList<Runnable> queueAfterOnCreate = new LinkedList<>();
 
@@ -113,6 +117,7 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
                     // Run GC once to free all the garbage accumulated during provider initialization
                     System.gc();
                 }
+                updateTextView(debugTextView);
             }
         };
 
@@ -121,11 +126,13 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
         registerReceiver(mReceiver, intentFilterFullLoadOver);
 
         setContentView(R.layout.activity_fullscreen);
+        debugTextView = findViewById(R.id.debugText);
 
         if (BuildConfig.DEBUG) {
             DeviceUtils.showDeviceInfo("TBLauncher", this);
         }
 
+        Log.d(TAG, "onCreateActivity(" + this + ")");
         // call after all views are set
         TBApplication.behaviour(this).onCreateActivity(this);
         TBApplication.ui(this).onCreateActivity(this);
@@ -148,7 +155,7 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
 
     @Override
     protected void onDestroy() {
-        Log.d(TAG, "onDestroy()");
+        Log.d(TAG, "onDestroy(" + this + ")");
         TBApplication.onDestroyActivity(this);
         unregisterReceiver(mReceiver);
         super.onDestroy();
@@ -166,7 +173,7 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
 
     @Override
     protected void onResume() {
-        Log.d(TAG, "onResume()");
+        Log.d(TAG, "onResume(" + this + ")");
         super.onResume();
 
         TBApplication app = TBApplication.getApplication(this);
@@ -176,6 +183,7 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
             Log.i(TAG, "Restarting app after setting changes");
             // Restart current activity to refresh view, since some preferences may require using a new UI
             //getWindow().getDecorView().post(TBLauncherActivity.this::recreate);
+            Log.d(TAG, "finish(" + this + ")");
             finish();
             startActivity(new Intent(this, getClass()));
             overridePendingTransition(android.R.anim.fade_in, android.R.anim.fade_out);
@@ -187,7 +195,30 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
     }
 
     @Override
+    protected void onRestart() {
+        Log.d(TAG, "onRestart(" + this + ")");
+        super.onRestart();
+    }
+
+    @Override
+    protected void onStart() {
+        Log.d(TAG, "onStart(" + this + ")");
+        super.onStart();
+
+        if (DebugInfo.providerStatus(this)) {
+            debugTextView.setVisibility(View.VISIBLE);
+        }
+    }
+
+    @Override
+    protected void onStop() {
+        Log.d(TAG, "onStop(" + this + ")");
+        super.onStop();
+    }
+
+    @Override
     protected void onNewIntent(Intent intent) {
+        Log.d(TAG, "onNewIntent(" + this + ")");
         setIntent(intent);
         super.onNewIntent(intent);
 
@@ -201,7 +232,7 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
 
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
-        Log.i(TAG, "onSaveInstanceState " + Integer.toHexString(outState.hashCode()));
+        Log.i(TAG, "onSaveInstanceState " + Integer.toHexString(outState.hashCode()) + " " + this);
         super.onSaveInstanceState(outState);
         outState.clear();
     }
@@ -301,7 +332,7 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
 
         Context c = this;
         while (null != c) {
-            Log.d("TBog", "Ctx: " + c.toString() + " | Res: " + c.getResources().toString());
+            Log.d(TAG, "Ctx: " + c.toString() + " | Res: " + c.getResources().toString());
 
             if (c instanceof ContextWrapper)
                 c = ((ContextWrapper) c).getBaseContext();
@@ -315,5 +346,17 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
         if (TBApplication.widgetManager(this).onActivityResult(this, requestCode, resultCode, data))
             return;
         super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    private void updateTextView(TextView debugTextView) {
+        if (debugTextView == null)
+            return;
+
+        StringBuilder text = new StringBuilder();
+        TBApplication app = TBApplication.getApplication(this);
+
+        app.getDataHandler().appendDebugText(text);
+
+        debugTextView.setText(text);
     }
 }

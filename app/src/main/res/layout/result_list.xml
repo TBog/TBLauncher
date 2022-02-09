@@ -11,7 +11,7 @@
     android:background="?attr/listBackgroundColor"
     android:elevation="2dp"
     android:visibility="gone"
-    app:layout_constraintBottom_toTopOf="@id/quickList"
+    app:layout_constraintBottom_toTopOf="@id/debugText"
     app:layout_constraintTop_toTopOf="parent"
     app:layout_constraintVertical_bias="0.0"
     tools:ignore="UnusedAttribute"

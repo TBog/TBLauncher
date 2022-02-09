@@ -14,6 +14,7 @@ import rocks.tbog.tblauncher.handler.AppsHandler;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.searcher.Searcher;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
+import rocks.tbog.tblauncher.utils.Timer;
 
 public class AppCacheProvider implements IProvider<AppEntry> {
     final static String TAG = "AppCP";
@@ -55,6 +56,11 @@ public class AppCacheProvider implements IProvider<AppEntry> {
     @Override
     public boolean isLoaded() {
         return true;
+    }
+
+    @Override
+    public Timer getLoadDuration() {
+        return null;
     }
 
     @Override

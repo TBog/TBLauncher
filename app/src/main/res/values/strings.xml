@@ -450,6 +450,7 @@
     <string name="generate_theme_simple_summary">Use primary for background and secondary for text</string>
     <string name="generate_theme_highlight">Highlight theme</string>
     <string name="generate_theme_highlight_summary">Use primary for background and secondary for highlight</string>
+    <string name="debug_provider_status">Provider status</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>

@@ -52,9 +52,22 @@
         <!--                />-->
         <!--        </rocks.tbog.tblauncher.ui.WidgetLayout>-->
 
+        <TextView
+            android:id="@+id/debugText"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:background="#000"
+            android:textColor="#666"
+            android:visibility="gone"
+            android:elevation="10dp"
+            app:layout_constraintBottom_toTopOf="@id/quickList"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:visibility="visible" />
+
         <LinearLayout
             android:id="@+id/quickList"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="@dimen/large_bar_height"
             android:background="@null"
             android:gravity="center"
@@ -62,6 +75,8 @@
             android:orientation="horizontal"
             android:visibility="gone"
             app:layout_constraintBottom_toTopOf="@id/searchBarContainer"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             tools:background="@drawable/tab_background_light"
             tools:backgroundTint="@color/colorAccent"
             tools:visibility="visible" />

@@ -1,12 +1,14 @@
 package rocks.tbog.tblauncher.dataprovider;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 
 import java.util.List;
 
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.searcher.Searcher;
+import rocks.tbog.tblauncher.utils.Timer;
 
 /**
  * Public interface exposed by every KISS data provider
@@ -45,6 +47,14 @@ public interface IProvider<T extends EntryItem> {
      * @return Is the provider ready to process search results?
      */
     boolean isLoaded();
+
+    /**
+     * User for debug, this is the last load duration
+     *
+     * @return amount of time it took for this provider to load. null if
+     */
+    @Nullable
+    Timer getLoadDuration();
 
     /**
      * Indicate that some providers have reloaded and this one may need to also reload

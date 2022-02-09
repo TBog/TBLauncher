@@ -116,7 +116,6 @@ public class DataHandler extends BroadcastReceiver
         // (otherwise we might receive an exception about broadcast listeners not being able
         //  to bind to services)
         context = ctx.getApplicationContext();
-        ;
 
         mTimer.start();
 
@@ -488,6 +487,54 @@ public class DataHandler extends BroadcastReceiver
     public void onReceive(Context context, Intent intent) {
         // A provider finished loading and contacted us
         this.handleProviderLoaded();
+    }
+
+    public void appendDebugText(StringBuilder text) {
+        text.append("Providers: ");
+        boolean first = true;
+        for (int step : IProvider.LOAD_STEPS) {
+            if (first)
+                first = false;
+            else
+                text.append(", ");
+
+            if (providersHaveLoaded(step))
+                text.append("S#")   // step number
+                    .append(step);
+        }
+        if (mFullLoadOverSent)
+            text.append(",done in ")
+                .append(mTimer);
+        text.append("\n");
+
+        ArrayList<ProviderEntry> sortedProviders = new ArrayList<>(providers.size());
+        sortedProviders.addAll(providers.values());
+        Collections.sort(sortedProviders, (o1, o2) -> {
+            Timer t1 = o1.provider == null ? null : o1.provider.getLoadDuration();
+            Timer t2 = o2.provider == null ? null : o2.provider.getLoadDuration();
+            return Timer.STOP_TIME_COMPARATOR.compare(t1, t2);
+        });
+
+        first = true;
+        for (ProviderEntry entry : sortedProviders) {
+            if (entry.provider == null)
+                continue;
+            if (entry.provider.isLoaded()) {
+                Timer timer = entry.provider.getLoadDuration();
+                if (timer == null)
+                    continue;
+                if (first)
+                    first = false;
+                else
+                    text.append(" | ");
+                text.append(entry.provider.getLoadStep())
+                    .append(".")
+                    .append(entry.provider.getClass().getSimpleName())
+                    .append(":")
+                    .append(timer);
+            }
+        }
+        text.append("\n");
     }
 
     /**
