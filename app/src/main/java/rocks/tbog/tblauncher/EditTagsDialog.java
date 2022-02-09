@@ -71,7 +71,7 @@ public class EditTagsDialog extends DialogFragment<Set<String>> {
             View entryView = dialogInflater.inflate(entry.getResultLayout(drawFlags), wrapper, false);
             entryView.setId(R.id.preview);
             wrapper.addView(entryView, 0);
-            app.ui().setResultListPref(entryView);
+            CustomizeUI.setResultListPref(entryView);
         }
 
         return root;

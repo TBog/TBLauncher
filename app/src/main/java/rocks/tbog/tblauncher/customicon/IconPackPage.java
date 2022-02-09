@@ -12,13 +12,14 @@ import android.widget.GridView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import androidx.annotation.Nullable;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.fragment.app.DialogFragment;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
+import rocks.tbog.tblauncher.CustomizeUI;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.icons.IconPackXML;
@@ -72,7 +73,7 @@ class IconPackPage extends PageAdapter.Page {
                 return true;
             });
         }
-        TBApplication.ui(context).setResultListPref(mGridView);
+        CustomizeUI.setResultListPref(mGridView);
 
         // set page search bar
         mSearch = pageView.findViewById(R.id.search);

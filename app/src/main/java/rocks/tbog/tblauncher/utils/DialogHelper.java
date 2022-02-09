@@ -15,6 +15,7 @@ import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
 
+import rocks.tbog.tblauncher.CustomizeUI;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.ui.dialog.EditTextDialog;
@@ -65,7 +66,7 @@ public class DialogHelper {
 
         // apply the background
         if (buttonLayout != null) {
-            Drawable background = TBApplication.ui(ctx).getDialogButtonBarBackgroundDrawable(ctx.getTheme());
+            Drawable background = CustomizeUI.getDialogButtonBarBackgroundDrawable(ctx.getTheme());
             if (background != null)
                 buttonLayout.setBackground(background);
         }

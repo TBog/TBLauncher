@@ -23,8 +23,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.preference.PreferenceManager;
 
-import java.util.LinkedList;
-
+import rocks.tbog.tblauncher.quicklist.QuickList;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.DebugInfo;
 import rocks.tbog.tblauncher.utils.DeviceUtils;
@@ -60,22 +59,70 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
     /**
      * Receive events from providers
      */
-    private BroadcastReceiver mReceiver;
+    private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (START_LOAD.equalsIgnoreCase(intent.getAction())) {
+                behaviour.displayLoader(true);
+            } else if (LOAD_OVER.equalsIgnoreCase(intent.getAction())) {
+                behaviour.updateSearchRecords();
+            } else if (FULL_LOAD_OVER.equalsIgnoreCase(intent.getAction())) {
+                Log.v(TAG, "All providers are done loading.");
+
+                TBApplication app = TBApplication.getApplication(TBLauncherActivity.this);
+                app.getDataHandler().executeAfterLoadOverTasks();
+                behaviour.displayLoader(false);
+
+                SharedPreferences prefs = app.preferences();
+                // we need to set drawable cache preferences after we load all the apps
+                app.drawableCache().onPrefChanged(TBLauncherActivity.this, prefs);
+                // make sure we load the icon pack as early as possible
+                app.iconsHandler().onPrefChanged(prefs);
+
+                // Run GC once to free all the garbage accumulated during provider initialization
+                System.gc();
+            }
+            updateTextView(debugTextView);
+        }
+    };
 
     private Permission permissionManager;
     private TextView debugTextView;
 
-    private final LinkedList<Runnable> queueAfterOnCreate = new LinkedList<>();
+    /**
+     * Everything that has to do with the UI behaviour
+     */
+    public final Behaviour behaviour = new Behaviour();
+    /**
+     * Manage live wallpaper interaction
+     */
+    public final LiveWallpaper liveWallpaper = new LiveWallpaper();
+    /**
+     * The dock / quick access bar
+     */
+    public final QuickList quickList = new QuickList();
+    /**
+     * Everything that has to do with the UI customization (drawables and colors)
+     */
+    public final CustomizeUI mCustomizeUI = new CustomizeUI();
+    /**
+     * Manage widgets
+     */
+    public final WidgetManager widgetManager = new WidgetManager();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        widgetManager.start(this);
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
             getWindow().getAttributes().layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_SHORT_EDGES;
         }
 
-        TBApplication.getApplication(this).initDataHandler();
+        final TBApplication app = TBApplication.getApplication(this);
+        app.onCreateActivity(this);
+        app.initDataHandler();
 
         /*
          * Initialize preferences
@@ -94,32 +141,6 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
         IntentFilter intentFilterLoad = new IntentFilter(START_LOAD);
         IntentFilter intentFilterLoadOver = new IntentFilter(LOAD_OVER);
         IntentFilter intentFilterFullLoadOver = new IntentFilter(FULL_LOAD_OVER);
-        mReceiver = new BroadcastReceiver() {
-            @Override
-            public void onReceive(Context context, Intent intent) {
-                TBApplication app = TBApplication.getApplication(TBLauncherActivity.this);
-                if (START_LOAD.equalsIgnoreCase(intent.getAction())) {
-                    app.behaviour().displayLoader(true);
-                } else if (LOAD_OVER.equalsIgnoreCase(intent.getAction())) {
-                    app.behaviour().updateSearchRecords();
-                } else if (FULL_LOAD_OVER.equalsIgnoreCase(intent.getAction())) {
-                    Log.v(TAG, "All providers are done loading.");
-
-                    app.getDataHandler().executeAfterLoadOverTasks();
-                    app.behaviour().displayLoader(false);
-
-                    SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(TBLauncherActivity.this);
-                    // we need to set drawable cache preferences after we load all the apps
-                    app.drawableCache().onPrefChanged(TBLauncherActivity.this, prefs);
-                    // make sure we load the icon pack as early as possible
-                    app.iconsHandler().onPrefChanged(prefs);
-
-                    // Run GC once to free all the garbage accumulated during provider initialization
-                    System.gc();
-                }
-                updateTextView(debugTextView);
-            }
-        };
 
         registerReceiver(mReceiver, intentFilterLoad);
         registerReceiver(mReceiver, intentFilterLoadOver);
@@ -134,23 +155,19 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
 
         Log.d(TAG, "onCreateActivity(" + this + ")");
         // call after all views are set
-        TBApplication.behaviour(this).onCreateActivity(this);
-        TBApplication.ui(this).onCreateActivity(this);
-        TBApplication.quickList(this).onCreateActivity(this);
-        TBApplication.liveWallpaper(this).onCreateActivity(this);
-        TBApplication.widgetManager(this).onCreateActivity(this);
-
-        // run queued callbacks
-        while (!queueAfterOnCreate.isEmpty())
-            queueAfterOnCreate.removeFirst().run();
+        behaviour.onCreateActivity(this);
+        mCustomizeUI.onCreateActivity(this);
+        quickList.onCreateActivity(this);
+        liveWallpaper.onCreateActivity(this);
+        widgetManager.onCreateActivity(this);
     }
 
     @Override
     protected void onPostCreate(@Nullable Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
 
-        TBApplication.behaviour(this).onPostCreate();
-        TBApplication.ui(this).onPostCreate();
+        behaviour.onPostCreate();
+        mCustomizeUI.onPostCreate();
     }
 
     @Override
@@ -158,6 +175,7 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
         Log.d(TAG, "onDestroy(" + this + ")");
         TBApplication.onDestroyActivity(this);
         unregisterReceiver(mReceiver);
+        widgetManager.stop();
         super.onDestroy();
     }
 
@@ -190,8 +208,8 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
             return;
         }
 
-        app.behaviour().onResume();
-        app.quickList().onResume();
+        behaviour.onResume();
+        quickList.onResume();
     }
 
     @Override
@@ -227,7 +245,7 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
         // http://developer.android.com/reference/android/app/Activity.html#onNewIntent(android.content.Intent)
         // Animation can't happen in this method, since the activity is not resumed yet, so they'll happen in the onResume()
         // https://github.com/Neamar/KISS/issues/569
-        TBApplication.behaviour(this).onNewIntent();
+        behaviour.onNewIntent();
     }
 
     @Override
@@ -241,7 +259,7 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
     public boolean onKeyDown(int keycode, KeyEvent e) {
         // For devices with a physical menu button, we still want to display *our* contextual menu
         if (keycode == KeyEvent.KEYCODE_MENU) {
-            TBApplication.behaviour(this).showContextMenu();
+            behaviour.showContextMenu();
             return true;
         }
 
@@ -253,7 +271,7 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
         if (dismissPopup())
             return;
 
-        if (TBApplication.behaviour(this).onBackPressed())
+        if (behaviour.onBackPressed())
             return;
 
         super.onBackPressed();
@@ -262,13 +280,7 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
     @Override
     public void onWindowFocusChanged(boolean hasFocus) {
         super.onWindowFocusChanged(hasFocus);
-        TBApplication app = TBApplication.getApplication(this);
-        if (app.behaviour().getContext() == this)
-            app.behaviour().onWindowFocusChanged(hasFocus);
-        else {
-            // this happens when pressing "home" after changing a preference that requires layout update (restart)
-            queueAfterOnCreate.add(() -> TBApplication.behaviour(this).onWindowFocusChanged(hasFocus));
-        }
+        behaviour.onWindowFocusChanged(hasFocus);
     }
 
     //    /**
@@ -343,7 +355,7 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        if (TBApplication.widgetManager(this).onActivityResult(this, requestCode, resultCode, data))
+        if (widgetManager.onActivityResult(this, requestCode, resultCode, data))
             return;
         super.onActivityResult(requestCode, resultCode, data);
     }

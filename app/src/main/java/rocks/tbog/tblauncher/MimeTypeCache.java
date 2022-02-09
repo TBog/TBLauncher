@@ -92,7 +92,7 @@ public class MimeTypeCache {
     }
 
     /**
-     * @param context
+     * @param context to get the Account system service and PackageManager
      * @return all mime types and related data columns from contact sync adapters
      */
     public Map<String, String> fetchDetailColumns(Context context) {
@@ -155,8 +155,8 @@ public class MimeTypeCache {
      * Loads contact description from other sync providers, search for ContactsAccountType or ContactsSource
      * detailed description can be found here https://developer.android.com/guide/topics/providers/contacts-provider
      *
-     * @param context
-     * @param packageName
+     * @param context     to get the PackageManager
+     * @param packageName AuthenticatorDescription.packageName
      * @return XmlResourceParser for contacts.xml, null if nothing found
      */
     @SuppressLint("WrongConstant")

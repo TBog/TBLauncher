@@ -32,6 +32,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import rocks.tbog.tblauncher.CustomizeUI;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.db.DBHelper;
@@ -135,7 +136,7 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
         mPreviewLabel = view.findViewById(R.id.previewLabel);
         mViewPager = view.findViewById(R.id.viewPager);
 
-        TBApplication.ui(context).setResultListPref(mPreviewLabel);
+        CustomizeUI.setResultListPref(mPreviewLabel);
 
         PageAdapter pageAdapter = new PageAdapter();
         mViewPager.setAdapter(pageAdapter);
@@ -407,7 +408,7 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
             Drawable icon = drawable.mutate();
             icon.setBounds(0, 0, size, size);
             ((TextView) view).setCompoundDrawables(null, null, icon, null);
-            int radius = (int) (.5f + .5f * TBApplication.ui(ctx).getResultListRadius());
+            int radius = (int) (.5f + .5f * UISizes.getResultListRadius(ctx));
             int paddingTop = view.getPaddingTop();
             int paddingBottom = view.getPaddingBottom();
             view.setPadding(radius, paddingTop, radius, paddingBottom);

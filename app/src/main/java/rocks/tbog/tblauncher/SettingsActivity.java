@@ -61,7 +61,6 @@ import rocks.tbog.tblauncher.entry.TagEntry;
 import rocks.tbog.tblauncher.handler.IconsHandler;
 import rocks.tbog.tblauncher.preference.BaseListPreferenceDialog;
 import rocks.tbog.tblauncher.preference.BaseMultiSelectListPreferenceDialog;
-import rocks.tbog.tblauncher.preference.PreferenceColorDialog;
 import rocks.tbog.tblauncher.preference.ConfirmDialog;
 import rocks.tbog.tblauncher.preference.ContentLoadHelper;
 import rocks.tbog.tblauncher.preference.CustomDialogPreference;
@@ -69,6 +68,7 @@ import rocks.tbog.tblauncher.preference.EditSearchEnginesPreferenceDialog;
 import rocks.tbog.tblauncher.preference.EditSearchHintPreferenceDialog;
 import rocks.tbog.tblauncher.preference.IconListPreferenceDialog;
 import rocks.tbog.tblauncher.preference.OrderListPreferenceDialog;
+import rocks.tbog.tblauncher.preference.PreferenceColorDialog;
 import rocks.tbog.tblauncher.preference.QuickListPreferenceDialog;
 import rocks.tbog.tblauncher.preference.SliderDialog;
 import rocks.tbog.tblauncher.preference.TagOrderListPreferenceDialog;
@@ -928,10 +928,15 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     }
 
     public static void onSharedPreferenceChanged(Context context, SharedPreferences sharedPreferences, String key) {
-        if (PREF_THAT_REQUIRE_LAYOUT_UPDATE.contains(key))
-            TBApplication.getApplication(context).requireLayoutUpdate();
+        TBApplication app = TBApplication.getApplication(context);
 
-        TBApplication.liveWallpaper(context).onPrefChanged(sharedPreferences, key);
+        if (PREF_THAT_REQUIRE_LAYOUT_UPDATE.contains(key))
+            app.requireLayoutUpdate();
+
+        TBLauncherActivity activity = app.launcherActivity();
+
+        if (activity != null)
+            activity.liveWallpaper.onPrefChanged(sharedPreferences, key);
 
         switch (key) {
             case "notification-bar-color":
@@ -951,7 +956,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case "matrix-contacts":
             case "icons-visible":
                 TBApplication.drawableCache(context).clearCache();
-                TBApplication.behaviour(context).refreshSearchRecords();
+                if (activity != null)
+                    activity.behaviour.refreshSearchRecords();
                 // fallthrough
             case "quick-list-color":
             case "quick-list-ripple-color":
@@ -959,7 +965,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 // fallthrough
             case "quick-list-toggle-color":
                 // toggle animation is also caching the color
-                TBApplication.quickList(context).reload();
+                if (activity != null)
+                    activity.quickList.reload();
                 // fallthrough
             case "result-list-color":
             case "result-ripple-color":
@@ -1005,14 +1012,15 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case "shortcut-pack-badge-mask":
                 TBApplication.iconsHandler(context).onPrefChanged(sharedPreferences);
                 TBApplication.drawableCache(context).clearCache();
-                TBApplication.quickList(context).reload();
+                if (activity != null)
+                    activity.quickList.reload();
                 break;
             case "tags-enabled": {
                 boolean useTags = sharedPreferences.getBoolean("tags-enabled", true);
-                Activity activity = Utilities.getActivity(context);
+                Activity settingsActivity = Utilities.getActivity(context);
                 Fragment fragment = null;
-                if (activity instanceof SettingsActivity)
-                    fragment = ((SettingsActivity) activity).getSupportFragmentManager().findFragmentByTag(SettingsFragment.FRAGMENT_TAG);
+                if (settingsActivity instanceof SettingsActivity)
+                    fragment = ((SettingsActivity) settingsActivity).getSupportFragmentManager().findFragmentByTag(SettingsFragment.FRAGMENT_TAG);
                 SwitchPreference preference = null;
                 if (fragment instanceof SettingsFragment)
                     preference = ((SettingsFragment) fragment).findPreference("fuzzy-search-tags");
@@ -1026,7 +1034,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case "quick-list-text-visible":
             case "quick-list-icons-visible":
             case "quick-list-show-badge":
-                TBApplication.quickList(context).reload();
+                if (activity != null)
+                    activity.quickList.reload();
                 break;
             case "cache-drawable":
             case "cache-half-apps":

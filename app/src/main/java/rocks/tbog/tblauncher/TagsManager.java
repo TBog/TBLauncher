@@ -87,9 +87,11 @@ public class TagsManager {
                 },
                 task -> {
                     Log.d(TAG, "tags and fav providers should have loaded by now");
-                    TBApplication app = TBApplication.getApplication(context);
-                    app.behaviour().refreshSearchRecords();
-                    app.quickList().reload();
+                    TBLauncherActivity activity = TBApplication.launcherActivity(context);
+                    if (activity != null) {
+                        activity.behaviour.refreshSearchRecords();
+                        activity.quickList.reload();
+                    }
                 });
         DataHandler.EXECUTOR_PROVIDERS.execute(afterProviders);
     }

@@ -1114,7 +1114,7 @@ public class Behaviour implements ISearchActivity {
                 app.iconsHandler().changeIcon(appEntry, drawable);
             // force a result refresh to update the icon in the view
             refreshSearchRecord(appEntry);
-            app.quickList().reload();
+            mTBLauncherActivity.quickList.reload();
         });
         dialog.show(mTBLauncherActivity.getSupportFragmentManager(), DIALOG_CUSTOM_ICON);
     }
@@ -1148,7 +1148,7 @@ public class Behaviour implements ISearchActivity {
                 app.iconsHandler().changeIcon(shortcutEntry, drawable);
             // force a result refresh to update the icon in the view
             refreshSearchRecord(shortcutEntry);
-            app.quickList().reload();
+            mTBLauncherActivity.quickList.reload();
         });
         dialog.show(mTBLauncherActivity.getSupportFragmentManager(), DIALOG_CUSTOM_ICON);
     }
@@ -1184,7 +1184,7 @@ public class Behaviour implements ISearchActivity {
                 app.iconsHandler().changeIcon(staticEntry, drawable);
             // force a result refresh to update the icon in the view
             refreshSearchRecord(staticEntry);
-            app.quickList().reload();
+            mTBLauncherActivity.quickList.reload();
             if (afterConfirmation != null)
                 afterConfirmation.run();
         });
@@ -1219,7 +1219,7 @@ public class Behaviour implements ISearchActivity {
                 app.iconsHandler().changeIcon(searchEntry, drawable);
             // force a result refresh to update the icon in the view
             refreshSearchRecord(searchEntry);
-            app.quickList().reload();
+            mTBLauncherActivity.quickList.reload();
             if (afterConfirmation != null)
                 afterConfirmation.run();
         });
@@ -1259,7 +1259,7 @@ public class Behaviour implements ISearchActivity {
                 app.iconsHandler().changeIcon(dialEntry, drawable);
             // force a result refresh to update the icon in the view
             refreshSearchRecord(dialEntry);
-            app.quickList().reload();
+            mTBLauncherActivity.quickList.reload();
         });
         dialog.show(mTBLauncherActivity.getSupportFragmentManager(), DIALOG_CUSTOM_ICON);
     }

@@ -193,9 +193,8 @@ public class EditQuickList {
             pages.trimToSize();
             mViewPager.setAdapter(new ViewPagerAdapter(pages));
 
-            CustomizeUI customizeUI = TBApplication.ui(context);
             for (ViewPagerAdapter.PageInfo page : pages) {
-                customizeUI.setResultListPref(page.getView());
+                CustomizeUI.setResultListPref(page.getView());
             }
         }
     }

@@ -30,6 +30,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Objects;
 
+import rocks.tbog.tblauncher.CustomizeUI;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.drawable.CodePointDrawable;
@@ -110,7 +111,7 @@ class CustomShapePage extends PageAdapter.Page {
                 }
                 reshapeIcons(activity);
             });
-            TBApplication.ui(context).setResultListPref(shapeGridView);
+            CustomizeUI.setResultListPref(shapeGridView);
         }
 
         // icons we are customizing
@@ -134,7 +135,7 @@ class CustomShapePage extends PageAdapter.Page {
                     if (item instanceof ShapedIconInfo && ((ShapedIconInfo) item).getPreview() != null)
                         iconClickListener.onItemClick(parent.getAdapter(), view, position);
                 });
-            TBApplication.ui(context).setResultListPref(gridView);
+            CustomizeUI.setResultListPref(gridView);
         }
 
         // scale bar

@@ -32,6 +32,7 @@ import java.util.List;
 
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
+import rocks.tbog.tblauncher.TBLauncherActivity;
 import rocks.tbog.tblauncher.WorkAsync.RunnableTask;
 import rocks.tbog.tblauncher.db.AppRecord;
 import rocks.tbog.tblauncher.drawable.DrawableUtils;
@@ -158,9 +159,11 @@ public class IconsHandler {
 
                     Log.i("time", timer + " to load icon pack " + packageName);
                     mLoadIconsPackTask = null;
-                    TBApplication app = TBApplication.getApplication(ctx);
-                    app.behaviour().refreshSearchRecords();
-                    app.quickList().reload();
+                    TBLauncherActivity activity = TBApplication.launcherActivity(ctx);
+                    if (activity != null) {
+                        activity.behaviour.refreshSearchRecords();
+                        activity.quickList.reload();
+                    }
                 }
             });
         }

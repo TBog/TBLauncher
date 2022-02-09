@@ -1,5 +1,6 @@
 package rocks.tbog.tblauncher;
 
+import android.app.Activity;
 import android.app.Application;
 import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
@@ -11,7 +12,14 @@ import android.content.pm.ResolveInfo;
 import android.database.sqlite.SQLiteDatabase;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.lifecycle.Lifecycle;
 import androidx.preference.PreferenceManager;
+
+import java.lang.ref.WeakReference;
+import java.util.ConcurrentModificationException;
+import java.util.Iterator;
+import java.util.LinkedList;
 
 import rocks.tbog.tblauncher.handler.AppsHandler;
 import rocks.tbog.tblauncher.handler.DataHandler;
@@ -21,6 +29,7 @@ import rocks.tbog.tblauncher.icons.IconPackCache;
 import rocks.tbog.tblauncher.quicklist.QuickList;
 import rocks.tbog.tblauncher.searcher.Searcher;
 import rocks.tbog.tblauncher.utils.RootHandler;
+import rocks.tbog.tblauncher.utils.Utilities;
 
 public class TBApplication extends Application {
 
@@ -35,61 +44,150 @@ public class TBApplication extends Application {
     private AppsHandler appsHandler = null;
     private boolean bLayoutUpdateRequired = false;
     private SharedPreferences mSharedPreferences = null;
+
+    /**
+     * List of running launcher activities
+     */
+    private final LinkedList<WeakReference<TBLauncherActivity>> mActivities = new LinkedList<>();
+
     /**
      * Task launched on text change
      */
     private Searcher mSearchTask;
     /**
-     * Everything that has to do with the UI behaviour
-     */
-    private Behaviour mBehaviour = new Behaviour();
-    /**
-     * Everything that has to do with the UI customization (drawables and colors)
-     */
-    private CustomizeUI mCustomizeUI = new CustomizeUI();
-    /**
-     * The favorite / quick access bar
-     */
-    private QuickList mQuickList = new QuickList();
-    /**
      * We store a number of drawables in memory for fast redraw
      */
-    private DrawableCache mDrawableCache = new DrawableCache();
+    private final DrawableCache mDrawableCache = new DrawableCache();
     /**
      * We store a number of icon packs so we don't have to parse the XML
      */
-    private IconPackCache mIconPackCache = new IconPackCache();
+    private final IconPackCache mIconPackCache = new IconPackCache();
     /**
      * We store a number of icon packs so we don't have to parse the XML
      */
-    private MimeTypeCache mMimeTypeCache = new MimeTypeCache();
-    /**
-     * Manage live wallpaper interaction
-     */
-    private LiveWallpaper mLiveWallpaper = new LiveWallpaper();
-    /**
-     * Manage widgets
-     */
-    private WidgetManager mWidgetManager = new WidgetManager();
+    private final MimeTypeCache mMimeTypeCache = new MimeTypeCache();
     /**
      * Root handler - su
      */
     private RootHandler mRootHandler = null;
 
-    public static TBApplication getApplication(Context context) {
-        return (TBApplication) context.getApplicationContext();
+    @NonNull
+    public static TBApplication getApplication(@NonNull Context context) {
+        Context appContext = context.getApplicationContext();
+        if (appContext instanceof TBApplication)
+            return (TBApplication) appContext;
+        throw new IllegalStateException("appContext " + appContext + " not of type " + TBApplication.class.getSimpleName());
     }
 
-    public static Behaviour behaviour(Context context) {
-        return getApplication(context).mBehaviour;
+    @NonNull
+    private TBLauncherActivity validateActivity(@NonNull Context context) {
+        Activity activity = Utilities.getActivity(context);
+        if (activity == null)
+            throw new IllegalStateException("context " + context + " null activity");
+        TBLauncherActivity foundActivity = null;
+        for (WeakReference<TBLauncherActivity> ref : mActivities) {
+            TBLauncherActivity launcherActivity = ref.get();
+            if (launcherActivity == activity)
+                foundActivity = launcherActivity;
+        }
+        if (foundActivity == null)
+            throw new IllegalStateException("activity " + activity + " not registered");
+        return foundActivity;
     }
 
-    public static CustomizeUI ui(Context context) {
-        return getApplication(context).mCustomizeUI;
+    @NonNull
+    private TBLauncherActivity getActivity() {
+        WeakReference<TBLauncherActivity> ref = mActivities.peekFirst();
+        if (ref == null)
+            throw new IllegalStateException("no activity registered");
+        TBLauncherActivity launcherActivity = ref.get();
+        while (launcherActivity == null) {
+            if (!mActivities.remove(ref))
+                throw new ConcurrentModificationException();
+            ref = mActivities.peekFirst();
+            if (ref == null)
+                throw new IllegalStateException("all registered activities released");
+            launcherActivity = ref.get();
+        }
+        if (launcherActivity.getLifecycle().getCurrentState().compareTo(Lifecycle.State.DESTROYED) == 0)
+            throw new IllegalStateException("activity destroyed");
+        return launcherActivity;
+    }
+
+    /**
+     * There should be only one activity, but for short periods of time there can be:
+     * - none when launcher got shut down for memory reasons
+     * - two when the activity gets recreated (user pressed the "home" button for example)
+     *
+     * @return most recently registered launcher activity or null
+     */
+    @Nullable
+    public TBLauncherActivity launcherActivity() {
+        WeakReference<TBLauncherActivity> ref = mActivities.peekFirst();
+        TBLauncherActivity launcherActivity = ref == null ? null : ref.get();
+        if (launcherActivity != null && launcherActivity.getLifecycle().getCurrentState().compareTo(Lifecycle.State.DESTROYED) == 0)
+            return null;
+        return launcherActivity;
+    }
+
+    /**
+     * Same as the getting application from context then calling launcherActivity()
+     *
+     * @param context to get application from
+     * @return most recently registered launcher activity or null
+     */
+    @Nullable
+    public static TBLauncherActivity launcherActivity(@NonNull Context context) {
+        return getApplication(context).launcherActivity();
+    }
+
+    public void onCreateActivity(TBLauncherActivity activity) {
+        // clean list
+        for (Iterator<WeakReference<TBLauncherActivity>> iterator = mActivities.iterator(); iterator.hasNext(); ) {
+            WeakReference<TBLauncherActivity> ref = iterator.next();
+            TBLauncherActivity launcherActivity = ref.get();
+            if (launcherActivity == null)
+                iterator.remove();
+        }
+        // add to list
+        mActivities.push(new WeakReference<>(activity));
+    }
+
+    @NonNull
+    public SharedPreferences preferences() {
+        return mSharedPreferences;
+    }
+
+    public static Behaviour behaviour(@NonNull Context context) {
+        TBApplication app = getApplication(context);
+        return app.validateActivity(context).behaviour;
+    }
+
+    @NonNull
+    public Behaviour behaviour() {
+        return getActivity().behaviour;
+    }
+
+    @NonNull
+    public static LiveWallpaper liveWallpaper(Context context) {
+        TBApplication app = getApplication(context);
+        return app.validateActivity(context).liveWallpaper;
     }
 
     public static QuickList quickList(Context context) {
-        return getApplication(context).mQuickList;
+        TBApplication app = getApplication(context);
+        return app.validateActivity(context).quickList;
+    }
+
+    public static CustomizeUI ui(Context context) {
+        TBApplication app = getApplication(context);
+        return app.validateActivity(context).mCustomizeUI;
+    }
+
+    @NonNull
+    public static WidgetManager widgetManager(Context context) {
+        TBApplication app = getApplication(context);
+        return app.validateActivity(context).widgetManager;
     }
 
     @NonNull
@@ -105,16 +203,6 @@ public class TBApplication extends Application {
     @NonNull
     public static MimeTypeCache mimeTypeCache(Context context) {
         return getApplication(context).mMimeTypeCache;
-    }
-
-    @NonNull
-    public static LiveWallpaper liveWallpaper(Context context) {
-        return getApplication(context).mLiveWallpaper;
-    }
-
-    @NonNull
-    public static WidgetManager widgetManager(Context context) {
-        return getApplication(context).mWidgetManager;
     }
 
     @NonNull
@@ -143,19 +231,13 @@ public class TBApplication extends Application {
     }
 
     public static void onDestroyActivity(TBLauncherActivity activity) {
-        TBApplication tbApplication = getApplication(activity);
-
-        // to make sure we don't keep any references to activity or it's views
-        if (tbApplication.mBehaviour.getContext() == activity)
-            tbApplication.mBehaviour = new Behaviour();
-        if (tbApplication.mCustomizeUI.getContext() == activity)
-            tbApplication.mCustomizeUI = new CustomizeUI();
-        if (tbApplication.mQuickList.getContext() == activity)
-            tbApplication.mQuickList = new QuickList();
-        if (tbApplication.mLiveWallpaper.getContext() == activity)
-            tbApplication.mLiveWallpaper = new LiveWallpaper();
-        if (tbApplication.mWidgetManager.usingActivity(activity))
-            tbApplication.mWidgetManager = new WidgetManager();
+        TBApplication app = getApplication(activity);
+        for (Iterator<WeakReference<TBLauncherActivity>> iterator = app.mActivities.iterator(); iterator.hasNext(); ) {
+            WeakReference<TBLauncherActivity> ref = iterator.next();
+            TBLauncherActivity launcherActivity = ref.get();
+            if (launcherActivity == null || launcherActivity == activity)
+                iterator.remove();
+        }
     }
 
     public static void runTask(Context context, Searcher task) {
@@ -222,25 +304,14 @@ public class TBApplication extends Application {
 //        editor.commit();
 
         mDrawableCache.onPrefChanged(this, mSharedPreferences);
-        mWidgetManager.start(this);
     }
 
     @Override
     public void onTerminate() {
-        mWidgetManager.stop();
+        TBLauncherActivity launcherActivity = launcherActivity();
+        if (launcherActivity != null)
+            launcherActivity.widgetManager.stop();
         super.onTerminate();
-    }
-
-    public Behaviour behaviour() {
-        return mBehaviour;
-    }
-
-    public CustomizeUI ui() {
-        return mCustomizeUI;
-    }
-
-    public QuickList quickList() {
-        return mQuickList;
     }
 
     @NonNull
@@ -296,7 +367,7 @@ public class TBApplication extends Application {
     @NonNull
     public RootHandler rootHandler() {
         if (mRootHandler == null)
-            mRootHandler = new RootHandler(this);
+            mRootHandler = new RootHandler(mSharedPreferences);
         return mRootHandler;
     }
 
