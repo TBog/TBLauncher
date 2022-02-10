@@ -79,13 +79,12 @@ public class CustomizeUI {
         mLauncherButton = mSearchBarContainer.findViewById(R.id.launcherButton);
         mMenuButton = mSearchBarContainer.findViewById(R.id.menuButton);
         mClearButton = mSearchBarContainer.findViewById(R.id.clearButton);
-
-        setSearchBarPref();
-        setResultListPref(findViewById(R.id.resultLayout));
-        adjustInputType(mSearchBar);
     }
 
     public void onPostCreate() {
+        setSearchBarPref();
+        setResultListPref(findViewById(R.id.resultLayout));
+        adjustInputType(mSearchBar);
         setNotificationBarColor();
     }
 

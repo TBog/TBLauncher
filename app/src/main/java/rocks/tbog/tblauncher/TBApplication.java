@@ -10,6 +10,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.sqlite.SQLiteDatabase;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -33,17 +34,18 @@ import rocks.tbog.tblauncher.utils.RootHandler;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public class TBApplication extends Application {
+    private static final String TAG = "APP";
 
     /**
      * The state of certain launcher features
      */
     @NonNull
     private static final LauncherState mState = new LauncherState();
+
     private DataHandler dataHandler = null;
     private IconsHandler iconsPackHandler = null;
     private TagsHandler tagsHandler = null;
     private AppsHandler appsHandler = null;
-    private boolean bLayoutUpdateRequired = false;
     private SharedPreferences mSharedPreferences = null;
     private ListPopup mPopup = null;
 
@@ -129,6 +131,7 @@ public class TBApplication extends Application {
         TBLauncherActivity launcherActivity = ref == null ? null : ref.get();
         if (launcherActivity != null && launcherActivity.getLifecycle().getCurrentState().compareTo(Lifecycle.State.DESTROYED) == 0)
             return null;
+        Log.d(TAG, "launcherActivity=" + launcherActivity);
         return launcherActivity;
     }
 
@@ -153,6 +156,7 @@ public class TBApplication extends Application {
         }
         // add to list
         mActivities.push(new WeakReference<>(activity));
+        Log.d(TAG, "activities.size=" + mActivities.size());
     }
 
     @NonNull
@@ -373,16 +377,12 @@ public class TBApplication extends Application {
         return mRootHandler;
     }
 
-    public boolean isLayoutUpdateRequired() {
-        return bLayoutUpdateRequired;
-    }
-
-    public void requireLayoutUpdate(boolean require) {
-        bLayoutUpdateRequired = require;
-    }
-
     public void requireLayoutUpdate() {
-        bLayoutUpdateRequired = true;
+        for (WeakReference<TBLauncherActivity> ref : mActivities) {
+            TBLauncherActivity launcherActivity = ref.get();
+            if (launcherActivity != null)
+                launcherActivity.requireLayoutUpdate();
+        }
     }
 
     public void registerPopup(ListPopup popup) {

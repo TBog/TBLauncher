@@ -14,7 +14,6 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.PopupWindow;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
@@ -108,6 +107,8 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
      */
     public final WidgetManager widgetManager = new WidgetManager();
 
+    private boolean bLayoutUpdateRequired = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -161,7 +162,17 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
     }
 
     @Override
+    protected void onRestart() {
+        Log.d(TAG, "onRestart(" + this + ")");
+        super.onRestart();
+
+        behaviour.onPostCreate();
+        customizeUI.onPostCreate();
+    }
+
+    @Override
     protected void onPostCreate(@Nullable Bundle savedInstanceState) {
+        Log.d(TAG, "onPostCreate(" + this + ")");
         super.onPostCreate(savedInstanceState);
 
         behaviour.onPostCreate();
@@ -181,10 +192,22 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
     public void onConfigurationChanged(@NonNull Configuration newConfig) {
         //TBApplication.behaviour(this).onConfigurationChanged(this, newConfig);
         Log.d(TAG, "onConfigurationChanged" +
-                " orientation=" + newConfig.orientation +
-                " keyboard=" + newConfig.keyboard +
-                " keyboardHidden=" + newConfig.keyboardHidden);
+            " orientation=" + newConfig.orientation +
+            " keyboard=" + newConfig.keyboard +
+            " keyboardHidden=" + newConfig.keyboardHidden);
         super.onConfigurationChanged(newConfig);
+    }
+
+    public boolean isLayoutUpdateRequired() {
+        return bLayoutUpdateRequired;
+    }
+
+    public void requireLayoutUpdate(boolean require) {
+        bLayoutUpdateRequired = require;
+    }
+
+    public void requireLayoutUpdate() {
+        bLayoutUpdateRequired = true;
     }
 
     @Override
@@ -192,10 +215,8 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
         Log.d(TAG, "onResume(" + this + ")");
         super.onResume();
 
-        TBApplication app = TBApplication.getApplication(this);
-
-        if (app.isLayoutUpdateRequired()) {
-            app.requireLayoutUpdate(false);
+        if (isLayoutUpdateRequired()) {
+            requireLayoutUpdate(false);
             Log.i(TAG, "Restarting app after setting changes");
             // Restart current activity to refresh view, since some preferences may require using a new UI
             //getWindow().getDecorView().post(TBLauncherActivity.this::recreate);
@@ -208,12 +229,6 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
 
         behaviour.onResume();
         quickList.onResume();
-    }
-
-    @Override
-    protected void onRestart() {
-        Log.d(TAG, "onRestart(" + this + ")");
-        super.onRestart();
     }
 
     @Override
