@@ -100,6 +100,7 @@ class PageAdapter extends androidx.viewpager.widget.PagerAdapter implements View
         abstract void setupView(@NonNull DialogFragment dialogFragment, @Nullable OnItemClickListener iconClickListener, @Nullable OnItemClickListener iconLongClickListener);
 
         public void addPickedIcon(@NonNull Drawable pickedImage, String filename) {
+            // do nothing in the base class, override to handle image picked from gallery
         }
 
         void loadData() {

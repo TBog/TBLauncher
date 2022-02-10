@@ -89,136 +89,138 @@ class CustomShapePage extends PageAdapter.Page {
         // letters toggle
         setupToggle(R.id.lettersToggle, R.id.lettersGroup);
 
-        // shapes list
-        {
-            GridView shapeGridView = pageView.findViewById(R.id.shapeGrid);
-            mShapesAdapter = new ShapedIconAdapter();
-            shapeGridView.setAdapter(mShapesAdapter);
-            shapeGridView.setOnItemClickListener((parent, view, position, id) -> {
-                Activity activity = Utilities.getActivity(view);
-                if (activity == null)
-                    return;
-
-                Object objItem = parent.getAdapter().getItem(position);
-                if (!(objItem instanceof NamedIconInfo) || ((NamedIconInfo) objItem).getPreview() == null)
-                    return;
-                CharSequence name = ((NamedIconInfo) objItem).name;
-                for (int shape : DrawableUtils.SHAPE_LIST) {
-                    if (name.equals(DrawableUtils.shapeName(activity, shape))) {
-                        mShape = shape;
-                        break;
-                    }
-                }
-                reshapeIcons(activity);
-            });
-            CustomizeUI.setResultListPref(shapeGridView);
-        }
-
-        // icons we are customizing
-        {
-            GridView gridView = pageView.findViewById(R.id.iconGrid);
-            mShapedIconAdapter = new ShapedIconAdapter();
-
-            gridView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-                @Override
-                public boolean onPreDraw() {
-                    gridView.getViewTreeObserver().removeOnPreDrawListener(this);
-                    gridView.setAdapter(mShapedIconAdapter);
-                    return false;
-                }
-            });
-            //gridView.setAdapter(mShapedIconAdapter);
-
-            if (iconClickListener != null)
-                gridView.setOnItemClickListener((parent, view, position, id) -> {
-                    Object item = parent.getAdapter().getItem(position);
-                    if (item instanceof ShapedIconInfo && ((ShapedIconInfo) item).getPreview() != null)
-                        iconClickListener.onItemClick(parent.getAdapter(), view, position);
-                });
-            CustomizeUI.setResultListPref(gridView);
-        }
-
-        // scale bar
-        {
-            SeekBar seekBar = pageView.findViewById(R.id.scaleBar);
-            seekBar.setMax(200);
-            seekBar.setProgress((int) (100.f * mScale));
-            final Runnable updateIcons = () -> {
-                mScale = 0.01f * seekBar.getProgress();
-                reshapeIcons(seekBar.getContext());
-            };
-            seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                @Override
-                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                    seekBar.removeCallbacks(updateIcons);
-                    seekBar.post(updateIcons);
-                }
-
-                @Override
-                public void onStartTrackingTouch(SeekBar seekBar) {
-
-                }
-
-                @Override
-                public void onStopTrackingTouch(SeekBar seekBar) {
-                    seekBar.removeCallbacks(updateIcons);
-                    seekBar.post(updateIcons);
-                }
-            });
-        }
+        addShapesList();
+        addIconsList(iconClickListener);
+        addScaleBar();
 
         final float colorPreviewRadius = dialogFragment.getResources().getDimension(R.dimen.color_preview_radius);
         final int colorPreviewBorder = UISizes.dp2px(context, 1);
         final int colorPreviewSize = dialogFragment.getResources().getDimensionPixelSize(R.dimen.color_preview_size);
 
-        // shape background color chooser
+        addBackgroundColorChooser(colorPreviewRadius, colorPreviewBorder, colorPreviewSize);
+        addLetterColorChooser(colorPreviewRadius, colorPreviewBorder, colorPreviewSize);
+
+        generateShapes(context);
+    }
+
+    private void addShapesList() {
+        GridView shapeGridView = pageView.findViewById(R.id.shapeGrid);
+        mShapesAdapter = new ShapedIconAdapter();
+        shapeGridView.setAdapter(mShapesAdapter);
+        shapeGridView.setOnItemClickListener((parent, view, position, id) -> {
+            Activity activity = Utilities.getActivity(view);
+            if (activity == null)
+                return;
+
+            Object objItem = parent.getAdapter().getItem(position);
+            if (!(objItem instanceof NamedIconInfo) || ((NamedIconInfo) objItem).getPreview() == null)
+                return;
+            CharSequence name = ((NamedIconInfo) objItem).name;
+            for (int shape : DrawableUtils.SHAPE_LIST) {
+                if (name.equals(DrawableUtils.shapeName(activity, shape))) {
+                    mShape = shape;
+                    break;
+                }
+            }
+            reshapeIcons(activity);
+        });
+        CustomizeUI.setResultListPref(shapeGridView);
+    }
+
+    private void addIconsList(@Nullable OnItemClickListener iconClickListener) {
+        GridView gridView = pageView.findViewById(R.id.iconGrid);
+        mShapedIconAdapter = new ShapedIconAdapter();
+
+        gridView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                gridView.getViewTreeObserver().removeOnPreDrawListener(this);
+                gridView.setAdapter(mShapedIconAdapter);
+                return false;
+            }
+        });
+        //gridView.setAdapter(mShapedIconAdapter);
+
+        if (iconClickListener != null)
+            gridView.setOnItemClickListener((parent, view, position, id) -> {
+                Object item = parent.getAdapter().getItem(position);
+                if (item instanceof ShapedIconInfo && ((ShapedIconInfo) item).getPreview() != null)
+                    iconClickListener.onItemClick(parent.getAdapter(), view, position);
+            });
+        CustomizeUI.setResultListPref(gridView);
+    }
+
+    private void addScaleBar() {
+        SeekBar seekBar = pageView.findViewById(R.id.scaleBar);
+        seekBar.setMax(200);
+        seekBar.setProgress((int) (100.f * mScale));
+        final Runnable updateIcons = () -> {
+            mScale = 0.01f * seekBar.getProgress();
+            reshapeIcons(seekBar.getContext());
+        };
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                seekBar.removeCallbacks(updateIcons);
+                seekBar.post(updateIcons);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                seekBar.removeCallbacks(updateIcons);
+                seekBar.post(updateIcons);
+            }
+        });
+    }
+
+    private void addBackgroundColorChooser(float colorPreviewRadius, int colorPreviewBorder, int colorPreviewSize) {
+        TextView colorView = pageView.findViewById(R.id.backgroundColor);
         {
-            TextView colorView = pageView.findViewById(R.id.backgroundColor);
-            {
+            Drawable drawable = UIColors.getPreviewDrawable(mBackground, colorPreviewBorder, colorPreviewRadius);
+            drawable.setBounds(0, 0, colorPreviewSize, colorPreviewSize);
+            colorView.setCompoundDrawables(null, null, drawable, null);
+        }
+        colorView.setOnClickListener(v -> {
+            Context ctx = v.getContext();
+            launchCustomColorDialog(ctx, mBackground, color -> {
+                mBackground = color;
+                Activity activity = Utilities.getActivity(v);
+                if (activity == null)
+                    return;
                 Drawable drawable = UIColors.getPreviewDrawable(mBackground, colorPreviewBorder, colorPreviewRadius);
                 drawable.setBounds(0, 0, colorPreviewSize, colorPreviewSize);
                 colorView.setCompoundDrawables(null, null, drawable, null);
-            }
-            colorView.setOnClickListener(v -> {
-                Context ctx = v.getContext();
-                launchCustomColorDialog(ctx, mBackground, color -> {
-                    mBackground = color;
-                    Activity activity = Utilities.getActivity(v);
-                    if (activity == null)
-                        return;
-                    Drawable drawable = UIColors.getPreviewDrawable(mBackground, colorPreviewBorder, colorPreviewRadius);
-                    drawable.setBounds(0, 0, colorPreviewSize, colorPreviewSize);
-                    colorView.setCompoundDrawables(null, null, drawable, null);
-                    generateShapes(activity);
-                    reshapeIcons(activity);
-                });
+                generateShapes(activity);
+                reshapeIcons(activity);
             });
-        }
+        });
+    }
 
-        // letter color chooser
+    private void addLetterColorChooser(float colorPreviewRadius, int colorPreviewBorder, int colorPreviewSize) {
+        TextView colorView = pageView.findViewById(R.id.lettersColor);
         {
-            TextView colorView = pageView.findViewById(R.id.lettersColor);
-            {
+            Drawable drawable = UIColors.getPreviewDrawable(mLetters, colorPreviewBorder, colorPreviewRadius);
+            drawable.setBounds(0, 0, colorPreviewSize, colorPreviewSize);
+            colorView.setCompoundDrawables(null, null, drawable, null);
+        }
+        colorView.setOnClickListener(v -> {
+            Context ctx = v.getContext();
+            launchCustomColorDialog(ctx, mLetters, color -> {
+                mLetters = color;
+                Activity activity = Utilities.getActivity(v);
+                if (activity == null)
+                    return;
                 Drawable drawable = UIColors.getPreviewDrawable(mLetters, colorPreviewBorder, colorPreviewRadius);
                 drawable.setBounds(0, 0, colorPreviewSize, colorPreviewSize);
                 colorView.setCompoundDrawables(null, null, drawable, null);
-            }
-            colorView.setOnClickListener(v -> {
-                Context ctx = v.getContext();
-                launchCustomColorDialog(ctx, mLetters, color -> {
-                    mLetters = color;
-                    Activity activity = Utilities.getActivity(v);
-                    if (activity == null)
-                        return;
-                    Drawable drawable = UIColors.getPreviewDrawable(mLetters, colorPreviewBorder, colorPreviewRadius);
-                    drawable.setBounds(0, 0, colorPreviewSize, colorPreviewSize);
-                    colorView.setCompoundDrawables(null, null, drawable, null);
-                    generateTextIcons(mLettersView.getText());
-                });
+                generateTextIcons(mLettersView.getText());
             });
-        }
-
-        generateShapes(context);
+        });
     }
 
     @Override
@@ -461,7 +463,7 @@ class CustomShapePage extends PageAdapter.Page {
                 return false;
             ShapedIconInfo that = (ShapedIconInfo) o;
             return Objects.equals(iconDrawable, that.iconDrawable) &&
-                Objects.equals(textId, that.textId);
+                   Objects.equals(textId, that.textId);
         }
 
         @Override

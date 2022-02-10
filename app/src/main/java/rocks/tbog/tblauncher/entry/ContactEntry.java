@@ -387,9 +387,6 @@ public class ContactEntry extends EntryItem {
         private long contactId = 0;
         private long contentId = 0;
 
-        public Builder() {
-        }
-
         public Builder setContactId(long contactId) {
             this.contactId = contactId;
             return this;
