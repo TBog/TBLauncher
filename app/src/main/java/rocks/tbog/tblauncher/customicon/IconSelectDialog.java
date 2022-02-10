@@ -131,7 +131,6 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
         View view = super.onCreateView(inflater, container, savedInstanceState);
         if (view == null)
             return null;
-        Context context = inflater.getContext();
 
         mPreviewLabel = view.findViewById(R.id.previewLabel);
         mViewPager = view.findViewById(R.id.viewPager);
@@ -160,6 +159,7 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
 
     /**
      * Add ViewPager pages for every icon pack
+     *
      * @param inflater used for inflating the page view
      * @return an array of pairs with the icon pack package name and icon pack name
      */

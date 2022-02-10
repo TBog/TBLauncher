@@ -22,8 +22,6 @@ import rocks.tbog.tblauncher.MimeTypeCache;
 import rocks.tbog.tblauncher.Permission;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.entry.ContactEntry;
-import rocks.tbog.tblauncher.normalizer.PhoneNormalizer;
-import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.utils.MimeTypeUtils;
 import rocks.tbog.tblauncher.utils.Timer;
 

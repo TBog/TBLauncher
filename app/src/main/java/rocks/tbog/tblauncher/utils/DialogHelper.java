@@ -17,7 +17,6 @@ import androidx.appcompat.app.AlertDialog;
 
 import rocks.tbog.tblauncher.CustomizeUI;
 import rocks.tbog.tblauncher.R;
-import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.ui.dialog.EditTextDialog;
 
 public class DialogHelper {

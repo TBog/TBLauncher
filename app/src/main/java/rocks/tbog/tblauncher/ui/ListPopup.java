@@ -22,7 +22,6 @@ import androidx.annotation.StringRes;
 
 import rocks.tbog.tblauncher.CustomizeUI;
 import rocks.tbog.tblauncher.R;
-import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.UISizes;
 
