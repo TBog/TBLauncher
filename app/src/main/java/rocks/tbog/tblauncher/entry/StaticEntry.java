@@ -98,7 +98,7 @@ public abstract class StaticEntry extends EntryItem {
         })
                 .setTitle(R.string.title_static_rename)
                 .setNeutralButton(R.string.custom_name_set_default, (dialog, which) -> {
-                    Context ctx = dialog.getContext();
+                    Context ctx = dialog.requireContext();
                     TBApplication app = TBApplication.getApplication(ctx);
                     DataHandler dataHandler = app.getDataHandler();
                     // restore default name
