@@ -5,12 +5,14 @@ import android.app.Application;
 import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.database.sqlite.SQLiteDatabase;
 import android.util.Log;
+import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -144,6 +146,41 @@ public class TBApplication extends Application {
     @Nullable
     public static TBLauncherActivity launcherActivity(@NonNull Context context) {
         return getApplication(context).launcherActivity();
+    }
+
+    public static boolean activityInvalid(@Nullable View view) {
+        if (view != null && view.isAttachedToWindow())
+            return activityInvalid(view.getContext());
+        return false;
+    }
+
+    public static boolean activityInvalid(@Nullable Context ctx) {
+        return !activityValid(ctx);
+    }
+
+    public static boolean activityValid(@Nullable Context ctx) {
+        while (ctx instanceof ContextWrapper) {
+            if (ctx instanceof Activity) {
+                Activity act = (Activity) ctx;
+                if (act.isFinishing() || act.isDestroyed()) {
+                    // activity is no more
+                    return false;
+                }
+                TBApplication app = getApplication(act);
+                for (WeakReference<TBLauncherActivity> ref : app.mActivities) {
+                    TBLauncherActivity launcherActivity = ref.get();
+                    if (act.equals(launcherActivity)) {
+                        Lifecycle.State state = launcherActivity.getLifecycle().getCurrentState();
+                        return state.isAtLeast(Lifecycle.State.INITIALIZED);
+                    }
+                }
+                // activity not registered
+                return false;
+            }
+            ctx = ((ContextWrapper) ctx).getBaseContext();
+        }
+        // context is null
+        return false;
     }
 
     public void onCreateActivity(TBLauncherActivity activity) {

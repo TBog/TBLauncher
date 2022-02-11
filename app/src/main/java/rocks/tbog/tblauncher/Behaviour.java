@@ -341,6 +341,8 @@ public class Behaviour implements ISearchActivity {
             @Override
             public void showKeyboard() {
                 LauncherState state = TBApplication.state();
+                if (TBApplication.activityInvalid(mTBLauncherActivity))
+                    return;
 
                 if (state.isSearchBarVisible() && PrefCache.modeSearchFullscreen(mPref)) {
                     showSystemBars();
@@ -358,6 +360,8 @@ public class Behaviour implements ISearchActivity {
 
             @Override
             public void hideKeyboard() {
+                if (TBApplication.activityInvalid(mTBLauncherActivity))
+                    return;
                 if (TBApplication.state().isSearchBarVisible() && PrefCache.modeSearchFullscreen(mPref)) {
                     //hideSystemBars();
                     enableFullscreen(0);
@@ -555,6 +559,8 @@ public class Behaviour implements ISearchActivity {
     }
 
     private void showDesktop(LauncherState.Desktop mode) {
+        if (TBApplication.activityInvalid(mTBLauncherActivity))
+            return;
         TBApplication.state().setDesktop(mode);
         switch (mode) {
             case SEARCH:
@@ -1346,6 +1352,8 @@ public class Behaviour implements ISearchActivity {
      * @param tag     name to keep track of
      */
     public static void showDialog(Context context, DialogFragment<?> dialog, String tag) {
+        if (TBApplication.activityInvalid(context))
+            return;
         TBApplication.behaviour(context).openFragmentDialog(dialog, tag);
         Activity activity = Utilities.getActivity(context);
         if (!(activity instanceof FragmentActivity))
@@ -1508,6 +1516,10 @@ public class Behaviour implements ISearchActivity {
     private boolean executeAction(@Nullable String action, @Nullable String source) {
         if (action == null)
             return false;
+        if (TBApplication.activityInvalid(mTBLauncherActivity)) {
+            // only do stuff if we are the current activity
+            return false;
+        }
         switch (action) {
             case "lockScreen":
                 if (DeviceAdmin.isAdminActive(mTBLauncherActivity)) {

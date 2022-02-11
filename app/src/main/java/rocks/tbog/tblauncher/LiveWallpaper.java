@@ -188,16 +188,10 @@ public class LiveWallpaper {
     }
 
     private static boolean onClick(View view) {
-        if (!view.isAttachedToWindow()) {
-            return false;
-        }
         return TBApplication.behaviour(view.getContext()).onClick();
     }
 
     private static boolean onDoubleClick(View view) {
-        if (!view.isAttachedToWindow()) {
-            return false;
-        }
         return TBApplication.behaviour(view.getContext()).onDoubleClick();
     }
 
