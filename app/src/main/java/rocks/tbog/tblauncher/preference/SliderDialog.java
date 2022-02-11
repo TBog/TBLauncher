@@ -52,14 +52,18 @@ public class SliderDialog extends BasePreferenceDialog {
         }
 
         switch (key) {
-            case "search-bar-size":
-                ((TextView) root.findViewById(android.R.id.text1)).setText(R.string.search_bar_size);
+            case "search-bar-text-size":
+                ((TextView) root.findViewById(android.R.id.text1)).setText(R.string.search_bar_text_size);
                 break;
-            case "quick-list-size":
-                ((TextView) root.findViewById(android.R.id.text1)).setText(R.string.quick_list_size);
+            case "search-bar-height":
+                ((TextView) root.findViewById(android.R.id.text1)).setText(R.string.search_bar_height);
+                break;
+            case "quick-list-height":
+                ((TextView) root.findViewById(android.R.id.text1)).setText(R.string.quick_list_height);
                 break;
             case "popup-corner-radius":
-                ((TextView) root.findViewById(android.R.id.text1)).setText(R.string.popup_corner_radius);
+            case "quick-list-radius":
+                ((TextView) root.findViewById(android.R.id.text1)).setText(R.string.corner_radius);
                 break;
         }
 
@@ -68,6 +72,9 @@ public class SliderDialog extends BasePreferenceDialog {
             case "result-text-size":
             case "result-text2-size":
             case "result-icon-size":
+            case "search-bar-text-size":
+            case "search-bar-height":
+            case "quick-list-height":
                 mSliderOffset = 2;
                 seekBar.setMax(seekBar.getMax() - mSliderOffset);
                 break;
@@ -96,16 +103,13 @@ public class SliderDialog extends BasePreferenceDialog {
                 break;
         }
 
-        int seekBarProgress = (Integer) preference.getValue() - mSliderOffset;
-        seekBar.setProgress(seekBarProgress);
-
         // update display value
         mTextView2 = root.findViewById(android.R.id.text2);
-        {
-            int progress = seekBarProgress;
-            progress += mSliderOffset;
-            mTextView2.setText(mTextView2.getResources().getString(R.string.value, progress));
-        }
+//        {
+//            int progress = seekBarProgress;
+//            progress += mSliderOffset;
+//            mTextView2.setText(mTextView2.getResources().getString(R.string.value, progress));
+//        }
 
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -127,5 +131,9 @@ public class SliderDialog extends BasePreferenceDialog {
                 pref.setValue(progress);
             }
         });
+
+        // set progress after listener set to also update text view
+        int seekBarProgress = (Integer) preference.getValue() - mSliderOffset;
+        seekBar.setProgress(seekBarProgress);
     }
 }

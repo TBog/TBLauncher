@@ -124,15 +124,19 @@ public class CustomizeUI {
         final Resources resources = mSearchBarContainer.getResources();
 
         // size
-        int percent = mPref.getInt("search-bar-size", 0);
+        int barHeight = mPref.getInt("search-bar-height", 0);
+        if (barHeight <= 1)
+            barHeight = resources.getInteger(R.integer.default_bar_height);
+        barHeight = UISizes.dp2px(ctx, barHeight);
+        int textSize = mPref.getInt("search-bar-text-size", 0);
+        if (textSize <= 1)
+            textSize = resources.getInteger(R.integer.default_size_text);
 
         // layout height
         {
-            int smallSize = resources.getDimensionPixelSize(R.dimen.bar_height);
-            int largeSize = resources.getDimensionPixelSize(R.dimen.large_bar_height);
             ViewGroup.LayoutParams params = mSearchBarContainer.getLayoutParams();
             if (params instanceof ViewGroup.MarginLayoutParams) {
-                params.height = smallSize + (largeSize - smallSize) * percent / 100;
+                params.height = barHeight;
                 mSearchBarContainer.setLayoutParams(params);
             } else {
                 throw new IllegalStateException("mSearchBarContainer has the wrong layout params");
@@ -141,9 +145,7 @@ public class CustomizeUI {
 
         // text size
         {
-            float smallSize = resources.getDimension(R.dimen.small_bar_text);
-            float largeSize = resources.getDimension(R.dimen.large_bar_text);
-            mSearchBar.setTextSize(TypedValue.COMPLEX_UNIT_PX, smallSize + (largeSize - smallSize) * percent / 100);
+            mSearchBar.setTextSize(TypedValue.COMPLEX_UNIT_DIP, textSize);
         }
 
         final int searchBarRipple = UIColors.setAlpha(UIColors.getColor(mPref, "search-bar-ripple-color"), 0xFF);

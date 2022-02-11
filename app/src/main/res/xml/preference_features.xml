@@ -42,11 +42,18 @@
             android:title="@string/quick_list_animation" />
 
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
-            android:defaultValue="@integer/default_bar_size"
+            android:defaultValue="@integer/default_bar_height"
             android:dependency="quick-list-enabled"
             android:dialogLayout="@layout/pref_slider"
-            android:key="quick-list-size"
-            android:title="@string/quick_list_size"
+            android:key="quick-list-height"
+            android:title="@string/quick_list_height"
+            android:widgetLayout="@layout/pref_size_preview" />
+
+        <rocks.tbog.tblauncher.preference.CustomDialogPreference
+            android:defaultValue="@integer/default_corner_radius"
+            android:dialogLayout="@layout/pref_slider"
+            android:key="quick-list-radius"
+            android:title="@string/corner_radius"
             android:widgetLayout="@layout/pref_size_preview" />
 
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
@@ -65,10 +72,17 @@
         android:title="@string/search_bar_section">
 
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
-            android:defaultValue="@integer/default_bar_size"
+            android:defaultValue="@integer/default_bar_height"
             android:dialogLayout="@layout/pref_slider"
-            android:key="search-bar-size"
-            android:title="@string/search_bar_size"
+            android:key="search-bar-height"
+            android:title="@string/search_bar_height"
+            android:widgetLayout="@layout/pref_size_preview" />
+
+        <rocks.tbog.tblauncher.preference.CustomDialogPreference
+            android:defaultValue="@integer/default_size_text"
+            android:dialogLayout="@layout/pref_slider"
+            android:key="search-bar-text-size"
+            android:title="@string/search_bar_text_size"
             android:widgetLayout="@layout/pref_size_preview" />
 
         <rocks.tbog.tblauncher.preference.CustomDialogPreference

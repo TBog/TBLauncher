@@ -44,6 +44,7 @@ import rocks.tbog.tblauncher.result.ResultHelper;
 import rocks.tbog.tblauncher.searcher.Searcher;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.UIColors;
+import rocks.tbog.tblauncher.utils.UISizes;
 
 /**
  * Dock
@@ -424,20 +425,20 @@ public class QuickList {
             final SharedPreferences pref = mSharedPreferences;
             if (pref.getBoolean("quick-list-animation", true)) {
                 mQuickList.animate()
-                        .scaleY(1f)
-                        .setInterpolator(new AccelerateDecelerateInterpolator())
-                        .setListener(new AnimatorListenerAdapter() {
-                            @Override
-                            public void onAnimationStart(Animator animation) {
-                                TBApplication.state().setQuickList(LauncherState.AnimatedVisibility.ANIM_TO_VISIBLE);
-                            }
+                    .scaleY(1f)
+                    .setInterpolator(new AccelerateDecelerateInterpolator())
+                    .setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationStart(Animator animation) {
+                            TBApplication.state().setQuickList(LauncherState.AnimatedVisibility.ANIM_TO_VISIBLE);
+                        }
 
-                            @Override
-                            public void onAnimationEnd(Animator animation) {
-                                TBApplication.state().setQuickList(LauncherState.AnimatedVisibility.VISIBLE);
-                            }
-                        })
-                        .start();
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            TBApplication.state().setQuickList(LauncherState.AnimatedVisibility.VISIBLE);
+                        }
+                    })
+                    .start();
             } else {
                 mQuickList.setScaleY(1f);
                 TBApplication.state().setQuickList(LauncherState.AnimatedVisibility.VISIBLE);
@@ -451,21 +452,21 @@ public class QuickList {
             animToggleOff();
             if (animate) {
                 mQuickList.animate()
-                        .scaleY(0f)
-                        .setInterpolator(new DecelerateInterpolator())
-                        .setListener(new AnimatorListenerAdapter() {
-                            @Override
-                            public void onAnimationStart(Animator animation) {
-                                TBApplication.state().setQuickList(LauncherState.AnimatedVisibility.ANIM_TO_HIDDEN);
-                            }
+                    .scaleY(0f)
+                    .setInterpolator(new DecelerateInterpolator())
+                    .setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationStart(Animator animation) {
+                            TBApplication.state().setQuickList(LauncherState.AnimatedVisibility.ANIM_TO_HIDDEN);
+                        }
 
-                            @Override
-                            public void onAnimationEnd(Animator animation) {
-                                TBApplication.state().setQuickList(LauncherState.AnimatedVisibility.HIDDEN);
-                                mQuickList.setVisibility(View.GONE);
-                            }
-                        })
-                        .start();
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            TBApplication.state().setQuickList(LauncherState.AnimatedVisibility.HIDDEN);
+                            mQuickList.setVisibility(View.GONE);
+                        }
+                    })
+                    .start();
                 mQuickList.setVisibility(View.VISIBLE);
             } else {
                 TBApplication.state().setQuickList(LauncherState.AnimatedVisibility.HIDDEN);
@@ -499,42 +500,54 @@ public class QuickList {
         animToggleOff();
         bFilterOn = false;
         bActionOn = mLastSelection != null
-                && (mLastSelection.startsWith(ActionEntry.SCHEME)
-                || mLastSelection.startsWith(TagEntry.SCHEME));
+            && (mLastSelection.startsWith(ActionEntry.SCHEME)
+            || mLastSelection.startsWith(TagEntry.SCHEME));
         bAdapterEmpty = false;
     }
 
     public static void applyUiPref(SharedPreferences pref, LinearLayout quickList) {
+        Context ctx = quickList.getContext();
         Resources resources = quickList.getResources();
         // size
-        int percent = pref.getInt("quick-list-size", 0);
+        int barHeight = pref.getInt("quick-list-height", 0);
+        if (barHeight <= 1)
+            barHeight = resources.getInteger(R.integer.default_bar_height);
+        barHeight = UISizes.dp2px(ctx, barHeight);
 
         if (!(quickList.getLayoutParams() instanceof ViewGroup.MarginLayoutParams))
             throw new IllegalStateException("mSearchBarContainer has the wrong layout params");
 
         ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) quickList.getLayoutParams();
         // set layout height
-        {
-            int smallSize = resources.getDimensionPixelSize(R.dimen.bar_height);
-            int largeSize = resources.getDimensionPixelSize(R.dimen.large_quick_list_bar_height);
-            params.height = smallSize + (largeSize - smallSize) * percent / 100;
-            quickList.setLayoutParams(params);
-        }
+        params.height = barHeight;
+        quickList.setLayoutParams(params);
 
-        int color = getBackgroundColor(pref);
+        final int defaultCorner = resources.getInteger(R.integer.default_corner_radius);
+        final int cornerRadius = pref.getInt("quick-list-radius", defaultCorner);
+        final int color = getBackgroundColor(pref);
 
         // rounded drawable
-        PaintDrawable drawable = new PaintDrawable();
-        drawable.getPaint().setColor(color);
-        drawable.setCornerRadius(resources.getDimension(R.dimen.bar_corner_radius));
-        quickList.setBackground(drawable);
-        int margin = (int) (params.height * .25f);
-        params.setMargins(margin, 0, margin, margin);
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            // clip list content to rounded corners
-            quickList.setClipToOutline(true);
+        if (cornerRadius > 0) {
+            final PaintDrawable drawable;
+            {
+                Drawable background = quickList.getBackground();
+                if (background instanceof PaintDrawable)
+                    drawable = (PaintDrawable) background;
+                else
+                    drawable = new PaintDrawable();
+            }
+            drawable.getPaint().setColor(color);
+            drawable.setCornerRadius(cornerRadius);
+            quickList.setBackground(drawable);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                // clip list content to rounded corners
+                quickList.setClipToOutline(true);
+            }
+        } else {
+            quickList.setBackgroundColor(color);
         }
-
+        int margin = (int) (cornerRadius * .5f);
+        params.setMargins(margin, margin, margin, margin);
     }
 
     public static int getBackgroundColor(SharedPreferences pref) {

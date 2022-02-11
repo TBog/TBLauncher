@@ -72,7 +72,8 @@
     <string name="title_select_alpha">Drag the slider to select the desired opacity</string>
     <string name="title_select_size">Drag the slider to select the desired size</string>
     <string name="search_bar_section">Search bar</string>
-    <string name="search_bar_size">Bar and text size</string>
+    <string name="search_bar_text_size">Text size</string>
+    <string name="search_bar_height">Bar height</string>
     <string name="result_list_section">Result list</string>
     <string name="icons_pack">Choose pack</string>
     <string name="icons_pack_default_name">System icons</string>
@@ -110,7 +111,7 @@
     <string name="features_summary">Toggle and customize app features</string>
     <string name="quick_list_section">Dock</string>
     <string name="quick_list_enabled">Use dock</string>
-    <string name="quick_list_size">Dock height</string>
+    <string name="quick_list_height">Dock height</string>
     <string name="tags_section">Tags</string>
     <string name="fuzzy_search_tags">Fuzzy-search tags</string>
     <string name="fuzzy_search_tags_summary">When searching include tags as possible match candidates</string>
@@ -381,7 +382,7 @@
     <string name="icon_scale_blue">Scale blue</string>
     <string name="icon_scale_alpha">Scale transparency</string>
     <string name="reset_matrix">Set default values</string>
-    <string name="popup_corner_radius">Corner radius</string>
+    <string name="corner_radius">Corner radius</string>
     <string name="behaviour_section">Behaviour</string>
     <string name="behaviour_link_keyboard_search_bar">Link keyboard to search bar visibility</string>
     <string name="behaviour_widget_after_launch">Widget mode after launch</string>

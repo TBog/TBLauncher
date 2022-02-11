@@ -90,7 +90,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     private final static ArraySet<String> PREF_THAT_REQUIRE_LAYOUT_UPDATE = new ArraySet<>(Arrays.asList(
             "result-list-color", "result-list-alpha", "result-ripple-color", "result-list-rounded",
             "notification-bar-color", "notification-bar-alpha", "notification-bar-gradient", "black-notification-icons",
-            "search-bar-size", "search-bar-rounded", "search-bar-gradient", "search-bar-at-bottom",
+            "search-bar-height", "search-bar-text-size", "search-bar-rounded", "search-bar-gradient", "search-bar-at-bottom",
             "search-bar-color", "search-bar-alpha", "search-bar-text-color", "search-bar-icon-color",
             "search-bar-ripple-color", "search-bar-cursor-argb", "enable-suggestions-keyboard"
     ));
@@ -649,9 +649,10 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "notification-bar-alpha":
                     case "search-bar-alpha":
                     case "result-list-alpha":
-                    case "search-bar-size":
+                    case "search-bar-height":
+                    case "search-bar-text-size":
                     case "quick-list-alpha":
-                    case "quick-list-size":
+                    case "quick-list-height":
                     case "result-text-size":
                     case "result-text2-size":
                     case "result-icon-size":
@@ -668,6 +669,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "icon-brightness":
                     case "icon-saturation":
                     case "popup-corner-radius":
+                    case "quick-list-radius":
                         dialogFragment = SliderDialog.newInstance(key);
                         break;
                     case "generate-theme-simple":

@@ -161,7 +161,7 @@
     <string name="icons_section">Ikoner</string>
     <string name="tags_enabled">Vis etiketter for programmer</string>
     <string name="tags_section">Etiketter</string>
-    <string name="quick_list_size">Felthøyde</string>
+    <string name="quick_list_height">Felthøyde</string>
     <string name="quick_list_enabled">Bruk hurtigliste</string>
     <string name="quick_list_section">Hurtigliste</string>
     <string name="features_summary">Veksle og tilpass programfunksjoner</string>
@@ -251,7 +251,7 @@
     <string name="dm_widget_quick_list">Vis hurtigliste</string>
     <string name="dm_search_quick_list">Vis hurtigliste</string>
     <string name="dm_empty_quick_list">Vis hurtigliste</string>
-    <string name="popup_corner_radius">Hjørneradius</string>
+    <string name="corner_radius">Hjørneradius</string>
     <string name="reset_matrix">Sett forvalgte verdier</string>
     <string name="icon_scale_alpha">Juster gjennomsiktighet</string>
     <string name="icon_scale_blue">Juster blå</string>
