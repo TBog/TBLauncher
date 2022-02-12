@@ -496,7 +496,8 @@ public class QuickList {
     }
 
     public void adapterUpdated() {
-        show();
+        if (mOnlyForResults)
+            show();
         animToggleOff();
         bFilterOn = false;
         bActionOn = mLastSelection != null
