@@ -81,7 +81,7 @@ public class CustomizeUI {
         mClearButton = mSearchBarContainer.findViewById(R.id.clearButton);
     }
 
-    public void onPostCreate() {
+    public void onStart() {
         setSearchBarPref();
         setResultListPref(findViewById(R.id.resultLayout));
         adjustInputType(mSearchBar);

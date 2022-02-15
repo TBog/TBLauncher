@@ -455,7 +455,7 @@ public class Behaviour implements ISearchActivity {
         });
     }
 
-    public void onPostCreate() {
+    public void onStart() {
         String initialDesktop = mPref.getString("initial-desktop", null);
         if (executeAction(initialDesktop, null))
             return;

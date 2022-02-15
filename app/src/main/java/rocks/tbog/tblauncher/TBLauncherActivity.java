@@ -162,21 +162,30 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
     }
 
     @Override
+    protected void onStart() {
+        Log.d(TAG, "onStart(" + this + ")");
+        super.onStart();
+
+        if (DebugInfo.providerStatus(this)) {
+            debugTextView.setVisibility(View.VISIBLE);
+        }
+
+        behaviour.onStart();
+        customizeUI.onStart();
+        quickList.onStart();
+    }
+
+    @Override
+    protected void onStop() {
+        Log.d(TAG, "onStop(" + this + ")");
+        super.onStop();
+    }
+
+    @Override
     protected void onRestart() {
         Log.d(TAG, "onRestart(" + this + ")");
         super.onRestart();
 
-        behaviour.onPostCreate();
-        customizeUI.onPostCreate();
-    }
-
-    @Override
-    protected void onPostCreate(@Nullable Bundle savedInstanceState) {
-        Log.d(TAG, "onPostCreate(" + this + ")");
-        super.onPostCreate(savedInstanceState);
-
-        behaviour.onPostCreate();
-        customizeUI.onPostCreate();
     }
 
     @Override
@@ -228,23 +237,6 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
         }
 
         behaviour.onResume();
-        quickList.onResume();
-    }
-
-    @Override
-    protected void onStart() {
-        Log.d(TAG, "onStart(" + this + ")");
-        super.onStart();
-
-        if (DebugInfo.providerStatus(this)) {
-            debugTextView.setVisibility(View.VISIBLE);
-        }
-    }
-
-    @Override
-    protected void onStop() {
-        Log.d(TAG, "onStop(" + this + ")");
-        super.onStop();
     }
 
     @Override

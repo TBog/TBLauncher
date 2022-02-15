@@ -479,7 +479,7 @@ public class QuickList {
         }
     }
 
-    public void onResume() {
+    public void onStart() {
         final SharedPreferences pref = mSharedPreferences;
         mOnlyForResults = pref.getBoolean("quick-list-only-for-results", false);
         applyUiPref(pref, mQuickList);
