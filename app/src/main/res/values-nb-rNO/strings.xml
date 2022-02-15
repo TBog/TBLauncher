@@ -196,7 +196,6 @@
     <string name="value">verdi %d</string>
     <string name="icons_pack">Velg pakke</string>
     <string name="result_list_section">Resultatliste</string>
-    <string name="search_bar_size">Felt- og tekststørrelse</string>
     <string name="search_bar_section">Søkefelt</string>
     <string name="title_select_size">Dra glidebryteren for å velge ønsket størrelse</string>
     <string name="title_select_alpha">Dra glidebryteren for å velge ønsket dekkevne</string>

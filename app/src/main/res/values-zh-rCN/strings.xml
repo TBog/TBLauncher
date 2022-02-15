@@ -33,7 +33,6 @@
     <string name="icons_pack_default_name">系统图标</string>
     <string name="icons_pack">选择图标包</string>
     <string name="result_list_section">清单</string>
-    <string name="search_bar_size">栏和文字大小</string>
     <string name="search_bar_section">搜索栏</string>
     <string name="title_select_size">拖动滑块设置大小</string>
     <string name="title_select_alpha">拖动滑块设置透明度</string>
