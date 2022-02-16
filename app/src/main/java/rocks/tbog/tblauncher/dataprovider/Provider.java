@@ -149,6 +149,7 @@ public abstract class Provider<T extends EntryItem> extends Service implements I
         return null;
     }
 
+    @Nullable
     @Override
     public List<T> getPojos() {
         if (BuildConfig.DEBUG)

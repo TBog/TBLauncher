@@ -90,5 +90,6 @@ public interface IProvider<T extends EntryItem> {
      *
      * @return list of all entries
      */
+    @Nullable
     List<T> getPojos();
 }

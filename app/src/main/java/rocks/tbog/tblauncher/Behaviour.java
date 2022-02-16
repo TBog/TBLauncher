@@ -42,11 +42,14 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
 import rocks.tbog.tblauncher.customicon.IconSelectDialog;
+import rocks.tbog.tblauncher.dataprovider.IProvider;
 import rocks.tbog.tblauncher.dataprovider.TagsProvider;
 import rocks.tbog.tblauncher.drawable.LoadingDrawable;
 import rocks.tbog.tblauncher.entry.ActionEntry;
@@ -54,6 +57,7 @@ import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.entry.DialContactEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.EntryWithTags;
+import rocks.tbog.tblauncher.entry.FilterEntry;
 import rocks.tbog.tblauncher.entry.SearchEntry;
 import rocks.tbog.tblauncher.entry.ShortcutEntry;
 import rocks.tbog.tblauncher.entry.StaticEntry;
@@ -844,8 +848,44 @@ public class Behaviour implements ISearchActivity {
         updateClearButton();
     }
 
+    public boolean showProviderEntries(@Nullable IProvider<?> provider) {
+        return showProviderEntries(provider, null);
+    }
+
+    public boolean showProviderEntries(@Nullable IProvider<?> provider, @Nullable java.util.Comparator<? super EntryItem> comparator) {
+        if (TBApplication.state().getDesktop() != LauncherState.Desktop.SEARCH) {
+            // TODO: switchToDesktop might show the result list, we may need to prevent this as an optimization
+            switchToDesktop(LauncherState.Desktop.SEARCH);
+            clearAdapter();
+        }
+
+        List<? extends EntryItem> entries = provider != null ? provider.getPojos() : null;
+        if (entries != null && entries.size() > 0) {
+//            // copy list in order to change it
+//            entries = new ArrayList<>(entries);
+//            // remove actions and filters from the result list
+//            for (Iterator<? extends EntryItem> iterator = entries.iterator(); iterator.hasNext(); ) {
+//                EntryItem entry = iterator.next();
+//                if (entry instanceof FilterEntry)
+//                    iterator.remove();
+//            }
+
+            if (comparator != null) {
+                // copy list in order to change it
+                entries = new ArrayList<>(entries);
+                //TODO: do we need this on another thread?
+                Collections.sort(entries, comparator);
+            }
+
+            updateAdapter(entries, false);
+            return true;
+        }
+
+        return false;
+    }
+
     @Override
-    public void updateAdapter(List<? extends EntryItem> results, boolean isRefresh) {
+    public void updateAdapter(@NonNull List<? extends EntryItem> results, boolean isRefresh) {
         Log.d(TAG, "updateAdapter " + results.size() + " result(s); isRefresh=" + isRefresh);
 
         if (!isFragmentDialogVisible()) {
@@ -865,7 +905,7 @@ public class Behaviour implements ISearchActivity {
     }
 
     @Override
-    public void removeResult(EntryItem result) {
+    public void removeResult(@NonNull EntryItem result) {
         // Do not reset scroll, we want the remaining items to still be in view
         mResultAdapter.removeResult(result);
     }

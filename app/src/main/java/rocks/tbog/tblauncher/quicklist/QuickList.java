@@ -22,9 +22,9 @@ import androidx.preference.PreferenceManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 
+import rocks.tbog.tblauncher.Behaviour;
 import rocks.tbog.tblauncher.CustomizeUI;
 import rocks.tbog.tblauncher.LauncherState;
 import rocks.tbog.tblauncher.R;
@@ -280,7 +280,7 @@ public class QuickList {
 
     public void toggleProvider(View v, IProvider<?> provider, @Nullable java.util.Comparator<? super EntryItem> comparator) {
         Context ctx = v.getContext();
-        TBApplication app = TBApplication.getApplication(ctx);
+        Behaviour behaviour = TBApplication.behaviour(ctx);
         final String actionId;
         {
             Object tag_actionId = v.getTag(R.id.tag_actionId);
@@ -291,44 +291,24 @@ public class QuickList {
         if (bFilterOn) {
             animToggleOff();
             bFilterOn = false;
-            app.behaviour().filterResults(null);
+            behaviour.filterResults(null);
         }
 
-        // show action provider content
-        {
-            // if the last action is not the current action, toggle on this action
-            if (!bActionOn || !isLastSelection(actionId)) {
-                List<? extends EntryItem> list;
-                list = provider != null ? provider.getPojos() : null;
-                if (list != null) {
-                    // copy list in order to change it
-                    list = new ArrayList<>(list);
-
-                    // remove actions and filters from the result list
-                    for (Iterator<? extends EntryItem> iterator = list.iterator(); iterator.hasNext(); ) {
-                        EntryItem entry = iterator.next();
-                        if (entry instanceof FilterEntry)
-                            iterator.remove();
-                    }
-
-                    // sort if we have a comparator
-                    if (comparator != null) {
-                        //TODO: do we need this on another thread?
-                        Collections.sort(list, comparator);
-                    }
-
-                    // show result list
-                    app.behaviour().clearSearchText();
-                    app.behaviour().updateAdapter(list, false);
-
-                    // update toggle information
-                    mLastSelection = actionId;
-                    bActionOn = true;
-                }
+        // if the last action is not the current action, toggle on this action
+        if (!bActionOn || !isLastSelection(actionId)) {
+            behaviour.clearSearchText();
+            // show provider content or toggle off if nothing to show
+            if (behaviour.showProviderEntries(provider, comparator)) {
+                // update toggle information
+                mLastSelection = actionId;
+                bActionOn = true;
             } else {
                 // to toggle off the action, set bActionOn to false
-                app.behaviour().clearSearch();
+                behaviour.clearSearch();
             }
+        } else {
+            // to toggle off the action, set bActionOn to false
+            behaviour.clearSearch();
         }
     }
 
@@ -347,6 +327,12 @@ public class QuickList {
                 app.behaviour().clearAdapter();
                 bFilterOn = false;
             } else {
+                if (app.behaviour().showProviderEntries(provider)) {
+                    mLastSelection = actionId;
+                    bFilterOn = true;
+                } else {
+                    bFilterOn = false;
+                }
                 List<? extends EntryItem> list;
                 list = provider != null ? provider.getPojos() : null;
                 if (list != null) {

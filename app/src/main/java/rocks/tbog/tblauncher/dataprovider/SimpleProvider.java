@@ -54,6 +54,7 @@ public abstract class SimpleProvider<T extends EntryItem> implements IProvider<T
         return null;
     }
 
+    @Nullable
     @Override
     public List<T> getPojos() {
         return null;

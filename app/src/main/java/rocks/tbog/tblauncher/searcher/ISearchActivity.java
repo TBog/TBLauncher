@@ -27,12 +27,12 @@ public interface ISearchActivity {
     /**
      * Called when searcher found results
      */
-    void updateAdapter(List<? extends EntryItem> results, boolean isRefresh);
+    void updateAdapter(@NonNull List<? extends EntryItem> results, boolean isRefresh);
 
     /**
      * Called when user removed/hidden app
      */
-    void removeResult(EntryItem result);
+    void removeResult(@NonNull EntryItem result);
 
     /**
      * Show only results matching filter text

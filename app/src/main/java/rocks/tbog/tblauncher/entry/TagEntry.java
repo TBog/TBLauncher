@@ -48,8 +48,9 @@ public class TagEntry extends StaticEntry {
 
     @Override
     public void doLaunch(@NonNull View v, int flags) {
+        if (TBApplication.activityInvalid(v))
+            return;
         Context ctx = v.getContext();
-
         TBApplication.quickList(ctx).toggleSearch(v, getName(), TagSearcher.class);
     }
 
@@ -77,8 +78,8 @@ public class TagEntry extends StaticEntry {
             // update providers and refresh views
             TagsManager.afterChangesMade(ctx);
         })
-                .setTitle(R.string.title_rename_tag)
-                .setHint(R.string.hint_rename_tag)
-                .show();
+            .setTitle(R.string.title_rename_tag)
+            .setHint(R.string.hint_rename_tag)
+            .show();
     }
 }

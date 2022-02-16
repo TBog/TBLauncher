@@ -3,6 +3,7 @@ package rocks.tbog.tblauncher.dataprovider;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 
 import java.util.Collection;
@@ -83,6 +84,7 @@ public class AppCacheProvider implements IProvider<AppEntry> {
         return null;
     }
 
+    @Nullable
     @Override
     public List<AppEntry> getPojos() {
         return null;
