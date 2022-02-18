@@ -158,7 +158,8 @@ public class TBApplication extends Application {
         return !activityValid(ctx);
     }
 
-    public static boolean activityValid(@Nullable Context ctx) {
+    public static boolean activityValid(@Nullable Context context) {
+        Context ctx = context;
         while (ctx instanceof ContextWrapper) {
             if (ctx instanceof Activity) {
                 Activity act = (Activity) ctx;

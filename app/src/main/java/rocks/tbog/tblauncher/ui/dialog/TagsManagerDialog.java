@@ -10,7 +10,10 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import rocks.tbog.tblauncher.R;
+import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.TagsManager;
+import rocks.tbog.tblauncher.entry.EntryItem;
+import rocks.tbog.tblauncher.searcher.TagSearcher;
 import rocks.tbog.tblauncher.ui.DialogFragment;
 
 public class TagsManagerDialog extends DialogFragment<Void> {
@@ -37,7 +40,16 @@ public class TagsManagerDialog extends DialogFragment<Void> {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        mManager.bindView(view);
+        mManager.bindView(view, (v, info) -> {
+            if (info.staticEntry != null) {
+                info.staticEntry.doLaunch(v, EntryItem.LAUNCHED_FROM_GESTURE);
+            } else {
+                Context ctx = v.getContext();
+                TBApplication.quickList(ctx).toggleSearch(v, info.tagName, TagSearcher.class);
+            }
+            // dismiss the dialog or else the result list will be covered
+            dismiss();
+        });
 
         setOnPositiveClickListener((dialog, button) -> {
             mManager.applyChanges(requireContext());

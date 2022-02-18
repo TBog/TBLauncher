@@ -14,6 +14,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.content.res.AppCompatResources;
 
 import java.util.ArrayList;
@@ -48,6 +49,10 @@ public class TagsManager {
     private final ArrayList<TagInfo> mTagList = new ArrayList<>();
     private ListView mListView;
     private TagsAdapter mAdapter;
+
+    public interface OnItemClickListener {
+        void onItemClickListener(@NonNull View view, @NonNull TagInfo tagInfo);
+    }
 
     public void applyChanges(@NonNull Context context) {
         TagsHandler tagsHandler = TBApplication.tagsHandler(context);
@@ -113,9 +118,18 @@ public class TagsManager {
         DataHandler.EXECUTOR_PROVIDERS.execute(afterProviders);
     }
 
-    public void bindView(@NonNull View view) {
+    public void bindView(@NonNull View view, @Nullable OnItemClickListener listener) {
         final Context context = view.getContext();
         mListView = view.findViewById(android.R.id.list);
+
+        if (listener != null) {
+            mListView.setOnItemClickListener((parent, v, pos, id) -> {
+                Object objItem = parent.getAdapter().getItem(pos);
+                if (objItem instanceof TagInfo) {
+                    listener.onItemClickListener(v, (TagInfo) objItem);
+                }
+            });
+        }
 
         // prepare the grid with all the tags
         mAdapter = new TagsAdapter(mTagList);
@@ -152,8 +166,7 @@ public class TagsManager {
             for (String tagName : validTags) {
                 TagEntry tagEntry = tagsProvider != null ? tagsProvider.getTagEntry(tagName) : null;
                 TagInfo tagInfo = tagEntry != null ? new TagInfo(tagEntry) : new TagInfo(tagName);
-                tagInfo.name = tagName;
-                tagInfo.entryCount = tagsHandler.getValidEntryIds(tagName).size();
+                tagInfo.setInfo(tagName, tagsHandler.getValidEntryIds(tagName).size());
                 tags.add(tagInfo);
             }
             Collections.sort(tags, (lhs, rhs) -> lhs.tagName.compareTo(rhs.tagName));
@@ -161,8 +174,7 @@ public class TagsManager {
             EntryItem untaggedEntry = TBApplication.dataHandler(context).getPojo(ActionEntry.SCHEME + "show/untagged");
             if (untaggedEntry instanceof ActionEntry) {
                 TagInfo tagInfo = new TagInfo((ActionEntry) untaggedEntry);
-                tagInfo.name = untaggedEntry.getName();
-                tagInfo.entryCount = -1;
+                tagInfo.setInfo(untaggedEntry.getName(), -1);
                 tags.add(0, tagInfo);
             }
 
@@ -380,16 +392,16 @@ public class TagsManager {
         }
     }
 
-    static class TagInfo {
-        final StaticEntry staticEntry;
-        final String tagName;
-        String name;
-        Drawable icon = null;
+    public static class TagInfo {
+        public final StaticEntry staticEntry;
+        public final String tagName;
+        private String name;
+        private Drawable icon = null;
 
-        int entryCount;
-        Action action = Action.NONE;
+        private int entryCount;
+        private Action action = Action.NONE;
 
-        enum Action {NONE, DELETE, RENAME}
+        public enum Action {NONE, DELETE, RENAME}
 
         public TagInfo(String name) {
             staticEntry = null;
@@ -399,6 +411,11 @@ public class TagsManager {
         public TagInfo(StaticEntry entry) {
             staticEntry = entry;
             tagName = entry.getName();
+        }
+
+        public void setInfo(String name, int count) {
+            this.name = name;
+            this.entryCount = count;
         }
 
         @Override
