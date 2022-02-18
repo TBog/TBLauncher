@@ -56,6 +56,7 @@ public class TagsManager {
         boolean changesMade = false;
         for (TagInfo tagInfo : mTagList) {
             if (tagInfo.staticEntry instanceof ActionEntry) {
+                // can't delete actions (it's the show untagged action)
                 if (tagInfo.action == TagInfo.Action.RENAME) {
                     TBApplication.dataHandler(context).renameStaticEntry(tagInfo.staticEntry, tagInfo.name);
                     changesMade = true;
@@ -67,6 +68,9 @@ public class TagsManager {
                             changesMade = true;
                         break;
                     case DELETE:
+                        if (tagInfo.staticEntry != null)
+                            iconsHandler.restoreDefaultIcon(tagInfo.staticEntry);
+                        tagInfo.icon = null;
                         if (tagsHandler.removeTag(tagInfo.tagName))
                             changesMade = true;
                         break;
