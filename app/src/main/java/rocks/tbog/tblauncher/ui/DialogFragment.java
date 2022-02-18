@@ -70,6 +70,24 @@ public abstract class DialogFragment<Output> extends androidx.fragment.app.Dialo
         mOnNeutralClickListener = listener;
     }
 
+    public DialogFragment<Output> putArgString(@Nullable String key, @Nullable String value) {
+        Bundle args = getArguments();
+        if (args == null)
+            args = new Bundle();
+        args.putString(key, value);
+        setArguments(args);
+        return this;
+    }
+
+    public DialogFragment<Output> putArgLong(@Nullable String key, long value) {
+        Bundle args = getArguments();
+        if (args == null)
+            args = new Bundle();
+        args.putLong(key, value);
+        setArguments(args);
+        return this;
+    }
+
     @Override
     public void onDismiss(@NonNull DialogInterface dialog) {
         if (mOnDismissListener != null)

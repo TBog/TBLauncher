@@ -35,7 +35,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.ActionBar;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.fragment.app.FragmentActivity;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -43,7 +42,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -57,7 +55,6 @@ import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.entry.DialContactEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.EntryWithTags;
-import rocks.tbog.tblauncher.entry.FilterEntry;
 import rocks.tbog.tblauncher.entry.SearchEntry;
 import rocks.tbog.tblauncher.entry.ShortcutEntry;
 import rocks.tbog.tblauncher.entry.StaticEntry;
@@ -1173,26 +1170,30 @@ public class Behaviour implements ISearchActivity {
         return closeKeyboard;
     }
 
-    public void launchCustomIconDialog(AppEntry appEntry) {
+    @NonNull
+    public static IconSelectDialog getCustomIconDialog(@NonNull Context ctx, boolean hideResultList) {
         IconSelectDialog dialog = new IconSelectDialog();
-        openFragmentDialog(dialog, DIALOG_CUSTOM_ICON);
-
-        // If mResultLayout is visible
-//        boolean bResultListVisible = TBApplication.state().isResultListVisible();
-//        if (bResultListVisible)
-//            mResultLayout.setVisibility(View.INVISIBLE);
-
-        // set args
-        {
-            Bundle args = new Bundle();
-            args.putString("componentName", appEntry.getUserComponentName());
-            args.putLong("customIcon", appEntry.getCustomIcon());
-            args.putString("entryName", appEntry.getName());
-            dialog.setArguments(args);
+        //openFragmentDialog(dialog, DIALOG_CUSTOM_ICON);
+        if (hideResultList) {
+            // If results are visible
+            if (TBApplication.state().isResultListVisible()) {
+                final Behaviour behaviour = TBApplication.behaviour(ctx);
+                behaviour.mResultLayout.setVisibility(View.INVISIBLE);
+                // OnDismiss: We restore mResultLayout visibility
+                dialog.setOnDismissListener(dlg -> behaviour.mResultLayout.setVisibility(View.VISIBLE));
+            }
         }
-        // OnDismiss: We restore mResultLayout visibility
-//        if (bResultListVisible)
-//            dialog.setOnDismissListener(dlg -> mResultLayout.setVisibility(View.VISIBLE));
+
+        //dialog.show(mTBLauncherActivity.getSupportFragmentManager(), DIALOG_CUSTOM_ICON);
+        return dialog;
+    }
+
+    public void launchCustomIconDialog(AppEntry appEntry) {
+        IconSelectDialog dialog = getCustomIconDialog(getContext(), false);
+        dialog
+            .putArgString("componentName", appEntry.getUserComponentName())
+            .putArgLong("customIcon", appEntry.getCustomIcon())
+            .putArgString("entryName", appEntry.getName());
 
         dialog.setOnConfirmListener(drawable -> {
             TBApplication app = TBApplication.getApplication(getContext());
@@ -1204,29 +1205,15 @@ public class Behaviour implements ISearchActivity {
             refreshSearchRecord(appEntry);
             mTBLauncherActivity.queueDockReload();
         });
-        dialog.show(mTBLauncherActivity.getSupportFragmentManager(), DIALOG_CUSTOM_ICON);
+        showDialog(dialog, DIALOG_CUSTOM_ICON);
     }
 
     public void launchCustomIconDialog(ShortcutEntry shortcutEntry) {
-        IconSelectDialog dialog = new IconSelectDialog();
-        openFragmentDialog(dialog, DIALOG_CUSTOM_ICON);
-
-        // If mResultLayout is visible
-        boolean bResultListVisible = TBApplication.state().isResultListVisible();
-        if (bResultListVisible) {
-            mResultLayout.setVisibility(View.INVISIBLE);
-            // OnDismiss: We restore mResultLayout visibility
-            dialog.setOnDismissListener(dlg -> mResultLayout.setVisibility(View.VISIBLE));
-        }
-
-        // set args
-        {
-            Bundle args = new Bundle();
-            args.putString("packageName", shortcutEntry.packageName);
-            args.putString("shortcutData", shortcutEntry.shortcutData);
-            args.putString("shortcutId", shortcutEntry.id);
-            dialog.setArguments(args);
-        }
+        IconSelectDialog dialog = getCustomIconDialog(getContext(), true);
+        dialog
+            .putArgString("packageName", shortcutEntry.packageName)
+            .putArgString("shortcutData", shortcutEntry.shortcutData)
+            .putArgString("shortcutId", shortcutEntry.id);
 
         dialog.setOnConfirmListener(drawable -> {
             final TBApplication app = TBApplication.getApplication(mTBLauncherActivity);
@@ -1238,7 +1225,7 @@ public class Behaviour implements ISearchActivity {
             refreshSearchRecord(shortcutEntry);
             mTBLauncherActivity.queueDockReload();
         });
-        dialog.show(mTBLauncherActivity.getSupportFragmentManager(), DIALOG_CUSTOM_ICON);
+        showDialog(dialog, DIALOG_CUSTOM_ICON);
     }
 
     public void launchCustomIconDialog(@NonNull StaticEntry staticEntry) {
@@ -1246,23 +1233,8 @@ public class Behaviour implements ISearchActivity {
     }
 
     public void launchCustomIconDialog(@NonNull StaticEntry staticEntry, @Nullable Runnable afterConfirmation) {
-        IconSelectDialog dialog = new IconSelectDialog();
-        openFragmentDialog(dialog, DIALOG_CUSTOM_ICON);
-
-        // If mResultLayout is visible
-        boolean bResultListVisible = TBApplication.state().isResultListVisible();
-        if (bResultListVisible) {
-            mResultLayout.setVisibility(View.INVISIBLE);
-            // OnDismiss: We restore mResultLayout visibility
-            dialog.setOnDismissListener(dlg -> mResultLayout.setVisibility(View.VISIBLE));
-        }
-
-        // set args
-        {
-            Bundle args = new Bundle();
-            args.putString("entryId", staticEntry.id);
-            dialog.setArguments(args);
-        }
+        IconSelectDialog dialog = getCustomIconDialog(getContext(), true);
+        dialog.putArgString("entryId", staticEntry.id);
 
         dialog.setOnConfirmListener(drawable -> {
             final TBApplication app = TBApplication.getApplication(mTBLauncherActivity);
@@ -1276,28 +1248,14 @@ public class Behaviour implements ISearchActivity {
             if (afterConfirmation != null)
                 afterConfirmation.run();
         });
-        dialog.show(mTBLauncherActivity.getSupportFragmentManager(), DIALOG_CUSTOM_ICON);
+        showDialog(dialog, DIALOG_CUSTOM_ICON);
     }
 
     public void launchCustomIconDialog(@NonNull SearchEntry searchEntry, @Nullable Runnable afterConfirmation) {
-        IconSelectDialog dialog = new IconSelectDialog();
-        openFragmentDialog(dialog, DIALOG_CUSTOM_ICON);
-
-        // If mResultLayout is visible
-        boolean bResultListVisible = TBApplication.state().isResultListVisible();
-        if (bResultListVisible) {
-            mResultLayout.setVisibility(View.INVISIBLE);
-            // OnDismiss: We restore mResultLayout visibility
-            dialog.setOnDismissListener(dlg -> mResultLayout.setVisibility(View.VISIBLE));
-        }
-
-        // set args
-        {
-            Bundle args = new Bundle();
-            args.putString("searchEntryId", searchEntry.id);
-            args.putString("searchName", searchEntry.getName());
-            dialog.setArguments(args);
-        }
+        IconSelectDialog dialog = getCustomIconDialog(getContext(), true);
+        dialog
+            .putArgString("searchEntryId", searchEntry.id)
+            .putArgString("searchName", searchEntry.getName());
 
         dialog.setOnConfirmListener(drawable -> {
             final TBApplication app = TBApplication.getApplication(mTBLauncherActivity);
@@ -1311,33 +1269,19 @@ public class Behaviour implements ISearchActivity {
             if (afterConfirmation != null)
                 afterConfirmation.run();
         });
-        dialog.show(mTBLauncherActivity.getSupportFragmentManager(), DIALOG_CUSTOM_ICON);
+        showDialog(dialog, DIALOG_CUSTOM_ICON);
     }
 
     /**
      * Change the icon for the "Dial" contact
      *
-     * @param dialEntry
+     * @param dialEntry entry that currently holds the "Dial" icon
      */
     public void launchCustomIconDialog(@NonNull DialContactEntry dialEntry) {
-        IconSelectDialog dialog = new IconSelectDialog();
-        openFragmentDialog(dialog, DIALOG_CUSTOM_ICON);
-
-        // If mResultLayout is visible
-        boolean bResultListVisible = TBApplication.state().isResultListVisible();
-        if (bResultListVisible) {
-            mResultLayout.setVisibility(View.INVISIBLE);
-            // OnDismiss: We restore mResultLayout visibility
-            dialog.setOnDismissListener(dlg -> mResultLayout.setVisibility(View.VISIBLE));
-        }
-
-        // set args
-        {
-            Bundle args = new Bundle();
-            args.putString("contactEntryId", dialEntry.id);
-            args.putString("contactName", dialEntry.getName());
-            dialog.setArguments(args);
-        }
+        IconSelectDialog dialog = getCustomIconDialog(getContext(), true);
+        dialog
+            .putArgString("contactEntryId", dialEntry.id)
+            .putArgString("contactName", dialEntry.getName());
 
         dialog.setOnConfirmListener(drawable -> {
             final TBApplication app = TBApplication.getApplication(getContext());
@@ -1349,7 +1293,7 @@ public class Behaviour implements ISearchActivity {
             refreshSearchRecord(dialEntry);
             mTBLauncherActivity.queueDockReload();
         });
-        dialog.show(mTBLauncherActivity.getSupportFragmentManager(), DIALOG_CUSTOM_ICON);
+        showDialog(dialog, DIALOG_CUSTOM_ICON);
     }
 
     public void launchEditTagsDialog(EntryWithTags entry) {
@@ -1394,11 +1338,12 @@ public class Behaviour implements ISearchActivity {
     public static void showDialog(Context context, DialogFragment<?> dialog, String tag) {
         if (TBApplication.activityInvalid(context))
             return;
-        TBApplication.behaviour(context).openFragmentDialog(dialog, tag);
-        Activity activity = Utilities.getActivity(context);
-        if (!(activity instanceof FragmentActivity))
-            throw new IllegalStateException("showDialog called without FragmentActivity");
-        dialog.show(((FragmentActivity) activity).getSupportFragmentManager(), tag);
+        TBApplication.behaviour(context).showDialog(dialog, tag);
+    }
+
+    private void showDialog(@NonNull DialogFragment<?> dialog, @Nullable String tag) {
+        openFragmentDialog(dialog, tag);
+        dialog.show(mTBLauncherActivity.getSupportFragmentManager(), tag);
     }
 
     private void openFragmentDialog(DialogFragment<?> dialog, @Nullable String tag) {
