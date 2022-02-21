@@ -460,6 +460,9 @@
     <string name="result_right_to_left_summary">Layout grid row from right to left</string>
     <string name="debug_provider_status">Provider status</string>
 
+    <string name="exit_tags_manager_confirm">Close Tags manager?</string>
+    <string name="exit_tags_manager_description">You will lose all changes if you close the Tags manager.\nAre you sure you want to continue?</string>
+
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>
         <item quantity="other">%d entries</item>

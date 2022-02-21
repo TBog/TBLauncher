@@ -3,7 +3,9 @@ package rocks.tbog.tblauncher.utils;
 import android.annotation.SuppressLint;
 import android.app.Dialog;
 import android.content.Context;
+import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
+import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -13,10 +15,13 @@ import android.widget.TextView;
 
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
+import androidx.annotation.StringRes;
 import androidx.appcompat.app.AlertDialog;
 
 import rocks.tbog.tblauncher.CustomizeUI;
 import rocks.tbog.tblauncher.R;
+import rocks.tbog.tblauncher.ui.DialogFragment;
+import rocks.tbog.tblauncher.ui.dialog.ConfirmDialog;
 import rocks.tbog.tblauncher.ui.dialog.EditTextDialog;
 
 public class DialogHelper {
@@ -69,6 +74,19 @@ public class DialogHelper {
             if (background != null)
                 buttonLayout.setBackground(background);
         }
+    }
+
+    public static ConfirmDialog makeConfirmDialog(@NonNull Context context, @StringRes int titleId, @StringRes int descId, DialogFragment.OnButtonClickListener<Void> onOk) {
+        Resources r = context.getResources();
+        Bundle args = new Bundle();
+        args.putCharSequence("titleText", r.getText(titleId));
+        args.putCharSequence("descriptionText", r.getText(descId));
+
+        ConfirmDialog confirmDialog = new ConfirmDialog();
+        confirmDialog.setArguments(args);
+        confirmDialog.setOnPositiveClickListener(onOk);
+
+        return confirmDialog;
     }
 
     public interface OnRename {

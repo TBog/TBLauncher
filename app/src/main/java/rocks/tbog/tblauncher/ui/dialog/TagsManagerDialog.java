@@ -9,12 +9,14 @@ import android.view.ViewGroup;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
+import rocks.tbog.tblauncher.Behaviour;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.TagsManager;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.searcher.TagSearcher;
 import rocks.tbog.tblauncher.ui.DialogFragment;
+import rocks.tbog.tblauncher.utils.DialogHelper;
 
 public class TagsManagerDialog extends DialogFragment<Void> {
 
@@ -47,19 +49,35 @@ public class TagsManagerDialog extends DialogFragment<Void> {
                 Context ctx = v.getContext();
                 TBApplication.quickList(ctx).toggleSearch(v, info.tagName, TagSearcher.class);
             }
-            // dismiss the dialog or else the result list will be covered
-            dismiss();
+            if (mManager.hasChangesMade())
+                askBeforeDismiss();
         });
+    }
 
-        setOnPositiveClickListener((dialog, button) -> {
+    @Override
+    public void onButtonClick(@NonNull Button button) {
+        if (button == Button.POSITIVE) {
             mManager.applyChanges(requireContext());
             onConfirm(null);
-        });
+        } else if (button == Button.NEGATIVE && mManager.hasChangesMade()) {
+            askBeforeDismiss();
+            return;
+        }
+        super.onButtonClick(button);
     }
 
     @Override
     public void onStart() {
         super.onStart();
         mManager.onStart();
+    }
+
+    private void askBeforeDismiss() {
+        Context ctx = requireContext();
+        DialogFragment<?> dlg = DialogHelper.makeConfirmDialog(ctx,
+            R.string.exit_tags_manager_confirm,
+            R.string.exit_tags_manager_description,
+            (dialog, btn) -> TagsManagerDialog.this.dismiss());
+        Behaviour.showDialog(ctx, dlg, "dialog_confirm");
     }
 }

@@ -54,6 +54,16 @@ public class TagsManager {
         void onItemClickListener(@NonNull View view, @NonNull TagInfo tagInfo);
     }
 
+    public boolean hasChangesMade() {
+        for (TagInfo tagInfo : mTagList) {
+            if (tagInfo.action != TagInfo.Action.NONE)
+                return true;
+            if (tagInfo.icon != null && tagInfo.staticEntry != null)
+                return true;
+        }
+        return false;
+    }
+
     public void applyChanges(@NonNull Context context) {
         TagsHandler tagsHandler = TBApplication.tagsHandler(context);
         IconsHandler iconsHandler = TBApplication.iconsHandler(context);
