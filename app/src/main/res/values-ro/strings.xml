@@ -445,4 +445,6 @@
     <string name="action_entry_to_show">Etichete de afișat</string>
     <string name="no_tags">Nu au fost găsite etichete</string>
     <string name="quick_list_animation">Animați spectacol/ascundere</string>
+    <string name="enable_dial">Căutare prin apelare</string>
+    <string name="tab_search_icon">Pictograma de căutare</string>
 </resources>
