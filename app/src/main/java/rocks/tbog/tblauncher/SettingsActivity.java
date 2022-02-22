@@ -88,26 +88,26 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     private final static String INTENT_EXTRA_BACK_STACK_TAGS = "backStackTagList";
 
     private final static ArraySet<String> PREF_THAT_REQUIRE_LAYOUT_UPDATE = new ArraySet<>(Arrays.asList(
-            "result-list-color", "result-list-alpha", "result-ripple-color", "result-list-rounded",
-            "notification-bar-color", "notification-bar-alpha", "notification-bar-gradient", "black-notification-icons",
-            "search-bar-height", "search-bar-text-size", "search-bar-rounded", "search-bar-gradient", "search-bar-at-bottom",
-            "search-bar-color", "search-bar-alpha", "search-bar-text-color", "search-bar-icon-color",
-            "search-bar-ripple-color", "search-bar-cursor-argb", "enable-suggestions-keyboard"
+        "result-list-color", "result-list-alpha", "result-ripple-color", "result-list-rounded",
+        "notification-bar-color", "notification-bar-alpha", "notification-bar-gradient", "black-notification-icons",
+        "search-bar-height", "search-bar-text-size", "search-bar-rounded", "search-bar-gradient", "search-bar-at-bottom",
+        "search-bar-color", "search-bar-alpha", "search-bar-text-color", "search-bar-icon-color",
+        "search-bar-ripple-color", "search-bar-cursor-argb", "enable-suggestions-keyboard"
     ));
     private final static ArraySet<String> PREF_LISTS_WITH_DEPENDENCY = new ArraySet<>(Arrays.asList(
-            "gesture-click",
-            "gesture-double-click",
-            "gesture-fling-down-left",
-            "gesture-fling-down-right",
-            "gesture-fling-up",
-            "gesture-fling-left",
-            "gesture-fling-right",
-            "button-launcher",
-            "button-home",
-            "dm-empty-back",
-            "dm-search-back",
-            "dm-widget-back",
-            "dm-search-open-result"
+        "gesture-click",
+        "gesture-double-click",
+        "gesture-fling-down-left",
+        "gesture-fling-down-right",
+        "gesture-fling-up",
+        "gesture-fling-left",
+        "gesture-fling-right",
+        "button-launcher",
+        "button-home",
+        "dm-empty-back",
+        "dm-search-back",
+        "dm-widget-back",
+        "dm-search-open-result"
     ));
 
     private static final int FILE_SELECT_XML_SET = 63;
@@ -417,15 +417,16 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         ResultPopupContent = ContentLoadHelper.generateResultPopupContent(context, sharedPreferences);
                     if (MimeTypeListContent == null)
                         MimeTypeListContent = generateMimeTypeListContent(context);
+
+                    for (String gesturePref : PREF_LISTS_WITH_DEPENDENCY) {
+                        updateAppToRunList(sharedPreferences, gesturePref);
+                        updateEntryToShowList(sharedPreferences, gesturePref);
+                    }
+                    TagsMenuContent.setMultiListValues(findPreference("tags-menu-list"));
+                    TagsMenuContent.setOrderedListValues(findPreference("tags-menu-order"));
+                    ResultPopupContent.setOrderedListValues(findPreference("result-popup-order"));
+                    ContentLoadHelper.setMultiListValues(findPreference("selected-contact-mime-types"), MimeTypeListContent, null);
                 }
-                for (String gesturePref : PREF_LISTS_WITH_DEPENDENCY) {
-                    updateAppToRunList(sharedPreferences, gesturePref);
-                    updateEntryToShowList(sharedPreferences, gesturePref);
-                }
-                TagsMenuContent.setMultiListValues(findPreference("tags-menu-list"));
-                TagsMenuContent.setOrderedListValues(findPreference("tags-menu-order"));
-                ResultPopupContent.setOrderedListValues(findPreference("result-popup-order"));
-                ContentLoadHelper.setMultiListValues(findPreference("selected-contact-mime-types"), MimeTypeListContent, null);
             }
 
             final ListPreference iconsPack = findPreference("icons-pack");
@@ -483,8 +484,12 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
         private void initTagsMenuList(@NonNull Context context, @NonNull SharedPreferences sharedPreferences) {
             final Runnable setTagsMenuValues = () -> {
-                TagsMenuContent.setMultiListValues(findPreference("tags-menu-list"));
-                TagsMenuContent.setOrderedListValues(findPreference("tags-menu-order"));
+                synchronized (SettingsFragment.this) {
+                    if (TagsMenuContent != null) {
+                        TagsMenuContent.setMultiListValues(findPreference("tags-menu-list"));
+                        TagsMenuContent.setOrderedListValues(findPreference("tags-menu-order"));
+                    }
+                }
             };
 
             if (TagsMenuContent == null) {
@@ -503,7 +508,10 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
         private void initResultPopupList(@NonNull Context context, @NonNull SharedPreferences sharedPreferences) {
             final Runnable setResultPopupValues = () -> {
-                ResultPopupContent.setOrderedListValues(findPreference("result-popup-order"));
+                synchronized (SettingsFragment.this) {
+                    if (ResultPopupContent != null)
+                        ResultPopupContent.setOrderedListValues(findPreference("result-popup-order"));
+                }
             };
 
             if (ResultPopupContent == null) {
@@ -523,7 +531,10 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         private void initMimeTypes(@NonNull Context context) {
             // get all supported mime types
             final Runnable setMimeTypeValues = () -> {
-                ContentLoadHelper.setMultiListValues(findPreference("selected-contact-mime-types"), MimeTypeListContent, null);
+                synchronized (SettingsFragment.this) {
+                    if (MimeTypeListContent != null)
+                        ContentLoadHelper.setMultiListValues(findPreference("selected-contact-mime-types"), MimeTypeListContent, null);
+                }
             };
 
             if (MimeTypeListContent == null) {
@@ -800,13 +811,19 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
         private void updateListPrefDependency(@NonNull String dependOnKey, @Nullable String dependOnValue, @NonNull String enableValue, @NonNull String listKey, @Nullable Pair<CharSequence[], CharSequence[]> listContent) {
             Preference prefAppToRun = findPreference(listKey);
-            if (prefAppToRun instanceof ListPreference && listContent != null) {
-                CharSequence[] entries = listContent.first;
-                CharSequence[] entryValues = listContent.second;
-                ((ListPreference) prefAppToRun).setEntries(entries);
-                ((ListPreference) prefAppToRun).setEntryValues(entryValues);
-                prefAppToRun.setVisible(enableValue.equals(dependOnValue));
-            } else if (prefAppToRun == null) {
+            if (prefAppToRun instanceof ListPreference) {
+                synchronized (SettingsFragment.this) {
+                    if (listContent != null) {
+                        CharSequence[] entries = listContent.first;
+                        CharSequence[] entryValues = listContent.second;
+                        ((ListPreference) prefAppToRun).setEntries(entries);
+                        ((ListPreference) prefAppToRun).setEntryValues(entryValues);
+                        prefAppToRun.setVisible(enableValue.equals(dependOnValue));
+                        return;
+                    }
+                }
+            }
+            if (prefAppToRun == null) {
                 // the ListPreference for selecting an app is missing. Remove the option to run an app.
                 Preference pref = findPreference(dependOnKey);
                 if (pref instanceof ListPreference) {
@@ -871,11 +888,13 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
             SettingsActivity.onSharedPreferenceChanged(activity, sharedPreferences, key);
 
-            if (TagsMenuContent != null) {
-                if ("tags-menu-list".equals(key) || "tags-menu-order".equals(key)) {
-                    TagsMenuContent.reloadOrderedValues(sharedPreferences, this, "tags-menu-order");
-                } else if ("result-popup-order".equals(key)) {
-                    ResultPopupContent.reloadOrderedValues(sharedPreferences, this, "result-popup-order");
+            synchronized (SettingsFragment.this) {
+                if (TagsMenuContent != null) {
+                    if ("tags-menu-list".equals(key) || "tags-menu-order".equals(key)) {
+                        TagsMenuContent.reloadOrderedValues(sharedPreferences, this, "tags-menu-order");
+                    } else if ("result-popup-order".equals(key)) {
+                        ResultPopupContent.reloadOrderedValues(sharedPreferences, this, "result-popup-order");
+                    }
                 }
             }
         }
@@ -884,8 +903,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     @SuppressWarnings("deprecation")
     private static void setActionBarTextColor(Activity activity, int color) {
         ActionBar actionBar = activity instanceof AppCompatActivity
-                ? ((AppCompatActivity) activity).getSupportActionBar()
-                : null;
+            ? ((AppCompatActivity) activity).getSupportActionBar()
+            : null;
         CharSequence title = actionBar != null ? actionBar.getTitle() : null;
         if (title == null)
             return;
@@ -1053,12 +1072,12 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 break;
             case "root-mode":
                 if (sharedPreferences.getBoolean("root-mode", false) &&
-                        !TBApplication.rootHandler(context).isRootAvailable()) {
+                    !TBApplication.rootHandler(context).isRootAvailable()) {
                     //show error dialog
                     new AlertDialog.Builder(context).setMessage(R.string.root_mode_error)
-                            .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                                sharedPreferences.edit().putBoolean("root-mode", false).apply();
-                            }).show();
+                        .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                            sharedPreferences.edit().putBoolean("root-mode", false).apply();
+                        }).show();
                 }
                 TBApplication.rootHandler(context).resetRootHandler(sharedPreferences);
                 break;
