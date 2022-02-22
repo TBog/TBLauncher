@@ -18,9 +18,6 @@ import androidx.core.content.withStyledAttributes
 import rocks.tbog.tblauncher.R
 import net.mm2d.color.chooser.util.*
 
-/**
- * @author [大前良介 (OHMAE Ryosuke)](mailto:ryo@mm2d.net)
- */
 internal class ColorSliderView
 @JvmOverloads constructor(
     context: Context,
@@ -90,6 +87,9 @@ internal class ColorSliderView
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
+        if (event.action == MotionEvent.ACTION_DOWN) {
+            parent.requestDisallowInterceptTouchEvent(true)
+        }
         _value = ((event.x - targetRect.left) / targetRect.width().toFloat()).coerceIn(0f, 1f)
         onValueChanged?.invoke(value, true)
         invalidate()
@@ -144,10 +144,9 @@ internal class ColorSliderView
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         setMeasuredDimension(
-            resolveSizeAndState(
+            getDefaultSize(
                 maxOf(_width + paddingLeft + paddingRight, suggestedMinimumWidth),
-                widthMeasureSpec,
-                MeasureSpec.UNSPECIFIED
+                widthMeasureSpec
             ),
             resolveSizeAndState(
                 maxOf(_height + paddingTop + paddingBottom, suggestedMinimumHeight),

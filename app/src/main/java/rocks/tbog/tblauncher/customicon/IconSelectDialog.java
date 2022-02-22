@@ -1,10 +1,15 @@
 package rocks.tbog.tblauncher.customicon;
 
+import android.app.Activity;
 import android.app.Dialog;
 import android.content.ComponentName;
 import android.content.Context;
+import android.content.Intent;
+import android.database.Cursor;
 import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.OpenableColumns;
 import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -12,16 +17,22 @@ import android.view.ViewGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.viewpager.widget.ViewPager;
 
+import com.github.dhaval2404.imagepicker.ImagePicker;
+
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import rocks.tbog.tblauncher.CustomizeUI;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.db.DBHelper;
@@ -46,6 +57,67 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
     private CustomShapePage mCustomShapePage = null;
     private TextView mPreviewLabel;
 
+    ActivityResultLauncher<Intent> imagePickerResult;
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        imagePickerResult =
+            registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                Context context = IconSelectDialog.this.requireContext();
+                int resultCode = result.getResultCode();
+                Intent data = result.getData();
+                Uri imageUri = data != null ? data.getData() : null;
+                if (resultCode == Activity.RESULT_OK && imageUri != null) {
+                    Drawable imageDrawable;
+                    try {
+                        InputStream is = context.getContentResolver().openInputStream(imageUri);
+                        imageDrawable = Drawable.createFromStream(is, imageUri.toString());
+                    } catch (Throwable ignore) {
+                        imageDrawable = null;
+                    }
+
+                    String filename = getFileName(context, imageUri);
+
+                    if (imageDrawable != null)
+                        IconSelectDialog.this.addPickedIcon(imageDrawable, filename);
+                } else if (resultCode == ImagePicker.RESULT_ERROR) {
+                    Toast.makeText(context, ImagePicker.getError(data), Toast.LENGTH_SHORT).show();
+                }
+            });
+
+    }
+
+    public static String getFileName(@NonNull Context context, @NonNull Uri uri) {
+        String result = null;
+        if (uri.getScheme().equals("content")) {
+            try (Cursor cursor = context.getContentResolver().query(uri, null, null, null, null)) {
+                if (cursor != null && cursor.moveToFirst()) {
+                    int columnIdx = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME);
+                    if (columnIdx != -1)
+                        result = cursor.getString(columnIdx);
+                }
+            }
+        }
+        if (result == null) {
+            result = uri.getPath();
+            int cut = result.lastIndexOf('/');
+            if (cut != -1) {
+                result = result.substring(cut + 1);
+            }
+        }
+        return result;
+    }
+
+    private void addPickedIcon(@NonNull Drawable pickedImage, String filename) {
+        if (!(mViewPager.getAdapter() instanceof PageAdapter))
+            return;
+        PageAdapter pageAdapter = (PageAdapter) mViewPager.getAdapter();
+        for (PageAdapter.Page page : pageAdapter.getPageIterable()) {
+            page.addPickedIcon(pickedImage, filename);
+        }
+    }
+
     @Override
     protected int layoutRes() {
         return R.layout.dialog_icon_select;
@@ -59,107 +131,24 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
         View view = super.onCreateView(inflater, container, savedInstanceState);
         if (view == null)
             return null;
-        Context context = inflater.getContext();
 
         mPreviewLabel = view.findViewById(R.id.previewLabel);
         mViewPager = view.findViewById(R.id.viewPager);
 
-        TBApplication.ui(context).setResultListPref(mPreviewLabel);
+        CustomizeUI.setResultListPref(mPreviewLabel);
 
         PageAdapter pageAdapter = new PageAdapter();
         mViewPager.setAdapter(pageAdapter);
 
         // add system icons
-        {
-            Bundle args = getArguments() != null ? getArguments() : new Bundle();
-            if (args.containsKey("componentName")) {
-                String name = args.getString("componentName", "");
-                String entryName = args.getString("entryName", "");
-                String pageName = context.getString(R.string.tab_app_icons, entryName);
+        addSystemIcons(inflater);
 
-                ComponentName cn = UserHandleCompat.unflattenComponentName(name);
-                UserHandleCompat userHandle = UserHandleCompat.fromComponentName(context, name);
-
-                mCustomShapePage = addSystemPage(inflater, mViewPager, cn, userHandle, pageName);
-            } else if (args.containsKey("entryId")) {
-                String entryId = args.getString("entryId", "");
-                EntryItem entryItem = TBApplication.dataHandler(context).getPojo(entryId);
-                if (!(entryItem instanceof StaticEntry)) {
-                    dismiss();
-                    Toast.makeText(Utilities.getActivity(context), context.getString(R.string.entry_not_found, entryId), Toast.LENGTH_LONG).show();
-                } else {
-                    StaticEntry staticEntry = (StaticEntry) entryItem;
-                    String pageName = context.getString(R.string.tab_static_icons);
-                    mCustomShapePage = addStaticEntryPage(inflater, mViewPager, staticEntry, pageName);
-                }
-            } else if (args.containsKey("shortcutId")) {
-                String packageName = args.getString("packageName", "");
-                String shortcutData = args.getString("shortcutData", "");
-                ShortcutRecord shortcutRecord = null;
-                List<ShortcutRecord> shortcutRecordList = DBHelper.getShortcutsNoIcons(context, packageName);
-                for (ShortcutRecord rec : shortcutRecordList)
-                    if (shortcutData.equals(rec.infoData)) {
-                        shortcutRecord = rec;
-                        break;
-                    }
-                if (shortcutRecord == null) {
-                    dismiss();
-                    String shortcutId = args.getString("shortcutId", "");
-                    Toast.makeText(Utilities.getActivity(context), context.getString(R.string.entry_not_found, shortcutId), Toast.LENGTH_LONG).show();
-                } else {
-                    mCustomShapePage = addShortcutPage(inflater, mViewPager, shortcutRecord, shortcutRecord.displayName);
-                }
-            } else if (args.containsKey("searchEntryId")) {
-                String entryName = args.getString("searchName", "");
-                String pageName = context.getString(R.string.tab_search_icon);
-                mCustomShapePage = addSearchEntryPage(inflater, mViewPager, entryName, pageName);
-            }
-        }
-
-        ArrayList<Pair<String, String>> iconPacks;
         // add icon packs
-        {
-            IconsHandler iconsHandler = TBApplication.iconsHandler(context);
-            Map<String, String> iconPackNames = iconsHandler.getIconPackNames();
-            iconPacks = new ArrayList<>(iconPackNames.size());
-            for (Map.Entry<String, String> packInfo : iconPackNames.entrySet())
-                iconPacks.add(new Pair<>(packInfo.getKey(), packInfo.getValue()));
-            IconPack<?> iconPack = iconsHandler.getCustomIconPack();
-            String selectedPackPackageName = iconPack != null ? iconPack.getPackPackageName() : "";
-            Collections.sort(iconPacks, (o1, o2) -> {
-                if (selectedPackPackageName.equals(o1.first))
-                    return -1;
-                if (selectedPackPackageName.equals(o2.first))
-                    return 1;
-                return o1.second.compareTo(o2.second);
-            });
-            for (Pair<String, String> packInfo : iconPacks) {
-                String packPackageName = packInfo.first;
-                String packName = packInfo.second;
-                if (selectedPackPackageName.equals(packPackageName))
-                    packName = context.getString(R.string.selected_pack, packName);
+        ArrayList<Pair<String, String>> iconPacks = addIconPacks(inflater);
 
-                // add page to ViewPager
-                addIconPackPage(inflater, mViewPager, packName, packPackageName);
-            }
-        }
         pageAdapter.notifyDataSetChanged();
 
-        pageAdapter.setupPageView(context, (adapter, v, position) -> {
-            if (adapter instanceof IconAdapter) {
-                IconData item = ((IconAdapter) adapter).getItem(position);
-                Drawable icon = item.getIcon();
-                setSelectedDrawable(icon, icon);
-            } else if (adapter instanceof CustomShapePage.ShapedIconAdapter) {
-                CustomShapePage.ShapedIconInfo item = ((CustomShapePage.ShapedIconAdapter) adapter).getItem(position);
-                setSelectedDrawable(item.getIcon(), item.getPreview());
-            }
-        }, (adapter, v, position) -> {
-            if (adapter instanceof IconAdapter) {
-                IconData item = ((IconAdapter) adapter).getItem(position);
-                getIconPackMenu(item).show(v);
-            }
-        });
+        pageAdapter.setupPageView(this);
 
         if (mCustomShapePage instanceof SystemPage) {
             ((SystemPage) mCustomShapePage).loadIconPackIcons(iconPacks);
@@ -167,6 +156,94 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
 
         return view;
     }
+
+    /**
+     * Add ViewPager pages for every icon pack
+     *
+     * @param inflater used for inflating the page view
+     * @return an array of pairs with the icon pack package name and icon pack name
+     */
+    @NonNull
+    private ArrayList<Pair<String, String>> addIconPacks(LayoutInflater inflater) {
+        Context context = inflater.getContext();
+        IconsHandler iconsHandler = TBApplication.iconsHandler(context);
+        Map<String, String> iconPackNames = iconsHandler.getIconPackNames();
+        ArrayList<Pair<String, String>> iconPacks = new ArrayList<>(iconPackNames.size());
+        for (Map.Entry<String, String> packInfo : iconPackNames.entrySet())
+            iconPacks.add(new Pair<>(packInfo.getKey(), packInfo.getValue()));
+        IconPack<?> iconPack = iconsHandler.getCustomIconPack();
+        String selectedPackPackageName = iconPack != null ? iconPack.getPackPackageName() : "";
+        Collections.sort(iconPacks, (o1, o2) -> {
+            if (selectedPackPackageName.equals(o1.first))
+                return -1;
+            if (selectedPackPackageName.equals(o2.first))
+                return 1;
+            return o1.second.compareTo(o2.second);
+        });
+        for (Pair<String, String> packInfo : iconPacks) {
+            String packPackageName = packInfo.first;
+            String packName = packInfo.second;
+            if (selectedPackPackageName.equals(packPackageName))
+                packName = context.getString(R.string.selected_pack, packName);
+
+            // add page to ViewPager
+            addIconPackPage(inflater, mViewPager, packName, packPackageName);
+        }
+        return iconPacks;
+    }
+
+    /**
+     * Add ViewPager page for system icons
+     *
+     * @param inflater used for inflating the page view
+     */
+    private void addSystemIcons(LayoutInflater inflater) {
+        Context context = inflater.getContext();
+        Bundle args = getArguments() != null ? getArguments() : new Bundle();
+        if (args.containsKey("componentName")) {
+            String name = args.getString("componentName", "");
+            String entryName = args.getString("entryName", "");
+            String pageName = context.getString(R.string.tab_app_icons, entryName);
+
+            ComponentName cn = UserHandleCompat.unflattenComponentName(name);
+            UserHandleCompat userHandle = UserHandleCompat.fromComponentName(context, name);
+
+            mCustomShapePage = addSystemPage(inflater, mViewPager, cn, userHandle, pageName);
+        } else if (args.containsKey("entryId")) {
+            String entryId = args.getString("entryId", "");
+            EntryItem entryItem = TBApplication.dataHandler(context).getPojo(entryId);
+            if (!(entryItem instanceof StaticEntry)) {
+                dismiss();
+                Toast.makeText(Utilities.getActivity(context), context.getString(R.string.entry_not_found, entryId), Toast.LENGTH_LONG).show();
+            } else {
+                StaticEntry staticEntry = (StaticEntry) entryItem;
+                String pageName = context.getString(R.string.tab_static_icons);
+                mCustomShapePage = addStaticEntryPage(inflater, mViewPager, staticEntry, pageName);
+            }
+        } else if (args.containsKey("shortcutId")) {
+            String packageName = args.getString("packageName", "");
+            String shortcutData = args.getString("shortcutData", "");
+            ShortcutRecord shortcutRecord = null;
+            List<ShortcutRecord> shortcutRecordList = DBHelper.getShortcutsNoIcons(context, packageName);
+            for (ShortcutRecord rec : shortcutRecordList)
+                if (shortcutData.equals(rec.infoData)) {
+                    shortcutRecord = rec;
+                    break;
+                }
+            if (shortcutRecord == null) {
+                dismiss();
+                String shortcutId = args.getString("shortcutId", "");
+                Toast.makeText(Utilities.getActivity(context), context.getString(R.string.entry_not_found, shortcutId), Toast.LENGTH_LONG).show();
+            } else {
+                mCustomShapePage = addShortcutPage(inflater, mViewPager, shortcutRecord, shortcutRecord.displayName);
+            }
+        } else if (args.containsKey("searchEntryId")) {
+            String entryName = args.getString("searchName", "");
+            String pageName = context.getString(R.string.tab_search_icon);
+            mCustomShapePage = addSearchEntryPage(inflater, mViewPager, entryName, pageName);
+        }
+    }
+
 
     @Override
     public void onStart() {
@@ -190,7 +267,7 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
         view.setLayoutParams(params);
     }
 
-    private void setSelectedDrawable(Drawable selected, Drawable preview) {
+    public void setSelectedDrawable(Drawable selected, Drawable preview) {
         Context context = mViewPager.getContext();
         mSelectedDrawable = selected;
         @StringRes
@@ -241,7 +318,7 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
         return page;
     }
 
-    private ListPopup getIconPackMenu(IconData iconData) {
+    public ListPopup getIconPackMenu(IconData iconData) {
         final Context ctx = requireContext();
         LinearAdapter adapter = new LinearAdapter();
 
@@ -331,7 +408,7 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
             Drawable icon = drawable.mutate();
             icon.setBounds(0, 0, size, size);
             ((TextView) view).setCompoundDrawables(null, null, icon, null);
-            int radius = (int) (.5f + .5f * TBApplication.ui(ctx).getResultListRadius());
+            int radius = (int) (.5f + .5f * UISizes.getResultListRadius(ctx));
             int paddingTop = view.getPaddingTop();
             int paddingBottom = view.getPaddingBottom();
             view.setPadding(radius, paddingTop, radius, paddingBottom);

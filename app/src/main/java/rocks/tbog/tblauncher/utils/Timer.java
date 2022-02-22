@@ -9,6 +9,8 @@ public class Timer {
     protected long mStop;
     protected TimeUnit mUnit;
 
+    public static final StopTimeComparator STOP_TIME_COMPARATOR = new StopTimeComparator();
+
     public Timer() {
         this(0, TimeUnit.MILLISECONDS);
     }
@@ -71,5 +73,18 @@ public class Timer {
         if (ms > 0)
             return s + "sec " + ms + "ms";
         return s + "sec";
+    }
+
+    public static class StopTimeComparator implements java.util.Comparator<Timer> {
+        @Override
+        public int compare(Timer o1, Timer o2) {
+            if (o1 == o2)
+                return 0;
+            if (o1 == null)
+                return -1;
+            if (o2 == null)
+                return 1;
+            return (int) (o1.mStop - o2.mStop);
+        }
     }
 }

@@ -31,4 +31,10 @@ public class DebugInfo {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         return prefs.getBoolean("debug-favorites", false);
     }
+
+    public static boolean providerStatus(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getBoolean("debug-provider-status", false);
+    }
+
 }

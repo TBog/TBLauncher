@@ -61,7 +61,6 @@ import rocks.tbog.tblauncher.entry.TagEntry;
 import rocks.tbog.tblauncher.handler.IconsHandler;
 import rocks.tbog.tblauncher.preference.BaseListPreferenceDialog;
 import rocks.tbog.tblauncher.preference.BaseMultiSelectListPreferenceDialog;
-import rocks.tbog.tblauncher.preference.ChooseColorDialog;
 import rocks.tbog.tblauncher.preference.ConfirmDialog;
 import rocks.tbog.tblauncher.preference.ContentLoadHelper;
 import rocks.tbog.tblauncher.preference.CustomDialogPreference;
@@ -69,6 +68,7 @@ import rocks.tbog.tblauncher.preference.EditSearchEnginesPreferenceDialog;
 import rocks.tbog.tblauncher.preference.EditSearchHintPreferenceDialog;
 import rocks.tbog.tblauncher.preference.IconListPreferenceDialog;
 import rocks.tbog.tblauncher.preference.OrderListPreferenceDialog;
+import rocks.tbog.tblauncher.preference.PreferenceColorDialog;
 import rocks.tbog.tblauncher.preference.QuickListPreferenceDialog;
 import rocks.tbog.tblauncher.preference.SliderDialog;
 import rocks.tbog.tblauncher.preference.TagOrderListPreferenceDialog;
@@ -88,26 +88,26 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     private final static String INTENT_EXTRA_BACK_STACK_TAGS = "backStackTagList";
 
     private final static ArraySet<String> PREF_THAT_REQUIRE_LAYOUT_UPDATE = new ArraySet<>(Arrays.asList(
-            "result-list-color", "result-list-alpha", "result-ripple-color", "result-list-rounded",
-            "notification-bar-color", "notification-bar-alpha", "notification-bar-gradient", "black-notification-icons",
-            "search-bar-size", "search-bar-rounded", "search-bar-gradient", "search-bar-at-bottom",
-            "search-bar-color", "search-bar-alpha", "search-bar-text-color", "search-bar-icon-color",
-            "search-bar-ripple-color", "search-bar-cursor-argb", "enable-suggestions-keyboard"
+        "result-list-color", "result-list-alpha", "result-ripple-color", "result-list-rounded",
+        "notification-bar-color", "notification-bar-alpha", "notification-bar-gradient", "black-notification-icons",
+        "search-bar-height", "search-bar-text-size", "search-bar-rounded", "search-bar-gradient", "search-bar-at-bottom",
+        "search-bar-color", "search-bar-alpha", "search-bar-text-color", "search-bar-icon-color",
+        "search-bar-ripple-color", "search-bar-cursor-argb", "enable-suggestions-keyboard"
     ));
     private final static ArraySet<String> PREF_LISTS_WITH_DEPENDENCY = new ArraySet<>(Arrays.asList(
-            "gesture-click",
-            "gesture-double-click",
-            "gesture-fling-down-left",
-            "gesture-fling-down-right",
-            "gesture-fling-up",
-            "gesture-fling-left",
-            "gesture-fling-right",
-            "button-launcher",
-            "button-home",
-            "dm-empty-back",
-            "dm-search-back",
-            "dm-widget-back",
-            "dm-search-open-result"
+        "gesture-click",
+        "gesture-double-click",
+        "gesture-fling-down-left",
+        "gesture-fling-down-right",
+        "gesture-fling-up",
+        "gesture-fling-left",
+        "gesture-fling-right",
+        "button-launcher",
+        "button-home",
+        "dm-empty-back",
+        "dm-search-back",
+        "dm-widget-back",
+        "dm-search-open-result"
     ));
 
     private static final int FILE_SELECT_XML_SET = 63;
@@ -417,15 +417,16 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         ResultPopupContent = ContentLoadHelper.generateResultPopupContent(context, sharedPreferences);
                     if (MimeTypeListContent == null)
                         MimeTypeListContent = generateMimeTypeListContent(context);
+
+                    for (String gesturePref : PREF_LISTS_WITH_DEPENDENCY) {
+                        updateAppToRunList(sharedPreferences, gesturePref);
+                        updateEntryToShowList(sharedPreferences, gesturePref);
+                    }
+                    TagsMenuContent.setMultiListValues(findPreference("tags-menu-list"));
+                    TagsMenuContent.setOrderedListValues(findPreference("tags-menu-order"));
+                    ResultPopupContent.setOrderedListValues(findPreference("result-popup-order"));
+                    ContentLoadHelper.setMultiListValues(findPreference("selected-contact-mime-types"), MimeTypeListContent, null);
                 }
-                for (String gesturePref : PREF_LISTS_WITH_DEPENDENCY) {
-                    updateAppToRunList(sharedPreferences, gesturePref);
-                    updateEntryToShowList(sharedPreferences, gesturePref);
-                }
-                TagsMenuContent.setMultiListValues(findPreference("tags-menu-list"));
-                TagsMenuContent.setOrderedListValues(findPreference("tags-menu-order"));
-                ResultPopupContent.setOrderedListValues(findPreference("result-popup-order"));
-                ContentLoadHelper.setMultiListValues(findPreference("selected-contact-mime-types"), MimeTypeListContent, null);
             }
 
             final ListPreference iconsPack = findPreference("icons-pack");
@@ -483,8 +484,12 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
         private void initTagsMenuList(@NonNull Context context, @NonNull SharedPreferences sharedPreferences) {
             final Runnable setTagsMenuValues = () -> {
-                TagsMenuContent.setMultiListValues(findPreference("tags-menu-list"));
-                TagsMenuContent.setOrderedListValues(findPreference("tags-menu-order"));
+                synchronized (SettingsFragment.this) {
+                    if (TagsMenuContent != null) {
+                        TagsMenuContent.setMultiListValues(findPreference("tags-menu-list"));
+                        TagsMenuContent.setOrderedListValues(findPreference("tags-menu-order"));
+                    }
+                }
             };
 
             if (TagsMenuContent == null) {
@@ -503,7 +508,10 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
         private void initResultPopupList(@NonNull Context context, @NonNull SharedPreferences sharedPreferences) {
             final Runnable setResultPopupValues = () -> {
-                ResultPopupContent.setOrderedListValues(findPreference("result-popup-order"));
+                synchronized (SettingsFragment.this) {
+                    if (ResultPopupContent != null)
+                        ResultPopupContent.setOrderedListValues(findPreference("result-popup-order"));
+                }
             };
 
             if (ResultPopupContent == null) {
@@ -523,7 +531,10 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         private void initMimeTypes(@NonNull Context context) {
             // get all supported mime types
             final Runnable setMimeTypeValues = () -> {
-                ContentLoadHelper.setMultiListValues(findPreference("selected-contact-mime-types"), MimeTypeListContent, null);
+                synchronized (SettingsFragment.this) {
+                    if (MimeTypeListContent != null)
+                        ContentLoadHelper.setMultiListValues(findPreference("selected-contact-mime-types"), MimeTypeListContent, null);
+                }
             };
 
             if (MimeTypeListContent == null) {
@@ -644,14 +655,15 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "popup-ripple-color":
                     case "popup-text-color":
                     case "popup-title-color":
-                        dialogFragment = ChooseColorDialog.newInstance(key);
+                        dialogFragment = PreferenceColorDialog.newInstance(key);
                         break;
                     case "notification-bar-alpha":
                     case "search-bar-alpha":
                     case "result-list-alpha":
-                    case "search-bar-size":
+                    case "search-bar-height":
+                    case "search-bar-text-size":
                     case "quick-list-alpha":
-                    case "quick-list-size":
+                    case "quick-list-height":
                     case "result-text-size":
                     case "result-text2-size":
                     case "result-icon-size":
@@ -668,6 +680,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "icon-brightness":
                     case "icon-saturation":
                     case "popup-corner-radius":
+                    case "quick-list-radius":
                         dialogFragment = SliderDialog.newInstance(key);
                         break;
                     case "generate-theme-simple":
@@ -702,7 +715,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         dialogFragment = EditSearchHintPreferenceDialog.newInstance(key);
                         break;
                     default:
-                        throw new RuntimeException("CustomDialogPreference \"" + key + "\" has no dialog defined");
+                        throw new IllegalArgumentException("CustomDialogPreference \"" + key + "\" has no dialog defined");
                 }
             } else if (preference instanceof ListPreference) {
                 String key = preference.getKey();
@@ -798,13 +811,19 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
         private void updateListPrefDependency(@NonNull String dependOnKey, @Nullable String dependOnValue, @NonNull String enableValue, @NonNull String listKey, @Nullable Pair<CharSequence[], CharSequence[]> listContent) {
             Preference prefAppToRun = findPreference(listKey);
-            if (prefAppToRun instanceof ListPreference && listContent != null) {
-                CharSequence[] entries = listContent.first;
-                CharSequence[] entryValues = listContent.second;
-                ((ListPreference) prefAppToRun).setEntries(entries);
-                ((ListPreference) prefAppToRun).setEntryValues(entryValues);
-                prefAppToRun.setVisible(enableValue.equals(dependOnValue));
-            } else if (prefAppToRun == null) {
+            if (prefAppToRun instanceof ListPreference) {
+                synchronized (SettingsFragment.this) {
+                    if (listContent != null) {
+                        CharSequence[] entries = listContent.first;
+                        CharSequence[] entryValues = listContent.second;
+                        ((ListPreference) prefAppToRun).setEntries(entries);
+                        ((ListPreference) prefAppToRun).setEntryValues(entryValues);
+                        prefAppToRun.setVisible(enableValue.equals(dependOnValue));
+                        return;
+                    }
+                }
+            }
+            if (prefAppToRun == null) {
                 // the ListPreference for selecting an app is missing. Remove the option to run an app.
                 Preference pref = findPreference(dependOnKey);
                 if (pref instanceof ListPreference) {
@@ -869,11 +888,13 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
             SettingsActivity.onSharedPreferenceChanged(activity, sharedPreferences, key);
 
-            if (TagsMenuContent != null) {
-                if ("tags-menu-list".equals(key) || "tags-menu-order".equals(key)) {
-                    TagsMenuContent.reloadOrderedValues(sharedPreferences, this, "tags-menu-order");
-                } else if ("result-popup-order".equals(key)) {
-                    ResultPopupContent.reloadOrderedValues(sharedPreferences, this, "result-popup-order");
+            synchronized (SettingsFragment.this) {
+                if (TagsMenuContent != null) {
+                    if ("tags-menu-list".equals(key) || "tags-menu-order".equals(key)) {
+                        TagsMenuContent.reloadOrderedValues(sharedPreferences, this, "tags-menu-order");
+                    } else if ("result-popup-order".equals(key)) {
+                        ResultPopupContent.reloadOrderedValues(sharedPreferences, this, "result-popup-order");
+                    }
                 }
             }
         }
@@ -882,8 +903,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     @SuppressWarnings("deprecation")
     private static void setActionBarTextColor(Activity activity, int color) {
         ActionBar actionBar = activity instanceof AppCompatActivity
-                ? ((AppCompatActivity) activity).getSupportActionBar()
-                : null;
+            ? ((AppCompatActivity) activity).getSupportActionBar()
+            : null;
         CharSequence title = actionBar != null ? actionBar.getTitle() : null;
         if (title == null)
             return;
@@ -928,10 +949,15 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     }
 
     public static void onSharedPreferenceChanged(Context context, SharedPreferences sharedPreferences, String key) {
-        if (PREF_THAT_REQUIRE_LAYOUT_UPDATE.contains(key))
-            TBApplication.getApplication(context).requireLayoutUpdate();
+        TBApplication app = TBApplication.getApplication(context);
 
-        TBApplication.liveWallpaper(context).onPrefChanged(sharedPreferences, key);
+        if (PREF_THAT_REQUIRE_LAYOUT_UPDATE.contains(key))
+            app.requireLayoutUpdate();
+
+        TBLauncherActivity activity = app.launcherActivity();
+
+        if (activity != null)
+            activity.liveWallpaper.onPrefChanged(sharedPreferences, key);
 
         switch (key) {
             case "notification-bar-color":
@@ -951,7 +977,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case "matrix-contacts":
             case "icons-visible":
                 TBApplication.drawableCache(context).clearCache();
-                TBApplication.behaviour(context).refreshSearchRecords();
+                if (activity != null)
+                    activity.refreshSearchRecords();
                 // fallthrough
             case "quick-list-color":
             case "quick-list-ripple-color":
@@ -959,7 +986,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 // fallthrough
             case "quick-list-toggle-color":
                 // toggle animation is also caching the color
-                TBApplication.quickList(context).reload();
+                if (activity != null)
+                    activity.queueDockReload();
                 // fallthrough
             case "result-list-color":
             case "result-ripple-color":
@@ -1005,14 +1033,15 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case "shortcut-pack-badge-mask":
                 TBApplication.iconsHandler(context).onPrefChanged(sharedPreferences);
                 TBApplication.drawableCache(context).clearCache();
-                TBApplication.quickList(context).reload();
+                if (activity != null)
+                    activity.queueDockReload();
                 break;
             case "tags-enabled": {
                 boolean useTags = sharedPreferences.getBoolean("tags-enabled", true);
-                Activity activity = Utilities.getActivity(context);
+                Activity settingsActivity = Utilities.getActivity(context);
                 Fragment fragment = null;
-                if (activity instanceof SettingsActivity)
-                    fragment = ((SettingsActivity) activity).getSupportFragmentManager().findFragmentByTag(SettingsFragment.FRAGMENT_TAG);
+                if (settingsActivity instanceof SettingsActivity)
+                    fragment = ((SettingsActivity) settingsActivity).getSupportFragmentManager().findFragmentByTag(SettingsFragment.FRAGMENT_TAG);
                 SwitchPreference preference = null;
                 if (fragment instanceof SettingsFragment)
                     preference = ((SettingsFragment) fragment).findPreference("fuzzy-search-tags");
@@ -1026,7 +1055,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case "quick-list-text-visible":
             case "quick-list-icons-visible":
             case "quick-list-show-badge":
-                TBApplication.quickList(context).reload();
+                if (activity != null)
+                    activity.queueDockReload();
                 break;
             case "cache-drawable":
             case "cache-half-apps":
@@ -1042,12 +1072,12 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 break;
             case "root-mode":
                 if (sharedPreferences.getBoolean("root-mode", false) &&
-                        !TBApplication.rootHandler(context).isRootAvailable()) {
+                    !TBApplication.rootHandler(context).isRootAvailable()) {
                     //show error dialog
                     new AlertDialog.Builder(context).setMessage(R.string.root_mode_error)
-                            .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                                sharedPreferences.edit().putBoolean("root-mode", false).apply();
-                            }).show();
+                        .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                            sharedPreferences.edit().putBoolean("root-mode", false).apply();
+                        }).show();
                 }
                 TBApplication.rootHandler(context).resetRootHandler(sharedPreferences);
                 break;

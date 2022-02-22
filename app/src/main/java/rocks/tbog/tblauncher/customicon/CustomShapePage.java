@@ -2,7 +2,6 @@ package rocks.tbog.tblauncher.customicon;
 
 import android.app.Activity;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Color;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.ColorDrawable;
@@ -20,10 +19,10 @@ import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
-import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.DialogFragment;
 
-import net.mm2d.color.chooser.DialogView;
+import net.mm2d.color.chooser.ColorChooserDialog;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -31,6 +30,7 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Objects;
 
+import rocks.tbog.tblauncher.CustomizeUI;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.drawable.CodePointDrawable;
@@ -38,10 +38,8 @@ import rocks.tbog.tblauncher.drawable.DrawableUtils;
 import rocks.tbog.tblauncher.drawable.FourCodePointDrawable;
 import rocks.tbog.tblauncher.drawable.TextDrawable;
 import rocks.tbog.tblauncher.drawable.TwoCodePointDrawable;
-import rocks.tbog.tblauncher.utils.DialogHelper;
 import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.UISizes;
-import rocks.tbog.tblauncher.utils.UITheme;
 import rocks.tbog.tblauncher.utils.Utilities;
 import rocks.tbog.tblauncher.utils.ViewHolderAdapter;
 import rocks.tbog.tblauncher.utils.ViewHolderListAdapter;
@@ -66,7 +64,8 @@ class CustomShapePage extends PageAdapter.Page {
     }
 
     @Override
-    void setupView(@NonNull Context context, @Nullable OnItemClickListener iconClickListener, @Nullable OnItemClickListener iconLongClickListener) {
+    void setupView(@NonNull DialogFragment dialogFragment, @Nullable OnItemClickListener iconClickListener, @Nullable OnItemClickListener iconLongClickListener) {
+        Context context = dialogFragment.getContext();
         mLettersView = pageView.findViewById(R.id.letters);
         mLettersView.addTextChangedListener(new TextWatcher() {
             @Override
@@ -90,136 +89,143 @@ class CustomShapePage extends PageAdapter.Page {
         // letters toggle
         setupToggle(R.id.lettersToggle, R.id.lettersGroup);
 
-        // shapes list
+        addShapesList();
+        addIconsList(iconClickListener);
+        addScaleBar();
+
+        final float colorPreviewRadius = dialogFragment.getResources().getDimension(R.dimen.color_preview_radius);
+        final int colorPreviewBorder = UISizes.dp2px(context, 1);
+        final int colorPreviewSize = dialogFragment.getResources().getDimensionPixelSize(R.dimen.color_preview_size);
+
+        addBackgroundColorChooser(colorPreviewRadius, colorPreviewBorder, colorPreviewSize);
+        addLetterColorChooser(colorPreviewRadius, colorPreviewBorder, colorPreviewSize);
+
+        generateShapes(context);
+    }
+
+    private void addShapesList() {
+        GridView shapeGridView = pageView.findViewById(R.id.shapeGrid);
+        mShapesAdapter = new ShapedIconAdapter();
+        shapeGridView.setAdapter(mShapesAdapter);
+        shapeGridView.setOnItemClickListener((parent, view, position, id) -> {
+            Activity activity = Utilities.getActivity(view);
+            if (activity == null)
+                return;
+
+            Object objItem = parent.getAdapter().getItem(position);
+            if (!(objItem instanceof NamedIconInfo) || ((NamedIconInfo) objItem).getPreview() == null)
+                return;
+            CharSequence name = ((NamedIconInfo) objItem).name;
+            for (int shape : DrawableUtils.SHAPE_LIST) {
+                if (name.equals(DrawableUtils.shapeName(activity, shape))) {
+                    mShape = shape;
+                    break;
+                }
+            }
+            reshapeIcons(activity);
+        });
+        CustomizeUI.setResultListPref(shapeGridView);
+    }
+
+    private void addIconsList(@Nullable OnItemClickListener iconClickListener) {
+        GridView gridView = pageView.findViewById(R.id.iconGrid);
+        mShapedIconAdapter = new ShapedIconAdapter();
+
+        gridView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
+            @Override
+            public boolean onPreDraw() {
+                gridView.getViewTreeObserver().removeOnPreDrawListener(this);
+                gridView.setAdapter(mShapedIconAdapter);
+                return false;
+            }
+        });
+        //gridView.setAdapter(mShapedIconAdapter);
+
+        if (iconClickListener != null)
+            gridView.setOnItemClickListener((parent, view, position, id) -> {
+                Object item = parent.getAdapter().getItem(position);
+                if (item instanceof ShapedIconInfo && ((ShapedIconInfo) item).getPreview() != null)
+                    iconClickListener.onItemClick(parent.getAdapter(), view, position);
+            });
+        CustomizeUI.setResultListPref(gridView);
+    }
+
+    private void addScaleBar() {
+        SeekBar seekBar = pageView.findViewById(R.id.scaleBar);
+        seekBar.setMax(200);
+        seekBar.setProgress((int) (100.f * mScale));
+        final Runnable updateIcons = () -> {
+            mScale = 0.01f * seekBar.getProgress();
+            reshapeIcons(seekBar.getContext());
+        };
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                seekBar.removeCallbacks(updateIcons);
+                seekBar.post(updateIcons);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                seekBar.removeCallbacks(updateIcons);
+                seekBar.post(updateIcons);
+            }
+        });
+    }
+
+    private void addBackgroundColorChooser(float colorPreviewRadius, int colorPreviewBorder, int colorPreviewSize) {
+        TextView colorView = pageView.findViewById(R.id.backgroundColor);
         {
-            GridView shapeGridView = pageView.findViewById(R.id.shapeGrid);
-            mShapesAdapter = new ShapedIconAdapter();
-            shapeGridView.setAdapter(mShapesAdapter);
-            shapeGridView.setOnItemClickListener((parent, view, position, id) -> {
-                Activity activity = Utilities.getActivity(view);
+            Drawable drawable = UIColors.getPreviewDrawable(mBackground, colorPreviewBorder, colorPreviewRadius);
+            drawable.setBounds(0, 0, colorPreviewSize, colorPreviewSize);
+            colorView.setCompoundDrawables(null, null, drawable, null);
+        }
+        colorView.setOnClickListener(v -> {
+            Context ctx = v.getContext();
+            launchCustomColorDialog(ctx, mBackground, color -> {
+                mBackground = color;
+                Activity activity = Utilities.getActivity(v);
                 if (activity == null)
                     return;
-
-                Object objItem = parent.getAdapter().getItem(position);
-                if (!(objItem instanceof NamedIconInfo) || ((NamedIconInfo) objItem).getPreview() == null)
-                    return;
-                CharSequence name = ((NamedIconInfo) objItem).name;
-                for (int shape : DrawableUtils.SHAPE_LIST) {
-                    if (name.equals(DrawableUtils.shapeName(activity, shape))) {
-                        mShape = shape;
-                        break;
-                    }
-                }
-                reshapeIcons(activity);
-            });
-            TBApplication.ui(context).setResultListPref(shapeGridView);
-        }
-
-        // icons we are customizing
-        {
-            GridView gridView = pageView.findViewById(R.id.iconGrid);
-            mShapedIconAdapter = new ShapedIconAdapter();
-
-            gridView.getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-                @Override
-                public boolean onPreDraw() {
-                    gridView.getViewTreeObserver().removeOnPreDrawListener(this);
-                    gridView.setAdapter(mShapedIconAdapter);
-                    return false;
-                }
-            });
-            //gridView.setAdapter(mShapedIconAdapter);
-
-            if (iconClickListener != null)
-                gridView.setOnItemClickListener((parent, view, position, id) -> {
-                    Object item = parent.getAdapter().getItem(position);
-                    if (item instanceof ShapedIconInfo && ((ShapedIconInfo) item).getPreview() != null)
-                        iconClickListener.onItemClick(parent.getAdapter(), view, position);
-                });
-            TBApplication.ui(context).setResultListPref(gridView);
-        }
-
-        // scale bar
-        {
-            SeekBar seekBar = pageView.findViewById(R.id.scaleBar);
-            seekBar.setMax(200);
-            seekBar.setProgress((int) (100.f * mScale));
-            final Runnable updateIcons = () -> {
-                mScale = 0.01f * seekBar.getProgress();
-                reshapeIcons(seekBar.getContext());
-            };
-            seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                @Override
-                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                    seekBar.removeCallbacks(updateIcons);
-                    seekBar.post(updateIcons);
-                }
-
-                @Override
-                public void onStartTrackingTouch(SeekBar seekBar) {
-
-                }
-
-                @Override
-                public void onStopTrackingTouch(SeekBar seekBar) {
-                    seekBar.removeCallbacks(updateIcons);
-                    seekBar.post(updateIcons);
-                }
-            });
-        }
-
-        final float colorPreviewRadius = context.getResources().getDimension(R.dimen.color_preview_radius);
-        final int colorPreviewBorder = UISizes.dp2px(context, 1);
-        final int colorPreviewSize = context.getResources().getDimensionPixelSize(R.dimen.color_preview_size);
-
-        // shape background color chooser
-        {
-            TextView colorView = pageView.findViewById(R.id.backgroundColor);
-            {
                 Drawable drawable = UIColors.getPreviewDrawable(mBackground, colorPreviewBorder, colorPreviewRadius);
                 drawable.setBounds(0, 0, colorPreviewSize, colorPreviewSize);
                 colorView.setCompoundDrawables(null, null, drawable, null);
-            }
-            colorView.setOnClickListener(v -> {
-                Context ctx = v.getContext();
-                launchCustomColorDialog(ctx, mBackground, color -> {
-                    mBackground = color;
-                    Activity activity = Utilities.getActivity(v);
-                    if (activity == null)
-                        return;
-                    Drawable drawable = UIColors.getPreviewDrawable(mBackground, colorPreviewBorder, colorPreviewRadius);
-                    drawable.setBounds(0, 0, colorPreviewSize, colorPreviewSize);
-                    colorView.setCompoundDrawables(null, null, drawable, null);
-                    generateShapes(activity);
-                    reshapeIcons(activity);
-                });
+                generateShapes(activity);
+                reshapeIcons(activity);
             });
-        }
+        });
+    }
 
-        // letter color chooser
+    private void addLetterColorChooser(float colorPreviewRadius, int colorPreviewBorder, int colorPreviewSize) {
+        TextView colorView = pageView.findViewById(R.id.lettersColor);
         {
-            TextView colorView = pageView.findViewById(R.id.lettersColor);
-            {
+            Drawable drawable = UIColors.getPreviewDrawable(mLetters, colorPreviewBorder, colorPreviewRadius);
+            drawable.setBounds(0, 0, colorPreviewSize, colorPreviewSize);
+            colorView.setCompoundDrawables(null, null, drawable, null);
+        }
+        colorView.setOnClickListener(v -> {
+            Context ctx = v.getContext();
+            launchCustomColorDialog(ctx, mLetters, color -> {
+                mLetters = color;
+                Activity activity = Utilities.getActivity(v);
+                if (activity == null)
+                    return;
                 Drawable drawable = UIColors.getPreviewDrawable(mLetters, colorPreviewBorder, colorPreviewRadius);
                 drawable.setBounds(0, 0, colorPreviewSize, colorPreviewSize);
                 colorView.setCompoundDrawables(null, null, drawable, null);
-            }
-            colorView.setOnClickListener(v -> {
-                Context ctx = v.getContext();
-                launchCustomColorDialog(ctx, mLetters, color -> {
-                    mLetters = color;
-                    Activity activity = Utilities.getActivity(v);
-                    if (activity == null)
-                        return;
-                    Drawable drawable = UIColors.getPreviewDrawable(mLetters, colorPreviewBorder, colorPreviewRadius);
-                    drawable.setBounds(0, 0, colorPreviewSize, colorPreviewSize);
-                    colorView.setCompoundDrawables(null, null, drawable, null);
-                    generateTextIcons(mLettersView.getText());
-                });
+                generateTextIcons(mLettersView.getText());
             });
-        }
+        });
+    }
 
-        generateShapes(context);
+    @Override
+    public void addPickedIcon(@NonNull Drawable pickedImage, String filename) {
+        mShapedIconAdapter.addItem(new SystemPage.PickedIconInfo(pickedImage, filename));
     }
 
     private void setupToggle(@IdRes int toggleTextView, @IdRes int viewToToggle) {
@@ -349,24 +355,27 @@ class CustomShapePage extends PageAdapter.Page {
         if (!(activity instanceof AppCompatActivity))
             return;
 
-        Context themeWrapper = UITheme.getDialogThemedContext(context);
-        DialogView dialogView = new DialogView(themeWrapper);
+        ColorChooserDialog.INSTANCE.registerListener((AppCompatActivity) activity, "request color", listener::onColorChanged);
+        ColorChooserDialog.INSTANCE.show((AppCompatActivity) activity, "request color", selectedColor, true, ColorChooserDialog.TAB_PALETTE);
 
-        dialogView.init(selectedColor, (AppCompatActivity) activity);
-        dialogView.setWithAlpha(true);
-
-        DialogInterface.OnClickListener buttonListener = (dialog, which) -> {
-            if (which == DialogInterface.BUTTON_POSITIVE) {
-                listener.onColorChanged(dialogView.getColor());
-            }
-            dialog.dismiss();
-        };
-
-        final AlertDialog.Builder builder = new AlertDialog.Builder(themeWrapper)
-                .setPositiveButton(android.R.string.ok, buttonListener)
-                .setNegativeButton(android.R.string.cancel, buttonListener);
-        builder.setView(dialogView);
-        DialogHelper.setButtonBarBackground(builder.show());
+//        Context themeWrapper = UITheme.getDialogThemedContext(context);
+//        DialogView dialogView = new DialogView(themeWrapper);
+//
+//        dialogView.init(selectedColor, (AppCompatActivity) activity);
+//        dialogView.setWithAlpha(true);
+//
+//        DialogInterface.OnClickListener buttonListener = (dialog, which) -> {
+//            if (which == DialogInterface.BUTTON_POSITIVE) {
+//                listener.onColorChanged(dialogView.getColor());
+//            }
+//            dialog.dismiss();
+//        };
+//
+//        final AlertDialog.Builder builder = new AlertDialog.Builder(themeWrapper)
+//                .setPositiveButton(android.R.string.ok, buttonListener)
+//                .setNegativeButton(android.R.string.cancel, buttonListener);
+//        builder.setView(dialogView);
+//        DialogHelper.setButtonBarBackground(builder.show());
     }
 
     static class LetterIconInfo extends NamedIconInfo {
@@ -376,7 +385,7 @@ class CustomShapePage extends PageAdapter.Page {
         }
 
         @Override
-        ShapedIconInfo reshape(Context context, int shape, float scale, int background) {
+        protected ShapedIconInfo reshape(Context context, int shape, float scale, int background) {
             Drawable drawable = DrawableUtils.applyIconMaskShape(context, originalDrawable, shape, scale, background);
             return new LetterIconInfo(name, drawable, originalDrawable);
         }
@@ -389,7 +398,7 @@ class CustomShapePage extends PageAdapter.Page {
         }
 
         @Override
-        Drawable getIcon() {
+        public Drawable getIcon() {
             return null;
         }
     }
@@ -403,7 +412,7 @@ class CustomShapePage extends PageAdapter.Page {
         }
 
         @Override
-        ShapedIconInfo reshape(Context context, int shape, float scale, int background) {
+        protected ShapedIconInfo reshape(Context context, int shape, float scale, int background) {
             Drawable drawable = DrawableUtils.applyIconMaskShape(context, originalDrawable, shape, scale, background);
             return new NamedIconInfo(name, drawable, originalDrawable);
         }
@@ -415,25 +424,25 @@ class CustomShapePage extends PageAdapter.Page {
         }
     }
 
-    static class ShapedIconInfo {
-        final Drawable originalDrawable;
-        final Drawable iconDrawable;
+    public static class ShapedIconInfo {
+        protected final Drawable originalDrawable;
+        protected final Drawable iconDrawable;
         @StringRes
-        int textId;
+        protected int textId;
 
-        ShapedIconInfo(Drawable icon, Drawable origin) {
+        public ShapedIconInfo(Drawable icon, Drawable origin) {
             iconDrawable = icon;
             originalDrawable = origin;
         }
 
-        ShapedIconInfo reshape(Context context, int shape, float scale, int background) {
+        protected ShapedIconInfo reshape(Context context, int shape, float scale, int background) {
             Drawable drawable = DrawableUtils.applyIconMaskShape(context, originalDrawable, shape, scale, background);
             ShapedIconInfo shapedIconInfo = new ShapedIconInfo(drawable, originalDrawable);
             shapedIconInfo.textId = textId;
             return shapedIconInfo;
         }
 
-        Drawable getIcon() {
+        public Drawable getIcon() {
             return iconDrawable;
         }
 
@@ -448,11 +457,13 @@ class CustomShapePage extends PageAdapter.Page {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o)
+                return true;
+            if (o == null || getClass() != o.getClass())
+                return false;
             ShapedIconInfo that = (ShapedIconInfo) o;
             return Objects.equals(iconDrawable, that.iconDrawable) &&
-                    Objects.equals(textId, that.textId);
+                   Objects.equals(textId, that.textId);
         }
 
         @Override
@@ -486,8 +497,10 @@ class CustomShapePage extends PageAdapter.Page {
             CharSequence text = content.getText();
             if (text != null)
                 text1.setText(text);
-            else
+            else if (content.textId != 0)
                 text1.setText(content.textId);
+            else
+                text1.setText("null");
         }
     }
 

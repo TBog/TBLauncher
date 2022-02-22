@@ -188,16 +188,10 @@ public class LiveWallpaper {
     }
 
     private static boolean onClick(View view) {
-        if (!view.isAttachedToWindow()) {
-            return false;
-        }
         return TBApplication.behaviour(view.getContext()).onClick();
     }
 
     private static boolean onDoubleClick(View view) {
-        if (!view.isAttachedToWindow()) {
-            return false;
-        }
         return TBApplication.behaviour(view.getContext()).onDoubleClick();
     }
 
@@ -251,7 +245,7 @@ public class LiveWallpaper {
         view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
         Context ctx = view.getContext();
         ListPopup menu = TBApplication.widgetManager(ctx).getConfigPopup(mTBLauncherActivity);
-        TBApplication.behaviour(ctx).registerPopup(menu);
+        TBApplication.getApplication(getContext()).registerPopup(menu);
         int x = (int) (mLastTouchPos.x + .5f);
         int y = (int) (mLastTouchPos.y + .5f);
         menu.showAtLocation(view, Gravity.START | Gravity.TOP, x, y);
@@ -336,8 +330,8 @@ public class LiveWallpaper {
                     if (isScrollEnabled() && mAnimation.init())
                         mContentView.startAnimation(mAnimation);
                 }
-                //fallthrough
             }
+            // fallthrough
             case MotionEvent.ACTION_CANCEL:
                 if (isScrollEnabled()) {
                     if (mVelocityTracker != null) {

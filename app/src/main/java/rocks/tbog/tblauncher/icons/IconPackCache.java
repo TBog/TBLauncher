@@ -10,7 +10,7 @@ import java.util.HashMap;
 import rocks.tbog.tblauncher.TBApplication;
 
 public class IconPackCache {
-    private SoftReferenceCache<String, IconPackXML> mCache = new SoftReferenceCache<>();
+    private final SoftReferenceCache<String, IconPackXML> mCache = new SoftReferenceCache<>();
 
     @NonNull
     public IconPackXML getIconPack(String packageName) {

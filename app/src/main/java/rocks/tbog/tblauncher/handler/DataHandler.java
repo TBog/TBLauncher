@@ -8,7 +8,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.ServiceConnection;
 import android.content.SharedPreferences;
-import android.content.pm.ShortcutInfo;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.Build;
@@ -101,6 +100,7 @@ public class DataHandler extends BroadcastReceiver
         , "shortcuts"
     );
 
+    @NonNull
     private final Context context;
     private String currentQuery;
     private final Map<String, ProviderEntry> providers = new LinkedHashMap<>(); // preserve insert order
@@ -116,7 +116,6 @@ public class DataHandler extends BroadcastReceiver
         // (otherwise we might receive an exception about broadcast listeners not being able
         //  to bind to services)
         context = ctx.getApplicationContext();
-        ;
 
         mTimer.start();
 
@@ -185,15 +184,13 @@ public class DataHandler extends BroadcastReceiver
         toggleableProviders(prefs);
     }
 
-    @Nullable
+    @NonNull
     public Context getContext() {
         return context;
     }
 
     private void toggleableProviders(SharedPreferences prefs) {
-        final Context context = this.getContext();
-        if (context == null)
-            return;
+        final Context context = getContext();
 
         // Search engine provider,
         {
@@ -276,9 +273,7 @@ public class DataHandler extends BroadcastReceiver
      * @param name Data provider name (i.e.: `ContactsProvider` → `"contacts"`)
      */
     private void connectToProvider(final String name, final int counter) {
-        final Context context = this.getContext();
-        if (context == null)
-            return;
+        final Context context = getContext();
 
         // Do not continue if this provider has already been connected to
         if (this.providers.containsKey(name)) {
@@ -294,6 +289,40 @@ public class DataHandler extends BroadcastReceiver
             return;
         }
 
+        if (!startService(context, intent, name, counter))
+            return;
+
+        final ProviderEntry entry = new ProviderEntry();
+        // Add empty provider object to list of providers
+        this.providers.put(name, entry);
+
+        // Connect and bind to provider service
+        context.bindService(intent, new ServiceConnection() {
+            @Override
+            public void onServiceConnected(ComponentName className, IBinder service) {
+                Log.i(TAG, "onServiceConnected " + className);
+
+                // We've bound to LocalService, cast the IBinder and get LocalService instance
+                Provider<?>.LocalBinder binder = (Provider<?>.LocalBinder) service;
+                IProvider<?> provider = binder.getService();
+
+                // Update provider info so that it contains something useful
+                entry.provider = provider;
+                entry.connection = this;
+
+                if (provider.isLoaded()) {
+                    handleProviderLoaded();
+                }
+            }
+
+            @Override
+            public void onServiceDisconnected(ComponentName arg0) {
+                Log.i(TAG, "onServiceDisconnected " + arg0);
+            }
+        }, Context.BIND_AUTO_CREATE);
+    }
+
+    private boolean startService(Context context, Intent intent, String name, int counter) {
         try {
             // Send "start service" command first so that the service can run independently
             // of the activity
@@ -310,7 +339,7 @@ public class DataHandler extends BroadcastReceiver
 
             if (counter > 20) {
                 Log.e(TAG, "Already tried and failed twenty times to start service. Giving up.");
-                return;
+                return false;
             }
 
             // Add a receiver to get notified next time the screen is on
@@ -345,37 +374,9 @@ public class DataHandler extends BroadcastReceiver
             }, intentFilter);
 
             // Stop here for now, the Receiver will re-trigger the whole flow when services can be started.
-            return;
+            return false;
         }
-
-        final ProviderEntry entry = new ProviderEntry();
-        // Add empty provider object to list of providers
-        this.providers.put(name, entry);
-
-        // Connect and bind to provider service
-        context.bindService(intent, new ServiceConnection() {
-            @Override
-            public void onServiceConnected(ComponentName className, IBinder service) {
-                Log.i(TAG, "onServiceConnected " + className);
-
-                // We've bound to LocalService, cast the IBinder and get LocalService instance
-                Provider<?>.LocalBinder binder = (Provider<?>.LocalBinder) service;
-                IProvider<?> provider = binder.getService();
-
-                // Update provider info so that it contains something useful
-                entry.provider = provider;
-                entry.connection = this;
-
-                if (provider.isLoaded()) {
-                    handleProviderLoaded();
-                }
-            }
-
-            @Override
-            public void onServiceDisconnected(ComponentName arg0) {
-                Log.i(TAG, "onServiceDisconnected " + arg0);
-            }
-        }, Context.BIND_AUTO_CREATE);
+        return true;
     }
 
     /**
@@ -384,9 +385,7 @@ public class DataHandler extends BroadcastReceiver
      * @param name Data provider name (i.e.: `AppProvider` → `"app"`)
      */
     private void disconnectFromProvider(String name) {
-        final Context context = this.getContext();
-        if (context == null)
-            return;
+        final Context context = getContext();
 
         // Skip already disconnected services
         ProviderEntry entry = this.providers.get(name);
@@ -405,9 +404,7 @@ public class DataHandler extends BroadcastReceiver
     }
 
     private boolean allProvidersHaveLoaded() {
-        final Context context = this.getContext();
-        if (context == null)
-            return false;
+        final Context context = getContext();
 
         for (ProviderEntry entry : this.providers.values())
             if (entry.provider == null || !entry.provider.isLoaded())
@@ -465,16 +462,14 @@ public class DataHandler extends BroadcastReceiver
 
         mFullLoadOverSent = true;
 
-        final Context context = this.getContext();
-        if (context != null) {
-            // Broadcast the fact that the new providers list is ready
-            try {
-                context.unregisterReceiver(this);
-                Intent i = new Intent(TBLauncherActivity.FULL_LOAD_OVER);
-                context.sendBroadcast(i);
-            } catch (IllegalArgumentException e) {
-                Log.e(TAG, "send FULL_LOAD_OVER", e);
-            }
+        final Context context = getContext();
+        // Broadcast the fact that the new providers list is ready
+        try {
+            context.unregisterReceiver(this);
+            Intent i = new Intent(TBLauncherActivity.FULL_LOAD_OVER);
+            context.sendBroadcast(i);
+        } catch (IllegalArgumentException e) {
+            Log.e(TAG, "send FULL_LOAD_OVER", e);
         }
     }
 
@@ -482,6 +477,54 @@ public class DataHandler extends BroadcastReceiver
     public void onReceive(Context context, Intent intent) {
         // A provider finished loading and contacted us
         this.handleProviderLoaded();
+    }
+
+    public void appendDebugText(StringBuilder text) {
+        text.append("Providers: ");
+        boolean first = true;
+        for (int step : IProvider.LOAD_STEPS) {
+            if (first)
+                first = false;
+            else
+                text.append(", ");
+
+            if (providersHaveLoaded(step))
+                text.append("S#")   // step number
+                    .append(step);
+        }
+        if (mFullLoadOverSent)
+            text.append(",done in ")
+                .append(mTimer);
+        text.append("\n");
+
+        ArrayList<ProviderEntry> sortedProviders = new ArrayList<>(providers.size());
+        sortedProviders.addAll(providers.values());
+        Collections.sort(sortedProviders, (o1, o2) -> {
+            Timer t1 = o1.provider == null ? null : o1.provider.getLoadDuration();
+            Timer t2 = o2.provider == null ? null : o2.provider.getLoadDuration();
+            return Timer.STOP_TIME_COMPARATOR.compare(t1, t2);
+        });
+
+        first = true;
+        for (ProviderEntry entry : sortedProviders) {
+            if (entry.provider == null)
+                continue;
+            if (entry.provider.isLoaded()) {
+                Timer timer = entry.provider.getLoadDuration();
+                if (timer == null)
+                    continue;
+                if (first)
+                    first = false;
+                else
+                    text.append(" | ");
+                text.append(entry.provider.getLoadStep())
+                    .append(".")
+                    .append(entry.provider.getClass().getSimpleName())
+                    .append(":")
+                    .append(timer);
+            }
+        }
+        text.append("\n");
     }
 
     /**
@@ -562,8 +605,8 @@ public class DataHandler extends BroadcastReceiver
         int extendedItemCount = itemCount + itemsToExcludeById.size();
 
         // Read history
-        final Context context = this.getContext();
-        List<ValuedHistoryRecord> ids = context != null ? DBHelper.getHistory(context, extendedItemCount, historyMode) : Collections.emptyList();
+        final Context context = getContext();
+        List<ValuedHistoryRecord> ids = DBHelper.getHistory(context, extendedItemCount, historyMode);
 
         // Pre-allocate array slots that are likely to be used
         ArrayList<EntryItem> history = new ArrayList<>(ids.size());
@@ -593,27 +636,8 @@ public class DataHandler extends BroadcastReceiver
         return history;
     }
 
-//    public int getHistoryLength() {
-//        return DBHelper.getHistoryLength(this.context);
-//    }
-
-    /**
-     * Query database for item and return its name
-     *
-     * @param id globally unique ID, usually starts with provider scheme, e.g. "app://" or "contact://"
-     * @return name of item (i.e. app name)
-     */
-    @NonNull
-    public String getItemName(String id) {
-        // Ask all providers if they know this id
-        EntryItem pojo = getPojo(id);
-        return (pojo != null) ? pojo.getName() : "???";
-    }
-
     public boolean addShortcut(ShortcutRecord record) {
-        final Context context = this.getContext();
-        if (context == null)
-            return false;
+        final Context context = getContext();
 
         Log.d(TAG, "Adding shortcut " + record.displayName + " for " + record.packageName);
         if (DBHelper.insertShortcut(context, record)) {
@@ -625,46 +649,8 @@ public class DataHandler extends BroadcastReceiver
         return false;
     }
 
-    public void addShortcut(String packageName) {
-        final Context context = this.getContext();
-        if (context == null)
-            return;
-
-        if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            return;
-        }
-
-        List<ShortcutInfo> shortcuts;
-        try {
-            shortcuts = ShortcutUtil.getShortcut(context, packageName);
-        } catch (SecurityException | IllegalStateException e) {
-            e.printStackTrace();
-            return;
-        }
-
-        for (ShortcutInfo shortcutInfo : shortcuts) {
-            // Create Pojo
-            ShortcutRecord record = ShortcutUtil.createShortcutRecord(context, shortcutInfo, true);
-            if (record == null) {
-                continue;
-            }
-            // Add shortcut to the DataHandler
-            addShortcut(record);
-        }
-
-        if (!shortcuts.isEmpty() && this.getShortcutsProvider() != null) {
-            this.getShortcutsProvider().reload(true);
-        }
-    }
-
-//    public void clearHistory() {
-//        DBHelper.clearHistory(this.context);
-//    }
-
     public void removeShortcut(ShortcutEntry shortcut) {
-        final Context context = this.getContext();
-        if (context == null)
-            return;
+        final Context context = getContext();
 
         // Also remove shortcut from mods
         removeFromMods(shortcut);
@@ -680,9 +666,7 @@ public class DataHandler extends BroadcastReceiver
     }
 
     public void removeShortcuts(String packageName) {
-        final Context context = this.getContext();
-        if (context == null)
-            return;
+        final Context context = getContext();
 
         if (android.os.Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
             return;
@@ -704,81 +688,15 @@ public class DataHandler extends BroadcastReceiver
         }
     }
 
-//    @NonNull
-//    public Set<String> getExcludedFromHistory(@NonNull SharedPreferences prefs) {
-//        Set<String> excluded = prefs.getStringSet("excluded-apps-from-history", null);
-//        if (excluded == null) {
-//            excluded = new HashSet<>();
-//            final Context context = this.getContext();
-//            if (context != null)
-//                excluded.add(context.getPackageName());
-//        }
-//        return excluded;
-//    }
-
-//    @NonNull
-//    public Set<String> getExcluded(@NonNull SharedPreferences prefs) {
-//        Set<String> excluded = prefs.getStringSet("excluded-apps", null);
-//        if (excluded == null) {
-//            excluded = new HashSet<>();
-//            final Context context = this.getContext();
-//            if (context != null)
-//                excluded.add(context.getPackageName());
-//        }
-//        return excluded;
-//    }
-
     public boolean addToHidden(AppEntry entry) {
-        final Context context = this.getContext();
-        if (context == null)
-            return false;
+        final Context context = getContext();
         return DBHelper.setAppHidden(context, entry.getUserComponentName());
     }
 
     public boolean removeFromHidden(AppEntry entry) {
-        final Context context = this.getContext();
-        if (context == null)
-            return false;
+        final Context context = getContext();
         return DBHelper.removeAppHidden(context, entry.getUserComponentName());
     }
-
-//    public void removeFromExcluded(String packageName) {
-//        final Context context = this.getContext();
-//        if (context == null)
-//            return;
-//        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-//        Set<String> excluded = getExcluded(prefs);
-//        Set<String> newExcluded = new HashSet<>();
-//        for (String excludedItem : excluded) {
-//            if (!excludedItem.contains(packageName + "/")) {
-//                newExcluded.add(excludedItem);
-//            }
-//        }
-//
-//        prefs.edit().putStringSet("excluded-apps", newExcluded).apply();
-//    }
-//
-//    public void removeFromExcluded(UserHandleCompat user) {
-//        // This is only intended for apps from foreign-profiles
-//        if (user.isCurrentUser()) {
-//            return;
-//        }
-//
-//        final Context context = this.getContext();
-//        if (context == null)
-//            return;
-//        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-//
-//        Set<String> excluded = getExcluded(prefs);
-//        Set<String> newExcluded = new HashSet<>();
-//        for (String excludedItem : excluded) {
-//            if (!user.hasStringUserSuffix(excludedItem, '#')) {
-//                newExcluded.add(excludedItem);
-//            }
-//        }
-//
-//        prefs.edit().putStringSet("excluded-apps", newExcluded).apply();
-//    }
 
     @Nullable
     public ContactsProvider getContactsProvider() {
@@ -828,12 +746,6 @@ public class DataHandler extends BroadcastReceiver
         return (entry != null) ? ((QuickListProvider) entry.provider) : null;
     }
 
-//    @Nullable
-//    public SearchProvider getSearchProvider() {
-//        ProviderEntry entry = this.providers.get("search");
-//        return (entry != null) ? ((SearchProvider) entry.provider) : null;
-//    }
-
     /**
      * Return a list of records that have modifications (custom icon, name or flags)
      *
@@ -841,70 +753,12 @@ public class DataHandler extends BroadcastReceiver
      */
     @NonNull
     public List<ModRecord> getMods() {
-        final Context context = this.getContext();
-        if (context == null)
-            return Collections.emptyList();
+        final Context context = getContext();
         return DBHelper.getMods(context);
     }
 
-//    @NonNull
-//    public List<String> getTagList() {
-//        return DBHelper.loadTagList(context);
-//    }
-
-//    /**
-//     * This method is used to set the specific position of an app in the fav array.
-//     *
-//     * @param context  The mainActivity context
-//     * @param id       the app you want to set the position of
-//     * @param position the new position of the fav
-//     */
-//    public void setFavoritePosition(TBLauncherActivity context, String id, int position) {
-//        List<EntryItem> currentFavorites = getFavorites();
-//        List<String> favAppsList = new ArrayList<>();
-//
-//        for (EntryItem pojo : currentFavorites) {
-//            favAppsList.add(pojo.getHistoryId());
-//        }
-//
-//        int currentPos = favAppsList.indexOf(id);
-//        if (currentPos == -1) {
-//            Log.e(TAG, "Couldn't find id in favAppsList");
-//            return;
-//        }
-//        // Clamp the position so we don't just extend past the end of the array.
-//        position = Math.min(position, favAppsList.size() - 1);
-//
-//        favAppsList.remove(currentPos);
-//        favAppsList.add(position, id);
-//
-//        String newFavList = TextUtils.join(";", favAppsList);
-//
-//        PreferenceManager.getDefaultSharedPreferences(context).edit()
-//                .putString("favorite-apps-list", newFavList + ";").apply();
-//
-//        //TODO: make this work
-//        //context.onFavoriteChange();
-//    }
-
-//    public void addToMods(EntryItem entry) {
-//        final Context context = this.getContext();
-//        if (context == null)
-//            return;
-//
-//        ModRecord record = new ModRecord();
-//        record.record = entry.id;
-//        record.position = "0";
-//        DBHelper.setMod(context, record);
-//        ModProvider modProvider = getModProvider();
-//        if (modProvider != null)
-//            modProvider.reload(true);
-//    }
-
     public void removeFromMods(EntryItem entry) {
-        final Context context = this.getContext();
-        if (context == null)
-            return;
+        final Context context = getContext();
 
         if (DBHelper.removeMod(context, entry.id)) {
             ModProvider modProvider = getModProvider();
@@ -912,31 +766,6 @@ public class DataHandler extends BroadcastReceiver
                 modProvider.reload(true);
         }
     }
-
-//    @SuppressWarnings("StringSplitter")
-//    public void removeFromMods(UserHandleCompat user) {
-//        // This is only intended for apps from foreign-profiles
-//        if (user.isCurrentUser()) {
-//            return;
-//        }
-//
-//        final Context context = this.getContext();
-//        if (context == null)
-//            return;
-//        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-//
-//        String[] favAppList = prefs.getString("favorite-apps-list", "").split(";");
-//
-//        StringBuilder favApps = new StringBuilder();
-//        for (String favAppID : favAppList) {
-//            if (!favAppID.startsWith("app://") || !user.hasStringUserSuffix(favAppID, '/')) {
-//                favApps.append(favAppID);
-//                favApps.append(";");
-//            }
-//        }
-//
-//        prefs.edit().putString("favorite-apps-list", favApps.toString()).apply();
-//    }
 
     /**
      * Insert specified ID (probably a pojo.id) into history
@@ -947,19 +776,7 @@ public class DataHandler extends BroadcastReceiver
         if (id.isEmpty()) {
             return;
         }
-        final Context context = this.getContext();
-        if (context == null)
-            return;
-
-//        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
-//
-//        boolean frozen = prefs.getBoolean("freeze-history", false);
-//
-//        Set<String> excludedFromHistory = getExcludedFromHistory(prefs);
-//
-//        if (frozen || excludedFromHistory.contains(id)) {
-//            return;
-//        }
+        final Context context = getContext();
         DBHelper.insertHistory(context, currentQuery, id);
     }
 
@@ -976,10 +793,7 @@ public class DataHandler extends BroadcastReceiver
     }
 
     public void renameApp(String componentName, String newName) {
-        final Context context = this.getContext();
-        if (context == null)
-            return;
-
+        final Context context = getContext();
         DBHelper.setCustomAppName(context, componentName, newName);
     }
 
@@ -992,9 +806,7 @@ public class DataHandler extends BroadcastReceiver
      */
     @Nullable
     public String renameStaticEntry(@NonNull StaticEntry entry, @Nullable String newName) {
-        final Context context = this.getContext();
-        if (context == null)
-            return null;
+        final Context context = getContext();
 
         final String entryId = entry.id;
         if (newName == null) {
@@ -1028,10 +840,7 @@ public class DataHandler extends BroadcastReceiver
     }
 
     public void removeRenameApp(String componentName, String defaultName) {
-        final Context context = this.getContext();
-        if (context == null)
-            return;
-
+        final Context context = getContext();
         DBHelper.removeCustomAppName(context, componentName, defaultName);
     }
 
@@ -1041,9 +850,7 @@ public class DataHandler extends BroadcastReceiver
             Log.e(TAG, "bitmapToByteArray failed for `" + componentName + "` with bitmap " + bitmap);
             return;
         }
-        final Context context = this.getContext();
-        if (context == null)
-            return;
+        final Context context = getContext();
         if (!DBHelper.setCachedAppIcon(context, componentName, array)) {
             Log.w(TAG, "setCachedAppIcon failed for `" + componentName + "` with bitmap " + bitmap);
         }
@@ -1056,16 +863,12 @@ public class DataHandler extends BroadcastReceiver
             Log.e(TAG, "bitmapToByteArray failed for `" + componentName + "` with bitmap " + bitmap);
             return null;
         }
-        final Context context = this.getContext();
-        if (context == null)
-            return null;
+        final Context context = getContext();
         return DBHelper.setCustomAppIcon(context, componentName, array);
     }
 
     public void setCustomStaticEntryIcon(String entryId, Bitmap bitmap) {
-        final Context context = this.getContext();
-        if (context == null)
-            return;
+        final Context context = getContext();
         byte[] array = Utilities.bitmapToByteArray(bitmap);
         if (array != null) {
             DBHelper.setCustomStaticEntryIcon(context, entryId, array);
@@ -1077,9 +880,7 @@ public class DataHandler extends BroadcastReceiver
     }
 
     public Bitmap getCachedAppIcon(String componentName) {
-        final Context context = this.getContext();
-        if (context == null)
-            return null;
+        final Context context = getContext();
         byte[] bytes = DBHelper.getCachedAppIcon(context, componentName);
         if (bytes == null)
             return null;
@@ -1087,9 +888,7 @@ public class DataHandler extends BroadcastReceiver
     }
 
     public Bitmap getCustomAppIcon(String componentName) {
-        final Context context = this.getContext();
-        if (context == null)
-            return null;
+        final Context context = getContext();
         byte[] bytes = DBHelper.getCustomAppIcon(context, componentName);
         if (bytes == null)
             return null;
@@ -1097,23 +896,17 @@ public class DataHandler extends BroadcastReceiver
     }
 
     public AppRecord removeCustomAppIcon(String componentName) {
-        final Context context = this.getContext();
-        if (context == null)
-            return null;
+        final Context context = getContext();
         return DBHelper.removeCustomAppIcon(context, componentName);
     }
 
     public void removeCustomStaticEntryIcon(String entryId) {
-        final Context context = this.getContext();
-        if (context == null)
-            return;
+        final Context context = getContext();
         DBHelper.removeCustomStaticEntryIcon(context, entryId);
     }
 
     public Bitmap getCustomEntryIconById(@NonNull String entryId) {
-        final Context context = this.getContext();
-        if (context == null)
-            return null;
+        final Context context = getContext();
         byte[] bytes = DBHelper.getCustomFavIcon(context, entryId);
         if (bytes == null)
             return null;
@@ -1121,18 +914,13 @@ public class DataHandler extends BroadcastReceiver
     }
 
     public void renameShortcut(ShortcutEntry shortcutEntry, String newName) {
-        final Context context = this.getContext();
-        if (context == null)
-            return;
+        final Context context = getContext();
         DBHelper.renameShortcut(context, shortcutEntry, newName);
     }
 
     public void onProviderRecreated(Provider<? extends EntryItem> provider) {
         mFullLoadOverSent = false;
-
-        final Context context = this.getContext();
-        if (context == null)
-            return;
+        final Context context = getContext();
 
         IntentFilter intentFilter = new IntentFilter(TBLauncherActivity.LOAD_OVER);
         context.registerReceiver(this, intentFilter);
@@ -1158,11 +946,7 @@ public class DataHandler extends BroadcastReceiver
      */
     public void reloadProviders(int loadStep) {
         mFullLoadOverSent = false;
-
-        final Context context = this.getContext();
-        if (context == null)
-            return;
-
+        final Context context = getContext();
         mTimer.start();
 
         IntentFilter intentFilter = new IntentFilter(TBLauncherActivity.LOAD_OVER);
@@ -1183,11 +967,7 @@ public class DataHandler extends BroadcastReceiver
 
     public void reloadProviders() {
         mFullLoadOverSent = false;
-
-        final Context context = this.getContext();
-        if (context == null)
-            return;
-
+        final Context context = getContext();
         mTimer.start();
 
         IntentFilter intentFilter = new IntentFilter(TBLauncherActivity.LOAD_OVER);
@@ -1214,9 +994,7 @@ public class DataHandler extends BroadcastReceiver
     }
 
     public void checkServices() {
-        final Context context = this.getContext();
-        if (context == null)
-            return;
+        final Context context = getContext();
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         for (String providerName : PROVIDER_NAMES) {
             if (!providers.containsKey(providerName) && prefs.getBoolean("enable-" + providerName, true)) {
@@ -1226,18 +1004,8 @@ public class DataHandler extends BroadcastReceiver
         }
     }
 
-//    @NonNull
-//    public List<? extends EntryItem> getQuickList() {
-//        ModProvider favProvider = getFavProvider();
-//        if (favProvider == null)
-//            return Collections.emptyList();
-//        return favProvider.getQuickList();
-//    }
-
     public void setQuickList(Iterable<String> records) {
-        final Context context = this.getContext();
-        if (context == null)
-            return;
+        final Context context = getContext();
 
         List<ModRecord> oldFav = getMods();
         int pos = 1;

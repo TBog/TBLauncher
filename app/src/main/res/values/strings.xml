@@ -1,5 +1,6 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
     <string name="app_name">TinyBit launcher</string>
+    <string name="app_name_debug">TinyBit debug launcher</string>
     <string name="hint_ui_search">Search in apps, contacts, …</string>
     <string name="ui_item_search">Search in %1$s for \"%2$s\"?</string>
     <string name="ui_item_visit">Visit \"%1$s\"</string>
@@ -71,7 +72,8 @@
     <string name="title_select_alpha">Drag the slider to select the desired opacity</string>
     <string name="title_select_size">Drag the slider to select the desired size</string>
     <string name="search_bar_section">Search bar</string>
-    <string name="search_bar_size">Bar and text size</string>
+    <string name="search_bar_text_size">Text size</string>
+    <string name="search_bar_height">Bar height</string>
     <string name="result_list_section">Result list</string>
     <string name="icons_pack">Choose pack</string>
     <string name="icons_pack_default_name">System icons</string>
@@ -109,7 +111,7 @@
     <string name="features_summary">Toggle and customize app features</string>
     <string name="quick_list_section">Dock</string>
     <string name="quick_list_enabled">Use dock</string>
-    <string name="quick_list_size">Dock height</string>
+    <string name="quick_list_height">Dock height</string>
     <string name="tags_section">Tags</string>
     <string name="fuzzy_search_tags">Fuzzy-search tags</string>
     <string name="fuzzy_search_tags_summary">When searching include tags as possible match candidates</string>
@@ -136,8 +138,12 @@
     <string name="filter_apps">App filter</string>
     <string name="filter_contacts">Contact filter</string>
     <string name="filter_shortcuts">Shortcuts filter</string>
+    <string name="action_reload">Reload</string>
+    <string name="action_toggle_grid">Toggle grid</string>
     <string name="action_show_apps">Apps A→Z</string>
+    <string name="action_show_apps_grid4">App grid A→Z</string>
     <string name="action_show_apps_reversed">Apps Z→A</string>
+    <string name="action_show_apps_grid4_reversed">App grid Z→A</string>
     <string name="action_show_contacts">Contacts A→Z</string>
     <string name="action_show_contacts_reversed">Contacts Z→A</string>
     <string name="action_show_shortcuts">Shortcuts A→Z</string>
@@ -376,7 +382,7 @@
     <string name="icon_scale_blue">Scale blue</string>
     <string name="icon_scale_alpha">Scale transparency</string>
     <string name="reset_matrix">Set default values</string>
-    <string name="popup_corner_radius">Corner radius</string>
+    <string name="corner_radius">Corner radius</string>
     <string name="behaviour_section">Behaviour</string>
     <string name="behaviour_link_keyboard_search_bar">Link keyboard to search bar visibility</string>
     <string name="behaviour_widget_after_launch">Widget mode after launch</string>
@@ -449,6 +455,13 @@
     <string name="generate_theme_simple_summary">Use primary for background and secondary for text</string>
     <string name="generate_theme_highlight">Highlight theme</string>
     <string name="generate_theme_highlight_summary">Use primary for background and secondary for highlight</string>
+    <string name="result_first_at_bottom">First at bottom</string>
+    <string name="result_right_to_left">Right to left</string>
+    <string name="result_right_to_left_summary">Layout grid row from right to left</string>
+    <string name="debug_provider_status">Provider status</string>
+
+    <string name="exit_tags_manager_confirm">Close Tags manager?</string>
+    <string name="exit_tags_manager_description">You will lose all changes if you close the Tags manager.\nAre you sure you want to continue?</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>

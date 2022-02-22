@@ -1,10 +1,7 @@
 package rocks.tbog.tblauncher.utils;
 
-import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.Log;
-
-import androidx.preference.PreferenceManager;
 
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -16,8 +13,7 @@ public class RootHandler {
     private Boolean isRootAvailable = null;
     private Boolean isRootActivated = null;
 
-    public RootHandler(Context ctx) {
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+    public RootHandler(SharedPreferences prefs) {
         resetRootHandler(prefs);
     }
 

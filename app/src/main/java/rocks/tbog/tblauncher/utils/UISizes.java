@@ -9,6 +9,7 @@ import androidx.annotation.AttrRes;
 import androidx.preference.PreferenceManager;
 
 import rocks.tbog.tblauncher.R;
+import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.ui.CutoutFactory;
 
 public final class UISizes {
@@ -72,6 +73,14 @@ public final class UISizes {
             CACHED_SIZE_RESULT_ICON = dp2px(context, Math.max(1, size));
         }
         return CACHED_SIZE_RESULT_ICON;
+    }
+
+    public static float getResultListRadius(Context context) {
+        SharedPreferences pref = TBApplication.getApplication(context).preferences();
+        if (pref.getBoolean("result-list-rounded", true)) {
+            return context.getResources().getDimension(R.dimen.result_corner_radius);
+        }
+        return 0f;
     }
 
     public static int getTagsMenuIconSize(Context context) {

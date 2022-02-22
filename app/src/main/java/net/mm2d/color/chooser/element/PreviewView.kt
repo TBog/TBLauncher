@@ -19,9 +19,6 @@ import net.mm2d.color.chooser.util.getDimension
 import net.mm2d.color.chooser.util.getPixels
 import kotlin.math.max
 
-/**
- * @author [大前良介 (OHMAE Ryosuke)](mailto:ryo@mm2d.net)
- */
 internal class PreviewView
 @JvmOverloads constructor(
     context: Context,

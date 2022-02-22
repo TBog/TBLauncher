@@ -176,6 +176,32 @@ public class TagsHandler {
     }
 
     /**
+     * Filter out entry ids not found from each set. Remove unused tags from the map.
+     *
+     * @param context used for getting DataHandler to check if entryIds are found.
+     * @param tags    map with tag names as keys.
+     */
+    public static void validateTags(@NonNull Context context, Map<String, Set<String>> tags) {
+        tags.remove("");
+        DataHandler dataHandler = TBApplication.dataHandler(context);
+        for (Iterator<Map.Entry<String, Set<String>>> iteratorTagsMap = tags.entrySet().iterator(); iteratorTagsMap.hasNext(); ) {
+            Map.Entry<String, Set<String>> tagsMapEntry = iteratorTagsMap.next();
+            String tagName = tagsMapEntry.getKey();
+            Set<String> entryIdSet = tagsMapEntry.getValue();
+            for (Iterator<String> iteratorEntryId = entryIdSet.iterator(); iteratorEntryId.hasNext(); ) {
+                String entryId = iteratorEntryId.next();
+                EntryItem entryItem = dataHandler.getPojo(entryId);
+                if (entryItem == null)
+                    iteratorEntryId.remove();
+            }
+            if (tagsMapEntry.getValue().isEmpty()) {
+                Log.i(TAG, "Dropped tag `" + tagName + "`");
+                iteratorTagsMap.remove();
+            }
+        }
+    }
+
+    /**
      * Get all tags from DB, even if not used
      *
      * @return a set of tags

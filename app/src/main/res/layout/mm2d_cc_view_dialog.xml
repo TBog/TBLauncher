@@ -4,30 +4,95 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    tools:parentTag="android.widget.LinearLayout">
+    tools:parentTag="androidx.constraintlayout.widget.ConstraintLayout"
+    tools:theme="@style/SettingsDialogTheme">
 
     <com.google.android.material.tabs.TabLayout
         android:id="@+id/tab_layout"
         style="?attr/tabLayoutStyle"
-        android:layout_width="@dimen/mm2d_cc_dialog_width"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="@dimen/dialog_padding_horizontal"
-        android:layout_marginVertical="@dimen/dialog_padding_vertical" />
+        android:layout_marginHorizontal="@dimen/dialog_margin_horizontal"
+        android:layout_marginTop="@dimen/dialog_margin_vertical"
+        app:layout_constraintBottom_toTopOf="@id/view_pager"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="spread_inside" />
 
-    <net.mm2d.color.chooser.SwipeDisabledViewPager
+    <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/view_pager"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginHorizontal="@dimen/dialog_padding_horizontal"
-        android:layout_marginVertical="@dimen/dialog_padding_vertical"
-        android:layout_weight="1"
-        app:maxHeight="@dimen/mm2d_cc_panel_height" />
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/dialog_margin_horizontal"
+        app:layout_constrainedHeight="true"
+        app:layout_constraintBottom_toTopOf="@id/control_view"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHeight_max="@dimen/mm2d_cc_panel_height"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/tab_layout" />
 
     <net.mm2d.color.chooser.ControlView
         android:id="@+id/control_view"
-        android:layout_width="match_parent"
+        android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_gravity="center_horizontal"
-        android:layout_marginTop="@dimen/mm2d_cc_panel_margin" />
+        android:layout_marginTop="@dimen/mm2d_cc_panel_margin"
+        app:layout_constraintBottom_toTopOf="@android:id/button1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/view_pager" />
+
+    <!-- Alert dialog style buttons along the bottom. -->
+    <LinearLayout
+        android:id="@+id/buttonPanel"
+        style="?android:attr/buttonBarStyle"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
+        android:baselineAligned="false"
+        android:measureWithLargestChild="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/control_view">
+
+        <Button
+            android:id="@android:id/button3"
+            style="?attr/buttonBarNeutralButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:focusable="true"
+            tools:text="@android:string/unknownName"
+            tools:visibility="gone" />
+
+        <android.widget.Space
+            android:id="@+id/spacer"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:visibility="invisible" />
+
+        <Button
+            android:id="@android:id/button2"
+            style="?attr/buttonBarNegativeButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:focusable="true"
+            tools:text="@android:string/cancel" />
+
+        <Button
+            android:id="@android:id/button1"
+            style="?attr/buttonBarPositiveButtonStyle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:clickable="true"
+            android:focusable="true"
+            tools:text="@android:string/ok" />
+    </LinearLayout>
 </merge>

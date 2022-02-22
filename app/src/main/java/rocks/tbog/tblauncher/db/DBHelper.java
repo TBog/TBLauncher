@@ -28,7 +28,7 @@ import rocks.tbog.tblauncher.utils.PrefCache;
 public class DBHelper {
     private static final String TAG = DBHelper.class.getSimpleName();
     private static DB database = null;
-    private static final String[] TABLE_COLUMNS_APPS = new String[]{"_id", "display_name", "component_name", "custom_flags"};//, "custom_icon"};
+    private static final String[] TABLE_COLUMNS_APPS = new String[]{"_id", "display_name", "component_name", "custom_flags"};//, "custom_icon", "cached_icon"};
     private static final String[] TABLE_APPS_CUSTOM_ICON = new String[]{"custom_icon"};
     private static final String[] TABLE_APPS_CACHED_ICON = new String[]{"cached_icon"};
     private static final String[] TABLE_MODS_CUSTOM_ICON = new String[]{"custom_icon"};

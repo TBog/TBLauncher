@@ -23,9 +23,6 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 
-/**
- * @author [大前良介 (OHMAE Ryosuke)](mailto:ryo@mm2d.net)
- */
 internal class SvView
 @JvmOverloads constructor(
     context: Context,
@@ -98,6 +95,9 @@ internal class SvView
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onTouchEvent(event: MotionEvent): Boolean {
+        if (event.action == MotionEvent.ACTION_DOWN) {
+            parent.requestDisallowInterceptTouchEvent(true)
+        }
         val s = ((event.x - targetRect.left) / targetRect.width()).coerceIn(0f, 1f)
         val v = ((targetRect.bottom - event.y) / targetRect.height()).coerceIn(0f, 1f)
         color = ColorUtils.hsvToColor(hue, s, v)

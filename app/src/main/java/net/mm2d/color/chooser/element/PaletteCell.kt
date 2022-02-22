@@ -21,9 +21,6 @@ import rocks.tbog.tblauncher.R.drawable
 import net.mm2d.color.chooser.util.ColorUtils
 import kotlin.math.min
 
-/**
- * @author [大前良介 (OHMAE Ryosuke)](mailto:ryo@mm2d.net)
- */
 internal class PaletteCell @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,

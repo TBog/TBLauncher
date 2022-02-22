@@ -44,8 +44,7 @@ public abstract class DBProvider<T extends EntryItem> implements IProvider<T> {
     public void reload(boolean cancelCurrentLoadTask) {
         if (!cancelCurrentLoadTask && mLoadTask != null)
             return;
-        if (mLoadTask != null)
-            mLoadTask.cancel(true);
+        setDirty();
         Log.i(Provider.TAG, "Starting provider: " + this.getClass().getSimpleName());
         mTimer.start();
         mLoadTask = newLoadTask();
@@ -57,6 +56,11 @@ public abstract class DBProvider<T extends EntryItem> implements IProvider<T> {
     @Override
     public boolean isLoaded() {
         return mIsLoaded;
+    }
+
+    @Override
+    public Timer getLoadDuration() {
+        return mTimer;
     }
 
     protected void setLoaded() {
@@ -104,6 +108,7 @@ public abstract class DBProvider<T extends EntryItem> implements IProvider<T> {
         return null;
     }
 
+    @Nullable
     @Override
     public List<T> getPojos() {
         if (BuildConfig.DEBUG)

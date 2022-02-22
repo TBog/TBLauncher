@@ -70,6 +70,24 @@ public abstract class DialogFragment<Output> extends androidx.fragment.app.Dialo
         mOnNeutralClickListener = listener;
     }
 
+    public DialogFragment<Output> putArgString(@Nullable String key, @Nullable String value) {
+        Bundle args = getArguments();
+        if (args == null)
+            args = new Bundle();
+        args.putString(key, value);
+        setArguments(args);
+        return this;
+    }
+
+    public DialogFragment<Output> putArgLong(@Nullable String key, long value) {
+        Bundle args = getArguments();
+        if (args == null)
+            args = new Bundle();
+        args.putLong(key, value);
+        setArguments(args);
+        return this;
+    }
+
     @Override
     public void onDismiss(@NonNull DialogInterface dialog) {
         if (mOnDismissListener != null)
@@ -127,6 +145,14 @@ public abstract class DialogFragment<Output> extends androidx.fragment.app.Dialo
         return dialog;
     }
 
+    @NonNull
+    public View inflateLayoutRes(@NonNull LayoutInflater inflater, @Nullable ViewGroup container) {
+        //Log.i(TAG, "context=" + getContext());
+        //Log.i(TAG, "dialog.context=" + dialog.getContext());
+        Log.i(TAG, "inflater.context=" + inflater.getContext());
+        return inflater.inflate(layoutRes(), container, false);
+    }
+
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -142,10 +168,7 @@ public abstract class DialogFragment<Output> extends androidx.fragment.app.Dialo
         }
         dialog.setCanceledOnTouchOutside(true);
 
-        //Log.i(TAG, "context=" + getContext());
-        //Log.i(TAG, "dialog.context=" + dialog.getContext());
-        Log.i(TAG, "inflater.context=" + inflater.getContext());
-        View view = inflater.inflate(layoutRes(), container, false);
+        View view = inflateLayoutRes(inflater, container);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             view.setClipToOutline(true);

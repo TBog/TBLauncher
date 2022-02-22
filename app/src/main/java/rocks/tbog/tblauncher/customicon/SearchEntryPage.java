@@ -7,6 +7,7 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
+import androidx.fragment.app.DialogFragment;
 
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.drawable.DrawableUtils;
@@ -21,15 +22,16 @@ public class SearchEntryPage extends CustomShapePage {
     }
 
     @Override
-    void setupView(@NonNull Context context, @Nullable OnItemClickListener iconClickListener, @Nullable OnItemClickListener iconLongClickListener) {
-        super.setupView(context, iconClickListener, iconLongClickListener);
+    void setupView(@NonNull DialogFragment dialogFragment, @Nullable OnItemClickListener iconClickListener, @Nullable OnItemClickListener iconLongClickListener) {
+        Context context = dialogFragment.requireContext();
+        super.setupView(dialogFragment, iconClickListener, iconLongClickListener);
 
         final Drawable originalDrawable;
         // default icon
         {
             Drawable drawable = ContextCompat.getDrawable(context, R.drawable.ic_search);
             originalDrawable = drawable;
-            ShapedIconInfo iconInfo = new DefaultIconInfo(context.getString(R.string.default_static_icon, mEntryName), drawable);
+            ShapedIconInfo iconInfo = new DefaultIconInfo(dialogFragment.getString(R.string.default_static_icon, mEntryName), drawable);
             mShapedIconAdapter.addItem(iconInfo);
         }
 

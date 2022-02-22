@@ -2,19 +2,23 @@ package rocks.tbog.tblauncher.preference;
 
 import android.content.Context;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.preference.DialogPreference;
 
-import net.mm2d.color.chooser.DialogView;
+import net.mm2d.color.chooser.ColorChooserDialog;
+import net.mm2d.color.chooser.ColorChooserView;
 
+import rocks.tbog.tblauncher.databinding.Mm2dCcColorChooserBinding;
 import rocks.tbog.tblauncher.utils.UIColors;
 
-public class ChooseColorDialog extends BasePreferenceDialog {
-    private DialogView mChooseView = null;
+public class PreferenceColorDialog extends BasePreferenceDialog {
+    private ColorChooserView mChooseView = null;
 
-    public static ChooseColorDialog newInstance(String key) {
-        final ChooseColorDialog fragment = new ChooseColorDialog();
+    public static PreferenceColorDialog newInstance(String key) {
+        final PreferenceColorDialog fragment = new PreferenceColorDialog();
         final Bundle b = new Bundle(1);
         b.putString(ARG_KEY, key);
         fragment.setArguments(b);
@@ -52,8 +56,8 @@ public class ChooseColorDialog extends BasePreferenceDialog {
     }
 
     @Override
-    protected View onCreateDialogView(Context context) {
-        mChooseView = new DialogView(context);
+    protected View onCreateDialogView(@NonNull Context context) {
+        mChooseView = Mm2dCcColorChooserBinding.inflate(LayoutInflater.from(context)).getRoot();
 
         Object selectedColor = null;
         {
@@ -67,15 +71,9 @@ public class ChooseColorDialog extends BasePreferenceDialog {
             selectedColor = UIColors.COLOR_DEFAULT;
         }
 
+        mChooseView.setCurrentItem(ColorChooserDialog.TAB_PALETTE);
         mChooseView.init((int) selectedColor, this);
         mChooseView.setWithAlpha(getPreference().getKey().endsWith("-argb"));
-        mChooseView.addObserver(color -> {
-            DialogPreference dialogPreference = getPreference();
-            if (!(dialogPreference instanceof CustomDialogPreference))
-                return;
-            CustomDialogPreference preference = (CustomDialogPreference) dialogPreference;
-            preference.setValue(color);
-        }, this);
 
         return mChooseView;
     }

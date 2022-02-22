@@ -32,11 +32,14 @@ import java.util.List;
 
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
+import rocks.tbog.tblauncher.TBLauncherActivity;
 import rocks.tbog.tblauncher.WorkAsync.RunnableTask;
 import rocks.tbog.tblauncher.db.AppRecord;
 import rocks.tbog.tblauncher.drawable.DrawableUtils;
 import rocks.tbog.tblauncher.drawable.TextDrawable;
 import rocks.tbog.tblauncher.entry.AppEntry;
+import rocks.tbog.tblauncher.entry.ContactEntry;
+import rocks.tbog.tblauncher.entry.DialContactEntry;
 import rocks.tbog.tblauncher.entry.SearchEntry;
 import rocks.tbog.tblauncher.entry.ShortcutEntry;
 import rocks.tbog.tblauncher.entry.StaticEntry;
@@ -156,9 +159,11 @@ public class IconsHandler {
 
                     Log.i("time", timer + " to load icon pack " + packageName);
                     mLoadIconsPackTask = null;
-                    TBApplication app = TBApplication.getApplication(ctx);
-                    app.behaviour().refreshSearchRecords();
-                    app.quickList().reload();
+                    TBLauncherActivity activity = TBApplication.launcherActivity(ctx);
+                    if (activity != null) {
+                        activity.refreshSearchRecords();
+                        activity.queueDockReload();
+                    }
                 }
             });
         }
@@ -183,24 +188,28 @@ public class IconsHandler {
             return;
         }
 
-        Collection<AppEntry> appEntries = TBApplication.appsHandler(ctx).getAllApps();
-        DataHandler dataHandler = TBApplication.dataHandler(ctx);
-        // build the cache
-        for (AppEntry appEntry : appEntries) {
-            Drawable drawable = getDrawableIconForPackage(appEntry.componentName, UserHandleCompat.CURRENT_USER);
-            Bitmap bitmap = getIconBitmap(ctx, drawable);
-            dataHandler.setCachedAppIcon(appEntry.getUserComponentName(), bitmap);
-        }
+        // we add it to the run queue to make sure we run it synchronized
+        TBApplication.appsHandler(ctx).runWhenLoaded(() -> {
+            Collection<AppEntry> appEntries = TBApplication.appsHandler(ctx).getAllApps();
+            DataHandler dataHandler = TBApplication.dataHandler(ctx);
+            // build the cache
+            for (AppEntry appEntry : appEntries) {
+                Drawable drawable = getDrawableIconForPackage(appEntry.componentName, UserHandleCompat.CURRENT_USER);
+                Bitmap bitmap = getIconBitmap(ctx, drawable);
+                dataHandler.setCachedAppIcon(appEntry.getUserComponentName(), bitmap);
+            }
 
-        // save icon pack name and version
-        prefs.edit()
-            .putLong("cached-app-icons-version", cacheVersion)
-            .putString("cached-app-icons-pack", mIconPack.getPackPackageName())
-            .apply();
+            // save icon pack name and version
+            prefs.edit()
+                .putLong("cached-app-icons-version", cacheVersion)
+                .putString("cached-app-icons-pack", mIconPack.getPackPackageName())
+                .apply();
 
-        Log.i(TAG, "cached app icons changed from " +
-            "`" + packName + "` v" + version + " to " +
-            "`" + mIconPack.getPackPackageName() + "` v" + cacheVersion);
+            Log.i(TAG, "cached app icons changed from " +
+                "`" + packName + "` v" + version + " to " +
+                "`" + mIconPack.getPackPackageName() + "` v" + cacheVersion);
+
+        });
     }
 
     public void resetCachedAppIcons() {
@@ -369,6 +378,15 @@ public class IconsHandler {
         return null;
     }
 
+    public Drawable getCustomIcon(ContactEntry contactEntry) {
+        Bitmap bitmap = TBApplication.dataHandler(ctx).getCustomEntryIconById(contactEntry.id);
+        if (bitmap != null)
+            return new BitmapDrawable(ctx.getResources(), bitmap);
+
+        Log.e(TAG, "Unable to get custom icon for " + contactEntry.id);
+        return null;
+    }
+
     @WorkerThread
     public Drawable getCachedAppIcon(String componentName) {
         Bitmap bitmap = TBApplication.dataHandler(ctx).getCachedAppIcon(componentName);
@@ -437,6 +455,16 @@ public class IconsHandler {
         app.drawableCache().cacheDrawable(searchEntry.getIconCacheId(), drawable);
     }
 
+    public void changeIcon(DialContactEntry dialContactEntry, Drawable drawable) {
+        Bitmap bitmap = getIconBitmap(ctx, drawable);
+        TBApplication app = TBApplication.getApplication(ctx);
+        app.getDataHandler().setCustomStaticEntryIcon(DialContactEntry.SCHEME, bitmap);
+
+        app.drawableCache().cacheDrawable(dialContactEntry.getIconCacheId(), null);
+        dialContactEntry.setCustomIcon();
+        app.drawableCache().cacheDrawable(dialContactEntry.getIconCacheId(), drawable);
+    }
+
     public void restoreDefaultIcon(AppEntry appEntry) {
         TBApplication app = TBApplication.getApplication(ctx);
         app.getDataHandler().removeCustomAppIcon(appEntry.getUserComponentName());
@@ -467,6 +495,14 @@ public class IconsHandler {
 
         app.drawableCache().cacheDrawable(searchEntry.getIconCacheId(), null);
         searchEntry.clearCustomIcon();
+    }
+
+    public void restoreDefaultIcon(DialContactEntry dialContactEntry) {
+        TBApplication app = TBApplication.getApplication(ctx);
+        app.getDataHandler().removeCustomStaticEntryIcon(DialContactEntry.SCHEME);
+
+        app.drawableCache().cacheDrawable(dialContactEntry.getIconCacheId(), null);
+        dialContactEntry.clearCustomIcon();
     }
 
     public Drawable applyContactMask(@NonNull Context ctx, @NonNull Drawable drawable) {

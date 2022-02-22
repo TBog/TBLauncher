@@ -41,7 +41,7 @@ class DB extends SQLiteOpenHelper {
     }
 
     private void addAppsTable(SQLiteDatabase db) {
-        db.execSQL("CREATE TABLE \"apps\" ( _id INTEGER PRIMARY KEY AUTOINCREMENT, display_name TEXT NOT NULL DEFAULT '', component_name TEXT NOT NULL UNIQUE, custom_flags INTEGER DEFAULT 0, custom_icon BLOB DEFAULT NULL )");
+        db.execSQL("CREATE TABLE \"apps\" ( _id INTEGER PRIMARY KEY AUTOINCREMENT, display_name TEXT NOT NULL DEFAULT '', component_name TEXT NOT NULL UNIQUE, custom_flags INTEGER DEFAULT 0, custom_icon BLOB DEFAULT NULL, cached_icon BLOB DEFAULT NULL)");
         db.execSQL("CREATE INDEX \"index_component\" ON \"apps\"(component_name);");
     }
 

@@ -349,6 +349,6 @@ public abstract class EntryItem {
     }
 
     public void doLaunch(@NonNull View view, int flags) {
-        throw new RuntimeException("No launch action defined for " + getClass().getSimpleName());
+        throw new IllegalStateException("No launch action defined for " + getClass().getSimpleName());
     }
 }

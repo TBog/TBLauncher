@@ -7,6 +7,7 @@ import android.os.IBinder;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,6 +18,7 @@ import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.TBLauncherActivity;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.loader.LoadEntryItem;
+import rocks.tbog.tblauncher.utils.Timer;
 
 public abstract class Provider<T extends EntryItem> extends Service implements IProvider<T> {
     final static String TAG = "Provider";
@@ -37,7 +39,7 @@ public abstract class Provider<T extends EntryItem> extends Service implements I
     @NonNull
     private String pojoScheme = "(none)://";
 
-    private long start;
+    private final Timer mTimer = new Timer();
 
     /**
      * (Re-)load the providers resources when the provider has been completely initialized
@@ -55,8 +57,8 @@ public abstract class Provider<T extends EntryItem> extends Service implements I
         return loader != null;
     }
 
-    void initialize(@NonNull LoadEntryItem<T> loader) {
-        start = System.currentTimeMillis();
+    protected void initialize(@NonNull LoadEntryItem<T> loader) {
+        mTimer.start();
 
         if (this.loader != null)
             this.loader.cancel(false);
@@ -89,15 +91,21 @@ public abstract class Provider<T extends EntryItem> extends Service implements I
         return this.loaded;
     }
 
+    @Nullable
+    @Override
+    public Timer getLoadDuration() {
+        return mTimer;
+    }
+
     @Override
     public int getLoadStep() {
         return LOAD_STEP_1;
     }
 
     public void loadOver(ArrayList<T> results) {
-        long time = System.currentTimeMillis() - start;
+        mTimer.stop();
 
-        Log.i(TAG, "Time to load " + this.getClass().getSimpleName() + ": " + time + "ms");
+        Log.i(TAG, "Time to load " + this.getClass().getSimpleName() + ": " + mTimer);
 
         // Store results
         this.pojos = results;
@@ -141,6 +149,7 @@ public abstract class Provider<T extends EntryItem> extends Service implements I
         return null;
     }
 
+    @Nullable
     @Override
     public List<T> getPojos() {
         if (BuildConfig.DEBUG)

@@ -22,8 +22,6 @@ import rocks.tbog.tblauncher.MimeTypeCache;
 import rocks.tbog.tblauncher.Permission;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.entry.ContactEntry;
-import rocks.tbog.tblauncher.normalizer.PhoneNormalizer;
-import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.utils.MimeTypeUtils;
 import rocks.tbog.tblauncher.utils.Timer;
 
@@ -216,23 +214,21 @@ public class LoadContactsEntry extends LoadEntryItem<ContactEntry> {
                     BasicRawContact basicRawContact = basicRawContacts.get(rawContactId);
 
                     if (basicContact != null && basicRawContact != null) {
-                        String name = basicContact.getDisplayName();
-                        long contactId = basicContact.getContactId();
-
                         String phone = phoneCursor.getString(numberIndex);
                         if (phone == null) {
                             phone = "";
                         }
 
-                        StringNormalizer.Result normalizedPhone = PhoneNormalizer.simplifyPhoneNumber(phone);
-                        boolean starred = basicRawContact.isStarred();
-                        boolean primary = phoneCursor.getInt(isPrimaryIndex) != 0;
-                        Uri icon = basicContact.getIcon();
-
-                        ContactEntry contact = ContactEntry.newPhoneContact(contactId, phone, normalizedPhone, lookupKey, icon, primary, starred);
-
-                        contact.setName(name);
-                        contact.setNickname(basicContact.getNickName());
+                        ContactEntry contact = new ContactEntry.Builder()
+                            .setContactId(basicContact.getContactId())
+                            .setPhone(phone)
+                            .setPrimary(phoneCursor.getInt(isPrimaryIndex) != 0)
+                            .setLookupKey(lookupKey)
+                            .setStarred(basicRawContact.isStarred())
+                            .setIconUri(basicContact.getIcon())
+                            .setName(basicContact.getDisplayName())
+                            .setNickname(basicContact.getNickName())
+                            .getContact();
 
                         addContactToMap(contact, mapContacts);
                     }
@@ -241,7 +237,7 @@ public class LoadContactsEntry extends LoadEntryItem<ContactEntry> {
             phoneCursor.close();
         }
 
-        return getFilteredContacts(mapContacts, contact -> contact.normalizedPhone.toString());
+        return getFilteredContacts(mapContacts, contact -> contact.normalizedPhone);
     }
 
     private ArrayList<ContactEntry> createGenericContacts(String mimeType, Map<String, BasicContact> basicContacts, Map<Long, BasicRawContact> basicRawContacts, String mimeLabel) {
@@ -283,9 +279,7 @@ public class LoadContactsEntry extends LoadEntryItem<ContactEntry> {
                     BasicRawContact basicRawContact = basicRawContacts.get(rawContactId);
 
                     if (basicContact != null && basicRawContact != null) {
-                        long contactId = basicContact.getContactId();
                         long id = mimeTypeCursor.getLong(idIndex);
-                        boolean primary = mimeTypeCursor.getInt(isPrimaryIndex) != 0;
                         String label = null;
                         if (detailColumnIndex >= 0) {
                             label = mimeTypeCursor.getString(detailColumnIndex);
@@ -293,15 +287,21 @@ public class LoadContactsEntry extends LoadEntryItem<ContactEntry> {
                         if (label == null) {
                             label = mimeTypeCache.getLabel(context.get(), mimeType);
                         }
-                        Uri icon = basicContact.getIcon();
 
-                        ContactEntry contact = ContactEntry.newGenericContact(contactId, MimeTypeUtils.getShortMimeType(mimeType), id, lookupKey, icon, primary, basicRawContact.isStarred());
-
-                        contact.setName(basicContact.getDisplayName());
-                        contact.setNickname(basicContact.getNickName());
                         ContactEntry.ImData imData = new ContactEntry.ImData(mimeType, id, mimeLabel);
                         imData.setIdentifier(label);
-                        contact.setIm(imData);
+
+                        ContactEntry contact = new ContactEntry.Builder()
+                            .setContactId(basicContact.getContactId())
+                            .setMimeInfo(id, MimeTypeUtils.getShortMimeType(mimeType))
+                            .setPrimary(mimeTypeCursor.getInt(isPrimaryIndex) != 0)
+                            .setLookupKey(lookupKey)
+                            .setStarred(basicRawContact.isStarred())
+                            .setIconUri(basicContact.getIcon())
+                            .setName(basicContact.getDisplayName())
+                            .setNickname(basicContact.getNickName())
+                            .setImData(imData)
+                            .getContact();
 
                         addContactToMap(contact, mapContacts);
                     }
@@ -353,9 +353,9 @@ public class LoadContactsEntry extends LoadEntryItem<ContactEntry> {
 
             // If no primary available, add all (excluding duplicates).
             if (!hasPrimary) {
-                HashSet<String> added = new HashSet<>(mappedContacts.size());
+                HashSet<Object> added = new HashSet<>(mappedContacts.size());
                 for (ContactEntry contact : mappedContacts) {
-                    String id = idSupplier.getId(contact);
+                    Object id = idSupplier.getId(contact);
                     if (id == null) {
                         contacts.add(contact);
                     } else if (!added.contains(id)) {
@@ -371,7 +371,7 @@ public class LoadContactsEntry extends LoadEntryItem<ContactEntry> {
     // TODO: move to separate class, which package?
     @FunctionalInterface
     public interface IdSupplier {
-        String getId(ContactEntry contact);
+        Object getId(ContactEntry contact);
     }
 
     // TODO: move to separate class, which package?

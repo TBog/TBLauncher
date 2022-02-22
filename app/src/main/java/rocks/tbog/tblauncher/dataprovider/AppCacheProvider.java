@@ -3,6 +3,7 @@ package rocks.tbog.tblauncher.dataprovider;
 import android.util.Log;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 
 import java.util.Collection;
@@ -14,6 +15,7 @@ import rocks.tbog.tblauncher.handler.AppsHandler;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.searcher.Searcher;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
+import rocks.tbog.tblauncher.utils.Timer;
 
 public class AppCacheProvider implements IProvider<AppEntry> {
     final static String TAG = "AppCP";
@@ -58,6 +60,11 @@ public class AppCacheProvider implements IProvider<AppEntry> {
     }
 
     @Override
+    public Timer getLoadDuration() {
+        return null;
+    }
+
+    @Override
     public void setDirty() {
         // do nothing, we already have the full list of items
     }
@@ -77,6 +84,7 @@ public class AppCacheProvider implements IProvider<AppEntry> {
         return null;
     }
 
+    @Nullable
     @Override
     public List<AppEntry> getPojos() {
         return null;

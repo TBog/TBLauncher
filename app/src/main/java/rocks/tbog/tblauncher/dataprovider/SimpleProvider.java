@@ -1,11 +1,13 @@
 package rocks.tbog.tblauncher.dataprovider;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.util.List;
 
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.searcher.Searcher;
+import rocks.tbog.tblauncher.utils.Timer;
 
 /**
  * Unlike normal providers, simple providers are not Android Services but classic Android class
@@ -27,6 +29,12 @@ public abstract class SimpleProvider<T extends EntryItem> implements IProvider<T
         return true;
     }
 
+    @Nullable
+    @Override
+    public Timer getLoadDuration() {
+        return null;
+    }
+
     @Override
     public void setDirty() {
     }
@@ -46,6 +54,7 @@ public abstract class SimpleProvider<T extends EntryItem> implements IProvider<T
         return null;
     }
 
+    @Nullable
     @Override
     public List<T> getPojos() {
         return null;

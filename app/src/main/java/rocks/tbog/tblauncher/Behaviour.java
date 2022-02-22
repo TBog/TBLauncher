@@ -35,22 +35,24 @@ import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.ActionBar;
 import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.fragment.app.FragmentActivity;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
 import rocks.tbog.tblauncher.customicon.IconSelectDialog;
+import rocks.tbog.tblauncher.dataprovider.IProvider;
 import rocks.tbog.tblauncher.dataprovider.TagsProvider;
 import rocks.tbog.tblauncher.drawable.LoadingDrawable;
 import rocks.tbog.tblauncher.entry.ActionEntry;
 import rocks.tbog.tblauncher.entry.AppEntry;
+import rocks.tbog.tblauncher.entry.DialContactEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.EntryWithTags;
 import rocks.tbog.tblauncher.entry.SearchEntry;
@@ -62,6 +64,7 @@ import rocks.tbog.tblauncher.result.CustomRecycleLayoutManager;
 import rocks.tbog.tblauncher.result.RecycleAdapter;
 import rocks.tbog.tblauncher.result.RecycleScrollListener;
 import rocks.tbog.tblauncher.result.ResultHelper;
+import rocks.tbog.tblauncher.result.ResultItemDecoration;
 import rocks.tbog.tblauncher.searcher.ISearchActivity;
 import rocks.tbog.tblauncher.searcher.QuerySearcher;
 import rocks.tbog.tblauncher.searcher.Searcher;
@@ -195,19 +198,20 @@ public class Behaviour implements ISearchActivity {
         if (mResultList == null)
             throw new IllegalStateException("mResultList==null");
 
-        RecyclerView.LayoutManager layoutManager;
         RecycleScrollListener recycleScrollListener;
-
-        layoutManager = new CustomRecycleLayoutManager();
         recycleScrollListener = new RecycleScrollListener(mKeyboardHandler);
 
         mResultAdapter = new RecycleAdapter(getContext(), new ArrayList<>());
 
         mResultList.setHasFixedSize(true);
-        mResultList.setLayoutManager(layoutManager);
         mResultList.setAdapter(mResultAdapter);
         mResultList.addOnScrollListener(recycleScrollListener);
 //        mResultList.addOnLayoutChangeListener(recycleScrollListener);
+
+        int vertical = getContext().getResources().getDimensionPixelSize(R.dimen.result_margin_vertical);
+        mResultList.addItemDecoration(new ResultItemDecoration(0, vertical, true));
+
+        setListLayout();
     }
 
     private void initSearchBarContainer() {
@@ -311,9 +315,16 @@ public class Behaviour implements ISearchActivity {
 
         // On validate, launch first record
         mSearchEditText.setOnEditorActionListener((view, actionId, event) -> {
-            // if keyboard closed
-            if (actionId == android.R.id.closeButton)
+            // Return true if you have consumed the action, else false.
+
+            // if keyboard close action issued
+            if (actionId == android.R.id.closeButton) {
+                // Fix for #238
+                TBApplication.state().syncKeyboardVisibility(view);
+                if (TBApplication.state().isKeyboardHidden())
+                    return false;
                 return onKeyboardClosed();
+            }
 
             // launch most relevant result
             final int mostRelevantIdx = mResultList.getAdapterFirstItemIdx();
@@ -331,6 +342,8 @@ public class Behaviour implements ISearchActivity {
             @Override
             public void showKeyboard() {
                 LauncherState state = TBApplication.state();
+                if (TBApplication.activityInvalid(mTBLauncherActivity))
+                    return;
 
                 if (state.isSearchBarVisible() && PrefCache.modeSearchFullscreen(mPref)) {
                     showSystemBars();
@@ -339,7 +352,7 @@ public class Behaviour implements ISearchActivity {
 
                 Log.i(TAG, "Keyboard - SHOW");
                 state.setKeyboard(LauncherState.AnimatedVisibility.VISIBLE);
-                mTBLauncherActivity.dismissPopup();
+                dismissPopup();
 
                 mSearchEditText.requestFocus();
 
@@ -348,15 +361,16 @@ public class Behaviour implements ISearchActivity {
 
             @Override
             public void hideKeyboard() {
-                Log.i(TAG, "Keyboard - HIDE");
-
+                if (TBApplication.activityInvalid(mTBLauncherActivity))
+                    return;
                 if (TBApplication.state().isSearchBarVisible() && PrefCache.modeSearchFullscreen(mPref)) {
                     //hideSystemBars();
                     enableFullscreen(0);
                 }
 
+                Log.i(TAG, "Keyboard - HIDE");
                 TBApplication.state().setKeyboard(LauncherState.AnimatedVisibility.HIDDEN);
-                mTBLauncherActivity.dismissPopup();
+                dismissPopup();
 
                 View focus = mTBLauncherActivity.getCurrentFocus();
                 if (focus != null)
@@ -442,7 +456,7 @@ public class Behaviour implements ISearchActivity {
         });
     }
 
-    public void onPostCreate() {
+    public void onStart() {
         String initialDesktop = mPref.getString("initial-desktop", null);
         if (executeAction(initialDesktop, null))
             return;
@@ -546,6 +560,8 @@ public class Behaviour implements ISearchActivity {
     }
 
     private void showDesktop(LauncherState.Desktop mode) {
+        if (TBApplication.activityInvalid(mTBLauncherActivity))
+            return;
         TBApplication.state().setDesktop(mode);
         switch (mode) {
             case SEARCH:
@@ -557,7 +573,7 @@ public class Behaviour implements ISearchActivity {
                 else
                     TBApplication.quickList(getContext()).hideQuickList(false);
                 // enable/disable fullscreen (status and navigation bar)
-                if (!TBApplication.state().isKeyboardVisible()
+                if (TBApplication.state().isKeyboardHidden()
                     && PrefCache.modeSearchFullscreen(mPref))
                     enableFullscreen(UI_ANIMATION_DELAY);
                 else
@@ -688,6 +704,7 @@ public class Behaviour implements ISearchActivity {
     }
 
     private void showSearchBar() {
+        mSearchEditText.setEnabled(true);
         setSearchHint();
 
         mSearchBarContainer.animate().cancel();
@@ -706,9 +723,14 @@ public class Behaviour implements ISearchActivity {
 
                 @Override
                 public void onAnimationEnd(Animator animation) {
-                    TBApplication.state().setSearchBar(LauncherState.AnimatedVisibility.VISIBLE);
+                    LauncherState state = TBApplication.state();
+                    state.setSearchBar(LauncherState.AnimatedVisibility.VISIBLE);
                     if (PrefCache.linkKeyboardAndSearchBar(mPref))
                         showKeyboard();
+                    else {
+                        // sync keyboard state
+                        state.syncKeyboardVisibility(mSearchEditText);
+                    }
                 }
             })
             .start();
@@ -767,6 +789,8 @@ public class Behaviour implements ISearchActivity {
 
         if (PrefCache.linkKeyboardAndSearchBar(mPref))
             hideKeyboard();
+        // disabling mSearchEditText will most probably also close the keyboard
+        mSearchEditText.setEnabled(false);
     }
 
     private void showWidgets() {
@@ -821,8 +845,44 @@ public class Behaviour implements ISearchActivity {
         updateClearButton();
     }
 
+    public boolean showProviderEntries(@Nullable IProvider<?> provider) {
+        return showProviderEntries(provider, null);
+    }
+
+    public boolean showProviderEntries(@Nullable IProvider<?> provider, @Nullable java.util.Comparator<? super EntryItem> comparator) {
+        if (TBApplication.state().getDesktop() != LauncherState.Desktop.SEARCH) {
+            // TODO: switchToDesktop might show the result list, we may need to prevent this as an optimization
+            switchToDesktop(LauncherState.Desktop.SEARCH);
+            clearAdapter();
+        }
+
+        List<? extends EntryItem> entries = provider != null ? provider.getPojos() : null;
+        if (entries != null && entries.size() > 0) {
+//            // copy list in order to change it
+//            entries = new ArrayList<>(entries);
+//            // remove actions and filters from the result list
+//            for (Iterator<? extends EntryItem> iterator = entries.iterator(); iterator.hasNext(); ) {
+//                EntryItem entry = iterator.next();
+//                if (entry instanceof FilterEntry)
+//                    iterator.remove();
+//            }
+
+            if (comparator != null) {
+                // copy list in order to change it
+                entries = new ArrayList<>(entries);
+                //TODO: do we need this on another thread?
+                Collections.sort(entries, comparator);
+            }
+
+            updateAdapter(entries, false);
+            return true;
+        }
+
+        return false;
+    }
+
     @Override
-    public void updateAdapter(List<? extends EntryItem> results, boolean isRefresh) {
+    public void updateAdapter(@NonNull List<? extends EntryItem> results, boolean isRefresh) {
         Log.d(TAG, "updateAdapter " + results.size() + " result(s); isRefresh=" + isRefresh);
 
         if (!isFragmentDialogVisible()) {
@@ -842,7 +902,7 @@ public class Behaviour implements ISearchActivity {
     }
 
     @Override
-    public void removeResult(EntryItem result) {
+    public void removeResult(@NonNull EntryItem result) {
         // Do not reset scroll, we want the remaining items to still be in view
         mResultAdapter.removeResult(result);
     }
@@ -902,7 +962,7 @@ public class Behaviour implements ISearchActivity {
             mResultList.getRecycledViewPool().clear();
         }
         if (mResultAdapter != null) {
-            mResultAdapter.setGridLayout(getContext(), false);
+            mResultAdapter.setGridLayout(getContext(), isGridLayout());
             mResultAdapter.refresh();
         }
     }
@@ -991,7 +1051,7 @@ public class Behaviour implements ISearchActivity {
         searcher.setRefresh(isRefresh);
 
         resetTask();
-        mTBLauncherActivity.dismissPopup();
+        dismissPopup();
 
         TBApplication.runTask(getContext(), searcher);
         showResultList(true);
@@ -1024,6 +1084,46 @@ public class Behaviour implements ISearchActivity {
         mMenuButton.performClick();
     }
 
+    public void setListLayout() {
+        // update adapter draw flags
+        mResultAdapter.setGridLayout(getContext(), false);
+
+        // get layout manager
+        RecyclerView.LayoutManager layoutManager = mResultList.getLayoutManager();
+        if (!(layoutManager instanceof CustomRecycleLayoutManager))
+            mResultList.setLayoutManager(layoutManager = new CustomRecycleLayoutManager());
+
+        CustomRecycleLayoutManager lm = (CustomRecycleLayoutManager) layoutManager;
+        lm.setBottomToTop(PrefCache.firstAtBottom(mPref));
+        lm.setColumns(1, false);
+    }
+
+    public void setGridLayout() {
+        setGridLayout(3);
+    }
+
+    public void setGridLayout(int columnCount) {
+        // update adapter draw flags
+        mResultAdapter.setGridLayout(getContext(), true);
+
+        // get layout manager
+        RecyclerView.LayoutManager layoutManager = mResultList.getLayoutManager();
+        if (!(layoutManager instanceof CustomRecycleLayoutManager))
+            mResultList.setLayoutManager(layoutManager = new CustomRecycleLayoutManager());
+
+        CustomRecycleLayoutManager lm = (CustomRecycleLayoutManager) layoutManager;
+        lm.setBottomToTop(PrefCache.firstAtBottom(mPref));
+        lm.setRightToLeft(PrefCache.rightToLeft(mPref));
+        lm.setColumns(columnCount, false);
+    }
+
+    public boolean isGridLayout() {
+        RecyclerView.LayoutManager layoutManager = mResultList.getLayoutManager();
+        if (layoutManager instanceof CustomRecycleLayoutManager)
+            return ((CustomRecycleLayoutManager) layoutManager).getColumnCount() > 1;
+        return false;
+    }
+
     /**
      * Handle the back button press. Returns true if action handled.
      *
@@ -1054,74 +1154,66 @@ public class Behaviour implements ISearchActivity {
     }
 
     boolean onKeyboardClosed() {
-        if (mTBLauncherActivity.dismissPopup())
+        if (dismissPopup())
             return true;
         LauncherState state = TBApplication.state();
-        state.setKeyboard(LauncherState.AnimatedVisibility.HIDDEN);
+
         if (state.isSearchBarVisible() && PrefCache.modeSearchFullscreen(mPref))
             enableFullscreen(0);
         if (PrefCache.linkCloseKeyboardToBackButton(mPref))
             onBackPressed();
-        if (!state.isKeyboardVisible())
-            onBackPressed();
+
         // check if we should hide the keyboard
-        return state.isSearchBarVisible() && PrefCache.linkKeyboardAndSearchBar(mPref);
+        boolean closeKeyboard = state.isSearchBarVisible() && PrefCache.linkKeyboardAndSearchBar(mPref);
+        if (closeKeyboard)
+            state.setKeyboard(LauncherState.AnimatedVisibility.HIDDEN);
+        return closeKeyboard;
+    }
+
+    @NonNull
+    public static IconSelectDialog getCustomIconDialog(@NonNull Context ctx, boolean hideResultList) {
+        IconSelectDialog dialog = new IconSelectDialog();
+        //openFragmentDialog(dialog, DIALOG_CUSTOM_ICON);
+        if (hideResultList) {
+            // If results are visible
+            if (TBApplication.state().isResultListVisible()) {
+                final Behaviour behaviour = TBApplication.behaviour(ctx);
+                behaviour.mResultLayout.setVisibility(View.INVISIBLE);
+                // OnDismiss: We restore mResultLayout visibility
+                dialog.setOnDismissListener(dlg -> behaviour.mResultLayout.setVisibility(View.VISIBLE));
+            }
+        }
+
+        //dialog.show(mTBLauncherActivity.getSupportFragmentManager(), DIALOG_CUSTOM_ICON);
+        return dialog;
     }
 
     public void launchCustomIconDialog(AppEntry appEntry) {
-        IconSelectDialog dialog = new IconSelectDialog();
-        openFragmentDialog(dialog, DIALOG_CUSTOM_ICON);
-
-        // If mResultLayout is visible
-//        boolean bResultListVisible = TBApplication.state().isResultListVisible();
-//        if (bResultListVisible)
-//            mResultLayout.setVisibility(View.INVISIBLE);
-
-        // set args
-        {
-            Bundle args = new Bundle();
-            args.putString("componentName", appEntry.getUserComponentName());
-            args.putLong("customIcon", appEntry.getCustomIcon());
-            args.putString("entryName", appEntry.getName());
-            dialog.setArguments(args);
-        }
-        // OnDismiss: We restore mResultLayout visibility
-//        if (bResultListVisible)
-//            dialog.setOnDismissListener(dlg -> mResultLayout.setVisibility(View.VISIBLE));
+        IconSelectDialog dialog = getCustomIconDialog(getContext(), false);
+        dialog
+            .putArgString("componentName", appEntry.getUserComponentName())
+            .putArgLong("customIcon", appEntry.getCustomIcon())
+            .putArgString("entryName", appEntry.getName());
 
         dialog.setOnConfirmListener(drawable -> {
-            TBApplication app = TBApplication.getApplication(mTBLauncherActivity);
+            TBApplication app = TBApplication.getApplication(getContext());
             if (drawable == null)
                 app.iconsHandler().restoreDefaultIcon(appEntry);
             else
                 app.iconsHandler().changeIcon(appEntry, drawable);
             // force a result refresh to update the icon in the view
             refreshSearchRecord(appEntry);
-            app.quickList().reload();
+            mTBLauncherActivity.queueDockReload();
         });
-        dialog.show(mTBLauncherActivity.getSupportFragmentManager(), DIALOG_CUSTOM_ICON);
+        showDialog(dialog, DIALOG_CUSTOM_ICON);
     }
 
     public void launchCustomIconDialog(ShortcutEntry shortcutEntry) {
-        IconSelectDialog dialog = new IconSelectDialog();
-        openFragmentDialog(dialog, DIALOG_CUSTOM_ICON);
-
-        // If mResultLayout is visible
-        boolean bResultListVisible = TBApplication.state().isResultListVisible();
-        if (bResultListVisible) {
-            mResultLayout.setVisibility(View.INVISIBLE);
-            // OnDismiss: We restore mResultLayout visibility
-            dialog.setOnDismissListener(dlg -> mResultLayout.setVisibility(View.VISIBLE));
-        }
-
-        // set args
-        {
-            Bundle args = new Bundle();
-            args.putString("packageName", shortcutEntry.packageName);
-            args.putString("shortcutData", shortcutEntry.shortcutData);
-            args.putString("shortcutId", shortcutEntry.id);
-            dialog.setArguments(args);
-        }
+        IconSelectDialog dialog = getCustomIconDialog(getContext(), true);
+        dialog
+            .putArgString("packageName", shortcutEntry.packageName)
+            .putArgString("shortcutData", shortcutEntry.shortcutData)
+            .putArgString("shortcutId", shortcutEntry.id);
 
         dialog.setOnConfirmListener(drawable -> {
             final TBApplication app = TBApplication.getApplication(mTBLauncherActivity);
@@ -1131,9 +1223,9 @@ public class Behaviour implements ISearchActivity {
                 app.iconsHandler().changeIcon(shortcutEntry, drawable);
             // force a result refresh to update the icon in the view
             refreshSearchRecord(shortcutEntry);
-            app.quickList().reload();
+            mTBLauncherActivity.queueDockReload();
         });
-        dialog.show(mTBLauncherActivity.getSupportFragmentManager(), DIALOG_CUSTOM_ICON);
+        showDialog(dialog, DIALOG_CUSTOM_ICON);
     }
 
     public void launchCustomIconDialog(@NonNull StaticEntry staticEntry) {
@@ -1141,23 +1233,8 @@ public class Behaviour implements ISearchActivity {
     }
 
     public void launchCustomIconDialog(@NonNull StaticEntry staticEntry, @Nullable Runnable afterConfirmation) {
-        IconSelectDialog dialog = new IconSelectDialog();
-        openFragmentDialog(dialog, DIALOG_CUSTOM_ICON);
-
-        // If mResultLayout is visible
-        boolean bResultListVisible = TBApplication.state().isResultListVisible();
-        if (bResultListVisible) {
-            mResultLayout.setVisibility(View.INVISIBLE);
-            // OnDismiss: We restore mResultLayout visibility
-            dialog.setOnDismissListener(dlg -> mResultLayout.setVisibility(View.VISIBLE));
-        }
-
-        // set args
-        {
-            Bundle args = new Bundle();
-            args.putString("entryId", staticEntry.id);
-            dialog.setArguments(args);
-        }
+        IconSelectDialog dialog = getCustomIconDialog(getContext(), true);
+        dialog.putArgString("entryId", staticEntry.id);
 
         dialog.setOnConfirmListener(drawable -> {
             final TBApplication app = TBApplication.getApplication(mTBLauncherActivity);
@@ -1167,32 +1244,18 @@ public class Behaviour implements ISearchActivity {
                 app.iconsHandler().changeIcon(staticEntry, drawable);
             // force a result refresh to update the icon in the view
             refreshSearchRecord(staticEntry);
-            app.quickList().reload();
+            mTBLauncherActivity.queueDockReload();
             if (afterConfirmation != null)
                 afterConfirmation.run();
         });
-        dialog.show(mTBLauncherActivity.getSupportFragmentManager(), DIALOG_CUSTOM_ICON);
+        showDialog(dialog, DIALOG_CUSTOM_ICON);
     }
 
     public void launchCustomIconDialog(@NonNull SearchEntry searchEntry, @Nullable Runnable afterConfirmation) {
-        IconSelectDialog dialog = new IconSelectDialog();
-        openFragmentDialog(dialog, DIALOG_CUSTOM_ICON);
-
-        // If mResultLayout is visible
-        boolean bResultListVisible = TBApplication.state().isResultListVisible();
-        if (bResultListVisible) {
-            mResultLayout.setVisibility(View.INVISIBLE);
-            // OnDismiss: We restore mResultLayout visibility
-            dialog.setOnDismissListener(dlg -> mResultLayout.setVisibility(View.VISIBLE));
-        }
-
-        // set args
-        {
-            Bundle args = new Bundle();
-            args.putString("searchEntryId", searchEntry.id);
-            args.putString("searchName", searchEntry.getName());
-            dialog.setArguments(args);
-        }
+        IconSelectDialog dialog = getCustomIconDialog(getContext(), true);
+        dialog
+            .putArgString("searchEntryId", searchEntry.id)
+            .putArgString("searchName", searchEntry.getName());
 
         dialog.setOnConfirmListener(drawable -> {
             final TBApplication app = TBApplication.getApplication(mTBLauncherActivity);
@@ -1202,11 +1265,35 @@ public class Behaviour implements ISearchActivity {
                 app.iconsHandler().changeIcon(searchEntry, drawable);
             // force a result refresh to update the icon in the view
             refreshSearchRecord(searchEntry);
-            app.quickList().reload();
+            mTBLauncherActivity.queueDockReload();
             if (afterConfirmation != null)
                 afterConfirmation.run();
         });
-        dialog.show(mTBLauncherActivity.getSupportFragmentManager(), DIALOG_CUSTOM_ICON);
+        showDialog(dialog, DIALOG_CUSTOM_ICON);
+    }
+
+    /**
+     * Change the icon for the "Dial" contact
+     *
+     * @param dialEntry entry that currently holds the "Dial" icon
+     */
+    public void launchCustomIconDialog(@NonNull DialContactEntry dialEntry) {
+        IconSelectDialog dialog = getCustomIconDialog(getContext(), true);
+        dialog
+            .putArgString("contactEntryId", dialEntry.id)
+            .putArgString("contactName", dialEntry.getName());
+
+        dialog.setOnConfirmListener(drawable -> {
+            final TBApplication app = TBApplication.getApplication(getContext());
+            if (drawable == null)
+                app.iconsHandler().restoreDefaultIcon(dialEntry);
+            else
+                app.iconsHandler().changeIcon(dialEntry, drawable);
+            // force a result refresh to update the icon in the view
+            refreshSearchRecord(dialEntry);
+            mTBLauncherActivity.queueDockReload();
+        });
+        showDialog(dialog, DIALOG_CUSTOM_ICON);
     }
 
     public void launchEditTagsDialog(EntryWithTags entry) {
@@ -1222,7 +1309,7 @@ public class Behaviour implements ISearchActivity {
         }
 
         dialog.setOnConfirmListener(newTags -> {
-            TBApplication.tagsHandler(mTBLauncherActivity).setTags(entry, newTags);
+            TBApplication.tagsHandler(getContext()).setTags(entry, newTags);
             refreshSearchRecord(entry);
         });
 
@@ -1249,11 +1336,14 @@ public class Behaviour implements ISearchActivity {
      * @param tag     name to keep track of
      */
     public static void showDialog(Context context, DialogFragment<?> dialog, String tag) {
-        TBApplication.behaviour(context).openFragmentDialog(dialog, tag);
-        Activity activity = Utilities.getActivity(context);
-        if (!(activity instanceof FragmentActivity))
-            throw new IllegalStateException("showDialog called without FragmentActivity");
-        dialog.show(((FragmentActivity) activity).getSupportFragmentManager(), tag);
+        if (TBApplication.activityInvalid(context))
+            return;
+        TBApplication.behaviour(context).showDialog(dialog, tag);
+    }
+
+    private void showDialog(@NonNull DialogFragment<?> dialog, @Nullable String tag) {
+        openFragmentDialog(dialog, tag);
+        dialog.show(mTBLauncherActivity.getSupportFragmentManager(), tag);
     }
 
     private void openFragmentDialog(DialogFragment<?> dialog, @Nullable String tag) {
@@ -1278,8 +1368,12 @@ public class Behaviour implements ISearchActivity {
         return false;
     }
 
-    public void registerPopup(ListPopup menu) {
-        mTBLauncherActivity.registerPopup(menu);
+    private void registerPopup(ListPopup menu) {
+        TBApplication.getApplication(getContext()).registerPopup(menu);
+    }
+
+    private boolean dismissPopup() {
+        return TBApplication.getApplication(getContext()).dismissPopup();
     }
 
     public void onResume() {
@@ -1407,6 +1501,10 @@ public class Behaviour implements ISearchActivity {
     private boolean executeAction(@Nullable String action, @Nullable String source) {
         if (action == null)
             return false;
+        if (TBApplication.activityInvalid(mTBLauncherActivity)) {
+            // only do stuff if we are the current activity
+            return false;
+        }
         switch (action) {
             case "lockScreen":
                 if (DeviceAdmin.isAdminActive(mTBLauncherActivity)) {
@@ -1543,9 +1641,5 @@ public class Behaviour implements ISearchActivity {
 
     public boolean onDoubleClick() {
         return executeGestureAction("gesture-double-click");
-    }
-
-    public void showUntagged() {
-        executeAction("showUntagged", null);
     }
 }

@@ -20,11 +20,13 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.SettingsActivity;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.WidgetManager;
+import rocks.tbog.tblauncher.handler.TagsHandler;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public class ExportedData {
@@ -704,29 +706,33 @@ public class ExportedData {
     private void saveTags(@NonNull Context context, Method method) {
         if (!bTagListLoaded)
             return;
-        HashMap<String, ArraySet<String>> tags = new HashMap<>();
+        HashMap<String, Set<String>> tags = new HashMap<>();
         if (method == Method.OVERWRITE || method == Method.APPEND) {
             // load from DB first
             Map<String, List<String>> tagsDB = DBHelper.loadTags(context);
             for (Map.Entry<String, List<String>> entry : tagsDB.entrySet()) {
-                ArraySet<String> tagSet = tags.get(entry.getKey());
-                if (tagSet == null)
-                    tags.put(entry.getKey(), tagSet = new ArraySet<>(entry.getValue().size()));
-                tagSet.addAll(entry.getValue());
+                Set<String> entryIdSet = tags.get(entry.getKey());
+                if (entryIdSet == null)
+                    tags.put(entry.getKey(), entryIdSet = new ArraySet<>(0));
+                entryIdSet.addAll(entry.getValue());
             }
         }
         for (Map.Entry<String, List<String>> entry : mTags.entrySet()) {
-            ArraySet<String> tagSet = null;
+            Set<String> entryIdSet = null;
             if (method == Method.APPEND) {
-                tagSet = tags.get(entry.getKey());
+                entryIdSet = tags.get(entry.getKey());
             }
-            if (tagSet == null)
-                tags.put(entry.getKey(), tagSet = new ArraySet<>(entry.getValue().size()));
+            if (entryIdSet == null)
+                tags.put(entry.getKey(), entryIdSet = new ArraySet<>(0));
 
-            tagSet.addAll(entry.getValue());
+            entryIdSet.addAll(entry.getValue());
         }
-        DBHelper.setTagsMap(context, tags);
 
+        // filter out tags for apps we don't have installed
+        TagsHandler.validateTags(context, tags);
+        // store the tags in the DB
+        DBHelper.setTagsMap(context, tags);
+        // reload from DB to emulate a fresh start
         TBApplication.tagsHandler(context).loadFromDB(true);
     }
 

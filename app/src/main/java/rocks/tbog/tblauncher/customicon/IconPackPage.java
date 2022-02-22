@@ -12,12 +12,14 @@ import android.widget.GridView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
-import androidx.annotation.Nullable;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.fragment.app.DialogFragment;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
+import rocks.tbog.tblauncher.CustomizeUI;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.icons.IconPackXML;
@@ -40,13 +42,14 @@ class IconPackPage extends PageAdapter.Page {
     }
 
     @Override
-    void setupView(@NonNull Context context, @Nullable OnItemClickListener iconClickListener, @Nullable OnItemClickListener iconLongClickListener) {
+    void setupView(@NonNull DialogFragment dialogFragment, @Nullable OnItemClickListener iconClickListener, @Nullable OnItemClickListener iconLongClickListener) {
+        Context context = dialogFragment.getContext();
         mIconLoadingBar = pageView.findViewById(R.id.iconLoadingBar);
 
         Drawable packIcon = null;
         // set page title
         TextView textView = pageView.findViewById(android.R.id.text1);
-        textView.setText(context.getResources().getString(R.string.icon_pack_content_list, packageName));
+        textView.setText(dialogFragment.getResources().getString(R.string.icon_pack_content_list, packageName));
         try {
             packIcon = context.getPackageManager().getApplicationIcon(packageName);
         } catch (PackageManager.NameNotFoundException ignored) {
@@ -70,7 +73,7 @@ class IconPackPage extends PageAdapter.Page {
                 return true;
             });
         }
-        TBApplication.ui(context).setResultListPref(mGridView);
+        CustomizeUI.setResultListPref(mGridView);
 
         // set page search bar
         mSearch = pageView.findViewById(R.id.search);

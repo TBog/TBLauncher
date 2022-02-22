@@ -226,7 +226,7 @@
     <string name="fuzzy_search_tags_summary">Când căutați, includeți etichete ca posibili candidați</string>
     <string name="fuzzy_search_tags">Etichete de căutare fuzzy</string>
     <string name="tags_section">Tag-uri</string>
-    <string name="quick_list_size">Înălțimea barei</string>
+    <string name="quick_list_height">Înălțimea barei</string>
     <string name="quick_list_enabled">Utilizați lista rapidă</string>
     <string name="quick_list_section">Lista rapidă</string>
     <string name="features_summary">Comutați și personalizați caracteristicile aplicației</string>
@@ -264,7 +264,6 @@
     <string name="icons_pack_default_name">Iconițe de sistem</string>
     <string name="icons_pack">Alegeți pachetul</string>
     <string name="result_list_section">Lista de rezultate</string>
-    <string name="search_bar_size">Bara și dimensiunea textului</string>
     <string name="search_bar_section">Bara de căutare</string>
     <string name="title_select_size">Trageți glisorul pentru a selecta dimensiunea dorită</string>
     <string name="title_select_alpha">Trageți glisorul pentru a selecta opacitatea dorită</string>
@@ -409,7 +408,7 @@
     <string name="icon_scale_blue">Scara albastră</string>
     <string name="icon_scale_alpha">Transparența la scară</string>
     <string name="reset_matrix">Setați valorile implicite</string>
-    <string name="popup_corner_radius">Raza colțului</string>
+    <string name="corner_radius">Raza colțului</string>
     <string name="behaviour_section">Comportament</string>
     <string name="behaviour_link_keyboard_search_bar">Conectați tastatura la vizibilitatea barei de căutare</string>
     <string name="behaviour_widget_after_launch">Modul widget după lansare</string>

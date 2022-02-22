@@ -64,7 +64,7 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
         LayoutInflater inflater = LayoutInflater.from(context);
         View itemView = inflater.inflate(layoutRes, parent, false);
 
-        return new Holder(itemView, mDrawFlags);
+        return new Holder(itemView);
     }
 
     public void setGridLayout(@NonNull Context context, boolean bGridLayout) {
@@ -135,7 +135,7 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
 
         // check if menu contains elements and if yes show it
         if (!menu.getAdapter().isEmpty()) {
-            TBApplication.behaviour(v.getContext()).registerPopup(menu);
+            TBApplication.getApplication(v.getContext()).registerPopup(menu);
             menu.show(v);
             return true;
         }
@@ -186,7 +186,7 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
 
     public static class Holder extends RecyclerView.ViewHolder {
 
-        public Holder(@NonNull View itemView, int drawFlags) {
+        public Holder(@NonNull View itemView) {
             super(itemView);
             itemView.setTag(this);
 

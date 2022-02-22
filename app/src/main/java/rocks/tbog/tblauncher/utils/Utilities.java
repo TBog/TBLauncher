@@ -615,7 +615,7 @@ public class Utilities {
             // skip next character if it's not helpful
             codePoint = Character.codePointAt(s, next);
             boolean skip = codePoint == 0x200D;
-            skip = skip || Character.UnicodeBlock.of(codePoint) == Character.UnicodeBlock.VARIATION_SELECTORS;
+            skip = skip || Character.UnicodeBlock.VARIATION_SELECTORS.equals(Character.UnicodeBlock.of(codePoint));
             if (skip)
                 return getNextCodePointIndex(s, next);
         }
@@ -632,7 +632,7 @@ public class Utilities {
             // skip this if it's ZERO WIDTH JOINER
             if (codePoint == 0x200D)
                 continue;
-            if (Character.UnicodeBlock.of(codePoint) == Character.UnicodeBlock.VARIATION_SELECTORS)
+            if (Character.UnicodeBlock.VARIATION_SELECTORS.equals(Character.UnicodeBlock.of(codePoint)))
                 continue;
             ++n;
         }

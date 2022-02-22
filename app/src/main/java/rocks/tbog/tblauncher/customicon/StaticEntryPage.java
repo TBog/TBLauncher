@@ -6,6 +6,7 @@ import android.view.View;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.fragment.app.DialogFragment;
 
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.entry.StaticEntry;
@@ -21,15 +22,16 @@ public class StaticEntryPage extends CustomShapePage {
     }
 
     @Override
-    void setupView(@NonNull Context context, @Nullable OnItemClickListener iconClickListener, @Nullable OnItemClickListener iconLongClickListener) {
-        super.setupView(context, iconClickListener, iconLongClickListener);
+    void setupView(@NonNull DialogFragment dialogFragment, @Nullable OnItemClickListener iconClickListener, @Nullable OnItemClickListener iconLongClickListener) {
+        Context context = dialogFragment.getContext();
+        super.setupView(dialogFragment, iconClickListener, iconLongClickListener);
 
         final Drawable originalDrawable;
         // default icon
         {
             Drawable drawable = mStaticEntry.getDefaultDrawable(context);
             originalDrawable = drawable;
-            ShapedIconInfo iconInfo = new DefaultIconInfo(context.getString(R.string.default_static_icon, mStaticEntry.getName()), drawable);
+            ShapedIconInfo iconInfo = new DefaultIconInfo(dialogFragment.getString(R.string.default_static_icon, mStaticEntry.getName()), drawable);
             mShapedIconAdapter.addItem(iconInfo);
         }
 

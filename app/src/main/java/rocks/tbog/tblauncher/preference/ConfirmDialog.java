@@ -24,6 +24,7 @@ import rocks.tbog.tblauncher.DeviceAdmin;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.SettingsActivity;
 import rocks.tbog.tblauncher.TBApplication;
+import rocks.tbog.tblauncher.TBLauncherActivity;
 import rocks.tbog.tblauncher.WorkAsync.TaskRunner;
 import rocks.tbog.tblauncher.db.XmlExport;
 import rocks.tbog.tblauncher.utils.FileUtils;
@@ -90,8 +91,11 @@ public class ConfirmDialog extends BasePreferenceDialog {
 
                 PreferenceManager.setDefaultValues(context, R.xml.preferences, true);
                 TBApplication.drawableCache(context).clearCache();
-                TBApplication.behaviour(context).refreshSearchRecords();
-                TBApplication.quickList(context).reload();
+                TBLauncherActivity launcherActivity = TBApplication.launcherActivity(context);
+                if (launcherActivity != null) {
+                    launcherActivity.refreshSearchRecords();
+                    launcherActivity.queueDockReload();
+                }
                 break;
             }
             case "reset-preferences":

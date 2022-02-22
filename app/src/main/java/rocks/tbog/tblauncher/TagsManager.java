@@ -14,6 +14,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.content.res.AppCompatResources;
 
 import java.util.ArrayList;
@@ -23,8 +24,8 @@ import java.util.Objects;
 
 import rocks.tbog.tblauncher.WorkAsync.RunnableTask;
 import rocks.tbog.tblauncher.WorkAsync.TaskRunner;
+import rocks.tbog.tblauncher.customicon.IconSelectDialog;
 import rocks.tbog.tblauncher.dataprovider.IProvider;
-import rocks.tbog.tblauncher.dataprovider.ModProvider;
 import rocks.tbog.tblauncher.dataprovider.TagsProvider;
 import rocks.tbog.tblauncher.drawable.CodePointDrawable;
 import rocks.tbog.tblauncher.drawable.DrawableUtils;
@@ -34,6 +35,7 @@ import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.entry.TagEntry;
 import rocks.tbog.tblauncher.handler.AppsHandler;
 import rocks.tbog.tblauncher.handler.DataHandler;
+import rocks.tbog.tblauncher.handler.IconsHandler;
 import rocks.tbog.tblauncher.handler.TagsHandler;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.utils.DialogHelper;
@@ -48,11 +50,28 @@ public class TagsManager {
     private ListView mListView;
     private TagsAdapter mAdapter;
 
+    public interface OnItemClickListener {
+        void onItemClickListener(@NonNull View view, @NonNull TagInfo tagInfo);
+    }
+
+    public boolean hasChangesMade() {
+        for (TagInfo tagInfo : mTagList) {
+            if (tagInfo.action != TagInfo.Action.NONE)
+                return true;
+            if (tagInfo.icon != null && tagInfo.staticEntry != null)
+                return true;
+        }
+        return false;
+    }
+
     public void applyChanges(@NonNull Context context) {
         TagsHandler tagsHandler = TBApplication.tagsHandler(context);
+        IconsHandler iconsHandler = TBApplication.iconsHandler(context);
+        TBLauncherActivity launcherActivity = TBApplication.launcherActivity(context);
         boolean changesMade = false;
         for (TagInfo tagInfo : mTagList) {
             if (tagInfo.staticEntry instanceof ActionEntry) {
+                // can't delete actions (it's the show untagged action)
                 if (tagInfo.action == TagInfo.Action.RENAME) {
                     TBApplication.dataHandler(context).renameStaticEntry(tagInfo.staticEntry, tagInfo.name);
                     changesMade = true;
@@ -64,14 +83,26 @@ public class TagsManager {
                             changesMade = true;
                         break;
                     case DELETE:
+                        if (tagInfo.staticEntry != null)
+                            iconsHandler.restoreDefaultIcon(tagInfo.staticEntry);
+                        tagInfo.icon = null;
                         if (tagsHandler.removeTag(tagInfo.tagName))
                             changesMade = true;
                         break;
                 }
             }
+            if (tagInfo.icon != null && tagInfo.staticEntry != null) {
+                iconsHandler.changeIcon(tagInfo.staticEntry, tagInfo.icon);
+                if (launcherActivity != null) {
+                    // force a result refresh to update the icon in the view
+                    launcherActivity.behaviour.refreshSearchRecord(tagInfo.staticEntry);
+                }
+            }
         }
         // make sure we're in sync
         if (changesMade) {
+            if (launcherActivity != null)
+                launcherActivity.queueDockReload();
             afterChangesMade(context);
         }
     }
@@ -83,21 +114,32 @@ public class TagsManager {
         dataHandler.reloadProviders(IProvider.LOAD_STEP_2);
 
         RunnableTask afterProviders = TaskRunner.newTask(task -> {
-                    TBApplication app = TBApplication.getApplication(context);
-                    AppsHandler.setTagsForApps(app.appsHandler().getAllApps(), app.tagsHandler());
-                },
-                task -> {
-                    Log.d(TAG, "tags and fav providers should have loaded by now");
-                    TBApplication app = TBApplication.getApplication(context);
-                    app.behaviour().refreshSearchRecords();
-                    app.quickList().reload();
-                });
+                TBApplication app = TBApplication.getApplication(context);
+                AppsHandler.setTagsForApps(app.appsHandler().getAllApps(), app.tagsHandler());
+            },
+            task -> {
+                Log.d(TAG, "tags and fav providers should have loaded by now");
+                TBLauncherActivity activity = TBApplication.launcherActivity(context);
+                if (activity != null) {
+                    activity.refreshSearchRecords();
+                    activity.queueDockReload();
+                }
+            });
         DataHandler.EXECUTOR_PROVIDERS.execute(afterProviders);
     }
 
-    public void bindView(@NonNull View view) {
+    public void bindView(@NonNull View view, @Nullable OnItemClickListener listener) {
         final Context context = view.getContext();
         mListView = view.findViewById(android.R.id.list);
+
+        if (listener != null) {
+            mListView.setOnItemClickListener((parent, v, pos, id) -> {
+                Object objItem = parent.getAdapter().getItem(pos);
+                if (objItem instanceof TagInfo) {
+                    listener.onItemClickListener(v, (TagInfo) objItem);
+                }
+            });
+        }
 
         // prepare the grid with all the tags
         mAdapter = new TagsAdapter(mTagList);
@@ -134,8 +176,7 @@ public class TagsManager {
             for (String tagName : validTags) {
                 TagEntry tagEntry = tagsProvider != null ? tagsProvider.getTagEntry(tagName) : null;
                 TagInfo tagInfo = tagEntry != null ? new TagInfo(tagEntry) : new TagInfo(tagName);
-                tagInfo.name = tagName;
-                tagInfo.entryCount = tagsHandler.getValidEntryIds(tagName).size();
+                tagInfo.setInfo(tagName, tagsHandler.getValidEntryIds(tagName).size());
                 tags.add(tagInfo);
             }
             Collections.sort(tags, (lhs, rhs) -> lhs.tagName.compareTo(rhs.tagName));
@@ -143,8 +184,7 @@ public class TagsManager {
             EntryItem untaggedEntry = TBApplication.dataHandler(context).getPojo(ActionEntry.SCHEME + "show/untagged");
             if (untaggedEntry instanceof ActionEntry) {
                 TagInfo tagInfo = new TagInfo((ActionEntry) untaggedEntry);
-                tagInfo.name = untaggedEntry.getName();
-                tagInfo.entryCount = -1;
+                tagInfo.setInfo(untaggedEntry.getName(), -1);
                 tags.add(0, tagInfo);
             }
 
@@ -174,14 +214,13 @@ public class TagsManager {
 
             mAdapter.notifyDataSetChanged();
         })
-                .setTitle(R.string.title_rename_tag)
-                .setHint(R.string.hint_rename_tag)
-                .show();
+            .setTitle(R.string.title_rename_tag)
+            .setHint(R.string.hint_rename_tag)
+            .show();
     }
 
     private void launchCustomTagIconDialog(Context ctx, TagInfo info) {
-        TBApplication app = TBApplication.getApplication(ctx);
-        DataHandler dh = app.getDataHandler();
+        DataHandler dh = TBApplication.dataHandler(ctx);
         final StaticEntry staticEntry;
         if (info.staticEntry != null) {
             staticEntry = info.staticEntry;
@@ -196,17 +235,29 @@ public class TagsManager {
             staticEntry = tagEntry;
         }
 
-        TBApplication.behaviour(ctx).launchCustomIconDialog(staticEntry, () -> {
+        // make sure we have the tag in the provider or else IconSelectDialog will not find it
+        if (staticEntry instanceof TagEntry) {
+            TagsProvider tagsProvider = dh.getTagsProvider();
+            if (tagsProvider != null)
+                tagsProvider.addTagEntry((TagEntry) staticEntry);
+        }
+
+        IconSelectDialog dlg = Behaviour.getCustomIconDialog(ctx, false);
+        dlg.putArgString("entryId", staticEntry.id);
+        dlg.setOnConfirmListener(drawable -> {
             int pos = mTagList.indexOf(info);
             if (pos == -1)
                 return;
-            TagInfo tagInfo = new TagInfo(staticEntry);
-            tagInfo.name = info.name;
-            tagInfo.action = info.action;
-            tagInfo.entryCount = info.entryCount;
-            mTagList.set(pos, tagInfo);
+
+            // update tag info
+            if (staticEntry.hasCustomIcon() && drawable == null)
+                info.icon = staticEntry.getDefaultDrawable(ctx);
+            else
+                info.icon = drawable;
+
             mAdapter.notifyDataSetChanged();
         });
+        Behaviour.showDialog(ctx, dlg, Behaviour.DIALOG_CUSTOM_ICON);
     }
 
     public void onStart() {
@@ -326,13 +377,17 @@ public class TagsManager {
                 text2View.setVisibility(View.GONE);
             }
 
-            if (content.staticEntry != null) {
-                int drawFlags = EntryItem.FLAG_DRAW_ICON | EntryItem.FLAG_DRAW_NO_CACHE;
-                ResultViewHelper.setIconAsync(drawFlags, content.staticEntry, iconView, StaticEntry.AsyncSetEntryIcon.class);
+            if (content.icon == null) {
+                if (content.staticEntry != null) {
+                    int drawFlags = EntryItem.FLAG_DRAW_ICON | EntryItem.FLAG_DRAW_NO_CACHE;
+                    ResultViewHelper.setIconAsync(drawFlags, content.staticEntry, iconView, StaticEntry.AsyncSetEntryIcon.class);
+                } else {
+                    Drawable icon = new CodePointDrawable(content.name);
+                    icon = DrawableUtils.applyIconMaskShape(iconView.getContext(), icon, DrawableUtils.SHAPE_SQUIRCLE, false);
+                    iconView.setImageDrawable(icon);
+                }
             } else {
-                Drawable icon = new CodePointDrawable(content.name);
-                icon = DrawableUtils.applyIconMaskShape(iconView.getContext(), icon, DrawableUtils.SHAPE_SQUIRCLE, false);
-                iconView.setImageDrawable(icon);
+                iconView.setImageDrawable(content.icon);
             }
 
             renameBtnView.setOnClickListener(v -> {
@@ -347,15 +402,16 @@ public class TagsManager {
         }
     }
 
-    static class TagInfo {
-        final StaticEntry staticEntry;
-        final String tagName;
-        String name;
+    public static class TagInfo {
+        public final StaticEntry staticEntry;
+        public final String tagName;
+        private String name;
+        private Drawable icon = null;
 
-        int entryCount;
-        Action action = Action.NONE;
+        private int entryCount;
+        private Action action = Action.NONE;
 
-        enum Action {NONE, DELETE, RENAME}
+        public enum Action {NONE, DELETE, RENAME}
 
         public TagInfo(String name) {
             staticEntry = null;
@@ -365,6 +421,11 @@ public class TagsManager {
         public TagInfo(StaticEntry entry) {
             staticEntry = entry;
             tagName = entry.getName();
+        }
+
+        public void setInfo(String name, int count) {
+            this.name = name;
+            this.entryCount = count;
         }
 
         @Override
@@ -377,12 +438,13 @@ public class TagsManager {
             return Objects.equals(staticEntry, tagInfo.staticEntry) &&
                 Objects.equals(tagName, tagInfo.tagName) &&
                 Objects.equals(name, tagInfo.name) &&
+                Objects.equals(icon, tagInfo.icon) &&
                 action == tagInfo.action;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(staticEntry, tagName, name, action);
+            return Objects.hash(staticEntry, tagName, name, icon, action);
         }
     }
 }

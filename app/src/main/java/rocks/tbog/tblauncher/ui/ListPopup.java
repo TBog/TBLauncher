@@ -22,7 +22,6 @@ import androidx.annotation.StringRes;
 
 import rocks.tbog.tblauncher.CustomizeUI;
 import rocks.tbog.tblauncher.R;
-import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.UISizes;
 
@@ -43,9 +42,8 @@ public class ListPopup extends PopupWindow {
         ContextThemeWrapper ctx = new ContextThemeWrapper(context, R.style.ListPopupTheme);
         ListPopup popup = new ListPopup(ctx);
         View root = popup.getContentView().getRootView();
-        CustomizeUI customizeUI = TBApplication.ui(context);
 
-        Drawable background = customizeUI.getPopupBackgroundDrawable();
+        Drawable background = CustomizeUI.getPopupBackgroundDrawable(context);
         root.setBackground(background);
         int padding = UISizes.dp2px(context, 1);
         root.setPadding(padding, padding, padding, padding);

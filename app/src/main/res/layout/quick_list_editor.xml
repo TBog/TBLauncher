@@ -18,7 +18,7 @@
     <LinearLayout
         android:id="@+id/preview"
         android:layout_width="match_parent"
-        android:layout_height="@dimen/large_quick_list_bar_height"
+        android:layout_height="@dimen/large_bar_height"
         android:layout_marginHorizontal="@dimen/dialog_padding_horizontal"
         android:background="?attr/listBackgroundColor"
         android:gravity="center"
@@ -38,7 +38,8 @@
             style="?attr/tabLayoutStyle"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            app:tabMode="scrollable" />
+            app:tabGravity="fill"
+            app:tabMode="fixed" />
 
     </androidx.viewpager.widget.ViewPager>
 

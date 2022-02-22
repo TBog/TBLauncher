@@ -8,6 +8,7 @@ import android.util.Log;
 import androidx.preference.PreferenceManager;
 
 import rocks.tbog.tblauncher.TBApplication;
+import rocks.tbog.tblauncher.TBLauncherActivity;
 import rocks.tbog.tblauncher.dataprovider.AppProvider;
 import rocks.tbog.tblauncher.dataprovider.ShortcutsProvider;
 import rocks.tbog.tblauncher.entry.AppEntry;
@@ -47,7 +48,9 @@ public class PackageAddedRemovedHandler extends BroadcastReceiver {
         if ("android.intent.action.PACKAGE_REMOVED".equals(action) && !replacing) {
             // Remove all installed shortcuts
             dataHandler.removeShortcuts(packageName);
-            TBApplication.behaviour(ctx).handleRemoveApp(packageName);
+            TBLauncherActivity launcherActivity = TBApplication.launcherActivity(ctx);
+            if (launcherActivity != null)
+                launcherActivity.behaviour.handleRemoveApp(packageName);
 //            dataHandler.removeFromExcluded(packageName);
         }
 
@@ -81,9 +84,9 @@ public class PackageAddedRemovedHandler extends BroadcastReceiver {
         }
 
         handleEvent(ctx,
-                intent.getAction(),
-                packageName, UserHandleCompat.CURRENT_USER,
-                intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)
+            intent.getAction(),
+            packageName, UserHandleCompat.CURRENT_USER,
+            intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)
         );
 
     }

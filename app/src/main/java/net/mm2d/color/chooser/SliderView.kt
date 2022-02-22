@@ -11,25 +11,22 @@ import android.content.Context
 import android.graphics.Color
 import android.util.AttributeSet
 import android.view.LayoutInflater
-import android.widget.LinearLayout
+import androidx.constraintlayout.widget.ConstraintLayout
 import rocks.tbog.tblauncher.databinding.Mm2dCcViewSliderBinding
 
-/**
- * @author [大前良介 (OHMAE Ryosuke)](mailto:ryo@mm2d.net)
- */
 internal class SliderView
 @JvmOverloads constructor(
-        context: Context,
-        attrs: AttributeSet? = null,
-        defStyleAttr: Int = 0
-) : LinearLayout(context, attrs, defStyleAttr), ColorObserver {
+    context: Context,
+    attrs: AttributeSet? = null,
+    defStyleAttr: Int = 0
+) : ConstraintLayout(context, attrs, defStyleAttr), ColorObserver {
     private val colorChangeMediator by lazy {
         findColorChangeMediator()
     }
-    private var binding: Mm2dCcViewSliderBinding = Mm2dCcViewSliderBinding.inflate(LayoutInflater.from(context), this)
+    private val binding: Mm2dCcViewSliderBinding =
+        Mm2dCcViewSliderBinding.inflate(LayoutInflater.from(context), this)
 
     init {
-        orientation = VERTICAL
         binding.seekRed.onValueChanged = { value, fromUser ->
             binding.textRed.text = value.toString()
             updateBySeekBar(fromUser)
@@ -53,7 +50,11 @@ internal class SliderView
 
     private fun updateBySeekBar(fromUser: Boolean) {
         if (!fromUser) return
-        val color = Color.rgb(binding.seekRed.value, binding.seekGreen.value, binding.seekBlue.value)
+        val color = Color.rgb(
+            binding.seekRed.value,
+            binding.seekGreen.value,
+            binding.seekBlue.value
+        )
         colorChangeMediator?.onChangeColor(color)
     }
 }

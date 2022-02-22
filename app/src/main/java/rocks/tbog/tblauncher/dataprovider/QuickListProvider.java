@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.List;
 
 import rocks.tbog.tblauncher.TBApplication;
+import rocks.tbog.tblauncher.TBLauncherActivity;
 import rocks.tbog.tblauncher.db.DBHelper;
 import rocks.tbog.tblauncher.db.ModRecord;
 import rocks.tbog.tblauncher.entry.EntryItem;
@@ -159,7 +160,9 @@ public class QuickListProvider extends DBProvider<EntryItem> {
                 DBProvider<EntryItem> provider = weakProvider.get();
                 if (provider instanceof QuickListProvider) {
                     ((QuickListProvider) provider).fixPlaceholders();
-                    TBApplication.quickList(provider.context).reload();
+                    TBLauncherActivity launcherActivity = TBApplication.launcherActivity(provider.context);
+                    if (launcherActivity != null)
+                        launcherActivity.queueDockReload();
                 }
             });
         }

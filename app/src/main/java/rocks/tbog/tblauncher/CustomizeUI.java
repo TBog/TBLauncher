@@ -24,7 +24,6 @@ import android.widget.ImageView;
 
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.preference.PreferenceManager;
 
 import rocks.tbog.tblauncher.ui.RecyclerList;
@@ -80,13 +79,12 @@ public class CustomizeUI {
         mLauncherButton = mSearchBarContainer.findViewById(R.id.launcherButton);
         mMenuButton = mSearchBarContainer.findViewById(R.id.menuButton);
         mClearButton = mSearchBarContainer.findViewById(R.id.clearButton);
+    }
 
+    public void onStart() {
         setSearchBarPref();
         setResultListPref(findViewById(R.id.resultLayout));
         adjustInputType(mSearchBar);
-    }
-
-    public void onPostCreate() {
         setNotificationBarColor();
     }
 
@@ -126,15 +124,19 @@ public class CustomizeUI {
         final Resources resources = mSearchBarContainer.getResources();
 
         // size
-        int percent = mPref.getInt("search-bar-size", 0);
+        int barHeight = mPref.getInt("search-bar-height", 0);
+        if (barHeight <= 1)
+            barHeight = resources.getInteger(R.integer.default_bar_height);
+        barHeight = UISizes.dp2px(ctx, barHeight);
+        int textSize = mPref.getInt("search-bar-text-size", 0);
+        if (textSize <= 1)
+            textSize = resources.getInteger(R.integer.default_size_text);
 
         // layout height
         {
-            int smallSize = resources.getDimensionPixelSize(R.dimen.bar_height);
-            int largeSize = resources.getDimensionPixelSize(R.dimen.large_bar_height);
             ViewGroup.LayoutParams params = mSearchBarContainer.getLayoutParams();
             if (params instanceof ViewGroup.MarginLayoutParams) {
-                params.height = smallSize + (largeSize - smallSize) * percent / 100;
+                params.height = barHeight;
                 mSearchBarContainer.setLayoutParams(params);
             } else {
                 throw new IllegalStateException("mSearchBarContainer has the wrong layout params");
@@ -143,9 +145,7 @@ public class CustomizeUI {
 
         // text size
         {
-            float smallSize = resources.getDimension(R.dimen.small_bar_text);
-            float largeSize = resources.getDimension(R.dimen.large_bar_text);
-            mSearchBar.setTextSize(TypedValue.COMPLEX_UNIT_PX, smallSize + (largeSize - smallSize) * percent / 100);
+            mSearchBar.setTextSize(TypedValue.COMPLEX_UNIT_DIP, textSize);
         }
 
         final int searchBarRipple = UIColors.setAlpha(UIColors.getColor(mPref, "search-bar-ripple-color"), 0xFF);
@@ -203,13 +203,14 @@ public class CustomizeUI {
             mSearchBarContainer.setBackground(new ColorDrawable(UIColors.setAlpha(colorBackground, alpha)));
     }
 
-    public void setResultListPref(View resultLayout) {
-        int background = UIColors.getResultListBackground(mPref);
+    public static void setResultListPref(View resultLayout) {
+        SharedPreferences pref = TBApplication.getApplication(resultLayout.getContext()).preferences();
+        int background = UIColors.getResultListBackground(pref);
         Drawable drawable;
-        if (mPref.getBoolean("result-list-rounded", true)) {
+        if (pref.getBoolean("result-list-rounded", true)) {
             drawable = new GradientDrawable();  // can't use PaintDrawable when alpha < 255, ugly big darker borders
             ((GradientDrawable) drawable).setColor(background);
-            ((GradientDrawable) drawable).setCornerRadius(getResultListRadius());
+            ((GradientDrawable) drawable).setCornerRadius(UISizes.getResultListRadius(resultLayout.getContext()));
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 // clip list content to rounded corners
                 resultLayout.setClipToOutline(true);
@@ -257,14 +258,7 @@ public class CustomizeUI {
         }
     }
 
-    public float getResultListRadius() {
-        if (mPref.getBoolean("result-list-rounded", true)) {
-            return getContext().getResources().getDimension(R.dimen.result_corner_radius);
-        }
-        return 0f;
-    }
-
-    public void setListViewSelectorPref(AbsListView listView, boolean borderless) {
+    public static void setListViewSelectorPref(AbsListView listView, boolean borderless) {
         int touchColor = UIColors.getResultListRipple(listView.getContext());
         Drawable selector = getSelectorDrawable(listView, touchColor, borderless);
         listView.setSelector(selector);
@@ -307,8 +301,7 @@ public class CustomizeUI {
     }
 
     @NonNull
-    public Drawable getPopupBackgroundDrawable() {
-        Context ctx = getContext();
+    public static Drawable getPopupBackgroundDrawable(@NonNull Context ctx) {
         int border = UISizes.dp2px(ctx, 1);
         int radius = UISizes.getPopupCornerRadius(ctx);
 
@@ -320,13 +313,7 @@ public class CustomizeUI {
         return gradient;
     }
 
-    public Drawable getDialogButtonBarBackgroundDrawable(@Nullable Resources.Theme customTheme) {
-        final Resources.Theme theme;
-        if (customTheme != null)
-            theme = customTheme;
-        else
-            theme = getContext().getTheme();
-
+    public static Drawable getDialogButtonBarBackgroundDrawable(@NonNull Resources.Theme theme) {
         TypedValue typedValue = new TypedValue();
         if (theme.resolveAttribute(android.R.attr.buttonBarStyle, typedValue, true)) {
             TypedArray a = theme.obtainStyledAttributes(typedValue.resourceId, new int[]{android.R.attr.background});

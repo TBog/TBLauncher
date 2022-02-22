@@ -96,8 +96,8 @@ public class ContactsProvider extends Provider<ContactEntry> {
             }
 
             if (match) {
-                int boost = Math.min(30, pojo.timesContacted);
-                if (pojo.starred) {
+                int boost = Math.min(30, pojo.getTimesContacted());
+                if (pojo.isStarred()) {
                     boost += 40;
                 }
                 pojo.boostRelevance(boost);
