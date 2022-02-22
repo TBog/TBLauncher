@@ -1,0 +1,6 @@
+* fix Android 12 manifest error
+* add "show un-tagged" action in tag manager and tags menu
+* add option to choose contacts mime type
+* add simple and highlight theme generators
+* add dial (search) provider
+* allow custom icons for search results

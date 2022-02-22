@@ -1,0 +1,6 @@
+Please report any issues you encounter, anything and everything can go wrong because of version changes and minify
+* enable minify on release build (apk size should go down)
+* make Dial contact icon customizable
+* add grid layout for results
+* add storage icon picker
+* add dock and search bar independent height and text size preferences
