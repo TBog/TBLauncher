@@ -188,24 +188,28 @@ public class IconsHandler {
             return;
         }
 
-        Collection<AppEntry> appEntries = TBApplication.appsHandler(ctx).getAllApps();
-        DataHandler dataHandler = TBApplication.dataHandler(ctx);
-        // build the cache
-        for (AppEntry appEntry : appEntries) {
-            Drawable drawable = getDrawableIconForPackage(appEntry.componentName, UserHandleCompat.CURRENT_USER);
-            Bitmap bitmap = getIconBitmap(ctx, drawable);
-            dataHandler.setCachedAppIcon(appEntry.getUserComponentName(), bitmap);
-        }
+        // we add it to the run queue to make sure we run it synchronized
+        TBApplication.appsHandler(ctx).runWhenLoaded(() -> {
+            Collection<AppEntry> appEntries = TBApplication.appsHandler(ctx).getAllApps();
+            DataHandler dataHandler = TBApplication.dataHandler(ctx);
+            // build the cache
+            for (AppEntry appEntry : appEntries) {
+                Drawable drawable = getDrawableIconForPackage(appEntry.componentName, UserHandleCompat.CURRENT_USER);
+                Bitmap bitmap = getIconBitmap(ctx, drawable);
+                dataHandler.setCachedAppIcon(appEntry.getUserComponentName(), bitmap);
+            }
 
-        // save icon pack name and version
-        prefs.edit()
-            .putLong("cached-app-icons-version", cacheVersion)
-            .putString("cached-app-icons-pack", mIconPack.getPackPackageName())
-            .apply();
+            // save icon pack name and version
+            prefs.edit()
+                .putLong("cached-app-icons-version", cacheVersion)
+                .putString("cached-app-icons-pack", mIconPack.getPackPackageName())
+                .apply();
 
-        Log.i(TAG, "cached app icons changed from " +
-            "`" + packName + "` v" + version + " to " +
-            "`" + mIconPack.getPackPackageName() + "` v" + cacheVersion);
+            Log.i(TAG, "cached app icons changed from " +
+                "`" + packName + "` v" + version + " to " +
+                "`" + mIconPack.getPackPackageName() + "` v" + cacheVersion);
+
+        });
     }
 
     public void resetCachedAppIcons() {
