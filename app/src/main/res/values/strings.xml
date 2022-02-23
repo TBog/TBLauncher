@@ -138,7 +138,7 @@
     <string name="filter_apps">App filter</string>
     <string name="filter_contacts">Contact filter</string>
     <string name="filter_shortcuts">Shortcuts filter</string>
-    <string name="action_reload">Reload</string>
+    <string name="action_reload">Reload providers</string>
     <string name="action_toggle_grid">Toggle grid</string>
     <string name="action_show_apps">Apps A→Z</string>
     <string name="action_show_apps_grid4">App grid A→Z</string>

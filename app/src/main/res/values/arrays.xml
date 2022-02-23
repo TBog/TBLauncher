@@ -88,11 +88,13 @@
         <item>Show notifications panel</item>
         <item>Show settings panel</item>
         <item>Show &#171;Search&#187; desktop</item>
+        <item>Show &#171;Search&#187; desktop with keyboard</item>
         <item>Show &#171;Widget&#187; desktop</item>
         <item>Show &#171;Empty&#187; desktop</item>
         <item>Toggle between Search and Widget</item>
         <item>Toggle Search, Widget, Empty</item>
-        <item>Reload providers</item>
+        <item>@string/action_reload</item>
+        <item>@string/action_toggle_grid</item>
         <item>@string/action_show_apps</item>
         <item>@string/action_show_apps_reversed</item>
         <item>@string/action_show_contacts</item>
@@ -115,11 +117,13 @@
         <item>expandNotificationsPanel</item>
         <item>expandSettingsPanel</item>
         <item>showSearchBar</item>
+        <item>showSearchBarAndKeyboard</item>
         <item>showWidgets</item>
         <item>showEmpty</item>
         <item>toggleSearchAndWidget</item>
         <item>toggleSearchWidgetEmpty</item>
         <item>reloadProviders</item>
+        <item>toggleGrid</item>
         <item>showAllAppsAZ</item>
         <item>showAllAppsZA</item>
         <item>showContactsAZ</item>
@@ -172,11 +176,13 @@
 
     <string-array name="desktopEntries">
         <item>@string/title_desktop_mode_search</item>
+        <item>Desktop &#171;Search&#187; with keyboard</item>
         <item>@string/title_desktop_mode_widget</item>
         <item>@string/title_desktop_mode_empty</item>
     </string-array>
     <array name="desktopValues" translatable="false">
         <item>showSearchBar</item>
+        <item>showSearchBarAndKeyboard</item>
         <item>showWidgets</item>
         <item>showEmpty</item>
     </array>

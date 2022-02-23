@@ -1522,6 +1522,10 @@ public class Behaviour implements ISearchActivity {
             case "showSearchBar":
                 switchToDesktop(LauncherState.Desktop.SEARCH);
                 return true;
+            case "showSearchBarAndKeyboard":
+                showKeyboard();
+                switchToDesktop(LauncherState.Desktop.SEARCH);
+                return true;
             case "showWidgets":
                 switchToDesktop(LauncherState.Desktop.WIDGET);
                 return true;
@@ -1549,6 +1553,8 @@ public class Behaviour implements ISearchActivity {
                 return true;
             case "showAllAppsAZ":
                 return launchActionEntry("show/apps/byName");
+            case "toggleGrid":
+                return launchActionEntry("toggle/grid");
             case "showAllAppsZA":
                 return launchActionEntry("show/apps/byNameReversed");
             case "showContactsAZ":
