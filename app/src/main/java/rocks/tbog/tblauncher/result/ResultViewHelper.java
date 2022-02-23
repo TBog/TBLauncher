@@ -28,6 +28,7 @@ import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.EntryWithTags;
+import rocks.tbog.tblauncher.entry.ResultRelevance;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
 import rocks.tbog.tblauncher.utils.PrefCache;
@@ -57,6 +58,16 @@ public final class ResultViewHelper {
         }
 
         return enriched;
+    }
+
+    public static boolean displayHighlighted(@NonNull ResultRelevance relevance, @NonNull StringNormalizer.Result normText,
+                                             @NonNull String text, @NonNull TextView view) {
+        return displayHighlighted(relevance.relevanceSource, normText, text, relevance.relevance, view);
+    }
+
+    public static boolean displayHighlighted(@NonNull ResultRelevance relevance, Iterable<EntryWithTags.TagDetails> tags,
+                                             TextView view, Context context) {
+        return displayHighlighted(relevance.relevanceSource, tags, relevance.relevance, view, context);
     }
 
     /**
@@ -278,5 +289,4 @@ public final class ResultViewHelper {
         image.setImageResource(drawableId);
         Utilities.startAnimatable(image);
     }
-
 }

@@ -216,7 +216,7 @@ public final class AppEntry extends EntryWithTags {
     private void displayGridResult(@NonNull View view, int drawFlags) {
         TextView nameView = view.findViewById(android.R.id.text1);
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_NAME)) {
-            ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, nameView);
+            ResultViewHelper.displayHighlighted(relevance, normalizedName, getName(), nameView);
             nameView.setVisibility(View.VISIBLE);
         } else {
             nameView.setText(getName());
@@ -253,14 +253,14 @@ public final class AppEntry extends EntryWithTags {
         final Context context = view.getContext();
 
         TextView nameView = view.findViewById(R.id.item_app_name);
-        ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, nameView);
+        ResultViewHelper.displayHighlighted(relevance, normalizedName, getName(), nameView);
 
         TextView tagsView = view.findViewById(R.id.item_app_tag);
         // Hide tags view if tags are empty
         if (getTags().isEmpty()) {
             tagsView.setVisibility(View.GONE);
-        } else if (ResultViewHelper.displayHighlighted(relevanceSource, getTags(), relevance, tagsView, context)
-                || Utilities.checkFlag(drawFlags, FLAG_DRAW_TAGS)) {
+        } else if (ResultViewHelper.displayHighlighted(relevance, getTags(), tagsView, context)
+            || Utilities.checkFlag(drawFlags, FLAG_DRAW_TAGS)) {
             tagsView.setVisibility(View.VISIBLE);
         } else {
             tagsView.setVisibility(View.GONE);
@@ -537,30 +537,30 @@ public final class AppEntry extends EntryWithTags {
             String msg = context.getResources().getString(R.string.app_rename_confirmation, getName());
             Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
         })
-                .setTitle(R.string.title_app_rename)
-                .setNeutralButton(R.string.custom_name_set_default, (dialog, which) -> {
-                    Context context = dialog.getContext();
-                    String name = null;
-                    PackageManager pm = context.getPackageManager();
-                    try {
-                        ApplicationInfo applicationInfo = pm.getApplicationInfo(getPackageName(), 0);
-                        name = applicationInfo.loadLabel(pm).toString();
-                    } catch (PackageManager.NameNotFoundException ignored) {
-                    }
-                    if (name != null) {
-                        setName(name);
-                        TBApplication app = TBApplication.getApplication(context);
-                        app.getDataHandler().removeRenameApp(getUserComponentName(), name);
-                        app.behaviour().refreshSearchRecord(AppEntry.this);
+            .setTitle(R.string.title_app_rename)
+            .setNeutralButton(R.string.custom_name_set_default, (dialog, which) -> {
+                Context context = dialog.getContext();
+                String name = null;
+                PackageManager pm = context.getPackageManager();
+                try {
+                    ApplicationInfo applicationInfo = pm.getApplicationInfo(getPackageName(), 0);
+                    name = applicationInfo.loadLabel(pm).toString();
+                } catch (PackageManager.NameNotFoundException ignored) {
+                }
+                if (name != null) {
+                    setName(name);
+                    TBApplication app = TBApplication.getApplication(context);
+                    app.getDataHandler().removeRenameApp(getUserComponentName(), name);
+                    app.behaviour().refreshSearchRecord(AppEntry.this);
 
-                        // Show toast message
-                        String msg = context.getString(R.string.app_rename_confirmation, getName());
-                        Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
-                    }
+                    // Show toast message
+                    String msg = context.getString(R.string.app_rename_confirmation, getName());
+                    Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
+                }
 
-                    dialog.dismiss();
-                })
-                .show();
+                dialog.dismiss();
+            })
+            .show();
     }
 
     /**
@@ -583,7 +583,7 @@ public final class AppEntry extends EntryWithTags {
             }, Behaviour.LAUNCH_DELAY);
         } else {
             Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
-                    Uri.fromParts("package", getPackageName(), null));
+                Uri.fromParts("package", getPackageName(), null));
             TBApplication.behaviour(context).launchIntent(view, intent);
         }
     }
@@ -614,7 +614,7 @@ public final class AppEntry extends EntryWithTags {
      */
     private void launchUninstall(Context context) {
         Intent intent = new Intent(Intent.ACTION_DELETE,
-                Uri.fromParts("package", getPackageName(), null));
+            Uri.fromParts("package", getPackageName(), null));
         context.startActivity(intent);
     }
 

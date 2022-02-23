@@ -278,7 +278,7 @@ public final class ShortcutEntry extends EntryWithTags {
         TextView nameView = view.findViewById(android.R.id.text1);
         nameView.setTextColor(UIColors.getResultTextColor(context));
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_NAME)) {
-            ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, nameView);
+            ResultViewHelper.displayHighlighted(relevance, normalizedName, getName(), nameView);
             nameView.setVisibility(View.VISIBLE);
         } else {
             nameView.setText(getName());
@@ -310,7 +310,7 @@ public final class ShortcutEntry extends EntryWithTags {
         TextView shortcutName = view.findViewById(R.id.item_app_name);
         shortcutName.setTextColor(UIColors.getResultTextColor(context));
 
-        ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, shortcutName);
+        ResultViewHelper.displayHighlighted(relevance, normalizedName, getName(), shortcutName);
 
         TextView tagsView = view.findViewById(R.id.item_app_tag);
         tagsView.setTextColor(UIColors.getResultText2Color(context));
@@ -318,7 +318,7 @@ public final class ShortcutEntry extends EntryWithTags {
         // Hide tags view if tags are empty
         if (getTags().isEmpty()) {
             tagsView.setVisibility(View.GONE);
-        } else if (ResultViewHelper.displayHighlighted(relevanceSource, getTags(), relevance, tagsView, context)
+        } else if (ResultViewHelper.displayHighlighted(relevance, getTags(), tagsView, context)
             || Utilities.checkFlag(drawFlags, FLAG_DRAW_TAGS)) {
             tagsView.setVisibility(View.VISIBLE);
         } else {
