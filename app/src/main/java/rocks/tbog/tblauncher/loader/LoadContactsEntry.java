@@ -27,6 +27,8 @@ import rocks.tbog.tblauncher.utils.Timer;
 
 public class LoadContactsEntry extends LoadEntryItem<ContactEntry> {
 
+    private static final String TAG = "LoadContacts";
+
     public LoadContactsEntry(Context context) {
         super(context);
     }
@@ -240,8 +242,8 @@ public class LoadContactsEntry extends LoadEntryItem<ContactEntry> {
         return getFilteredContacts(mapContacts, contact -> contact.normalizedPhone);
     }
 
-    private ArrayList<ContactEntry> createGenericContacts(String mimeType, Map<String, BasicContact> basicContacts, Map<Long, BasicRawContact> basicRawContacts, String mimeLabel) {
-        final MimeTypeCache mimeTypeCache = TBApplication.mimeTypeCache(context.get());
+    @NonNull
+    private List<ContactEntry> createGenericContacts(String mimeType, Map<String, BasicContact> basicContacts, Map<Long, BasicRawContact> basicRawContacts, String mimeLabel) {
         // Prevent duplicates by keeping in memory encountered contacts.
         Map<String, Set<ContactEntry>> mapContacts = new HashMap<>();
 
@@ -251,13 +253,20 @@ public class LoadContactsEntry extends LoadEntryItem<ContactEntry> {
         columns.add(ContactsContract.Data._ID);
         columns.add(ContactsContract.Data.IS_PRIMARY);
 
-        String detailColumn = mimeTypeCache.getDetailColumn(context.get(), mimeType);
+        Context ctx = context.get();
+        if (ctx == null) {
+            Log.w(TAG, "null context in createGenericContacts");
+            return Collections.emptyList();
+        }
+
+        final MimeTypeCache mimeTypeCache = TBApplication.mimeTypeCache(ctx);
+        String detailColumn = mimeTypeCache.getDetailColumn(ctx, mimeType);
         if (detailColumn != null && !columns.contains(detailColumn)) {
             columns.add(detailColumn);
         }
 
         // Query all entries by mimeType
-        Cursor mimeTypeCursor = context.get().getContentResolver().query(
+        Cursor mimeTypeCursor = ctx.getContentResolver().query(
             ContactsContract.Data.CONTENT_URI,
             columns.toArray(new String[]{}),
             ContactsContract.Data.MIMETYPE + "= ?",
@@ -285,7 +294,7 @@ public class LoadContactsEntry extends LoadEntryItem<ContactEntry> {
                             label = mimeTypeCursor.getString(detailColumnIndex);
                         }
                         if (label == null) {
-                            label = mimeTypeCache.getLabel(context.get(), mimeType);
+                            label = mimeTypeCache.getLabel(ctx, mimeType);
                         }
 
                         ContactEntry.ImData imData = new ContactEntry.ImData(mimeType, id, mimeLabel);

@@ -30,6 +30,7 @@ import java.util.Set;
 
 import rocks.tbog.tblauncher.utils.MimeTypeUtils;
 import rocks.tbog.tblauncher.utils.PackageManagerUtils;
+import rocks.tbog.tblauncher.utils.Timer;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public class MimeTypeCache {
@@ -39,32 +40,26 @@ public class MimeTypeCache {
     private static final String CONTACT_ATTR_DETAIL_COLUMN = "detailColumn";
 
     private static final String[] METADATA_CONTACTS_NAMES = new String[]{
-            "android.provider.ALTERNATE_CONTACTS_STRUCTURE",
-            "android.provider.CONTACTS_STRUCTURE"
+        "android.provider.ALTERNATE_CONTACTS_STRUCTURE",
+        "android.provider.CONTACTS_STRUCTURE"
     };
+    private static final String TAG = "MTCache";
 
     // Cached componentName
-    private final Map<String, ComponentName> componentNames;
+    private final Map<String, ComponentName> componentNames = new HashMap<>();
     // Cached label
-    private final Map<String, String> labels;
+    private final Map<String, String> labels = new HashMap<>();
     // Cached detail columns
-    private Map<String, String> detailColumns;
+    private Map<String, String> mDetailColumnsCache = null;
 
-
-    public MimeTypeCache() {
-        this.componentNames = new HashMap<>();
-        this.labels = new HashMap<>();
-        this.detailColumns = null;
-    }
-
-    public void clearCache() {
+    public synchronized void clearCache() {
         this.componentNames.clear();
         this.labels.clear();
-        this.detailColumns = null;
+        this.mDetailColumnsCache = null;
     }
 
     /**
-     * @param context so we can get the label
+     * @param context  so we can get the label
      * @param mimeType to look for
      * @return label for best matching app by mimetype
      */
@@ -96,59 +91,62 @@ public class MimeTypeCache {
      * @return all mime types and related data columns from contact sync adapters
      */
     public Map<String, String> fetchDetailColumns(Context context) {
-        if (detailColumns == null) {
-            long start = System.nanoTime();
+        synchronized (this) {
+            if (mDetailColumnsCache != null)
+                return mDetailColumnsCache;
+        }
+        Timer timer = Timer.startNano();
 
-            detailColumns = new HashMap<>();
+        HashMap<String, String> detailColumns = new HashMap<>();
+        // add data columns for known mime types
+        detailColumns.put(ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE, ContactsContract.CommonDataKinds.Email.ADDRESS);
+        detailColumns.put(ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE, ContactsContract.CommonDataKinds.Phone.NUMBER);
 
-            final Set<String> contactSyncableTypes = new HashSet<>();
+        final Set<String> contactSyncableTypes = new HashSet<>();
 
-            SyncAdapterType[] syncAdapterTypes = ContentResolver.getSyncAdapterTypes();
-            for (SyncAdapterType type : syncAdapterTypes) {
-                if (type.authority.equals(ContactsContract.AUTHORITY)) {
-                    contactSyncableTypes.add(type.accountType);
-                }
+        SyncAdapterType[] syncAdapterTypes = ContentResolver.getSyncAdapterTypes();
+        for (SyncAdapterType type : syncAdapterTypes) {
+            if (type.authority.equals(ContactsContract.AUTHORITY)) {
+                contactSyncableTypes.add(type.accountType);
             }
+        }
 
-            AuthenticatorDescription[] authenticatorDescriptions = ((AccountManager) context.getSystemService(Context.ACCOUNT_SERVICE)).getAuthenticatorTypes();
-            for (AuthenticatorDescription auth : authenticatorDescriptions) {
-                if (contactSyncableTypes.contains(auth.type)) {
-                    XmlResourceParser parser = loadContactsXml(context, auth.packageName);
-                    if (parser != null) {
-                        try {
-                            while (parser.next() != XmlPullParser.END_DOCUMENT) {
-                                if (CONTACTS_DATA_KIND.equals(parser.getName())) {
-                                    String foundMimeType = null;
-                                    String foundDetailColumn = null;
-                                    int attributeCount = parser.getAttributeCount();
-                                    for (int i = 0; i < attributeCount; i++) {
-                                        String attr = parser.getAttributeName(i);
-                                        String value = parser.getAttributeValue(i);
-                                        if (CONTACT_ATTR_MIME_TYPE.equals(attr)) {
-                                            foundMimeType = value;
-                                        } else if (CONTACT_ATTR_DETAIL_COLUMN.equals(attr)) {
-                                            foundDetailColumn = value;
-                                        }
-                                    }
-                                    if (foundMimeType != null) {
-                                        detailColumns.put(foundMimeType, foundDetailColumn);
+        AuthenticatorDescription[] authenticatorDescriptions = ((AccountManager) context.getSystemService(Context.ACCOUNT_SERVICE)).getAuthenticatorTypes();
+        for (AuthenticatorDescription auth : authenticatorDescriptions) {
+            if (contactSyncableTypes.contains(auth.type)) {
+                XmlResourceParser parser = loadContactsXml(context, auth.packageName);
+                if (parser != null) {
+                    try {
+                        while (parser.next() != XmlPullParser.END_DOCUMENT) {
+                            if (CONTACTS_DATA_KIND.equals(parser.getName())) {
+                                String foundMimeType = null;
+                                String foundDetailColumn = null;
+                                int attributeCount = parser.getAttributeCount();
+                                for (int i = 0; i < attributeCount; i++) {
+                                    String attr = parser.getAttributeName(i);
+                                    String value = parser.getAttributeValue(i);
+                                    if (CONTACT_ATTR_MIME_TYPE.equals(attr)) {
+                                        foundMimeType = value;
+                                    } else if (CONTACT_ATTR_DETAIL_COLUMN.equals(attr)) {
+                                        foundDetailColumn = value;
                                     }
                                 }
+                                if (foundMimeType != null) {
+                                    detailColumns.put(foundMimeType, foundDetailColumn);
+                                }
                             }
-                        } catch (IOException | XmlPullParserException ignored) {
                         }
+                    } catch (IOException | XmlPullParserException e) {
+                        Log.w(TAG, "type=" + auth.type + " package=" + auth.packageName, e);
                     }
                 }
             }
-
-            // Add additional data columns for known mime types
-            detailColumns.put(ContactsContract.CommonDataKinds.Email.CONTENT_ITEM_TYPE, ContactsContract.CommonDataKinds.Email.ADDRESS);
-            detailColumns.put(ContactsContract.CommonDataKinds.Phone.CONTENT_ITEM_TYPE, ContactsContract.CommonDataKinds.Phone.NUMBER);
-
-            long end = System.nanoTime();
-            Log.i("time", (end - start) / 1000000 + " milliseconds to fetch detail data columns");
         }
-        return detailColumns;
+
+        Log.i("time", timer + " to fetch detail data columns");
+        synchronized (this) {
+            return mDetailColumnsCache = detailColumns;
+        }
     }
 
     /**
@@ -164,7 +162,7 @@ public class MimeTypeCache {
         final PackageManager pm = context.getPackageManager();
         final Intent intent = new Intent("android.content.SyncAdapter").setPackage(packageName);
         final List<ResolveInfo> intentServices = pm.queryIntentServices(intent,
-                PackageManager.GET_META_DATA | PackageManager.GET_SERVICES);
+            PackageManager.GET_META_DATA | PackageManager.GET_SERVICES);
 
         if (intentServices != null) {
             for (final ResolveInfo resolveInfo : intentServices) {
@@ -174,7 +172,7 @@ public class MimeTypeCache {
                 }
                 for (String metadataName : METADATA_CONTACTS_NAMES) {
                     final XmlResourceParser parser = serviceInfo.loadXmlMetaData(
-                            pm, metadataName);
+                        pm, metadataName);
                     if (parser != null) {
                         return parser;
                     }
