@@ -156,7 +156,7 @@ public final class ShortcutEntry extends EntryWithTags {
         TextView nameView = view.findViewById(android.R.id.text1);
         nameView.setTextColor(UIColors.getResultTextColor(context));
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_NAME)) {
-            ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, nameView);
+            ResultViewHelper.displayHighlighted(relevance, normalizedName, getName(), nameView);
             nameView.setVisibility(View.VISIBLE);
         } else
             nameView.setVisibility(View.GONE);
@@ -186,7 +186,7 @@ public final class ShortcutEntry extends EntryWithTags {
         TextView shortcutName = view.findViewById(R.id.item_app_name);
         shortcutName.setTextColor(UIColors.getResultTextColor(context));
 
-        ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, shortcutName);
+        ResultViewHelper.displayHighlighted(relevance, normalizedName, getName(), shortcutName);
 
         TextView tagsView = view.findViewById(R.id.item_app_tag);
         tagsView.setTextColor(UIColors.getResultText2Color(context));
@@ -194,8 +194,8 @@ public final class ShortcutEntry extends EntryWithTags {
         // Hide tags view if tags are empty
         if (getTags().isEmpty()) {
             tagsView.setVisibility(View.GONE);
-        } else if (ResultViewHelper.displayHighlighted(relevanceSource, getTags(), relevance, tagsView, context)
-                || Utilities.checkFlag(drawFlags, FLAG_DRAW_TAGS)) {
+        } else if (ResultViewHelper.displayHighlighted(relevance, getTags(), tagsView, context)
+            || Utilities.checkFlag(drawFlags, FLAG_DRAW_TAGS)) {
             tagsView.setVisibility(View.VISIBLE);
         } else {
             tagsView.setVisibility(View.GONE);
@@ -344,8 +344,8 @@ public final class ShortcutEntry extends EntryWithTags {
             String msg = context.getString(R.string.shortcut_rename_confirmation, getName());
             Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
         })
-                .setTitle(R.string.title_shortcut_rename)
-                .show();
+            .setTitle(R.string.title_shortcut_rename)
+            .show();
     }
 
     @WorkerThread
@@ -369,8 +369,8 @@ public final class ShortcutEntry extends EntryWithTags {
             String actName = mainPackage.activityInfo.name;
             ComponentName className = new ComponentName(packName, actName);
             appDrawable = isBadge
-                    ? iconsHandler.getDrawableBadgeForPackage(className, UserHandleCompat.CURRENT_USER)
-                    : iconsHandler.getDrawableIconForPackage(className, UserHandleCompat.CURRENT_USER);
+                ? iconsHandler.getDrawableBadgeForPackage(className, UserHandleCompat.CURRENT_USER)
+                : iconsHandler.getDrawableIconForPackage(className, UserHandleCompat.CURRENT_USER);
         }
 
         if (appDrawable == null && shortcutInfo != null) {
@@ -380,8 +380,8 @@ public final class ShortcutEntry extends EntryWithTags {
                 UserHandleCompat user = new UserHandleCompat(context, shortcutInfo.getUserHandle());
                 ComponentName componentName = shortcutInfo.getActivity();
                 appDrawable = isBadge
-                        ? iconsHandler.getDrawableBadgeForPackage(componentName, user)
-                        : iconsHandler.getDrawableIconForPackage(componentName, user);
+                    ? iconsHandler.getDrawableBadgeForPackage(componentName, user)
+                    : iconsHandler.getDrawableIconForPackage(componentName, user);
                 if (appDrawable == null)
                     try {
                         appDrawable = packageManager.getActivityIcon(componentName);

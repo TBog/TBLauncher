@@ -33,6 +33,7 @@ import rocks.tbog.tblauncher.WorkAsync.AsyncTask;
 import rocks.tbog.tblauncher.WorkAsync.TaskRunner;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.EntryWithTags;
+import rocks.tbog.tblauncher.entry.ResultRelevance;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
 import rocks.tbog.tblauncher.utils.PrefCache;
@@ -54,14 +55,24 @@ public final class ResultViewHelper {
 
         for (Pair<Integer, Integer> position : matchInfo.getMatchedSequences()) {
             enriched.setSpan(
-                    new ForegroundColorSpan(color),
-                    normalized.mapPosition(position.first),
-                    normalized.mapPosition(position.second),
-                    Spannable.SPAN_INCLUSIVE_EXCLUSIVE
+                new ForegroundColorSpan(color),
+                normalized.mapPosition(position.first),
+                normalized.mapPosition(position.second),
+                Spannable.SPAN_INCLUSIVE_EXCLUSIVE
             );
         }
 
         return enriched;
+    }
+
+    public static boolean displayHighlighted(@NonNull ResultRelevance relevance, @NonNull StringNormalizer.Result normText,
+                                             @NonNull String text, @NonNull TextView view) {
+        return displayHighlighted(relevance.relevanceSource, normText, text, relevance.relevance, view);
+    }
+
+    public static boolean displayHighlighted(@NonNull ResultRelevance relevance, Iterable<EntryWithTags.TagDetails> tags,
+                                             TextView view, Context context) {
+        return displayHighlighted(relevance.relevanceSource, tags, relevance.relevance, view, context);
     }
 
     /**
@@ -236,12 +247,12 @@ public final class ResultViewHelper {
                 keepIcon = tag_cacheId.equals(cacheId);
             }
             Log.i(TAG, "start task=" + Integer.toHexString(hashCode()) +
-                    " view=" + Integer.toHexString(image.hashCode()) +
-                    " tag_iconTask=" + (tag_iconTask != null ? Integer.toHexString(tag_iconTask.hashCode()) : "null") +
-                    " entry=`" + entryItem.getName() + "`" +
-                    " keepIcon=" + keepIcon +
-                    " tag_cacheId=" + tag_cacheId +
-                    " cacheId=" + cacheId);
+                " view=" + Integer.toHexString(image.hashCode()) +
+                " tag_iconTask=" + (tag_iconTask != null ? Integer.toHexString(tag_iconTask.hashCode()) : "null") +
+                " entry=`" + entryItem.getName() + "`" +
+                " keepIcon=" + keepIcon +
+                " tag_cacheId=" + tag_cacheId +
+                " cacheId=" + cacheId);
             if (!keepIcon) {
                 setLoadingIcon(image);
             }
@@ -286,9 +297,9 @@ public final class ResultViewHelper {
             ImageView image = getImageView();
             if (image == null || drawable == null) {
                 Log.i(TAG, "end task=" + Integer.toHexString(hashCode()) +
-                        " view=" + (image == null ? "null" : Integer.toHexString(image.hashCode())) +
-                        " drawable=" + drawable +
-                        " cacheId=`" + cacheId + "`");
+                    " view=" + (image == null ? "null" : Integer.toHexString(image.hashCode())) +
+                    " drawable=" + drawable +
+                    " cacheId=`" + cacheId + "`");
                 weakImage.clear();
                 return;
             }
@@ -299,9 +310,9 @@ public final class ResultViewHelper {
                 TBApplication.drawableCache(image.getContext()).cacheDrawable(cacheId, drawable);
 
             Log.i(TAG, "end task=" + Integer.toHexString(hashCode()) +
-                    " view=" + Integer.toHexString(image.hashCode()) +
-                    " tag_iconTask=" + (tag_iconTask != null ? Integer.toHexString(tag_iconTask.hashCode()) : "null") +
-                    " cacheId=`" + cacheId + "`");
+                " view=" + Integer.toHexString(image.hashCode()) +
+                " tag_iconTask=" + (tag_iconTask != null ? Integer.toHexString(tag_iconTask.hashCode()) : "null") +
+                " cacheId=`" + cacheId + "`");
             if (tag_iconTask instanceof AsyncSetEntryDrawable) {
                 AsyncSetEntryDrawable task = (AsyncSetEntryDrawable) tag_iconTask;
                 if (!entryItem.equals(task.entryItem)) {

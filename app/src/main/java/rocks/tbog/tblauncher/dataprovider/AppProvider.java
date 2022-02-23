@@ -8,12 +8,14 @@ import android.content.pm.LauncherApps;
 import android.os.Build;
 import android.os.Process;
 import android.os.UserManager;
+import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.WorkerThread;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Objects;
 
 import rocks.tbog.tblauncher.TBApplication;
@@ -24,6 +26,7 @@ import rocks.tbog.tblauncher.loader.LoadAppEntry;
 import rocks.tbog.tblauncher.loader.LoadCacheApps;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.searcher.ISearcher;
+import rocks.tbog.tblauncher.searcher.ResultBuffer;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 
@@ -202,6 +205,22 @@ public class AppProvider extends Provider<AppEntry> {
     @WorkerThread
     @Override
     public void requestResults(String query, ISearcher searcher) {
+        int pos = query.lastIndexOf(' ');
+        if (pos > 0) {
+            String queryLeft = query.substring(0, pos).trim();
+            String queryRight = query.substring(pos + 1).trim();
+
+            StringNormalizer.Result queryNormalizedRight = StringNormalizer.normalizeWithResult(queryRight, false);
+            if (queryNormalizedRight.codePoints.length > 0) {
+                ResultBuffer<AppEntry> buffer = new ResultBuffer<>(searcher.tagsEnabled(), AppEntry.class);
+                requestResults(queryLeft, buffer);
+
+                FuzzyScore fuzzyScoreRight = new FuzzyScore(queryNormalizedRight.codePoints);
+                checkAppResults(buffer.getEntryItems(), fuzzyScoreRight, searcher);
+                return;
+            }
+        }
+
         StringNormalizer.Result queryNormalized = StringNormalizer.normalizeWithResult(query, false);
 
         if (queryNormalized.codePoints.length == 0) {
@@ -214,7 +233,8 @@ public class AppProvider extends Provider<AppEntry> {
     }
 
     @WorkerThread
-    static void checkAppResults(Iterable<AppEntry> pojos, FuzzyScore fuzzyScore, ISearcher searcher) {
+    static void checkAppResults(Collection<AppEntry> pojos, FuzzyScore fuzzyScore, ISearcher searcher) {
+        Log.d(TAG, "checkAppResults pojo.size=" + pojos.size() + " " + fuzzyScore);
         FuzzyScore.MatchInfo matchInfo;
         boolean match;
 

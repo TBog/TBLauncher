@@ -97,6 +97,39 @@ public class FuzzyScore {
         this.unmatched_letter_penalty = unmatched_letter_penalty;
     }
 
+    public static String patternToString(int[] pattern) {
+        if (pattern == null)
+            return "null";
+        int iMax = pattern.length - 1;
+        if (iMax == -1)
+            return "[]";
+
+        StringBuilder b = new StringBuilder();
+        b.append('[');
+        for (int i = 0; ; i++) {
+            b.appendCodePoint(pattern[i]);
+            if (i == iMax)
+                return b.append(']').toString();
+        }
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "FuzzyScore{" +
+            "patternLength=" + patternLength +
+            ", patternChar=" + patternToString(patternChar) +
+            ", patternLower=" + patternToString(patternLower) +
+            ", adjacency_bonus=" + adjacency_bonus +
+            ", separator_bonus=" + separator_bonus +
+            ", camel_bonus=" + camel_bonus +
+            ", leading_letter_penalty=" + leading_letter_penalty +
+            ", max_leading_letter_penalty=" + max_leading_letter_penalty +
+            ", unmatched_letter_penalty=" + unmatched_letter_penalty +
+            ", matchInfo=" + matchInfo +
+            '}';
+    }
+
     /**
      * @param text string where to search
      * @return true if each character in pattern is found sequentially within text
@@ -275,6 +308,16 @@ public class FuzzyScore {
             }
             positions.add(new Pair<>(start, end));
             return positions;
+        }
+
+        @NonNull
+        @Override
+        public String toString() {
+            return "MatchInfo{" +
+                "score=" + score +
+                ", match=" + match +
+                ", matchedIndices=" + matchedIndices +
+                '}';
         }
     }
 }
