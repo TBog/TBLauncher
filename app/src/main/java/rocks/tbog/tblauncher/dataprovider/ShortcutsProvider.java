@@ -28,7 +28,7 @@ import rocks.tbog.tblauncher.entry.EntryWithTags;
 import rocks.tbog.tblauncher.entry.ShortcutEntry;
 import rocks.tbog.tblauncher.loader.LoadShortcutsEntryItem;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
-import rocks.tbog.tblauncher.searcher.Searcher;
+import rocks.tbog.tblauncher.searcher.ISearcher;
 import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
 import rocks.tbog.tblauncher.utils.Utilities;
@@ -213,7 +213,7 @@ public class ShortcutsProvider extends Provider<ShortcutEntry> {
     }
 
     @Override
-    public void requestResults(String query, Searcher searcher) {
+    public void requestResults(String query, ISearcher searcher) {
         StringNormalizer.Result queryNormalized = StringNormalizer.normalizeWithResult(query, false);
 
         if (queryNormalized.codePoints.length == 0) {

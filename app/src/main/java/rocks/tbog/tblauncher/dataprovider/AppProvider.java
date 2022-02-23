@@ -23,7 +23,7 @@ import rocks.tbog.tblauncher.entry.EntryWithTags;
 import rocks.tbog.tblauncher.loader.LoadAppEntry;
 import rocks.tbog.tblauncher.loader.LoadCacheApps;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
-import rocks.tbog.tblauncher.searcher.Searcher;
+import rocks.tbog.tblauncher.searcher.ISearcher;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 
@@ -68,8 +68,8 @@ public class AppProvider extends Provider<AppEntry> {
                 final UserManager manager = (UserManager) context.getSystemService(Context.USER_SERVICE);
                 assert manager != null;
                 PackageAddedRemovedHandler.handleEvent(context,
-                        "android.intent.action.PACKAGE_ADDED",
-                        packageName, new UserHandleCompat(manager.getSerialNumberForUser(user), user), false
+                    "android.intent.action.PACKAGE_ADDED",
+                    packageName, new UserHandleCompat(manager.getSerialNumberForUser(user), user), false
                 );
             }
         }
@@ -80,8 +80,8 @@ public class AppProvider extends Provider<AppEntry> {
                 final UserManager manager = (UserManager) context.getSystemService(Context.USER_SERVICE);
                 assert manager != null;
                 PackageAddedRemovedHandler.handleEvent(context,
-                        "android.intent.action.PACKAGE_ADDED",
-                        packageName, new UserHandleCompat(manager.getSerialNumberForUser(user), user), true
+                    "android.intent.action.PACKAGE_ADDED",
+                    packageName, new UserHandleCompat(manager.getSerialNumberForUser(user), user), true
                 );
             }
         }
@@ -92,8 +92,8 @@ public class AppProvider extends Provider<AppEntry> {
                 final UserManager manager = (UserManager) context.getSystemService(Context.USER_SERVICE);
                 assert manager != null;
                 PackageAddedRemovedHandler.handleEvent(context,
-                        "android.intent.action.PACKAGE_REMOVED",
-                        packageName, new UserHandleCompat(manager.getSerialNumberForUser(user), user), false
+                    "android.intent.action.PACKAGE_REMOVED",
+                    packageName, new UserHandleCompat(manager.getSerialNumberForUser(user), user), false
                 );
             }
         }
@@ -104,8 +104,8 @@ public class AppProvider extends Provider<AppEntry> {
                 final UserManager manager = (UserManager) context.getSystemService(Context.USER_SERVICE);
                 assert manager != null;
                 PackageAddedRemovedHandler.handleEvent(context,
-                        "android.intent.action.MEDIA_MOUNTED",
-                        null, new UserHandleCompat(manager.getSerialNumberForUser(user), user), false
+                    "android.intent.action.MEDIA_MOUNTED",
+                    null, new UserHandleCompat(manager.getSerialNumberForUser(user), user), false
                 );
             }
         }
@@ -116,8 +116,8 @@ public class AppProvider extends Provider<AppEntry> {
                 final UserManager manager = (UserManager) context.getSystemService(Context.USER_SERVICE);
                 assert manager != null;
                 PackageAddedRemovedHandler.handleEvent(context,
-                        "android.intent.action.MEDIA_UNMOUNTED",
-                        null, new UserHandleCompat(manager.getSerialNumberForUser(user), user), false
+                    "android.intent.action.MEDIA_UNMOUNTED",
+                    null, new UserHandleCompat(manager.getSerialNumberForUser(user), user), false
                 );
             }
         }
@@ -201,7 +201,7 @@ public class AppProvider extends Provider<AppEntry> {
 
     @WorkerThread
     @Override
-    public void requestResults(String query, Searcher searcher) {
+    public void requestResults(String query, ISearcher searcher) {
         StringNormalizer.Result queryNormalized = StringNormalizer.normalizeWithResult(query, false);
 
         if (queryNormalized.codePoints.length == 0) {
@@ -214,7 +214,7 @@ public class AppProvider extends Provider<AppEntry> {
     }
 
     @WorkerThread
-    static void checkAppResults(Iterable<AppEntry> pojos, FuzzyScore fuzzyScore, Searcher searcher) {
+    static void checkAppResults(Iterable<AppEntry> pojos, FuzzyScore fuzzyScore, ISearcher searcher) {
         FuzzyScore.MatchInfo matchInfo;
         boolean match;
 

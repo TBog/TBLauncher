@@ -6,7 +6,7 @@ import androidx.annotation.Nullable;
 import java.util.List;
 
 import rocks.tbog.tblauncher.entry.EntryItem;
-import rocks.tbog.tblauncher.searcher.Searcher;
+import rocks.tbog.tblauncher.searcher.ISearcher;
 import rocks.tbog.tblauncher.utils.Timer;
 
 /**
@@ -17,7 +17,7 @@ import rocks.tbog.tblauncher.utils.Timer;
 public abstract class SimpleProvider<T extends EntryItem> implements IProvider<T> {
 
     @Override
-    public void requestResults(String s, Searcher searcher) {
+    public void requestResults(String query, ISearcher searcher) {
     }
 
     @Override
