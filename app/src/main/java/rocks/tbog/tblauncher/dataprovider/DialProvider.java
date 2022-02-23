@@ -6,7 +6,7 @@ import java.util.regex.Pattern;
 
 import rocks.tbog.tblauncher.entry.ContactEntry;
 import rocks.tbog.tblauncher.entry.DialContactEntry;
-import rocks.tbog.tblauncher.searcher.Searcher;
+import rocks.tbog.tblauncher.searcher.ISearcher;
 
 public class DialProvider extends SimpleProvider<ContactEntry> {
 
@@ -33,7 +33,7 @@ public class DialProvider extends SimpleProvider<ContactEntry> {
     }
 
     @Override
-    public void requestResults(String query, Searcher searcher) {
+    public void requestResults(String query, ISearcher searcher) {
         // Append an item only if query looks like a phone number and device has phone capabilities
         if (phonePattern.matcher(query).find()) {
             searcher.addResult(getResult(query));

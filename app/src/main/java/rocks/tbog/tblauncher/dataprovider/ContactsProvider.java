@@ -12,7 +12,7 @@ import rocks.tbog.tblauncher.entry.ContactEntry;
 import rocks.tbog.tblauncher.loader.LoadContactsEntry;
 import rocks.tbog.tblauncher.normalizer.PhoneNormalizer;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
-import rocks.tbog.tblauncher.searcher.Searcher;
+import rocks.tbog.tblauncher.searcher.ISearcher;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
 
 public class ContactsProvider extends Provider<ContactEntry> {
@@ -64,7 +64,7 @@ public class ContactsProvider extends Provider<ContactEntry> {
     }
 
     @Override
-    public void requestResults(String query, Searcher searcher) {
+    public void requestResults(String query, ISearcher searcher) {
         StringNormalizer.Result queryNormalized = StringNormalizer.normalizeWithResult(query, false);
 
         if (queryNormalized.codePoints.length == 0) {

@@ -24,7 +24,7 @@ import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.Utilities;
 
-public abstract class Searcher extends AsyncTask<Void, Void> {
+public abstract class Searcher extends AsyncTask<Void, Void> implements ISearcher {
     // define a different thread than the default AsyncTask thread or else we will block everything else that uses AsyncTask while we search
     public static final ExecutorService SEARCH_THREAD = Executors.newSingleThreadExecutor();
     protected static final int INITIAL_CAPACITY = 50;
@@ -73,6 +73,7 @@ public abstract class Searcher extends AsyncTask<Void, Void> {
      * This is called from the background thread by the providers
      */
     @WorkerThread
+    @Override
     public boolean addResult(EntryItem... pojos) {
         if (isCancelled())
             return false;
@@ -137,6 +138,7 @@ public abstract class Searcher extends AsyncTask<Void, Void> {
         isRefresh = refresh;
     }
 
+    @Override
     public boolean tagsEnabled() {
         return tagsEnabled;
     }
