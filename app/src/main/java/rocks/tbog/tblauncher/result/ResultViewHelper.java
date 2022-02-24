@@ -62,12 +62,44 @@ public final class ResultViewHelper {
 
     public static boolean displayHighlighted(@NonNull ResultRelevance relevance, @NonNull StringNormalizer.Result normText,
                                              @NonNull String text, @NonNull TextView view) {
-        return displayHighlighted(relevance.relevanceSource, normText, text, relevance.relevance, view);
+        for (ResultRelevance.ResultInfo result : relevance.getInfoList()) {
+            if (result.relevance.match && result.relevanceSource.equals(normText)) {
+                int color = UIColors.getResultHighlightColor(view.getContext());
+                view.setText(highlightText(normText, text, result.relevance, color));
+                return true;
+            }
+        }
+        view.setText(text);
+        return false;
     }
 
     public static boolean displayHighlighted(@NonNull ResultRelevance relevance, Iterable<EntryWithTags.TagDetails> tags,
                                              TextView view, Context context) {
-        return displayHighlighted(relevance.relevanceSource, tags, relevance.relevance, view, context);
+        boolean matchFound = false;
+
+        int color = UIColors.getResultHighlightColor(context);
+        SpannableStringBuilder builder = new SpannableStringBuilder();
+        boolean first = true;
+        for (EntryWithTags.TagDetails tag : tags) {
+            if (!first)
+                builder.append(" \u2223 ");
+            first = false;
+            boolean appendTagName = true;
+            for (ResultRelevance.ResultInfo result : relevance.getInfoList()) {
+                if (result.relevance.match && result.relevanceSource.equals(tag.normalized)) {
+                    builder.append(highlightText(tag.normalized, tag.name, result.relevance, color));
+                    appendTagName = false;
+                    matchFound = true;
+                    break;
+                }
+            }
+            if (appendTagName)
+                builder.append(tag.name);
+        }
+
+        view.setText(builder);
+
+        return matchFound;
     }
 
     /**

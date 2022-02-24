@@ -205,6 +205,13 @@ public class AppProvider extends Provider<AppEntry> {
     @WorkerThread
     @Override
     public void requestResults(String query, ISearcher searcher) {
+        for (AppEntry pojo : pojos)
+            pojo.resetResultInfo();
+
+        recursiveWordCheck(pojos, query, searcher);
+    }
+
+    static void recursiveWordCheck(Collection<AppEntry> entries, String query, ISearcher searcher) {
         int pos = query.lastIndexOf(' ');
         if (pos > 0) {
             String queryLeft = query.substring(0, pos).trim();
@@ -213,7 +220,7 @@ public class AppProvider extends Provider<AppEntry> {
             StringNormalizer.Result queryNormalizedRight = StringNormalizer.normalizeWithResult(queryRight, false);
             if (queryNormalizedRight.codePoints.length > 0) {
                 ResultBuffer<AppEntry> buffer = new ResultBuffer<>(searcher.tagsEnabled(), AppEntry.class);
-                requestResults(queryLeft, buffer);
+                recursiveWordCheck(entries, queryLeft, buffer);
 
                 FuzzyScore fuzzyScoreRight = new FuzzyScore(queryNormalizedRight.codePoints);
                 checkAppResults(buffer.getEntryItems(), fuzzyScoreRight, searcher);
@@ -222,43 +229,46 @@ public class AppProvider extends Provider<AppEntry> {
         }
 
         StringNormalizer.Result queryNormalized = StringNormalizer.normalizeWithResult(query, false);
-
-        if (queryNormalized.codePoints.length == 0) {
+        if (queryNormalized.codePoints.length == 0)
             return;
-        }
 
         FuzzyScore fuzzyScore = new FuzzyScore(queryNormalized.codePoints);
-
-        checkAppResults(pojos, fuzzyScore, searcher);
+        checkAppResults(entries, fuzzyScore, searcher);
     }
 
     @WorkerThread
-    static void checkAppResults(Collection<AppEntry> pojos, FuzzyScore fuzzyScore, ISearcher searcher) {
-        Log.d(TAG, "checkAppResults pojo.size=" + pojos.size() + " " + fuzzyScore);
-        FuzzyScore.MatchInfo matchInfo;
-        boolean match;
+    static void checkAppResults(Collection<AppEntry> entries, FuzzyScore fuzzyScore, ISearcher searcher) {
+        Log.d(TAG, "checkAppResults pojo.size=" + entries.size() + " " + fuzzyScore);
 
-        for (AppEntry pojo : pojos) {
-            if (pojo.isHiddenByUser()) {
+        for (AppEntry entry : entries) {
+            if (entry.isHiddenByUser()) {
                 continue;
             }
 
-            matchInfo = fuzzyScore.match(pojo.normalizedName.codePoints);
-            match = matchInfo.match;
-            pojo.setRelevance(pojo.normalizedName, matchInfo);
+            FuzzyScore.MatchInfo scoreInfo = fuzzyScore.match(entry.normalizedName.codePoints);
+
+            StringNormalizer.Result matchedText = entry.normalizedName;
+            FuzzyScore.MatchInfo matchedInfo = new FuzzyScore.MatchInfo(scoreInfo);
+            int matchScore = matchedInfo.score;
+            boolean matchFound = matchedInfo.match;
 
             if (searcher.tagsEnabled()) {
                 // check relevance for tags
-                for (EntryWithTags.TagDetails tag : pojo.getTags()) {
-                    matchInfo = fuzzyScore.match(tag.normalized.codePoints);
-                    if (matchInfo.match && (!match || matchInfo.score > pojo.getRelevance())) {
-                        match = true;
-                        pojo.setRelevance(tag.normalized, matchInfo);
+                for (EntryWithTags.TagDetails tag : entry.getTags()) {
+                    // fuzzyScore.match will return the same object
+                    scoreInfo = fuzzyScore.match(tag.normalized.codePoints);
+                    if (scoreInfo.match && (!matchFound || scoreInfo.score > matchScore)) {
+                        matchFound = true;
+                        matchScore = scoreInfo.score;
+                        matchedText = tag.normalized;
+                        matchedInfo = new FuzzyScore.MatchInfo(scoreInfo);
                     }
                 }
             }
 
-            if (match && !searcher.addResult(pojo)) {
+            entry.addResultMatch(matchedText, matchedInfo);
+
+            if (matchFound && !searcher.addResult(entry)) {
                 return;
             }
         }

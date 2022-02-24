@@ -156,6 +156,10 @@ public abstract class EntryItem {
         return relevance.getRelevance();
     }
 
+    public void addResultMatch(@NonNull StringNormalizer.Result normalizedName, @Nullable FuzzyScore.MatchInfo matchInfo) {
+        relevance.addMatchInfo(normalizedName, matchInfo);
+    }
+
     public void setRelevance(@NonNull StringNormalizer.Result normalizedName, @Nullable FuzzyScore.MatchInfo matchInfo) {
         relevance.setRelevance(normalizedName, matchInfo);
     }
@@ -164,7 +168,7 @@ public abstract class EntryItem {
         relevance.boostRelevance(boost);
     }
 
-    public void resetRelevance() {
+    public void resetResultInfo() {
         relevance.resetRelevance();
     }
 

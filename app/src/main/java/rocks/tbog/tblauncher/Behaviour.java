@@ -929,7 +929,7 @@ public class Behaviour implements ISearchActivity {
         if (entries != null && entries.size() > 0) {
             // reset relevance. This is normally done by a Searcher.
             for (EntryItem entry : entries)
-                entry.resetRelevance();
+                entry.resetResultInfo();
 
 //            // copy list in order to change it
 //            entries = new ArrayList<>(entries);
