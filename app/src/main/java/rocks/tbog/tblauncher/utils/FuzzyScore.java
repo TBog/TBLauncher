@@ -134,6 +134,7 @@ public class FuzzyScore {
      * @param text string where to search
      * @return true if each character in pattern is found sequentially within text
      */
+    @NonNull
     public MatchInfo match(CharSequence text) {
         int idx = 0;
         int idxCodepoint = 0;
@@ -152,6 +153,7 @@ public class FuzzyScore {
      * @param text string converted to codepoints
      * @return true if each character in pattern is found sequentially within text
      */
+    @NonNull
     public MatchInfo match(int[] text) {
         // Loop variables
         int score = 0;
@@ -272,8 +274,8 @@ public class FuzzyScore {
          * higher is better match. Value has no intrinsic meaning. Range varies with pattern.
          * Can only compare scores with same search pattern.
          */
-        public int score;
-        public boolean match;
+        public int score = 0;
+        public boolean match = false;
         final ArrayList<Integer> matchedIndices;
 
         public MatchInfo() {
