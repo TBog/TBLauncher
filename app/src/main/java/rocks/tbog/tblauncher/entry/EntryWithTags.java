@@ -13,6 +13,10 @@ public abstract class EntryWithTags extends EntryItem {
     // Tags assigned to this pojo
     private final ArraySet<TagDetails> tags = new ArraySet<>(0);
 
+    public boolean isHiddenByUser() {
+        return false;
+    }
+
     public static class TagDetails {
         @NonNull
         public final String name;
@@ -20,8 +24,10 @@ public abstract class EntryWithTags extends EntryItem {
 
         @Override
         public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
+            if (this == o)
+                return true;
+            if (o == null || getClass() != o.getClass())
+                return false;
             TagDetails that = (TagDetails) o;
             return name.equals(that.name);
         }

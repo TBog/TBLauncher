@@ -30,7 +30,7 @@ public class ResultRelevance implements Comparable<ResultRelevance> {
         infoList.add(resultInfo);
     }
 
-    public void setRelevance(@NonNull StringNormalizer.Result normalizedName, @Nullable FuzzyScore.MatchInfo matchInfo) {
+    public void setMatchInfo(@NonNull StringNormalizer.Result normalizedName, @Nullable FuzzyScore.MatchInfo matchInfo) {
         resetRelevance();
         addMatchInfo(normalizedName, matchInfo);
     }

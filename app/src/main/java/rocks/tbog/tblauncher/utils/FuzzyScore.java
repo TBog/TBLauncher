@@ -3,6 +3,7 @@ package rocks.tbog.tblauncher.utils;
 import android.util.Pair;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -71,6 +72,10 @@ public class FuzzyScore {
 
     public FuzzyScore(int[] pattern) {
         this(pattern, true);
+    }
+
+    public int getPatternLength() {
+        return patternLength;
     }
 
     public void setAdjacencyBonus(int adjacency_bonus) {
@@ -269,7 +274,7 @@ public class FuzzyScore {
         return matchInfo;
     }
 
-    public static class MatchInfo {
+    public static final class MatchInfo {
         /**
          * higher is better match. Value has no intrinsic meaning. Range varies with pattern.
          * Can only compare scores with same search pattern.
@@ -310,6 +315,19 @@ public class FuzzyScore {
             }
             positions.add(new Pair<>(start, end));
             return positions;
+        }
+
+        public static MatchInfo copyOrNewInstance(@NonNull MatchInfo source, @Nullable MatchInfo destination) {
+            if (destination == null || (destination.matchedIndices == null && source.matchedIndices != null))
+                return new MatchInfo(source);
+            destination.score = source.score;
+            destination.match = source.match;
+            if (destination.matchedIndices != null) {
+                destination.matchedIndices.clear();
+                if (source.matchedIndices != null)
+                    destination.matchedIndices.addAll(source.matchedIndices);
+            }
+            return destination;
         }
 
         @NonNull
