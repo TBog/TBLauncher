@@ -8,26 +8,20 @@ import android.content.pm.LauncherApps;
 import android.os.Build;
 import android.os.Process;
 import android.os.UserManager;
-import android.util.Log;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.WorkerThread;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Objects;
 
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.broadcast.PackageAddedRemovedHandler;
 import rocks.tbog.tblauncher.entry.AppEntry;
-import rocks.tbog.tblauncher.entry.EntryWithTags;
 import rocks.tbog.tblauncher.loader.LoadAppEntry;
 import rocks.tbog.tblauncher.loader.LoadCacheApps;
-import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.searcher.ISearcher;
-import rocks.tbog.tblauncher.searcher.ResultBuffer;
-import rocks.tbog.tblauncher.utils.FuzzyScore;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 
 public class AppProvider extends Provider<AppEntry> {
@@ -208,72 +202,8 @@ public class AppProvider extends Provider<AppEntry> {
         for (AppEntry pojo : pojos)
             pojo.resetResultInfo();
 
-        recursiveWordCheck(pojos, query, searcher);
+        EntryToResultUtils.recursiveWordCheck(pojos, query, searcher, EntryToResultUtils::tagsCheckResults, AppEntry.class);
     }
-
-    static void recursiveWordCheck(Collection<AppEntry> entries, String query, ISearcher searcher) {
-        int pos = query.lastIndexOf(' ');
-        if (pos > 0) {
-            String queryLeft = query.substring(0, pos).trim();
-            String queryRight = query.substring(pos + 1).trim();
-
-            StringNormalizer.Result queryNormalizedRight = StringNormalizer.normalizeWithResult(queryRight, false);
-            if (queryNormalizedRight.codePoints.length > 0) {
-                ResultBuffer<AppEntry> buffer = new ResultBuffer<>(searcher.tagsEnabled(), AppEntry.class);
-                recursiveWordCheck(entries, queryLeft, buffer);
-
-                FuzzyScore fuzzyScoreRight = new FuzzyScore(queryNormalizedRight.codePoints);
-                checkAppResults(buffer.getEntryItems(), fuzzyScoreRight, searcher);
-                return;
-            }
-        }
-
-        StringNormalizer.Result queryNormalized = StringNormalizer.normalizeWithResult(query, false);
-        if (queryNormalized.codePoints.length == 0)
-            return;
-
-        FuzzyScore fuzzyScore = new FuzzyScore(queryNormalized.codePoints);
-        checkAppResults(entries, fuzzyScore, searcher);
-    }
-
-    @WorkerThread
-    static void checkAppResults(Collection<AppEntry> entries, FuzzyScore fuzzyScore, ISearcher searcher) {
-        Log.d(TAG, "checkAppResults pojo.size=" + entries.size() + " " + fuzzyScore);
-
-        for (AppEntry entry : entries) {
-            if (entry.isHiddenByUser()) {
-                continue;
-            }
-
-            FuzzyScore.MatchInfo scoreInfo = fuzzyScore.match(entry.normalizedName.codePoints);
-
-            StringNormalizer.Result matchedText = entry.normalizedName;
-            FuzzyScore.MatchInfo matchedInfo = new FuzzyScore.MatchInfo(scoreInfo);
-            int matchScore = matchedInfo.score;
-            boolean matchFound = matchedInfo.match;
-
-            if (searcher.tagsEnabled()) {
-                // check relevance for tags
-                for (EntryWithTags.TagDetails tag : entry.getTags()) {
-                    // fuzzyScore.match will return the same object
-                    scoreInfo = fuzzyScore.match(tag.normalized.codePoints);
-                    if (scoreInfo.match && (!matchFound || scoreInfo.score > matchScore)) {
-                        matchFound = true;
-                        matchScore = scoreInfo.score;
-                        matchedText = tag.normalized;
-                        matchedInfo = new FuzzyScore.MatchInfo(scoreInfo);
-                    }
-                }
-            }
-
-            entry.addResultMatch(matchedText, matchedInfo);
-
-            if (matchFound && !searcher.addResult(entry)) {
-                return;
-            }
-        }
-    }
-
 
     /**
      * Return a Pojo

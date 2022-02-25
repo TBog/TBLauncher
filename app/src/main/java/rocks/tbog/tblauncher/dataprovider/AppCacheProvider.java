@@ -48,7 +48,7 @@ public class AppCacheProvider implements IProvider<AppEntry> {
 
         FuzzyScore fuzzyScore = new FuzzyScore(queryNormalized.codePoints);
 
-        AppProvider.checkAppResults(entries, fuzzyScore, searcher);
+        EntryToResultUtils.tagsCheckResults(entries, fuzzyScore, searcher);
     }
 
     public void reload(boolean cancelCurrentLoadTask) {

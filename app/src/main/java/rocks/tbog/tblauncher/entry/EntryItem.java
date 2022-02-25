@@ -161,7 +161,7 @@ public abstract class EntryItem {
     }
 
     public void setRelevance(@NonNull StringNormalizer.Result normalizedName, @Nullable FuzzyScore.MatchInfo matchInfo) {
-        relevance.setRelevance(normalizedName, matchInfo);
+        relevance.setMatchInfo(normalizedName, matchInfo);
     }
 
     public void boostRelevance(int boost) {

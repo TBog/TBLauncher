@@ -104,6 +104,7 @@ public final class AppEntry extends EntryWithTags {
         return componentName.getPackageName();
     }
 
+    @Override
     public boolean isHiddenByUser() {
         return hiddenByUser;
     }

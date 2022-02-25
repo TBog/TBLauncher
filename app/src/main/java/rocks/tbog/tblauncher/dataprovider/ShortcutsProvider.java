@@ -17,20 +17,17 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
+import androidx.annotation.WorkerThread;
 
 import java.util.List;
 
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.db.ShortcutRecord;
-import rocks.tbog.tblauncher.entry.EntryItem;
-import rocks.tbog.tblauncher.entry.EntryWithTags;
 import rocks.tbog.tblauncher.entry.ShortcutEntry;
 import rocks.tbog.tblauncher.loader.LoadShortcutsEntryItem;
-import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.searcher.ISearcher;
 import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
-import rocks.tbog.tblauncher.utils.FuzzyScore;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public class ShortcutsProvider extends Provider<ShortcutEntry> {
@@ -141,16 +138,16 @@ public class ShortcutsProvider extends Provider<ShortcutEntry> {
                     intentPackage = i.getPackage();
                 }
                 Log.i("SHC", "Shortcut changed for `" + packageName + "`" +
-                        "\naction      " + action +
-                        "\ncomponent   " + component +
-                        "\nintentPack  " + intentPackage +
-                        "\nshortLabel  " + info.getShortLabel() +
-                        "\nlongLabel   " + info.getLongLabel() +
-                        "\nisImmutable " + info.isImmutable() +
-                        "\nisEnabled   " + info.isEnabled() +
-                        "\nisPinned    " + info.isPinned() +
-                        "\ninManifest  " + info.isDeclaredInManifest() +
-                        "\nisDynamic   " + info.isDynamic());
+                    "\naction      " + action +
+                    "\ncomponent   " + component +
+                    "\nintentPack  " + intentPackage +
+                    "\nshortLabel  " + info.getShortLabel() +
+                    "\nlongLabel   " + info.getLongLabel() +
+                    "\nisImmutable " + info.isImmutable() +
+                    "\nisEnabled   " + info.isEnabled() +
+                    "\nisPinned    " + info.isPinned() +
+                    "\ninManifest  " + info.isDeclaredInManifest() +
+                    "\nisDynamic   " + info.isDynamic());
             }
         }
     }
@@ -212,45 +209,12 @@ public class ShortcutsProvider extends Provider<ShortcutEntry> {
         }
     }
 
+    @WorkerThread
     @Override
     public void requestResults(String query, ISearcher searcher) {
-        StringNormalizer.Result queryNormalized = StringNormalizer.normalizeWithResult(query, false);
+        for (ShortcutEntry pojo : pojos)
+            pojo.resetResultInfo();
 
-        if (queryNormalized.codePoints.length == 0) {
-            return;
-        }
-
-        FuzzyScore fuzzyScore = new FuzzyScore(queryNormalized.codePoints);
-        FuzzyScore.MatchInfo matchInfo;
-        boolean match;
-
-        for (ShortcutEntry pojo : pojos) {
-            matchInfo = fuzzyScore.match(pojo.normalizedName.codePoints);
-            match = matchInfo.match;
-            pojo.setRelevance(pojo.normalizedName, matchInfo);
-
-            if (searcher.tagsEnabled()) {
-                // check relevance for tags
-                for (EntryWithTags.TagDetails tag : pojo.getTags()) {
-                    matchInfo = fuzzyScore.match(tag.normalized.codePoints);
-                    if (matchInfo.match && (!match || matchInfo.score > pojo.getRelevance())) {
-                        match = true;
-                        pojo.setRelevance(tag.normalized, matchInfo);
-                    }
-                }
-            }
-
-            if (match && !searcher.addResult(pojo)) {
-                return;
-            }
-        }
-    }
-
-    public EntryItem findByName(String name) {
-        for (EntryItem pojo : pojos) {
-            if (pojo.getName().equals(name))
-                return pojo;
-        }
-        return null;
+        EntryToResultUtils.recursiveWordCheck(pojos, query, searcher, EntryToResultUtils::tagsCheckResults, ShortcutEntry.class);
     }
 }
