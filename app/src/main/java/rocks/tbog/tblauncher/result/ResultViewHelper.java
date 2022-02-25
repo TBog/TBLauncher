@@ -24,6 +24,9 @@ import androidx.annotation.WorkerThread;
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -51,9 +54,13 @@ public final class ResultViewHelper {
     }
 
     private static SpannableString highlightText(StringNormalizer.Result normalized, String text, FuzzyScore.MatchInfo matchInfo, int color) {
+        return highlightText(normalized, text, matchInfo.getMatchedSequences(), color);
+    }
+
+    private static SpannableString highlightText(StringNormalizer.Result normalized, String text, Iterable<Pair<Integer, Integer>> matchedSequences, int color) {
         SpannableString enriched = new SpannableString(text);
 
-        for (Pair<Integer, Integer> position : matchInfo.getMatchedSequences()) {
+        for (Pair<Integer, Integer> position : matchedSequences) {
             enriched.setSpan(
                 new ForegroundColorSpan(color),
                 normalized.mapPosition(position.first),
@@ -65,78 +72,39 @@ public final class ResultViewHelper {
         return enriched;
     }
 
-    public static boolean displayHighlighted(@NonNull ResultRelevance relevance, @NonNull StringNormalizer.Result normText,
-                                             @NonNull String text, @NonNull TextView view) {
-        for (ResultRelevance.ResultInfo result : relevance.getInfoList()) {
-            if (result.relevance.match && result.relevanceSource.equals(normText)) {
-                int color = UIColors.getResultHighlightColor(view.getContext());
-                view.setText(highlightText(normText, text, result.relevance, color));
-                return true;
-            }
-        }
-        view.setText(text);
-        return false;
-    }
-
-    public static boolean displayHighlighted(@NonNull ResultRelevance relevance, Iterable<EntryWithTags.TagDetails> tags,
-                                             TextView view, Context context) {
-        boolean matchFound = false;
-
-        int color = UIColors.getResultHighlightColor(context);
-        SpannableStringBuilder builder = new SpannableStringBuilder();
-        boolean first = true;
-        for (EntryWithTags.TagDetails tag : tags) {
-            if (!first)
-                builder.append(" \u2223 ");
-            first = false;
-            boolean appendTagName = true;
-            for (ResultRelevance.ResultInfo result : relevance.getInfoList()) {
-                if (result.relevance.match && result.relevanceSource.equals(tag.normalized)) {
-                    builder.append(highlightText(tag.normalized, tag.name, result.relevance, color));
-                    appendTagName = false;
-                    matchFound = true;
-                    break;
-                }
-            }
-            if (appendTagName)
-                builder.append(tag.name);
-        }
-
-        view.setText(builder);
-
-        return matchFound;
-    }
-
     /**
      * Highlight text
      *
-     * @param relevance the mapping and code points of the matched text
-     * @param normText  the mapping and code points of the provided text
+     * @param relevance result match information
+     * @param normText  we'll use this to match the result with the text we try to highlight
      * @param text      provided visible text that may need highlighting
-     * @param matchInfo matched sequences
      * @param view      TextView that gets the text
      * @return if the text got any matches
      */
-    public static boolean displayHighlighted(@Nullable StringNormalizer.Result relevance, StringNormalizer.Result normText,
-                                             String text, @Nullable FuzzyScore.MatchInfo matchInfo,
-                                             TextView view) {
-        if (matchInfo == null || !matchInfo.match || !normText.equals(relevance)) {
+    public static boolean displayHighlighted(@NonNull ResultRelevance relevance, @NonNull StringNormalizer.Result normText,
+                                             @NonNull String text, @NonNull TextView view) {
+        // merge all results that have the same text source
+        TreeSet<Integer> matchedPositions = new TreeSet<>();
+        for (ResultRelevance.ResultInfo result : relevance.getInfoList()) {
+            if (result.relevance.match && result.relevanceSource.equals(normText)) {
+                matchedPositions.addAll(result.relevance.matchedIndices);
+            }
+        }
+        if (matchedPositions.isEmpty()) {
             view.setText(text);
             return false;
         }
 
         int color = UIColors.getResultHighlightColor(view.getContext());
-        view.setText(highlightText(normText, text, matchInfo, color));
-
+        List<Pair<Integer, Integer>> matchedSequences = FuzzyScore.MatchInfo.getMatchedSequences(new ArrayList<>(matchedPositions));
+        view.setText(highlightText(normText, text, matchedSequences, color));
         return true;
     }
 
-    public static boolean displayHighlighted(StringNormalizer.Result normalized, Iterable<EntryWithTags.TagDetails> tags,
-                                             @Nullable FuzzyScore.MatchInfo matchInfo, TextView view, Context context) {
-//        final StringBuilder debug = new StringBuilder();
-//        Printer debugPrint = x -> debug.append(x).append("\n");
+    public static boolean displayHighlighted(@NonNull ResultRelevance relevance, Iterable<EntryWithTags.TagDetails> tags,
+                                             TextView view, Context context) {
         boolean matchFound = false;
-
+        TreeSet<Integer> matchedPositions = new TreeSet<>();
         int color = UIColors.getResultHighlightColor(context);
         SpannableStringBuilder builder = new SpannableStringBuilder();
         boolean first = true;
@@ -144,14 +112,23 @@ public final class ResultViewHelper {
             if (!first)
                 builder.append(" \u2223 ");
             first = false;
-            if (matchInfo != null && matchInfo.match && tag.normalized.equals(normalized)) {
-                builder.append(highlightText(tag.normalized, tag.name, matchInfo, color));
-                matchFound = true;
 
-//                debug.setLength(0);
-//                TextUtils.dumpSpans(builder, debugPrint, "");
-            } else {
+            matchedPositions.clear();
+            // find all matched positions
+            for (ResultRelevance.ResultInfo result : relevance.getInfoList()) {
+                if (result.relevance.match && result.relevanceSource.equals(tag.normalized)) {
+                    matchedPositions.addAll(result.relevance.matchedIndices);
+                    matchFound = true;
+                }
+            }
+
+            if (matchedPositions.isEmpty()) {
+                // no matches found
                 builder.append(tag.name);
+            } else {
+                // highlight found matches
+                List<Pair<Integer, Integer>> matchedSequences = FuzzyScore.MatchInfo.getMatchedSequences(new ArrayList<>(matchedPositions));
+                builder.append(highlightText(tag.normalized, tag.name, matchedSequences, color));
             }
         }
 

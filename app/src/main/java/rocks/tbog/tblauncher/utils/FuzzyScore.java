@@ -281,7 +281,7 @@ public class FuzzyScore {
          */
         public int score = 0;
         public boolean match = false;
-        final ArrayList<Integer> matchedIndices;
+        public final ArrayList<Integer> matchedIndices;
 
         public MatchInfo() {
             matchedIndices = null;
@@ -297,19 +297,25 @@ public class FuzzyScore {
             matchedIndices = o.matchedIndices != null ? new ArrayList<>(o.matchedIndices) : null;
         }
 
+        @NonNull
         public List<Pair<Integer, Integer>> getMatchedSequences() {
+            return getMatchedSequences(matchedIndices);
+        }
+
+        @NonNull
+        public static List<Pair<Integer, Integer>> getMatchedSequences(@Nullable List<Integer> matchedIndices) {
             if (matchedIndices == null)
                 return Collections.emptyList();
             // compute pair match indices
-            List<Pair<Integer, Integer>> positions = new ArrayList<>(this.matchedIndices.size());
-            int start = this.matchedIndices.get(0);
+            List<Pair<Integer, Integer>> positions = new ArrayList<>(matchedIndices.size());
+            int start = matchedIndices.get(0);
             int end = start + 1;
-            for (int i = 1; i < this.matchedIndices.size(); i += 1) {
-                if (end == this.matchedIndices.get(i)) {
+            for (int i = 1; i < matchedIndices.size(); i += 1) {
+                if (end == matchedIndices.get(i)) {
                     end += 1;
                 } else {
                     positions.add(new Pair<>(start, end));
-                    start = this.matchedIndices.get(i);
+                    start = matchedIndices.get(i);
                     end = start + 1;
                 }
             }
