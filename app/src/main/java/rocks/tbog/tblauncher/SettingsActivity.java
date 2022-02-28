@@ -57,7 +57,7 @@ import rocks.tbog.tblauncher.db.ExportedData;
 import rocks.tbog.tblauncher.db.XmlImport;
 import rocks.tbog.tblauncher.drawable.SizeWrappedDrawable;
 import rocks.tbog.tblauncher.entry.AppEntry;
-import rocks.tbog.tblauncher.entry.ShortcutEntry;
+import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.entry.TagEntry;
 import rocks.tbog.tblauncher.handler.IconsHandler;
@@ -795,17 +795,17 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
         private static Pair<CharSequence[], CharSequence[]> generateShortcutToRunListContent(@NonNull Context context) {
             ShortcutsProvider shortcutsProvider = TBApplication.dataHandler(context).getShortcutsProvider();
-            List<ShortcutEntry> shortcutList = shortcutsProvider == null ? null : shortcutsProvider.getPojos();
+            List<? extends EntryItem> shortcutList = shortcutsProvider == null ? null : shortcutsProvider.getPojos();
             if (shortcutList == null)
                 return new Pair<>(new CharSequence[0], new CharSequence[0]);
             // copy list in order to sort it
             shortcutList = new ArrayList<>(shortcutList);
-            Collections.sort(shortcutList, AppEntry.NAME_COMPARATOR);
+            Collections.sort(shortcutList, EntryItem.NAME_COMPARATOR);
             final int entryCount = shortcutList.size();
             CharSequence[] entries = new CharSequence[entryCount];
             CharSequence[] entryValues = new CharSequence[entryCount];
             for (int idx = 0; idx < entryCount; idx++) {
-                ShortcutEntry shortcutEntry = shortcutList.get(idx);
+                EntryItem shortcutEntry = shortcutList.get(idx);
                 entries[idx] = shortcutEntry.getName();
                 entryValues[idx] = shortcutEntry.id;
             }
