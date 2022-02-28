@@ -48,8 +48,20 @@ public final class ResultViewHelper {
         // this is a namespace
     }
 
-    private static SpannableString highlightText(StringNormalizer.Result normalized, String text, FuzzyScore.MatchInfo matchInfo, int color) {
-        return highlightText(normalized, text, matchInfo.getMatchedSequences(), color);
+    private static CharSequence highlightText(@NonNull StringNormalizer.Result normText, @NonNull String text, @NonNull ResultRelevance relevance, int color) {
+        // merge all results that have the same text source
+        TreeSet<Integer> matchedPositions = new TreeSet<>();
+        for (ResultRelevance.ResultInfo result : relevance.getInfoList()) {
+            if (result.relevance.match && result.relevanceSource.equals(normText)) {
+                matchedPositions.addAll(result.relevance.matchedIndices);
+            }
+        }
+        if (matchedPositions.isEmpty()) {
+            return text;
+        }
+
+        List<Pair<Integer, Integer>> matchedSequences = FuzzyScore.MatchInfo.getMatchedSequences(new ArrayList<>(matchedPositions));
+        return highlightText(normText, text, matchedSequences, color);
     }
 
     private static SpannableString highlightText(StringNormalizer.Result normalized, String text, Iterable<Pair<Integer, Integer>> matchedSequences, int color) {
@@ -74,26 +86,11 @@ public final class ResultViewHelper {
      * @param normText  we'll use this to match the result with the text we try to highlight
      * @param text      provided visible text that may need highlighting
      * @param view      TextView that gets the text
-     * @return if the text got any matches
      */
-    public static boolean displayHighlighted(@NonNull ResultRelevance relevance, @NonNull StringNormalizer.Result normText,
-                                             @NonNull String text, @NonNull TextView view) {
-        // merge all results that have the same text source
-        TreeSet<Integer> matchedPositions = new TreeSet<>();
-        for (ResultRelevance.ResultInfo result : relevance.getInfoList()) {
-            if (result.relevance.match && result.relevanceSource.equals(normText)) {
-                matchedPositions.addAll(result.relevance.matchedIndices);
-            }
-        }
-        if (matchedPositions.isEmpty()) {
-            view.setText(text);
-            return false;
-        }
-
+    public static void displayHighlighted(@NonNull ResultRelevance relevance, @NonNull StringNormalizer.Result normText,
+                                          @NonNull String text, @NonNull TextView view) {
         int color = UIColors.getResultHighlightColor(view.getContext());
-        List<Pair<Integer, Integer>> matchedSequences = FuzzyScore.MatchInfo.getMatchedSequences(new ArrayList<>(matchedPositions));
-        view.setText(highlightText(normText, text, matchedSequences, color));
-        return true;
+        view.setText(highlightText(normText, text, relevance, color));
     }
 
     public static boolean displayHighlighted(@NonNull ResultRelevance relevance, Iterable<EntryWithTags.TagDetails> tags,
