@@ -1487,6 +1487,18 @@ public class Behaviour implements ISearchActivity {
         return false;
     }
 
+    private boolean launchEntryById(@NonNull String entryId) {
+        Context ctx = getContext();
+        DataHandler dataHandler = TBApplication.dataHandler(ctx);
+        EntryItem item = dataHandler.getPojo(entryId);
+        if (item == null) {
+            Toast.makeText(ctx, ctx.getString(R.string.entry_not_found, entryId), Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        item.doLaunch(mLauncherButton, LAUNCHED_FROM_GESTURE);
+        return true;
+    }
+
     private void executeButtonAction(@Nullable String button) {
         if (mPref != null)
             executeAction(mPref.getString(button, null), button);
@@ -1599,6 +1611,12 @@ public class Behaviour implements ISearchActivity {
                 String runApp = mPref.getString(source + "-app-to-run", null);
                 if (runApp != null)
                     return launchAppEntry(runApp);
+                break;
+            }
+            case "runShortcut": {
+                String runApp = mPref.getString(source + "-shortcut-to-run", null);
+                if (runApp != null)
+                    return launchEntryById(runApp);
                 break;
             }
             case "showEntry": {

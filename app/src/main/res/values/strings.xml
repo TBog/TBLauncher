@@ -404,6 +404,7 @@
     <string name="action_show_untagged">Untagged</string>
     <string name="dm_search_open_result">Initial result list</string>
     <string name="action_app_to_run">App to run</string>
+    <string name="action_shortcut_to_run">Shortcut to run</string>
     <string name="action_entry_to_show">Tags to show</string>
     <string name="no_tags">No tags found</string>
     <string name="quick_list_animation">Animate show/hide</string>

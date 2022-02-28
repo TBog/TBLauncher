@@ -51,11 +51,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import rocks.tbog.tblauncher.dataprovider.ShortcutsProvider;
 import rocks.tbog.tblauncher.dataprovider.TagsProvider;
 import rocks.tbog.tblauncher.db.ExportedData;
 import rocks.tbog.tblauncher.db.XmlImport;
 import rocks.tbog.tblauncher.drawable.SizeWrappedDrawable;
 import rocks.tbog.tblauncher.entry.AppEntry;
+import rocks.tbog.tblauncher.entry.ShortcutEntry;
 import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.entry.TagEntry;
 import rocks.tbog.tblauncher.handler.IconsHandler;
@@ -317,6 +319,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         private static final String TAG = "Settings";
 
         private static Pair<CharSequence[], CharSequence[]> AppToRunListContent = null;
+        private static Pair<CharSequence[], CharSequence[]> ShortcutToRunListContent = null;
         private static Pair<CharSequence[], CharSequence[]> EntryToShowListContent = null;
         private static ContentLoadHelper.OrderedMultiSelectListData TagsMenuContent = null;
         private static ContentLoadHelper.OrderedMultiSelectListData ResultPopupContent = null;
@@ -401,6 +404,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         private void onCreateAsyncLoad(@NonNull Context context, @NonNull SharedPreferences sharedPreferences, @Nullable Bundle savedInstanceState) {
             if (savedInstanceState == null) {
                 initAppToRunLists(context, sharedPreferences);
+                initShortcutToRunLists(context, sharedPreferences);
                 initEntryToShowLists(context, sharedPreferences);
                 initTagsMenuList(context, sharedPreferences);
                 initResultPopupList(context, sharedPreferences);
@@ -409,6 +413,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 synchronized (SettingsFragment.this) {
                     if (AppToRunListContent == null)
                         AppToRunListContent = generateAppToRunListContent(context);
+                    if (ShortcutToRunListContent == null)
+                        ShortcutToRunListContent = generateShortcutToRunListContent(context);
                     if (EntryToShowListContent == null)
                         EntryToShowListContent = generateEntryToShowListContent(context);
                     if (TagsMenuContent == null)
@@ -420,6 +426,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
                     for (String gesturePref : PREF_LISTS_WITH_DEPENDENCY) {
                         updateAppToRunList(sharedPreferences, gesturePref);
+                        updateShortcutToRunList(sharedPreferences, gesturePref);
                         updateEntryToShowList(sharedPreferences, gesturePref);
                     }
                     TagsMenuContent.setMultiListValues(findPreference("tags-menu-list"));
@@ -457,6 +464,24 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     synchronized (SettingsFragment.this) {
                         if (AppToRunListContent == null)
                             AppToRunListContent = content;
+                    }
+                }, t -> updateLists.run());
+            } else {
+                updateLists.run();
+            }
+        }
+
+        private void initShortcutToRunLists(@NonNull Context context, @NonNull SharedPreferences sharedPreferences) {
+            final Runnable updateLists = () -> {
+                for (String gesturePref : PREF_LISTS_WITH_DEPENDENCY)
+                    updateShortcutToRunList(sharedPreferences, gesturePref);
+            };
+            if (ShortcutToRunListContent == null) {
+                Utilities.runAsync(getLifecycle(), t -> {
+                    Pair<CharSequence[], CharSequence[]> content = generateShortcutToRunListContent(context);
+                    synchronized (SettingsFragment.this) {
+                        if (ShortcutToRunListContent == null)
+                            ShortcutToRunListContent = content;
                     }
                 }, t -> updateLists.run());
             } else {
@@ -617,6 +642,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             super.onDestroy();
             synchronized (SettingsFragment.this) {
                 AppToRunListContent = null;
+                ShortcutToRunListContent = null;
                 EntryToShowListContent = null;
                 TagsMenuContent = null;
                 ResultPopupContent = null;
@@ -767,6 +793,25 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             return new Pair<>(entries, entryValues);
         }
 
+        private static Pair<CharSequence[], CharSequence[]> generateShortcutToRunListContent(@NonNull Context context) {
+            ShortcutsProvider shortcutsProvider = TBApplication.dataHandler(context).getShortcutsProvider();
+            List<ShortcutEntry> shortcutList = shortcutsProvider == null ? null : shortcutsProvider.getPojos();
+            if (shortcutList == null)
+                return new Pair<>(new CharSequence[0], new CharSequence[0]);
+            // copy list in order to sort it
+            shortcutList = new ArrayList<>(shortcutList);
+            Collections.sort(shortcutList, AppEntry.NAME_COMPARATOR);
+            final int entryCount = shortcutList.size();
+            CharSequence[] entries = new CharSequence[entryCount];
+            CharSequence[] entryValues = new CharSequence[entryCount];
+            for (int idx = 0; idx < entryCount; idx++) {
+                ShortcutEntry shortcutEntry = shortcutList.get(idx);
+                entries[idx] = shortcutEntry.getName();
+                entryValues[idx] = shortcutEntry.id;
+            }
+            return new Pair<>(entries, entryValues);
+        }
+
         private static Pair<CharSequence[], CharSequence[]> generateEntryToShowListContent(@NonNull Context context) {
             final List<StaticEntry> tagList;
 
@@ -810,20 +855,20 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         }
 
         private void updateListPrefDependency(@NonNull String dependOnKey, @Nullable String dependOnValue, @NonNull String enableValue, @NonNull String listKey, @Nullable Pair<CharSequence[], CharSequence[]> listContent) {
-            Preference prefAppToRun = findPreference(listKey);
-            if (prefAppToRun instanceof ListPreference) {
+            Preference prefEntryToRun = findPreference(listKey);
+            if (prefEntryToRun instanceof ListPreference) {
                 synchronized (SettingsFragment.this) {
                     if (listContent != null) {
                         CharSequence[] entries = listContent.first;
                         CharSequence[] entryValues = listContent.second;
-                        ((ListPreference) prefAppToRun).setEntries(entries);
-                        ((ListPreference) prefAppToRun).setEntryValues(entryValues);
-                        prefAppToRun.setVisible(enableValue.equals(dependOnValue));
+                        ((ListPreference) prefEntryToRun).setEntries(entries);
+                        ((ListPreference) prefEntryToRun).setEntryValues(entryValues);
+                        prefEntryToRun.setVisible(enableValue.equals(dependOnValue));
                         return;
                     }
                 }
             }
-            if (prefAppToRun == null) {
+            if (prefEntryToRun == null) {
                 // the ListPreference for selecting an app is missing. Remove the option to run an app.
                 Preference pref = findPreference(dependOnKey);
                 if (pref instanceof ListPreference) {
@@ -831,12 +876,16 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 }
             } else {
                 Log.w(TAG, "ListPreference `" + listKey + "` can't be updated");
-                prefAppToRun.setVisible(false);
+                prefEntryToRun.setVisible(false);
             }
         }
 
         private void updateAppToRunList(@NonNull SharedPreferences sharedPreferences, String key) {
             updateListPrefDependency(key, sharedPreferences.getString(key, null), "runApp", key + "-app-to-run", AppToRunListContent);
+        }
+
+        private void updateShortcutToRunList(@NonNull SharedPreferences sharedPreferences, String key) {
+            updateListPrefDependency(key, sharedPreferences.getString(key, null), "runShortcut", key + "-shortcut-to-run", ShortcutToRunListContent);
         }
 
         private void updateEntryToShowList(@NonNull SharedPreferences sharedPreferences, String key) {
@@ -880,6 +929,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
             if (PREF_LISTS_WITH_DEPENDENCY.contains(key)) {
                 updateAppToRunList(sharedPreferences, key);
+                updateShortcutToRunList(sharedPreferences, key);
                 updateEntryToShowList(sharedPreferences, key);
             }
 

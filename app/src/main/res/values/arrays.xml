@@ -109,6 +109,7 @@
         <item>@string/show_tags_list</item>
         <item>@string/show_tags_list_reversed</item>
         <item>Run app…</item>
+        <item>Run shortcut…</item>
         <item>Show tagged…</item>
     </string-array>
     <array name="gestureValues" translatable="false">
@@ -138,6 +139,7 @@
         <item>showTagsList</item>
         <item>showTagsListReversed</item>
         <item>runApp</item>
+        <item>runShortcut</item>
         <item>showEntry</item>
     </array>
 

@@ -564,6 +564,10 @@
                 android:title="@string/action_app_to_run"
                 app:isPreferenceVisible="false" />
             <ListPreference
+                android:key="gesture-click-shortcut-to-run"
+                android:title="@string/action_shortcut_to_run"
+                app:isPreferenceVisible="false" />
+            <ListPreference
                 android:key="gesture-click-entry-to-show"
                 android:title="@string/action_entry_to_show"
                 app:isPreferenceVisible="false" />
@@ -577,6 +581,10 @@
             <ListPreference
                 android:key="gesture-double-click-app-to-run"
                 android:title="@string/action_app_to_run"
+                app:isPreferenceVisible="false" />
+            <ListPreference
+                android:key="gesture-double-click-shortcut-to-run"
+                android:title="@string/action_shortcut_to_run"
                 app:isPreferenceVisible="false" />
             <ListPreference
                 android:key="gesture-double-click-entry-to-show"
@@ -595,6 +603,10 @@
                 android:title="@string/action_app_to_run"
                 app:isPreferenceVisible="false" />
             <ListPreference
+                android:key="gesture-fling-down-left-shortcut-to-run"
+                android:title="@string/action_shortcut_to_run"
+                app:isPreferenceVisible="false" />
+            <ListPreference
                 android:key="gesture-fling-down-left-entry-to-show"
                 android:title="@string/action_entry_to_show"
                 app:isPreferenceVisible="false" />
@@ -609,6 +621,10 @@
             <ListPreference
                 android:key="gesture-fling-down-right-app-to-run"
                 android:title="@string/action_app_to_run"
+                app:isPreferenceVisible="false" />
+            <ListPreference
+                android:key="gesture-fling-down-right-shortcut-to-run"
+                android:title="@string/action_shortcut_to_run"
                 app:isPreferenceVisible="false" />
             <ListPreference
                 android:key="gesture-fling-down-right-entry-to-show"
@@ -626,6 +642,10 @@
                 android:title="@string/action_app_to_run"
                 app:isPreferenceVisible="false" />
             <ListPreference
+                android:key="gesture-fling-up-shortcut-to-run"
+                android:title="@string/action_shortcut_to_run"
+                app:isPreferenceVisible="false" />
+            <ListPreference
                 android:key="gesture-fling-up-entry-to-show"
                 android:title="@string/action_entry_to_show"
                 app:isPreferenceVisible="false" />
@@ -641,6 +661,10 @@
                 android:title="@string/action_app_to_run"
                 app:isPreferenceVisible="false" />
             <ListPreference
+                android:key="gesture-fling-left-shortcut-to-run"
+                android:title="@string/action_shortcut_to_run"
+                app:isPreferenceVisible="false" />
+            <ListPreference
                 android:key="gesture-fling-left-entry-to-show"
                 android:title="@string/action_entry_to_show"
                 app:isPreferenceVisible="false" />
@@ -654,6 +678,10 @@
             <ListPreference
                 android:key="gesture-fling-right-app-to-run"
                 android:title="@string/action_app_to_run"
+                app:isPreferenceVisible="false" />
+            <ListPreference
+                android:key="gesture-fling-right-shortcut-to-run"
+                android:title="@string/action_shortcut_to_run"
                 app:isPreferenceVisible="false" />
             <ListPreference
                 android:key="gesture-fling-right-entry-to-show"
@@ -699,6 +727,10 @@
             <ListPreference
                 android:key="button-launcher-app-to-run"
                 android:title="@string/action_app_to_run"
+                app:isPreferenceVisible="false" />
+            <ListPreference
+                android:key="button-launcher-shortcut-to-run"
+                android:title="@string/action_shortcut_to_run"
                 app:isPreferenceVisible="false" />
             <ListPreference
                 android:key="button-launcher-entry-to-show"
