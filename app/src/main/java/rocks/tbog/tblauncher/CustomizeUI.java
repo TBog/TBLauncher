@@ -205,20 +205,28 @@ public class CustomizeUI {
 
     public static void setResultListPref(View resultLayout) {
         SharedPreferences pref = TBApplication.getApplication(resultLayout.getContext()).preferences();
-        int background = UIColors.getResultListBackground(pref);
-        Drawable drawable;
-        if (pref.getBoolean("result-list-rounded", true)) {
-            drawable = new GradientDrawable();  // can't use PaintDrawable when alpha < 255, ugly big darker borders
-            ((GradientDrawable) drawable).setColor(background);
-            ((GradientDrawable) drawable).setCornerRadius(UISizes.getResultListRadius(resultLayout.getContext()));
+        int backgroundColor = UIColors.getResultListBackground(pref);
+        int cornerRadius = UISizes.getResultListRadius(resultLayout.getContext());
+        if (cornerRadius > 0) {
+            final GradientDrawable drawable;
+            {
+                Drawable background = resultLayout.getBackground();
+                // can't use PaintDrawable when alpha < 255, ugly big darker borders
+                if (background instanceof GradientDrawable)
+                    drawable = (GradientDrawable) background;
+                else
+                    drawable = new GradientDrawable();
+            }
+            ((GradientDrawable) drawable).setColor(backgroundColor);
+            ((GradientDrawable) drawable).setCornerRadius(cornerRadius);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 // clip list content to rounded corners
                 resultLayout.setClipToOutline(true);
             }
+            resultLayout.setBackground(drawable);
         } else {
-            drawable = new ColorDrawable(background);
+            resultLayout.setBackgroundColor(backgroundColor);
         }
-        resultLayout.setBackground(drawable);
 
         int overscrollColor = UIColors.getResultListRipple(resultLayout.getContext());
         overscrollColor = UIColors.setAlpha(overscrollColor, 0x7F);

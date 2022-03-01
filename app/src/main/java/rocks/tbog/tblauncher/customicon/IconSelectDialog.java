@@ -408,10 +408,10 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
             Drawable icon = drawable.mutate();
             icon.setBounds(0, 0, size, size);
             ((TextView) view).setCompoundDrawables(null, null, icon, null);
-            int radius = (int) (.5f + .5f * UISizes.getResultListRadius(ctx));
+            int radius = UISizes.getResultListRadius(ctx);
             int paddingTop = view.getPaddingTop();
             int paddingBottom = view.getPaddingBottom();
-            view.setPadding(radius, paddingTop, radius, paddingBottom);
+            view.setPadding(radius / 2, paddingTop, radius / 2, paddingBottom);
         });
     }
 

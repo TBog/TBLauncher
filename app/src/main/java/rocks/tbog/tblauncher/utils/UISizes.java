@@ -75,12 +75,12 @@ public final class UISizes {
         return CACHED_SIZE_RESULT_ICON;
     }
 
-    public static float getResultListRadius(Context context) {
+    public static int getResultListRadius(Context context) {
         SharedPreferences pref = TBApplication.getApplication(context).preferences();
-        if (pref.getBoolean("result-list-rounded", true)) {
-            return context.getResources().getDimension(R.dimen.result_corner_radius);
-        }
-        return 0f;
+        int radius = pref.getInt("result-list-radius", -1);
+        if (radius >= 0)
+            return radius;
+        return context.getResources().getDimensionPixelSize(R.dimen.result_corner_radius);
     }
 
     public static int getTagsMenuIconSize(Context context) {

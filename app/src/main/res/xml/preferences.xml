@@ -332,15 +332,17 @@
                 android:widgetLayout="@layout/pref_alpha_preview" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@integer/default_corner_radius"
+                android:dialogLayout="@layout/pref_slider"
+                android:key="result-list-radius"
+                android:title="@string/corner_radius"
+                android:widgetLayout="@layout/pref_size_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@integer/default_color_highlight"
                 android:key="result-ripple-color"
                 android:title="@string/result_ripple_color"
                 android:widgetLayout="@layout/pref_color_preview" />
-
-            <SwitchPreference
-                android:defaultValue="true"
-                android:key="result-list-rounded"
-                android:title="@string/round_corners" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@integer/default_color_highlight"

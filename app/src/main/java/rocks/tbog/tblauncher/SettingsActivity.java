@@ -90,7 +90,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     private final static String INTENT_EXTRA_BACK_STACK_TAGS = "backStackTagList";
 
     private final static ArraySet<String> PREF_THAT_REQUIRE_LAYOUT_UPDATE = new ArraySet<>(Arrays.asList(
-        "result-list-color", "result-list-alpha", "result-ripple-color", "result-list-rounded",
+        "result-list-color", "result-list-alpha", "result-ripple-color", "result-list-radius",
         "notification-bar-color", "notification-bar-alpha", "notification-bar-gradient", "black-notification-icons",
         "search-bar-height", "search-bar-text-size", "search-bar-rounded", "search-bar-gradient", "search-bar-at-bottom",
         "search-bar-color", "search-bar-alpha", "search-bar-text-color", "search-bar-icon-color",
@@ -705,6 +705,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "icon-contrast":
                     case "icon-brightness":
                     case "icon-saturation":
+                    case "result-list-radius":
                     case "popup-corner-radius":
                     case "quick-list-radius":
                         dialogFragment = SliderDialog.newInstance(key);
