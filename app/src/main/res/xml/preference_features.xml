@@ -138,6 +138,12 @@
             android:summary="@string/result_right_to_left_summary"
             android:title="@string/result_right_to_left" />
 
+        <androidx.preference.SwitchPreference
+            android:defaultValue="false"
+            android:key="result-fading-edge"
+            android:summary="@string/result_fading_edge_summary"
+            android:title="@string/result_fading_edge" />
+
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
             android:defaultValue="@integer/default_result_history_size"
             android:dialogLayout="@layout/pref_slider"

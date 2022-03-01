@@ -24,6 +24,7 @@ import android.widget.ImageView;
 
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.preference.PreferenceManager;
 
 import rocks.tbog.tblauncher.ui.RecyclerList;
@@ -53,8 +54,8 @@ public class CustomizeUI {
      * we ignore whatever the IME thinks we should display.
      */
     private final static int INPUT_TYPE_STANDARD = InputType.TYPE_CLASS_TEXT
-            | InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE
-            | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS;
+        | InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE
+        | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS;
     /**
      * InputType that behaves as if the consuming IME is SwiftKey
      * <p>
@@ -62,7 +63,48 @@ public class CustomizeUI {
      * unexpected behaviour in numerous ways. (#454, #517)
      */
     private final static int INPUT_TYPE_WORKAROUND = InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
-            | InputType.TYPE_TEXT_FLAG_AUTO_CORRECT;
+        | InputType.TYPE_TEXT_FLAG_AUTO_CORRECT;
+
+    private final View.OnLayoutChangeListener updateResultFadeOut = new UpdateResultFadeOut();
+
+    private static final class UpdateResultFadeOut implements View.OnLayoutChangeListener {
+        @Override
+        public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+            SharedPreferences pref = TBApplication.getApplication(v.getContext()).preferences();
+            boolean fadeOut = PrefCache.getResultFadeOut(pref);
+            if (!fadeOut) {
+                v.removeOnLayoutChangeListener(this);
+                return;
+            }
+            int oldHeight = oldBottom - oldTop;
+            if (oldHeight != v.getHeight()) {
+                boolean drawableColorSet = false;
+                Drawable bg = v.getBackground();
+                if (bg instanceof GradientDrawable) {
+                    GradientDrawable drawable = (GradientDrawable) bg;
+                    drawable.setGradientType(GradientDrawable.LINEAR_GRADIENT);
+                    drawable.setOrientation(GradientDrawable.Orientation.TOP_BOTTOM);
+
+                    int backgroundColor = UIColors.getResultListBackground(pref);
+                    int color = backgroundColor & 0x00ffffff;
+                    int alpha = Color.alpha(backgroundColor);
+                    int c1 = UIColors.setAlpha(color, 0);
+                    int c2 = UIColors.setAlpha(color, alpha * 3 / 4);
+                    int c3 = UIColors.setAlpha(color, alpha);
+                    float p = (float) UISizes.getResultIconSize(v.getContext()) / v.getHeight();
+                    //TODO: use java reflection to change GradientDrawable.GradientState.mPositions
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                        drawable.setColors(
+                            new int[]{c1, c2, c3, c3, c2, c1},
+                            new float[]{0f, p * .5f, p, 1f - p, 1f - (p * .5f), 1f});
+                        drawableColorSet = true;
+                    }
+                }
+                if (!drawableColorSet)
+                    v.removeOnLayoutChangeListener(this);
+            }
+        }
+    }
 
     @SuppressWarnings("TypeParameterUnusedInFormals")
     private <T extends View> T findViewById(@IdRes int id) {
@@ -83,7 +125,12 @@ public class CustomizeUI {
 
     public void onStart() {
         setSearchBarPref();
-        setResultListPref(findViewById(R.id.resultLayout));
+        View resultLayout = findViewById(R.id.resultLayout);
+        setResultListPref(resultLayout, true);
+        resultLayout.addOnLayoutChangeListener(updateResultFadeOut);
+        updateResultFadeOut.onLayoutChange(resultLayout,
+            resultLayout.getLeft(), resultLayout.getTop(), resultLayout.getRight(), resultLayout.getBottom(),
+            0, 0, 0, 0);
         adjustInputType(mSearchBar);
         setNotificationBarColor();
     }
@@ -204,25 +251,48 @@ public class CustomizeUI {
     }
 
     public static void setResultListPref(View resultLayout) {
+        setResultListPref(resultLayout, false);
+    }
+
+    public static void setResultListPref(View resultLayout, boolean setMargin) {
         SharedPreferences pref = TBApplication.getApplication(resultLayout.getContext()).preferences();
+
+        if (setMargin) {
+            ViewGroup.LayoutParams params = resultLayout.getLayoutParams();
+            if (params instanceof ViewGroup.MarginLayoutParams) {
+                int hMargin = UISizes.getResultListRadius(resultLayout.getContext());
+                int vMargin = hMargin / 2;
+                ((ViewGroup.MarginLayoutParams) params).setMargins(hMargin, vMargin, hMargin, vMargin);
+            }
+        }
+
+        boolean fadeOut = PrefCache.getResultFadeOut(pref);
         int backgroundColor = UIColors.getResultListBackground(pref);
         int cornerRadius = UISizes.getResultListRadius(resultLayout.getContext());
-        if (cornerRadius > 0) {
-            final GradientDrawable drawable;
-            {
-                Drawable background = resultLayout.getBackground();
-                // can't use PaintDrawable when alpha < 255, ugly big darker borders
-                if (background instanceof GradientDrawable)
-                    drawable = (GradientDrawable) background;
-                else
-                    drawable = new GradientDrawable();
+        if (cornerRadius > 0 || fadeOut) {
+            final GradientDrawable drawable = new GradientDrawable();
+            drawable.setCornerRadius(cornerRadius);
+            boolean drawableColorSet = false;
+            if (fadeOut) {
+                drawable.setGradientType(GradientDrawable.LINEAR_GRADIENT);
+                drawable.setOrientation(GradientDrawable.Orientation.TOP_BOTTOM);
+                int color = backgroundColor & 0x00ffffff;
+                int alpha = Color.alpha(backgroundColor);
+                int c1 = UIColors.setAlpha(color, 0);
+                int c2 = UIColors.setAlpha(color, alpha);
+                //TODO: use java reflection to change GradientDrawable.GradientState.mPositions
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                    drawable.setColors(new int[]{c1, c2, c2, c1}, new float[]{0f, 0.1f, 0.9f, 1f});
+                    drawableColorSet = true;
+                }
             }
-            ((GradientDrawable) drawable).setColor(backgroundColor);
-            ((GradientDrawable) drawable).setCornerRadius(cornerRadius);
+            if (!drawableColorSet)
+                drawable.setColor(backgroundColor);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 // clip list content to rounded corners
                 resultLayout.setClipToOutline(true);
             }
+            // can't use PaintDrawable when alpha < 255, ugly big darker borders
             resultLayout.setBackground(drawable);
         } else {
             resultLayout.setBackgroundColor(backgroundColor);
@@ -234,6 +304,8 @@ public class CustomizeUI {
             setListViewSelectorPref((AbsListView) resultLayout, true);
             setListViewScrollbarPref(resultLayout);
             EdgeGlowHelper.setEdgeGlowColor((AbsListView) resultLayout, overscrollColor);
+            if (setMargin)
+                setFadingEdge(resultLayout, fadeOut);
         } else {
             View list = resultLayout.findViewById(R.id.resultList);
             if (list instanceof AbsListView) {
@@ -244,7 +316,17 @@ public class CustomizeUI {
                 setListViewScrollbarPref(list);
                 EdgeGlowHelper.setEdgeGlowColor((RecyclerList) list, overscrollColor);
             }
+            if (setMargin)
+                setFadingEdge(list, fadeOut);
         }
+    }
+
+    private static void setFadingEdge(@Nullable View view, boolean enabled) {
+        if (view == null)
+            return;
+        if (enabled)
+            view.setFadingEdgeLength(UISizes.getResultIconSize(view.getContext()));
+        view.setVerticalFadingEdgeEnabled(enabled);
     }
 
     private void adjustInputType(EditText searchEditText) {

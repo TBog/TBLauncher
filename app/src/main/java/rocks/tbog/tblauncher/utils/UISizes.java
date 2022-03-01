@@ -78,9 +78,9 @@ public final class UISizes {
     public static int getResultListRadius(Context context) {
         SharedPreferences pref = TBApplication.getApplication(context).preferences();
         int radius = pref.getInt("result-list-radius", -1);
-        if (radius >= 0)
-            return radius;
-        return context.getResources().getDimensionPixelSize(R.dimen.result_corner_radius);
+        if (radius < 0)
+            return context.getResources().getDimensionPixelSize(R.dimen.result_corner_radius);
+        return dp2px(context, radius);
     }
 
     public static int getTagsMenuIconSize(Context context) {

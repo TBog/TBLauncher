@@ -226,4 +226,8 @@ public class PrefCache {
     public static boolean rightToLeft(SharedPreferences preferences) {
         return preferences.getBoolean("result-right-to-left", true);
     }
+
+    public static boolean getResultFadeOut(SharedPreferences pref) {
+        return pref.getBoolean("result-fading-edge", false);
+    }
 }
