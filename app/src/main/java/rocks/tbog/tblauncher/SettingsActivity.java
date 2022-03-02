@@ -674,7 +674,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "search-bar-ripple-color":
                     case "search-bar-cursor-argb":
                     case "quick-list-toggle-color":
-                    case "quick-list-color":
+                    case "quick-list-argb":
                     case "quick-list-ripple-color":
                     case "popup-background-argb":
                     case "popup-border-argb":
@@ -685,7 +685,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         break;
                     case "search-bar-height":
                     case "search-bar-text-size":
-                    case "quick-list-alpha":
                     case "quick-list-height":
                     case "result-text-size":
                     case "result-text2-size":
@@ -1027,7 +1026,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 if (activity != null)
                     activity.refreshSearchRecords();
                 // fallthrough
-            case "quick-list-color":
+            case "quick-list-argb":
             case "quick-list-ripple-color":
                 // static entities will change color based on luminance
                 // fallthrough

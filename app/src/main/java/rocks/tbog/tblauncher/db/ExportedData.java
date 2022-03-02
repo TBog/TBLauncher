@@ -844,8 +844,8 @@ public class ExportedData {
             }
         }
 
-        if (PrefCache.migratePreferences(mPreferences, editor))
-            Log.i(TAG, "Preferences migrated");
+        if (PrefCache.migratePreferences(context, mPreferences, editor))
+            Log.i(TAG, "Preferences migration done.");
 
         editor.commit();
 

@@ -341,8 +341,8 @@ public class TBApplication extends Application {
         PreferenceManager.setDefaultValues(this, R.xml.preference_features, true);
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
 
-        if (PrefCache.isMigrateRequired(mSharedPreferences) && PrefCache.migratePreferences(mSharedPreferences)) {
-            Log.i(TAG, "Preferences migrated");
+        if (PrefCache.isMigrateRequired(mSharedPreferences) && PrefCache.migratePreferences(this, mSharedPreferences)) {
+            Log.i(TAG, "Preferences migration done.");
         }
 
 //        SharedPreferences.Editor editor = mSharedPreferences.edit();

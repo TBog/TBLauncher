@@ -124,7 +124,7 @@ public class QuickList {
             drawFlags |= EntryItem.FLAG_DRAW_ICON;
         if (prefs.getBoolean("quick-list-show-badge", true))
             drawFlags |= EntryItem.FLAG_DRAW_ICON_BADGE;
-        if (UIColors.isColorLight(UIColors.getColor(prefs, "quick-list-color"))) {
+        if (UIColors.isColorLight(UIColors.getColor(prefs, "quick-list-argb"))) {
             drawFlags |= EntryItem.FLAG_DRAW_WHITE_BG;
             //drawFlags |= EntryItem.FLAG_DRAW_NO_CACHE; // no need, we already have it
         }
@@ -538,9 +538,7 @@ public class QuickList {
     }
 
     public static int getBackgroundColor(SharedPreferences pref) {
-        int color = UIColors.getColor(pref, "quick-list-color");
-        int alpha = UIColors.getAlpha(pref, "quick-list-alpha");
-        return UIColors.setAlpha(color, alpha);
+        return UIColors.getColor(pref, "quick-list-argb");
     }
 
     // ugly: check from where the entry was launched

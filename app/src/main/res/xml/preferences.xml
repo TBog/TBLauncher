@@ -393,17 +393,10 @@
             android:title="@string/quick_list_section">
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:defaultValue="@integer/default_color"
-                android:key="quick-list-color"
+                android:defaultValue="@integer/default_background_argb"
+                android:key="quick-list-argb"
                 android:title="@string/quick_list_color"
                 android:widgetLayout="@layout/pref_color_preview" />
-
-            <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:defaultValue="@integer/default_quick_list_opacity"
-                android:dialogLayout="@layout/pref_slider"
-                android:key="quick-list-alpha"
-                android:title="@string/quick_list_alpha"
-                android:widgetLayout="@layout/pref_alpha_preview" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@integer/default_color_highlight"
