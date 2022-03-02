@@ -78,29 +78,8 @@ public class CustomizeUI {
             }
             int oldHeight = oldBottom - oldTop;
             if (oldHeight != v.getHeight()) {
-                boolean drawableColorSet = false;
-                Drawable bg = v.getBackground();
-                if (bg instanceof GradientDrawable) {
-                    GradientDrawable drawable = (GradientDrawable) bg;
-                    drawable.setGradientType(GradientDrawable.LINEAR_GRADIENT);
-                    drawable.setOrientation(GradientDrawable.Orientation.TOP_BOTTOM);
-
-                    int backgroundColor = UIColors.getResultListBackground(pref);
-                    int color = backgroundColor & 0x00ffffff;
-                    int alpha = Color.alpha(backgroundColor);
-                    int c1 = UIColors.setAlpha(color, 0);
-                    int c2 = UIColors.setAlpha(color, alpha * 3 / 4);
-                    int c3 = UIColors.setAlpha(color, alpha);
-                    float p = (float) UISizes.getResultIconSize(v.getContext()) / v.getHeight();
-                    //TODO: use java reflection to change GradientDrawable.GradientState.mPositions
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                        drawable.setColors(
-                            new int[]{c1, c2, c3, c3, c2, c1},
-                            new float[]{0f, p * .5f, p, 1f - p, 1f - (p * .5f), 1f});
-                        drawableColorSet = true;
-                    }
-                }
-                if (!drawableColorSet)
+                int backgroundColor = UIColors.getResultListBackground(pref);
+                if (!setResultListGradientFade(v, backgroundColor))
                     v.removeOnLayoutChangeListener(this);
             }
         }
@@ -253,6 +232,28 @@ public class CustomizeUI {
         setResultListPref(resultLayout, false);
     }
 
+    private static boolean setResultListGradientFade(@NonNull View resultLayout, int backgroundColor) {
+        Drawable bg = resultLayout.getBackground();
+        if (bg instanceof GradientDrawable) {
+            GradientDrawable drawable = (GradientDrawable) bg;
+            drawable.setGradientType(GradientDrawable.LINEAR_GRADIENT);
+            drawable.setOrientation(GradientDrawable.Orientation.TOP_BOTTOM);
+
+            int color = backgroundColor & 0x00ffffff;
+            int alpha = Color.alpha(backgroundColor);
+            int c1 = UIColors.setAlpha(color, 0);
+            int c2 = UIColors.setAlpha(color, alpha * 3 / 4);
+            int c3 = UIColors.setAlpha(color, alpha);
+            float p = UISizes.getResultIconSize(resultLayout.getContext()) * .5f / resultLayout.getHeight();
+            // if height is too small, fade only on 66% of the height (33% fade in and 33% fade out)
+            p = Math.min(p, .33f);
+            return Utilities.setGradientDrawableColors(drawable,
+                new int[]{c1, c2, c3, c3, c2, c1},
+                new float[]{0f, p * .5f, p, 1f - p, 1f - (p * .5f), 1f});
+        }
+        return false;
+    }
+
     public static void setResultListPref(View resultLayout, boolean setMargin) {
         SharedPreferences pref = TBApplication.getApplication(resultLayout.getContext()).preferences();
 
@@ -271,28 +272,13 @@ public class CustomizeUI {
         if (cornerRadius > 0 || fadeOut) {
             final GradientDrawable drawable = new GradientDrawable();
             drawable.setCornerRadius(cornerRadius);
-            boolean drawableColorSet = false;
-            if (fadeOut) {
-                drawable.setGradientType(GradientDrawable.LINEAR_GRADIENT);
-                drawable.setOrientation(GradientDrawable.Orientation.TOP_BOTTOM);
-                int color = backgroundColor & 0x00ffffff;
-                int alpha = Color.alpha(backgroundColor);
-                int c1 = UIColors.setAlpha(color, 0);
-                int c2 = UIColors.setAlpha(color, alpha);
-                //TODO: use java reflection to change GradientDrawable.GradientState.mPositions
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                    drawable.setColors(new int[]{c1, c2, c2, c1}, new float[]{0f, 0.1f, 0.9f, 1f});
-                    drawableColorSet = true;
-                }
-            }
-            if (!drawableColorSet)
-                drawable.setColor(backgroundColor);
+            resultLayout.setBackground(drawable);
+            if (fadeOut)
+                setResultListGradientFade(resultLayout, backgroundColor);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 // clip list content to rounded corners
                 resultLayout.setClipToOutline(true);
             }
-            // can't use PaintDrawable when alpha < 255, ugly big darker borders
-            resultLayout.setBackground(drawable);
         } else {
             resultLayout.setBackgroundColor(backgroundColor);
         }

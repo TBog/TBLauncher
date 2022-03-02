@@ -18,6 +18,7 @@ import android.graphics.drawable.Animatable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.ShapeDrawable;
 import android.graphics.drawable.shapes.RectShape;
 import android.os.Build;
@@ -76,10 +77,14 @@ public class Utilities {
         }
     };
 
+    private static final Class<?> CLASS_GRADIENT_DRAWABLE_GRADIENT_STATE;
+    private static final Field GRADIENT_DRAWABLE_FIELD_GRADIENT_STATE;
+    private static final Field GRADIENT_DRAWABLE_GRADIENT_STATE_FIELD_POSITIONS;
+
     static {
         ThreadPoolExecutor threadPoolExecutor = new ThreadPoolExecutor(
-                CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, KEEP_ALIVE_SECONDS, TimeUnit.SECONDS,
-                new SynchronousQueue<Runnable>(), sThreadFactory);
+            CORE_POOL_SIZE, MAXIMUM_POOL_SIZE, KEEP_ALIVE_SECONDS, TimeUnit.SECONDS,
+            new SynchronousQueue<Runnable>(), sThreadFactory);
         threadPoolExecutor.setRejectedExecutionHandler((runnable, executor) -> {
             Log.w(TAG, "task rejected");
             if (!executor.isShutdown()) {
@@ -87,6 +92,40 @@ public class Utilities {
             }
         });
         EXECUTOR_RUN_ASYNC = threadPoolExecutor;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            CLASS_GRADIENT_DRAWABLE_GRADIENT_STATE = null;
+            GRADIENT_DRAWABLE_FIELD_GRADIENT_STATE = null;
+            GRADIENT_DRAWABLE_GRADIENT_STATE_FIELD_POSITIONS = null;
+        } else {
+            // make mGradientState accessible
+            Field f_mGradientState = null;
+            try {
+                f_mGradientState = GradientDrawable.class.getDeclaredField("mGradientState");
+                f_mGradientState.setAccessible(true);
+            } catch (Throwable t) {
+                Log.w(TAG, "make mGradientState from " + GradientDrawable.class.getSimpleName() + " accessible", t);
+            }
+            GRADIENT_DRAWABLE_FIELD_GRADIENT_STATE = f_mGradientState;
+
+            // make mGradientState.mPositions accessible
+            Class<?> c_GradientState = null;
+            try {
+                c_GradientState = Class.forName(GradientDrawable.class.getName() + "$GradientState");
+            } catch (ClassNotFoundException ignored) {
+            }
+            CLASS_GRADIENT_DRAWABLE_GRADIENT_STATE = c_GradientState;
+            Field f_mPositions = null;
+            if (c_GradientState != null) {
+                try {
+                    f_mPositions = c_GradientState.getDeclaredField("mPositions");
+                    f_mPositions.setAccessible(true);
+                } catch (Throwable t) {
+                    Log.w(TAG, "make GradientState.mPositions from " + c_GradientState + " accessible", t);
+                }
+            }
+            GRADIENT_DRAWABLE_GRADIENT_STATE_FIELD_POSITIONS = f_mPositions;
+        }
     }
 
     // https://stackoverflow.com/questions/3035692/how-to-convert-a-drawable-to-a-bitmap
@@ -172,28 +211,28 @@ public class Utilities {
 
     public static void setIconAsync(@NonNull ImageView image, @NonNull GetDrawable callback) {
         TaskRunner.executeOnExecutor(ResultViewHelper.EXECUTOR_LOAD_ICON,
-                new Utilities.AsyncSetDrawable(image) {
-                    @Override
-                    protected Drawable getDrawable(Context context) {
-                        return callback.getDrawable(context);
-                    }
+            new Utilities.AsyncSetDrawable(image) {
+                @Override
+                protected Drawable getDrawable(Context context) {
+                    return callback.getDrawable(context);
                 }
+            }
         );
     }
 
     public static void setViewAsync(@NonNull View image, @NonNull GetDrawable cbGet, @NonNull SetDrawable cbSet) {
         TaskRunner.executeOnExecutor(ResultViewHelper.EXECUTOR_LOAD_ICON,
-                new Utilities.AsyncViewSet(image) {
-                    @Override
-                    protected Drawable getDrawable(Context context) {
-                        return cbGet.getDrawable(context);
-                    }
-
-                    @Override
-                    protected void setDrawable(@NonNull View view, @NonNull Drawable drawable) {
-                        cbSet.setDrawable(view, drawable);
-                    }
+            new Utilities.AsyncViewSet(image) {
+                @Override
+                protected Drawable getDrawable(Context context) {
+                    return cbGet.getDrawable(context);
                 }
+
+                @Override
+                protected void setDrawable(@NonNull View view, @NonNull Drawable drawable) {
+                    cbSet.setDrawable(view, drawable);
+                }
+            }
         );
     }
 
@@ -607,6 +646,29 @@ public class Utilities {
         setTextSelectHandle(editText, drawableLeft, drawableRight, drawableCenter);
     }
 
+    public static boolean setGradientDrawableColors(@NonNull GradientDrawable drawable, @Nullable @ColorInt int[] colors, @Nullable float[] offsets) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            drawable.setColors(colors, offsets);
+            return true;
+        } else {
+            drawable.setColors(colors);
+            Object mGradientState = null;
+            try {
+                mGradientState = GRADIENT_DRAWABLE_FIELD_GRADIENT_STATE.get(drawable);
+            } catch (IllegalAccessException ignored) {
+            }
+            final Class<?> c_GradientState = CLASS_GRADIENT_DRAWABLE_GRADIENT_STATE;
+            if (c_GradientState != null && c_GradientState.isInstance(mGradientState)) {
+                try {
+                    GRADIENT_DRAWABLE_GRADIENT_STATE_FIELD_POSITIONS.set(mGradientState, offsets);
+                    return true;
+                } catch (IllegalAccessException ignored) {
+                }
+            }
+        }
+        return false;
+    }
+
     public static int getNextCodePointIndex(CharSequence s, int startPosition) {
         int codePoint = Character.codePointAt(s, startPosition);
         int next = startPosition + Character.charCount(codePoint);
@@ -818,41 +880,4 @@ public class Utilities {
             ((ImageView) image).setImageDrawable(drawable);
         }
     }
-
-//    public static class AsyncRun extends TaskRunner.AsyncTask<Void, Void> {
-//        private final Run mBackground;
-//        private final Run mAfter;
-//
-//        public interface Run {
-//            void run(@NonNull Utilities.AsyncRun task);
-//        }
-//
-//        public AsyncRun(@NonNull Run background, @Nullable Run after) {
-//            super();
-//            mBackground = background;
-//            mAfter = after;
-//        }
-//
-//        @Override
-//        protected Void doInBackground(Void param) {
-//            mBackground.run(this);
-//            return null;
-//        }
-//
-//        @Override
-//        protected void onCancelled(Void aVoid) {
-//            if (mAfter != null)
-//                mAfter.run(this);
-//        }
-//
-//        @Override
-//        protected void onPostExecute(Void aVoid) {
-//            if (mAfter != null)
-//                mAfter.run(this);
-//        }
-//
-//        public boolean cancel() {
-//            return cancel(false);
-//        }
-//    }
 }
