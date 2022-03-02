@@ -219,17 +219,10 @@
             android:title="@string/notification_bar_section">
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:defaultValue="@integer/default_color"
-                android:key="notification-bar-color"
-                android:title="@string/color"
+                android:defaultValue="@integer/default_background_argb"
+                android:key="notification-bar-argb"
+                android:title="@string/color_and_opacity"
                 android:widgetLayout="@layout/pref_color_preview" />
-
-            <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:defaultValue="@integer/default_notification_bar_opacity"
-                android:dialogLayout="@layout/pref_slider"
-                android:key="notification-bar-alpha"
-                android:title="@string/alpha"
-                android:widgetLayout="@layout/pref_alpha_preview" />
 
             <SwitchPreference
                 android:defaultValue="true"
@@ -319,7 +312,7 @@
             android:title="@string/result_list_section">
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:defaultValue="@integer/default_result_list_argb"
+                android:defaultValue="@integer/default_background_argb"
                 android:key="result-list-argb"
                 android:title="@string/result_list_argb"
                 android:widgetLayout="@layout/pref_color_preview" />

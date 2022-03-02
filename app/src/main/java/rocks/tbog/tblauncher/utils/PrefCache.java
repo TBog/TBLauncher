@@ -236,7 +236,8 @@ public class PrefCache {
     }
 
     private final static ArraySet<String> PREF_THAT_REQUIRE_MIGRATION = new ArraySet<>(Arrays.asList(
-        "result-list-color", "result-list-alpha"
+        "result-list-color", "result-list-alpha",
+        "notification-bar-color", "notification-bar-alpha"
     ));
 
     public static boolean isMigrateRequired(@NonNull SharedPreferences pref) {
@@ -256,7 +257,10 @@ public class PrefCache {
     }
 
     public static boolean migratePreferences(@NonNull HashMap<String, Object> entries, @NonNull SharedPreferences.Editor editor) {
-        return migrateColor(entries, editor, "result-list");
+        boolean changesMade;
+        changesMade = migrateColor(entries, editor, "result-list");
+        changesMade = migrateColor(entries, editor, "notification-bar") || changesMade;
+        return changesMade;
     }
 
     private static boolean migrateColor(@NonNull HashMap<String, Object> entries, @NonNull SharedPreferences.Editor editor, String key) {

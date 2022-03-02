@@ -136,8 +136,7 @@ public class CustomizeUI {
     }
 
     private void setNotificationBarColor() {
-        int color = UIColors.getColor(mPref, "notification-bar-color");
-        int alpha = UIColors.getAlpha(mPref, "notification-bar-alpha");
+        int argb = UIColors.getColor(mPref, "notification-bar-argb");
         boolean gradient = mPref.getBoolean("notification-bar-gradient", true);
 
         if (gradient) {
@@ -147,11 +146,11 @@ public class CustomizeUI {
                 params.height = size;
                 mNotificationBackground.setLayoutParams(params);
             }
-            Utilities.setColorFilterMultiply(mNotificationBackground, UIColors.setAlpha(color, alpha));
+            Utilities.setColorFilterMultiply(mNotificationBackground, argb);
             UIColors.setStatusBarColor(mTBLauncherActivity, 0x00000000);
         } else {
             mNotificationBackground.setVisibility(View.GONE);
-            UIColors.setStatusBarColor(mTBLauncherActivity, UIColors.setAlpha(color, alpha));
+            UIColors.setStatusBarColor(mTBLauncherActivity, argb);
         }
 
         // Notification drawer icon color

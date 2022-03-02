@@ -47,6 +47,7 @@
     <string name="user_interface_summary">Themes, transparency and colors</string>
     <string name="title_ui">User interface</string>
     <string name="notification_bar_section">Notification bar</string>
+    <string name="color_and_opacity">Color and opacity</string>
     <string name="color">Color</string>
     <string name="alpha">Opacity</string>
     <string name="gradient">Gradient</string>

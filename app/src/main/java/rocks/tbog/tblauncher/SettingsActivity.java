@@ -91,7 +91,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
     private final static ArraySet<String> PREF_THAT_REQUIRE_LAYOUT_UPDATE = new ArraySet<>(Arrays.asList(
         "result-list-argb", "result-ripple-color", "result-list-radius",
-        "notification-bar-color", "notification-bar-alpha", "notification-bar-gradient", "black-notification-icons",
+        "notification-bar-argb", "notification-bar-gradient", "black-notification-icons",
         "search-bar-height", "search-bar-text-size", "search-bar-rounded", "search-bar-gradient", "search-bar-at-bottom",
         "search-bar-color", "search-bar-alpha", "search-bar-text-color", "search-bar-icon-color",
         "search-bar-ripple-color", "search-bar-cursor-argb", "enable-suggestions-keyboard"
@@ -661,7 +661,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "primary-color":
                     case "secondary-color":
                     case "icon-background-argb":
-                    case "notification-bar-color":
+                    case "notification-bar-argb":
                     case "search-bar-color":
                     case "result-list-argb":
                     case "result-ripple-color":
@@ -683,7 +683,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "popup-title-color":
                         dialogFragment = PreferenceColorDialog.newInstance(key);
                         break;
-                    case "notification-bar-alpha":
                     case "search-bar-alpha":
                     case "search-bar-height":
                     case "search-bar-text-size":
@@ -977,7 +976,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     }
 
     private static void applyNotificationBarColor(@NonNull SharedPreferences sharedPreferences, @Nullable Context context) {
-        int color = UIColors.getColor(sharedPreferences, "notification-bar-color");
+        int color = UIColors.getColor(sharedPreferences, "notification-bar-argb");
         // keep the bars opaque to avoid white text on white background by mistake
         int alpha = 0xFF;//UIColors.getAlpha(sharedPreferences, "notification-bar-alpha");
         Activity activity = Utilities.getActivity(context);
@@ -1010,8 +1009,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             activity.liveWallpaper.onPrefChanged(sharedPreferences, key);
 
         switch (key) {
-            case "notification-bar-color":
-            case "notification-bar-alpha":
+            case "notification-bar-argb":
             case "black-notification-icons":
                 applyNotificationBarColor(sharedPreferences, context);
                 break;
