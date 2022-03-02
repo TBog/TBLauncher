@@ -151,12 +151,9 @@
     <string name="shortcut_with_appName">%1$s: %2$s</string>
     <string name="cfg_widget_front">Mutați <b> deasupra </b> tuturor</string>
     <string name="cfg_widget_back">Mutați <b> sub </b> toate</string>
-    <string name="cfg_widget_screen_right">Mutați la <br/>
-\n<b> → </b> ecran</string>
-    <string name="cfg_widget_screen_middle">Mutați la <br/>
-\n<b> ecran mediu </b></string>
-    <string name="cfg_widget_screen_left">Mutați la <br/>
-\n<b> ecranul ← </b></string>
+    <string name="cfg_widget_screen_right">Mută în ecranul <b> → </b></string>
+    <string name="cfg_widget_screen_middle">Mută în ecranul <b>central</b></string>
+    <string name="cfg_widget_screen_left">Mută în <b> ecranul ← </b></string>
     <string name="cfg_widget_remove">Elimină</string>
     <string name="cfg_widget_move_resize_exit">Ieșiți din „Mutați și redimensionați”</string>
     <string name="cfg_widget_move_resize">Mutați și redimensionați</string>
@@ -252,7 +249,7 @@
     <string name="title_edit_url_search_engine">Alegeți o adresă URL diferită pentru acest motor de căutare</string>
     <string name="title_rename_search_hint">Alegeți un alt nume pentru acest indiciu de căutare</string>
     <string name="title_rename_search_engine">Alegeți un alt nume pentru acest motor de căutare</string>
-    <string name="title_rename_tag">Alegeți un alt nume pentru această etichetă</string>
+    <string name="title_rename_tag">Redenumeşte această etichetă peste tot</string>
     <string name="title_app_rename">Alegeți un nume personalizat pentru această aplicație</string>
     <string name="menu_custom_icon">Schimbă iconița</string>
     <string name="menu_shortcut_rename">Redenumiți comanda rapidă</string>
@@ -315,7 +312,7 @@
     <string name="toast_favorites_added">%s adăugat la favorite</string>
     <string name="cant_save_shortcuts">Nu s-au putut adăuga comenzi rapide. TinyBit este lansatorul dvs. implicit\?</string>
     <string name="cant_pin_shortcut">Nu s-a putut adăuga comanda rapidă. TinyBit este lansatorul dvs. implicit\?</string>
-    <string name="unable_to_initialize_shortcuts">Nu se pot inițializa comenzile rapide. TinyBit este lansatorul dvs. implicit\?</string>
+    <string name="unable_to_initialize_shortcuts">Nu se pot accesa comenzile rapide. Este TinyBit lansatorul dvs. implicit\?</string>
     <string name="removed_item">Eliminat %s</string>
     <string name="copy_confirmation">Copiat „%s” în clipboard</string>
     <string name="ui_item_visit">Accesați „%1$s”</string>
