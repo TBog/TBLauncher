@@ -21,8 +21,10 @@ import androidx.preference.PreferenceManager;
 
 import java.lang.ref.WeakReference;
 import java.util.ConcurrentModificationException;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Map;
 
 import rocks.tbog.tblauncher.handler.AppsHandler;
 import rocks.tbog.tblauncher.handler.DataHandler;
@@ -32,7 +34,9 @@ import rocks.tbog.tblauncher.icons.IconPackCache;
 import rocks.tbog.tblauncher.quicklist.QuickList;
 import rocks.tbog.tblauncher.searcher.Searcher;
 import rocks.tbog.tblauncher.ui.ListPopup;
+import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.RootHandler;
+import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public class TBApplication extends Application {
@@ -336,6 +340,10 @@ public class TBApplication extends Application {
         PreferenceManager.setDefaultValues(this, R.xml.preferences, true);
         PreferenceManager.setDefaultValues(this, R.xml.preference_features, true);
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        if (PrefCache.isMigrateRequired(mSharedPreferences) && PrefCache.migratePreferences(mSharedPreferences)) {
+            Log.i(TAG, "Preferences migrated");
+        }
 
 //        SharedPreferences.Editor editor = mSharedPreferences.edit();
 //        for (Map.Entry<String, ?> entry : mSharedPreferences.getAll().entrySet() )

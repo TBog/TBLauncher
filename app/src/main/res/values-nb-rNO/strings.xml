@@ -36,8 +36,6 @@
     <string name="menu_app_details">Programinfo</string>
     <string name="menu_exclude">Ekskluder …</string>
     <string name="permission_denied">Tilgang nektet</string>
-    <string name="toast_favorites_removed">%s ble fjernet fra favoritter</string>
-    <string name="toast_favorites_added">%s ble lagt til i favoritter</string>
     <string name="removed_item">Fjernet %s</string>
     <string name="title_static_rename">Velg egendefinert navn</string>
     <string name="settings_dark">Mørk</string>
@@ -122,7 +120,6 @@
     <string name="result_text_color">Tekstfarge</string>
     <string name="result_icon_size">Ikonstørrelse</string>
     <string name="quick_list_color">Bakgrunnsfarge</string>
-    <string name="result_list_color">Bakgrunnsfarge</string>
     <string name="shortcut_section">Snarvei</string>
     <string name="shortcut_with_appName">%1$s: %2$s</string>
     <string name="cfg_widget_remove">Fjern</string>
@@ -224,7 +221,6 @@
     <string name="menu_tags_add">Legg til etiketter</string>
     <string name="menu_remove_shortcut">Opphev festing</string>
     <string name="menu_show">Avslør</string>
-    <string name="cant_save_shortcuts">Kunne ikke legge til snarveiere. Er TinyBit din forvalgte oppstarter\?</string>
     <string name="hint_ui_search">Søk i programmer, kontakter, …</string>
     <string name="behaviour_clear_search_after_launch">Tøm søkefelt etter oppstart</string>
     <string name="behaviour_widget_after_launch">Miniprogramsmodus etter oppstart</string>
@@ -283,7 +279,6 @@
     <string name="quick_list_toggle_color">Veksle bakgrunnsfarge</string>
     <string name="quick_list_alpha">Bakgrunnsdekkevne</string>
     <string name="result_highlight_color">Framhevelsesfarge</string>
-    <string name="result_list_alpha">Bakgrunnsdekkevne</string>
     <string name="quick_list_show_badge">Vis «Hurtigliste»-snarveisskilt</string>
     <string name="shortcut_show_badge_summary">Vis programikon som opprettet snarveien</string>
     <string name="shortcut_show_badge">Vis programskilt</string>
@@ -291,7 +286,6 @@
     <string name="debug_item_relevance">Søkerelevans</string>
     <string name="debug_widget_info">Lang-trykk for ekstra miniprogramsinfo</string>
     <string name="debug_widget_add_info">Legg til ekstra miniprogramsinfo</string>
-    <string name="debug_menu_state">Info om synlighetstilstand</string>
     <string name="cfg_widget_move_resize_exit">Avslutt «flytt og endre størrelse»</string>
     <string name="cfg_widget_move_resize">Flytt og endre størrelse</string>
     <string name="cfg_widget_resize_exit">Avslutt «endre størrelse»</string>

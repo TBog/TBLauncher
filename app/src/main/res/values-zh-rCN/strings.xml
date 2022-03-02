@@ -7,9 +7,6 @@
     <string name="shortcut_rename_confirmation">快捷方式名称现在为\"%s\"</string>
     <string name="size">&lt;%d&gt;</string>
     <string name="menu_exclude_kiss">来自TinyBit</string>
-    <string name="toast_favorites_removed">%s已从收藏夹中删除</string>
-    <string name="toast_favorites_added">%s已添加到收藏夹</string>
-    <string name="cant_save_shortcuts">无法添加快捷方式.TinyBit是您的默认启动器吗？</string>
     <string name="cant_pin_shortcut">无法添加快捷方式。 TinyBit是您的默认启动器吗？</string>
     <string name="unable_to_initialize_shortcuts">无法初始化快捷方式。 TinyBit是您的默认启动器吗？</string>
     <string name="removed_item">移除%s</string>

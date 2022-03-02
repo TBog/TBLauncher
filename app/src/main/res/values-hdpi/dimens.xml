@@ -15,8 +15,6 @@
     <dimen name="bar_height">25dp</dimen>
     <dimen name="large_bar_height">40dp</dimen>
     <dimen name="bar_corner_radius">15dp</dimen> <!-- at most half of `large_bar_height` -->
-    <dimen name="small_bar_text">12sp</dimen>
-    <dimen name="large_bar_text">22sp</dimen>
 
     <dimen name="mm2d_cc_panel_height">360dp</dimen>
 

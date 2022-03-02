@@ -27,6 +27,7 @@ import rocks.tbog.tblauncher.SettingsActivity;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.WidgetManager;
 import rocks.tbog.tblauncher.handler.TagsHandler;
+import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public class ExportedData {
@@ -842,6 +843,9 @@ public class ExportedData {
                 editor.putStringSet(entry.getKey(), set);
             }
         }
+
+        if (PrefCache.migratePreferences(mPreferences, editor))
+            Log.i(TAG, "Preferences migrated");
 
         editor.commit();
 

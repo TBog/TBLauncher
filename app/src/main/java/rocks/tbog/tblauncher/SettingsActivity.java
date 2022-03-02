@@ -90,7 +90,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     private final static String INTENT_EXTRA_BACK_STACK_TAGS = "backStackTagList";
 
     private final static ArraySet<String> PREF_THAT_REQUIRE_LAYOUT_UPDATE = new ArraySet<>(Arrays.asList(
-        "result-list-color", "result-list-alpha", "result-ripple-color", "result-list-radius",
+        "result-list-argb", "result-ripple-color", "result-list-radius",
         "notification-bar-color", "notification-bar-alpha", "notification-bar-gradient", "black-notification-icons",
         "search-bar-height", "search-bar-text-size", "search-bar-rounded", "search-bar-gradient", "search-bar-at-bottom",
         "search-bar-color", "search-bar-alpha", "search-bar-text-color", "search-bar-icon-color",
@@ -663,7 +663,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "icon-background-argb":
                     case "notification-bar-color":
                     case "search-bar-color":
-                    case "result-list-color":
+                    case "result-list-argb":
                     case "result-ripple-color":
                     case "result-highlight-color":
                     case "result-text-color":
@@ -685,7 +685,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         break;
                     case "notification-bar-alpha":
                     case "search-bar-alpha":
-                    case "result-list-alpha":
                     case "search-bar-height":
                     case "search-bar-text-size":
                     case "quick-list-alpha":
@@ -1040,9 +1039,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 if (activity != null)
                     activity.queueDockReload();
                 // fallthrough
-            case "result-list-color":
+            case "result-list-argb":
             case "result-ripple-color":
-            case "result-list-alpha":
             case "result-highlight-color":
             case "result-text-color":
             case "result-text2-color":

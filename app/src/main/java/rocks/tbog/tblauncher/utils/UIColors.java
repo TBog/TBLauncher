@@ -305,9 +305,7 @@ public final class UIColors {
 
     public static int getResultListBackground(SharedPreferences pref) {
         if (CACHED_BACKGROUND_RESULT_LIST == null) {
-            int color = UIColors.getColor(pref, "result-list-color");
-            int alpha = UIColors.getAlpha(pref, "result-list-alpha");
-            CACHED_BACKGROUND_RESULT_LIST = setAlpha(color, alpha);
+            CACHED_BACKGROUND_RESULT_LIST = UIColors.getColor(pref, "result-list-argb");
         }
         return CACHED_BACKGROUND_RESULT_LIST;
     }

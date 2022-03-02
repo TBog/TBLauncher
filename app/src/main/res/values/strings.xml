@@ -12,9 +12,6 @@
 
     <string name="unable_to_initialize_shortcuts">Could not access shortcuts. Is TinyBit your default launcher?</string>
     <string name="cant_pin_shortcut">Could not add shortcut. Is TinyBit your default launcher?</string>
-    <string name="cant_save_shortcuts">Could not add shortcuts. Is TinyBit your default launcher?</string>
-    <string name="toast_favorites_added">%s added to favorites</string>
-    <string name="toast_favorites_removed">%s removed from favorites</string>
     <string name="menu_quick_list_add">Add to dock</string>
     <string name="menu_quick_list_remove">Remove from dock</string>
     <string name="menu_remove_history">Remove from history</string>
@@ -199,7 +196,6 @@
     <string name="shortcut_with_appName">%1$s: %2$s</string>
 
     <string name="debug_section">Debug</string>
-    <string name="debug_menu_state">Visibility state info</string>
     <string name="debug_widget_add_info">Add extra widget info</string>
     <string name="debug_widget_info">Long press for extra widget info</string>
     <string name="debug_item_relevance">Search relevance</string>
@@ -208,8 +204,7 @@
     <string name="shortcut_show_badge">Show app badge</string>
     <string name="shortcut_show_badge_summary">Display app icon that created the shortcut</string>
     <string name="quick_list_show_badge">Show shortcut badge in dock</string>
-    <string name="result_list_color">Background color</string>
-    <string name="result_list_alpha">Background opacity</string>
+    <string name="result_list_argb">Background color and opacity</string>
     <string name="result_highlight_color">Highlight color</string>
     <string name="quick_list_color">Background color</string>
     <string name="quick_list_alpha">Background Opacity</string>

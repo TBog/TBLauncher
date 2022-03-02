@@ -19,7 +19,7 @@ public class UITheme {
         "icon-background-argb",
         "notification-bar-color",
         "search-bar-color",
-        "result-list-color",
+        "result-list-argb",
         "quick-list-color",
         "popup-background-argb",
     };
@@ -51,7 +51,6 @@ public class UITheme {
     private static final String[] PREF_ALPHA = {
         "notification-bar-alpha",
         "search-bar-alpha",
-        "result-list-alpha",
         "quick-list-alpha",
     };
 

@@ -319,17 +319,10 @@
             android:title="@string/result_list_section">
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:defaultValue="@integer/default_color"
-                android:key="result-list-color"
-                android:title="@string/result_list_color"
+                android:defaultValue="@integer/default_result_list_argb"
+                android:key="result-list-argb"
+                android:title="@string/result_list_argb"
                 android:widgetLayout="@layout/pref_color_preview" />
-
-            <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:defaultValue="@integer/default_result_list_opacity"
-                android:dialogLayout="@layout/pref_slider"
-                android:key="result-list-alpha"
-                android:title="@string/result_list_alpha"
-                android:widgetLayout="@layout/pref_alpha_preview" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@integer/default_corner_radius"

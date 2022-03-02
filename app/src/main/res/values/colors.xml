@@ -31,10 +31,6 @@
     <color name="DeepBlues_selector_secondary_disable">#2Fffffff</color>
     <color name="DeepBlues_selector_secondary">#6Fffffff</color>
 
-    <color name="Black_gradient_start">#FF000000</color>
-    <color name="Black_gradient_center">#2Fffffff</color>
-    <color name="Black_gradient_finish">#FF000000</color>
-    <color name="Black_window">#FF000000</color>
     <color name="Black_selector_primary_disable">#7Fdddddd</color>
     <color name="Black_selector_primary">#FFdddddd</color>
     <color name="Black_selector_secondary_disable">#2Fdddddd</color>

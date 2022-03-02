@@ -136,8 +136,6 @@
     <string name="quick_list_alpha">Opacitate de fundal</string>
     <string name="quick_list_color">Culoare de fundal</string>
     <string name="result_highlight_color">Evidențiați culoarea</string>
-    <string name="result_list_alpha">Opacitatea fundalului</string>
-    <string name="result_list_color">Culoare de fundal</string>
     <string name="quick_list_show_badge">Afișați insigna de comenzi rapide „Listă rapidă”</string>
     <string name="shortcut_show_badge_summary">Afișați pictograma aplicației care a creat comanda rapidă</string>
     <string name="shortcut_show_badge">Afișați insigna aplicației</string>
@@ -146,7 +144,6 @@
     <string name="debug_item_relevance">Căutați relevanță</string>
     <string name="debug_widget_info">Apăsați lung pentru informații suplimentare despre widget</string>
     <string name="debug_widget_add_info">Adăugați informații suplimentare despre widget</string>
-    <string name="debug_menu_state">Informații despre starea de vizibilitate</string>
     <string name="debug_section">Depanare</string>
     <string name="shortcut_with_appName">%1$s: %2$s</string>
     <string name="cfg_widget_front">Mutați <b> deasupra </b> tuturor</string>
@@ -311,9 +308,6 @@
     <string name="permission_denied">Acordă mai întâi această permisiune</string>
     <string name="stub_app_tag">lista de etichete a aplicației</string>
     <string name="menu_remove_history">Elimină din istoric</string>
-    <string name="toast_favorites_removed">%s eliminat din favorite</string>
-    <string name="toast_favorites_added">%s adăugat la favorite</string>
-    <string name="cant_save_shortcuts">Nu s-au putut adăuga comenzi rapide. TinyBit este lansatorul dvs. implicit\?</string>
     <string name="cant_pin_shortcut">Nu s-a putut adăuga comanda rapidă. TinyBit este lansatorul dvs. implicit\?</string>
     <string name="unable_to_initialize_shortcuts">Nu se pot inițializa comenzile rapide. TinyBit este lansatorul dvs. implicit\?</string>
     <string name="removed_item">Eliminat %s</string>

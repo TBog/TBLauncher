@@ -9,10 +9,14 @@ import android.graphics.drawable.Drawable;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.appcompat.content.res.AppCompatResources;
+import androidx.collection.ArraySet;
 import androidx.preference.PreferenceManager;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.preference.ContentLoadHelper;
@@ -229,5 +233,46 @@ public class PrefCache {
 
     public static boolean getResultFadeOut(SharedPreferences pref) {
         return pref.getBoolean("result-fading-edge", false);
+    }
+
+    private final static ArraySet<String> PREF_THAT_REQUIRE_MIGRATION = new ArraySet<>(Arrays.asList(
+        "result-list-color", "result-list-alpha"
+    ));
+
+    public static boolean isMigrateRequired(@NonNull SharedPreferences pref) {
+        Map<String, ?> allPref = pref.getAll();
+        for (String key : PREF_THAT_REQUIRE_MIGRATION)
+            if (allPref.containsKey(key))
+                return true;
+        return false;
+    }
+
+    public static boolean migratePreferences(@NonNull SharedPreferences pref) {
+        HashMap<String, Object> prefMapCopy = new HashMap<>(pref.getAll());
+        SharedPreferences.Editor editor = pref.edit();
+        boolean changesMade = migratePreferences(prefMapCopy, editor);
+        editor.apply();
+        return changesMade;
+    }
+
+    public static boolean migratePreferences(@NonNull HashMap<String, Object> entries, @NonNull SharedPreferences.Editor editor) {
+        return migrateColor(entries, editor, "result-list");
+    }
+
+    private static boolean migrateColor(@NonNull HashMap<String, Object> entries, @NonNull SharedPreferences.Editor editor, String key) {
+        String keyColor = key + "-color";
+        String keyAlpha = key + "-alpha";
+        Object color = entries.get(keyColor);
+        Object alpha = entries.get(keyAlpha);
+        if (color instanceof Integer && alpha instanceof Integer) {
+            int argb = UIColors.setAlpha((Integer) color, (Integer) alpha);
+            String keyARGB = key + "-argb";
+            editor
+                .remove(keyColor)
+                .remove(keyAlpha)
+                .putInt(keyARGB, argb);
+            return true;
+        }
+        return false;
     }
 }

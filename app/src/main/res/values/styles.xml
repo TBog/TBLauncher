@@ -84,24 +84,4 @@
         </item>
     </style>
 
-    <style name="EditTextViewStyle" parent="Widget.AppCompat.EditText">
-        <item name="android:textSelectHandle">@drawable/abc_text_select_handle_middle_mtrl_dark
-        </item>
-        <item name="android:textSelectHandleLeft">@drawable/abc_text_select_handle_left_mtrl_dark
-        </item>
-        <item name="android:textSelectHandleRight">
-            @drawable/abc_text_select_handle_right_mtrl_dark
-        </item>
-    </style>
-
-    <style name="EditTextViewStyle.White">
-        <item name="android:textSelectHandle">@drawable/abc_text_select_handle_middle_mtrl_light
-        </item>
-        <item name="android:textSelectHandleLeft">@drawable/abc_text_select_handle_left_mtrl_light
-        </item>
-        <item name="android:textSelectHandleRight">
-            @drawable/abc_text_select_handle_right_mtrl_light
-        </item>
-    </style>
-
 </resources>
