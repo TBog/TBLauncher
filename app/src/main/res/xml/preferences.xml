@@ -243,17 +243,10 @@
             android:title="@string/search_bar_section">
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:defaultValue="@integer/default_color"
-                android:key="search-bar-color"
-                android:title="@string/color"
+                android:defaultValue="@integer/default_background_argb"
+                android:key="search-bar-argb"
+                android:title="@string/color_and_opacity"
                 android:widgetLayout="@layout/pref_color_preview" />
-
-            <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:defaultValue="@integer/default_search_bar_opacity"
-                android:dialogLayout="@layout/pref_slider"
-                android:key="search-bar-alpha"
-                android:title="@string/alpha"
-                android:widgetLayout="@layout/pref_alpha_preview" />
 
             <SwitchPreference
                 android:defaultValue="true"

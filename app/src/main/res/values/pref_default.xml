@@ -2,8 +2,7 @@
 <resources>
     <integer name="default_bar_size" translatable="false">25</integer>                  <!-- 25% -->
     <integer name="default_bar_height" translatable="false">20</integer>                <!-- 20dp -->
-    <integer name="default_search_bar_opacity" translatable="false">193</integer>       <!-- 75% -->
-    <integer name="default_background_argb" translatable="false">0xC13caf50</integer>  <!-- 75% opacity with default_color -->
+    <integer name="default_background_argb" translatable="false">0xC13caf50</integer>   <!-- 75% opacity with default_color -->
     <integer name="default_quick_list_opacity" translatable="false">193</integer>       <!-- 75% -->
     <integer name="default_icon_background" translatable="false">0xffffff</integer>     <!-- white -->
     <integer name="default_icon_hue" translatable="false">0</integer>

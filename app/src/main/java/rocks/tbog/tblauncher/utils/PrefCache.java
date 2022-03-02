@@ -237,7 +237,8 @@ public class PrefCache {
 
     private final static ArraySet<String> PREF_THAT_REQUIRE_MIGRATION = new ArraySet<>(Arrays.asList(
         "result-list-color", "result-list-alpha",
-        "notification-bar-color", "notification-bar-alpha"
+        "notification-bar-color", "notification-bar-alpha",
+        "search-bar-color", "search-bar-alpha"
     ));
 
     public static boolean isMigrateRequired(@NonNull SharedPreferences pref) {
@@ -260,6 +261,7 @@ public class PrefCache {
         boolean changesMade;
         changesMade = migrateColor(entries, editor, "result-list");
         changesMade = migrateColor(entries, editor, "notification-bar") || changesMade;
+        changesMade = migrateColor(entries, editor, "search-bar") || changesMade;
         return changesMade;
     }
 

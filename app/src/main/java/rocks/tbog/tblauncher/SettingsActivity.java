@@ -93,7 +93,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         "result-list-argb", "result-ripple-color", "result-list-radius",
         "notification-bar-argb", "notification-bar-gradient", "black-notification-icons",
         "search-bar-height", "search-bar-text-size", "search-bar-rounded", "search-bar-gradient", "search-bar-at-bottom",
-        "search-bar-color", "search-bar-alpha", "search-bar-text-color", "search-bar-icon-color",
+        "search-bar-argb", "search-bar-text-color", "search-bar-icon-color",
         "search-bar-ripple-color", "search-bar-cursor-argb", "enable-suggestions-keyboard"
     ));
     private final static ArraySet<String> PREF_LISTS_WITH_DEPENDENCY = new ArraySet<>(Arrays.asList(
@@ -662,7 +662,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "secondary-color":
                     case "icon-background-argb":
                     case "notification-bar-argb":
-                    case "search-bar-color":
+                    case "search-bar-argb":
                     case "result-list-argb":
                     case "result-ripple-color":
                     case "result-highlight-color":
@@ -683,7 +683,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "popup-title-color":
                         dialogFragment = PreferenceColorDialog.newInstance(key);
                         break;
-                    case "search-bar-alpha":
                     case "search-bar-height":
                     case "search-bar-text-size":
                     case "quick-list-alpha":

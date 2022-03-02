@@ -18,7 +18,7 @@ public class UITheme {
     private static final String[] PREF_BACKGROUND = {
         "icon-background-argb",
         "notification-bar-argb",
-        "search-bar-color",
+        "search-bar-argb",
         "result-list-argb",
         "quick-list-color",
         "popup-background-argb",
@@ -49,7 +49,6 @@ public class UITheme {
     };
 
     private static final String[] PREF_ALPHA = {
-        "search-bar-alpha",
         "quick-list-alpha",
     };
 

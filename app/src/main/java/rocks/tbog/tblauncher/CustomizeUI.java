@@ -196,7 +196,7 @@ public class CustomizeUI {
 
         final int searchBarRipple = UIColors.setAlpha(UIColors.getColor(mPref, "search-bar-ripple-color"), 0xFF);
         final int searchIconColor = UIColors.setAlpha(UIColors.getColor(mPref, "search-bar-icon-color"), 0xFF);
-        final int colorBackground = UIColors.getColor(mPref, "search-bar-color");
+        final int argbBackground = UIColors.getColor(mPref, "search-bar-argb");
 
         // text color
         {
@@ -225,28 +225,28 @@ public class CustomizeUI {
         }
 
         // background color
-        int alpha = UIColors.getAlpha(mPref, "search-bar-alpha");
         if (mPref.getBoolean("search-bar-gradient", true)) {
             final GradientDrawable.Orientation orientation;
             if (PrefCache.searchBarAtBottom(mPref))
                 orientation = GradientDrawable.Orientation.TOP_BOTTOM;
             else
                 orientation = GradientDrawable.Orientation.BOTTOM_TOP;
-            int c1 = UIColors.setAlpha(colorBackground, 0);
-            int c2 = UIColors.setAlpha(colorBackground, alpha * 3 / 4);
-            int c3 = UIColors.setAlpha(colorBackground, alpha);
+            int alpha = Color.alpha(argbBackground);
+            int c1 = UIColors.setAlpha(argbBackground, 0);
+            int c2 = UIColors.setAlpha(argbBackground, alpha * 3 / 4);
+            int c3 = UIColors.setAlpha(argbBackground, alpha);
             GradientDrawable drawable = new GradientDrawable(orientation, new int[]{c1, c2, c3});
             mSearchBarContainer.setBackground(drawable);
         } else if (mPref.getBoolean("search-bar-rounded", true)) {
             PaintDrawable drawable = new PaintDrawable();
-            drawable.getPaint().setColor(UIColors.setAlpha(colorBackground, alpha));
+            drawable.getPaint().setColor(argbBackground);
             ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) mSearchBarContainer.getLayoutParams();
             drawable.setCornerRadius(resources.getDimension(R.dimen.bar_corner_radius));
             mSearchBarContainer.setBackground(drawable);
             int margin = (int) (params.height * .25f);
             params.setMargins(margin, 0, margin, margin);
         } else
-            mSearchBarContainer.setBackground(new ColorDrawable(UIColors.setAlpha(colorBackground, alpha)));
+            mSearchBarContainer.setBackground(new ColorDrawable(argbBackground));
     }
 
     public static void setResultListPref(View resultLayout) {
