@@ -1,0 +1,1 @@
+Küçük bellek alanı, simge paketi desteği, özelleştirilebilir renk ve davranış

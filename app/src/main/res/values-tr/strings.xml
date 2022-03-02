@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="copy_confirmation">\"%s\" panoya kopyalandı</string>
+    <string name="app_name">TinyBit başlatıcısı</string>
+    <string name="hint_ui_search">Uygulamalarda, kişilerde ara…</string>
+    <string name="ui_item_search">%1$s içinde \"%2$s\" aransın mı\?</string>
+    <string name="removed_item">%s Kaldırıldı</string>
+    <string name="app_name_debug">TinyBit hata ayıklama başlatıcısı</string>
+    <string name="ui_item_visit">\"%1$s\" sayfasını ziyaret edin</string>
+</resources>
