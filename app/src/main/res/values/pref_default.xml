@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <integer name="default_bar_size" translatable="false">25</integer>                  <!-- 25% -->
-    <integer name="default_bar_height" translatable="false">20</integer>                <!-- 20dp -->
+    <integer name="default_search_bar_height" translatable="false">25</integer>         <!-- 25dp -->
+    <integer name="default_dock_height" translatable="false">40</integer>               <!-- 40dp -->
     <integer name="default_background_argb" translatable="false">0xC13caf50</integer>   <!-- 75% opacity with default_color -->
     <integer name="default_quick_list_opacity" translatable="false">193</integer>       <!-- 75% -->
     <integer name="default_icon_background" translatable="false">0xffffff</integer>     <!-- white -->

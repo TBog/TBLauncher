@@ -150,7 +150,7 @@ public class CustomizeUI {
         // size
         int barHeight = mPref.getInt("search-bar-height", 0);
         if (barHeight <= 1)
-            barHeight = resources.getInteger(R.integer.default_bar_height);
+            barHeight = resources.getInteger(R.integer.default_search_bar_height);
         barHeight = UISizes.dp2px(ctx, barHeight);
         int textSize = mPref.getInt("search-bar-text-size", 0);
         if (textSize <= 1)

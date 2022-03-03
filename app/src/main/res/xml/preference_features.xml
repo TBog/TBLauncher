@@ -42,7 +42,7 @@
             android:title="@string/quick_list_animation" />
 
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
-            android:defaultValue="@integer/default_bar_height"
+            android:defaultValue="@integer/default_dock_height"
             android:dependency="quick-list-enabled"
             android:dialogLayout="@layout/pref_slider"
             android:key="quick-list-height"
@@ -72,7 +72,7 @@
         android:title="@string/search_bar_section">
 
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
-            android:defaultValue="@integer/default_bar_height"
+            android:defaultValue="@integer/default_search_bar_height"
             android:dialogLayout="@layout/pref_slider"
             android:key="search-bar-height"
             android:title="@string/search_bar_height"

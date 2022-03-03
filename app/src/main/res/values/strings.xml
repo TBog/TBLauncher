@@ -459,7 +459,7 @@
 
     <string name="exit_tags_manager_confirm">Close Tags manager?</string>
     <string name="exit_tags_manager_description">You will lose all changes if you close the Tags manager.\nAre you sure you want to continue?</string>
-    <string name="result_fading_edge">Fading edge</string>
+    <string name="result_fading_edge">Gradient</string>
     <string name="result_fading_edge_summary">Top and bottom edges fade out</string>
 
     <plurals name="tag_entry_count">

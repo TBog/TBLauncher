@@ -498,7 +498,7 @@ public class QuickList {
         // size
         int barHeight = pref.getInt("quick-list-height", 0);
         if (barHeight <= 1)
-            barHeight = resources.getInteger(R.integer.default_bar_height);
+            barHeight = resources.getInteger(R.integer.default_dock_height);
         barHeight = UISizes.dp2px(ctx, barHeight);
 
         if (!(quickList.getLayoutParams() instanceof ViewGroup.MarginLayoutParams))

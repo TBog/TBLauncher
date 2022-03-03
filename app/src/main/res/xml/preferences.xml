@@ -74,8 +74,7 @@
                 android:key="reset-matrix"
                 android:title="@string/reset_matrix" />
 
-            <rocks.tbog.tblauncher.preference.PreviewImagePreference
-                android:widgetLayout="@layout/pref_matrix_preview"/>
+            <rocks.tbog.tblauncher.preference.PreviewImagePreference android:widgetLayout="@layout/pref_matrix_preview" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@integer/default_icon_scale"
@@ -136,10 +135,10 @@
         </PreferenceScreen>
 
         <SwitchPreference
-                android:defaultValue="false"
-                android:key="matrix-contacts"
-                android:summary="@string/matrix_contacts_summary"
-                android:title="@string/matrix_contacts" />
+            android:defaultValue="false"
+            android:key="matrix-contacts"
+            android:summary="@string/matrix_contacts_summary"
+            android:title="@string/matrix_contacts" />
 
         <SwitchPreference
             android:defaultValue="true"
@@ -249,7 +248,7 @@
                 android:widgetLayout="@layout/pref_color_preview" />
 
             <SwitchPreference
-                android:defaultValue="true"
+                android:defaultValue="false"
                 android:disableDependentsState="true"
                 android:key="search-bar-gradient"
                 android:title="@string/gradient" />
@@ -286,7 +285,7 @@
                 android:widgetLayout="@layout/pref_color_preview" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:defaultValue="@integer/default_bar_size"
+                android:defaultValue="@integer/default_search_bar_height"
                 android:dialogLayout="@layout/pref_slider"
                 android:key="search-bar-height"
                 android:title="@string/search_bar_height"
@@ -310,6 +309,12 @@
                 android:key="result-list-argb"
                 android:title="@string/result_list_argb"
                 android:widgetLayout="@layout/pref_color_preview" />
+
+            <androidx.preference.SwitchPreference
+                android:defaultValue="false"
+                android:key="result-fading-edge"
+                android:summary="@string/result_fading_edge_summary"
+                android:title="@string/result_fading_edge" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@integer/default_corner_radius"
@@ -417,7 +422,7 @@
                 android:title="@string/quick_list_animation" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:defaultValue="@integer/default_bar_height"
+                android:defaultValue="@integer/default_dock_height"
                 android:dialogLayout="@layout/pref_slider"
                 android:key="quick-list-height"
                 android:title="@string/quick_list_height"
@@ -478,21 +483,21 @@
 
         <!-- Tags Menu -->
         <PreferenceCategory
-                android:key="tags-menu-section"
-                android:title="@string/tags_menu_section">
+            android:key="tags-menu-section"
+            android:title="@string/tags_menu_section">
 
             <androidx.preference.SwitchPreference
-                    android:defaultValue="false"
-                    android:key="tags-menu-icons"
-                    android:title="@string/tags_menu_icons" />
+                android:defaultValue="false"
+                android:key="tags-menu-icons"
+                android:title="@string/tags_menu_icons" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                    android:defaultValue="@integer/default_size_icon"
-                    android:dialogLayout="@layout/pref_slider"
-                    android:dependency="tags-menu-icons"
-                    android:key="tags-menu-icon-size"
-                    android:title="@string/tags_menu_icon_size"
-                    android:widgetLayout="@layout/pref_size_preview" />
+                android:defaultValue="@integer/default_size_icon"
+                android:dependency="tags-menu-icons"
+                android:dialogLayout="@layout/pref_slider"
+                android:key="tags-menu-icon-size"
+                android:title="@string/tags_menu_icon_size"
+                android:widgetLayout="@layout/pref_size_preview" />
 
         </PreferenceCategory>
 
@@ -790,9 +795,9 @@
                     android:key="dm-search-open-result"
                     android:title="@string/dm_search_open_result" />
                 <ListPreference
-                        android:key="dm-search-open-result-entry-to-show"
-                        android:title="@string/action_entry_to_show"
-                        app:isPreferenceVisible="false" />
+                    android:key="dm-search-open-result-entry-to-show"
+                    android:title="@string/action_entry_to_show"
+                    app:isPreferenceVisible="false" />
 
             </PreferenceScreen>
 

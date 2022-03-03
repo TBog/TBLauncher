@@ -922,7 +922,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
             SettingsActivity activity = (SettingsActivity) getActivity();
-            if (activity == null)
+            if (activity == null || key == null)
                 return;
 
             if (PREF_LISTS_WITH_DEPENDENCY.contains(key)) {
