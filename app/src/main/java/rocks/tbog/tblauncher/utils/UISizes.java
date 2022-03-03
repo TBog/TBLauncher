@@ -45,6 +45,15 @@ public final class UISizes {
         return Math.max(1, (int) (px + .5f));
     }
 
+    public static int px2dp(Context context, int pixelSize) {
+        if (pixelSize == 0)
+            return 0;
+        // Get the screen's density scale
+        final float scale = context.getResources().getDisplayMetrics().density;
+        // Convert the DIPs to pixels, based on density scale
+        return Math.max(1, (int) (pixelSize * scale + .5f));
+    }
+
     public static int getResultTextSize(Context context) {
         if (CACHED_SIZE_RESULT_TEXT == 0) {
             SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
@@ -133,5 +142,4 @@ public final class UISizes {
         int radius = pref.getInt("search-bar-radius", 0);
         return dp2px(context, radius);
     }
-
 }

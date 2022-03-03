@@ -268,8 +268,11 @@ public class PrefCache {
         changesMade = migrateColor(entries, editor, "notification-bar") || changesMade;
         changesMade = migrateColor(entries, editor, "search-bar") || changesMade;
         changesMade = migrateColor(entries, editor, "quick-list") || changesMade;
-        changesMade = migrateToggleToValue(entries, editor, "result-list-rounded", "result-list-radius", 0, res.getDimensionPixelSize(R.dimen.result_corner_radius)) || changesMade;
-        changesMade = migrateToggleToValue(entries, editor, "search-bar-rounded", "search-bar-radius", 0, res.getDimensionPixelSize(R.dimen.result_corner_radius)) || changesMade;
+
+        int defaultCornerRadius = UISizes.px2dp(context, res.getDimensionPixelSize(R.dimen.result_corner_radius));
+        changesMade = migrateToggleToValue(entries, editor, "result-list-rounded", "result-list-radius", 0, defaultCornerRadius) || changesMade;
+        changesMade = migrateToggleToValue(entries, editor, "search-bar-rounded", "search-bar-radius", 0, defaultCornerRadius) || changesMade;
+
         return changesMade;
     }
 
