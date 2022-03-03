@@ -92,6 +92,18 @@ public final class UISizes {
         return dp2px(context, radius);
     }
 
+    public static int getResultListMarginVertical(Context context) {
+        SharedPreferences pref = TBApplication.getApplication(context).preferences();
+        int margin = pref.getInt("result-list-margin-vertical", 0);
+        return dp2px(context, margin);
+    }
+
+    public static int getResultListMarginHorizontal(Context context) {
+        SharedPreferences pref = TBApplication.getApplication(context).preferences();
+        int margin = pref.getInt("result-list-margin-horizontal", 0);
+        return dp2px(context, margin);
+    }
+
     public static int getTagsMenuIconSize(Context context) {
         if (CACHED_SIZE_TAGS_MENU_ICON == 0) {
             SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);

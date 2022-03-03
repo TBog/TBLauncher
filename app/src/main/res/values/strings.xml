@@ -461,6 +461,8 @@
     <string name="exit_tags_manager_description">You will lose all changes if you close the Tags manager.\nAre you sure you want to continue?</string>
     <string name="result_fading_edge">Gradient</string>
     <string name="result_fading_edge_summary">Top and bottom edges fade out</string>
+    <string name="margin_vertical">Vertical margin</string>
+    <string name="margin_horizontal">Horizontal margin</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>

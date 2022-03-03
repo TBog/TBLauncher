@@ -257,20 +257,21 @@ public class CustomizeUI {
     }
 
     public static void setResultListPref(View resultLayout, boolean setMargin) {
-        SharedPreferences pref = TBApplication.getApplication(resultLayout.getContext()).preferences();
+        Context ctx = resultLayout.getContext();
+        SharedPreferences pref = TBApplication.getApplication(ctx).preferences();
 
         if (setMargin) {
             ViewGroup.LayoutParams params = resultLayout.getLayoutParams();
             if (params instanceof ViewGroup.MarginLayoutParams) {
-                int hMargin = UISizes.getResultListRadius(resultLayout.getContext());
-                int vMargin = hMargin / 2;
+                int hMargin = UISizes.getResultListMarginHorizontal(ctx);
+                int vMargin = UISizes.getResultListMarginVertical(ctx);
                 ((ViewGroup.MarginLayoutParams) params).setMargins(hMargin, vMargin, hMargin, vMargin);
             }
         }
 
         boolean fadeOut = PrefCache.getResultFadeOut(pref);
         int backgroundColor = UIColors.getResultListBackground(pref);
-        int cornerRadius = UISizes.getResultListRadius(resultLayout.getContext());
+        int cornerRadius = UISizes.getResultListRadius(ctx);
         if (cornerRadius > 0 || fadeOut) {
             final GradientDrawable drawable = new GradientDrawable();
             drawable.setCornerRadius(cornerRadius);
@@ -287,7 +288,7 @@ public class CustomizeUI {
             resultLayout.setBackgroundColor(backgroundColor);
         }
 
-        int overscrollColor = UIColors.getResultListRipple(resultLayout.getContext());
+        int overscrollColor = UIColors.getResultListRipple(ctx);
         overscrollColor = UIColors.setAlpha(overscrollColor, 0x7F);
         if (resultLayout instanceof AbsListView) {
             setListViewSelectorPref((AbsListView) resultLayout, true);

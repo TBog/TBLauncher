@@ -705,6 +705,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "result-list-radius":
                     case "popup-corner-radius":
                     case "quick-list-radius":
+                    case "result-list-margin-vertical":
+                    case "result-list-margin-horizontal":
                         dialogFragment = SliderDialog.newInstance(key);
                         break;
                     case "generate-theme-simple":
