@@ -127,4 +127,11 @@ public final class UISizes {
         }
         return (size == 0) ? sp2px(context, 12) : size;
     }
+
+    public static int getSearchBarRadius(Context context) {
+        SharedPreferences pref = TBApplication.getApplication(context).preferences();
+        int radius = pref.getInt("search-bar-radius", 0);
+        return dp2px(context, radius);
+    }
+
 }

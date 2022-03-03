@@ -92,7 +92,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     private final static ArraySet<String> PREF_THAT_REQUIRE_LAYOUT_UPDATE = new ArraySet<>(Arrays.asList(
         "result-list-argb", "result-ripple-color", "result-list-radius",
         "notification-bar-argb", "notification-bar-gradient", "black-notification-icons",
-        "search-bar-height", "search-bar-text-size", "search-bar-rounded", "search-bar-gradient", "search-bar-at-bottom",
+        "search-bar-height", "search-bar-text-size", "search-bar-radius", "search-bar-gradient", "search-bar-at-bottom",
         "search-bar-argb", "search-bar-text-color", "search-bar-icon-color",
         "search-bar-ripple-color", "search-bar-cursor-argb", "enable-suggestions-keyboard"
     ));
@@ -683,6 +683,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "popup-title-color":
                         dialogFragment = PreferenceColorDialog.newInstance(key);
                         break;
+                    case "search-bar-radius":
                     case "search-bar-height":
                     case "search-bar-text-size":
                     case "quick-list-height":

@@ -9,7 +9,6 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.PaintDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.graphics.drawable.StateListDrawable;
 import android.os.Build;
@@ -203,29 +202,31 @@ public class CustomizeUI {
             mClearButton.setBackground(getSelectorDrawable(mClearButton, searchBarRipple, true));
         }
 
-        // background color
-        if (mPref.getBoolean("search-bar-gradient", true)) {
-            final GradientDrawable.Orientation orientation;
-            if (PrefCache.searchBarAtBottom(mPref))
-                orientation = GradientDrawable.Orientation.TOP_BOTTOM;
-            else
-                orientation = GradientDrawable.Orientation.BOTTOM_TOP;
-            int alpha = Color.alpha(argbBackground);
-            int c1 = UIColors.setAlpha(argbBackground, 0);
-            int c2 = UIColors.setAlpha(argbBackground, alpha * 3 / 4);
-            int c3 = UIColors.setAlpha(argbBackground, alpha);
-            GradientDrawable drawable = new GradientDrawable(orientation, new int[]{c1, c2, c3});
+        // set background
+        boolean isGradient = mPref.getBoolean("search-bar-gradient", true);
+        int cornerRadius = UISizes.getSearchBarRadius(ctx);
+        if (isGradient || cornerRadius > 0) {
+            GradientDrawable drawable;
+            if (isGradient) {
+                final GradientDrawable.Orientation orientation;
+                if (PrefCache.searchBarAtBottom(mPref))
+                    orientation = GradientDrawable.Orientation.TOP_BOTTOM;
+                else
+                    orientation = GradientDrawable.Orientation.BOTTOM_TOP;
+                int alpha = Color.alpha(argbBackground);
+                int c1 = UIColors.setAlpha(argbBackground, 0);
+                int c2 = UIColors.setAlpha(argbBackground, alpha * 3 / 4);
+                int c3 = UIColors.setAlpha(argbBackground, alpha);
+                drawable = new GradientDrawable(orientation, new int[]{c1, c2, c3});
+            } else {
+                drawable = new GradientDrawable();
+                drawable.setColor(argbBackground);
+            }
+            drawable.setCornerRadius(cornerRadius);
             mSearchBarContainer.setBackground(drawable);
-        } else if (mPref.getBoolean("search-bar-rounded", true)) {
-            PaintDrawable drawable = new PaintDrawable();
-            drawable.getPaint().setColor(argbBackground);
-            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) mSearchBarContainer.getLayoutParams();
-            drawable.setCornerRadius(resources.getDimension(R.dimen.bar_corner_radius));
-            mSearchBarContainer.setBackground(drawable);
-            int margin = (int) (params.height * .25f);
-            params.setMargins(margin, 0, margin, margin);
-        } else
+        } else {
             mSearchBarContainer.setBackground(new ColorDrawable(argbBackground));
+        }
     }
 
     public static void setResultListPref(View resultLayout) {
@@ -244,6 +245,7 @@ public class CustomizeUI {
             int c1 = UIColors.setAlpha(color, 0);
             int c2 = UIColors.setAlpha(color, alpha * 3 / 4);
             int c3 = UIColors.setAlpha(color, alpha);
+            // compute fade percentage of height
             float p = UISizes.getResultIconSize(resultLayout.getContext()) * .5f / resultLayout.getHeight();
             // if height is too small, fade only on 66% of the height (33% fade in and 33% fade out)
             p = Math.min(p, .33f);
@@ -275,6 +277,8 @@ public class CustomizeUI {
             resultLayout.setBackground(drawable);
             if (fadeOut)
                 setResultListGradientFade(resultLayout, backgroundColor);
+            else
+                drawable.setColor(backgroundColor);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 // clip list content to rounded corners
                 resultLayout.setClipToOutline(true);

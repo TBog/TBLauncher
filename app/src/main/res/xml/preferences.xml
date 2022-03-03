@@ -254,11 +254,12 @@
                 android:key="search-bar-gradient"
                 android:title="@string/gradient" />
 
-            <SwitchPreference
-                android:defaultValue="true"
-                android:dependency="search-bar-gradient"
-                android:key="search-bar-rounded"
-                android:title="@string/round_corners" />
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@integer/default_corner_radius"
+                android:dialogLayout="@layout/pref_slider"
+                android:key="search-bar-radius"
+                android:title="@string/corner_radius"
+                android:widgetLayout="@layout/pref_size_preview" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@integer/default_color_text"
