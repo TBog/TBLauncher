@@ -88,7 +88,7 @@ public class LiveWallpaper {
         @Override
         public boolean onSingleTapUp(MotionEvent e) {
             // if we have a double tap listener, wait for onSingleTapConfirmed
-            if (TBApplication.behaviour(mTBLauncherActivity).hasDoubleClick())
+            if (mTBLauncherActivity.behaviour.hasDoubleClick())
                 return true;
             View view = mTBLauncherActivity.findViewById(R.id.root_layout);
             return onClick(view);
@@ -97,7 +97,7 @@ public class LiveWallpaper {
         @Override
         public boolean onSingleTapConfirmed(MotionEvent e) {
             // if we have both a double tap and click, handle click here
-            if (TBApplication.behaviour(mTBLauncherActivity).hasDoubleClick()) {
+            if (mTBLauncherActivity.behaviour.hasDoubleClick()) {
                 View view = mTBLauncherActivity.findViewById(R.id.root_layout);
                 return onClick(view);
             }
@@ -261,8 +261,8 @@ public class LiveWallpaper {
             mWindowSize.set(width, height);
         } else {
             mTBLauncherActivity.getWindowManager()
-                    .getDefaultDisplay()
-                    .getSize(mWindowSize);
+                .getDefaultDisplay()
+                .getSize(mWindowSize);
         }
     }
 
