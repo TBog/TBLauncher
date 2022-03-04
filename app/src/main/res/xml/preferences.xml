@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:pref="http://tbog.rocks/res/pref"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -767,7 +768,7 @@
                     android:defaultValue="true"
                     android:key="quick-list-enabled"
                     android:title="@string/quick_list_enabled"
-                    app:isPreferenceVisible="false"/>
+                    app:isPreferenceVisible="false" />
 
             </PreferenceScreen>
 
@@ -781,6 +782,13 @@
                     android:dependency="quick-list-enabled"
                     android:key="dm-search-quick-list"
                     android:title="@string/dm_search_quick_list" />
+
+                <rocks.tbog.tblauncher.preference.MultiDependenciesSwitchPreference
+                    android:defaultValue="false"
+                    android:key="quick-list-only-for-results"
+                    android:summary="@string/quick_list_only_for_results_summary"
+                    android:title="@string/quick_list_only_for_results"
+                    pref:dependencies="quick-list-enabled,dm-search-quick-list" />
 
                 <androidx.preference.SwitchPreference
                     android:defaultValue="false"
@@ -811,7 +819,7 @@
                     android:defaultValue="true"
                     android:key="quick-list-enabled"
                     android:title="@string/quick_list_enabled"
-                    app:isPreferenceVisible="false"/>
+                    app:isPreferenceVisible="false" />
 
             </PreferenceScreen>
 
@@ -843,7 +851,7 @@
                     android:defaultValue="true"
                     android:key="quick-list-enabled"
                     android:title="@string/quick_list_enabled"
-                    app:isPreferenceVisible="false"/>
+                    app:isPreferenceVisible="false" />
 
             </PreferenceScreen>
 

@@ -54,6 +54,7 @@ public class QuickList {
     private static final int RETRY_COUNT = 3;
 
     private TBLauncherActivity mTBLauncherActivity;
+    private boolean mQuickListEnabled = false;
     private boolean mOnlyForResults = false;
     private boolean mListDirty = true;
     private int mRetryCountdown;
@@ -395,11 +396,17 @@ public class QuickList {
     }
 
     private boolean isQuickListEnabled() {
-        return mSharedPreferences.getBoolean("quick-list-enabled", true);
+        return mQuickListEnabled;
+    }
+
+    private boolean isOnlyForResults() {
+        if (TBApplication.state().getDesktop() == LauncherState.Desktop.SEARCH)
+            return mOnlyForResults;
+        return false;
     }
 
     public void showQuickList() {
-        if (!mOnlyForResults)
+        if (!isOnlyForResults())
             show();
     }
 
@@ -469,7 +476,9 @@ public class QuickList {
 
     public void onStart() {
         final SharedPreferences pref = mSharedPreferences;
+        mQuickListEnabled = pref.getBoolean("quick-list-enabled", true);
         mOnlyForResults = pref.getBoolean("quick-list-only-for-results", false);
+
         applyUiPref(pref, mQuickList);
     }
 
@@ -478,13 +487,13 @@ public class QuickList {
         bFilterOn = false;
         bActionOn = false;
         bAdapterEmpty = true;
-        if (mOnlyForResults)
+        if (isOnlyForResults())
             hideQuickList(true);
         mLastSelection = null;
     }
 
     public void adapterUpdated() {
-        if (mOnlyForResults)
+        if (isOnlyForResults())
             show();
         animToggleOff();
         bFilterOn = false;

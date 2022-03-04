@@ -25,13 +25,6 @@
         <androidx.preference.SwitchPreference
             android:defaultValue="false"
             android:dependency="quick-list-enabled"
-            android:key="quick-list-only-for-results"
-            android:summary="@string/quick_list_only_for_results_summary"
-            android:title="@string/quick_list_only_for_results" />
-
-        <androidx.preference.SwitchPreference
-            android:defaultValue="false"
-            android:dependency="quick-list-enabled"
             android:key="quick-list-text-visible"
             android:title="@string/quick_list_text_visible" />
 
