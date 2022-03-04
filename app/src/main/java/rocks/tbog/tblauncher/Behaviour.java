@@ -1002,8 +1002,11 @@ public class Behaviour implements ISearchActivity {
         Log.d(TAG, "hideResultList (anim " + animate + ")");
         if (TBApplication.state().getResultListVisibility() != LauncherState.AnimatedVisibility.ANIM_TO_HIDDEN)
             mResultLayout.animate().cancel();
-        if (mResultLayout.getVisibility() != View.VISIBLE)
+        if (mResultLayout.getVisibility() != View.VISIBLE) {
+            Log.d(TAG, "mResultLayout not VISIBLE, setting state to HIDDEN");
+            TBApplication.state().setResultList(LauncherState.AnimatedVisibility.HIDDEN);
             return;
+        }
         if (animate) {
             TBApplication.state().setResultList(LauncherState.AnimatedVisibility.ANIM_TO_HIDDEN);
             mResultLayout.animate()
