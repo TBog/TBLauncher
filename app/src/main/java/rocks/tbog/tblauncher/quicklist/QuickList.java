@@ -405,7 +405,6 @@ public class QuickList {
 
     private void show() {
         mQuickList.removeCallbacks(runCleanList);
-        runCleanList.run();
 
         if (isQuickListEnabled()) {
             final SharedPreferences pref = mSharedPreferences;
@@ -426,11 +425,14 @@ public class QuickList {
                     })
                     .start();
             } else {
+                mQuickList.animate().cancel();
                 mQuickList.setScaleY(1f);
                 TBApplication.state().setQuickList(LauncherState.AnimatedVisibility.VISIBLE);
             }
             mQuickList.setVisibility(View.VISIBLE);
         }
+        // after state set, make sure the list is not dirty
+        runCleanList.run();
     }
 
     public void hideQuickList(boolean animate) {
