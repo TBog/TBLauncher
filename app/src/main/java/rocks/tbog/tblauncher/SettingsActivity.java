@@ -247,9 +247,22 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     public boolean onSupportNavigateUp() {
         if (getSupportFragmentManager().popBackStackImmediate()) {
             final int count = getSupportFragmentManager().getBackStackEntryCount();
-            if (count == 0) {
-                setTitle(R.string.menu_popup_launcher_settings);
+            CharSequence title = null;
+            if (count > 0) {
+                String tag = getSupportFragmentManager().getBackStackEntryAt(count - 1).getName();
+                if (tag != null) {
+                    Fragment fragment = getSupportFragmentManager().findFragmentByTag(SettingsFragment.FRAGMENT_TAG);
+                    if (fragment instanceof SettingsFragment) {
+                        Preference preference = ((SettingsFragment) fragment).findPreference(tag);
+                        if (preference != null)
+                            title = preference.getTitle();
+                    }
+                }
             }
+            if (title != null)
+                setTitle(title);
+            else
+                setTitle(R.string.menu_popup_launcher_settings);
             return true;
         }
         return super.onSupportNavigateUp();
