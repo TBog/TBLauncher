@@ -746,6 +746,7 @@
 
                 <androidx.preference.SwitchPreference
                     android:defaultValue="false"
+                    android:dependency="quick-list-enabled"
                     android:key="dm-empty-quick-list"
                     android:title="@string/dm_empty_quick_list" />
 
@@ -761,6 +762,13 @@
                     android:key="dm-empty-back"
                     android:title="@string/back_device_key" />
 
+                <!-- This is here just to be able to use dependency, not visible for user -->
+                <androidx.preference.SwitchPreference
+                    android:defaultValue="true"
+                    android:key="quick-list-enabled"
+                    android:title="@string/quick_list_enabled"
+                    app:isPreferenceVisible="false"/>
+
             </PreferenceScreen>
 
             <!-- ‹Search› desktop mode -->
@@ -770,6 +778,7 @@
 
                 <androidx.preference.SwitchPreference
                     android:defaultValue="true"
+                    android:dependency="quick-list-enabled"
                     android:key="dm-search-quick-list"
                     android:title="@string/dm_search_quick_list" />
 
@@ -797,6 +806,13 @@
                     android:title="@string/action_entry_to_show"
                     app:isPreferenceVisible="false" />
 
+                <!-- This is here just to be able to use dependency, not visible for user -->
+                <androidx.preference.SwitchPreference
+                    android:defaultValue="true"
+                    android:key="quick-list-enabled"
+                    android:title="@string/quick_list_enabled"
+                    app:isPreferenceVisible="false"/>
+
             </PreferenceScreen>
 
             <!-- ‹Widget› desktop mode -->
@@ -806,6 +822,7 @@
 
                 <androidx.preference.SwitchPreference
                     android:defaultValue="false"
+                    android:dependency="quick-list-enabled"
                     android:key="dm-widget-quick-list"
                     android:title="@string/dm_widget_quick_list" />
 
@@ -820,6 +837,13 @@
                     android:entryValues="@array/gestureValues"
                     android:key="dm-widget-back"
                     android:title="@string/back_device_key" />
+
+                <!-- This is here just to be able to use dependency, not visible for user -->
+                <androidx.preference.SwitchPreference
+                    android:defaultValue="true"
+                    android:key="quick-list-enabled"
+                    android:title="@string/quick_list_enabled"
+                    app:isPreferenceVisible="false"/>
 
             </PreferenceScreen>
 
