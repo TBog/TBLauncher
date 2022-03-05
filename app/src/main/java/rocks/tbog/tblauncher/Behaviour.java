@@ -567,18 +567,8 @@ public class Behaviour implements ISearchActivity {
             case SEARCH:
                 // show the SearchBar
                 showSearchBar();
-                // hide/show the QuickList
-                if (PrefCache.modeSearchQuickListVisible(mPref))
-                    TBApplication.quickList(getContext()).showQuickList();
-                else
-                    TBApplication.quickList(getContext()).hideQuickList(false);
-                // enable/disable fullscreen (status and navigation bar)
-                if (TBApplication.state().isKeyboardHidden()
-                    && PrefCache.modeSearchFullscreen(mPref))
-                    enableFullscreen(UI_ANIMATION_DELAY);
-                else
-                    disableFullscreen();
 
+                // hide/show result list
                 final String openResult = PrefCache.modeSearchOpenResult(mPref);
                 if ("none".equals(openResult)) {
                     // hide result
@@ -592,15 +582,22 @@ public class Behaviour implements ISearchActivity {
                             }),
                         KEYBOARD_ANIMATION_DELAY);
                 }
+
+                // hide/show the QuickList
+                TBApplication.quickList(getContext()).updateVisibility();
+
+                // enable/disable fullscreen (status and navigation bar)
+                if (TBApplication.state().isKeyboardHidden()
+                    && PrefCache.modeSearchFullscreen(mPref))
+                    enableFullscreen(UI_ANIMATION_DELAY);
+                else
+                    disableFullscreen();
                 break;
             case WIDGET:
                 // show widgets
                 showWidgets();
                 // hide/show the QuickList
-                if (PrefCache.modeWidgetQuickListVisible(mPref))
-                    TBApplication.quickList(getContext()).showQuickList();
-                else
-                    TBApplication.quickList(getContext()).hideQuickList(false);
+                TBApplication.quickList(getContext()).updateVisibility();
                 // enable/disable fullscreen (status and navigation bar)
                 if (PrefCache.modeWidgetFullscreen(mPref))
                     enableFullscreen(UI_ANIMATION_DELAY);
@@ -610,10 +607,7 @@ public class Behaviour implements ISearchActivity {
             case EMPTY:
             default:
                 // hide/show the QuickList
-                if (PrefCache.modeEmptyQuickListVisible(mPref))
-                    TBApplication.quickList(getContext()).showQuickList();
-                else
-                    TBApplication.quickList(getContext()).hideQuickList(false);
+                TBApplication.quickList(getContext()).updateVisibility();
                 // enable/disable fullscreen (status and navigation bar)
                 if (PrefCache.modeEmptyFullscreen(mPref))
                     enableFullscreen(UI_ANIMATION_DELAY);

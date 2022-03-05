@@ -43,6 +43,7 @@ import rocks.tbog.tblauncher.handler.DataHandler;
 import rocks.tbog.tblauncher.result.ResultHelper;
 import rocks.tbog.tblauncher.searcher.Searcher;
 import rocks.tbog.tblauncher.ui.ListPopup;
+import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.UISizes;
 
@@ -133,7 +134,6 @@ public class QuickList {
     }
 
     private void populateList() {
-        mListDirty = false;
         // keep a list of the old views so we can reuse them
         final View[] oldList = new View[mQuickList.getChildCount()];
         for (int nChild = 0; nChild < oldList.length; nChild += 1)
@@ -147,6 +147,8 @@ public class QuickList {
             mQuickList.setVisibility(View.GONE);
             return;
         }
+
+        mListDirty = false;
 
         // get list of entries we must show
         final List<EntryItem> list;
@@ -396,6 +398,14 @@ public class QuickList {
     }
 
     private boolean isQuickListEnabled() {
+        if (mQuickListEnabled) {
+            if (TBApplication.state().getDesktop() == LauncherState.Desktop.SEARCH)
+                return PrefCache.modeSearchQuickListVisible(mSharedPreferences);
+            if (TBApplication.state().getDesktop() == LauncherState.Desktop.EMPTY)
+                return PrefCache.modeEmptyQuickListVisible(mSharedPreferences);
+            if (TBApplication.state().getDesktop() == LauncherState.Desktop.WIDGET)
+                return PrefCache.modeWidgetQuickListVisible(mSharedPreferences);
+        }
         return mQuickListEnabled;
     }
 
@@ -405,9 +415,19 @@ public class QuickList {
         return false;
     }
 
-    public void showQuickList() {
-        if (!isOnlyForResults())
-            show();
+    public void updateVisibility() {
+        if (isQuickListEnabled()) {
+            if (isOnlyForResults()) {
+                if (TBApplication.state().isResultListVisible()) {
+                    show();
+                    return;
+                }
+            } else {
+                show();
+                return;
+            }
+        }
+        hideQuickList(false);
     }
 
     private void show() {
