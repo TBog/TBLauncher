@@ -21,10 +21,8 @@ import androidx.preference.PreferenceManager;
 
 import java.lang.ref.WeakReference;
 import java.util.ConcurrentModificationException;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.Map;
 
 import rocks.tbog.tblauncher.handler.AppsHandler;
 import rocks.tbog.tblauncher.handler.DataHandler;
@@ -36,7 +34,6 @@ import rocks.tbog.tblauncher.searcher.Searcher;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.RootHandler;
-import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public class TBApplication extends Application {
@@ -80,6 +77,12 @@ public class TBApplication extends Application {
      * Root handler - su
      */
     private RootHandler mRootHandler = null;
+
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        //MultiDex.install(this);
+    }
 
     @NonNull
     public static TBApplication getApplication(@NonNull Context context) {
