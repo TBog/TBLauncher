@@ -2,10 +2,8 @@ package rocks.tbog.tblauncher.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.content.res.TypedArray;
 import android.util.TypedValue;
 
-import androidx.annotation.AttrRes;
 import androidx.preference.PreferenceManager;
 
 import rocks.tbog.tblauncher.R;
@@ -131,27 +129,39 @@ public final class UISizes {
         return CACHED_RADIUS_POPUP_CORNER;
     }
 
-    /**
-     * Example usage: `int size = UISizes.getTextAppearanceTextSize(context, android.R.attr.textAppearanceMedium);`
-     *
-     * @param context        we need the context to get the theme
-     * @param textAppearance text size of what attribute
-     * @return text size
-     */
-    public static int getTextAppearanceTextSize(Context context, @AttrRes int textAppearance) {
-        int size = 0;
-        TypedValue appearance = new TypedValue();
-        if (context.getTheme().resolveAttribute(textAppearance, appearance, true)) {
-            TypedArray ta = context.obtainStyledAttributes(appearance.resourceId, new int[]{android.R.attr.textSize});
-            size = ta.getDimensionPixelSize(0, size);
-            ta.recycle();
-        }
-        return (size == 0) ? sp2px(context, 12) : size;
-    }
+//    /**
+//     * Example usage: `int size = UISizes.getTextAppearanceTextSize(context, android.R.attr.textAppearanceMedium);`
+//     *
+//     * @param context        we need the context to get the theme
+//     * @param textAppearance text size of what attribute
+//     * @return text size
+//     */
+//    public static int getTextAppearanceTextSize(Context context, @AttrRes int textAppearance) {
+//        int size = 0;
+//        TypedValue appearance = new TypedValue();
+//        if (context.getTheme().resolveAttribute(textAppearance, appearance, true)) {
+//            TypedArray ta = context.obtainStyledAttributes(appearance.resourceId, new int[]{android.R.attr.textSize});
+//            size = ta.getDimensionPixelSize(0, size);
+//            ta.recycle();
+//        }
+//        return (size == 0) ? sp2px(context, 12) : size;
+//    }
 
     public static int getSearchBarRadius(Context context) {
         SharedPreferences pref = TBApplication.getApplication(context).preferences();
         int radius = pref.getInt("search-bar-radius", 0);
         return dp2px(context, radius);
+    }
+
+    public static int getQuickListMarginVertical(Context context) {
+        SharedPreferences pref = TBApplication.getApplication(context).preferences();
+        int margin = pref.getInt("quick-list-margin-vertical", 0);
+        return dp2px(context, margin);
+    }
+
+    public static int getQuickListMarginHorizontal(Context context) {
+        SharedPreferences pref = TBApplication.getApplication(context).preferences();
+        int margin = pref.getInt("quick-list-margin-horizontal", 0);
+        return dp2px(context, margin);
     }
 }

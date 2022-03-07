@@ -532,13 +532,18 @@ public class QuickList {
             barHeight = resources.getInteger(R.integer.default_dock_height);
         barHeight = UISizes.dp2px(ctx, barHeight);
 
-        if (!(quickList.getLayoutParams() instanceof ViewGroup.MarginLayoutParams))
-            throw new IllegalStateException("mSearchBarContainer has the wrong layout params");
-
-        ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) quickList.getLayoutParams();
-        // set layout height
-        params.height = barHeight;
-        quickList.setLayoutParams(params);
+        if (quickList.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) quickList.getLayoutParams();
+            // set layout height
+            params.height = barHeight;
+            int hMargin = UISizes.getQuickListMarginHorizontal(ctx);
+            int vMargin = UISizes.getQuickListMarginVertical(ctx);
+            params.setMargins(hMargin, vMargin, hMargin, vMargin);
+            quickList.setLayoutParams(params);
+        }
+        else {
+            throw new IllegalStateException("quickList has the wrong layout params");
+        }
 
         final int defaultCorner = resources.getInteger(R.integer.default_corner_radius);
         final int cornerRadius = pref.getInt("quick-list-radius", defaultCorner);
@@ -564,8 +569,6 @@ public class QuickList {
         } else {
             quickList.setBackgroundColor(color);
         }
-        int margin = (int) (cornerRadius * .5f);
-        params.setMargins(margin, margin, margin, margin);
     }
 
     public static int getBackgroundColor(SharedPreferences pref) {
