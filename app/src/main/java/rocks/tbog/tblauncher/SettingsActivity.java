@@ -672,31 +672,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 String key = preference.getKey();
                 Log.d(TAG, "onDisplayPreferenceDialog " + key);
                 switch (key) {
-                    case "primary-color":
-                    case "secondary-color":
-                    case "icon-background-argb":
-                    case "notification-bar-argb":
-                    case "search-bar-argb":
-                    case "result-list-argb":
-                    case "result-ripple-color":
-                    case "result-highlight-color":
-                    case "result-text-color":
-                    case "result-text2-color":
-                    case "contact-action-color":
-                    case "search-bar-text-color":
-                    case "search-bar-icon-color":
-                    case "search-bar-ripple-color":
-                    case "search-bar-cursor-argb":
-                    case "quick-list-toggle-color":
-                    case "quick-list-argb":
-                    case "quick-list-ripple-color":
-                    case "popup-background-argb":
-                    case "popup-border-argb":
-                    case "popup-ripple-color":
-                    case "popup-text-color":
-                    case "popup-title-color":
-                        dialogFragment = PreferenceColorDialog.newInstance(key);
-                        break;
                     case "quick-list-content":
                         dialogFragment = QuickListPreferenceDialog.newInstance(key);
                         break;
@@ -716,10 +691,14 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 if (dialogFragment == null) {
                     @LayoutRes
                     int dialogLayout = ((CustomDialogPreference) preference).getDialogLayoutResource();
-                    if (R.layout.pref_slider == dialogLayout)
+                    if (dialogLayout == 0) {
+                        if (key.endsWith("-color") || key.endsWith("-argb"))
+                            dialogFragment = PreferenceColorDialog.newInstance(key);
+                    } else if (R.layout.pref_slider == dialogLayout) {
                         dialogFragment = SliderDialog.newInstance(key);
-                    else if (R.layout.pref_confirm == dialogLayout)
+                    } else if (R.layout.pref_confirm == dialogLayout) {
                         dialogFragment = ConfirmDialog.newInstance(key);
+                    }
                 }
                 if (dialogFragment == null)
                     throw new IllegalArgumentException("CustomDialogPreference \"" + key + "\" has no dialog defined");
