@@ -16,24 +16,17 @@ import android.view.View;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
-import androidx.appcompat.content.res.AppCompatResources;
 import androidx.collection.ArraySet;
 import androidx.fragment.app.DialogFragment;
 
-import com.github.dhaval2404.imagepicker.ImagePicker;
-import com.github.dhaval2404.imagepicker.constant.ImageProvider;
-
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import kotlin.Unit;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.drawable.DrawableUtils;
 import rocks.tbog.tblauncher.handler.IconsHandler;
 import rocks.tbog.tblauncher.icons.IconPackXML;
-import rocks.tbog.tblauncher.utils.UISizes;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
 
@@ -124,63 +117,6 @@ public class SystemPage extends CustomShapePage {
                     }
                 }
             }
-        }
-
-        // add icon picker
-        {
-            PickedIconInfo iconInfo = new PickedIconInfo(AppCompatResources.getDrawable(context, R.drawable.abc_vector_test), R.string.choose_icon);
-            adapter.addItem(iconInfo);
-        }
-    }
-
-    public static class PickedIconInfo extends ShapedIconInfo {
-        @Nullable
-        String text = null;
-
-        public PickedIconInfo(Drawable icon, @StringRes int textId) {
-            super(icon, icon);
-            this.textId = textId;
-        }
-
-        public PickedIconInfo(Drawable icon, @Nullable String text) {
-            super(icon, icon);
-            this.text = text;
-        }
-
-        public PickedIconInfo(Drawable shaped, Drawable original, @Nullable String text) {
-            super(shaped, original);
-            this.text = text;
-        }
-
-        @Nullable
-        CharSequence getText() {
-            return text;
-        }
-
-        @Override
-        protected ShapedIconInfo reshape(Context context, int shape, float scale, int background) {
-            if (textId != 0)
-                return this;
-            Drawable drawable = DrawableUtils.applyIconMaskShape(context, originalDrawable, shape, scale, background);
-            return new PickedIconInfo(drawable, originalDrawable, text);
-        }
-
-        public boolean launchPicker(@NonNull IconSelectDialog iconSelectDialog, @NonNull View v) {
-            if (textId == 0)
-                return false;
-            Context ctx = v.getContext();
-            int size = UISizes.dp2px(ctx, R.dimen.icon_size) * 2;
-            ImagePicker
-                .with(iconSelectDialog)
-                .cropSquare()
-                .provider(ImageProvider.GALLERY)
-                .maxResultSize(size, size)
-                .saveDir(new File(ctx.getCacheDir(), "ImagePicker"))
-                .createIntent(intent -> {
-                    iconSelectDialog.imagePickerResult.launch(intent);
-                    return Unit.INSTANCE;
-                });
-            return true;
         }
     }
 

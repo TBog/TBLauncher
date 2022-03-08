@@ -20,16 +20,22 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.content.res.AppCompatResources;
 import androidx.fragment.app.DialogFragment;
+
+import com.github.dhaval2404.imagepicker.ImagePicker;
+import com.github.dhaval2404.imagepicker.constant.ImageProvider;
 
 import net.mm2d.color.chooser.ColorChooserDialog;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Objects;
 
+import kotlin.Unit;
 import rocks.tbog.tblauncher.CustomizeUI;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
@@ -65,7 +71,7 @@ class CustomShapePage extends PageAdapter.Page {
 
     @Override
     void setupView(@NonNull DialogFragment dialogFragment, @Nullable OnItemClickListener iconClickListener, @Nullable OnItemClickListener iconLongClickListener) {
-        Context context = dialogFragment.getContext();
+        Context context = dialogFragment.requireContext();
         mLettersView = pageView.findViewById(R.id.letters);
         mLettersView.addTextChangedListener(new TextWatcher() {
             @Override
@@ -92,6 +98,12 @@ class CustomShapePage extends PageAdapter.Page {
         addShapesList();
         addIconsList(iconClickListener);
         addScaleBar();
+
+        // add icon picker
+        {
+            PickedIconInfo iconInfo = new PickedIconInfo(AppCompatResources.getDrawable(context, R.drawable.ic_browse_add_icon), R.string.browse_add_icon);
+            mShapedIconAdapter.addItem(iconInfo);
+        }
 
         final float colorPreviewRadius = dialogFragment.getResources().getDimension(R.dimen.color_preview_radius);
         final int colorPreviewBorder = UISizes.dp2px(context, 1);
@@ -225,7 +237,7 @@ class CustomShapePage extends PageAdapter.Page {
 
     @Override
     public void addPickedIcon(@NonNull Drawable pickedImage, String filename) {
-        mShapedIconAdapter.addItem(new SystemPage.PickedIconInfo(pickedImage, filename));
+        mShapedIconAdapter.addItem(new PickedIconInfo(pickedImage, filename));
     }
 
     private void setupToggle(@IdRes int toggleTextView, @IdRes int viewToToggle) {
@@ -516,6 +528,57 @@ class CustomShapePage extends PageAdapter.Page {
         void removeItem(ShapedIconInfo item) {
             mList.remove(item);
             notifyDataSetChanged();
+        }
+    }
+
+    public static class PickedIconInfo extends ShapedIconInfo {
+        @Nullable
+        String text = null;
+
+        public PickedIconInfo(Drawable icon, @StringRes int textId) {
+            super(icon, icon);
+            this.textId = textId;
+        }
+
+        public PickedIconInfo(Drawable icon, @Nullable String text) {
+            super(icon, icon);
+            this.text = text;
+        }
+
+        public PickedIconInfo(Drawable shaped, Drawable original, @Nullable String text) {
+            super(shaped, original);
+            this.text = text;
+        }
+
+        @Nullable
+        CharSequence getText() {
+            return text;
+        }
+
+        @Override
+        protected ShapedIconInfo reshape(Context context, int shape, float scale, int background) {
+            if (textId != 0)
+                return this;
+            Drawable drawable = DrawableUtils.applyIconMaskShape(context, originalDrawable, shape, scale, background);
+            return new PickedIconInfo(drawable, originalDrawable, text);
+        }
+
+        public boolean launchPicker(@NonNull IconSelectDialog iconSelectDialog, @NonNull View v) {
+            if (textId == 0)
+                return false;
+            Context ctx = v.getContext();
+            int size = UISizes.dp2px(ctx, R.dimen.icon_size) * 2;
+            ImagePicker
+                .with(iconSelectDialog)
+                .cropSquare()
+                .provider(ImageProvider.GALLERY)
+                .maxResultSize(size, size)
+                .saveDir(new File(ctx.getCacheDir(), "ImagePicker"))
+                .createIntent(intent -> {
+                    iconSelectDialog.imagePickerResult.launch(intent);
+                    return Unit.INSTANCE;
+                });
+            return true;
         }
     }
 }

@@ -459,6 +459,7 @@
     <string name="result_fading_edge_summary">Top and bottom edges fade out</string>
     <string name="margin_vertical">Vertical margin</string>
     <string name="margin_horizontal">Horizontal margin</string>
+    <string name="browse_add_icon">Browse local images</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>
