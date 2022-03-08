@@ -153,6 +153,18 @@ public final class UISizes {
         return dp2px(context, radius);
     }
 
+    public static int getSearchBarMarginVertical(Context context) {
+        SharedPreferences pref = TBApplication.getApplication(context).preferences();
+        int margin = pref.getInt("search-bar-margin-vertical", 0);
+        return dp2px(context, margin);
+    }
+
+    public static int getSearchBarMarginHorizontal(Context context) {
+        SharedPreferences pref = TBApplication.getApplication(context).preferences();
+        int margin = pref.getInt("search-bar-margin-horizontal", 0);
+        return dp2px(context, margin);
+    }
+
     public static int getQuickListMarginVertical(Context context) {
         SharedPreferences pref = TBApplication.getApplication(context).preferences();
         int margin = pref.getInt("quick-list-margin-vertical", 0);

@@ -156,11 +156,14 @@ public class CustomizeUI {
         if (textSize <= 1)
             textSize = resources.getInteger(R.integer.default_size_text);
 
-        // layout height
+        // layout height and margins
         {
             ViewGroup.LayoutParams params = mSearchBarContainer.getLayoutParams();
             if (params instanceof ViewGroup.MarginLayoutParams) {
                 params.height = barHeight;
+                int hMargin = UISizes.getSearchBarMarginHorizontal(ctx);
+                int vMargin = UISizes.getSearchBarMarginVertical(ctx);
+                ((ViewGroup.MarginLayoutParams)params).setMargins(hMargin, vMargin, hMargin, vMargin);
                 mSearchBarContainer.setLayoutParams(params);
             } else {
                 throw new IllegalStateException("mSearchBarContainer has the wrong layout params");
