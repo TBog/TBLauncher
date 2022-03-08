@@ -43,11 +43,8 @@
     <string name="cd_show_all_apps">显示全部应用</string>
     <string name="cd_main_clear">清空搜索栏</string>
     <string name="cd_main_menu">菜单</string>
-    <string name="round_corners">圆角</string>
     <string name="black_notification_icons">暗色图标</string>
     <string name="gradient">坡度</string>
-    <string name="alpha">不透明度</string>
-    <string name="color">颜色</string>
     <string name="notification_bar_section">通知栏</string>
     <string name="title_ui">用户界面</string>
     <string name="user_interface_summary">主题,透明度,和颜色</string>

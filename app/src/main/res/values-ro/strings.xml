@@ -133,7 +133,6 @@
     <string name="result_icon_size">Dimensiunea pictogramei</string>
     <string name="contact_action_color">Culoare pictogramă acțiune</string>
     <string name="quick_list_toggle_color">Comutați culoarea de fundal</string>
-    <string name="quick_list_alpha">Opacitate de fundal</string>
     <string name="quick_list_color">Culoare de fundal</string>
     <string name="result_highlight_color">Evidențiați culoarea</string>
     <string name="quick_list_show_badge">Afișați insigna de comenzi rapide „Listă rapidă”</string>
@@ -274,11 +273,8 @@
     <string name="cd_show_all_apps">Afișați toate aplicațiile</string>
     <string name="cd_main_clear">Curăță bara de căutare</string>
     <string name="cd_main_menu">Meniu</string>
-    <string name="round_corners">Colturi rotunjite</string>
     <string name="black_notification_icons">Icoane întunecate</string>
     <string name="gradient">Gradient</string>
-    <string name="alpha">Opacitate</string>
-    <string name="color">Culoare</string>
     <string name="notification_bar_section">Bara de notificari</string>
     <string name="title_ui">Interfață</string>
     <string name="user_interface_summary">Teme, transparență și culori</string>

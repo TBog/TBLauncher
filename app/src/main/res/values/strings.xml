@@ -48,11 +48,8 @@
     <string name="title_ui">User interface</string>
     <string name="notification_bar_section">Notification bar</string>
     <string name="color_and_opacity">Color and opacity</string>
-    <string name="color">Color</string>
-    <string name="alpha">Opacity</string>
     <string name="gradient">Gradient</string>
     <string name="black_notification_icons">Dark icons</string>
-    <string name="round_corners">Rounded corners</string>
 
     <!-- Content Description -->
     <string name="cd_main_menu">Menu</string>
@@ -208,7 +205,6 @@
     <string name="result_list_argb">Background color and opacity</string>
     <string name="result_highlight_color">Highlight color</string>
     <string name="quick_list_color">Background color</string>
-    <string name="quick_list_alpha">Background Opacity</string>
     <string name="quick_list_toggle_color">Toggle background color</string>
     <string name="contact_action_color">Action icon color</string>
     <string name="result_icon_size">Icon size</string>

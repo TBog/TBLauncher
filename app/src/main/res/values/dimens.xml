@@ -21,7 +21,7 @@
 
     <dimen name="bar_height">13dp</dimen>
     <dimen name="large_bar_height">22dp</dimen>
-    <dimen name="bar_corner_radius">11dp</dimen> <!-- at most half of `large_bar_height` -->
+    <!-- at most half of `large_bar_height` -->
 
     <dimen name="launcher_button_width">45dp</dimen>
     <dimen name="launcher_button_padding">10dp</dimen>

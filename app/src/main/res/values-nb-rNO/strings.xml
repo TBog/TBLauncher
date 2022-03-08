@@ -205,9 +205,6 @@
     <string name="cd_show_all_apps">Vis alle programmer</string>
     <string name="cd_main_clear">Tøm søkefelt</string>
     <string name="cd_main_menu">Meny</string>
-    <string name="round_corners">Avrundede hjørner</string>
-    <string name="alpha">Dekkevne</string>
-    <string name="color">Farge</string>
     <string name="notification_bar_section">Merknadsfelt</string>
     <string name="menu_popup_tags_manager">Etiketthåndtering</string>
     <string name="menu_popup_launcher_settings">TinyBit-innstillinger</string>
@@ -277,7 +274,6 @@
     <string name="search_bar_icon_color">Ikonfarge</string>
     <string name="contact_action_color">Handlingsikonfarge</string>
     <string name="quick_list_toggle_color">Veksle bakgrunnsfarge</string>
-    <string name="quick_list_alpha">Bakgrunnsdekkevne</string>
     <string name="result_highlight_color">Framhevelsesfarge</string>
     <string name="quick_list_show_badge">Vis «Hurtigliste»-snarveisskilt</string>
     <string name="shortcut_show_badge_summary">Vis programikon som opprettet snarveien</string>
