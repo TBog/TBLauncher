@@ -11,9 +11,6 @@ import rocks.tbog.tblauncher.R;
 
 public class SliderDialog extends BasePreferenceDialog {
 
-    protected TextView mTextView2;
-    protected int mSliderOffset = 0;
-
     public static SliderDialog newInstance(String key) {
         SliderDialog fragment = new SliderDialog();
         final Bundle b = new Bundle(1);
@@ -68,6 +65,7 @@ public class SliderDialog extends BasePreferenceDialog {
         }
 
         // because we can't set minimum below API 26 we make our own
+        int minValue = 0;
         switch (key) {
             case "result-text-size":
             case "result-text2-size":
@@ -75,65 +73,83 @@ public class SliderDialog extends BasePreferenceDialog {
             case "search-bar-text-size":
             case "search-bar-height":
             case "quick-list-height":
-                mSliderOffset = 2;
-                seekBar.setMax(seekBar.getMax() - mSliderOffset);
+                minValue = 2;
+                seekBar.setMax(seekBar.getMax() - minValue);
                 break;
             case "result-history-size":
             case "result-history-adaptive":
             case "result-search-cap":
-                mSliderOffset = 1;
-                seekBar.setMax(1000 - mSliderOffset);
+                minValue = 1;
+                seekBar.setMax(1000 - minValue);
                 break;
             case "icon-hue":
-                mSliderOffset = -180;
-                seekBar.setMax(180 - mSliderOffset);
+                minValue = -180;
+                seekBar.setMax(180 - minValue);
                 break;
             case "icon-scale-red":
             case "icon-scale-green":
             case "icon-scale-blue":
             case "icon-scale-alpha":
-                mSliderOffset = -200;
-                seekBar.setMax(200 - mSliderOffset);
+                minValue = -200;
+                seekBar.setMax(200 - minValue);
                 break;
             case "icon-contrast":
             case "icon-brightness":
             case "icon-saturation":
-                mSliderOffset = -100;
-                seekBar.setMax(100 - mSliderOffset);
+                minValue = -100;
+                seekBar.setMax(100 - minValue);
                 break;
         }
 
-        // update display value
-        mTextView2 = root.findViewById(android.R.id.text2);
-//        {
-//            int progress = seekBarProgress;
-//            progress += mSliderOffset;
-//            mTextView2.setText(mTextView2.getResources().getString(R.string.value, progress));
-//        }
+        // set slider value
+        int seekBarProgress = (Integer) preference.getValue() - minValue;
+        seekBar.setProgress(seekBarProgress);
 
-        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                progress += mSliderOffset;
-                mTextView2.setText(mTextView2.getResources().getString(R.string.value, progress));
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                int progress = seekBar.getProgress();
-                progress += mSliderOffset;
-                CustomDialogPreference pref = ((CustomDialogPreference) SliderDialog.this.getPreference());
-                pref.setValue(progress);
-            }
+        // make change listener
+        TextView text2 = root.findViewById(android.R.id.text2);
+        ProgressChanged listener = new ProgressChanged(minValue, text2, (progress) -> {
+            CustomDialogPreference pref = ((CustomDialogPreference) SliderDialog.this.getPreference());
+            pref.setValue(progress);
         });
 
-        // set progress after listener set to also update text view
-        int seekBarProgress = (Integer) preference.getValue() - mSliderOffset;
-        seekBar.setProgress(seekBarProgress);
+        // update display value
+        listener.onProgressChanged(seekBar, seekBarProgress, false);
+
+        // set change listener
+        seekBar.setOnSeekBarChangeListener(listener);
+    }
+
+    interface ValueChanged {
+        void valueChanged(int newValue);
+    }
+
+    private static class ProgressChanged implements SeekBar.OnSeekBarChangeListener {
+        private final int offset;
+        private final TextView textView;
+        private final ValueChanged listener;
+
+        public ProgressChanged(int offset, TextView textView, ValueChanged listener) {
+            this.offset = offset;
+            this.textView = textView;
+            this.listener = listener;
+        }
+
+        @Override
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+            progress += offset;
+            textView.setText(textView.getResources().getString(R.string.value, progress));
+        }
+
+        @Override
+        public void onStartTrackingTouch(SeekBar seekBar) {
+            // do nothing
+        }
+
+        @Override
+        public void onStopTrackingTouch(SeekBar seekBar) {
+            int progress = seekBar.getProgress();
+            progress += offset;
+            listener.valueChanged(progress);
+        }
     }
 }

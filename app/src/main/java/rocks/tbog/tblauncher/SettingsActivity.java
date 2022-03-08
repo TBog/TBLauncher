@@ -22,6 +22,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
@@ -663,7 +664,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         }
 
         @Override
-        public void onDisplayPreferenceDialog(Preference preference) {
+        public void onDisplayPreferenceDialog(@NonNull Preference preference) {
             // Try if the preference is one of our custom Preferences
             DialogFragment dialogFragment = null;
             if (preference instanceof CustomDialogPreference) {
@@ -696,50 +697,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     case "popup-title-color":
                         dialogFragment = PreferenceColorDialog.newInstance(key);
                         break;
-                    case "search-bar-radius":
-                    case "search-bar-height":
-                    case "search-bar-text-size":
-                    case "quick-list-height":
-                    case "result-text-size":
-                    case "result-text2-size":
-                    case "result-icon-size":
-                    case "result-history-size":
-                    case "result-history-adaptive":
-                    case "result-search-cap":
-                    case "tags-menu-icon-size":
-                    case "icon-scale-red":
-                    case "icon-scale-green":
-                    case "icon-scale-blue":
-                    case "icon-scale-alpha":
-                    case "icon-hue":
-                    case "icon-contrast":
-                    case "icon-brightness":
-                    case "icon-saturation":
-                    case "result-list-radius":
-                    case "popup-corner-radius":
-                    case "quick-list-radius":
-                    case "result-list-margin-vertical":
-                    case "result-list-margin-horizontal":
-                        dialogFragment = SliderDialog.newInstance(key);
-                        break;
-                    case "generate-theme-simple":
-                    case "generate-theme-highlight":
-                    case "device-admin":
-                    case "reset-matrix":
-                    case "reset-preferences":
-                    case "reset-cached-app-icons":
-                    case "exit-app":
-                    case "reset-default-launcher":
-                    case "export-tags":
-                    case "export-modifications":
-                    case "export-apps":
-                    case "export-interface":
-                    case "export-widgets":
-                    case "export-history":
-                    case "export-backup":
-                    case "unlimited-search-cap":
-                        dialogFragment = ConfirmDialog.newInstance(key);
-                        break;
                     case "quick-list-content":
                         dialogFragment = QuickListPreferenceDialog.newInstance(key);
                         break;
@@ -754,8 +711,18 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         dialogFragment = EditSearchHintPreferenceDialog.newInstance(key);
                         break;
                     default:
-                        throw new IllegalArgumentException("CustomDialogPreference \"" + key + "\" has no dialog defined");
+                        dialogFragment = null;
                 }
+                if (dialogFragment == null) {
+                    @LayoutRes
+                    int dialogLayout = ((CustomDialogPreference) preference).getDialogLayoutResource();
+                    if (R.layout.pref_slider == dialogLayout)
+                        dialogFragment = SliderDialog.newInstance(key);
+                    else if (R.layout.pref_confirm == dialogLayout)
+                        dialogFragment = ConfirmDialog.newInstance(key);
+                }
+                if (dialogFragment == null)
+                    throw new IllegalArgumentException("CustomDialogPreference \"" + key + "\" has no dialog defined");
             } else if (preference instanceof ListPreference) {
                 String key = preference.getKey();
                 switch (key) {
@@ -782,8 +749,12 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
             // If it was one of our custom Preferences, show its dialog
             if (dialogFragment != null) {
-                dialogFragment.setTargetFragment(this, 0);
                 final FragmentManager fm = this.getParentFragmentManager();
+                // check if dialog is already showing
+                if (fm.findFragmentByTag(DIALOG_FRAGMENT_TAG) != null) {
+                    return;
+                }
+                dialogFragment.setTargetFragment(this, 0);
                 dialogFragment.show(fm, DIALOG_FRAGMENT_TAG);
             }
             // Could not be handled here. Try with the super method.
