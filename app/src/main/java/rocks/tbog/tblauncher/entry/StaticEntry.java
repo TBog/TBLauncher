@@ -4,6 +4,7 @@ import android.content.Context;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -99,24 +100,24 @@ public abstract class StaticEntry extends EntryItem {
             String msg = ctx.getString(R.string.entry_rename_confirmation, getName());
             Toast.makeText(ctx, msg, Toast.LENGTH_SHORT).show();
         })
-                .setTitle(R.string.title_static_rename)
-                .setNeutralButton(R.string.custom_name_set_default, (dialog, which) -> {
-                    Context ctx = dialog.requireContext();
-                    TBApplication app = TBApplication.getApplication(ctx);
-                    DataHandler dataHandler = app.getDataHandler();
-                    // restore default name
-                    String name = dataHandler.renameStaticEntry(this, null);
+            .setTitle(R.string.title_static_rename)
+            .setNeutralButton(R.string.custom_name_set_default, (dialog, which) -> {
+                Context ctx = dialog.requireContext();
+                TBApplication app = TBApplication.getApplication(ctx);
+                DataHandler dataHandler = app.getDataHandler();
+                // restore default name
+                String name = dataHandler.renameStaticEntry(this, null);
 
-                    if (name != null) {
-                        app.behaviour().refreshSearchRecord(StaticEntry.this);
+                if (name != null) {
+                    app.behaviour().refreshSearchRecord(StaticEntry.this);
 
-                        // Show toast message
-                        String msg = ctx.getString(R.string.entry_rename_confirmation, getName());
-                        Toast.makeText(ctx, msg, Toast.LENGTH_SHORT).show();
-                    }
+                    // Show toast message
+                    String msg = ctx.getString(R.string.entry_rename_confirmation, getName());
+                    Toast.makeText(ctx, msg, Toast.LENGTH_SHORT).show();
+                }
 
-                    dialog.dismiss();
-                })
+                dialog.dismiss();
+            })
             .show();
     }
 
@@ -156,6 +157,8 @@ public abstract class StaticEntry extends EntryItem {
         }
 
         ResultViewHelper.applyPreferences(drawFlags, nameView, appIcon);
+        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_LIST))
+            ResultViewHelper.applyListRowPreferences((ViewGroup) view);
     }
 
     public void setCustomIcon() {

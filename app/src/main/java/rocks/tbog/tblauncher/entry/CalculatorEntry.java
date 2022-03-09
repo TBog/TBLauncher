@@ -5,6 +5,7 @@ import android.text.Spannable;
 import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -43,10 +44,10 @@ public final class CalculatorEntry extends SearchEntry {
                 int color = UIColors.getResultHighlightColor(context);
                 SpannableString enriched = new SpannableString(text);
                 enriched.setSpan(
-                        new ForegroundColorSpan(color),
-                        pos + 1,
-                        text.length(),
-                        Spannable.SPAN_INCLUSIVE_EXCLUSIVE
+                    new ForegroundColorSpan(color),
+                    pos + 1,
+                    text.length(),
+                    Spannable.SPAN_INCLUSIVE_EXCLUSIVE
                 );
                 nameView.setText(enriched);
             } else {
@@ -68,6 +69,8 @@ public final class CalculatorEntry extends SearchEntry {
         }
 
         ResultViewHelper.applyPreferences(drawFlags, nameView, appIcon);
+        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_LIST))
+            ResultViewHelper.applyListRowPreferences((ViewGroup) view);
     }
 
     @Override
