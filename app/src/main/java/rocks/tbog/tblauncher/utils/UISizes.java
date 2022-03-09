@@ -108,11 +108,19 @@ public final class UISizes {
     public static int getResultListRowHeight(Context context) {
         if (CACHED_ROW_HEIGHT_RESULT_LIST == null) {
             SharedPreferences pref = TBApplication.getApplication(context).preferences();
-            int height = pref.getInt("result-list-row-height", 0);
-            if (height <= 0)
-                CACHED_ROW_HEIGHT_RESULT_LIST = ViewGroup.LayoutParams.WRAP_CONTENT;
-            else
-                CACHED_ROW_HEIGHT_RESULT_LIST = dp2px(context, height);
+            boolean manual = pref.getBoolean("result-list-row-height-manual", false);
+            if (manual) {
+                int height = pref.getInt("result-list-row-height", 0);
+                if (height <= 0)
+                    CACHED_ROW_HEIGHT_RESULT_LIST = ViewGroup.LayoutParams.WRAP_CONTENT;
+                else
+                    CACHED_ROW_HEIGHT_RESULT_LIST = dp2px(context, height);
+            } else {
+                int iconSize = getResultIconSize(context);
+                int resultMargin = context.getResources().getDimensionPixelSize(R.dimen.result_margin_vertical);
+                int iconMargin = context.getResources().getDimensionPixelSize(R.dimen.icon_margin_vertical);
+                CACHED_ROW_HEIGHT_RESULT_LIST = iconSize + 2 * resultMargin + 2 * iconMargin;
+            }
         }
         return CACHED_ROW_HEIGHT_RESULT_LIST;
     }

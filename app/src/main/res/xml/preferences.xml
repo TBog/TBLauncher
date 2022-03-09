@@ -389,9 +389,15 @@
                 android:title="@string/result_icon_size"
                 android:widgetLayout="@layout/pref_size_preview" />
 
+            <androidx.preference.SwitchPreference
+                android:defaultValue="false"
+                android:key="result-list-row-height-manual"
+                android:title="@string/result_list_row_height_manual" />
+
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@integer/default_height_row"
                 android:dialogLayout="@layout/pref_slider"
+                android:dependency="result-list-row-height-manual"
                 android:key="result-list-row-height"
                 android:title="@string/result_list_row_height"
                 android:widgetLayout="@layout/pref_size_preview" />

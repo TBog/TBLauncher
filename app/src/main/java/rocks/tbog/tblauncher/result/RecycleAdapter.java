@@ -104,6 +104,8 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
         holder.setOnLongClickListener(view -> onLongClick(result, view));
 
         results.get(position).displayResult(holder.itemView, mDrawFlags);
+
+        // result list item height
         if ((mDrawFlags & EntryItem.FLAG_DRAW_LIST) == EntryItem.FLAG_DRAW_LIST) {
             Context ctx = holder.itemView.getContext();
             int rowHeight = UISizes.getResultListRowHeight(ctx);
