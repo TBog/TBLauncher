@@ -91,7 +91,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     private final static String INTENT_EXTRA_BACK_STACK_TAGS = "backStackTagList";
 
     private final static ArraySet<String> PREF_THAT_REQUIRE_LAYOUT_UPDATE = new ArraySet<>(Arrays.asList(
-        "result-list-argb", "result-ripple-color", "result-list-radius",
+        "result-list-argb", "result-ripple-color", "result-list-radius", "result-list-row-height",
         "notification-bar-argb", "notification-bar-gradient", "black-notification-icons",
         "search-bar-height", "search-bar-text-size", "search-bar-radius", "search-bar-gradient", "search-bar-at-bottom",
         "search-bar-argb", "search-bar-text-color", "search-bar-icon-color",
@@ -1020,6 +1020,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case "result-icon-size":
             case "tags-menu-icon-size":
             case "popup-corner-radius":
+            case "result-list-row-height":
                 UISizes.resetCache();
                 break;
             case "result-history-size":

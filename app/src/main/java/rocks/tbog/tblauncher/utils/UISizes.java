@@ -3,6 +3,7 @@ package rocks.tbog.tblauncher.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.util.TypedValue;
+import android.view.ViewGroup;
 
 import androidx.preference.PreferenceManager;
 
@@ -18,6 +19,7 @@ public final class UISizes {
     private static int CACHED_SIZE_TAGS_MENU_ICON = 0;
     private static int CACHED_SIZE_STATUS_BAR = 0;
     private static int CACHED_RADIUS_POPUP_CORNER = -1;
+    private static Integer CACHED_ROW_HEIGHT_RESULT_LIST = null;
 
     private UISizes() {
     }
@@ -29,6 +31,7 @@ public final class UISizes {
         CACHED_SIZE_TAGS_MENU_ICON = 0;
         CACHED_SIZE_STATUS_BAR = 0;
         CACHED_RADIUS_POPUP_CORNER = -1;
+        CACHED_ROW_HEIGHT_RESULT_LIST = null;
     }
 
     public static int sp2px(Context context, int size) {
@@ -100,6 +103,18 @@ public final class UISizes {
         SharedPreferences pref = TBApplication.getApplication(context).preferences();
         int margin = pref.getInt("result-list-margin-horizontal", 0);
         return dp2px(context, margin);
+    }
+
+    public static int getResultListRowHeight(Context context) {
+        if (CACHED_ROW_HEIGHT_RESULT_LIST == null) {
+            SharedPreferences pref = TBApplication.getApplication(context).preferences();
+            int height = pref.getInt("result-list-row-height", 0);
+            if (height <= 0)
+                CACHED_ROW_HEIGHT_RESULT_LIST = ViewGroup.LayoutParams.WRAP_CONTENT;
+            else
+                CACHED_ROW_HEIGHT_RESULT_LIST = dp2px(context, height);
+        }
+        return CACHED_ROW_HEIGHT_RESULT_LIST;
     }
 
     public static int getTagsMenuIconSize(Context context) {

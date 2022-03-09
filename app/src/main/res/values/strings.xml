@@ -460,6 +460,7 @@
     <string name="margin_vertical">Vertical margin</string>
     <string name="margin_horizontal">Horizontal margin</string>
     <string name="browse_add_icon">Browse local images</string>
+    <string name="result_list_row_height">List row height</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>

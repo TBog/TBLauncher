@@ -3,7 +3,6 @@
     <integer name="default_search_bar_height" translatable="false">25</integer>         <!-- 25dp -->
     <integer name="default_dock_height" translatable="false">40</integer>               <!-- 40dp -->
     <integer name="default_background_argb" translatable="false">0xC13caf50</integer>   <!-- 75% opacity with default_color -->
-    <!-- 75% -->
     <integer name="default_icon_background" translatable="false">0xffffff</integer>     <!-- white -->
     <integer name="default_icon_hue" translatable="false">0</integer>
     <integer name="default_icon_contrast" translatable="false">0</integer>
@@ -18,6 +17,7 @@
     <integer name="default_size_text" translatable="false">14</integer>                 <!-- sp -->
     <integer name="default_size_text2" translatable="false">12</integer>                <!-- sp -->
     <integer name="default_size_icon" translatable="false">48</integer>                 <!-- dp -->
+    <integer name="default_height_row" translatable="false">58</integer>                <!-- dp -->
     <integer name="default_result_history_size" translatable="false">32</integer>       <!-- count -->
     <integer name="default_result_history_adaptive" translatable="false">36</integer>   <!-- adaptive hours -->
     <integer name="default_result_searcher_cap" translatable="false">0</integer>        <!-- 0->infinite results -->

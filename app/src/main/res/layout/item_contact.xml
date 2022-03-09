@@ -7,13 +7,12 @@
     android:layout_height="wrap_content"
     android:descendantFocusability="blocksDescendants"
     android:paddingHorizontal="@dimen/result_margin_horizontal"
-    android:paddingVertical="@dimen/result_margin_vertical">
+    tools:layout_height="58dp">
 
     <ImageView
         android:id="@android:id/icon"
         android:layout_width="@dimen/icon_size"
         android:layout_height="@dimen/icon_size"
-        android:layout_marginVertical="@dimen/icon_margin_vertical"
         android:layout_marginStart="@dimen/icon_margin_left"
         android:layout_marginEnd="@dimen/icon_margin_right"
         android:importantForAccessibility="no"
@@ -81,12 +80,12 @@
         android:shadowRadius="?attr/textShadowRadius"
         android:textColor="?android:attr/textColorSecondary"
         android:textSize="@dimen/result_small_size"
-        app:layout_constraintEnd_toStartOf="@id/item_contact_nickname"
         app:layout_constraintBottom_toBottomOf="@android:id/icon"
-        app:layout_constraintStart_toStartOf="@id/item_contact_name"
-        app:layout_constraintTop_toBottomOf="@id/item_contact_name"
+        app:layout_constraintEnd_toStartOf="@id/item_contact_nickname"
         app:layout_constraintHorizontal_bias="0"
         app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintStart_toStartOf="@id/item_contact_name"
+        app:layout_constraintTop_toBottomOf="@id/item_contact_name"
         tools:ignore="RtlSymmetry"
         tools:text="+1 330 1234 5678" />
 
@@ -96,6 +95,7 @@
         android:layout_height="wrap_content"
         android:layout_marginStart="5dp"
         android:ellipsize="end"
+        android:maxLines="1"
         android:paddingEnd="2dp"
         android:shadowColor="?attr/resultShadowColor"
         android:shadowDx="1"
@@ -104,9 +104,8 @@
         android:singleLine="true"
         android:textColor="?android:attr/textColorSecondary"
         android:textSize="@dimen/result_title_size"
-        android:maxLines="1"
-        app:layout_constraintEnd_toStartOf="@+id/item_contact_action_message"
         app:layout_constraintBaseline_toBaselineOf="@id/item_contact_phone"
+        app:layout_constraintEnd_toStartOf="@+id/item_contact_action_message"
         app:layout_constraintStart_toEndOf="@+id/item_contact_phone"
         tools:ignore="RtlSymmetry"
         tools:text="Nickname" />

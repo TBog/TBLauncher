@@ -23,6 +23,7 @@ import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.UIColors;
+import rocks.tbog.tblauncher.utils.UISizes;
 
 public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> {
 
@@ -103,6 +104,15 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
         holder.setOnLongClickListener(view -> onLongClick(result, view));
 
         results.get(position).displayResult(holder.itemView, mDrawFlags);
+        if ((mDrawFlags & EntryItem.FLAG_DRAW_LIST) == EntryItem.FLAG_DRAW_LIST) {
+            Context ctx = holder.itemView.getContext();
+            int rowHeight = UISizes.getResultListRowHeight(ctx);
+            ViewGroup.LayoutParams params = holder.itemView.getLayoutParams();
+            if (params.height != rowHeight) {
+                params.height = rowHeight;
+                holder.itemView.setLayoutParams(params);
+            }
+        }
     }
 
     @Override

@@ -7,6 +7,8 @@
     android:layout_marginHorizontal="@dimen/result_margin_horizontal"
     android:layout_marginVertical="@dimen/result_margin_vertical"
     android:orientation="vertical"
+    tools:layout_height="90dp"
+    tools:layout_width="90dp"
     tools:theme="@style/SettingsTheme">
     <!--    android:background="@color/BlanchedAlmond"-->
 
