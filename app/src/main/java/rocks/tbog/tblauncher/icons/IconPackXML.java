@@ -24,8 +24,10 @@ import androidx.core.content.res.ResourcesCompat;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -280,18 +282,32 @@ public class IconPackXML implements IconPack<IconPackXML.DrawableInfo> {
 
     }
 
+    @Nullable
+    private XmlPullParser findAppFilterXml() throws XmlPullParserException {
+        // search appfilter.xml in icon pack's apk resource folder for xml files
+        int appFilterIdXml = packResources.getIdentifier("appfilter", "xml", iconPackPackageName);
+        if (appFilterIdXml > 0) {
+            return packResources.getXml(appFilterIdXml);
+        }
+
+        // search appfilter.xml in icon pack's apk resource folder for raw files (supporting icon pack studio)
+        int appFilterIdRaw = packResources.getIdentifier("appfilter", "raw", iconPackPackageName);
+        if (appFilterIdRaw > 0) {
+            InputStream input = packResources.openRawResource(appFilterIdRaw);
+            XmlPullParserFactory xppf = XmlPullParserFactory.newInstance();
+            XmlPullParser xpp = xppf.newPullParser();
+            xpp.setInput(input, "UTF-8");
+            return xpp;
+        }
+        return null;
+    }
+
     private void parseAppFilterXML() {
         if (packResources == null)
             return;
 
-        XmlPullParser xpp = null;
         try {
-            // search appfilter.xml into icons pack apk resource folder
-            int appfilterid = packResources.getIdentifier("appfilter", "xml", iconPackPackageName);
-            if (appfilterid > 0) {
-                xpp = packResources.getXml(appfilterid);
-            }
-
+            XmlPullParser xpp = findAppFilterXml();
             if (xpp != null) {
                 int eventType = xpp.getEventType();
                 while (eventType != XmlPullParser.END_DOCUMENT) {
