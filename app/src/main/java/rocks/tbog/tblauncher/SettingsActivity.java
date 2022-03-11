@@ -406,7 +406,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 initResultPopupList(context, sharedPreferences);
                 initMimeTypes(context);
             } else {
-                synchronized (SettingsFragment.this) {
+                synchronized (SettingsFragment.class) {
                     if (AppToRunListContent == null)
                         AppToRunListContent = generateAppToRunListContent(context);
                     if (EntryToShowListContent == null)
@@ -454,7 +454,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             if (AppToRunListContent == null) {
                 Utilities.runAsync(getLifecycle(), t -> {
                     Pair<CharSequence[], CharSequence[]> content = generateAppToRunListContent(context);
-                    synchronized (SettingsFragment.this) {
+                    synchronized (SettingsFragment.class) {
                         if (AppToRunListContent == null)
                             AppToRunListContent = content;
                     }
@@ -472,7 +472,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             if (EntryToShowListContent == null) {
                 Utilities.runAsync(getLifecycle(), t -> {
                     Pair<CharSequence[], CharSequence[]> content = generateEntryToShowListContent(context);
-                    synchronized (SettingsFragment.this) {
+                    synchronized (SettingsFragment.class) {
                         if (EntryToShowListContent == null)
                             EntryToShowListContent = content;
                     }
@@ -484,7 +484,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
         private void initTagsMenuList(@NonNull Context context, @NonNull SharedPreferences sharedPreferences) {
             final Runnable setTagsMenuValues = () -> {
-                synchronized (SettingsFragment.this) {
+                synchronized (SettingsFragment.class) {
                     if (TagsMenuContent != null) {
                         TagsMenuContent.setMultiListValues(findPreference("tags-menu-list"));
                         TagsMenuContent.setOrderedListValues(findPreference("tags-menu-order"));
@@ -495,7 +495,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             if (TagsMenuContent == null) {
                 Utilities.runAsync(getLifecycle(), t -> {
                     ContentLoadHelper.OrderedMultiSelectListData content = ContentLoadHelper.generateTagsMenuContent(context, sharedPreferences);
-                    synchronized (SettingsFragment.this) {
+                    synchronized (SettingsFragment.class) {
                         if (TagsMenuContent == null) {
                             TagsMenuContent = content;
                         }
@@ -508,7 +508,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
         private void initResultPopupList(@NonNull Context context, @NonNull SharedPreferences sharedPreferences) {
             final Runnable setResultPopupValues = () -> {
-                synchronized (SettingsFragment.this) {
+                synchronized (SettingsFragment.class) {
                     if (ResultPopupContent != null)
                         ResultPopupContent.setOrderedListValues(findPreference("result-popup-order"));
                 }
@@ -517,7 +517,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             if (ResultPopupContent == null) {
                 Utilities.runAsync(getLifecycle(), t -> {
                     ContentLoadHelper.OrderedMultiSelectListData content = ContentLoadHelper.generateResultPopupContent(context, sharedPreferences);
-                    synchronized (SettingsFragment.this) {
+                    synchronized (SettingsFragment.class) {
                         if (ResultPopupContent == null) {
                             ResultPopupContent = content;
                         }
@@ -531,7 +531,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         private void initMimeTypes(@NonNull Context context) {
             // get all supported mime types
             final Runnable setMimeTypeValues = () -> {
-                synchronized (SettingsFragment.this) {
+                synchronized (SettingsFragment.class) {
                     if (MimeTypeListContent != null)
                         ContentLoadHelper.setMultiListValues(findPreference("selected-contact-mime-types"), MimeTypeListContent, null);
                 }
@@ -540,7 +540,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             if (MimeTypeListContent == null) {
                 Utilities.runAsync(getLifecycle(), t -> {
                     Pair<CharSequence[], CharSequence[]> content = generateMimeTypeListContent(context);
-                    synchronized (SettingsFragment.this) {
+                    synchronized (SettingsFragment.class) {
                         if (MimeTypeListContent == null)
                             MimeTypeListContent = content;
                     }
@@ -615,7 +615,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         @Override
         public void onDestroy() {
             super.onDestroy();
-            synchronized (SettingsFragment.this) {
+            synchronized (SettingsFragment.class) {
                 AppToRunListContent = null;
                 EntryToShowListContent = null;
                 TagsMenuContent = null;
@@ -812,7 +812,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         private void updateListPrefDependency(@NonNull String dependOnKey, @Nullable String dependOnValue, @NonNull String enableValue, @NonNull String listKey, @Nullable Pair<CharSequence[], CharSequence[]> listContent) {
             Preference prefAppToRun = findPreference(listKey);
             if (prefAppToRun instanceof ListPreference) {
-                synchronized (SettingsFragment.this) {
+                synchronized (SettingsFragment.class) {
                     if (listContent != null) {
                         CharSequence[] entries = listContent.first;
                         CharSequence[] entryValues = listContent.second;
@@ -888,7 +888,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
             SettingsActivity.onSharedPreferenceChanged(activity, sharedPreferences, key);
 
-            synchronized (SettingsFragment.this) {
+            synchronized (SettingsFragment.class) {
                 if (TagsMenuContent != null) {
                     if ("tags-menu-list".equals(key) || "tags-menu-order".equals(key)) {
                         TagsMenuContent.reloadOrderedValues(sharedPreferences, this, "tags-menu-order");
