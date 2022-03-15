@@ -237,6 +237,12 @@ public class PrefCache {
         return pref.getBoolean("result-fading-edge", false);
     }
 
+
+    public static boolean getContactCallOnClick(Context context) {
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+        return pref.getBoolean("call-contact-on-click", false);
+    }
+
     private final static ArraySet<String> PREF_THAT_REQUIRE_MIGRATION = new ArraySet<>(Arrays.asList(
         "result-list-color", "result-list-alpha",
         "notification-bar-color", "notification-bar-alpha",

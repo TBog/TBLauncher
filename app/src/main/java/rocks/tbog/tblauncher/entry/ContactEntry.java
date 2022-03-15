@@ -2,7 +2,6 @@ package rocks.tbog.tblauncher.entry;
 
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.PorterDuff;
 import android.graphics.drawable.ColorDrawable;
@@ -18,7 +17,6 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 import androidx.appcompat.content.res.AppCompatResources;
-import androidx.preference.PreferenceManager;
 
 import java.io.FileNotFoundException;
 import java.io.InputStream;
@@ -258,7 +256,12 @@ public class ContactEntry extends EntryItem {
                 phoneButton.setColorFilter(contactActionColor, PorterDuff.Mode.MULTIPLY);
                 phoneButton.setOnClickListener(v -> {
                     ResultHelper.recordLaunch(this, context);
-                    ResultHelper.launchCall(v.getContext(), v, phone);
+                    if (PrefCache.getContactCallOnClick(context)) {
+                        // doLaunch should not do the same as this action
+                        ResultHelper.launchContactView(this, context, v);
+                    } else {
+                        ResultHelper.launchCall(v.getContext(), v, phone);
+                    }
                 });
             } else {
                 phoneButton.setVisibility(View.GONE);
@@ -288,7 +291,12 @@ public class ContactEntry extends EntryItem {
                 openButton.setColorFilter(contactActionColor, PorterDuff.Mode.MULTIPLY);
                 openButton.setOnClickListener(v -> {
                     ResultHelper.recordLaunch(this, context);
-                    ResultHelper.launchIm(getImData(), v);
+                    if (phone == null && PrefCache.getContactCallOnClick(context)) {
+                        // doLaunch should not do the same as this action
+                        ResultHelper.launchContactView(this, context, v);
+                    } else {
+                        ResultHelper.launchIm(getImData(), v);
+                    }
                 });
             } else {
                 openButton.setVisibility(View.GONE);
@@ -299,10 +307,7 @@ public class ContactEntry extends EntryItem {
     @Override
     public void doLaunch(@NonNull View v, int flags) {
         Context context = v.getContext();
-        SharedPreferences settingPrefs = PreferenceManager.getDefaultSharedPreferences(v.getContext());
-        boolean callContactOnClick = settingPrefs.getBoolean("call-contact-on-click", false);
-
-        if (callContactOnClick) {
+        if (PrefCache.getContactCallOnClick(context)) {
             if (phone != null)
                 ResultHelper.launchCall(context, v, phone);
             else if (getImData() != null)
