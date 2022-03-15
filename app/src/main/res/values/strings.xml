@@ -470,6 +470,9 @@
     <string name="shortcut_dynamic_in_results">Show dynamic in results</string>
     <string name="shortcut_dynamic_in_results_summary">Dynamic shortcuts will be considered as possible results when searching</string>
 
+    <string name="contact_section">Contacts</string>
+    <string name="call_contact_on_click">Call on click</string>
+
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>
         <item quantity="other">%d entries</item>

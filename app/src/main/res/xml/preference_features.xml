@@ -190,6 +190,19 @@
 
     </PreferenceCategory>
 
+    <!-- Contacts -->
+    <androidx.preference.PreferenceCategory
+        android:icon="@drawable/ic_contacts"
+        android:key="contact-section"
+        android:title="@string/contact_section">
+
+        <androidx.preference.SwitchPreference
+            android:defaultValue="false"
+            android:key="call-contact-on-click"
+            android:title="@string/call_contact_on_click" />
+
+    </androidx.preference.PreferenceCategory>
+
     <!-- Shortcut -->
     <androidx.preference.PreferenceCategory
         android:icon="@drawable/ic_shortcuts"
