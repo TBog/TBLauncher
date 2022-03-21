@@ -72,6 +72,8 @@ public class LoadShortcutsEntryItem extends LoadEntryItem<ShortcutEntry> {
             final ShortcutEntry pojo = new ShortcutEntry(id, shortcutRecord.dbId, shortcutRecord.packageName, shortcutRecord.infoData);
 
             pojo.setName(shortcutRecord.displayName);
+            if (shortcutRecord.isFlagSet(ShortcutRecord.FLAG_CUSTOM_INTENT))
+                pojo.setCustomIntent();
 
             ModRecord modRecord = favorites.get(pojo.id);
             if (modRecord != null && modRecord.hasCustomIcon())

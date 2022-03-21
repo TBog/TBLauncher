@@ -342,6 +342,25 @@ public class DBHelper {
         }
     }
 
+    public static void changeShortcut(@NonNull Context context, ShortcutRecord record) {
+        SQLiteDatabase db = getDatabase(context);
+        String sql = "UPDATE \"shortcuts\" SET \"name\"=?, \"package\"=?, \"info_data\"=? WHERE \"_id\"=?";
+        try {
+            SQLiteStatement statement = db.compileStatement(sql);
+            statement.bindString(1, record.displayName);
+            statement.bindString(2, record.packageName);
+            statement.bindString(3, record.infoData);
+            statement.bindLong(4, record.dbId);
+            int count = statement.executeUpdateDelete();
+            if (count != 1) {
+                Log.e(TAG, "Change shortcut count = " + count);
+            }
+            statement.close();
+        } catch (Exception e) {
+            Log.e(TAG, "change shortcut", e);
+        }
+    }
+
     /**
      * Retrieve a list of all shortcuts for current package name, without icons.
      * Useful when we remove an app and need to also remove the shortcuts for it.
@@ -416,6 +435,29 @@ public class DBHelper {
             }
         }
         return iconBlob;
+    }
+
+    @Nullable
+    public static ShortcutRecord getShortcutRecord(@NonNull Context context, long dbId) {
+        SQLiteDatabase db = getDatabase(context);
+
+        //{"_id", "name", "package", "info_data", "icon_png", "custom_flags"}
+        try (Cursor cursor = db.query("shortcuts", TABLE_COLUMNS_SHORTCUTS,
+            "_id = ?", new String[]{Long.toString(dbId)},
+            null, null, null)) {
+
+            if (cursor.moveToNext()) {
+                ShortcutRecord record = new ShortcutRecord();
+                record.dbId = cursor.getLong(0);
+                record.displayName = cursor.getString(1);
+                record.packageName = cursor.getString(2);
+                record.infoData = cursor.getString(3);
+                record.iconPng = cursor.getBlob(4);
+                record.flags = cursor.getInt(5);
+                return record;
+            }
+        }
+        return null;
     }
 
     /**

@@ -63,6 +63,7 @@ public final class ShortcutEntry extends EntryWithTags {
     public final ShortcutInfo mShortcutInfo;
 
     protected int customIcon = 0;
+    private boolean customIntent = false;
 
     public ShortcutEntry(@NonNull String id, long dbId, @NonNull String packageName, @NonNull String shortcutData) {
         super(id);
@@ -81,6 +82,15 @@ public final class ShortcutEntry extends EntryWithTags {
         packageName = shortcutInfo.getPackage();
         shortcutData = shortcutInfo.getId();
         mShortcutInfo = shortcutInfo;
+    }
+
+    public void setCustomIntent() {
+        customIntent = true;
+        setCustomIcon();
+    }
+
+    public boolean isCustomIntent() {
+        return customIntent;
     }
 
     /**
@@ -296,7 +306,10 @@ public final class ShortcutEntry extends EntryWithTags {
                     adapter.add(new LinearAdapter.Item(context, R.string.menu_tags_add));
                 else
                     adapter.add(new LinearAdapter.Item(context, R.string.menu_tags_edit));
-                adapter.add(new LinearAdapter.Item(context, R.string.menu_shortcut_rename));
+                if (isCustomIntent())
+                    adapter.add(new LinearAdapter.Item(context, R.string.menu_shortcut_edit));
+                else
+                    adapter.add(new LinearAdapter.Item(context, R.string.menu_shortcut_rename));
                 adapter.add(new LinearAdapter.Item(context, R.string.menu_custom_icon));
             }
         }
@@ -329,6 +342,9 @@ public final class ShortcutEntry extends EntryWithTags {
                 return true;
             case R.string.menu_custom_icon:
                 TBApplication.behaviour(ctx).launchCustomIconDialog(this);
+                return true;
+            case R.string.menu_shortcut_edit:
+                TBApplication.behaviour(ctx).launchEditIntentDialog(dbId);
                 return true;
         }
         return super.popupMenuClickHandler(view, item, stringId, parentView);
@@ -447,9 +463,11 @@ public final class ShortcutEntry extends EntryWithTags {
             ShortcutEntry shortcutEntry = (ShortcutEntry) entryItem;
             Drawable icon = shortcutEntry.getIcon(context);
             if (icon == null) {
-                subIcon = AppCompatResources.getDrawable(context, R.drawable.ic_send);
+                subIcon = AppCompatResources.getDrawable(context, R.drawable.ic_shortcuts);
                 return getAppDrawable(context, shortcutEntry.shortcutData, shortcutEntry.packageName, shortcutEntry.mShortcutInfo, false);
             } else {
+                if (shortcutEntry.isCustomIntent())
+                    subIcon = AppCompatResources.getDrawable(context, R.drawable.ic_shortcuts);
                 subIcon = getAppDrawable(context, shortcutEntry.shortcutData, shortcutEntry.packageName, shortcutEntry.mShortcutInfo, true);
             }
             return icon;

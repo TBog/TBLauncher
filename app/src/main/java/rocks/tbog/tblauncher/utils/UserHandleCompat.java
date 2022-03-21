@@ -8,6 +8,7 @@ import android.os.Process;
 import android.os.UserManager;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 
 /**
@@ -61,6 +62,21 @@ public class UserHandleCompat {
     @NonNull
     public static ComponentName unflattenComponentName(@NonNull String name) {
         return new ComponentName(getPackageName(name), getActivityName(name));
+    }
+
+    @Nullable
+    public static ComponentName relativeComponentName(@NonNull String pkg, @NonNull String cls) {
+        if (cls.isEmpty())
+            return null;
+        final String fullName;
+        if (cls.charAt(0) == '.') {
+            // Relative to the package. Prepend the package name.
+            fullName = pkg + cls;
+        } else {
+            // Fully qualified package name.
+            fullName = cls;
+        }
+        return new ComponentName(pkg, fullName);
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)

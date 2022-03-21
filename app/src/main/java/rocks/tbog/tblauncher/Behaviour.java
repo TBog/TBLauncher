@@ -74,6 +74,7 @@ import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.ui.RecyclerList;
 import rocks.tbog.tblauncher.ui.WindowInsetsHelper;
+import rocks.tbog.tblauncher.ui.dialog.EditIntentDialog;
 import rocks.tbog.tblauncher.ui.dialog.TagsManagerDialog;
 import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.SystemUiVisibility;
@@ -90,6 +91,7 @@ public class Behaviour implements ISearchActivity {
     static final String DIALOG_CUSTOM_ICON = "custom_icon_dialog";
     static final String DIALOG_EDIT_TAGS = "edit_tags_dialog";
     static final String DIALOG_EDIT_QUICK_LIST = "edit_quick_list_dialog";
+    static final String DIALOG_EDIT_INTENT = "edit_intent_dialog";
     static final String DIALOG_TAGS_MANAGER = "tags_manager_dialog";
     private static final int UI_ANIMATION_DELAY = 300;
     // time to wait for the keyboard to show up
@@ -469,6 +471,7 @@ public class Behaviour implements ISearchActivity {
 
         adapter.add(new LinearAdapter.ItemTitle(ctx, R.string.menu_popup_title));
         adapter.add(new LinearAdapter.Item(ctx, R.string.change_wallpaper));
+        adapter.add(new LinearAdapter.Item(ctx, R.string.menu_shortcut_add));
         adapter.add(new LinearAdapter.Item(ctx, R.string.menu_widget_add));
         if (TBApplication.widgetManager(ctx).widgetCount() > 0)
             adapter.add(new LinearAdapter.Item(ctx, R.string.menu_widget_remove));
@@ -496,6 +499,8 @@ public class Behaviour implements ISearchActivity {
                 Intent intent = new Intent(Intent.ACTION_SET_WALLPAPER);
                 intent = Intent.createChooser(intent, c.getString(R.string.change_wallpaper));
                 launchIntent(this, mClearButton, intent);
+            } else if (stringId == R.string.menu_shortcut_add) {
+                executeAction("addIntent", "button-menu");
             } else if (stringId == R.string.menu_widget_add) {
                 TBApplication.widgetManager(c).showSelectWidget(mTBLauncherActivity);
             } else if (stringId == R.string.menu_widget_remove) {
@@ -1185,6 +1190,43 @@ public class Behaviour implements ISearchActivity {
         return dialog;
     }
 
+    private EditIntentDialog getEditIntentDialog(boolean hideResultList) {
+        EditIntentDialog dialog = new EditIntentDialog();
+        if (hideResultList) {
+            // If results are visible
+            if (TBApplication.state().isResultListVisible()) {
+                mResultLayout.setVisibility(View.INVISIBLE);
+                // OnDismiss: We restore mResultLayout visibility
+                dialog.setOnDismissListener(dlg -> mResultLayout.setVisibility(View.VISIBLE));
+            }
+        }
+        return dialog;
+    }
+
+    public void launchEditIntentDialog(boolean hideResultList) {
+        EditIntentDialog dialog = getEditIntentDialog(hideResultList);
+        dialog.setOnConfirmListener(shortcut -> {
+            if (shortcut == null)
+                return;
+            TBApplication.dataHandler(mTBLauncherActivity).addShortcut(shortcut);
+        });
+
+        showDialog(dialog, DIALOG_EDIT_INTENT);
+    }
+
+    public void launchEditIntentDialog(long dbId) {
+        EditIntentDialog dialog = getEditIntentDialog(true);
+        dialog
+            .putArgLong("dbId", dbId)
+            .setOnConfirmListener(shortcut -> {
+                if (shortcut == null)
+                    return;
+                TBApplication.dataHandler(mTBLauncherActivity).changeShortcut(shortcut);
+            });
+
+        showDialog(dialog, DIALOG_EDIT_INTENT);
+    }
+
     public void launchCustomIconDialog(AppEntry appEntry) {
         IconSelectDialog dialog = getCustomIconDialog(getContext(), false);
         dialog
@@ -1624,6 +1666,9 @@ public class Behaviour implements ISearchActivity {
                     return launchStaticEntry(entryToShow);
                 break;
             }
+            case "addIntent":
+                launchEditIntentDialog(true);
+                break;
             default:
                 // do nothing
                 break;

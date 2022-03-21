@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical">
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/nameLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/dialog_margin_horizontal">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autofillHints="application,text"
+            android:hint="Shortcut name"
+            android:inputType="textAutoCorrect"
+            android:textAppearance="?android:attr/textAppearance" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/packageLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/dialog_margin_horizontal">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/packageName"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autofillHints="application,text"
+            android:hint="Package name"
+            android:inputType="textAutoCorrect"
+            android:textAppearance="?android:attr/textAppearance" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/classLayout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="@dimen/dialog_margin_horizontal">
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/className"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:autofillHints="application,text"
+            android:hint="Class name"
+            android:inputType="textAutoCorrect"
+            android:textAppearance="?android:attr/textAppearance" />
+
+    </com.google.android.material.textfield.TextInputLayout>
+
+    <include layout="@layout/ok_cancel_button_bar" />
+</LinearLayout>

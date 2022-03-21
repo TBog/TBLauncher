@@ -916,6 +916,20 @@ public class DataHandler extends BroadcastReceiver
     public void renameShortcut(ShortcutEntry shortcutEntry, String newName) {
         final Context context = getContext();
         DBHelper.renameShortcut(context, shortcutEntry, newName);
+        shortcutEntry.setName(newName);
+
+        ShortcutsProvider shortcutsProvider = getShortcutsProvider();
+        if (shortcutsProvider != null)
+            shortcutsProvider.reload(true);
+    }
+
+    public void changeShortcut(ShortcutRecord record) {
+        final Context context = getContext();
+        DBHelper.changeShortcut(context, record);
+
+        ShortcutsProvider shortcutsProvider = getShortcutsProvider();
+        if (shortcutsProvider != null)
+            shortcutsProvider.reload(true);
     }
 
     public void onProviderRecreated(Provider<? extends EntryItem> provider) {
