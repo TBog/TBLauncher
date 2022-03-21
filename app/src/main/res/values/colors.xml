@@ -37,4 +37,14 @@
     <color name="Black_selector_secondary">#6Fdddddd</color>
     <color name="Black_accent">#FFffffff</color>
 
+    <color name="Default_dark">#1e1e28</color>
+    <color name="Default_background">#2d3a5d</color>
+    <color name="Default_text">#32c4c0</color>
+    <color name="Default_light">#8de9d5</color>
+
+    <color name="Default_selector_primary_disable">#3F32c4c0</color>
+    <color name="Default_selector_primary">#FF32c4c0</color>
+    <color name="Default_selector_secondary_disable">#3F8de9d5</color>
+    <color name="Default_selector_secondary">#FF8de9d5</color>
+
 </resources>

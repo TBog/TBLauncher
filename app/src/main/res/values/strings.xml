@@ -354,6 +354,7 @@
     <string name="popup_text_color">Text color</string>
     <string name="popup_title_color">Title color</string>
     <string name="settings_theme">Settings theme</string>
+    <string name="settings_default">Default</string>
     <string name="settings_8bit">8bit</string>
     <string name="settings_white">White</string>
     <string name="settings_black">Black</string>

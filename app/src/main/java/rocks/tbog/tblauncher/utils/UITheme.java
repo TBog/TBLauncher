@@ -57,6 +57,8 @@ public class UITheme {
         String theme = sharedPreferences.getString("settings-theme", null);
         if (theme != null) {
             switch (theme) {
+                case "default":
+                    return R.style.SettingsTheme_Default;
                 case "white":
                     return R.style.SettingsTheme_White;
                 case "black":
