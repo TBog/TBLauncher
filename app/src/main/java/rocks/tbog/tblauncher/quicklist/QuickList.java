@@ -523,7 +523,14 @@ public class QuickList {
         bAdapterEmpty = false;
     }
 
-    public static void applyUiPref(SharedPreferences pref, LinearLayout quickList) {
+    private static int cornerRadius(@NonNull Context ctx, @NonNull SharedPreferences pref) {
+        Resources resources = ctx.getResources();
+        final int defaultCorner = resources.getInteger(R.integer.default_corner_radius);
+        final int cornerRadius = pref.getInt("quick-list-radius", defaultCorner);
+        return UISizes.dp2px(ctx, cornerRadius);
+    }
+
+    public static void applyUiPref(@NonNull SharedPreferences pref, LinearLayout quickList) {
         Context ctx = quickList.getContext();
         Resources resources = quickList.getResources();
         // size
@@ -545,8 +552,7 @@ public class QuickList {
             throw new IllegalStateException("quickList has the wrong layout params");
         }
 
-        final int defaultCorner = resources.getInteger(R.integer.default_corner_radius);
-        final int cornerRadius = pref.getInt("quick-list-radius", defaultCorner);
+        final int cornerRadius = cornerRadius(ctx, pref);
         final int color = getBackgroundColor(pref);
 
         // rounded drawable
