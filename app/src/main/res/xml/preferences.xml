@@ -1007,6 +1007,7 @@
 
     <!-- "settings-theme" ListPreference is only used if the ActionBar menu is unavailable. This also helps to backup this preference. -->
     <ListPreference
+        android:defaultValue="default"
         android:entries="@array/settingsThemeEntries"
         android:entryValues="@array/settingsThemeValues"
         android:key="settings-theme"
