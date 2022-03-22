@@ -1348,7 +1348,7 @@ public class Behaviour implements ISearchActivity {
         mFragmentDialog = dialog;
     }
 
-    private boolean closeFragmentDialog() {
+    public boolean closeFragmentDialog() {
         return closeFragmentDialog(null);
     }
 
@@ -1359,9 +1359,11 @@ public class Behaviour implements ISearchActivity {
                 return true;
             } else if (tag == null) {
                 mFragmentDialog.dismiss();
+                mFragmentDialog = null;
                 return true;
             }
         }
+        mFragmentDialog = null;
         return false;
     }
 

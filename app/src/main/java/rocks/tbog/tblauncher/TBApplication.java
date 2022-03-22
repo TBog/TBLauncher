@@ -283,11 +283,20 @@ public class TBApplication extends Application {
 
     public static void onDestroyActivity(TBLauncherActivity activity) {
         TBApplication app = getApplication(activity);
+        Activity popupActivity = null;
+        if (app.mPopup != null)
+            popupActivity = Utilities.getActivity(app.mPopup.getContentView());
+        if (popupActivity == null && app.dismissPopup())
+            Log.i(TAG, "Popup dismissed in onDestroyActivity");
+
         for (Iterator<WeakReference<TBLauncherActivity>> iterator = app.mActivities.iterator(); iterator.hasNext(); ) {
             WeakReference<TBLauncherActivity> ref = iterator.next();
             TBLauncherActivity launcherActivity = ref.get();
-            if (launcherActivity == null || launcherActivity == activity)
+            if (launcherActivity == null || launcherActivity == activity) {
+                if (activity == popupActivity && app.dismissPopup())
+                    Log.i(TAG, "Popup dismissed in onDestroyActivity " + activity);
                 iterator.remove();
+            }
         }
     }
 

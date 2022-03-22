@@ -191,6 +191,9 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
     @Override
     protected void onDestroy() {
         Log.d(TAG, "onDestroy(" + this + ")");
+        if (behaviour.closeFragmentDialog()) {
+            Log.i(TAG, "closed dialog from onDestroy " + this);
+        }
         TBApplication.onDestroyActivity(this);
         unregisterReceiver(mReceiver);
         widgetManager.stop();
