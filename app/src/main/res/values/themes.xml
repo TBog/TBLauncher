@@ -331,7 +331,7 @@
         <item name="android:textColor">@color/settings_primary_selector_default</item>
         <item name="android:textColorPrimary">@color/settings_primary_selector_default</item>
         <item name="android:textColorSecondary">@color/settings_secondary_selector_default</item>
-        <item name="android:listDivider">@drawable/list_separator_light</item>
+        <item name="android:listDivider">@drawable/list_separator_default</item>
         <item name="android:windowTitleStyle">@style/SettingsDialogTitle.Default</item>
 
         <item name="tabIndicatorColor">@color/Default_text</item>
@@ -531,6 +531,7 @@
         <item name="alertDialogTheme">@style/SettingsDialogTheme.Default</item>
         <item name="actionOverflowMenuStyle">@style/OptionsMenu.Default</item>
         <item name="android:itemBackground">@drawable/tab_background_default</item>
+        <item name="android:listDivider">@drawable/list_separator_default</item>
 
         <item name="android:textColor">@color/settings_primary_selector_default</item>
         <item name="android:textColorPrimary">@color/settings_primary_selector_default</item>
@@ -540,10 +541,9 @@
         <item name="tabBackground">@drawable/tab_background_default</item>
         <item name="tabSelectedTextColor">@color/settings_primary_selector_default</item>
 
-        <item name="colorPrimary">@color/Default_selector_primary</item>
+        <item name="colorPrimary">@color/Default_selector_secondary</item>
         <item name="colorControlHighlight">@color/Default_light</item>
         <item name="colorControlNormal">@color/Default_selector_primary</item>
-        <item name="colorAccent">@color/Default_text</item>
-<!--        <item name="android:itemTextAppearance">@style/OptionsMenuTextAppearance.Default</item>-->
+        <item name="colorAccent">@color/Default_light</item>
     </style>
 </resources>

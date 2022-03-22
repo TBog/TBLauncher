@@ -68,7 +68,7 @@
     </style>
 
     <style name="FragmentPreferenceStyle" parent="PreferenceFragment.Material">
-        <item name="android:divider">@drawable/list_separator_dark</item>
+        <item name="android:divider">?android:attr/listDivider</item>
     </style>
 
     <style name="TextInputLayoutStyle" parent="Widget.MaterialComponents.TextInputLayout.OutlinedBox">
