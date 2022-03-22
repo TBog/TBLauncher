@@ -22,6 +22,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.view.ContextThemeWrapper;
 import androidx.core.graphics.ColorUtils;
 import androidx.preference.PreferenceManager;
 
@@ -86,7 +87,8 @@ public final class UIColors {
     private static int getSystemAccent(Context context) {
         int color = COLOR_DEFAULT;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            color = getThemeColor(context, android.R.attr.colorAccent);
+            ContextThemeWrapper contextThemeWrapper = new ContextThemeWrapper(context, android.R.style.Theme_DeviceDefault);
+            color = getThemeColor(contextThemeWrapper, android.R.attr.colorAccent);
         }
         // Oxygen OS accent color, also used by some custom ROMs now
         String propertyValue = Utilities.getSystemProperty("persist.sys.theme.accentcolor", "");
