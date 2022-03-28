@@ -284,6 +284,9 @@
     <string name="import_chooser">Select a file to import</string>
     <string name="export_description">After clicking \"OK\" you can select a file manager to save your settings as an XML file.</string>
     <string name="error">Error %s</string>
+
+    <string name="export_preferences">Export settings</string>
+    <string name="export_preferences_summary">All settings, features and behaviours, including interface</string>
     <string name="export_interface">Export interface</string>
     <string name="export_interface_summary">All interface colors, sizes, toggles and icon shapes</string>
     <string name="export_backup">Export backup</string>
@@ -292,6 +295,7 @@
     <string name="export_widgets_summary">Import may not work or require each widget to be added manually</string>
     <string name="export_history">Export history</string>
     <string name="export_history_summary">History of all launched apps</string>
+
     <string name="error_fail_import">Could not import file. Check logcat.</string>
     <string name="widget_placeholder">Click to restore %s</string>
     <string name="add_widget_failed">Could not add widget</string>

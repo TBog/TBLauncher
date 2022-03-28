@@ -25,6 +25,14 @@ import rocks.tbog.tblauncher.preference.ContentLoadHelper;
 
 public class PrefCache {
 
+    private final static ArraySet<String> PREF_THAT_REQUIRE_MIGRATION = new ArraySet<>(Arrays.asList(
+        "result-list-color", "result-list-alpha",
+        "notification-bar-color", "notification-bar-alpha",
+        "search-bar-color", "search-bar-alpha",
+        "quick-list-color", "quick-list-alpha",
+        "result-list-rounded", "search-bar-rounded"
+    ));
+
     private static int RESULT_HISTORY_SIZE = 0;
     private static int RESULT_HISTORY_ADAPTIVE = 0;
     private static int RESULT_SEARCHER_CAP = -1;
@@ -236,14 +244,6 @@ public class PrefCache {
     public static boolean getResultFadeOut(SharedPreferences pref) {
         return pref.getBoolean("result-fading-edge", false);
     }
-
-    private final static ArraySet<String> PREF_THAT_REQUIRE_MIGRATION = new ArraySet<>(Arrays.asList(
-        "result-list-color", "result-list-alpha",
-        "notification-bar-color", "notification-bar-alpha",
-        "search-bar-color", "search-bar-alpha",
-        "quick-list-color", "quick-list-alpha",
-        "result-list-rounded", "search-bar-rounded"
-    ));
 
     public static boolean isMigrateRequired(@NonNull SharedPreferences pref) {
         Map<String, ?> allPref = pref.getAll();

@@ -942,6 +942,12 @@
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:dialogLayout="@layout/pref_confirm"
+                android:key="export-preferences"
+                android:summary="@string/export_preferences_summary"
+                android:title="@string/export_preferences" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:dialogLayout="@layout/pref_confirm"
                 android:key="export-widgets"
                 android:summary="@string/export_widgets_summary"
                 android:title="@string/export_widgets" />

@@ -125,6 +125,9 @@ public class ConfirmDialog extends BasePreferenceDialog {
             case "export-interface":
                 FileUtils.sendSettingsFile(requireActivity(), "interface");
                 break;
+            case "export-preferences":
+                FileUtils.sendSettingsFile(requireActivity(), "settings");
+                break;
             case "export-widgets":
                 FileUtils.sendSettingsFile(requireActivity(), "widgets");
                 break;
@@ -259,6 +262,16 @@ public class ConfirmDialog extends BasePreferenceDialog {
                     if (activity != null) {
                         final PreferenceGroup rootPreference = loadAllPreferences(activity);
                         FileUtils.writeSettingsFile(activity, "interface", w -> XmlExport.interfaceXml(rootPreference, w));
+                    }
+                };
+                break;
+            }
+            case "export-preferences": {
+                asyncWrite = t -> {
+                    final Activity activity = Utilities.getActivity(getContext());
+                    if (activity != null) {
+                        final PreferenceGroup rootPreference = loadAllPreferences(activity);
+                        FileUtils.writeSettingsFile(activity, "settings", w -> XmlExport.preferencesXml(rootPreference, w));
                     }
                 };
                 break;
