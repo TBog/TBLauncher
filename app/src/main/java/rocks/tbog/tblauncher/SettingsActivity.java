@@ -1015,6 +1015,10 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case "popup-title-color":
                 UIColors.resetCache();
                 break;
+            case "quick-list-icon-size":
+                if (activity != null)
+                    activity.queueDockReload();
+                // fallthrough
             case "result-text-size":
             case "result-text2-size":
             case "result-icon-size":

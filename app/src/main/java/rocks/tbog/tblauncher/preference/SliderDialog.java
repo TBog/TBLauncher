@@ -67,9 +67,14 @@ public class SliderDialog extends BasePreferenceDialog {
         // because we can't set minimum below API 26 we make our own
         int minValue = 0;
         switch (key) {
+            case "result-icon-size":
+            case "quick-list-icon-size":
+            case "tags-menu-icon-size":
+                minValue = getResources().getInteger(R.integer.min_size_icon);
+                seekBar.setMax(getResources().getInteger(R.integer.max_size_icon) - minValue);
+                break;
             case "result-text-size":
             case "result-text2-size":
-            case "result-icon-size":
             case "search-bar-text-size":
             case "search-bar-height":
             case "quick-list-height":

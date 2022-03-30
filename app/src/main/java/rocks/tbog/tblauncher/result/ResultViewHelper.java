@@ -167,7 +167,7 @@ public final class ResultViewHelper {
             ViewGroup.LayoutParams params = iconView.getLayoutParams();
             if (params instanceof ConstraintLayout.LayoutParams) {
                 ConstraintLayout.LayoutParams cParams = (ConstraintLayout.LayoutParams) params;
-                int size = UISizes.getResultIconSize(ctx);
+                int size = UISizes.getDockMaxIconSize(ctx);
                 if (cParams.matchConstraintMaxWidth != size || cParams.matchConstraintMaxHeight != size) {
                     cParams.matchConstraintMaxWidth = size;
                     cParams.matchConstraintMaxHeight = size;

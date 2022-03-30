@@ -17,6 +17,8 @@
     <integer name="default_size_text" translatable="false">14</integer>                 <!-- sp -->
     <integer name="default_size_text2" translatable="false">12</integer>                <!-- sp -->
     <integer name="default_size_icon" translatable="false">36</integer>                 <!-- dp -->
+    <integer name="min_size_icon" translatable="false">4</integer>                      <!-- dp -->
+    <integer name="max_size_icon" translatable="false">100</integer>                    <!-- dp -->
     <integer name="default_height_row" translatable="false">58</integer>                <!-- dp -->
     <integer name="default_result_history_size" translatable="false">32</integer>       <!-- count -->
     <integer name="default_result_history_adaptive" translatable="false">36</integer>   <!-- adaptive hours -->

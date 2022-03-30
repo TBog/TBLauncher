@@ -106,6 +106,7 @@
     <string name="features_summary">Toggle and customize app features</string>
     <string name="quick_list_section">Dock</string>
     <string name="quick_list_enabled">Use dock</string>
+    <string name="quick_list_icon_size">Max icon size</string>
     <string name="quick_list_height">Dock height</string>
     <string name="tags_section">Tags</string>
     <string name="fuzzy_search_tags">Fuzzy-search tags</string>

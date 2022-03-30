@@ -448,6 +448,13 @@
                 android:title="@string/quick_list_animation" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@integer/max_size_icon"
+                android:dialogLayout="@layout/pref_slider"
+                android:key="quick-list-icon-size"
+                android:title="@string/quick_list_icon_size"
+                android:widgetLayout="@layout/pref_size_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@integer/default_dock_height"
                 android:dialogLayout="@layout/pref_slider"
                 android:key="quick-list-height"

@@ -17,6 +17,7 @@ public final class UISizes {
     private static int CACHED_SIZE_RESULT_TEXT2 = 0;
     private static int CACHED_SIZE_RESULT_ICON = 0;
     private static int CACHED_SIZE_TAGS_MENU_ICON = 0;
+    private static int CACHED_SIZE_DOCK_ICON = 0;
     private static int CACHED_SIZE_STATUS_BAR = 0;
     private static int CACHED_RADIUS_POPUP_CORNER = -1;
     private static Integer CACHED_ROW_HEIGHT_RESULT_LIST = null;
@@ -29,6 +30,7 @@ public final class UISizes {
         CACHED_SIZE_RESULT_TEXT2 = 0;
         CACHED_SIZE_RESULT_ICON = 0;
         CACHED_SIZE_TAGS_MENU_ICON = 0;
+        CACHED_SIZE_DOCK_ICON = 0;
         CACHED_SIZE_STATUS_BAR = 0;
         CACHED_RADIUS_POPUP_CORNER = -1;
         CACHED_ROW_HEIGHT_RESULT_LIST = null;
@@ -133,6 +135,16 @@ public final class UISizes {
             CACHED_SIZE_TAGS_MENU_ICON = dp2px(context, Math.max(1, size));
         }
         return CACHED_SIZE_TAGS_MENU_ICON;
+    }
+
+    public static int getDockMaxIconSize(Context context) {
+        if (CACHED_SIZE_DOCK_ICON == 0) {
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+            final int defaultSize = context.getResources().getInteger(R.integer.default_size_icon);
+            final int size = pref.getInt("quick-list-icon-size", defaultSize);
+            CACHED_SIZE_DOCK_ICON = dp2px(context, Math.max(1, size));
+        }
+        return CACHED_SIZE_DOCK_ICON;
     }
 
     public static int getStatusBarSize(Context context) {
