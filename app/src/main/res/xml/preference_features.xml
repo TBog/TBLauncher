@@ -31,6 +31,18 @@
         <androidx.preference.SwitchPreference
             android:defaultValue="true"
             android:dependency="quick-list-enabled"
+            android:key="quick-list-icons-visible"
+            android:title="@string/quick_list_icons_visible" />
+
+        <androidx.preference.SwitchPreference
+            android:defaultValue="true"
+            android:dependency="quick-list-icons-visible"
+            android:key="quick-list-show-badge"
+            android:title="@string/quick_list_show_badge" />
+
+        <androidx.preference.SwitchPreference
+            android:defaultValue="true"
+            android:dependency="quick-list-enabled"
             android:key="quick-list-animation"
             android:title="@string/quick_list_animation" />
 
@@ -171,31 +183,12 @@
             android:summary="@string/result_popup_order_summary"
             android:title="@string/result_popup_order" />
 
-    </PreferenceCategory>
-
-    <!-- Icons -->
-    <androidx.preference.PreferenceCategory
-        android:key="icons-section"
-        android:title="@string/icons_section">
-
         <androidx.preference.SwitchPreference
             android:defaultValue="true"
             android:key="icons-visible"
             android:title="@string/icons_visible" />
 
-        <androidx.preference.SwitchPreference
-            android:defaultValue="true"
-            android:dependency="quick-list-enabled"
-            android:key="quick-list-icons-visible"
-            android:title="@string/quick_list_icons_visible" />
-
-        <androidx.preference.SwitchPreference
-            android:defaultValue="true"
-            android:dependency="quick-list-icons-visible"
-            android:key="quick-list-show-badge"
-            android:title="@string/quick_list_show_badge" />
-
-    </androidx.preference.PreferenceCategory>
+    </PreferenceCategory>
 
     <!-- Shortcut -->
     <androidx.preference.PreferenceCategory

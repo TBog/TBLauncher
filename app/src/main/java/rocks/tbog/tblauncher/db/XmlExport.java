@@ -185,10 +185,6 @@ public class XmlExport {
         if ((pref instanceof PreferenceGroup))
             recursiveWritePreferences(sx, (PreferenceGroup) pref, prefMap);
 
-        pref = rootPref.findPreference("icons-section");
-        if ((pref instanceof PreferenceGroup))
-            recursiveWritePreferences(sx, (PreferenceGroup) pref, prefMap);
-
         pref = rootPref.findPreference("shortcut-section");
         if ((pref instanceof PreferenceGroup))
             recursiveWritePreferences(sx, (PreferenceGroup) pref, prefMap);

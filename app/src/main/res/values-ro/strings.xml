@@ -216,7 +216,6 @@
     <string name="popup_title_customize">Personalizați</string>
     <string name="popup_title_hist_fav">Preferințe</string>
     <string name="icons_visible">Afișați pictogramele</string>
-    <string name="icons_section">Iconuri</string>
     <string name="tags_enabled_summary">Afișați etichete pentru fiecare aplicație în lista de rezultate</string>
     <string name="tags_enabled">Afișați etichete pentru aplicații</string>
     <string name="fuzzy_search_tags_summary">Când căutați, includeți etichete ca posibili candidați</string>

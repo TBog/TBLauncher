@@ -155,7 +155,6 @@
     <string name="popup_title_customize">Tilpass</string>
     <string name="popup_title_hist_fav">Innstillinger</string>
     <string name="icons_visible">Vis ikoner</string>
-    <string name="icons_section">Ikoner</string>
     <string name="tags_enabled">Vis etiketter for programmer</string>
     <string name="tags_section">Etiketter</string>
     <string name="quick_list_height">Felthøyde</string>
