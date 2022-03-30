@@ -50,6 +50,7 @@ Motives for developing ~~a new~~ my own launcher:
 <footer>
       <hr>
       <p>The initial idea and code came from <a href="https://github.com/Neamar/KISS" style="display: inline">KISS</a></p>
+      <p>TinyBit Launcher icon (2022)<br>Copyright 2022 <a href="https://www.onnno.nl/" style="display: inline">Onno van den Dungen</a><br><a href="https://creativecommons.org/licenses/by-sa/4.0/" style="display: inline">Licensed under CC BY-SA 4.0</a></p>
       <p>Some SVG icons came from <a href="https://www.flaticon.com/" title="Flaticon">www.flaticon.com</a> and were made by
             <ul>
                   <li><a href="https://www.freepik.com" title="Freepik">Freepik</a></li>
