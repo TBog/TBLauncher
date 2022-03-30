@@ -20,6 +20,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 import androidx.annotation.WorkerThread;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
@@ -161,6 +162,17 @@ public final class ResultViewHelper {
                 params.width = size;
                 params.height = size;
                 iconView.setLayoutParams(params);
+            }
+        } else if (Utilities.checkFlag(drawFlags, EntryItem.FLAG_DRAW_QUICK_LIST)) {
+            ViewGroup.LayoutParams params = iconView.getLayoutParams();
+            if (params instanceof ConstraintLayout.LayoutParams) {
+                ConstraintLayout.LayoutParams cParams = (ConstraintLayout.LayoutParams) params;
+                int size = UISizes.getResultIconSize(ctx);
+                if (cParams.matchConstraintMaxWidth != size || cParams.matchConstraintMaxHeight != size) {
+                    cParams.matchConstraintMaxWidth = size;
+                    cParams.matchConstraintMaxHeight = size;
+                    iconView.setLayoutParams(params);
+                }
             }
         }
 
