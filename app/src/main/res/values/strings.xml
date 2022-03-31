@@ -467,6 +467,8 @@
     <string name="browse_add_icon">Browse local images</string>
     <string name="result_list_row_height">List row height</string>
     <string name="result_list_row_height_manual">Custom list row height</string>
+    <string name="shortcut_dynamic_in_results">Show dynamic in results</string>
+    <string name="shortcut_dynamic_in_results_summary">Dynamic shortcuts will be considered as possible results when searching</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>

@@ -207,6 +207,12 @@
             android:summary="@string/shortcut_show_badge_summary"
             android:title="@string/shortcut_show_badge" />
 
+        <androidx.preference.SwitchPreference
+            android:defaultValue="false"
+            android:key="shortcut-dynamic-in-results"
+            android:summary="@string/shortcut_dynamic_in_results_summary"
+            android:title="@string/shortcut_dynamic_in_results" />
+
     </androidx.preference.PreferenceCategory>
 
     <!-- Tags -->

@@ -1084,6 +1084,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case "enable-dial":
             case "enable-contacts":
             case "selected-contact-mime-types":
+            case "shortcut-dynamic-in-results":
                 TBApplication.dataHandler(context).reloadProviders();
                 break;
             case "root-mode":
