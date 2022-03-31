@@ -42,3 +42,9 @@
 -keepclassmembers class * extends rocks.tbog.tblauncher.WorkAsync.AsyncTask { <init>(...); }
 # Keep constructor of ViewHolder
 -keepclassmembers class * extends rocks.tbog.tblauncher.utils.ViewHolderAdapter$ViewHolder { <init>(...); }
+
+# We don't use okhttp3 from com.github.dhaval2404:imagepicker so don't warn that it's missing
+-dontwarn okhttp3.**
+-dontwarn okio.BufferedSource
+-dontwarn okio.Okio
+-dontwarn okio.Sink

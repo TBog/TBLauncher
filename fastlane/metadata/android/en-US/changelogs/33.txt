@@ -1,0 +1,9 @@
+* new icon
+* new default theme
+* add gestures
+* fix crashes
+* add image picker for icons
+* add more UI settings
+* merge color and opacity settings
+* add settings migration (allow old backups that had separate color and opacity to import properly)
+* add settings activity to the activity stack

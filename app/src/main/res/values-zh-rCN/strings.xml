@@ -111,18 +111,14 @@
     <string name="cfg_widget_resize_switch">切换调整大小</string>
     <string name="cfg_widget_resize_exit">退出“调整大小”</string>
     <string name="cfg_widget_move_resize">移动和调整大小</string>
-    <string name="debug_menu_state">可见性状态信息</string>
     <string name="debug_widget_add_info">添加额外的小部件信息</string>
     <string name="shortcut_section">快捷方式</string>
     <string name="shortcut_pin_auto_confirm">自动确认快捷方式</string>
     <string name="shortcut_show_badge">显示应用徽章</string>
     <string name="shortcut_show_badge_summary">显示创建快捷方式的应用程序图标</string>
     <string name="quick_list_show_badge">在 Dock 中显示快捷方式徽章</string>
-    <string name="result_list_color">背景颜色</string>
-    <string name="result_list_alpha">背景不透明度</string>
     <string name="result_highlight_color">高亮颜色</string>
     <string name="quick_list_color">背景颜色</string>
-    <string name="quick_list_alpha">背景不透明度</string>
     <string name="cd_item_contact_open">打开</string>
     <string name="debug_widget_info">长按以获取额外的小部件信息</string>
     <string name="menu_popup_tags_menu">标签菜单</string>
@@ -145,7 +141,6 @@
     <string name="fuzzy_search_tags">模糊搜索标签</string>
     <string name="tags_enabled">显示应用的标签</string>
     <string name="tags_enabled_summary">在结果列表中显示每个应用的标签</string>
-    <string name="icons_section">图标</string>
     <string name="icons_visible">显示图标</string>
     <string name="popup_title_shortcut_dynamic">快捷方式</string>
     <string name="popup_title_hist_fav">优先</string>
