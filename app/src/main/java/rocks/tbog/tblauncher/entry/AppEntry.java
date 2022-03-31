@@ -22,6 +22,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -181,6 +182,7 @@ public final class AppEntry extends EntryWithTags {
     public void displayResult(@NonNull View view, int drawFlags) {
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_LIST)) {
             displayListResult(view, drawFlags);
+            ResultViewHelper.applyListRowPreferences((ViewGroup) view);
         } else {
             displayGridResult(view, drawFlags);
         }

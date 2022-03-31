@@ -9,7 +9,6 @@ import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
-import android.graphics.drawable.PaintDrawable;
 import android.graphics.drawable.RippleDrawable;
 import android.graphics.drawable.StateListDrawable;
 import android.os.Build;
@@ -24,6 +23,7 @@ import android.widget.ImageView;
 
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.preference.PreferenceManager;
 
 import rocks.tbog.tblauncher.ui.RecyclerList;
@@ -53,8 +53,8 @@ public class CustomizeUI {
      * we ignore whatever the IME thinks we should display.
      */
     private final static int INPUT_TYPE_STANDARD = InputType.TYPE_CLASS_TEXT
-            | InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE
-            | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS;
+        | InputType.TYPE_TEXT_FLAG_AUTO_COMPLETE
+        | InputType.TYPE_TEXT_FLAG_NO_SUGGESTIONS;
     /**
      * InputType that behaves as if the consuming IME is SwiftKey
      * <p>
@@ -62,7 +62,27 @@ public class CustomizeUI {
      * unexpected behaviour in numerous ways. (#454, #517)
      */
     private final static int INPUT_TYPE_WORKAROUND = InputType.TYPE_TEXT_VARIATION_VISIBLE_PASSWORD
-            | InputType.TYPE_TEXT_FLAG_AUTO_CORRECT;
+        | InputType.TYPE_TEXT_FLAG_AUTO_CORRECT;
+
+    private final View.OnLayoutChangeListener updateResultFadeOut = new UpdateResultFadeOut();
+
+    private static final class UpdateResultFadeOut implements View.OnLayoutChangeListener {
+        @Override
+        public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+            SharedPreferences pref = TBApplication.getApplication(v.getContext()).preferences();
+            boolean fadeOut = PrefCache.getResultFadeOut(pref);
+            if (!fadeOut) {
+                v.removeOnLayoutChangeListener(this);
+                return;
+            }
+            int oldHeight = oldBottom - oldTop;
+            if (oldHeight != v.getHeight()) {
+                int backgroundColor = UIColors.getResultListBackground(pref);
+                if (!setResultListGradientFade(v, backgroundColor))
+                    v.removeOnLayoutChangeListener(this);
+            }
+        }
+    }
 
     @SuppressWarnings("TypeParameterUnusedInFormals")
     private <T extends View> T findViewById(@IdRes int id) {
@@ -83,14 +103,18 @@ public class CustomizeUI {
 
     public void onStart() {
         setSearchBarPref();
-        setResultListPref(findViewById(R.id.resultLayout));
+        View resultLayout = findViewById(R.id.resultLayout);
+        setResultListPref(resultLayout, true);
+        resultLayout.addOnLayoutChangeListener(updateResultFadeOut);
+        updateResultFadeOut.onLayoutChange(resultLayout,
+            resultLayout.getLeft(), resultLayout.getTop(), resultLayout.getRight(), resultLayout.getBottom(),
+            0, 0, 0, 0);
         adjustInputType(mSearchBar);
         setNotificationBarColor();
     }
 
     private void setNotificationBarColor() {
-        int color = UIColors.getColor(mPref, "notification-bar-color");
-        int alpha = UIColors.getAlpha(mPref, "notification-bar-alpha");
+        int argb = UIColors.getColor(mPref, "notification-bar-argb");
         boolean gradient = mPref.getBoolean("notification-bar-gradient", true);
 
         if (gradient) {
@@ -100,11 +124,11 @@ public class CustomizeUI {
                 params.height = size;
                 mNotificationBackground.setLayoutParams(params);
             }
-            Utilities.setColorFilterMultiply(mNotificationBackground, UIColors.setAlpha(color, alpha));
+            Utilities.setColorFilterMultiply(mNotificationBackground, argb);
             UIColors.setStatusBarColor(mTBLauncherActivity, 0x00000000);
         } else {
             mNotificationBackground.setVisibility(View.GONE);
-            UIColors.setStatusBarColor(mTBLauncherActivity, UIColors.setAlpha(color, alpha));
+            UIColors.setStatusBarColor(mTBLauncherActivity, argb);
         }
 
         // Notification drawer icon color
@@ -126,17 +150,20 @@ public class CustomizeUI {
         // size
         int barHeight = mPref.getInt("search-bar-height", 0);
         if (barHeight <= 1)
-            barHeight = resources.getInteger(R.integer.default_bar_height);
+            barHeight = resources.getInteger(R.integer.default_search_bar_height);
         barHeight = UISizes.dp2px(ctx, barHeight);
         int textSize = mPref.getInt("search-bar-text-size", 0);
         if (textSize <= 1)
             textSize = resources.getInteger(R.integer.default_size_text);
 
-        // layout height
+        // layout height and margins
         {
             ViewGroup.LayoutParams params = mSearchBarContainer.getLayoutParams();
             if (params instanceof ViewGroup.MarginLayoutParams) {
                 params.height = barHeight;
+                int hMargin = UISizes.getSearchBarMarginHorizontal(ctx);
+                int vMargin = UISizes.getSearchBarMarginVertical(ctx);
+                ((ViewGroup.MarginLayoutParams)params).setMargins(hMargin, vMargin, hMargin, vMargin);
                 mSearchBarContainer.setLayoutParams(params);
             } else {
                 throw new IllegalStateException("mSearchBarContainer has the wrong layout params");
@@ -150,7 +177,7 @@ public class CustomizeUI {
 
         final int searchBarRipple = UIColors.setAlpha(UIColors.getColor(mPref, "search-bar-ripple-color"), 0xFF);
         final int searchIconColor = UIColors.setAlpha(UIColors.getColor(mPref, "search-bar-icon-color"), 0xFF);
-        final int colorBackground = UIColors.getColor(mPref, "search-bar-color");
+        final int argbBackground = UIColors.getColor(mPref, "search-bar-argb");
 
         // text color
         {
@@ -178,54 +205,100 @@ public class CustomizeUI {
             mClearButton.setBackground(getSelectorDrawable(mClearButton, searchBarRipple, true));
         }
 
-        // background color
-        int alpha = UIColors.getAlpha(mPref, "search-bar-alpha");
-        if (mPref.getBoolean("search-bar-gradient", true)) {
-            final GradientDrawable.Orientation orientation;
-            if (PrefCache.searchBarAtBottom(mPref))
-                orientation = GradientDrawable.Orientation.TOP_BOTTOM;
-            else
-                orientation = GradientDrawable.Orientation.BOTTOM_TOP;
-            int c1 = UIColors.setAlpha(colorBackground, 0);
-            int c2 = UIColors.setAlpha(colorBackground, alpha * 3 / 4);
-            int c3 = UIColors.setAlpha(colorBackground, alpha);
-            GradientDrawable drawable = new GradientDrawable(orientation, new int[]{c1, c2, c3});
+        // set background
+        boolean isGradient = mPref.getBoolean("search-bar-gradient", true);
+        int cornerRadius = UISizes.getSearchBarRadius(ctx);
+        if (isGradient || cornerRadius > 0) {
+            GradientDrawable drawable;
+            if (isGradient) {
+                final GradientDrawable.Orientation orientation;
+                if (PrefCache.searchBarAtBottom(mPref))
+                    orientation = GradientDrawable.Orientation.TOP_BOTTOM;
+                else
+                    orientation = GradientDrawable.Orientation.BOTTOM_TOP;
+                int alpha = Color.alpha(argbBackground);
+                int c1 = UIColors.setAlpha(argbBackground, 0);
+                int c2 = UIColors.setAlpha(argbBackground, alpha * 3 / 4);
+                int c3 = UIColors.setAlpha(argbBackground, alpha);
+                drawable = new GradientDrawable(orientation, new int[]{c1, c2, c3});
+            } else {
+                drawable = new GradientDrawable();
+                drawable.setColor(argbBackground);
+            }
+            drawable.setCornerRadius(cornerRadius);
             mSearchBarContainer.setBackground(drawable);
-        } else if (mPref.getBoolean("search-bar-rounded", true)) {
-            PaintDrawable drawable = new PaintDrawable();
-            drawable.getPaint().setColor(UIColors.setAlpha(colorBackground, alpha));
-            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) mSearchBarContainer.getLayoutParams();
-            drawable.setCornerRadius(resources.getDimension(R.dimen.bar_corner_radius));
-            mSearchBarContainer.setBackground(drawable);
-            int margin = (int) (params.height * .25f);
-            params.setMargins(margin, 0, margin, margin);
-        } else
-            mSearchBarContainer.setBackground(new ColorDrawable(UIColors.setAlpha(colorBackground, alpha)));
+        } else {
+            mSearchBarContainer.setBackground(new ColorDrawable(argbBackground));
+        }
     }
 
     public static void setResultListPref(View resultLayout) {
-        SharedPreferences pref = TBApplication.getApplication(resultLayout.getContext()).preferences();
-        int background = UIColors.getResultListBackground(pref);
-        Drawable drawable;
-        if (pref.getBoolean("result-list-rounded", true)) {
-            drawable = new GradientDrawable();  // can't use PaintDrawable when alpha < 255, ugly big darker borders
-            ((GradientDrawable) drawable).setColor(background);
-            ((GradientDrawable) drawable).setCornerRadius(UISizes.getResultListRadius(resultLayout.getContext()));
+        setResultListPref(resultLayout, false);
+    }
+
+    private static boolean setResultListGradientFade(@NonNull View resultLayout, int backgroundColor) {
+        Drawable bg = resultLayout.getBackground();
+        if (bg instanceof GradientDrawable) {
+            GradientDrawable drawable = (GradientDrawable) bg;
+            drawable.setGradientType(GradientDrawable.LINEAR_GRADIENT);
+            drawable.setOrientation(GradientDrawable.Orientation.TOP_BOTTOM);
+
+            int color = backgroundColor & 0x00ffffff;
+            int alpha = Color.alpha(backgroundColor);
+            int c1 = UIColors.setAlpha(color, 0);
+            int c2 = UIColors.setAlpha(color, alpha * 3 / 4);
+            int c3 = UIColors.setAlpha(color, alpha);
+            // compute fade percentage of height
+            float p = UISizes.getResultIconSize(resultLayout.getContext()) * .5f / resultLayout.getHeight();
+            // if height is too small, fade only on 66% of the height (33% fade in and 33% fade out)
+            p = Math.min(p, .33f);
+            return Utilities.setGradientDrawableColors(drawable,
+                new int[]{c1, c2, c3, c3, c2, c1},
+                new float[]{0f, p * .5f, p, 1f - p, 1f - (p * .5f), 1f});
+        }
+        return false;
+    }
+
+    public static void setResultListPref(View resultLayout, boolean setMargin) {
+        Context ctx = resultLayout.getContext();
+        SharedPreferences pref = TBApplication.getApplication(ctx).preferences();
+
+        if (setMargin) {
+            ViewGroup.LayoutParams params = resultLayout.getLayoutParams();
+            if (params instanceof ViewGroup.MarginLayoutParams) {
+                int hMargin = UISizes.getResultListMarginHorizontal(ctx);
+                int vMargin = UISizes.getResultListMarginVertical(ctx);
+                ((ViewGroup.MarginLayoutParams) params).setMargins(hMargin, vMargin, hMargin, vMargin);
+            }
+        }
+
+        boolean fadeOut = PrefCache.getResultFadeOut(pref);
+        int backgroundColor = UIColors.getResultListBackground(pref);
+        int cornerRadius = UISizes.getResultListRadius(ctx);
+        if (cornerRadius > 0 || fadeOut) {
+            final GradientDrawable drawable = new GradientDrawable();
+            drawable.setCornerRadius(cornerRadius);
+            resultLayout.setBackground(drawable);
+            if (fadeOut)
+                setResultListGradientFade(resultLayout, backgroundColor);
+            else
+                drawable.setColor(backgroundColor);
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                 // clip list content to rounded corners
                 resultLayout.setClipToOutline(true);
             }
         } else {
-            drawable = new ColorDrawable(background);
+            resultLayout.setBackgroundColor(backgroundColor);
         }
-        resultLayout.setBackground(drawable);
 
-        int overscrollColor = UIColors.getResultListRipple(resultLayout.getContext());
+        int overscrollColor = UIColors.getResultListRipple(ctx);
         overscrollColor = UIColors.setAlpha(overscrollColor, 0x7F);
         if (resultLayout instanceof AbsListView) {
             setListViewSelectorPref((AbsListView) resultLayout, true);
             setListViewScrollbarPref(resultLayout);
             EdgeGlowHelper.setEdgeGlowColor((AbsListView) resultLayout, overscrollColor);
+            if (setMargin)
+                setFadingEdge(resultLayout, fadeOut);
         } else {
             View list = resultLayout.findViewById(R.id.resultList);
             if (list instanceof AbsListView) {
@@ -236,7 +309,17 @@ public class CustomizeUI {
                 setListViewScrollbarPref(list);
                 EdgeGlowHelper.setEdgeGlowColor((RecyclerList) list, overscrollColor);
             }
+            if (setMargin)
+                setFadingEdge(list, fadeOut);
         }
+    }
+
+    private static void setFadingEdge(@Nullable View view, boolean enabled) {
+        if (view == null)
+            return;
+        if (enabled)
+            view.setFadingEdgeLength(UISizes.getResultIconSize(view.getContext()));
+        view.setVerticalFadingEdgeEnabled(enabled);
     }
 
     private void adjustInputType(EditText searchEditText) {

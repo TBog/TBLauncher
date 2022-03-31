@@ -15,11 +15,11 @@ import java.util.HashMap;
 import java.util.List;
 
 import rocks.tbog.tblauncher.TBApplication;
-import rocks.tbog.tblauncher.handler.TagsHandler;
 import rocks.tbog.tblauncher.db.DBHelper;
 import rocks.tbog.tblauncher.db.ModRecord;
 import rocks.tbog.tblauncher.db.ShortcutRecord;
 import rocks.tbog.tblauncher.entry.ShortcutEntry;
+import rocks.tbog.tblauncher.handler.TagsHandler;
 
 public class LoadShortcutsEntryItem extends LoadEntryItem<ShortcutEntry> {
 
@@ -84,7 +84,15 @@ public class LoadShortcutsEntryItem extends LoadEntryItem<ShortcutEntry> {
             List<ShortcutInfo> shortcutInfos = null;
 
             ShortcutQuery q = new ShortcutQuery();
-            q.setQueryFlags(ShortcutQuery.FLAG_MATCH_PINNED);
+            if (TBApplication.getApplication(ctx).preferences().getBoolean("shortcut-dynamic-in-results", false)) {
+                q.setQueryFlags(ShortcutQuery.FLAG_MATCH_PINNED
+                    | ShortcutQuery.FLAG_MATCH_MANIFEST
+                    | ShortcutQuery.FLAG_MATCH_DYNAMIC
+                    | ShortcutQuery.FLAG_MATCH_CACHED);
+            } else {
+                q.setQueryFlags(ShortcutQuery.FLAG_MATCH_PINNED
+                    | ShortcutQuery.FLAG_MATCH_MANIFEST);
+            }
 
             if (mLauncherApps.hasShortcutHostPermission())
                 shortcutInfos = mLauncherApps.getShortcuts(q, Process.myUserHandle());
@@ -99,6 +107,18 @@ public class LoadShortcutsEntryItem extends LoadEntryItem<ShortcutEntry> {
                 if (record != null) {
                     dbId = record.dbId;
                     name = record.displayName;
+                }
+                // if no name found, try the shortcut text
+                if (name == null || name.isEmpty()) {
+                    CharSequence label = shortcutInfo.getLongLabel();
+                    if (label != null)
+                        name = label.toString();
+                }
+                // if no name found, try the shortcut title
+                if (name == null || name.isEmpty()) {
+                    CharSequence label = shortcutInfo.getShortLabel();
+                    if (label != null)
+                        name = label.toString();
                 }
                 ShortcutEntry pojo = new ShortcutEntry(dbId, shortcutInfo);
                 pojo.setName(name);

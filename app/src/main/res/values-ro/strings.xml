@@ -133,11 +133,8 @@
     <string name="result_icon_size">Dimensiunea pictogramei</string>
     <string name="contact_action_color">Culoare pictogramă acțiune</string>
     <string name="quick_list_toggle_color">Comutați culoarea de fundal</string>
-    <string name="quick_list_alpha">Opacitate de fundal</string>
     <string name="quick_list_color">Culoare de fundal</string>
     <string name="result_highlight_color">Evidențiați culoarea</string>
-    <string name="result_list_alpha">Opacitatea fundalului</string>
-    <string name="result_list_color">Culoare de fundal</string>
     <string name="quick_list_show_badge">Afișați insigna de comenzi rapide „Listă rapidă”</string>
     <string name="shortcut_show_badge_summary">Afișați pictograma aplicației care a creat comanda rapidă</string>
     <string name="shortcut_show_badge">Afișați insigna aplicației</string>
@@ -146,7 +143,6 @@
     <string name="debug_item_relevance">Căutați relevanță</string>
     <string name="debug_widget_info">Apăsați lung pentru informații suplimentare despre widget</string>
     <string name="debug_widget_add_info">Adăugați informații suplimentare despre widget</string>
-    <string name="debug_menu_state">Informații despre starea de vizibilitate</string>
     <string name="debug_section">Depanare</string>
     <string name="shortcut_with_appName">%1$s: %2$s</string>
     <string name="cfg_widget_front">Mutați <b> deasupra </b> tuturor</string>
@@ -217,7 +213,6 @@
     <string name="popup_title_customize">Personalizați</string>
     <string name="popup_title_hist_fav">Preferințe</string>
     <string name="icons_visible">Afișați pictogramele</string>
-    <string name="icons_section">Iconuri</string>
     <string name="tags_enabled_summary">Afișați etichete pentru fiecare aplicație în lista de rezultate</string>
     <string name="tags_enabled">Afișați etichete pentru aplicații</string>
     <string name="fuzzy_search_tags_summary">Când căutați, includeți etichete ca posibili candidați</string>
@@ -274,11 +269,8 @@
     <string name="cd_show_all_apps">Afișați toate aplicațiile</string>
     <string name="cd_main_clear">Curăță bara de căutare</string>
     <string name="cd_main_menu">Meniu</string>
-    <string name="round_corners">Colturi rotunjite</string>
     <string name="black_notification_icons">Icoane întunecate</string>
     <string name="gradient">Gradient</string>
-    <string name="alpha">Opacitate</string>
-    <string name="color">Culoare</string>
     <string name="notification_bar_section">Bara de notificari</string>
     <string name="title_ui">Interfață</string>
     <string name="user_interface_summary">Teme, transparență și culori</string>
@@ -308,9 +300,6 @@
     <string name="permission_denied">Acordă mai întâi această permisiune</string>
     <string name="stub_app_tag">lista de etichete a aplicației</string>
     <string name="menu_remove_history">Elimină din istoric</string>
-    <string name="toast_favorites_removed">%s eliminat din favorite</string>
-    <string name="toast_favorites_added">%s adăugat la favorite</string>
-    <string name="cant_save_shortcuts">Nu s-au putut adăuga comenzi rapide. TinyBit este lansatorul dvs. implicit\?</string>
     <string name="cant_pin_shortcut">Nu s-a putut adăuga comanda rapidă. TinyBit este lansatorul dvs. implicit\?</string>
     <string name="unable_to_initialize_shortcuts">Nu se pot accesa comenzile rapide. Este TinyBit lansatorul dvs. implicit\?</string>
     <string name="removed_item">Eliminat %s</string>

@@ -32,6 +32,7 @@ import rocks.tbog.tblauncher.icons.IconPackCache;
 import rocks.tbog.tblauncher.quicklist.QuickList;
 import rocks.tbog.tblauncher.searcher.Searcher;
 import rocks.tbog.tblauncher.ui.ListPopup;
+import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.RootHandler;
 import rocks.tbog.tblauncher.utils.Utilities;
 
@@ -76,6 +77,12 @@ public class TBApplication extends Application {
      * Root handler - su
      */
     private RootHandler mRootHandler = null;
+
+    @Override
+    protected void attachBaseContext(Context base) {
+        super.attachBaseContext(base);
+        //MultiDex.install(this);
+    }
 
     @NonNull
     public static TBApplication getApplication(@NonNull Context context) {
@@ -276,11 +283,20 @@ public class TBApplication extends Application {
 
     public static void onDestroyActivity(TBLauncherActivity activity) {
         TBApplication app = getApplication(activity);
+        Activity popupActivity = null;
+        if (app.mPopup != null)
+            popupActivity = Utilities.getActivity(app.mPopup.getContentView());
+        if (popupActivity == null && app.dismissPopup())
+            Log.i(TAG, "Popup dismissed in onDestroyActivity");
+
         for (Iterator<WeakReference<TBLauncherActivity>> iterator = app.mActivities.iterator(); iterator.hasNext(); ) {
             WeakReference<TBLauncherActivity> ref = iterator.next();
             TBLauncherActivity launcherActivity = ref.get();
-            if (launcherActivity == null || launcherActivity == activity)
+            if (launcherActivity == null || launcherActivity == activity) {
+                if (activity == popupActivity && app.dismissPopup())
+                    Log.i(TAG, "Popup dismissed in onDestroyActivity " + activity);
                 iterator.remove();
+            }
         }
     }
 
@@ -336,6 +352,10 @@ public class TBApplication extends Application {
         PreferenceManager.setDefaultValues(this, R.xml.preferences, true);
         PreferenceManager.setDefaultValues(this, R.xml.preference_features, true);
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+
+        if (PrefCache.isMigrateRequired(mSharedPreferences) && PrefCache.migratePreferences(this, mSharedPreferences)) {
+            Log.i(TAG, "Preferences migration done.");
+        }
 
 //        SharedPreferences.Editor editor = mSharedPreferences.edit();
 //        for (Map.Entry<String, ?> entry : mSharedPreferences.getAll().entrySet() )

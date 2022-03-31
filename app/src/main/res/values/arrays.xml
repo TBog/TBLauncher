@@ -2,6 +2,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools" tools:ignore="MissingTranslation">
 
     <string-array name="settingsThemeEntries">
+        <item>@string/settings_default</item>
         <item>@string/settings_8bit</item>
         <item>@string/settings_white</item>
         <item>@string/settings_black</item>
@@ -10,6 +11,7 @@
     </string-array>
 
     <string-array name="settingsThemeValues" translatable="false">
+        <item>default</item>
         <item>8bit</item>
         <item>white</item>
         <item>black</item>
@@ -109,6 +111,7 @@
         <item>@string/show_tags_list</item>
         <item>@string/show_tags_list_reversed</item>
         <item>Run app…</item>
+        <item>Run shortcut…</item>
         <item>Show tagged…</item>
     </string-array>
     <array name="gestureValues" translatable="false">
@@ -138,6 +141,7 @@
         <item>showTagsList</item>
         <item>showTagsListReversed</item>
         <item>runApp</item>
+        <item>runShortcut</item>
         <item>showEntry</item>
     </array>
 

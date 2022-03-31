@@ -25,15 +25,20 @@
         <androidx.preference.SwitchPreference
             android:defaultValue="false"
             android:dependency="quick-list-enabled"
-            android:key="quick-list-only-for-results"
-            android:summary="@string/quick_list_only_for_results_summary"
-            android:title="@string/quick_list_only_for_results" />
-
-        <androidx.preference.SwitchPreference
-            android:defaultValue="false"
-            android:dependency="quick-list-enabled"
             android:key="quick-list-text-visible"
             android:title="@string/quick_list_text_visible" />
+
+        <androidx.preference.SwitchPreference
+            android:defaultValue="true"
+            android:dependency="quick-list-enabled"
+            android:key="quick-list-icons-visible"
+            android:title="@string/quick_list_icons_visible" />
+
+        <androidx.preference.SwitchPreference
+            android:defaultValue="true"
+            android:dependency="quick-list-icons-visible"
+            android:key="quick-list-show-badge"
+            android:title="@string/quick_list_show_badge" />
 
         <androidx.preference.SwitchPreference
             android:defaultValue="true"
@@ -42,7 +47,7 @@
             android:title="@string/quick_list_animation" />
 
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
-            android:defaultValue="@integer/default_bar_height"
+            android:defaultValue="@integer/default_dock_height"
             android:dependency="quick-list-enabled"
             android:dialogLayout="@layout/pref_slider"
             android:key="quick-list-height"
@@ -72,7 +77,7 @@
         android:title="@string/search_bar_section">
 
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
-            android:defaultValue="@integer/default_bar_height"
+            android:defaultValue="@integer/default_search_bar_height"
             android:dialogLayout="@layout/pref_slider"
             android:key="search-bar-height"
             android:title="@string/search_bar_height"
@@ -138,6 +143,12 @@
             android:summary="@string/result_right_to_left_summary"
             android:title="@string/result_right_to_left" />
 
+        <androidx.preference.SwitchPreference
+            android:defaultValue="false"
+            android:key="result-fading-edge"
+            android:summary="@string/result_fading_edge_summary"
+            android:title="@string/result_fading_edge" />
+
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
             android:defaultValue="@integer/default_result_history_size"
             android:dialogLayout="@layout/pref_slider"
@@ -172,31 +183,12 @@
             android:summary="@string/result_popup_order_summary"
             android:title="@string/result_popup_order" />
 
-    </PreferenceCategory>
-
-    <!-- Icons -->
-    <androidx.preference.PreferenceCategory
-        android:key="icons-section"
-        android:title="@string/icons_section">
-
         <androidx.preference.SwitchPreference
             android:defaultValue="true"
             android:key="icons-visible"
             android:title="@string/icons_visible" />
 
-        <androidx.preference.SwitchPreference
-            android:defaultValue="true"
-            android:dependency="quick-list-enabled"
-            android:key="quick-list-icons-visible"
-            android:title="@string/quick_list_icons_visible" />
-
-        <androidx.preference.SwitchPreference
-            android:defaultValue="true"
-            android:dependency="quick-list-icons-visible"
-            android:key="quick-list-show-badge"
-            android:title="@string/quick_list_show_badge" />
-
-    </androidx.preference.PreferenceCategory>
+    </PreferenceCategory>
 
     <!-- Shortcut -->
     <androidx.preference.PreferenceCategory
@@ -214,6 +206,12 @@
             android:key="shortcut-show-badge"
             android:summary="@string/shortcut_show_badge_summary"
             android:title="@string/shortcut_show_badge" />
+
+        <androidx.preference.SwitchPreference
+            android:defaultValue="false"
+            android:key="shortcut-dynamic-in-results"
+            android:summary="@string/shortcut_dynamic_in_results_summary"
+            android:title="@string/shortcut_dynamic_in_results" />
 
     </androidx.preference.PreferenceCategory>
 

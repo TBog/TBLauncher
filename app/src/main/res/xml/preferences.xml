@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:pref="http://tbog.rocks/res/pref"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -74,8 +75,7 @@
                 android:key="reset-matrix"
                 android:title="@string/reset_matrix" />
 
-            <rocks.tbog.tblauncher.preference.PreviewImagePreference
-                android:widgetLayout="@layout/pref_matrix_preview"/>
+            <rocks.tbog.tblauncher.preference.PreviewImagePreference android:widgetLayout="@layout/pref_matrix_preview" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@integer/default_icon_scale"
@@ -136,10 +136,10 @@
         </PreferenceScreen>
 
         <SwitchPreference
-                android:defaultValue="false"
-                android:key="matrix-contacts"
-                android:summary="@string/matrix_contacts_summary"
-                android:title="@string/matrix_contacts" />
+            android:defaultValue="false"
+            android:key="matrix-contacts"
+            android:summary="@string/matrix_contacts_summary"
+            android:title="@string/matrix_contacts" />
 
         <SwitchPreference
             android:defaultValue="true"
@@ -219,17 +219,10 @@
             android:title="@string/notification_bar_section">
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:defaultValue="@integer/default_color"
-                android:key="notification-bar-color"
-                android:title="@string/color"
+                android:defaultValue="@integer/default_background_argb"
+                android:key="notification-bar-argb"
+                android:title="@string/color_and_opacity"
                 android:widgetLayout="@layout/pref_color_preview" />
-
-            <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:defaultValue="@integer/default_notification_bar_opacity"
-                android:dialogLayout="@layout/pref_slider"
-                android:key="notification-bar-alpha"
-                android:title="@string/alpha"
-                android:widgetLayout="@layout/pref_alpha_preview" />
 
             <SwitchPreference
                 android:defaultValue="true"
@@ -250,29 +243,23 @@
             android:title="@string/search_bar_section">
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:defaultValue="@integer/default_color"
-                android:key="search-bar-color"
-                android:title="@string/color"
+                android:defaultValue="@integer/default_background_argb"
+                android:key="search-bar-argb"
+                android:title="@string/color_and_opacity"
                 android:widgetLayout="@layout/pref_color_preview" />
 
-            <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:defaultValue="@integer/default_search_bar_opacity"
-                android:dialogLayout="@layout/pref_slider"
-                android:key="search-bar-alpha"
-                android:title="@string/alpha"
-                android:widgetLayout="@layout/pref_alpha_preview" />
-
             <SwitchPreference
-                android:defaultValue="true"
+                android:defaultValue="false"
                 android:disableDependentsState="true"
                 android:key="search-bar-gradient"
                 android:title="@string/gradient" />
 
-            <SwitchPreference
-                android:defaultValue="true"
-                android:dependency="search-bar-gradient"
-                android:key="search-bar-rounded"
-                android:title="@string/round_corners" />
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@integer/default_corner_radius"
+                android:dialogLayout="@layout/pref_slider"
+                android:key="search-bar-radius"
+                android:title="@string/corner_radius"
+                android:widgetLayout="@layout/pref_size_preview" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@integer/default_color_text"
@@ -299,10 +286,24 @@
                 android:widgetLayout="@layout/pref_color_preview" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:defaultValue="@integer/default_bar_size"
+                android:defaultValue="@integer/default_search_bar_height"
                 android:dialogLayout="@layout/pref_slider"
                 android:key="search-bar-height"
                 android:title="@string/search_bar_height"
+                android:widgetLayout="@layout/pref_size_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@integer/default_result_margin"
+                android:dialogLayout="@layout/pref_slider"
+                android:key="search-bar-margin-vertical"
+                android:title="@string/margin_vertical"
+                android:widgetLayout="@layout/pref_size_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@integer/default_result_margin"
+                android:dialogLayout="@layout/pref_slider"
+                android:key="search-bar-margin-horizontal"
+                android:title="@string/margin_horizontal"
                 android:widgetLayout="@layout/pref_size_preview" />
 
             <androidx.preference.SwitchPreference
@@ -319,28 +320,29 @@
             android:title="@string/result_list_section">
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:defaultValue="@integer/default_color"
-                android:key="result-list-color"
-                android:title="@string/result_list_color"
+                android:defaultValue="@integer/default_background_argb"
+                android:key="result-list-argb"
+                android:title="@string/result_list_argb"
                 android:widgetLayout="@layout/pref_color_preview" />
 
+            <androidx.preference.SwitchPreference
+                android:defaultValue="false"
+                android:key="result-fading-edge"
+                android:summary="@string/result_fading_edge_summary"
+                android:title="@string/result_fading_edge" />
+
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:defaultValue="@integer/default_result_list_opacity"
+                android:defaultValue="@integer/default_corner_radius"
                 android:dialogLayout="@layout/pref_slider"
-                android:key="result-list-alpha"
-                android:title="@string/result_list_alpha"
-                android:widgetLayout="@layout/pref_alpha_preview" />
+                android:key="result-list-radius"
+                android:title="@string/corner_radius"
+                android:widgetLayout="@layout/pref_size_preview" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@integer/default_color_highlight"
                 android:key="result-ripple-color"
                 android:title="@string/result_ripple_color"
                 android:widgetLayout="@layout/pref_color_preview" />
-
-            <SwitchPreference
-                android:defaultValue="true"
-                android:key="result-list-rounded"
-                android:title="@string/round_corners" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@integer/default_color_highlight"
@@ -387,20 +389,31 @@
                 android:title="@string/result_icon_size"
                 android:widgetLayout="@layout/pref_size_preview" />
 
+            <androidx.preference.SwitchPreference
+                android:defaultValue="false"
+                android:key="result-list-row-height-manual"
+                android:title="@string/result_list_row_height_manual" />
+
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:defaultValue="@integer/default_result_history_size"
+                android:defaultValue="@integer/default_height_row"
                 android:dialogLayout="@layout/pref_slider"
-                android:key="result-history-size"
-                android:summary="@string/result_history_size_summary"
-                android:title="@string/result_history_size"
+                android:dependency="result-list-row-height-manual"
+                android:key="result-list-row-height"
+                android:title="@string/result_list_row_height"
                 android:widgetLayout="@layout/pref_size_preview" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:defaultValue="@integer/default_result_history_adaptive"
+                android:defaultValue="@integer/default_result_margin"
                 android:dialogLayout="@layout/pref_slider"
-                android:key="result-history-adaptive"
-                android:summary="@string/result_history_adaptive_summary"
-                android:title="@string/result_history_adaptive"
+                android:key="result-list-margin-vertical"
+                android:title="@string/margin_vertical"
+                android:widgetLayout="@layout/pref_size_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@integer/default_result_margin"
+                android:dialogLayout="@layout/pref_slider"
+                android:key="result-list-margin-horizontal"
+                android:title="@string/margin_horizontal"
                 android:widgetLayout="@layout/pref_size_preview" />
 
         </PreferenceCategory>
@@ -412,17 +425,10 @@
             android:title="@string/quick_list_section">
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:defaultValue="@integer/default_color"
-                android:key="quick-list-color"
+                android:defaultValue="@integer/default_background_argb"
+                android:key="quick-list-argb"
                 android:title="@string/quick_list_color"
                 android:widgetLayout="@layout/pref_color_preview" />
-
-            <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:defaultValue="@integer/default_quick_list_opacity"
-                android:dialogLayout="@layout/pref_slider"
-                android:key="quick-list-alpha"
-                android:title="@string/quick_list_alpha"
-                android:widgetLayout="@layout/pref_alpha_preview" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@integer/default_color_highlight"
@@ -442,7 +448,14 @@
                 android:title="@string/quick_list_animation" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                android:defaultValue="@integer/default_bar_height"
+                android:defaultValue="@integer/max_size_icon"
+                android:dialogLayout="@layout/pref_slider"
+                android:key="quick-list-icon-size"
+                android:title="@string/quick_list_icon_size"
+                android:widgetLayout="@layout/pref_size_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@integer/default_dock_height"
                 android:dialogLayout="@layout/pref_slider"
                 android:key="quick-list-height"
                 android:title="@string/quick_list_height"
@@ -453,6 +466,20 @@
                 android:dialogLayout="@layout/pref_slider"
                 android:key="quick-list-radius"
                 android:title="@string/corner_radius"
+                android:widgetLayout="@layout/pref_size_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@integer/default_result_margin"
+                android:dialogLayout="@layout/pref_slider"
+                android:key="quick-list-margin-vertical"
+                android:title="@string/margin_vertical"
+                android:widgetLayout="@layout/pref_size_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@integer/default_result_margin"
+                android:dialogLayout="@layout/pref_slider"
+                android:key="quick-list-margin-horizontal"
+                android:title="@string/margin_horizontal"
                 android:widgetLayout="@layout/pref_size_preview" />
 
         </PreferenceCategory>
@@ -503,21 +530,21 @@
 
         <!-- Tags Menu -->
         <PreferenceCategory
-                android:key="tags-menu-section"
-                android:title="@string/tags_menu_section">
+            android:key="tags-menu-section"
+            android:title="@string/tags_menu_section">
 
             <androidx.preference.SwitchPreference
-                    android:defaultValue="false"
-                    android:key="tags-menu-icons"
-                    android:title="@string/tags_menu_icons" />
+                android:defaultValue="false"
+                android:key="tags-menu-icons"
+                android:title="@string/tags_menu_icons" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                    android:defaultValue="@integer/default_size_icon"
-                    android:dialogLayout="@layout/pref_slider"
-                    android:dependency="tags-menu-icons"
-                    android:key="tags-menu-icon-size"
-                    android:title="@string/tags_menu_icon_size"
-                    android:widgetLayout="@layout/pref_size_preview" />
+                android:defaultValue="@integer/default_size_icon"
+                android:dependency="tags-menu-icons"
+                android:dialogLayout="@layout/pref_slider"
+                android:key="tags-menu-icon-size"
+                android:title="@string/tags_menu_icon_size"
+                android:widgetLayout="@layout/pref_size_preview" />
 
         </PreferenceCategory>
 
@@ -564,6 +591,10 @@
                 android:title="@string/action_app_to_run"
                 app:isPreferenceVisible="false" />
             <ListPreference
+                android:key="gesture-click-shortcut-to-run"
+                android:title="@string/action_shortcut_to_run"
+                app:isPreferenceVisible="false" />
+            <ListPreference
                 android:key="gesture-click-entry-to-show"
                 android:title="@string/action_entry_to_show"
                 app:isPreferenceVisible="false" />
@@ -577,6 +608,10 @@
             <ListPreference
                 android:key="gesture-double-click-app-to-run"
                 android:title="@string/action_app_to_run"
+                app:isPreferenceVisible="false" />
+            <ListPreference
+                android:key="gesture-double-click-shortcut-to-run"
+                android:title="@string/action_shortcut_to_run"
                 app:isPreferenceVisible="false" />
             <ListPreference
                 android:key="gesture-double-click-entry-to-show"
@@ -595,6 +630,10 @@
                 android:title="@string/action_app_to_run"
                 app:isPreferenceVisible="false" />
             <ListPreference
+                android:key="gesture-fling-down-left-shortcut-to-run"
+                android:title="@string/action_shortcut_to_run"
+                app:isPreferenceVisible="false" />
+            <ListPreference
                 android:key="gesture-fling-down-left-entry-to-show"
                 android:title="@string/action_entry_to_show"
                 app:isPreferenceVisible="false" />
@@ -609,6 +648,10 @@
             <ListPreference
                 android:key="gesture-fling-down-right-app-to-run"
                 android:title="@string/action_app_to_run"
+                app:isPreferenceVisible="false" />
+            <ListPreference
+                android:key="gesture-fling-down-right-shortcut-to-run"
+                android:title="@string/action_shortcut_to_run"
                 app:isPreferenceVisible="false" />
             <ListPreference
                 android:key="gesture-fling-down-right-entry-to-show"
@@ -626,6 +669,10 @@
                 android:title="@string/action_app_to_run"
                 app:isPreferenceVisible="false" />
             <ListPreference
+                android:key="gesture-fling-up-shortcut-to-run"
+                android:title="@string/action_shortcut_to_run"
+                app:isPreferenceVisible="false" />
+            <ListPreference
                 android:key="gesture-fling-up-entry-to-show"
                 android:title="@string/action_entry_to_show"
                 app:isPreferenceVisible="false" />
@@ -641,6 +688,10 @@
                 android:title="@string/action_app_to_run"
                 app:isPreferenceVisible="false" />
             <ListPreference
+                android:key="gesture-fling-left-shortcut-to-run"
+                android:title="@string/action_shortcut_to_run"
+                app:isPreferenceVisible="false" />
+            <ListPreference
                 android:key="gesture-fling-left-entry-to-show"
                 android:title="@string/action_entry_to_show"
                 app:isPreferenceVisible="false" />
@@ -654,6 +705,10 @@
             <ListPreference
                 android:key="gesture-fling-right-app-to-run"
                 android:title="@string/action_app_to_run"
+                app:isPreferenceVisible="false" />
+            <ListPreference
+                android:key="gesture-fling-right-shortcut-to-run"
+                android:title="@string/action_shortcut_to_run"
                 app:isPreferenceVisible="false" />
             <ListPreference
                 android:key="gesture-fling-right-entry-to-show"
@@ -701,6 +756,10 @@
                 android:title="@string/action_app_to_run"
                 app:isPreferenceVisible="false" />
             <ListPreference
+                android:key="button-launcher-shortcut-to-run"
+                android:title="@string/action_shortcut_to_run"
+                app:isPreferenceVisible="false" />
+            <ListPreference
                 android:key="button-launcher-entry-to-show"
                 android:title="@string/action_entry_to_show"
                 app:isPreferenceVisible="false" />
@@ -736,6 +795,7 @@
 
                 <androidx.preference.SwitchPreference
                     android:defaultValue="false"
+                    android:dependency="quick-list-enabled"
                     android:key="dm-empty-quick-list"
                     android:title="@string/dm_empty_quick_list" />
 
@@ -751,6 +811,13 @@
                     android:key="dm-empty-back"
                     android:title="@string/back_device_key" />
 
+                <!-- This is here just to be able to use dependency, not visible for user -->
+                <androidx.preference.SwitchPreference
+                    android:defaultValue="true"
+                    android:key="quick-list-enabled"
+                    android:title="@string/quick_list_enabled"
+                    app:isPreferenceVisible="false" />
+
             </PreferenceScreen>
 
             <!-- ‹Search› desktop mode -->
@@ -760,8 +827,16 @@
 
                 <androidx.preference.SwitchPreference
                     android:defaultValue="true"
+                    android:dependency="quick-list-enabled"
                     android:key="dm-search-quick-list"
                     android:title="@string/dm_search_quick_list" />
+
+                <rocks.tbog.tblauncher.preference.MultiDependenciesSwitchPreference
+                    android:defaultValue="false"
+                    android:key="quick-list-only-for-results"
+                    android:summary="@string/quick_list_only_for_results_summary"
+                    android:title="@string/quick_list_only_for_results"
+                    pref:dependencies="quick-list-enabled,dm-search-quick-list" />
 
                 <androidx.preference.SwitchPreference
                     android:defaultValue="false"
@@ -783,9 +858,16 @@
                     android:key="dm-search-open-result"
                     android:title="@string/dm_search_open_result" />
                 <ListPreference
-                        android:key="dm-search-open-result-entry-to-show"
-                        android:title="@string/action_entry_to_show"
-                        app:isPreferenceVisible="false" />
+                    android:key="dm-search-open-result-entry-to-show"
+                    android:title="@string/action_entry_to_show"
+                    app:isPreferenceVisible="false" />
+
+                <!-- This is here just to be able to use dependency, not visible for user -->
+                <androidx.preference.SwitchPreference
+                    android:defaultValue="true"
+                    android:key="quick-list-enabled"
+                    android:title="@string/quick_list_enabled"
+                    app:isPreferenceVisible="false" />
 
             </PreferenceScreen>
 
@@ -796,6 +878,7 @@
 
                 <androidx.preference.SwitchPreference
                     android:defaultValue="false"
+                    android:dependency="quick-list-enabled"
                     android:key="dm-widget-quick-list"
                     android:title="@string/dm_widget_quick_list" />
 
@@ -810,6 +893,13 @@
                     android:entryValues="@array/gestureValues"
                     android:key="dm-widget-back"
                     android:title="@string/back_device_key" />
+
+                <!-- This is here just to be able to use dependency, not visible for user -->
+                <androidx.preference.SwitchPreference
+                    android:defaultValue="true"
+                    android:key="quick-list-enabled"
+                    android:title="@string/quick_list_enabled"
+                    app:isPreferenceVisible="false" />
 
             </PreferenceScreen>
 
@@ -856,6 +946,12 @@
                 android:key="export-interface"
                 android:summary="@string/export_interface_summary"
                 android:title="@string/export_interface" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:dialogLayout="@layout/pref_confirm"
+                android:key="export-preferences"
+                android:summary="@string/export_preferences_summary"
+                android:title="@string/export_preferences" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:dialogLayout="@layout/pref_confirm"
@@ -924,6 +1020,7 @@
 
     <!-- "settings-theme" ListPreference is only used if the ActionBar menu is unavailable. This also helps to backup this preference. -->
     <ListPreference
+        android:defaultValue="default"
         android:entries="@array/settingsThemeEntries"
         android:entryValues="@array/settingsThemeValues"
         android:key="settings-theme"

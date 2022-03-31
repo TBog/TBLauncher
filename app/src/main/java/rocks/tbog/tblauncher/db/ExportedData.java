@@ -25,8 +25,10 @@ import java.util.Set;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.SettingsActivity;
 import rocks.tbog.tblauncher.TBApplication;
+import rocks.tbog.tblauncher.TBLauncherActivity;
 import rocks.tbog.tblauncher.WidgetManager;
 import rocks.tbog.tblauncher.handler.TagsHandler;
+import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public class ExportedData {
@@ -843,6 +845,9 @@ public class ExportedData {
             }
         }
 
+        if (PrefCache.migratePreferences(context, mPreferences, editor))
+            Log.i(TAG, "Preferences migration done.");
+
         editor.commit();
 
         for (String key : mPreferences.keySet())
@@ -853,7 +858,11 @@ public class ExportedData {
         if (!bWidgetListLoaded)
             return;
 
-        WidgetManager wm = TBApplication.widgetManager(context);
+        TBLauncherActivity launcherActivity = TBApplication.launcherActivity(context);
+        if (launcherActivity == null)
+            return;
+
+        WidgetManager wm = launcherActivity.widgetManager;
         wm.onBeforeRestoreFromBackup(method != Method.APPEND);
 
         final boolean append = method == Method.APPEND;

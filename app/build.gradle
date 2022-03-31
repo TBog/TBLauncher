@@ -17,11 +17,13 @@ android {
     buildTypes {
         release {
             minifyEnabled true
+            //multiDexEnabled false
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             resValue "string", "app_name_dynamic", "@string/app_name"
         }
         debug {
             minifyEnabled false
+            //multiDexEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
             applicationIdSuffix '.debug'
             versionNameSuffix '-dbg'
@@ -53,7 +55,10 @@ dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-stdlib-common:$kotlin_version"
     implementation 'com.google.android.material:material:1.5.0'
-    implementation 'com.github.dhaval2404:imagepicker:2.1'
+    implementation('com.github.dhaval2404:imagepicker:2.1', {
+        exclude group: 'com.squareup.okhttp3'
+    })
+    //implementation "androidx.multidex:multidex:$multidex_version"
 }
 repositories {
     mavenCentral()

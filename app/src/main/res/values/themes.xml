@@ -73,6 +73,10 @@
         <item name="android:background">@android:color/transparent</item>
     </style>
 
+    <style name="GradientButtonBar.Default">
+        <item name="android:background">@drawable/button_bar_background_default</item>
+    </style>
+
     <style name="GradientBorderlessButton">
         <item name="android:background">?attr/selectableItemBackgroundBorderless</item>
         <item name="android:textColor">@color/accent_text_selector</item>
@@ -92,6 +96,11 @@
     <style name="GradientBorderlessButton.Black">
         <item name="colorControlHighlight">@color/Black_accent</item>
         <item name="android:textColor">@color/accent_text_selector_black</item>
+    </style>
+
+    <style name="GradientBorderlessButton.Default">
+        <item name="colorControlHighlight">@color/Default_dark</item>
+        <item name="android:textColor">@color/settings_primary_selector_default</item>
     </style>
 
     <style name="TitleDialogTheme" parent="Theme.MaterialComponents.Dialog.Alert">
@@ -160,6 +169,10 @@
         <item name="android:popupBackground">@color/darkBackground</item>
     </style>
 
+    <style name="AutoCompleteTextViewStyle.Default">
+        <item name="android:popupBackground">@color/Default_background</item>
+    </style>
+
     <style name="NoTitleDialogTheme" parent="TitleDialogTheme">
         <item name="android:windowNoTitle">true</item>
         <item name="windowNoTitle">true</item>
@@ -207,6 +220,11 @@
     <style name="SettingsDialogTitle.Black">
         <item name="android:background">@null</item>
         <item name="android:textColor">@color/Black_accent</item>
+    </style>
+
+    <style name="SettingsDialogTitle.Default">
+        <item name="android:background">@drawable/window_title_background_default</item>
+        <item name="android:textColor">@color/settings_primary_selector_default</item>
     </style>
 
     <style name="SettingsDialogTheme" parent="NoTitleDialogTheme">
@@ -308,6 +326,34 @@
         <item name="autoCompleteTextViewStyle">@style/AutoCompleteTextViewStyle.DarkBg</item>
     </style>
 
+    <style name="SettingsDialogTheme.Default">
+        <item name="android:windowBackground">@drawable/dialog_background_default</item>
+        <item name="android:textColor">@color/settings_primary_selector_default</item>
+        <item name="android:textColorPrimary">@color/settings_primary_selector_default</item>
+        <item name="android:textColorSecondary">@color/settings_secondary_selector_default</item>
+        <item name="android:listDivider">@drawable/list_separator_default</item>
+        <item name="android:windowTitleStyle">@style/SettingsDialogTitle.Default</item>
+
+        <item name="tabIndicatorColor">@color/Default_text</item>
+        <item name="tabBackground">@drawable/tab_background_default</item>
+        <item name="tabSelectedTextColor">@color/settings_primary_selector_default</item>
+
+        <item name="colorPrimary">@color/settings_primary_selector_default</item>
+        <item name="colorPrimaryDark">@color/Default_dark</item>
+        <item name="colorControlNormal">@color/Default_text</item>
+        <item name="colorControlHighlight">@color/Default_light</item>
+        <item name="colorControlActivated">@color/settings_secondary_selector_default</item>
+
+        <item name="android:buttonBarStyle">@style/GradientButtonBar.Default</item>
+        <item name="android:buttonBarButtonStyle">@style/GradientBorderlessButton.Default</item>
+        <item name="android:borderlessButtonStyle">@style/GradientBorderlessButton.Default</item>
+        <item name="buttonBarNeutralButtonStyle">@style/GradientBorderlessButton.Default</item>
+        <item name="buttonBarNegativeButtonStyle">@style/GradientBorderlessButton.Default</item>
+        <item name="buttonBarPositiveButtonStyle">@style/GradientBorderlessButton.Default</item>
+
+        <item name="autoCompleteTextViewStyle">@style/AutoCompleteTextViewStyle.Default</item>
+    </style>
+
     <style name="PreferenceTheme" parent="PreferenceThemeOverlay">
         <item name="dialogPreferenceStyle">@style/DialogPreferenceStyle</item>
         <item name="preferenceCategoryStyle">@style/CategoryPreferenceStyle</item>
@@ -332,6 +378,10 @@
 
     <style name="OptionsMenu.Dark">
         <item name="android:popupBackground">@drawable/popup_background</item>
+    </style>
+
+    <style name="OptionsMenu.Default">
+        <item name="android:popupBackground">@color/Default_dark</item>
     </style>
 
     <style name="OptionsMenu.DeepBlues">
@@ -471,5 +521,29 @@
         <item name="alertDialogTheme">@style/SettingsDialogTheme.DarkBg</item>
         <item name="actionOverflowMenuStyle">@style/OptionsMenu.Dark</item>
         <item name="android:itemBackground">@null</item>
+    </style>
+
+    <!--
+        Settings - Default
+    -->
+    <style name="SettingsTheme.Default">
+        <item name="android:windowBackground">@color/Default_background</item>
+        <item name="alertDialogTheme">@style/SettingsDialogTheme.Default</item>
+        <item name="actionOverflowMenuStyle">@style/OptionsMenu.Default</item>
+        <item name="android:itemBackground">@drawable/tab_background_default</item>
+        <item name="android:listDivider">@drawable/list_separator_default</item>
+
+        <item name="android:textColor">@color/settings_primary_selector_default</item>
+        <item name="android:textColorPrimary">@color/settings_primary_selector_default</item>
+        <item name="android:textColorSecondary">@color/settings_secondary_selector_default</item>
+
+        <item name="tabIndicatorColor">@color/Default_text</item>
+        <item name="tabBackground">@drawable/tab_background_default</item>
+        <item name="tabSelectedTextColor">@color/settings_primary_selector_default</item>
+
+        <item name="colorPrimary">@color/Default_selector_secondary</item>
+        <item name="colorControlHighlight">@color/Default_light</item>
+        <item name="colorControlNormal">@color/Default_selector_primary</item>
+        <item name="colorAccent">@color/Default_light</item>
     </style>
 </resources>

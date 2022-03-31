@@ -185,10 +185,6 @@ public class XmlExport {
         if ((pref instanceof PreferenceGroup))
             recursiveWritePreferences(sx, (PreferenceGroup) pref, prefMap);
 
-        pref = rootPref.findPreference("icons-section");
-        if ((pref instanceof PreferenceGroup))
-            recursiveWritePreferences(sx, (PreferenceGroup) pref, prefMap);
-
         pref = rootPref.findPreference("shortcut-section");
         if ((pref instanceof PreferenceGroup))
             recursiveWritePreferences(sx, (PreferenceGroup) pref, prefMap);
@@ -198,6 +194,18 @@ public class XmlExport {
             recursiveWritePreferences(sx, (PreferenceGroup) pref, prefMap);
 
         sx.endTag(ExportedData.XTN_UI_LIST);
+    }
+
+    public static void preferencesXml(@NonNull PreferenceGroup rootPref, @NonNull Writer writer) throws IOException {
+        SimpleXmlWriter sx = SimpleXmlWriter.getNewInstance();
+        sx.setOutput(writer);
+
+        sx.setIndentation(true);
+        sx.startDocument();
+
+        preferencesXml(rootPref, sx);
+
+        sx.endDocument();
     }
 
     public static void preferencesXml(@NonNull PreferenceGroup rootPref, @NonNull SimpleXmlWriter sx) throws IOException {

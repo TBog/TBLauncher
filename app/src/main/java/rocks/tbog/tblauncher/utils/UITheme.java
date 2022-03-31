@@ -17,10 +17,10 @@ public class UITheme {
 
     private static final String[] PREF_BACKGROUND = {
         "icon-background-argb",
-        "notification-bar-color",
-        "search-bar-color",
-        "result-list-color",
-        "quick-list-color",
+        "notification-bar-argb",
+        "search-bar-argb",
+        "result-list-argb",
+        "quick-list-argb",
         "popup-background-argb",
     };
 
@@ -48,13 +48,6 @@ public class UITheme {
         "result-text2-color",
     };
 
-    private static final String[] PREF_ALPHA = {
-        "notification-bar-alpha",
-        "search-bar-alpha",
-        "result-list-alpha",
-        "quick-list-alpha",
-    };
-
     private UITheme() {
     }
 
@@ -64,6 +57,8 @@ public class UITheme {
         String theme = sharedPreferences.getString("settings-theme", null);
         if (theme != null) {
             switch (theme) {
+                case "default":
+                    return R.style.SettingsTheme_Default;
                 case "white":
                     return R.style.SettingsTheme_White;
                 case "black":
@@ -111,10 +106,6 @@ public class UITheme {
 
         SharedPreferences.Editor editor = pref.edit();
 
-        for (String prefAlpha : PREF_ALPHA) {
-            editor.putInt(prefAlpha, 0xFF);
-        }
-
         setColor(editor, PREF_BACKGROUND, colorBg, 0xCD);
         setColor(editor, PREF_HIGHLIGHT, colorHl, 0xFF);
         setColor(editor, PREF_FOREGROUND, colorFg, 0xFF);
@@ -132,10 +123,6 @@ public class UITheme {
         final int colorFg2 = UIColors.modulateColorLightness(colorFg, 2.f * (1.f - lumFg));
 
         SharedPreferences.Editor editor = pref.edit();
-
-        for (String prefAlpha : PREF_ALPHA) {
-            editor.putInt(prefAlpha, 0xCD);
-        }
 
         setColor(editor, PREF_BACKGROUND, colorBg, 0xCD);
         setColor(editor, PREF_HIGHLIGHT, colorHl, 0xFF);

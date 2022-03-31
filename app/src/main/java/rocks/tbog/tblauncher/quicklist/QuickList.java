@@ -43,6 +43,7 @@ import rocks.tbog.tblauncher.handler.DataHandler;
 import rocks.tbog.tblauncher.result.ResultHelper;
 import rocks.tbog.tblauncher.searcher.Searcher;
 import rocks.tbog.tblauncher.ui.ListPopup;
+import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.UISizes;
 
@@ -54,6 +55,7 @@ public class QuickList {
     private static final int RETRY_COUNT = 3;
 
     private TBLauncherActivity mTBLauncherActivity;
+    private boolean mQuickListEnabled = false;
     private boolean mOnlyForResults = false;
     private boolean mListDirty = true;
     private int mRetryCountdown;
@@ -124,7 +126,7 @@ public class QuickList {
             drawFlags |= EntryItem.FLAG_DRAW_ICON;
         if (prefs.getBoolean("quick-list-show-badge", true))
             drawFlags |= EntryItem.FLAG_DRAW_ICON_BADGE;
-        if (UIColors.isColorLight(UIColors.getColor(prefs, "quick-list-color"))) {
+        if (UIColors.isColorLight(UIColors.getColor(prefs, "quick-list-argb"))) {
             drawFlags |= EntryItem.FLAG_DRAW_WHITE_BG;
             //drawFlags |= EntryItem.FLAG_DRAW_NO_CACHE; // no need, we already have it
         }
@@ -132,7 +134,6 @@ public class QuickList {
     }
 
     private void populateList() {
-        mListDirty = false;
         // keep a list of the old views so we can reuse them
         final View[] oldList = new View[mQuickList.getChildCount()];
         for (int nChild = 0; nChild < oldList.length; nChild += 1)
@@ -146,6 +147,8 @@ public class QuickList {
             mQuickList.setVisibility(View.GONE);
             return;
         }
+
+        mListDirty = false;
 
         // get list of entries we must show
         final List<EntryItem> list;
@@ -395,17 +398,40 @@ public class QuickList {
     }
 
     private boolean isQuickListEnabled() {
-        return mSharedPreferences.getBoolean("quick-list-enabled", true);
+        if (mQuickListEnabled) {
+            if (TBApplication.state().getDesktop() == LauncherState.Desktop.SEARCH)
+                return PrefCache.modeSearchQuickListVisible(mSharedPreferences);
+            if (TBApplication.state().getDesktop() == LauncherState.Desktop.EMPTY)
+                return PrefCache.modeEmptyQuickListVisible(mSharedPreferences);
+            if (TBApplication.state().getDesktop() == LauncherState.Desktop.WIDGET)
+                return PrefCache.modeWidgetQuickListVisible(mSharedPreferences);
+        }
+        return mQuickListEnabled;
     }
 
-    public void showQuickList() {
-        if (!mOnlyForResults)
-            show();
+    private boolean isOnlyForResults() {
+        if (TBApplication.state().getDesktop() == LauncherState.Desktop.SEARCH)
+            return mOnlyForResults;
+        return false;
+    }
+
+    public void updateVisibility() {
+        if (isQuickListEnabled()) {
+            if (isOnlyForResults()) {
+                if (TBApplication.state().isResultListVisible()) {
+                    show();
+                    return;
+                }
+            } else {
+                show();
+                return;
+            }
+        }
+        hideQuickList(false);
     }
 
     private void show() {
         mQuickList.removeCallbacks(runCleanList);
-        runCleanList.run();
 
         if (isQuickListEnabled()) {
             final SharedPreferences pref = mSharedPreferences;
@@ -426,11 +452,14 @@ public class QuickList {
                     })
                     .start();
             } else {
+                mQuickList.animate().cancel();
                 mQuickList.setScaleY(1f);
                 TBApplication.state().setQuickList(LauncherState.AnimatedVisibility.VISIBLE);
             }
             mQuickList.setVisibility(View.VISIBLE);
         }
+        // after state set, make sure the list is not dirty
+        runCleanList.run();
     }
 
     public void hideQuickList(boolean animate) {
@@ -467,7 +496,9 @@ public class QuickList {
 
     public void onStart() {
         final SharedPreferences pref = mSharedPreferences;
+        mQuickListEnabled = pref.getBoolean("quick-list-enabled", true);
         mOnlyForResults = pref.getBoolean("quick-list-only-for-results", false);
+
         applyUiPref(pref, mQuickList);
     }
 
@@ -476,13 +507,13 @@ public class QuickList {
         bFilterOn = false;
         bActionOn = false;
         bAdapterEmpty = true;
-        if (mOnlyForResults)
+        if (isOnlyForResults())
             hideQuickList(true);
         mLastSelection = null;
     }
 
     public void adapterUpdated() {
-        if (mOnlyForResults)
+        if (isOnlyForResults())
             show();
         animToggleOff();
         bFilterOn = false;
@@ -492,25 +523,36 @@ public class QuickList {
         bAdapterEmpty = false;
     }
 
-    public static void applyUiPref(SharedPreferences pref, LinearLayout quickList) {
+    private static int cornerRadius(@NonNull Context ctx, @NonNull SharedPreferences pref) {
+        Resources resources = ctx.getResources();
+        final int defaultCorner = resources.getInteger(R.integer.default_corner_radius);
+        final int cornerRadius = pref.getInt("quick-list-radius", defaultCorner);
+        return UISizes.dp2px(ctx, cornerRadius);
+    }
+
+    public static void applyUiPref(@NonNull SharedPreferences pref, LinearLayout quickList) {
         Context ctx = quickList.getContext();
         Resources resources = quickList.getResources();
         // size
         int barHeight = pref.getInt("quick-list-height", 0);
         if (barHeight <= 1)
-            barHeight = resources.getInteger(R.integer.default_bar_height);
+            barHeight = resources.getInteger(R.integer.default_dock_height);
         barHeight = UISizes.dp2px(ctx, barHeight);
 
-        if (!(quickList.getLayoutParams() instanceof ViewGroup.MarginLayoutParams))
-            throw new IllegalStateException("mSearchBarContainer has the wrong layout params");
+        if (quickList.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) quickList.getLayoutParams();
+            // set layout height
+            params.height = barHeight;
+            int hMargin = UISizes.getQuickListMarginHorizontal(ctx);
+            int vMargin = UISizes.getQuickListMarginVertical(ctx);
+            params.setMargins(hMargin, vMargin, hMargin, vMargin);
+            quickList.setLayoutParams(params);
+        }
+        else {
+            throw new IllegalStateException("quickList has the wrong layout params");
+        }
 
-        ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) quickList.getLayoutParams();
-        // set layout height
-        params.height = barHeight;
-        quickList.setLayoutParams(params);
-
-        final int defaultCorner = resources.getInteger(R.integer.default_corner_radius);
-        final int cornerRadius = pref.getInt("quick-list-radius", defaultCorner);
+        final int cornerRadius = cornerRadius(ctx, pref);
         final int color = getBackgroundColor(pref);
 
         // rounded drawable
@@ -533,14 +575,10 @@ public class QuickList {
         } else {
             quickList.setBackgroundColor(color);
         }
-        int margin = (int) (cornerRadius * .5f);
-        params.setMargins(margin, margin, margin, margin);
     }
 
     public static int getBackgroundColor(SharedPreferences pref) {
-        int color = UIColors.getColor(pref, "quick-list-color");
-        int alpha = UIColors.getAlpha(pref, "quick-list-alpha");
-        return UIColors.setAlpha(color, alpha);
+        return UIColors.getColor(pref, "quick-list-argb");
     }
 
     // ugly: check from where the entry was launched

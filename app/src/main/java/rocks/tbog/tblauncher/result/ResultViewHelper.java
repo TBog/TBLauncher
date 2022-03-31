@@ -20,6 +20,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 import androidx.annotation.WorkerThread;
+import androidx.constraintlayout.widget.ConstraintLayout;
 
 import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
@@ -54,10 +55,10 @@ public final class ResultViewHelper {
 
         for (Pair<Integer, Integer> position : matchInfo.getMatchedSequences()) {
             enriched.setSpan(
-                    new ForegroundColorSpan(color),
-                    normalized.mapPosition(position.first),
-                    normalized.mapPosition(position.second),
-                    Spannable.SPAN_INCLUSIVE_EXCLUSIVE
+                new ForegroundColorSpan(color),
+                normalized.mapPosition(position.first),
+                normalized.mapPosition(position.second),
+                Spannable.SPAN_INCLUSIVE_EXCLUSIVE
             );
         }
 
@@ -162,6 +163,17 @@ public final class ResultViewHelper {
                 params.height = size;
                 iconView.setLayoutParams(params);
             }
+        } else if (Utilities.checkFlag(drawFlags, EntryItem.FLAG_DRAW_QUICK_LIST)) {
+            ViewGroup.LayoutParams params = iconView.getLayoutParams();
+            if (params instanceof ConstraintLayout.LayoutParams) {
+                ConstraintLayout.LayoutParams cParams = (ConstraintLayout.LayoutParams) params;
+                int size = UISizes.getDockMaxIconSize(ctx);
+                if (cParams.matchConstraintMaxWidth != size || cParams.matchConstraintMaxHeight != size) {
+                    cParams.matchConstraintMaxWidth = size;
+                    cParams.matchConstraintMaxHeight = size;
+                    iconView.setLayoutParams(params);
+                }
+            }
         }
 
 //        if (Utilities.checkFlag(drawFlags, EntryItem.FLAG_DRAW_LIST))
@@ -179,6 +191,17 @@ public final class ResultViewHelper {
 
         tagsView.setTextColor(UIColors.getResultText2Color(ctx));
         tagsView.setTextSize(TypedValue.COMPLEX_UNIT_PX, UISizes.getResultText2Size(ctx));
+    }
+
+    public static void applyListRowPreferences(ViewGroup rowView) {
+        // set result list item height
+        Context ctx = rowView.getContext();
+        int rowHeight = UISizes.getResultListRowHeight(ctx);
+        ViewGroup.LayoutParams params = rowView.getLayoutParams();
+        if (params.height != rowHeight) {
+            params.height = rowHeight;
+            rowView.setLayoutParams(params);
+        }
     }
 
     @Nullable
@@ -236,12 +259,12 @@ public final class ResultViewHelper {
                 keepIcon = tag_cacheId.equals(cacheId);
             }
             Log.i(TAG, "start task=" + Integer.toHexString(hashCode()) +
-                    " view=" + Integer.toHexString(image.hashCode()) +
-                    " tag_iconTask=" + (tag_iconTask != null ? Integer.toHexString(tag_iconTask.hashCode()) : "null") +
-                    " entry=`" + entryItem.getName() + "`" +
-                    " keepIcon=" + keepIcon +
-                    " tag_cacheId=" + tag_cacheId +
-                    " cacheId=" + cacheId);
+                " view=" + Integer.toHexString(image.hashCode()) +
+                " tag_iconTask=" + (tag_iconTask != null ? Integer.toHexString(tag_iconTask.hashCode()) : "null") +
+                " entry=`" + entryItem.getName() + "`" +
+                " keepIcon=" + keepIcon +
+                " tag_cacheId=" + tag_cacheId +
+                " cacheId=" + cacheId);
             if (!keepIcon) {
                 setLoadingIcon(image);
             }
@@ -286,9 +309,9 @@ public final class ResultViewHelper {
             ImageView image = getImageView();
             if (image == null || drawable == null) {
                 Log.i(TAG, "end task=" + Integer.toHexString(hashCode()) +
-                        " view=" + (image == null ? "null" : Integer.toHexString(image.hashCode())) +
-                        " drawable=" + drawable +
-                        " cacheId=`" + cacheId + "`");
+                    " view=" + (image == null ? "null" : Integer.toHexString(image.hashCode())) +
+                    " drawable=" + drawable +
+                    " cacheId=`" + cacheId + "`");
                 weakImage.clear();
                 return;
             }
@@ -299,9 +322,9 @@ public final class ResultViewHelper {
                 TBApplication.drawableCache(image.getContext()).cacheDrawable(cacheId, drawable);
 
             Log.i(TAG, "end task=" + Integer.toHexString(hashCode()) +
-                    " view=" + Integer.toHexString(image.hashCode()) +
-                    " tag_iconTask=" + (tag_iconTask != null ? Integer.toHexString(tag_iconTask.hashCode()) : "null") +
-                    " cacheId=`" + cacheId + "`");
+                " view=" + Integer.toHexString(image.hashCode()) +
+                " tag_iconTask=" + (tag_iconTask != null ? Integer.toHexString(tag_iconTask.hashCode()) : "null") +
+                " cacheId=`" + cacheId + "`");
             if (tag_iconTask instanceof AsyncSetEntryDrawable) {
                 AsyncSetEntryDrawable task = (AsyncSetEntryDrawable) tag_iconTask;
                 if (!entryItem.equals(task.entryItem)) {

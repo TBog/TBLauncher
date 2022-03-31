@@ -12,9 +12,6 @@
 
     <string name="unable_to_initialize_shortcuts">Could not access shortcuts. Is TinyBit your default launcher?</string>
     <string name="cant_pin_shortcut">Could not add shortcut. Is TinyBit your default launcher?</string>
-    <string name="cant_save_shortcuts">Could not add shortcuts. Is TinyBit your default launcher?</string>
-    <string name="toast_favorites_added">%s added to favorites</string>
-    <string name="toast_favorites_removed">%s removed from favorites</string>
     <string name="menu_quick_list_add">Add to dock</string>
     <string name="menu_quick_list_remove">Remove from dock</string>
     <string name="menu_remove_history">Remove from history</string>
@@ -50,11 +47,9 @@
     <string name="user_interface_summary">Themes, transparency and colors</string>
     <string name="title_ui">User interface</string>
     <string name="notification_bar_section">Notification bar</string>
-    <string name="color">Color</string>
-    <string name="alpha">Opacity</string>
+    <string name="color_and_opacity">Color and opacity</string>
     <string name="gradient">Gradient</string>
     <string name="black_notification_icons">Dark icons</string>
-    <string name="round_corners">Rounded corners</string>
 
     <!-- Content Description -->
     <string name="cd_main_menu">Menu</string>
@@ -111,13 +106,13 @@
     <string name="features_summary">Toggle and customize app features</string>
     <string name="quick_list_section">Dock</string>
     <string name="quick_list_enabled">Use dock</string>
+    <string name="quick_list_icon_size">Max icon size</string>
     <string name="quick_list_height">Dock height</string>
     <string name="tags_section">Tags</string>
     <string name="fuzzy_search_tags">Fuzzy-search tags</string>
     <string name="fuzzy_search_tags_summary">When searching include tags as possible match candidates</string>
     <string name="tags_enabled">Display tags for apps</string>
     <string name="tags_enabled_summary">Show tags for each app in the result list</string>
-    <string name="icons_section">Icons</string>
     <string name="icons_visible">Show Icons</string>
     <string name="popup_title_shortcut_dynamic">Shortcuts</string>
     <string name="popup_title_hist_fav">Preferences</string>
@@ -127,7 +122,7 @@
     <string name="pin_shortcut_message">Do you want to add this shortcut?</string>
     <string name="pin_shortcut_label">Choose shortcut label</string>
     <string name="pin_shortcut_icon">Shortcut icon</string>
-    <string name="quick_list_only_for_results">Visible for results</string>
+    <string name="quick_list_only_for_results">Hide when no results</string>
     <string name="quick_list_only_for_results_summary">Visible when the result list has entries</string>
     <string name="exit_the_app">Close launcher</string>
     <string name="exit_the_app_confirm">Close the launcher?</string>
@@ -199,7 +194,6 @@
     <string name="shortcut_with_appName">%1$s: %2$s</string>
 
     <string name="debug_section">Debug</string>
-    <string name="debug_menu_state">Visibility state info</string>
     <string name="debug_widget_add_info">Add extra widget info</string>
     <string name="debug_widget_info">Long press for extra widget info</string>
     <string name="debug_item_relevance">Search relevance</string>
@@ -208,11 +202,9 @@
     <string name="shortcut_show_badge">Show app badge</string>
     <string name="shortcut_show_badge_summary">Display app icon that created the shortcut</string>
     <string name="quick_list_show_badge">Show shortcut badge in dock</string>
-    <string name="result_list_color">Background color</string>
-    <string name="result_list_alpha">Background opacity</string>
+    <string name="result_list_argb">Background color and opacity</string>
     <string name="result_highlight_color">Highlight color</string>
     <string name="quick_list_color">Background color</string>
-    <string name="quick_list_alpha">Background Opacity</string>
     <string name="quick_list_toggle_color">Toggle background color</string>
     <string name="contact_action_color">Action icon color</string>
     <string name="result_icon_size">Icon size</string>
@@ -292,6 +284,9 @@
     <string name="import_chooser">Select a file to import</string>
     <string name="export_description">After clicking \"OK\" you can select a file manager to save your settings as an XML file.</string>
     <string name="error">Error %s</string>
+
+    <string name="export_preferences">Export settings</string>
+    <string name="export_preferences_summary">All settings, features and behaviours, including interface</string>
     <string name="export_interface">Export interface</string>
     <string name="export_interface_summary">All interface colors, sizes, toggles and icon shapes</string>
     <string name="export_backup">Export backup</string>
@@ -300,6 +295,7 @@
     <string name="export_widgets_summary">Import may not work or require each widget to be added manually</string>
     <string name="export_history">Export history</string>
     <string name="export_history_summary">History of all launched apps</string>
+
     <string name="error_fail_import">Could not import file. Check logcat.</string>
     <string name="widget_placeholder">Click to restore %s</string>
     <string name="add_widget_failed">Could not add widget</string>
@@ -362,6 +358,7 @@
     <string name="popup_text_color">Text color</string>
     <string name="popup_title_color">Title color</string>
     <string name="settings_theme">Settings theme</string>
+    <string name="settings_default">Default</string>
     <string name="settings_8bit">8bit</string>
     <string name="settings_white">White</string>
     <string name="settings_black">Black</string>
@@ -404,6 +401,7 @@
     <string name="action_show_untagged">Untagged</string>
     <string name="dm_search_open_result">Initial result list</string>
     <string name="action_app_to_run">App to run</string>
+    <string name="action_shortcut_to_run">Shortcut to run</string>
     <string name="action_entry_to_show">Tags to show</string>
     <string name="no_tags">No tags found</string>
     <string name="quick_list_animation">Animate show/hide</string>
@@ -462,6 +460,15 @@
 
     <string name="exit_tags_manager_confirm">Close Tags manager?</string>
     <string name="exit_tags_manager_description">You will lose all changes if you close the Tags manager.\nAre you sure you want to continue?</string>
+    <string name="result_fading_edge">Gradient</string>
+    <string name="result_fading_edge_summary">Top and bottom edges fade out</string>
+    <string name="margin_vertical">Vertical margin</string>
+    <string name="margin_horizontal">Horizontal margin</string>
+    <string name="browse_add_icon">Browse local images</string>
+    <string name="result_list_row_height">List row height</string>
+    <string name="result_list_row_height_manual">Custom list row height</string>
+    <string name="shortcut_dynamic_in_results">Show dynamic in results</string>
+    <string name="shortcut_dynamic_in_results_summary">Dynamic shortcuts will be considered as possible results when searching</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>

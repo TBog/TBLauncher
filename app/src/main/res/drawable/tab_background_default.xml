@@ -1,0 +1,22 @@
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_selected="true">
+        <layer-list>
+            <item android:bottom="@dimen/edit_tag_padding" android:left="@dimen/edit_tag_padding" android:right="@dimen/edit_tag_padding" android:top="@dimen/edit_tag_padding">
+                <shape>
+                    <solid android:color="@color/Default_dark" />
+                    <stroke android:width="1dp" android:color="@color/Default_background" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+    <item>
+        <layer-list>
+            <item android:bottom="@dimen/edit_tag_padding" android:left="@dimen/edit_tag_padding" android:right="@dimen/edit_tag_padding" android:top="@dimen/edit_tag_padding">
+                <shape>
+                    <solid android:color="@color/Default_background" />
+                    <stroke android:width="1dp" android:color="@color/Default_dark" />
+                </shape>
+            </item>
+        </layer-list>
+    </item>
+</selector>

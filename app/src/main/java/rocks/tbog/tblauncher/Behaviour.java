@@ -567,18 +567,8 @@ public class Behaviour implements ISearchActivity {
             case SEARCH:
                 // show the SearchBar
                 showSearchBar();
-                // hide/show the QuickList
-                if (PrefCache.modeSearchQuickListVisible(mPref))
-                    TBApplication.quickList(getContext()).showQuickList();
-                else
-                    TBApplication.quickList(getContext()).hideQuickList(false);
-                // enable/disable fullscreen (status and navigation bar)
-                if (TBApplication.state().isKeyboardHidden()
-                    && PrefCache.modeSearchFullscreen(mPref))
-                    enableFullscreen(UI_ANIMATION_DELAY);
-                else
-                    disableFullscreen();
 
+                // hide/show result list
                 final String openResult = PrefCache.modeSearchOpenResult(mPref);
                 if ("none".equals(openResult)) {
                     // hide result
@@ -592,15 +582,22 @@ public class Behaviour implements ISearchActivity {
                             }),
                         KEYBOARD_ANIMATION_DELAY);
                 }
+
+                // hide/show the QuickList
+                TBApplication.quickList(getContext()).updateVisibility();
+
+                // enable/disable fullscreen (status and navigation bar)
+                if (TBApplication.state().isKeyboardHidden()
+                    && PrefCache.modeSearchFullscreen(mPref))
+                    enableFullscreen(UI_ANIMATION_DELAY);
+                else
+                    disableFullscreen();
                 break;
             case WIDGET:
                 // show widgets
                 showWidgets();
                 // hide/show the QuickList
-                if (PrefCache.modeWidgetQuickListVisible(mPref))
-                    TBApplication.quickList(getContext()).showQuickList();
-                else
-                    TBApplication.quickList(getContext()).hideQuickList(false);
+                TBApplication.quickList(getContext()).updateVisibility();
                 // enable/disable fullscreen (status and navigation bar)
                 if (PrefCache.modeWidgetFullscreen(mPref))
                     enableFullscreen(UI_ANIMATION_DELAY);
@@ -610,10 +607,7 @@ public class Behaviour implements ISearchActivity {
             case EMPTY:
             default:
                 // hide/show the QuickList
-                if (PrefCache.modeEmptyQuickListVisible(mPref))
-                    TBApplication.quickList(getContext()).showQuickList();
-                else
-                    TBApplication.quickList(getContext()).hideQuickList(false);
+                TBApplication.quickList(getContext()).updateVisibility();
                 // enable/disable fullscreen (status and navigation bar)
                 if (PrefCache.modeEmptyFullscreen(mPref))
                     enableFullscreen(UI_ANIMATION_DELAY);
@@ -1002,8 +996,11 @@ public class Behaviour implements ISearchActivity {
         Log.d(TAG, "hideResultList (anim " + animate + ")");
         if (TBApplication.state().getResultListVisibility() != LauncherState.AnimatedVisibility.ANIM_TO_HIDDEN)
             mResultLayout.animate().cancel();
-        if (mResultLayout.getVisibility() != View.VISIBLE)
+        if (mResultLayout.getVisibility() != View.VISIBLE) {
+            Log.d(TAG, "mResultLayout not VISIBLE, setting state to HIDDEN");
+            TBApplication.state().setResultList(LauncherState.AnimatedVisibility.HIDDEN);
             return;
+        }
         if (animate) {
             TBApplication.state().setResultList(LauncherState.AnimatedVisibility.ANIM_TO_HIDDEN);
             mResultLayout.animate()
@@ -1351,7 +1348,7 @@ public class Behaviour implements ISearchActivity {
         mFragmentDialog = dialog;
     }
 
-    private boolean closeFragmentDialog() {
+    public boolean closeFragmentDialog() {
         return closeFragmentDialog(null);
     }
 
@@ -1362,9 +1359,11 @@ public class Behaviour implements ISearchActivity {
                 return true;
             } else if (tag == null) {
                 mFragmentDialog.dismiss();
+                mFragmentDialog = null;
                 return true;
             }
         }
+        mFragmentDialog = null;
         return false;
     }
 
@@ -1487,6 +1486,18 @@ public class Behaviour implements ISearchActivity {
         return false;
     }
 
+    private boolean launchEntryById(@NonNull String entryId) {
+        Context ctx = getContext();
+        DataHandler dataHandler = TBApplication.dataHandler(ctx);
+        EntryItem item = dataHandler.getPojo(entryId);
+        if (item == null) {
+            Toast.makeText(ctx, ctx.getString(R.string.entry_not_found, entryId), Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        item.doLaunch(mLauncherButton, LAUNCHED_FROM_GESTURE);
+        return true;
+    }
+
     private void executeButtonAction(@Nullable String button) {
         if (mPref != null)
             executeAction(mPref.getString(button, null), button);
@@ -1599,6 +1610,12 @@ public class Behaviour implements ISearchActivity {
                 String runApp = mPref.getString(source + "-app-to-run", null);
                 if (runApp != null)
                     return launchAppEntry(runApp);
+                break;
+            }
+            case "runShortcut": {
+                String runApp = mPref.getString(source + "-shortcut-to-run", null);
+                if (runApp != null)
+                    return launchEntryById(runApp);
                 break;
             }
             case "showEntry": {

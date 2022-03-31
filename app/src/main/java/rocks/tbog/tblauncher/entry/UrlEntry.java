@@ -8,6 +8,7 @@ import android.text.SpannableString;
 import android.text.style.ForegroundColorSpan;
 import android.util.Pair;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -115,6 +116,8 @@ public abstract class UrlEntry extends SearchEntry {
         }
 
         ResultViewHelper.applyPreferences(drawFlags, nameView, appIcon);
+        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_LIST))
+            ResultViewHelper.applyListRowPreferences((ViewGroup) view);
     }
 
     public static class AsyncSetUrlEntryIcon extends ResultViewHelper.AsyncSetEntryDrawable {

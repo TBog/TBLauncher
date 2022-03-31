@@ -22,6 +22,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
@@ -51,11 +52,13 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import rocks.tbog.tblauncher.dataprovider.ShortcutsProvider;
 import rocks.tbog.tblauncher.dataprovider.TagsProvider;
 import rocks.tbog.tblauncher.db.ExportedData;
 import rocks.tbog.tblauncher.db.XmlImport;
 import rocks.tbog.tblauncher.drawable.SizeWrappedDrawable;
 import rocks.tbog.tblauncher.entry.AppEntry;
+import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.entry.TagEntry;
 import rocks.tbog.tblauncher.handler.IconsHandler;
@@ -88,10 +91,10 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     private final static String INTENT_EXTRA_BACK_STACK_TAGS = "backStackTagList";
 
     private final static ArraySet<String> PREF_THAT_REQUIRE_LAYOUT_UPDATE = new ArraySet<>(Arrays.asList(
-        "result-list-color", "result-list-alpha", "result-ripple-color", "result-list-rounded",
-        "notification-bar-color", "notification-bar-alpha", "notification-bar-gradient", "black-notification-icons",
-        "search-bar-height", "search-bar-text-size", "search-bar-rounded", "search-bar-gradient", "search-bar-at-bottom",
-        "search-bar-color", "search-bar-alpha", "search-bar-text-color", "search-bar-icon-color",
+        "result-list-argb", "result-ripple-color", "result-list-radius", "result-list-row-height",
+        "notification-bar-argb", "notification-bar-gradient", "black-notification-icons",
+        "search-bar-height", "search-bar-text-size", "search-bar-radius", "search-bar-gradient", "search-bar-at-bottom",
+        "search-bar-argb", "search-bar-text-color", "search-bar-icon-color",
         "search-bar-ripple-color", "search-bar-cursor-argb", "enable-suggestions-keyboard"
     ));
     private final static ArraySet<String> PREF_LISTS_WITH_DEPENDENCY = new ArraySet<>(Arrays.asList(
@@ -245,9 +248,22 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     public boolean onSupportNavigateUp() {
         if (getSupportFragmentManager().popBackStackImmediate()) {
             final int count = getSupportFragmentManager().getBackStackEntryCount();
-            if (count == 0) {
-                setTitle(R.string.menu_popup_launcher_settings);
+            CharSequence title = null;
+            if (count > 0) {
+                String tag = getSupportFragmentManager().getBackStackEntryAt(count - 1).getName();
+                if (tag != null) {
+                    Fragment fragment = getSupportFragmentManager().findFragmentByTag(SettingsFragment.FRAGMENT_TAG);
+                    if (fragment instanceof SettingsFragment) {
+                        Preference preference = ((SettingsFragment) fragment).findPreference(tag);
+                        if (preference != null)
+                            title = preference.getTitle();
+                    }
+                }
             }
+            if (title != null)
+                setTitle(title);
+            else
+                setTitle(R.string.menu_popup_launcher_settings);
             return true;
         }
         return super.onSupportNavigateUp();
@@ -317,6 +333,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         private static final String TAG = "Settings";
 
         private static Pair<CharSequence[], CharSequence[]> AppToRunListContent = null;
+        private static Pair<CharSequence[], CharSequence[]> ShortcutToRunListContent = null;
         private static Pair<CharSequence[], CharSequence[]> EntryToShowListContent = null;
         private static ContentLoadHelper.OrderedMultiSelectListData TagsMenuContent = null;
         private static ContentLoadHelper.OrderedMultiSelectListData ResultPopupContent = null;
@@ -401,6 +418,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         private void onCreateAsyncLoad(@NonNull Context context, @NonNull SharedPreferences sharedPreferences, @Nullable Bundle savedInstanceState) {
             if (savedInstanceState == null) {
                 initAppToRunLists(context, sharedPreferences);
+                initShortcutToRunLists(context, sharedPreferences);
                 initEntryToShowLists(context, sharedPreferences);
                 initTagsMenuList(context, sharedPreferences);
                 initResultPopupList(context, sharedPreferences);
@@ -409,6 +427,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 synchronized (SettingsFragment.class) {
                     if (AppToRunListContent == null)
                         AppToRunListContent = generateAppToRunListContent(context);
+                    if (ShortcutToRunListContent == null)
+                        ShortcutToRunListContent = generateShortcutToRunListContent(context);
                     if (EntryToShowListContent == null)
                         EntryToShowListContent = generateEntryToShowListContent(context);
                     if (TagsMenuContent == null)
@@ -420,6 +440,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
                     for (String gesturePref : PREF_LISTS_WITH_DEPENDENCY) {
                         updateAppToRunList(sharedPreferences, gesturePref);
+                        updateShortcutToRunList(sharedPreferences, gesturePref);
                         updateEntryToShowList(sharedPreferences, gesturePref);
                     }
                     TagsMenuContent.setMultiListValues(findPreference("tags-menu-list"));
@@ -457,6 +478,24 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     synchronized (SettingsFragment.class) {
                         if (AppToRunListContent == null)
                             AppToRunListContent = content;
+                    }
+                }, t -> updateLists.run());
+            } else {
+                updateLists.run();
+            }
+        }
+
+        private void initShortcutToRunLists(@NonNull Context context, @NonNull SharedPreferences sharedPreferences) {
+            final Runnable updateLists = () -> {
+                for (String gesturePref : PREF_LISTS_WITH_DEPENDENCY)
+                    updateShortcutToRunList(sharedPreferences, gesturePref);
+            };
+            if (ShortcutToRunListContent == null) {
+                Utilities.runAsync(getLifecycle(), t -> {
+                    Pair<CharSequence[], CharSequence[]> content = generateShortcutToRunListContent(context);
+                    synchronized (SettingsFragment.this) {
+                        if (ShortcutToRunListContent == null)
+                            ShortcutToRunListContent = content;
                     }
                 }, t -> updateLists.run());
             } else {
@@ -617,6 +656,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             super.onDestroy();
             synchronized (SettingsFragment.class) {
                 AppToRunListContent = null;
+                ShortcutToRunListContent = null;
                 EntryToShowListContent = null;
                 TagsMenuContent = null;
                 ResultPopupContent = null;
@@ -624,7 +664,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         }
 
         @Override
-        public void onDisplayPreferenceDialog(Preference preference) {
+        public void onDisplayPreferenceDialog(@NonNull Preference preference) {
             // Try if the preference is one of our custom Preferences
             DialogFragment dialogFragment = null;
             if (preference instanceof CustomDialogPreference) {
@@ -632,75 +672,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 String key = preference.getKey();
                 Log.d(TAG, "onDisplayPreferenceDialog " + key);
                 switch (key) {
-                    case "primary-color":
-                    case "secondary-color":
-                    case "icon-background-argb":
-                    case "notification-bar-color":
-                    case "search-bar-color":
-                    case "result-list-color":
-                    case "result-ripple-color":
-                    case "result-highlight-color":
-                    case "result-text-color":
-                    case "result-text2-color":
-                    case "contact-action-color":
-                    case "search-bar-text-color":
-                    case "search-bar-icon-color":
-                    case "search-bar-ripple-color":
-                    case "search-bar-cursor-argb":
-                    case "quick-list-toggle-color":
-                    case "quick-list-color":
-                    case "quick-list-ripple-color":
-                    case "popup-background-argb":
-                    case "popup-border-argb":
-                    case "popup-ripple-color":
-                    case "popup-text-color":
-                    case "popup-title-color":
-                        dialogFragment = PreferenceColorDialog.newInstance(key);
-                        break;
-                    case "notification-bar-alpha":
-                    case "search-bar-alpha":
-                    case "result-list-alpha":
-                    case "search-bar-height":
-                    case "search-bar-text-size":
-                    case "quick-list-alpha":
-                    case "quick-list-height":
-                    case "result-text-size":
-                    case "result-text2-size":
-                    case "result-icon-size":
-                    case "result-history-size":
-                    case "result-history-adaptive":
-                    case "result-search-cap":
-                    case "tags-menu-icon-size":
-                    case "icon-scale-red":
-                    case "icon-scale-green":
-                    case "icon-scale-blue":
-                    case "icon-scale-alpha":
-                    case "icon-hue":
-                    case "icon-contrast":
-                    case "icon-brightness":
-                    case "icon-saturation":
-                    case "popup-corner-radius":
-                    case "quick-list-radius":
-                        dialogFragment = SliderDialog.newInstance(key);
-                        break;
-                    case "generate-theme-simple":
-                    case "generate-theme-highlight":
-                    case "device-admin":
-                    case "reset-matrix":
-                    case "reset-preferences":
-                    case "reset-cached-app-icons":
-                    case "exit-app":
-                    case "reset-default-launcher":
-                    case "export-tags":
-                    case "export-modifications":
-                    case "export-apps":
-                    case "export-interface":
-                    case "export-widgets":
-                    case "export-history":
-                    case "export-backup":
-                    case "unlimited-search-cap":
-                        dialogFragment = ConfirmDialog.newInstance(key);
-                        break;
                     case "quick-list-content":
                         dialogFragment = QuickListPreferenceDialog.newInstance(key);
                         break;
@@ -715,8 +686,22 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         dialogFragment = EditSearchHintPreferenceDialog.newInstance(key);
                         break;
                     default:
-                        throw new IllegalArgumentException("CustomDialogPreference \"" + key + "\" has no dialog defined");
+                        dialogFragment = null;
                 }
+                if (dialogFragment == null) {
+                    @LayoutRes
+                    int dialogLayout = ((CustomDialogPreference) preference).getDialogLayoutResource();
+                    if (dialogLayout == 0) {
+                        if (key.endsWith("-color") || key.endsWith("-argb"))
+                            dialogFragment = PreferenceColorDialog.newInstance(key);
+                    } else if (R.layout.pref_slider == dialogLayout) {
+                        dialogFragment = SliderDialog.newInstance(key);
+                    } else if (R.layout.pref_confirm == dialogLayout) {
+                        dialogFragment = ConfirmDialog.newInstance(key);
+                    }
+                }
+                if (dialogFragment == null)
+                    throw new IllegalArgumentException("CustomDialogPreference \"" + key + "\" has no dialog defined");
             } else if (preference instanceof ListPreference) {
                 String key = preference.getKey();
                 switch (key) {
@@ -743,8 +728,12 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
             // If it was one of our custom Preferences, show its dialog
             if (dialogFragment != null) {
-                dialogFragment.setTargetFragment(this, 0);
                 final FragmentManager fm = this.getParentFragmentManager();
+                // check if dialog is already showing
+                if (fm.findFragmentByTag(DIALOG_FRAGMENT_TAG) != null) {
+                    return;
+                }
+                dialogFragment.setTargetFragment(this, 0);
                 dialogFragment.show(fm, DIALOG_FRAGMENT_TAG);
             }
             // Could not be handled here. Try with the super method.
@@ -763,6 +752,25 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 AppEntry appEntry = appEntryList.get(idx);
                 entries[idx] = appEntry.getName();
                 entryValues[idx] = appEntry.getUserComponentName();
+            }
+            return new Pair<>(entries, entryValues);
+        }
+
+        private static Pair<CharSequence[], CharSequence[]> generateShortcutToRunListContent(@NonNull Context context) {
+            ShortcutsProvider shortcutsProvider = TBApplication.dataHandler(context).getShortcutsProvider();
+            List<? extends EntryItem> shortcutList = shortcutsProvider == null ? null : shortcutsProvider.getPojos();
+            if (shortcutList == null)
+                return new Pair<>(new CharSequence[0], new CharSequence[0]);
+            // copy list in order to sort it
+            shortcutList = new ArrayList<>(shortcutList);
+            Collections.sort(shortcutList, EntryItem.NAME_COMPARATOR);
+            final int entryCount = shortcutList.size();
+            CharSequence[] entries = new CharSequence[entryCount];
+            CharSequence[] entryValues = new CharSequence[entryCount];
+            for (int idx = 0; idx < entryCount; idx++) {
+                EntryItem shortcutEntry = shortcutList.get(idx);
+                entries[idx] = shortcutEntry.getName();
+                entryValues[idx] = shortcutEntry.id;
             }
             return new Pair<>(entries, entryValues);
         }
@@ -810,20 +818,20 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         }
 
         private void updateListPrefDependency(@NonNull String dependOnKey, @Nullable String dependOnValue, @NonNull String enableValue, @NonNull String listKey, @Nullable Pair<CharSequence[], CharSequence[]> listContent) {
-            Preference prefAppToRun = findPreference(listKey);
-            if (prefAppToRun instanceof ListPreference) {
+            Preference prefEntryToRun = findPreference(listKey);
+            if (prefEntryToRun instanceof ListPreference) {
                 synchronized (SettingsFragment.class) {
                     if (listContent != null) {
                         CharSequence[] entries = listContent.first;
                         CharSequence[] entryValues = listContent.second;
-                        ((ListPreference) prefAppToRun).setEntries(entries);
-                        ((ListPreference) prefAppToRun).setEntryValues(entryValues);
-                        prefAppToRun.setVisible(enableValue.equals(dependOnValue));
+                        ((ListPreference) prefEntryToRun).setEntries(entries);
+                        ((ListPreference) prefEntryToRun).setEntryValues(entryValues);
+                        prefEntryToRun.setVisible(enableValue.equals(dependOnValue));
                         return;
                     }
                 }
             }
-            if (prefAppToRun == null) {
+            if (prefEntryToRun == null) {
                 // the ListPreference for selecting an app is missing. Remove the option to run an app.
                 Preference pref = findPreference(dependOnKey);
                 if (pref instanceof ListPreference) {
@@ -831,12 +839,16 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 }
             } else {
                 Log.w(TAG, "ListPreference `" + listKey + "` can't be updated");
-                prefAppToRun.setVisible(false);
+                prefEntryToRun.setVisible(false);
             }
         }
 
         private void updateAppToRunList(@NonNull SharedPreferences sharedPreferences, String key) {
             updateListPrefDependency(key, sharedPreferences.getString(key, null), "runApp", key + "-app-to-run", AppToRunListContent);
+        }
+
+        private void updateShortcutToRunList(@NonNull SharedPreferences sharedPreferences, String key) {
+            updateListPrefDependency(key, sharedPreferences.getString(key, null), "runShortcut", key + "-shortcut-to-run", ShortcutToRunListContent);
         }
 
         private void updateEntryToShowList(@NonNull SharedPreferences sharedPreferences, String key) {
@@ -875,11 +887,12 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         @Override
         public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
             SettingsActivity activity = (SettingsActivity) getActivity();
-            if (activity == null)
+            if (activity == null || key == null)
                 return;
 
             if (PREF_LISTS_WITH_DEPENDENCY.contains(key)) {
                 updateAppToRunList(sharedPreferences, key);
+                updateShortcutToRunList(sharedPreferences, key);
                 updateEntryToShowList(sharedPreferences, key);
             }
 
@@ -927,7 +940,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     }
 
     private static void applyNotificationBarColor(@NonNull SharedPreferences sharedPreferences, @Nullable Context context) {
-        int color = UIColors.getColor(sharedPreferences, "notification-bar-color");
+        int color = UIColors.getColor(sharedPreferences, "notification-bar-argb");
         // keep the bars opaque to avoid white text on white background by mistake
         int alpha = 0xFF;//UIColors.getAlpha(sharedPreferences, "notification-bar-alpha");
         Activity activity = Utilities.getActivity(context);
@@ -960,8 +973,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             activity.liveWallpaper.onPrefChanged(sharedPreferences, key);
 
         switch (key) {
-            case "notification-bar-color":
-            case "notification-bar-alpha":
+            case "notification-bar-argb":
             case "black-notification-icons":
                 applyNotificationBarColor(sharedPreferences, context);
                 break;
@@ -980,7 +992,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 if (activity != null)
                     activity.refreshSearchRecords();
                 // fallthrough
-            case "quick-list-color":
+            case "quick-list-argb":
             case "quick-list-ripple-color":
                 // static entities will change color based on luminance
                 // fallthrough
@@ -989,9 +1001,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 if (activity != null)
                     activity.queueDockReload();
                 // fallthrough
-            case "result-list-color":
+            case "result-list-argb":
             case "result-ripple-color":
-            case "result-list-alpha":
             case "result-highlight-color":
             case "result-text-color":
             case "result-text2-color":
@@ -1004,11 +1015,16 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case "popup-title-color":
                 UIColors.resetCache();
                 break;
+            case "quick-list-icon-size":
+                if (activity != null)
+                    activity.queueDockReload();
+                // fallthrough
             case "result-text-size":
             case "result-text2-size":
             case "result-icon-size":
             case "tags-menu-icon-size":
             case "popup-corner-radius":
+            case "result-list-row-height":
                 UISizes.resetCache();
                 break;
             case "result-history-size":
@@ -1068,6 +1084,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case "enable-dial":
             case "enable-contacts":
             case "selected-contact-mime-types":
+            case "shortcut-dynamic-in-results":
                 TBApplication.dataHandler(context).reloadProviders();
                 break;
             case "root-mode":
