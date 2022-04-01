@@ -122,8 +122,8 @@
     <string name="pin_shortcut_message">Do you want to add this shortcut?</string>
     <string name="pin_shortcut_label">Choose shortcut label</string>
     <string name="pin_shortcut_icon">Shortcut icon</string>
-    <string name="quick_list_only_for_results">Hide when no results</string>
-    <string name="quick_list_only_for_results_summary">Visible when the result list has entries</string>
+    <string name="quick_list_only_for_results">Hide dock when no results</string>
+    <string name="quick_list_only_for_results_summary">Make dock visible when the result list has entries</string>
     <string name="exit_the_app">Close launcher</string>
     <string name="exit_the_app_confirm">Close the launcher?</string>
     <string name="exit_the_app_description">Your default launcher will be opened, or you will be asked which one you want to use.</string>
