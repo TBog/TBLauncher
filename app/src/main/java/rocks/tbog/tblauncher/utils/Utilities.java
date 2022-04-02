@@ -28,6 +28,7 @@ import android.text.Spanned;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
+import android.view.ViewStub;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -38,6 +39,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 import androidx.annotation.WorkerThread;
 import androidx.appcompat.content.res.AppCompatResources;
+import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.lifecycle.Lifecycle;
 
@@ -809,6 +811,98 @@ public class Utilities {
             builder.append(glue);
         builder.append(layoutDirection == View.LAYOUT_DIRECTION_RTL ? textA : textB);
         return builder.toString();
+    }
+
+    @Nullable
+    public static View inflateViewStub(@Nullable View view) {
+        if (!(view instanceof ViewStub))
+            return view;
+
+        ViewStub stub = (ViewStub) view;
+        int stubId = stub.getId();
+
+        // get parent before the call to inflate
+        ConstraintLayout constraintLayout = stub.getParent() instanceof ConstraintLayout ? (ConstraintLayout) stub.getParent() : null;
+
+        View inflatedView = ((ViewStub) stub).inflate();
+        int inflatedId = inflatedView.getId();
+
+        // change parent ConstraintLayout constraints
+        if (constraintLayout != null && stubId != inflatedId) {
+            int childCount = constraintLayout.getChildCount();
+            for (int childIdx = 0; childIdx < childCount; childIdx += 1) {
+                View child = constraintLayout.getChildAt(childIdx);
+                ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) child.getLayoutParams();
+                if (changeConstraintLayoutParamsTarget(params, stubId, inflatedId))
+                    child.setLayoutParams(params);
+            }
+        }
+        return inflatedView;
+    }
+
+    private static boolean changeConstraintLayoutParamsTarget(ConstraintLayout.LayoutParams params, int fromId, int toId) {
+        boolean changed = false;
+        if (params.leftToLeft == fromId) {
+            params.leftToLeft = toId;
+            changed = true;
+        }
+        if (params.leftToRight == fromId) {
+            params.leftToRight = toId;
+            changed = true;
+        }
+        if (params.rightToLeft == fromId) {
+            params.rightToLeft = toId;
+            changed = true;
+        }
+        if (params.rightToRight == fromId) {
+            params.rightToRight = toId;
+            changed = true;
+        }
+        if (params.topToTop == fromId) {
+            params.topToTop = toId;
+            changed = true;
+        }
+        if (params.topToBottom == fromId) {
+            params.topToBottom = toId;
+            changed = true;
+        }
+        if (params.bottomToTop == fromId) {
+            params.bottomToTop = toId;
+            changed = true;
+        }
+        if (params.bottomToBottom == fromId) {
+            params.bottomToBottom = toId;
+            changed = true;
+        }
+        if (params.baselineToBaseline == fromId) {
+            params.baselineToBaseline = toId;
+            changed = true;
+        }
+        if (params.baselineToTop == fromId) {
+            params.baselineToTop = toId;
+            changed = true;
+        }
+        if (params.circleConstraint == fromId) {
+            params.circleConstraint = toId;
+            changed = true;
+        }
+        if (params.startToEnd == fromId) {
+            params.startToEnd = toId;
+            changed = true;
+        }
+        if (params.startToStart == fromId) {
+            params.startToStart = toId;
+            changed = true;
+        }
+        if (params.endToStart == fromId) {
+            params.endToStart = toId;
+            changed = true;
+        }
+        if (params.endToEnd == fromId) {
+            params.endToEnd = toId;
+            changed = true;
+        }
+        return changed;
     }
 
     public interface GetDrawable {

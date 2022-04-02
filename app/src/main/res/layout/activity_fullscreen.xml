@@ -31,7 +31,39 @@
              search bar when the soft keyboard is displayed
         -->
 
-        <include layout="@layout/result_list" />
+        <ViewStub
+            android:id="@+id/stubSearchTop"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/bar_height"
+            android:layout_gravity="bottom|center_horizontal"
+            android:background="@null"
+            android:clipChildren="false"
+            android:gravity="center"
+            android:layout="@layout/search_bar"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toTopOf="@+id/resultLayout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_chainStyle="spread_inside"
+            tools:visibility="visible" />
+
+        <!--        <include layout="@layout/result_list" />-->
+        <ViewStub
+            android:id="@+id/resultLayout"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginHorizontal="@dimen/result_margin_horizontal"
+            android:layout_marginVertical="@dimen/result_margin_vertical"
+            android:background="?attr/listBackgroundColor"
+            android:elevation="2dp"
+            android:inflatedId="@id/resultLayout"
+            android:layout="@layout/result_list"
+            app:layout_constraintBottom_toTopOf="@id/debugText"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/stubSearchTop"
+            tools:visibility="visible" />
 
         <rocks.tbog.tblauncher.ui.WidgetLayout
             android:id="@+id/widgetContainer"
@@ -43,7 +75,7 @@
             app:layout_constraintBottom_toTopOf="@id/quickList"
             app:layout_constraintTop_toTopOf="parent"
             tools:background="@drawable/popup_background"
-            tools:visibility="visible" />
+            tools:visibility="gone" />
         <!--            <ImageView-->
         <!--                android:importantForAccessibility="no"-->
         <!--                android:layout_width="50dp"-->
@@ -60,6 +92,7 @@
             android:textColor="#666"
             android:visibility="gone"
             android:elevation="10dp"
+            app:layout_constraintTop_toBottomOf="@id/resultLayout"
             app:layout_constraintBottom_toTopOf="@id/quickList"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -74,14 +107,30 @@
             android:measureWithLargestChild="true"
             android:orientation="horizontal"
             android:visibility="gone"
-            app:layout_constraintBottom_toTopOf="@id/searchBarContainer"
+            app:layout_constraintBottom_toTopOf="@id/stubSearchBottom"
+            app:layout_constraintTop_toBottomOf="@id/debugText"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             tools:background="@drawable/tab_background_light"
             tools:backgroundTint="@color/colorAccent"
             tools:visibility="visible" />
 
-        <include layout="@layout/search_bar" />
+        <!--        <include layout="@layout/search_bar" />-->
+        <ViewStub
+            android:id="@+id/stubSearchBottom"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/bar_height"
+            android:layout_gravity="bottom|center_horizontal"
+            android:background="@null"
+            android:clipChildren="false"
+            android:gravity="center"
+            android:layout="@layout/search_bar"
+            android:orientation="horizontal"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/quickList"
+            tools:visibility="visible" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
