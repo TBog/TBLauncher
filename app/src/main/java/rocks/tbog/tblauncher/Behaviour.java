@@ -176,7 +176,7 @@ public class Behaviour implements ISearchActivity {
     private WindowInsetsHelper mKeyboardHandler = null;
     private SharedPreferences mPref;
 
-    static void launchIntent(@NonNull Behaviour behaviour, @NonNull View view, @NonNull Intent intent) {
+    private static void launchIntent(@NonNull Behaviour behaviour, @NonNull View view, @NonNull Intent intent) {
         behaviour.beforeLaunchOccurred();
         view.postDelayed(() -> {
             Activity activity = Utilities.getActivity(view);
@@ -194,6 +194,8 @@ public class Behaviour implements ISearchActivity {
     }
 
     private void initResultLayout() {
+        mResultLayout = inflateViewStub(R.id.resultLayout);
+
         mResultList = mResultLayout.findViewById(R.id.resultList);
         if (mResultList == null)
             throw new IllegalStateException("mResultList==null");
@@ -215,10 +217,17 @@ public class Behaviour implements ISearchActivity {
     }
 
     private void initSearchBarContainer() {
-        if (PrefCache.searchBarAtBottom(mPref))
-            moveSearchBarAtBottom();
-        else
-            moveSearchBarAtTop();
+        if (PrefCache.searchBarAtBottom(mPref)) {
+            mSearchBarContainer = inflateViewStub(R.id.stubSearchBottom);
+            //moveSearchBarAtBottom();
+        } else {
+            mSearchBarContainer = inflateViewStub(R.id.stubSearchTop);
+            //moveSearchBarAtTop();
+        }
+        mLauncherButton = mSearchBarContainer.findViewById(R.id.launcherButton);
+        mSearchEditText = mSearchBarContainer.findViewById(R.id.launcherSearch);
+        mClearButton = mSearchBarContainer.findViewById(R.id.clearButton);
+        mMenuButton = mSearchBarContainer.findViewById(R.id.menuButton);
     }
 
     private void moveSearchBarAtBottom() {
@@ -354,7 +363,8 @@ public class Behaviour implements ISearchActivity {
                 state.setKeyboard(LauncherState.AnimatedVisibility.VISIBLE);
                 dismissPopup();
 
-                mSearchEditText.requestFocus();
+                if (mSearchEditText != null)
+                    mSearchEditText.requestFocus();
 
                 super.showKeyboard();
             }
@@ -375,7 +385,8 @@ public class Behaviour implements ISearchActivity {
                 View focus = mTBLauncherActivity.getCurrentFocus();
                 if (focus != null)
                     focus.clearFocus();
-                mSearchEditText.clearFocus();
+                if (mSearchEditText != null)
+                    mSearchEditText.clearFocus();
 
                 super.hideKeyboard();
             }
@@ -386,14 +397,17 @@ public class Behaviour implements ISearchActivity {
         mTBLauncherActivity = tbLauncherActivity;
         mPref = PreferenceManager.getDefaultSharedPreferences(tbLauncherActivity);
 
+        initKeyboardScrollHider();
+        initResultLayout();
+        initSearchBarContainer();
+
         mNotificationBackground = findViewById(R.id.notificationBackground);
-        mResultLayout = findViewById(R.id.resultLayout);
         mWidgetContainer = findViewById(R.id.widgetContainer);
-        mSearchBarContainer = findViewById(R.id.searchBarContainer);
-        mLauncherButton = findViewById(R.id.launcherButton);
-        mSearchEditText = findViewById(R.id.launcherSearch);
-        mClearButton = findViewById(R.id.clearButton);
-        mMenuButton = findViewById(R.id.menuButton);
+//        mSearchBarContainer = findViewById(R.id.searchBarContainer);
+//        mLauncherButton = mSearchBarContainer.findViewById(R.id.launcherButton);
+//        mSearchEditText = mSearchBarContainer.findViewById(R.id.launcherSearch);
+//        mClearButton = mSearchBarContainer.findViewById(R.id.clearButton);
+//        mMenuButton = mSearchBarContainer.findViewById(R.id.menuButton);
 
         Window window = mTBLauncherActivity.getWindow();
 //        WindowCompat.setDecorFitsSystemWindows(window, false);
@@ -410,9 +424,6 @@ public class Behaviour implements ISearchActivity {
 
         mDecorView = window.getDecorView();
 
-        initKeyboardScrollHider();
-        initResultLayout();
-        initSearchBarContainer();
         initLauncherButton();
         initLauncherSearchEditText();
 
@@ -516,6 +527,12 @@ public class Behaviour implements ISearchActivity {
     @SuppressWarnings("TypeParameterUnusedInFormals")
     private <T extends View> T findViewById(@IdRes int id) {
         return mTBLauncherActivity.findViewById(id);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T extends View> T inflateViewStub(@IdRes int id) {
+        View stub = mTBLauncherActivity.findViewById(id);
+        return (T) Utilities.inflateViewStub(stub);
     }
 
     private void updateClearButton() {
