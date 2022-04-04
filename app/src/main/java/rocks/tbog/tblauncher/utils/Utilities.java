@@ -39,6 +39,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 import androidx.annotation.WorkerThread;
 import androidx.appcompat.content.res.AppCompatResources;
+import androidx.constraintlayout.widget.ConstraintHelper;
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.lifecycle.Lifecycle;
@@ -832,6 +833,20 @@ public class Utilities {
             int childCount = constraintLayout.getChildCount();
             for (int childIdx = 0; childIdx < childCount; childIdx += 1) {
                 View child = constraintLayout.getChildAt(childIdx);
+                if (child instanceof ConstraintHelper) {
+                    // get a copy of the id list
+                    int[] refIds = ((ConstraintHelper) child).getReferencedIds();
+                    boolean changed = false;
+                    // change constraint reference IDs
+                    for (int idx = 0; idx < refIds.length; idx += 1) {
+                        if (refIds[idx] == stubId) {
+                            refIds[idx] = inflatedId;
+                            changed = true;
+                        }
+                    }
+                    if (changed)
+                        ((ConstraintHelper) child).setReferencedIds(refIds);
+                }
                 ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) child.getLayoutParams();
                 if (changeConstraintLayoutParamsTarget(params, stubId, inflatedId))
                     child.setLayoutParams(params);
