@@ -31,15 +31,15 @@
              search bar when the soft keyboard is displayed
         -->
 
-        <ViewStub
-            android:id="@+id/stubSearchTop"
+        <rocks.tbog.tblauncher.ui.ViewStubPreview
+            app:id="@+id/stubSearchTop"
             android:layout_width="0dp"
             android:layout_height="@dimen/bar_height"
             android:layout_gravity="bottom|center_horizontal"
             android:background="@null"
             android:clipChildren="false"
             android:gravity="center"
-            android:layout="@layout/search_bar"
+            app:layout="@layout/search_bar"
             android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -53,17 +53,16 @@
             app:barrierDirection="bottom"
             app:constraint_referenced_ids="stubSearchTop" />
 
-        <!--        <include layout="@layout/result_list" />-->
-        <ViewStub
-            android:id="@+id/resultLayout"
+        <rocks.tbog.tblauncher.ui.ViewStubPreview
+            app:id="@+id/resultLayout"
             android:layout_width="0dp"
             android:layout_height="0dp"
             android:layout_marginHorizontal="@dimen/result_margin_horizontal"
             android:layout_marginVertical="@dimen/result_margin_vertical"
             android:background="?attr/listBackgroundColor"
             android:elevation="2dp"
-            android:inflatedId="@id/resultLayout"
-            android:layout="@layout/result_list"
+            app:inflatedId="@id/resultLayout"
+            app:layout="@layout/result_list"
             app:layout_constraintBottom_toTopOf="@id/barrierFooter"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -82,7 +81,7 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/barrierTop"
             tools:background="@drawable/popup_background"
-            tools:visibility="gone" />
+            tools:visibility="invisible" />
         <!--            <ImageView-->
         <!--                android:importantForAccessibility="no"-->
         <!--                android:layout_width="50dp"-->
@@ -127,16 +126,15 @@
             tools:backgroundTint="@color/colorAccent"
             tools:visibility="visible" />
 
-        <!--        <include layout="@layout/search_bar" />-->
-        <ViewStub
-            android:id="@+id/stubSearchBottom"
+        <rocks.tbog.tblauncher.ui.ViewStubPreview
+            app:id="@+id/stubSearchBottom"
             android:layout_width="0dp"
             android:layout_height="@dimen/bar_height"
             android:layout_gravity="bottom|center_horizontal"
             android:background="@null"
             android:clipChildren="false"
             android:gravity="center"
-            android:layout="@layout/search_bar"
+            app:layout="@layout/search_bar"
             android:orientation="horizontal"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"

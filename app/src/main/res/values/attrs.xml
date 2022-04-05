@@ -31,5 +31,11 @@
         <attr name="baseColor" format="color"/>
         <attr name="alphaMode" format="boolean"/>
     </declare-styleable>
-    
+
+    <declare-styleable name="ViewStubPreview">
+        <attr name="id" format="reference"/>
+        <attr name="inflatedId" format="reference"/>
+        <attr name="layout" format="reference"/>
+    </declare-styleable>
+
 </resources>

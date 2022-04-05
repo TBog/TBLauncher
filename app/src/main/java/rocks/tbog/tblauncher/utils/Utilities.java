@@ -62,6 +62,7 @@ import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.ui.CenteredImageSpan;
 import rocks.tbog.tblauncher.ui.CutoutFactory;
 import rocks.tbog.tblauncher.ui.ICutout;
+import rocks.tbog.tblauncher.ui.ViewStubPreview;
 
 public class Utilities {
     public final static ExecutorService EXECUTOR_RUN_ASYNC;
@@ -816,6 +817,11 @@ public class Utilities {
 
     @Nullable
     public static View inflateViewStub(@Nullable View view) {
+        if (view instanceof ViewStubPreview) {
+            // ViewStubPreview already calls updateConstraintsAfterStubInflate
+            return ((ViewStubPreview) view).inflate();
+        }
+
         if (!(view instanceof ViewStub))
             return view;
 
@@ -825,9 +831,17 @@ public class Utilities {
         // get parent before the call to inflate
         ConstraintLayout constraintLayout = stub.getParent() instanceof ConstraintLayout ? (ConstraintLayout) stub.getParent() : null;
 
-        View inflatedView = ((ViewStub) stub).inflate();
+        View inflatedView = stub.inflate();
         int inflatedId = inflatedView.getId();
 
+        updateConstraintsAfterStubInflate(constraintLayout, stubId, inflatedId);
+
+        return inflatedView;
+    }
+
+    public static void updateConstraintsAfterStubInflate(@Nullable ConstraintLayout constraintLayout, int stubId, int inflatedId) {
+        if (inflatedId == View.NO_ID)
+            return;
         // change parent ConstraintLayout constraints
         if (constraintLayout != null && stubId != inflatedId) {
             int childCount = constraintLayout.getChildCount();
@@ -852,7 +866,6 @@ public class Utilities {
                     child.setLayoutParams(params);
             }
         }
-        return inflatedView;
     }
 
     private static boolean changeConstraintLayoutParamsTarget(ConstraintLayout.LayoutParams params, int fromId, int toId) {
