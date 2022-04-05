@@ -70,6 +70,8 @@ public class ListPopup extends PopupWindow {
         setContentView(scrollView);
         setWidth(ViewGroup.LayoutParams.WRAP_CONTENT);
         setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
+        // set transparent window background
+        setBackgroundDrawable(null);
     }
 
     public ListPopup setOnItemClickListener(OnItemClickListener onItemClickListener) {
