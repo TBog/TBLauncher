@@ -12,7 +12,6 @@
     android:gravity="center"
     android:orientation="horizontal"
     android:visibility="gone"
-    tools:background="@color/colorPrimaryDark"
     tools:visibility="visible">
 
     <ImageView
@@ -25,11 +24,8 @@
         android:contentDescription="@string/cd_show_all_apps"
         android:focusable="true"
         android:paddingVertical="1dp"
-        android:paddingLeft="@dimen/launcher_button_padding"
-        android:paddingRight="@dimen/launcher_button_padding"
-        android:scaleType="fitCenter"
-        app:srcCompat="@drawable/launcher_white"
-        app:tint="?attr/searchColor" />
+        android:scaleType="fitXY"
+        app:srcCompat="@drawable/launcher_pill" />
 
     <rocks.tbog.tblauncher.ui.SearchEditText
         android:id="@+id/launcherSearch"

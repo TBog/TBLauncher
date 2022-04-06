@@ -9,6 +9,7 @@ import android.graphics.drawable.Drawable;
 import android.util.Log;
 
 import androidx.annotation.DrawableRes;
+import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.appcompat.content.res.AppCompatResources;
 import androidx.collection.ArraySet;
@@ -170,6 +171,16 @@ public class PrefCache {
 
     public static boolean searchBarAtBottom(SharedPreferences preferences) {
         return preferences.getBoolean("search-bar-at-bottom", true);
+    }
+
+    @LayoutRes
+    public static int getSearchBarLayout(SharedPreferences pref) {
+        String layout = pref.getString("search-bar-layout", null);
+        if ("btn-text-menu".equals(layout))
+            return R.layout.search_bar;
+        if ("pill-search".equals(layout))
+            return R.layout.search_pill;
+        return 0;
     }
 
     public static boolean linkCloseKeyboardToBackButton(SharedPreferences preferences) {

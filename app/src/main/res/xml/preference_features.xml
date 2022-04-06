@@ -112,6 +112,12 @@
             android:key="search-bar-at-bottom"
             android:title="@string/search_bar_at_bottom" />
 
+        <ListPreference
+            android:key="search-bar-layout"
+            android:title="@string/search_bar_layout"
+            android:entries="@array/searchBarLayoutEntries"
+            android:entryValues="@array/searchBarLayoutValues"/>
+
         <!-- This is here just to set the default value and be saved in backup, not visible for user -->
         <MultiSelectListPreference
             android:defaultValue="@array/defaultSearchHints"

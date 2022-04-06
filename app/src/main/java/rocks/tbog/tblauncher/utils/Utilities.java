@@ -34,6 +34,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.ColorInt;
+import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
@@ -817,7 +818,14 @@ public class Utilities {
 
     @Nullable
     public static View inflateViewStub(@Nullable View view) {
+        return inflateViewStub(view, 0);
+    }
+
+    @Nullable
+    public static View inflateViewStub(@Nullable View view, @LayoutRes int layoutRes) {
         if (view instanceof ViewStubPreview) {
+            if (layoutRes != 0)
+                ((ViewStubPreview) view).setLayoutResource(layoutRes);
             // ViewStubPreview already calls updateConstraintsAfterStubInflate
             return ((ViewStubPreview) view).inflate();
         }
@@ -831,6 +839,8 @@ public class Utilities {
         // get parent before the call to inflate
         ConstraintLayout constraintLayout = stub.getParent() instanceof ConstraintLayout ? (ConstraintLayout) stub.getParent() : null;
 
+        if (layoutRes != 0)
+            stub.setLayoutResource(layoutRes);
         View inflatedView = stub.inflate();
         int inflatedId = inflatedView.getId();
 
