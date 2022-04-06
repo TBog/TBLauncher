@@ -46,7 +46,7 @@
         android:label="@string/app_name_dynamic"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
-        android:theme="@style/BaseThemeLight">
+        android:theme="@style/SettingsDialogTheme.Default">
         <activity
             android:name=".TBLauncherActivity"
             android:clearTaskOnLaunch="true"
