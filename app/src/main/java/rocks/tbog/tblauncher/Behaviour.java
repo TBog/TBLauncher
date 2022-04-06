@@ -30,11 +30,11 @@ import android.widget.ImageView;
 import android.widget.Toast;
 
 import androidx.annotation.IdRes;
+import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.ActionBar;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -217,77 +217,16 @@ public class Behaviour implements ISearchActivity {
     }
 
     private void initSearchBarContainer() {
+        int layout = PrefCache.getSearchBarLayout(mPref);
         if (PrefCache.searchBarAtBottom(mPref)) {
-            mSearchBarContainer = inflateViewStub(R.id.stubSearchBottom);
-            //moveSearchBarAtBottom();
+            mSearchBarContainer = inflateViewStub(R.id.stubSearchBottom, layout);
         } else {
-            mSearchBarContainer = inflateViewStub(R.id.stubSearchTop);
-            //moveSearchBarAtTop();
+            mSearchBarContainer = inflateViewStub(R.id.stubSearchTop, layout);
         }
         mLauncherButton = mSearchBarContainer.findViewById(R.id.launcherButton);
         mSearchEditText = mSearchBarContainer.findViewById(R.id.launcherSearch);
         mClearButton = mSearchBarContainer.findViewById(R.id.clearButton);
         mMenuButton = mSearchBarContainer.findViewById(R.id.menuButton);
-    }
-
-    private void moveSearchBarAtBottom() {
-        // move search bar
-        ViewGroup.LayoutParams layoutParams = mSearchBarContainer.getLayoutParams();
-        if (layoutParams instanceof ConstraintLayout.LayoutParams) {
-            ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) layoutParams;
-            params.topToBottom = ConstraintLayout.LayoutParams.UNSET;
-            params.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID;
-            mSearchBarContainer.setLayoutParams(params);
-        }
-
-        // update quick list constraints
-        ViewGroup quickList = findViewById(R.id.quickList);
-        layoutParams = quickList.getLayoutParams();
-        if (layoutParams instanceof ConstraintLayout.LayoutParams) {
-            ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) layoutParams;
-            params.bottomToTop = mSearchBarContainer.getId();
-            params.bottomToBottom = ConstraintLayout.LayoutParams.UNSET;
-            quickList.setLayoutParams(params);
-        }
-
-        // update result list constraints
-        layoutParams = mResultLayout.getLayoutParams();
-        if (layoutParams instanceof ConstraintLayout.LayoutParams) {
-            ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) layoutParams;
-            params.topToBottom = ConstraintLayout.LayoutParams.UNSET;
-            params.topToTop = ConstraintLayout.LayoutParams.PARENT_ID;
-            mResultLayout.setLayoutParams(params);
-        }
-    }
-
-    private void moveSearchBarAtTop() {
-        // move search bar
-        ViewGroup.LayoutParams layoutParams = mSearchBarContainer.getLayoutParams();
-        if (layoutParams instanceof ConstraintLayout.LayoutParams) {
-            ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) layoutParams;
-            params.topToBottom = mNotificationBackground.getId();
-            params.bottomToBottom = ConstraintLayout.LayoutParams.UNSET;
-            mSearchBarContainer.setLayoutParams(params);
-        }
-
-        // update quick list constraints
-        ViewGroup quickList = findViewById(R.id.quickList);
-        layoutParams = quickList.getLayoutParams();
-        if (layoutParams instanceof ConstraintLayout.LayoutParams) {
-            ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) layoutParams;
-            params.bottomToTop = ConstraintLayout.LayoutParams.UNSET;
-            params.bottomToBottom = ConstraintLayout.LayoutParams.PARENT_ID;
-            quickList.setLayoutParams(params);
-        }
-
-        // update result list constraints
-        layoutParams = mResultLayout.getLayoutParams();
-        if (layoutParams instanceof ConstraintLayout.LayoutParams) {
-            ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) layoutParams;
-            params.topToBottom = mSearchBarContainer.getId();
-            params.topToTop = ConstraintLayout.LayoutParams.UNSET;
-            mResultLayout.setLayoutParams(params);
-        }
     }
 
     private void initLauncherButton() {
@@ -533,6 +472,12 @@ public class Behaviour implements ISearchActivity {
     private <T extends View> T inflateViewStub(@IdRes int id) {
         View stub = mTBLauncherActivity.findViewById(id);
         return (T) Utilities.inflateViewStub(stub);
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T extends View> T inflateViewStub(@IdRes int id, @LayoutRes int layoutRes) {
+        View stub = mTBLauncherActivity.findViewById(id);
+        return (T) Utilities.inflateViewStub(stub, layoutRes);
     }
 
     private void updateClearButton() {
