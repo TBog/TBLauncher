@@ -49,6 +49,7 @@
 
     <style name="SwitchPreferenceStyle" parent="Preference.SwitchPreference.Material">
         <item name="iconSpaceReserved">false</item>
+        <item name="android:widgetLayout">@layout/preference_switch</item>
     </style>
 
     <style name="ScreenPreferenceStyle" parent="Preference.PreferenceScreen.Material">
