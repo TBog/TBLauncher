@@ -49,7 +49,6 @@ import java.util.Set;
 import rocks.tbog.tblauncher.customicon.IconSelectDialog;
 import rocks.tbog.tblauncher.dataprovider.IProvider;
 import rocks.tbog.tblauncher.dataprovider.TagsProvider;
-import rocks.tbog.tblauncher.drawable.LoadingDrawable;
 import rocks.tbog.tblauncher.entry.ActionEntry;
 import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.entry.DialContactEntry;
@@ -73,6 +72,7 @@ import rocks.tbog.tblauncher.ui.DialogFragment;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.ui.RecyclerList;
+import rocks.tbog.tblauncher.ui.ViewStubPreview;
 import rocks.tbog.tblauncher.ui.WindowInsetsHelper;
 import rocks.tbog.tblauncher.ui.dialog.TagsManagerDialog;
 import rocks.tbog.tblauncher.utils.PrefCache;
@@ -230,15 +230,6 @@ public class Behaviour implements ISearchActivity {
     }
 
     private void initLauncherButton() {
-        //mLoaderSpinner = loaderBar;
-        mLauncherButton.setImageDrawable(new LoadingDrawable());
-
-        // Upon interacting with UI controls, delay any scheduled hide()
-        // operations to prevent the jarring behavior of controls going away
-        // while interacting with the UI.
-        //mLauncherButton.setOnTouchListener(mDelayHideTouchListener);
-
-        //mLauncherButton.setOnClickListener((v) -> TBApplication.dataHandler(v.getContext()).reloadProviders());
         mLauncherButton.setOnClickListener((v) -> executeButtonAction("button-launcher"));
     }
 
@@ -305,6 +296,8 @@ public class Behaviour implements ISearchActivity {
                 if (mSearchEditText != null)
                     mSearchEditText.requestFocus();
 
+                mTBLauncherActivity.customizeUI.expandSearchPill();
+
                 super.showKeyboard();
             }
 
@@ -326,6 +319,8 @@ public class Behaviour implements ISearchActivity {
                     focus.clearFocus();
                 if (mSearchEditText != null)
                     mSearchEditText.clearFocus();
+
+                mTBLauncherActivity.customizeUI.collapseSearchPill();
 
                 super.hideKeyboard();
             }
@@ -471,13 +466,13 @@ public class Behaviour implements ISearchActivity {
     @SuppressWarnings("unchecked")
     private <T extends View> T inflateViewStub(@IdRes int id) {
         View stub = mTBLauncherActivity.findViewById(id);
-        return (T) Utilities.inflateViewStub(stub);
+        return (T) ViewStubPreview.inflateStub(stub);
     }
 
     @SuppressWarnings("unchecked")
     private <T extends View> T inflateViewStub(@IdRes int id, @LayoutRes int layoutRes) {
         View stub = mTBLauncherActivity.findViewById(id);
-        return (T) Utilities.inflateViewStub(stub, layoutRes);
+        return (T) ViewStubPreview.inflateStub(stub, layoutRes);
     }
 
     private void updateClearButton() {

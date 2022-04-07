@@ -28,20 +28,16 @@ import android.text.Spanned;
 import android.util.Base64;
 import android.util.Log;
 import android.view.View;
-import android.view.ViewStub;
 import android.view.ViewTreeObserver;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.ColorInt;
-import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.UiThread;
 import androidx.annotation.WorkerThread;
 import androidx.appcompat.content.res.AppCompatResources;
-import androidx.constraintlayout.widget.ConstraintHelper;
-import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.lifecycle.Lifecycle;
 
@@ -63,7 +59,6 @@ import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.ui.CenteredImageSpan;
 import rocks.tbog.tblauncher.ui.CutoutFactory;
 import rocks.tbog.tblauncher.ui.ICutout;
-import rocks.tbog.tblauncher.ui.ViewStubPreview;
 
 public class Utilities {
     public final static ExecutorService EXECUTOR_RUN_ASYNC;
@@ -814,133 +809,6 @@ public class Utilities {
             builder.append(glue);
         builder.append(layoutDirection == View.LAYOUT_DIRECTION_RTL ? textA : textB);
         return builder.toString();
-    }
-
-    @Nullable
-    public static View inflateViewStub(@Nullable View view) {
-        return inflateViewStub(view, 0);
-    }
-
-    @Nullable
-    public static View inflateViewStub(@Nullable View view, @LayoutRes int layoutRes) {
-        if (view instanceof ViewStubPreview) {
-            if (layoutRes != 0)
-                ((ViewStubPreview) view).setLayoutResource(layoutRes);
-            // ViewStubPreview already calls updateConstraintsAfterStubInflate
-            return ((ViewStubPreview) view).inflate();
-        }
-
-        if (!(view instanceof ViewStub))
-            return view;
-
-        ViewStub stub = (ViewStub) view;
-        int stubId = stub.getId();
-
-        // get parent before the call to inflate
-        ConstraintLayout constraintLayout = stub.getParent() instanceof ConstraintLayout ? (ConstraintLayout) stub.getParent() : null;
-
-        if (layoutRes != 0)
-            stub.setLayoutResource(layoutRes);
-        View inflatedView = stub.inflate();
-        int inflatedId = inflatedView.getId();
-
-        updateConstraintsAfterStubInflate(constraintLayout, stubId, inflatedId);
-
-        return inflatedView;
-    }
-
-    public static void updateConstraintsAfterStubInflate(@Nullable ConstraintLayout constraintLayout, int stubId, int inflatedId) {
-        if (inflatedId == View.NO_ID)
-            return;
-        // change parent ConstraintLayout constraints
-        if (constraintLayout != null && stubId != inflatedId) {
-            int childCount = constraintLayout.getChildCount();
-            for (int childIdx = 0; childIdx < childCount; childIdx += 1) {
-                View child = constraintLayout.getChildAt(childIdx);
-                if (child instanceof ConstraintHelper) {
-                    // get a copy of the id list
-                    int[] refIds = ((ConstraintHelper) child).getReferencedIds();
-                    boolean changed = false;
-                    // change constraint reference IDs
-                    for (int idx = 0; idx < refIds.length; idx += 1) {
-                        if (refIds[idx] == stubId) {
-                            refIds[idx] = inflatedId;
-                            changed = true;
-                        }
-                    }
-                    if (changed)
-                        ((ConstraintHelper) child).setReferencedIds(refIds);
-                }
-                ConstraintLayout.LayoutParams params = (ConstraintLayout.LayoutParams) child.getLayoutParams();
-                if (changeConstraintLayoutParamsTarget(params, stubId, inflatedId))
-                    child.setLayoutParams(params);
-            }
-        }
-    }
-
-    private static boolean changeConstraintLayoutParamsTarget(ConstraintLayout.LayoutParams params, int fromId, int toId) {
-        boolean changed = false;
-        if (params.leftToLeft == fromId) {
-            params.leftToLeft = toId;
-            changed = true;
-        }
-        if (params.leftToRight == fromId) {
-            params.leftToRight = toId;
-            changed = true;
-        }
-        if (params.rightToLeft == fromId) {
-            params.rightToLeft = toId;
-            changed = true;
-        }
-        if (params.rightToRight == fromId) {
-            params.rightToRight = toId;
-            changed = true;
-        }
-        if (params.topToTop == fromId) {
-            params.topToTop = toId;
-            changed = true;
-        }
-        if (params.topToBottom == fromId) {
-            params.topToBottom = toId;
-            changed = true;
-        }
-        if (params.bottomToTop == fromId) {
-            params.bottomToTop = toId;
-            changed = true;
-        }
-        if (params.bottomToBottom == fromId) {
-            params.bottomToBottom = toId;
-            changed = true;
-        }
-        if (params.baselineToBaseline == fromId) {
-            params.baselineToBaseline = toId;
-            changed = true;
-        }
-        if (params.baselineToTop == fromId) {
-            params.baselineToTop = toId;
-            changed = true;
-        }
-        if (params.circleConstraint == fromId) {
-            params.circleConstraint = toId;
-            changed = true;
-        }
-        if (params.startToEnd == fromId) {
-            params.startToEnd = toId;
-            changed = true;
-        }
-        if (params.startToStart == fromId) {
-            params.startToStart = toId;
-            changed = true;
-        }
-        if (params.endToStart == fromId) {
-            params.endToStart = toId;
-            changed = true;
-        }
-        if (params.endToEnd == fromId) {
-            params.endToEnd = toId;
-            changed = true;
-        }
-        return changed;
     }
 
     public interface GetDrawable {

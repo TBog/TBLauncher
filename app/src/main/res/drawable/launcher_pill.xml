@@ -1,27 +1,29 @@
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="12dp"
-    android:height="6dp"
-    android:viewportWidth="6"
-    android:viewportHeight="3">
+    android:width="15dp"
+    android:height="10dp"
+    android:viewportWidth="15"
+    android:viewportHeight="10">
     <path
         android:fillColor="#FFF"
         android:fillType="evenOdd"
         android:pathData="
-        M2,0
-        l3,0
-        a1,1 0 0 1 1,1
-        l0,1
-        a1,1 0 0 1 -1,1
-        l-3,0
-        a1,1 0 0 1 -1,-1
-        l0,-1
-        a1,1 0 0 1 1,-1
+        M11,0
+        a4,4 0 0 1 4,4
+        v2
+        a4,4 0 0 1 -4,4
+        h-6
+        a4,4 0 0 1 -4,-4
+        v-2
+        a4,4 0 0 1 4,-4
         z
-        M2.25,0.33h1v1h-1z
-        M2.25,1.66h1v1h-1z
-        M3.75,0.33h1v1h-1z
-        M3.75,1.66h1v1h-1z" />
-    <path
-        android:fillColor="#80ffffff"
-        android:pathData="M0,0 h2 v3 h-2 z" />
+        M4,1h2v2h-2z m0.2,0.2h1.6v1.6h-1.6z
+        M4,4h2v2h-2z m0.2,0.2h1.6v1.6h-1.6z
+        M4,7h2v2h-2z m0.2,0.2h1.6v1.6h-1.6z
+        M7,1h2v2h-2z m0.2,0.2h1.6v1.6h-1.6z
+        M7,4h2v2h-2z m0.2,0.2h1.6v1.6h-1.6z
+        M7,7h2v2h-2z m0.2,0.2h1.6v1.6h-1.6z
+        M10,1h2v2h-2z m0.2,0.2h1.6v1.6h-1.6z
+        M10,4h2v2h-2z m0.2,0.2h1.6v1.6h-1.6z
+        M10,7h2v2h-2z m0.2,0.2h1.6v1.6h-1.6z
+        " />
 </vector>

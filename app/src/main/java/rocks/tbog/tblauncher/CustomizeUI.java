@@ -17,6 +17,8 @@ import android.text.InputType;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.BounceInterpolator;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.AbsListView;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -24,8 +26,13 @@ import android.widget.ImageView;
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.preference.PreferenceManager;
+import androidx.transition.ChangeBounds;
+import androidx.transition.TransitionManager;
 
+import rocks.tbog.tblauncher.drawable.LoadingDrawable;
 import rocks.tbog.tblauncher.ui.RecyclerList;
 import rocks.tbog.tblauncher.ui.SearchEditText;
 import rocks.tbog.tblauncher.utils.EdgeGlowHelper;
@@ -102,7 +109,10 @@ public class CustomizeUI {
     }
 
     public void onStart() {
-        setSearchBarPref();
+        if (PrefCache.getSearchBarLayout(mPref) == R.layout.search_pill)
+            setSearchPillPref();
+        else
+            setSearchBarPref();
         View resultLayout = findViewById(R.id.resultLayout);
         setResultListPref(resultLayout, true);
         resultLayout.addOnLayoutChangeListener(updateResultFadeOut);
@@ -195,6 +205,9 @@ public class CustomizeUI {
             Utilities.setTextSelectHandleColor(mSearchBar, searchBarRipple);
         }
 
+        // icon
+        mLauncherButton.setImageDrawable(new LoadingDrawable());
+
         // icon color
         {
             Utilities.setColorFilterMultiply(mLauncherButton, searchIconColor);
@@ -229,6 +242,128 @@ public class CustomizeUI {
             mSearchBarContainer.setBackground(drawable);
         } else {
             mSearchBarContainer.setBackground(new ColorDrawable(argbBackground));
+        }
+    }
+
+    private void setSearchPillPref() {
+        final Context ctx = getContext();
+        final Resources resources = mSearchBarContainer.getResources();
+
+        // size
+        int barHeight = mPref.getInt("search-bar-height", 0);
+        if (barHeight <= 1)
+            barHeight = resources.getInteger(R.integer.default_search_bar_height);
+        barHeight = UISizes.dp2px(ctx, barHeight);
+        int textSize = mPref.getInt("search-bar-text-size", 0);
+        if (textSize <= 1)
+            textSize = resources.getInteger(R.integer.default_size_text);
+
+        // layout height and margins
+        {
+            ViewGroup.LayoutParams params = mSearchBarContainer.getLayoutParams();
+            if (params instanceof ViewGroup.MarginLayoutParams) {
+                params.height = barHeight;
+                int hMargin = UISizes.getSearchBarMarginHorizontal(ctx);
+                int vMargin = UISizes.getSearchBarMarginVertical(ctx);
+                // left must be touching the margin to look good
+                ((ViewGroup.MarginLayoutParams) params).setMargins(0, vMargin, hMargin, vMargin);
+                mSearchBarContainer.setLayoutParams(params);
+            } else {
+                throw new IllegalStateException("mSearchBarContainer has the wrong layout params");
+            }
+        }
+
+        // text size
+        {
+            mSearchBar.setTextSize(TypedValue.COMPLEX_UNIT_DIP, textSize);
+        }
+
+        final int searchBarRipple = UIColors.setAlpha(UIColors.getColor(mPref, "search-bar-ripple-color"), 0xFF);
+        final int searchIconColor = UIColors.setAlpha(UIColors.getColor(mPref, "search-bar-icon-color"), 0xFF);
+        final int argbBackground = UIColors.getColor(mPref, "search-bar-argb");
+
+        // text color
+        {
+            int searchTextCursor = UIColors.getColor(mPref, "search-bar-cursor-argb");
+            int searchTextHighlight = UIColors.setAlpha(searchTextCursor, 0x7F);
+            int searchTextColor = UIColors.getSearchTextColor(ctx);
+            int searchHintColor = UIColors.setAlpha(searchTextColor, 0xBB);
+
+            mSearchBar.setTextColor(searchTextColor);
+            mSearchBar.setHintTextColor(searchHintColor);
+            // set color for selection background
+            mSearchBar.setHighlightColor(searchTextHighlight);
+
+            Utilities.setTextCursorColor(mSearchBar, searchTextCursor);
+            Utilities.setTextSelectHandleColor(mSearchBar, searchBarRipple);
+        }
+
+        // icon color
+        {
+            Utilities.setColorFilterMultiply(mLauncherButton, searchIconColor);
+            Utilities.setColorFilterMultiply(mMenuButton, searchIconColor);
+            Utilities.setColorFilterMultiply(mClearButton, searchIconColor);
+            mLauncherButton.setBackground(getSelectorDrawable(mLauncherButton, searchBarRipple, true));
+            mMenuButton.setBackground(getSelectorDrawable(mMenuButton, searchBarRipple, true));
+            mClearButton.setBackground(getSelectorDrawable(mClearButton, searchBarRipple, true));
+        }
+
+        // set text bar background
+        boolean isGradient = mPref.getBoolean("search-bar-gradient", true);
+        if (isGradient) {
+            GradientDrawable drawable;
+            final GradientDrawable.Orientation orientation;
+            orientation = GradientDrawable.Orientation.LEFT_RIGHT;
+            int alpha = Color.alpha(argbBackground);
+            int c1 = UIColors.setAlpha(argbBackground, 0);
+            int c2 = UIColors.setAlpha(argbBackground, alpha * 3 / 4);
+            int c3 = UIColors.setAlpha(argbBackground, alpha);
+            drawable = new GradientDrawable(orientation, new int[]{c1, c2, c3});
+            mSearchBar.setBackground(drawable);
+        } else {
+            mSearchBar.setBackground(new ColorDrawable(argbBackground));
+        }
+
+        // set color for the pill background
+        ImageView bkgBehindButton = mSearchBarContainer.findViewById(R.id.bkgBehindButton);
+        if (bkgBehindButton != null)
+            Utilities.setColorFilterMultiply(bkgBehindButton, argbBackground);
+
+        // set menu button background
+        int cornerRadius = UISizes.getSearchBarRadius(ctx);
+        if (isGradient || cornerRadius > 0) {
+            GradientDrawable drawable;
+            if (isGradient) {
+                final GradientDrawable.Orientation orientation;
+                orientation = GradientDrawable.Orientation.RIGHT_LEFT;
+                int alpha = Color.alpha(argbBackground);
+                int c1 = UIColors.setAlpha(argbBackground, 0);
+                int c2 = UIColors.setAlpha(argbBackground, alpha * 3 / 4);
+                int c3 = UIColors.setAlpha(argbBackground, alpha);
+                drawable = new GradientDrawable(orientation, new int[]{c1, c2, c3});
+            } else {
+                drawable = new GradientDrawable();
+                drawable.setColor(argbBackground);
+            }
+            drawable.setCornerRadius(cornerRadius);
+            mMenuButton.setBackground(drawable);
+            mClearButton.setBackground(drawable);
+        } else {
+            mMenuButton.setBackground(new ColorDrawable(argbBackground));
+            mClearButton.setBackground(new ColorDrawable(argbBackground));
+        }
+
+        // set margin between the pill and menu button
+        {
+            ViewGroup.LayoutParams params = mLauncherButton.getLayoutParams();
+            if (params instanceof ViewGroup.MarginLayoutParams) {
+                int hMargin = UISizes.getSearchBarMarginHorizontal(ctx);
+                // left must be touching the margin to look good
+                ((ViewGroup.MarginLayoutParams) params).setMargins(0, 0, hMargin, 0);
+                mLauncherButton.setLayoutParams(params);
+            } else {
+                throw new IllegalStateException("mMenuButton has the wrong layout params");
+            }
         }
     }
 
@@ -423,5 +558,37 @@ public class CustomizeUI {
      */
     private boolean isSuggestionsEnabled() {
         return mPref.getBoolean("enable-suggestions-keyboard", false);
+    }
+
+    public void expandSearchPill() {
+        if (!(mSearchBarContainer instanceof ConstraintLayout))
+            return;
+        ConstraintSet cSet = new ConstraintSet();
+        cSet.clone((ConstraintLayout) mSearchBarContainer);
+        cSet.connect(mLauncherButton.getId(), ConstraintSet.LEFT, mSearchBar.getId(), ConstraintSet.RIGHT);
+        cSet.connect(mLauncherButton.getId(), ConstraintSet.RIGHT, mMenuButton.getId(), ConstraintSet.LEFT);
+
+        ChangeBounds transition = new ChangeBounds();
+        transition.setInterpolator(new BounceInterpolator());
+        transition.setDuration(1000);
+
+        TransitionManager.beginDelayedTransition(mSearchBarContainer, transition);
+        cSet.applyTo((ConstraintLayout) mSearchBarContainer);
+    }
+
+    public void collapseSearchPill() {
+        if (!(mSearchBarContainer instanceof ConstraintLayout))
+            return;
+        ConstraintSet cSet = new ConstraintSet();
+        cSet.clone((ConstraintLayout) mSearchBarContainer);
+        cSet.clear(mLauncherButton.getId(), ConstraintSet.RIGHT);
+        cSet.connect(mLauncherButton.getId(), ConstraintSet.LEFT, ConstraintSet.PARENT_ID, ConstraintSet.LEFT);
+
+        ChangeBounds transition = new ChangeBounds();
+        transition.setInterpolator(new DecelerateInterpolator());
+        transition.setDuration(1000);
+
+        TransitionManager.beginDelayedTransition(mSearchBarContainer, transition);
+        cSet.applyTo((ConstraintLayout) mSearchBarContainer);
     }
 }
