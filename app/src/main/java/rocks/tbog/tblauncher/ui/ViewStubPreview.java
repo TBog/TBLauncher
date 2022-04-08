@@ -35,11 +35,9 @@ public final class ViewStubPreview extends View {
 
     public ViewStubPreview(Context context, AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
-        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ViewStubPreview,
-            defStyle, 0);
+        TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.ViewStubPreview, defStyle, 0);
         mInflatedId = a.getResourceId(R.styleable.ViewStubPreview_inflatedId, NO_ID);
         mLayoutResource = a.getResourceId(R.styleable.ViewStubPreview_layout, 0);
-        setId(a.getResourceId(R.styleable.ViewStubPreview_id, NO_ID));
         a.recycle();
         if (!isInEditMode()) {
             setVisibility(GONE);
