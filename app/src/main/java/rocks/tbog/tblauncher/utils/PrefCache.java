@@ -183,6 +183,11 @@ public class PrefCache {
         return 0;
     }
 
+    public static boolean searchBarHasTimer(SharedPreferences pref) {
+        String layout = pref.getString("search-bar-layout", null);
+        return "pill-search".equals(layout);
+    }
+
     public static boolean linkCloseKeyboardToBackButton(SharedPreferences preferences) {
         return preferences.getBoolean("behaviour-link-close-keyboard-back-button", true);
     }

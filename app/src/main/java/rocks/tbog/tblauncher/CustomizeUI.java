@@ -567,6 +567,7 @@ public class CustomizeUI {
         cSet.clone((ConstraintLayout) mSearchBarContainer);
         cSet.connect(mLauncherButton.getId(), ConstraintSet.LEFT, mSearchBar.getId(), ConstraintSet.RIGHT);
         cSet.connect(mLauncherButton.getId(), ConstraintSet.RIGHT, mMenuButton.getId(), ConstraintSet.LEFT);
+        cSet.setVisibility(R.id.launcherTime, ConstraintSet.GONE);
 
         ChangeBounds transition = new ChangeBounds();
         transition.setInterpolator(new BounceInterpolator());
@@ -583,6 +584,7 @@ public class CustomizeUI {
         cSet.clone((ConstraintLayout) mSearchBarContainer);
         cSet.clear(mLauncherButton.getId(), ConstraintSet.RIGHT);
         cSet.connect(mLauncherButton.getId(), ConstraintSet.LEFT, ConstraintSet.PARENT_ID, ConstraintSet.LEFT);
+        cSet.setVisibility(R.id.launcherTime, ConstraintSet.VISIBLE);
 
         ChangeBounds transition = new ChangeBounds();
         transition.setInterpolator(new DecelerateInterpolator());
