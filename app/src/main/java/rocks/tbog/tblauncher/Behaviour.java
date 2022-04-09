@@ -27,6 +27,7 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.LinearInterpolator;
 import android.widget.EditText;
 import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.IdRes;
@@ -40,8 +41,10 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
+import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.Random;
 import java.util.Set;
@@ -107,6 +110,18 @@ public class Behaviour implements ISearchActivity {
     private View mWidgetContainer;
     private View mClearButton;
     private View mMenuButton;
+    private TextView mLauncherTime;
+    private final Runnable mUpdateTime = new Runnable() {
+        @Override
+        public void run() {
+            if (mLauncherTime == null)
+                return;
+            Date date = new Date();
+            mLauncherTime.setText(DateFormat.getDateTimeInstance().format(date));
+            long delay = 1000 - date.getTime() % 1000;
+            mLauncherTime.postDelayed(mUpdateTime, delay);
+        }
+    };
     private final TextWatcher mSearchTextWatcher = new TextWatcher() {
         @NonNull
         String lastText = "";
@@ -1353,6 +1368,12 @@ public class Behaviour implements ISearchActivity {
 
         LauncherState.Desktop desktop = TBApplication.state().getDesktop();
         showDesktop(desktop);
+
+        mLauncherTime = null;
+        if (PrefCache.searchBarHasTimer(mPref)) {
+            mLauncherTime = mSearchBarContainer.findViewById(R.id.launcherTime);
+            mUpdateTime.run();
+        }
     }
 
     public void onNewIntent() {

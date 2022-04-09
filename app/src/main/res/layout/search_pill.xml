@@ -45,8 +45,7 @@
         android:scaleType="fitXY"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintDimensionRatio="1.5:1"
-        app:layout_constraintLeft_toRightOf="@id/launcherSearch"
-        app:layout_constraintRight_toLeftOf="@id/menuButton"
+        app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/launcher_pill"
         tools:background="?attr/selectableItemBackgroundBorderless"
@@ -69,6 +68,21 @@
         tools:tint="@color/Default_light"
         tools:tintMode="multiply" />
 
+    <TextView
+        android:id="@+id/launcherTime"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toRightOf="@id/launcherButton"
+        app:layout_constraintRight_toLeftOf="@id/menuButton"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:background="@color/Default_background"
+        tools:text="@tools:sample/date/hhmmss"
+        tools:textColor="@color/Default_text"
+        tools:textColorHint="@color/Default_text"
+        tools:textSize="16sp" />
+
     <ImageView
         android:id="@+id/menuButton"
         android:layout_width="0dp"
@@ -77,9 +91,7 @@
         android:clickable="true"
         android:contentDescription="@string/cd_main_menu"
         android:focusable="true"
-        android:paddingLeft="@dimen/launcher_button_padding"
-        android:paddingRight="@dimen/launcher_button_padding"
-        android:scaleType="fitCenter"
+        android:scaleType="fitXY"
         android:textAlignment="center"
         app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintBottom_toBottomOf="@id/launcherButton"
@@ -95,8 +107,6 @@
         android:clickable="true"
         android:contentDescription="@string/cd_main_clear"
         android:focusable="true"
-        android:paddingLeft="@dimen/launcher_button_padding"
-        android:paddingRight="@dimen/launcher_button_padding"
         android:scaleType="fitCenter"
         android:textAlignment="center"
         android:visibility="invisible"
