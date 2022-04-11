@@ -59,7 +59,8 @@ public class WindowInsetsHelper implements KeyboardHandler {
         }
     }
 
-    private static Window findWindow(Context context) {
+    private static Window findWindow(Context ctx) {
+        Context context = ctx;
         while (context instanceof ContextWrapper) {
             if (context instanceof Activity) {
                 Window window = ((Activity) context).getWindow();

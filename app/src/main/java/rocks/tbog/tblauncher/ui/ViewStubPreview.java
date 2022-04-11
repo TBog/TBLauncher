@@ -134,6 +134,7 @@ public final class ViewStubPreview extends View {
 
     @Override
     protected void dispatchDraw(Canvas canvas) {
+        // don't draw the stub
     }
 
     /**
