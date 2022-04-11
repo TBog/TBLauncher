@@ -78,6 +78,7 @@ import rocks.tbog.tblauncher.ui.RecyclerList;
 import rocks.tbog.tblauncher.ui.ViewStubPreview;
 import rocks.tbog.tblauncher.ui.WindowInsetsHelper;
 import rocks.tbog.tblauncher.ui.dialog.TagsManagerDialog;
+import rocks.tbog.tblauncher.utils.KeyboardTriggerBehaviour;
 import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.SystemUiVisibility;
 import rocks.tbog.tblauncher.utils.UISizes;
@@ -110,7 +111,7 @@ public class Behaviour implements ISearchActivity {
     private View mWidgetContainer;
     private View mClearButton;
     private View mMenuButton;
-    private TextView mLauncherTime;
+    private TextView mLauncherTime = null;
     private final Runnable mUpdateTime = new Runnable() {
         @Override
         public void run() {
@@ -273,11 +274,15 @@ public class Behaviour implements ISearchActivity {
 
             // if keyboard close action issued
             if (actionId == android.R.id.closeButton) {
+                LauncherState state = TBApplication.state();
                 // Fix for #238
-                TBApplication.state().syncKeyboardVisibility(view);
-                if (TBApplication.state().isKeyboardHidden())
+                state.syncKeyboardVisibility(view);
+                if (state.isKeyboardHidden()) {
+                    Log.i(TAG, "Keyboard - closeButton");
                     return false;
-                return onKeyboardClosed();
+                }
+                // return true if we should hide the keyboard
+                return state.isSearchBarVisible() && PrefCache.linkKeyboardAndSearchBar(mPref);
             }
 
             // launch most relevant result
@@ -311,7 +316,16 @@ public class Behaviour implements ISearchActivity {
                 if (mSearchEditText != null)
                     mSearchEditText.requestFocus();
 
-                mTBLauncherActivity.customizeUI.expandSearchPill();
+//                mTBLauncherActivity.customizeUI.expandSearchPill((motionLayout, type) -> {
+//                    if (type == CustomizeUI.MotionTransitionListener.TransitionType.COMPLETED) {
+//                        Log.d(TAG, "[showKeyboard] expand type=" + type.toString());
+//                        if (mSearchEditText != null)
+//                            mSearchEditText.requestFocus();
+//                        updateClearButton();
+//                        return true;
+//                    }
+//                    return false;
+//                });
 
                 super.showKeyboard();
             }
@@ -335,7 +349,14 @@ public class Behaviour implements ISearchActivity {
                 if (mSearchEditText != null)
                     mSearchEditText.clearFocus();
 
-                mTBLauncherActivity.customizeUI.collapseSearchPill();
+//                mTBLauncherActivity.customizeUI.collapseSearchPill((motionLayout, type) -> {
+//                    Log.d(TAG, "[hideKeyboard] expand type=" + type.toString());
+//                    if (type == CustomizeUI.MotionTransitionListener.TransitionType.COMPLETED) {
+//                        updateClearButton();
+//                        return true;
+//                    }
+//                    return false;
+//                });
 
                 super.hideKeyboard();
             }
@@ -344,7 +365,20 @@ public class Behaviour implements ISearchActivity {
 
     public void onCreateActivity(TBLauncherActivity tbLauncherActivity) {
         mTBLauncherActivity = tbLauncherActivity;
-        mPref = PreferenceManager.getDefaultSharedPreferences(tbLauncherActivity);
+        mPref = PreferenceManager.getDefaultSharedPreferences(mTBLauncherActivity);
+        Window window = mTBLauncherActivity.getWindow();
+        mDecorView = window.getDecorView();
+        KeyboardTriggerBehaviour keyboardListener = new KeyboardTriggerBehaviour(mTBLauncherActivity);
+        keyboardListener.observe(mTBLauncherActivity, status -> {
+            if (status == KeyboardTriggerBehaviour.Status.CLOSED) {
+                onKeyboardClosed();
+                if (TBApplication.state().isSearchBarVisible())
+                    mTBLauncherActivity.customizeUI.collapseSearchPill(null);
+            } else {
+                if (TBApplication.state().isSearchBarVisible())
+                    mTBLauncherActivity.customizeUI.expandSearchPill(null);
+            }
+        });
 
         initKeyboardScrollHider();
         initResultLayout();
@@ -358,7 +392,6 @@ public class Behaviour implements ISearchActivity {
 //        mClearButton = mSearchBarContainer.findViewById(R.id.clearButton);
 //        mMenuButton = mSearchBarContainer.findViewById(R.id.menuButton);
 
-        Window window = mTBLauncherActivity.getWindow();
 //        WindowCompat.setDecorFitsSystemWindows(window, false);
 //        ViewCompat.setOnApplyWindowInsetsListener(window.getDecorView(), (v, insets) -> {
 //            int left = v.getPaddingLeft();
@@ -370,8 +403,6 @@ public class Behaviour implements ISearchActivity {
 //            v.setPadding(left, top, right, insets.getInsets(type).bottom);
 //            return insets;
 //        });
-
-        mDecorView = window.getDecorView();
 
         initLauncherButton();
         initLauncherSearchEditText();
@@ -1102,6 +1133,7 @@ public class Behaviour implements ISearchActivity {
         if (closeFragmentDialog())
             return true;
 
+        Log.i(TAG, "onBackPressed query=" + mSearchEditText.getText());
         mSearchEditText.setText("");
 
         switch (TBApplication.state().getDesktop()) {
@@ -1122,21 +1154,15 @@ public class Behaviour implements ISearchActivity {
         return TBApplication.isDefaultLauncher(mTBLauncherActivity);
     }
 
-    boolean onKeyboardClosed() {
+    void onKeyboardClosed() {
         if (dismissPopup())
-            return true;
+            return;
         LauncherState state = TBApplication.state();
 
         if (state.isSearchBarVisible() && PrefCache.modeSearchFullscreen(mPref))
             enableFullscreen(0);
         if (PrefCache.linkCloseKeyboardToBackButton(mPref))
             onBackPressed();
-
-        // check if we should hide the keyboard
-        boolean closeKeyboard = state.isSearchBarVisible() && PrefCache.linkKeyboardAndSearchBar(mPref);
-        if (closeKeyboard)
-            state.setKeyboard(LauncherState.AnimatedVisibility.HIDDEN);
-        return closeKeyboard;
     }
 
     @NonNull

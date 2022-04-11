@@ -17,8 +17,6 @@ import android.text.InputType;
 import android.util.TypedValue;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.BounceInterpolator;
-import android.view.animation.DecelerateInterpolator;
 import android.widget.AbsListView;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -26,11 +24,10 @@ import android.widget.ImageView;
 import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.constraintlayout.widget.ConstraintLayout;
-import androidx.constraintlayout.widget.ConstraintSet;
+import androidx.constraintlayout.motion.widget.MotionLayout;
 import androidx.preference.PreferenceManager;
-import androidx.transition.ChangeBounds;
-import androidx.transition.TransitionManager;
+
+import java.util.LinkedList;
 
 import rocks.tbog.tblauncher.drawable.LoadingDrawable;
 import rocks.tbog.tblauncher.ui.RecyclerList;
@@ -72,6 +69,7 @@ public class CustomizeUI {
         | InputType.TYPE_TEXT_FLAG_AUTO_CORRECT;
 
     private final View.OnLayoutChangeListener updateResultFadeOut = new UpdateResultFadeOut();
+    private final MotionTransitionListener mSearchBarTransition = new MotionTransitionListener();
 
     private static final class UpdateResultFadeOut implements View.OnLayoutChangeListener {
         @Override
@@ -91,6 +89,57 @@ public class CustomizeUI {
         }
     }
 
+    public static final class MotionTransitionListener implements MotionLayout.TransitionListener {
+        private LinkedList<OnTransition> mRunOnce = new LinkedList<>();
+
+        public enum TransitionType {STARTED, CHANGE, COMPLETED, TRIGGER}
+
+        public interface OnTransition {
+            boolean onTransition(MotionLayout motionLayout, TransitionType type);
+        }
+
+        private void callOnce(MotionLayout motionLayout, TransitionType type) {
+            OnTransition runOnce;
+            LinkedList<OnTransition> linkedList;
+            synchronized (this) {
+                linkedList = new LinkedList<>(mRunOnce);
+                mRunOnce = new LinkedList<>();
+            }
+            while ((runOnce = linkedList.poll()) != null) {
+                if (!runOnce.onTransition(motionLayout, type))
+                    addRunOnce(runOnce);
+            }
+        }
+
+        public void addRunOnce(OnTransition runOnce) {
+            if (runOnce == null)
+                return;
+            synchronized (this) {
+                mRunOnce.add(runOnce);
+            }
+        }
+
+        @Override
+        public void onTransitionStarted(MotionLayout motionLayout, int startId, int endId) {
+            callOnce(motionLayout, TransitionType.STARTED);
+        }
+
+        @Override
+        public void onTransitionChange(MotionLayout motionLayout, int startId, int endId, float progress) {
+            callOnce(motionLayout, TransitionType.CHANGE);
+        }
+
+        @Override
+        public void onTransitionCompleted(MotionLayout motionLayout, int currentId) {
+            callOnce(motionLayout, TransitionType.COMPLETED);
+        }
+
+        @Override
+        public void onTransitionTrigger(MotionLayout motionLayout, int triggerId, boolean positive, float progress) {
+            callOnce(motionLayout, TransitionType.TRIGGER);
+        }
+    }
+
     @SuppressWarnings("TypeParameterUnusedInFormals")
     private <T extends View> T findViewById(@IdRes int id) {
         return mTBLauncherActivity.findViewById(id);
@@ -106,6 +155,9 @@ public class CustomizeUI {
         mLauncherButton = mSearchBarContainer.findViewById(R.id.launcherButton);
         mMenuButton = mSearchBarContainer.findViewById(R.id.menuButton);
         mClearButton = mSearchBarContainer.findViewById(R.id.clearButton);
+
+        if (mSearchBarContainer instanceof MotionLayout)
+            ((MotionLayout) mSearchBarContainer).addTransitionListener(mSearchBarTransition);
     }
 
     public void onStart() {
@@ -560,37 +612,45 @@ public class CustomizeUI {
         return mPref.getBoolean("enable-suggestions-keyboard", false);
     }
 
-    public void expandSearchPill() {
-        if (!(mSearchBarContainer instanceof ConstraintLayout))
+    public void expandSearchPill(MotionTransitionListener.OnTransition runOnce) {
+        if (!(mSearchBarContainer instanceof MotionLayout))
             return;
-        ConstraintSet cSet = new ConstraintSet();
-        cSet.clone((ConstraintLayout) mSearchBarContainer);
-        cSet.connect(mLauncherButton.getId(), ConstraintSet.LEFT, mSearchBar.getId(), ConstraintSet.RIGHT);
-        cSet.connect(mLauncherButton.getId(), ConstraintSet.RIGHT, mMenuButton.getId(), ConstraintSet.LEFT);
-        cSet.setVisibility(R.id.launcherTime, ConstraintSet.GONE);
+//        ConstraintSet cSet = new ConstraintSet();
+//        cSet.clone((ConstraintLayout) mSearchBarContainer);
+//        cSet.connect(mLauncherButton.getId(), ConstraintSet.LEFT, mSearchBar.getId(), ConstraintSet.RIGHT);
+//        cSet.connect(mLauncherButton.getId(), ConstraintSet.RIGHT, mMenuButton.getId(), ConstraintSet.LEFT);
+//        cSet.setVisibility(R.id.launcherTime, ConstraintSet.GONE);
+//
+//        ChangeBounds transition = new ChangeBounds();
+//        transition.setInterpolator(new BounceInterpolator());
+//        transition.setDuration(1000);
+//
+//        TransitionManager.beginDelayedTransition(mSearchBarContainer, transition);
+//        cSet.applyTo((ConstraintLayout) mSearchBarContainer);
 
-        ChangeBounds transition = new ChangeBounds();
-        transition.setInterpolator(new BounceInterpolator());
-        transition.setDuration(1000);
-
-        TransitionManager.beginDelayedTransition(mSearchBarContainer, transition);
-        cSet.applyTo((ConstraintLayout) mSearchBarContainer);
+        mSearchBarTransition.addRunOnce(runOnce);
+        ((MotionLayout) mSearchBarContainer).transitionToEnd();
+        //((MotionLayout) mSearchBarContainer).setProgress(1f, 1f);
     }
 
-    public void collapseSearchPill() {
-        if (!(mSearchBarContainer instanceof ConstraintLayout))
+    public void collapseSearchPill(MotionTransitionListener.OnTransition runOnce) {
+        if (!(mSearchBarContainer instanceof MotionLayout))
             return;
-        ConstraintSet cSet = new ConstraintSet();
-        cSet.clone((ConstraintLayout) mSearchBarContainer);
-        cSet.clear(mLauncherButton.getId(), ConstraintSet.RIGHT);
-        cSet.connect(mLauncherButton.getId(), ConstraintSet.LEFT, ConstraintSet.PARENT_ID, ConstraintSet.LEFT);
-        cSet.setVisibility(R.id.launcherTime, ConstraintSet.VISIBLE);
+//        ConstraintSet cSet = new ConstraintSet();
+//        cSet.clone((ConstraintLayout) mSearchBarContainer);
+//        cSet.clear(mLauncherButton.getId(), ConstraintSet.RIGHT);
+//        cSet.connect(mLauncherButton.getId(), ConstraintSet.LEFT, ConstraintSet.PARENT_ID, ConstraintSet.LEFT);
+//        cSet.setVisibility(R.id.launcherTime, ConstraintSet.VISIBLE);
+//
+//        ChangeBounds transition = new ChangeBounds();
+//        transition.setInterpolator(new DecelerateInterpolator());
+//        transition.setDuration(1000);
+//
+//        TransitionManager.beginDelayedTransition(mSearchBarContainer, transition);
+//        cSet.applyTo((ConstraintLayout) mSearchBarContainer);
 
-        ChangeBounds transition = new ChangeBounds();
-        transition.setInterpolator(new DecelerateInterpolator());
-        transition.setDuration(1000);
-
-        TransitionManager.beginDelayedTransition(mSearchBarContainer, transition);
-        cSet.applyTo((ConstraintLayout) mSearchBarContainer);
+        mSearchBarTransition.addRunOnce(runOnce);
+        ((MotionLayout) mSearchBarContainer).transitionToStart();
+        //((MotionLayout) mSearchBarContainer).setProgress(0f, -1f);
     }
 }
