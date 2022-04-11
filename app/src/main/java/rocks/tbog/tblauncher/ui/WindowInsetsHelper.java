@@ -1,7 +1,14 @@
 package rocks.tbog.tblauncher.ui;
 
+import android.app.Activity;
+import android.content.Context;
+import android.content.ContextWrapper;
+import android.os.Build;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.view.inputmethod.InputMethodManager;
+import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.core.view.ViewCompat;
@@ -12,10 +19,11 @@ import rocks.tbog.tblauncher.R;
 
 public class WindowInsetsHelper implements KeyboardHandler {
     private final WindowInsetsControllerCompat controller;
+    private View mRoot;
 
     public WindowInsetsHelper(View root) {
         super();
-
+        mRoot = root;
         controller = ViewCompat.getWindowInsetsController(root);
         if (controller == null)
             throw new IllegalStateException("WindowInsetsController == null");
@@ -24,12 +32,75 @@ public class WindowInsetsHelper implements KeyboardHandler {
 
     @Override
     public void showKeyboard() {
-        controller.show(WindowInsetsCompat.Type.ime());
+        // on KitKat `controller.show` is no-op
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
+            Context ctx = mRoot.getContext();
+            InputMethodManager imm = (InputMethodManager) ctx.getSystemService(Context.INPUT_METHOD_SERVICE);
+            View view = mRoot;
+            if (view != null && (view.isInEditMode() || view.onCheckIsTextEditor())) {
+                view.requestFocus();
+            } else {
+                Window window = findWindow(ctx);
+                if (window != null) {
+                    // we should display the keyboard for the currently focused view
+                    view = window.getCurrentFocus();
+                } else {
+                    view = null;
+                }
+            }
+
+            // Fallback on finding the first EditText
+            if (view == null) {
+                view = findTextEditor(mRoot);
+            }
+            imm.showSoftInput(view, InputMethodManager.SHOW_IMPLICIT);
+        } else {
+            controller.show(WindowInsetsCompat.Type.ime());
+        }
+    }
+
+    private static Window findWindow(Context context) {
+        while (context instanceof ContextWrapper) {
+            if (context instanceof Activity) {
+                Window window = ((Activity) context).getWindow();
+                if (window != null)
+                    return window;
+            }
+            context = ((ContextWrapper) context).getBaseContext();
+        }
+        return null;
+    }
+
+    private static View findTextEditor(View root) {
+        if (root instanceof ViewGroup) {
+            int childCount = ((ViewGroup) root).getChildCount();
+            // search this level
+            for (int childIdx = 0; childIdx < childCount; childIdx += 1) {
+                View child = ((ViewGroup) root).getChildAt(childIdx);
+                if (child.onCheckIsTextEditor() || child instanceof EditText)
+                    return child;
+            }
+            // look deeper
+            for (int childIdx = 0; childIdx < childCount; childIdx += 1) {
+                View child = ((ViewGroup) root).getChildAt(childIdx);
+                child = findTextEditor(child);
+                if (child.onCheckIsTextEditor() || child instanceof EditText)
+                    return child;
+            }
+        }
+        return root;
     }
 
     @Override
     public void hideKeyboard() {
-        controller.hide(WindowInsetsCompat.Type.ime());
+        // on KitKat `controller.hide` is no-op
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.KITKAT) {
+            Context ctx = mRoot.getContext();
+            InputMethodManager imm = (InputMethodManager) ctx.getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(mRoot.getWindowToken(), 0);
+        } else {
+            controller.hide(WindowInsetsCompat.Type.ime());
+        }
     }
 
     public void showSystemBars() {

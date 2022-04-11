@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.motion.widget.MotionLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
 
@@ -9,19 +9,20 @@
     android:background="@null"
     android:clipChildren="false"
     android:visibility="gone"
+    app:layoutDescription="@xml/search_pill_scene"
     tools:visibility="visible">
 
     <rocks.tbog.tblauncher.ui.SearchEditText
         android:id="@+id/launcherSearch"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:gravity="start|center_vertical"
         android:hint="@string/hint_ui_search"
         android:imeOptions="flagNoExtractUi|actionSearch"
         android:importantForAutofill="no"
         android:inputType="textVisiblePassword|textNoSuggestions"
         android:singleLine="true"
         android:textAlignment="textStart"
+        android:padding="0dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintHorizontal_chainStyle="packed"
         app:layout_constraintHorizontal_weight="1"
@@ -49,6 +50,7 @@
         app:layout_constraintTop_toTopOf="parent"
         app:srcCompat="@drawable/launcher_pill"
         tools:background="?attr/selectableItemBackgroundBorderless"
+        tools:ignore="ImageContrastCheck"
         tools:tint="@color/Default_text"
         tools:tintMode="multiply" />
 
@@ -64,15 +66,16 @@
         app:layout_constraintTop_toTopOf="@id/launcherButton"
         app:srcCompat="@drawable/launcher_pill_background"
         tools:background="?attr/selectableItemBackgroundBorderless"
-        tools:ignore="ContentDescription"
+        tools:ignore="ContentDescription,ImageContrastCheck"
         tools:tint="@color/Default_light"
         tools:tintMode="multiply" />
 
     <TextView
         android:id="@+id/launcherTime"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
         android:textAlignment="center"
+        android:gravity="center"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toRightOf="@id/launcherButton"
         app:layout_constraintRight_toLeftOf="@id/menuButton"
@@ -116,4 +119,4 @@
         app:layout_constraintTop_toTopOf="@id/menuButton"
         app:srcCompat="@drawable/ic_clear" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.motion.widget.MotionLayout>
