@@ -90,8 +90,7 @@ public class LoadShortcutsEntryItem extends LoadEntryItem<ShortcutEntry> {
                     | ShortcutQuery.FLAG_MATCH_DYNAMIC
                     | ShortcutQuery.FLAG_MATCH_CACHED);
             } else {
-                q.setQueryFlags(ShortcutQuery.FLAG_MATCH_PINNED
-                    | ShortcutQuery.FLAG_MATCH_MANIFEST);
+                q.setQueryFlags(ShortcutQuery.FLAG_MATCH_PINNED);
             }
 
             if (mLauncherApps.hasShortcutHostPermission())
