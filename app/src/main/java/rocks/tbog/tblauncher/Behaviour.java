@@ -320,8 +320,10 @@ public class Behaviour implements ISearchActivity {
             @Override
             public void showKeyboard() {
                 LauncherState state = TBApplication.state();
-                if (TBApplication.activityInvalid(mTBLauncherActivity))
+                if (TBApplication.activityInvalid(mTBLauncherActivity)) {
+                    Log.e(TAG, "[activityInvalid] showKeyboard");
                     return;
+                }
 
                 if (state.isSearchBarVisible() && PrefCache.modeSearchFullscreen(mPref)) {
                     showSystemBars();
@@ -340,8 +342,10 @@ public class Behaviour implements ISearchActivity {
 
             @Override
             public void hideKeyboard() {
-                if (TBApplication.activityInvalid(mTBLauncherActivity))
+                if (TBApplication.activityInvalid(mTBLauncherActivity)) {
+                    Log.e(TAG, "[activityInvalid] hideKeyboard");
                     return;
+                }
                 if (TBApplication.state().isSearchBarVisible() && PrefCache.modeSearchFullscreen(mPref)) {
                     //hideSystemBars();
                     enableFullscreen(0);
@@ -562,8 +566,10 @@ public class Behaviour implements ISearchActivity {
     }
 
     private void showDesktop(LauncherState.Desktop mode) {
-        if (TBApplication.activityInvalid(mTBLauncherActivity))
+        if (TBApplication.activityInvalid(mTBLauncherActivity)) {
+            Log.e(TAG, "[activityInvalid] showDesktop " + mode);
             return;
+        }
         TBApplication.state().setDesktop(mode);
         switch (mode) {
             case SEARCH:
@@ -1139,17 +1145,20 @@ public class Behaviour implements ISearchActivity {
         Log.i(TAG, "onBackPressed query=" + mSearchEditText.getText());
         mSearchEditText.setText("");
 
-        switch (TBApplication.state().getDesktop()) {
-            case SEARCH:
-                executeButtonAction("dm-search-back");
-                break;
-            case WIDGET:
-                executeButtonAction("dm-widget-back");
-                break;
-            case EMPTY:
-            default:
-                executeButtonAction("dm-empty-back");
-                break;
+        LauncherState.Desktop desktop = TBApplication.state().getDesktop();
+        if (desktop != null) {
+            switch (desktop) {
+                case SEARCH:
+                    executeButtonAction("dm-search-back");
+                    break;
+                case WIDGET:
+                    executeButtonAction("dm-widget-back");
+                    break;
+                case EMPTY:
+                default:
+                    executeButtonAction("dm-empty-back");
+                    break;
+            }
         }
 
         // Calling super.onBackPressed() will quit the launcher, only do this if this is not the user's default home.
@@ -1335,8 +1344,10 @@ public class Behaviour implements ISearchActivity {
      * @param tag     name to keep track of
      */
     public static void showDialog(Context context, DialogFragment<?> dialog, String tag) {
-        if (TBApplication.activityInvalid(context))
+        if (TBApplication.activityInvalid(context)) {
+            Log.e(TAG, "[activityInvalid] showDialog " + tag);
             return;
+        }
         TBApplication.behaviour(context).showDialog(dialog, tag);
     }
 
@@ -1521,6 +1532,7 @@ public class Behaviour implements ISearchActivity {
         if (action == null)
             return false;
         if (TBApplication.activityInvalid(mTBLauncherActivity)) {
+            Log.e(TAG, "[activityInvalid] executeAction " + action);
             // only do stuff if we are the current activity
             return false;
         }

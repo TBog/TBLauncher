@@ -21,8 +21,9 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.collection.ArraySet;
+import androidx.fragment.app.FragmentActivity;
+import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.AndroidViewModel;
-import androidx.lifecycle.LifecycleOwner;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.MutableLiveData;
 import androidx.preference.PreferenceManager;
@@ -34,6 +35,7 @@ import java.util.Objects;
 import java.util.Set;
 
 import rocks.tbog.tblauncher.dataprovider.SearchProvider;
+import rocks.tbog.tblauncher.preference.BasePreferenceDialog;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.ui.dialog.EditTextDialog;
 import rocks.tbog.tblauncher.utils.SimpleTextWatcher;
@@ -46,6 +48,7 @@ public class EditSearchEngines extends AndroidViewModel {
     private final MutableLiveData<String> defaultProviderName = new MutableLiveData<>();
     private final MutableLiveData<String> addSearchEngineName = new MutableLiveData<>();
     private final MutableLiveData<String> addSearchEngineUrl = new MutableLiveData<>();
+    private FragmentManager mFragmentManager = null;
 
     public EditSearchEngines(@NonNull Application application) {
         super(application);
@@ -266,7 +269,8 @@ public class EditSearchEngines extends AndroidViewModel {
                 updateSearchEngineInfoList(info);
             })
             .setNegativeButton(android.R.string.cancel, null)
-            .show();
+            .getDialog()
+            .show(mFragmentManager, "rename");
     }
 
     private void launchEditUrlDialog(Context ctx, SearchEngineInfo info) {
@@ -288,10 +292,11 @@ public class EditSearchEngines extends AndroidViewModel {
                 updateSearchEngineInfoList(info);
             })
             .setNegativeButton(android.R.string.cancel, null)
-            .show();
+            .getDialog()
+            .show(mFragmentManager, "edit_url");
     }
 
-    public void onStartLifecycle(@NonNull Dialog dialog, @NonNull LifecycleOwner viewLifecycleOwner) {
+    public void onStartLifecycle(@NonNull Dialog dialog, @NonNull BasePreferenceDialog owner) {
         ListView listView = dialog.findViewById(android.R.id.list);
         if (listView != null) {
             ArrayList<SearchEngineInfo> list = getSearchEngineInfoList().getValue();
@@ -299,8 +304,11 @@ public class EditSearchEngines extends AndroidViewModel {
                 list = new ArrayList<>();
             SearchEngineAdapter adapter = new SearchEngineAdapter(list);
             listView.setAdapter(adapter);
-            getSearchEngineInfoList().observe(viewLifecycleOwner, adapter::replaceItems);
+            getSearchEngineInfoList().observe(owner, adapter::replaceItems);
         }
+        FragmentActivity activity = owner.getActivity();
+        if (activity != null)
+            mFragmentManager = activity.getSupportFragmentManager();
     }
 
     static class SearchEngineAdapter extends ViewHolderListAdapter<SearchEngineInfo, TagViewHolder> {
