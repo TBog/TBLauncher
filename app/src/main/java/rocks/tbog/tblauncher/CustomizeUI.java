@@ -91,6 +91,7 @@ public class CustomizeUI {
 
     public static final class MotionTransitionListener implements MotionLayout.TransitionListener {
         private LinkedList<OnTransition> mRunOnce = new LinkedList<>();
+        private Runnable transitionToEndListener = null;
 
         public enum TransitionType {STARTED, CHANGE, COMPLETED, TRIGGER}
 
@@ -102,6 +103,8 @@ public class CustomizeUI {
             OnTransition runOnce;
             LinkedList<OnTransition> linkedList;
             synchronized (this) {
+                if (mRunOnce.isEmpty())
+                    return;
                 linkedList = new LinkedList<>(mRunOnce);
                 mRunOnce = new LinkedList<>();
             }
@@ -119,6 +122,10 @@ public class CustomizeUI {
             }
         }
 
+        public void setTransitionToEndListener(Runnable listener) {
+            transitionToEndListener = listener;
+        }
+
         @Override
         public void onTransitionStarted(MotionLayout motionLayout, int startId, int endId) {
             callOnce(motionLayout, TransitionType.STARTED);
@@ -132,6 +139,8 @@ public class CustomizeUI {
         @Override
         public void onTransitionCompleted(MotionLayout motionLayout, int currentId) {
             callOnce(motionLayout, TransitionType.COMPLETED);
+            if (transitionToEndListener != null && motionLayout.getEndState() == currentId)
+                transitionToEndListener.run();
         }
 
         @Override
@@ -652,5 +661,15 @@ public class CustomizeUI {
         mSearchBarTransition.addRunOnce(runOnce);
         ((MotionLayout) mSearchBarContainer).transitionToStart();
         //((MotionLayout) mSearchBarContainer).setProgress(0f, -1f);
+    }
+
+    public void addSearchPillListener(MotionLayout.TransitionListener listener) {
+        if (!(mSearchBarContainer instanceof MotionLayout))
+            return;
+        ((MotionLayout) mSearchBarContainer).addTransitionListener(listener);
+    }
+
+    public void setExpandedSearchPillListener(Runnable listener) {
+        mSearchBarTransition.setTransitionToEndListener(listener);
     }
 }

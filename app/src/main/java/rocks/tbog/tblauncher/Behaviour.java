@@ -115,7 +115,7 @@ public class Behaviour implements ISearchActivity {
     private final Runnable mUpdateTime = new Runnable() {
         @Override
         public void run() {
-            if (mLauncherTime == null)
+            if (mLauncherTime == null || !mLauncherTime.isAttachedToWindow())
                 return;
             Date date = new Date();
             mLauncherTime.setText(DateFormat.getDateTimeInstance().format(date));
@@ -243,6 +243,13 @@ public class Behaviour implements ISearchActivity {
         mSearchEditText = mSearchBarContainer.findViewById(R.id.launcherSearch);
         mClearButton = mSearchBarContainer.findViewById(R.id.clearButton);
         mMenuButton = mSearchBarContainer.findViewById(R.id.menuButton);
+
+        mTBLauncherActivity.customizeUI.setExpandedSearchPillListener(() -> {
+            if (TBApplication.state().isKeyboardHidden()) {
+                // pill search bar expanded with a hidden keyboard
+                showKeyboard();
+            }
+        });
     }
 
     private void initLauncherButton() {
@@ -278,9 +285,10 @@ public class Behaviour implements ISearchActivity {
                 // Fix for #238
                 state.syncKeyboardVisibility(view);
                 if (state.isKeyboardHidden()) {
-                    Log.i(TAG, "Keyboard - closeButton");
+                    Log.i(TAG, "Keyboard - closeButton while keyboard hidden");
                     return false;
                 }
+                Log.i(TAG, "Keyboard - closeButton");
                 // return true if we should hide the keyboard
                 return state.isSearchBarVisible() && PrefCache.linkKeyboardAndSearchBar(mPref);
             }
@@ -316,17 +324,6 @@ public class Behaviour implements ISearchActivity {
                 if (mSearchEditText != null)
                     mSearchEditText.requestFocus();
 
-//                mTBLauncherActivity.customizeUI.expandSearchPill((motionLayout, type) -> {
-//                    if (type == CustomizeUI.MotionTransitionListener.TransitionType.COMPLETED) {
-//                        Log.d(TAG, "[showKeyboard] expand type=" + type.toString());
-//                        if (mSearchEditText != null)
-//                            mSearchEditText.requestFocus();
-//                        updateClearButton();
-//                        return true;
-//                    }
-//                    return false;
-//                });
-
                 super.showKeyboard();
             }
 
@@ -348,15 +345,6 @@ public class Behaviour implements ISearchActivity {
                     focus.clearFocus();
                 if (mSearchEditText != null)
                     mSearchEditText.clearFocus();
-
-//                mTBLauncherActivity.customizeUI.collapseSearchPill((motionLayout, type) -> {
-//                    Log.d(TAG, "[hideKeyboard] expand type=" + type.toString());
-//                    if (type == CustomizeUI.MotionTransitionListener.TransitionType.COMPLETED) {
-//                        updateClearButton();
-//                        return true;
-//                    }
-//                    return false;
-//                });
 
                 super.hideKeyboard();
             }
