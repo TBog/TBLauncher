@@ -289,8 +289,16 @@ public class Behaviour implements ISearchActivity {
                     return false;
                 }
                 Log.i(TAG, "Keyboard - closeButton");
-                // return true if we should hide the keyboard
-                return state.isSearchBarVisible() && PrefCache.linkKeyboardAndSearchBar(mPref);
+                if (state.isSearchBarVisible() && PrefCache.linkKeyboardAndSearchBar(mPref)) {
+                    if (PrefCache.linkCloseKeyboardToBackButton(mPref)) {
+                        onBackPressed();
+                        return !state.isKeyboardHidden();
+                    }
+                    // consume action to avoid closing the keyboard
+                    return true;
+                }
+                // close the keyboard
+                return false;
             }
 
             // launch most relevant result
@@ -1146,11 +1154,12 @@ public class Behaviour implements ISearchActivity {
         if (dismissPopup())
             return;
         LauncherState state = TBApplication.state();
-
-        if (state.isSearchBarVisible() && PrefCache.modeSearchFullscreen(mPref))
-            enableFullscreen(0);
-        if (PrefCache.linkCloseKeyboardToBackButton(mPref))
-            onBackPressed();
+        if (LauncherState.Desktop.SEARCH == state.getDesktop()) {
+            if (PrefCache.modeSearchFullscreen(mPref))
+                enableFullscreen(0);
+//            if (PrefCache.linkCloseKeyboardToBackButton(mPref))
+//                onBackPressed();
+        }
     }
 
     @NonNull
