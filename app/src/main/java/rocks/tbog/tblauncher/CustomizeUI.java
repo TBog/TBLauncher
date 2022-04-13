@@ -27,8 +27,6 @@ import androidx.annotation.Nullable;
 import androidx.constraintlayout.motion.widget.MotionLayout;
 import androidx.preference.PreferenceManager;
 
-import java.util.LinkedList;
-
 import rocks.tbog.tblauncher.drawable.LoadingDrawable;
 import rocks.tbog.tblauncher.ui.RecyclerList;
 import rocks.tbog.tblauncher.ui.SearchEditText;
@@ -90,37 +88,9 @@ public class CustomizeUI {
     }
 
     public static final class MotionTransitionListener implements MotionLayout.TransitionListener {
-        private LinkedList<OnTransition> mRunOnce = new LinkedList<>();
         private Runnable transitionToEndListener = null;
 
         public enum TransitionType {STARTED, CHANGE, COMPLETED, TRIGGER}
-
-        public interface OnTransition {
-            boolean onTransition(MotionLayout motionLayout, TransitionType type);
-        }
-
-        private void callOnce(MotionLayout motionLayout, TransitionType type) {
-            OnTransition runOnce;
-            LinkedList<OnTransition> linkedList;
-            synchronized (this) {
-                if (mRunOnce.isEmpty())
-                    return;
-                linkedList = new LinkedList<>(mRunOnce);
-                mRunOnce = new LinkedList<>();
-            }
-            while ((runOnce = linkedList.poll()) != null) {
-                if (!runOnce.onTransition(motionLayout, type))
-                    addRunOnce(runOnce);
-            }
-        }
-
-        public void addRunOnce(OnTransition runOnce) {
-            if (runOnce == null)
-                return;
-            synchronized (this) {
-                mRunOnce.add(runOnce);
-            }
-        }
 
         public void setTransitionToEndListener(Runnable listener) {
             transitionToEndListener = listener;
@@ -128,24 +98,23 @@ public class CustomizeUI {
 
         @Override
         public void onTransitionStarted(MotionLayout motionLayout, int startId, int endId) {
-            callOnce(motionLayout, TransitionType.STARTED);
+            // do nothing
         }
 
         @Override
         public void onTransitionChange(MotionLayout motionLayout, int startId, int endId, float progress) {
-            callOnce(motionLayout, TransitionType.CHANGE);
+            // do nothing
         }
 
         @Override
         public void onTransitionCompleted(MotionLayout motionLayout, int currentId) {
-            callOnce(motionLayout, TransitionType.COMPLETED);
             if (transitionToEndListener != null && motionLayout.getEndState() == currentId)
                 transitionToEndListener.run();
         }
 
         @Override
         public void onTransitionTrigger(MotionLayout motionLayout, int triggerId, boolean positive, float progress) {
-            callOnce(motionLayout, TransitionType.TRIGGER);
+            // do nothing
         }
     }
 
@@ -621,52 +590,14 @@ public class CustomizeUI {
         return mPref.getBoolean("enable-suggestions-keyboard", false);
     }
 
-    public void expandSearchPill(MotionTransitionListener.OnTransition runOnce) {
-        if (!(mSearchBarContainer instanceof MotionLayout))
-            return;
-//        ConstraintSet cSet = new ConstraintSet();
-//        cSet.clone((ConstraintLayout) mSearchBarContainer);
-//        cSet.connect(mLauncherButton.getId(), ConstraintSet.LEFT, mSearchBar.getId(), ConstraintSet.RIGHT);
-//        cSet.connect(mLauncherButton.getId(), ConstraintSet.RIGHT, mMenuButton.getId(), ConstraintSet.LEFT);
-//        cSet.setVisibility(R.id.launcherTime, ConstraintSet.GONE);
-//
-//        ChangeBounds transition = new ChangeBounds();
-//        transition.setInterpolator(new BounceInterpolator());
-//        transition.setDuration(1000);
-//
-//        TransitionManager.beginDelayedTransition(mSearchBarContainer, transition);
-//        cSet.applyTo((ConstraintLayout) mSearchBarContainer);
-
-        mSearchBarTransition.addRunOnce(runOnce);
-        ((MotionLayout) mSearchBarContainer).transitionToEnd();
-        //((MotionLayout) mSearchBarContainer).setProgress(1f, 1f);
+    public void expandSearchPill() {
+        if (mSearchBarContainer instanceof MotionLayout)
+            ((MotionLayout) mSearchBarContainer).transitionToEnd();
     }
 
-    public void collapseSearchPill(MotionTransitionListener.OnTransition runOnce) {
-        if (!(mSearchBarContainer instanceof MotionLayout))
-            return;
-//        ConstraintSet cSet = new ConstraintSet();
-//        cSet.clone((ConstraintLayout) mSearchBarContainer);
-//        cSet.clear(mLauncherButton.getId(), ConstraintSet.RIGHT);
-//        cSet.connect(mLauncherButton.getId(), ConstraintSet.LEFT, ConstraintSet.PARENT_ID, ConstraintSet.LEFT);
-//        cSet.setVisibility(R.id.launcherTime, ConstraintSet.VISIBLE);
-//
-//        ChangeBounds transition = new ChangeBounds();
-//        transition.setInterpolator(new DecelerateInterpolator());
-//        transition.setDuration(1000);
-//
-//        TransitionManager.beginDelayedTransition(mSearchBarContainer, transition);
-//        cSet.applyTo((ConstraintLayout) mSearchBarContainer);
-
-        mSearchBarTransition.addRunOnce(runOnce);
-        ((MotionLayout) mSearchBarContainer).transitionToStart();
-        //((MotionLayout) mSearchBarContainer).setProgress(0f, -1f);
-    }
-
-    public void addSearchPillListener(MotionLayout.TransitionListener listener) {
-        if (!(mSearchBarContainer instanceof MotionLayout))
-            return;
-        ((MotionLayout) mSearchBarContainer).addTransitionListener(listener);
+    public void collapseSearchPill() {
+        if (mSearchBarContainer instanceof MotionLayout)
+            ((MotionLayout) mSearchBarContainer).transitionToStart();
     }
 
     public void setExpandedSearchPillListener(Runnable listener) {

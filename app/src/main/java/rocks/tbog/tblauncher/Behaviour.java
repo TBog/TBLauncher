@@ -369,10 +369,10 @@ public class Behaviour implements ISearchActivity {
             if (status == KeyboardTriggerBehaviour.Status.CLOSED) {
                 onKeyboardClosed();
                 if (TBApplication.state().isSearchBarVisible())
-                    mTBLauncherActivity.customizeUI.collapseSearchPill(null);
+                    mTBLauncherActivity.customizeUI.collapseSearchPill();
             } else {
                 if (TBApplication.state().isSearchBarVisible())
-                    mTBLauncherActivity.customizeUI.expandSearchPill(null);
+                    mTBLauncherActivity.customizeUI.expandSearchPill();
             }
         });
 
