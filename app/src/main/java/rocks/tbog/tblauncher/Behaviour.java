@@ -190,6 +190,7 @@ public class Behaviour implements ISearchActivity {
     };
     private View mNotificationBackground;
     private WindowInsetsHelper mKeyboardHandler = null;
+    private RecycleScrollListener mRecycleScrollListener;
     private SharedPreferences mPref;
 
     private static void launchIntent(@NonNull Behaviour behaviour, @NonNull View view, @NonNull Intent intent) {
@@ -216,14 +217,13 @@ public class Behaviour implements ISearchActivity {
         if (mResultList == null)
             throw new IllegalStateException("mResultList==null");
 
-        RecycleScrollListener recycleScrollListener;
-        recycleScrollListener = new RecycleScrollListener(mKeyboardHandler);
+        mRecycleScrollListener = new RecycleScrollListener(mKeyboardHandler);
 
         mResultAdapter = new RecycleAdapter(getContext(), new ArrayList<>());
 
         mResultList.setHasFixedSize(true);
         mResultList.setAdapter(mResultAdapter);
-        mResultList.addOnScrollListener(recycleScrollListener);
+        mResultList.addOnScrollListener(mRecycleScrollListener);
 //        mResultList.addOnLayoutChangeListener(recycleScrollListener);
 
         int vertical = getContext().getResources().getDimensionPixelSize(R.dimen.result_margin_vertical);
@@ -1086,8 +1086,10 @@ public class Behaviour implements ISearchActivity {
 
         // get layout manager
         RecyclerView.LayoutManager layoutManager = mResultList.getLayoutManager();
-        if (!(layoutManager instanceof CustomRecycleLayoutManager))
+        if (!(layoutManager instanceof CustomRecycleLayoutManager)) {
             mResultList.setLayoutManager(layoutManager = new CustomRecycleLayoutManager());
+            ((CustomRecycleLayoutManager)layoutManager).setOverScrollListener(mRecycleScrollListener);
+        }
 
         CustomRecycleLayoutManager lm = (CustomRecycleLayoutManager) layoutManager;
         lm.setBottomToTop(PrefCache.firstAtBottom(mPref));
@@ -1104,8 +1106,10 @@ public class Behaviour implements ISearchActivity {
 
         // get layout manager
         RecyclerView.LayoutManager layoutManager = mResultList.getLayoutManager();
-        if (!(layoutManager instanceof CustomRecycleLayoutManager))
+        if (!(layoutManager instanceof CustomRecycleLayoutManager)) {
             mResultList.setLayoutManager(layoutManager = new CustomRecycleLayoutManager());
+            ((CustomRecycleLayoutManager)layoutManager).setOverScrollListener(mRecycleScrollListener);
+        }
 
         CustomRecycleLayoutManager lm = (CustomRecycleLayoutManager) layoutManager;
         lm.setBottomToTop(PrefCache.firstAtBottom(mPref));

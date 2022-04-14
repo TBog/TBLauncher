@@ -2,7 +2,6 @@ package rocks.tbog.tblauncher.result;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
-import android.annotation.SuppressLint;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
@@ -19,7 +18,7 @@ import rocks.tbog.tblauncher.ui.WindowInsetsHelper;
 import rocks.tbog.tblauncher.utils.DebugInfo;
 import rocks.tbog.tblauncher.utils.DebugString;
 
-public class RecycleScrollListener extends RecyclerView.OnScrollListener {
+public class RecycleScrollListener extends RecyclerView.OnScrollListener implements CustomRecycleLayoutManager.OverScrollListener {
     private static final String TAG = "RScrL";
     private final KeyboardHandler handler;
     private int mScrollAmountY = 0;
@@ -179,7 +178,6 @@ public class RecycleScrollListener extends RecyclerView.OnScrollListener {
         }
     }
 
-    @SuppressLint("ClickableViewAccessibility")
     @Override
     public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
         if (!(recyclerView instanceof RecyclerList))
@@ -229,6 +227,14 @@ public class RecycleScrollListener extends RecyclerView.OnScrollListener {
                 // let the Scroll Listener resize the list without any additional scrolling
                 setListAutoScroll(list, false);
             }
+        }
+    }
+
+    @Override
+    public void onOverScroll(RecyclerView list, int amount) {
+        if (mState.resizeFinished() || !WindowInsetsHelper.isKeyboardVisible(list)) {
+            Log.i(TAG, "overscroll show keyboard with state=" + mState);
+            handler.showKeyboard();
         }
     }
 
@@ -287,7 +293,6 @@ public class RecycleScrollListener extends RecyclerView.OnScrollListener {
             ((CustomRecycleLayoutManager) list.getLayoutManager()).setAutoScrollBottom(value);
     }
 
-    @SuppressLint("ClickableViewAccessibility")
     private void handleResizeDone(@NonNull RecyclerView list) {
         if (mState.resizeFinished()) {
             return;
