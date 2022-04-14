@@ -852,7 +852,7 @@
                     android:title="@string/back_device_key" />
 
                 <ListPreference
-                    android:defaultValue="resultHistoryByRecency"
+                    android:defaultValue="showHistoryByRecency"
                     android:entries="@array/resultEntries"
                     android:entryValues="@array/resultValues"
                     android:key="dm-search-open-result"
