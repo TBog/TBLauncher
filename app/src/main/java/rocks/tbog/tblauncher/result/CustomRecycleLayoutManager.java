@@ -13,14 +13,15 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import rocks.tbog.tblauncher.BuildConfig;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.utils.SparseArrayWrapper;
 
 public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager implements ReversibleAdapterRecyclerLayoutManager {
 
     private static final String TAG = "CRLM";
-    private static final Boolean LOG_DEBUG = BuildConfig.DEBUG;
+    private static final Boolean LOG_DEBUG = false;
+
+    private RecyclerView mRecyclerView = null;
 
     /* First position visible at any point (adapter index) */
     private int mFirstVisiblePosition;
@@ -43,11 +44,18 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
     private boolean mAutoColumn = false;
     /* When list height grows, keep bottom view at the bottom */
     private boolean mAutoScrollBottom = true;
+    /* Keep track of the amount of over-scroll */
+    private int mOverScrollVertical = 0;
+    private OverScrollListener mOverScrollListener = null;
 
     private boolean mRefreshViews = false;
 
     // Reusable array. This should only be used used transiently and should not be used to retain any state over time.
     private final SparseArrayWrapper<View> mViewCache = new SparseArrayWrapper<>();
+
+    public interface OverScrollListener {
+        void onOverScroll(RecyclerView recyclerView, int amount);
+    }
 
     private static class RowInfo {
         /* row alignment offset. When layout is bottom to top the first row has pos==-height */
@@ -136,6 +144,11 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
         mAutoScrollBottom = autoScrollBottom;
     }
 
+    public void setOverScrollListener(@Nullable OverScrollListener listener) {
+        mOverScrollListener = listener;
+    }
+
+
     @Override
     public int computeVerticalScrollExtent(@NonNull RecyclerView.State state) {
         return getVerticalSpace();
@@ -187,6 +200,17 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
         return 0;
     }
 
+    @Override
+    public void onAttachedToWindow(RecyclerView view) {
+        super.onAttachedToWindow(view);
+        mRecyclerView = view;
+    }
+
+    @Override
+    public void onDetachedFromWindow(RecyclerView view, RecyclerView.Recycler recycler) {
+        mRecyclerView = null;
+        super.onDetachedFromWindow(view, recycler);
+    }
 
     /*
      * You must return true from this method if you want your
@@ -988,8 +1012,12 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
             amount = dy;
         }
 
-        if (dy != amount)
-            logDebug("dy=" + dy + " amount=" + amount);
+        if (dy != amount) {
+            logDebug("dy=" + dy + " amount=" + amount + " overScroll=" + mOverScrollVertical);
+            overScrollVertical(dy - amount);
+        } else {
+            resetOverScrollVertical();
+        }
 
         if (amount == 0 || (dy < 0 && amount > 0) || (dy > 0 && amount < 0))
             return 0;
@@ -1008,6 +1036,21 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
          * an edge effect.
          */
         return amount;
+    }
+
+    private void overScrollVertical(int amount) {
+        // sum up amount until we can trigger the over scroll event
+        mOverScrollVertical += amount;
+        if (mOverScrollListener != null && mRecyclerView != null) {
+            if (mOverScrollVertical > getDecoratedMeasuredHeight(getBottomView())) {
+                mOverScrollListener.onOverScroll(mRecyclerView, mOverScrollVertical);
+            }
+        }
+    }
+
+    private void resetOverScrollVertical() {
+        // reset amount
+        mOverScrollVertical = 0;
     }
 
     private void checkVisibilityAfterScroll(RecyclerView.Recycler recycler, boolean checkTop) {
