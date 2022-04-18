@@ -36,6 +36,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.ActionBar;
+import androidx.lifecycle.Lifecycle;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -115,7 +116,9 @@ public class Behaviour implements ISearchActivity {
     private final Runnable mUpdateTime = new Runnable() {
         @Override
         public void run() {
-            if (mLauncherTime == null || !mLauncherTime.isAttachedToWindow())
+            if (mLauncherTime == null ||
+                !mLauncherTime.isAttachedToWindow() ||
+                !mTBLauncherActivity.getLifecycle().getCurrentState().isAtLeast(Lifecycle.State.STARTED))
                 return;
             Date date = new Date();
             mLauncherTime.setText(DateFormat.getDateTimeInstance().format(date));
@@ -1399,7 +1402,7 @@ public class Behaviour implements ISearchActivity {
         mLauncherTime = null;
         if (PrefCache.searchBarHasTimer(mPref)) {
             mLauncherTime = mSearchBarContainer.findViewById(R.id.launcherTime);
-            mUpdateTime.run();
+            mLauncherTime.post(mUpdateTime);
         }
     }
 
