@@ -46,12 +46,28 @@
             app:layout_constraintTop_toTopOf="parent"
             tools:visibility="visible" />
 
+        <rocks.tbog.tblauncher.ui.ViewStubPreview
+            android:id="@+id/dockAboveResults"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/large_bar_height"
+            android:background="@null"
+            android:gravity="center"
+            android:measureWithLargestChild="true"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            app:layout="@layout/quick_list"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/stubSearchTop"
+            tools:background="@drawable/tab_background_light"
+            tools:backgroundTint="@color/colorAccent" />
+
         <androidx.constraintlayout.widget.Barrier
             android:id="@+id/barrierTop"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:barrierDirection="bottom"
-            app:constraint_referenced_ids="stubSearchTop" />
+            app:constraint_referenced_ids="stubSearchTop,dockAboveResults" />
 
         <rocks.tbog.tblauncher.ui.ViewStubPreview
             android:id="@+id/resultLayout"
@@ -95,7 +111,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             app:barrierDirection="top"
-            app:constraint_referenced_ids="debugText,quickList,stubSearchBottom" />
+            app:constraint_referenced_ids="debugText,dockUnderResults,stubSearchBottom,dockAtBottom" />
 
         <TextView
             android:id="@+id/debugText"
@@ -105,13 +121,13 @@
             android:textColor="#666"
             android:visibility="gone"
             android:elevation="10dp"
-            app:layout_constraintBottom_toTopOf="@id/quickList"
+            app:layout_constraintBottom_toTopOf="@id/dockUnderResults"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             tools:visibility="visible" />
 
-        <LinearLayout
-            android:id="@+id/quickList"
+        <rocks.tbog.tblauncher.ui.ViewStubPreview
+            android:id="@+id/dockUnderResults"
             android:layout_width="0dp"
             android:layout_height="@dimen/large_bar_height"
             android:background="@null"
@@ -119,6 +135,7 @@
             android:measureWithLargestChild="true"
             android:orientation="horizontal"
             android:visibility="gone"
+            app:layout="@layout/quick_list"
             app:layout_constraintBottom_toTopOf="@id/stubSearchBottom"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
@@ -129,17 +146,33 @@
         <rocks.tbog.tblauncher.ui.ViewStubPreview
             android:id="@+id/stubSearchBottom"
             android:layout_width="0dp"
-            android:layout_height="@dimen/bar_height"
+            android:layout_height="@dimen/large_bar_height"
             android:layout_gravity="bottom|center_horizontal"
             android:background="@null"
             android:clipChildren="false"
             android:gravity="center"
             app:layout="@layout/search_bar"
             android:orientation="horizontal"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@id/dockAtBottom"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             tools:visibility="visible" />
+
+        <rocks.tbog.tblauncher.ui.ViewStubPreview
+            android:id="@+id/dockAtBottom"
+            android:layout_width="0dp"
+            android:layout_height="@dimen/large_bar_height"
+            android:background="@null"
+            android:gravity="center"
+            android:measureWithLargestChild="true"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            app:layout="@layout/quick_list"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            tools:background="@drawable/tab_background_light"
+            tools:backgroundTint="@color/colorAccent" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 

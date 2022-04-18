@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/quickList"
+    android:layout_width="0dp"
+    android:layout_height="@dimen/large_bar_height"
+    android:background="@null"
+    android:gravity="center"
+    android:measureWithLargestChild="true"
+    android:orientation="horizontal"
+    android:visibility="gone"
+    tools:background="@drawable/tab_background_light"
+    tools:backgroundTint="@color/colorAccent"
+    tools:showIn="@layout/activity_fullscreen"
+    tools:visibility="visible" />

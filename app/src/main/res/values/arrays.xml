@@ -41,6 +41,18 @@
         <item>pill-search</item>
     </string-array>
 
+    <string-array name="dockPositionEntries">
+        <item>Above the &#171;Result list&#187;</item>
+        <item>Under the &#171;Result list&#187;</item>
+        <item>Under the &#171;Search bar&#187;</item>
+    </string-array>
+
+    <string-array name="dockPositionValues" translatable="false">
+        <item>above-result-list</item>
+        <item>under-result-list</item>
+        <item>under-search-bar</item>
+    </string-array>
+
     <string-array name="adaptiveEntries">
         <item>None / Default</item>
         <item>Circle</item>
