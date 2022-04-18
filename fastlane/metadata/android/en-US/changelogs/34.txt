@@ -1,0 +1,8 @@
+ * add search bar pill layout preference
+ * fix keyboard open and close action
+ * add dock position preference
+ * fix popup background on Lollipop
+ * fix edit tag item background
+ * change switch preference (toggle) thumb and track for older Android
+ * fix edit search engines dialog
+ * fix manifest shortcuts appearing in results
