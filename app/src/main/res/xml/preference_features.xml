@@ -68,6 +68,13 @@
             android:summary="@string/quick_list_content_summary"
             android:title="@string/quick_list_content" />
 
+        <ListPreference
+            android:defaultValue="under-result-list"
+            android:entries="@array/dockPositionEntries"
+            android:entryValues="@array/dockPositionValues"
+            android:key="quick-list-position"
+            android:title="@string/quick_list_position" />
+
     </androidx.preference.PreferenceCategory>
 
     <!-- Search bar -->

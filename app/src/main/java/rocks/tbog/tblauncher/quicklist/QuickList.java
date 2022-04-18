@@ -16,6 +16,7 @@ import android.view.animation.AccelerateDecelerateInterpolator;
 import android.view.animation.DecelerateInterpolator;
 import android.widget.LinearLayout;
 
+import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.preference.PreferenceManager;
@@ -43,6 +44,7 @@ import rocks.tbog.tblauncher.handler.DataHandler;
 import rocks.tbog.tblauncher.result.ResultHelper;
 import rocks.tbog.tblauncher.searcher.Searcher;
 import rocks.tbog.tblauncher.ui.ListPopup;
+import rocks.tbog.tblauncher.ui.ViewStubPreview;
 import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.UISizes;
@@ -95,6 +97,12 @@ public class QuickList {
         }
     };
 
+    public enum QuickListPosition {
+        POSITION_ABOVE_RESULTS,
+        POSITION_UNDER_RESULTS,
+        POSITION_UNDER_SEARCH_BAR,
+    }
+
     public Context getContext() {
         return mTBLauncherActivity;
     }
@@ -102,7 +110,8 @@ public class QuickList {
     public void onCreateActivity(TBLauncherActivity tbLauncherActivity) {
         mTBLauncherActivity = tbLauncherActivity;
         mSharedPreferences = PreferenceManager.getDefaultSharedPreferences(mTBLauncherActivity);
-        mQuickList = mTBLauncherActivity.findViewById(R.id.quickList);
+
+        inflateQuickListView();
 
         mRetryCountdown = RETRY_COUNT;
         mListDirty = true;
@@ -131,6 +140,27 @@ public class QuickList {
             //drawFlags |= EntryItem.FLAG_DRAW_NO_CACHE; // no need, we already have it
         }
         return drawFlags;
+    }
+
+    @SuppressWarnings("unchecked")
+    private <T extends View> T inflateViewStub(@IdRes int id) {
+        View stub = mTBLauncherActivity.findViewById(id);
+        return (T) ViewStubPreview.inflateStub(stub);
+    }
+
+    private void inflateQuickListView() {
+        QuickListPosition position = PrefCache.getDockPosition(mSharedPreferences);
+        if (position == QuickListPosition.POSITION_UNDER_SEARCH_BAR && !PrefCache.searchBarAtBottom(mSharedPreferences))
+            position = QuickListPosition.POSITION_ABOVE_RESULTS;
+
+        if (position == QuickListPosition.POSITION_ABOVE_RESULTS)
+            mQuickList = inflateViewStub(R.id.dockAboveResults);
+        else if (position == QuickListPosition.POSITION_UNDER_RESULTS)
+            mQuickList = inflateViewStub(R.id.dockUnderResults);
+        else if (position == QuickListPosition.POSITION_UNDER_SEARCH_BAR)
+            mQuickList = inflateViewStub(R.id.dockAtBottom);
+        else
+            mQuickList = inflateViewStub(R.id.quickList);
     }
 
     private void populateList() {

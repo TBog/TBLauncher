@@ -23,6 +23,7 @@ import java.util.Map;
 
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.preference.ContentLoadHelper;
+import rocks.tbog.tblauncher.quicklist.QuickList;
 
 public class PrefCache {
 
@@ -186,6 +187,23 @@ public class PrefCache {
     public static boolean searchBarHasTimer(SharedPreferences pref) {
         String layout = pref.getString("search-bar-layout", null);
         return "pill-search".equals(layout);
+    }
+
+    public static QuickList.QuickListPosition getDockPosition(SharedPreferences pref) {
+        String position = pref.getString("quick-list-position", null);
+        if (position != null) {
+            switch (position) {
+                case "above-result-list":
+                    return QuickList.QuickListPosition.POSITION_ABOVE_RESULTS;
+                case "under-result-list":
+                    return QuickList.QuickListPosition.POSITION_UNDER_RESULTS;
+                case "under-search-bar":
+                    return QuickList.QuickListPosition.POSITION_UNDER_SEARCH_BAR;
+                default:
+                    break;
+            }
+        }
+        return QuickList.QuickListPosition.POSITION_UNDER_RESULTS;
     }
 
     public static boolean linkCloseKeyboardToBackButton(SharedPreferences preferences) {
