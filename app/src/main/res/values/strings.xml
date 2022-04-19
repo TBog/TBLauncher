@@ -44,8 +44,8 @@
     <string name="menu_popup_tags_manager">Tag manager</string>
     <string name="menu_popup_tags_menu">Tags menu</string>
     <string name="rate_the_app">Rate the app</string>
-    <string name="user_interface_summary">Themes, transparency and colors</string>
-    <string name="title_ui">User interface</string>
+    <string name="user_interface_summary">Colours, transparency and sizes for text and icons</string>
+    <string name="title_ui">Theme</string>
     <string name="notification_bar_section">Notification bar</string>
     <string name="color_and_opacity">Color and opacity</string>
     <string name="gradient">Gradient</string>
@@ -102,8 +102,8 @@
     <string name="custom_icon_preview_label">Selected\nicon</string>
     <string name="custom_name_set_default">Default name</string>
     <string name="hint_new_tag">add tag</string>
-    <string name="title_features">Features</string>
-    <string name="features_summary">Toggle and customize app features</string>
+    <string name="title_features">Layout</string>
+    <string name="features_summary">Toggle and customize UI elements</string>
     <string name="quick_list_section">Dock</string>
     <string name="quick_list_enabled">Use dock</string>
     <string name="quick_list_icon_size">Max icon size</string>
@@ -406,7 +406,7 @@
     <string name="no_tags">No tags found</string>
     <string name="quick_list_animation">Animate show/hide</string>
     <string name="initial_desktop">Initial desktop</string>
-    <string name="behaviour_summary">Gestures and behaviour</string>
+    <string name="behaviour_summary">Gestures and what-to-do-when</string>
     <string name="title_behaviour">Behaviour</string>
     <string name="root_mode">Root mode</string>
     <string name="root_mode_summary">Used to hibernate apps</string>
@@ -472,6 +472,8 @@
     <string name="search_bar_layout">Layout</string>
     <string name="quick_list_position">Position</string>
     <string name="navigation_bar_section">Navigation bar</string>
+    <string name="icons_section">Icons</string>
+    <string name="options_section">Options</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>
