@@ -118,6 +118,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     private static final int FILE_SELECT_XML_OVERWRITE = 62;
     private static final int FILE_SELECT_XML_APPEND = 61;
     public static final int ENABLE_DEVICE_ADMIN = 60;
+    private static final String TAG = "SettAct";
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -280,6 +281,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
+        Log.d(TAG, "onActivityResult request=" + requestCode + " result=" + resultCode);
         if (requestCode == ENABLE_DEVICE_ADMIN) {
             if (resultCode != RESULT_OK) {
                 Toast.makeText(this, "Failed!", Toast.LENGTH_SHORT).show();

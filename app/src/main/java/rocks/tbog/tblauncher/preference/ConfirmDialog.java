@@ -58,10 +58,12 @@ public class ConfirmDialog extends BasePreferenceDialog {
                 if (DeviceAdmin.isAdminActive(context)) {
                     DeviceAdmin.removeActiveAdmin(context);
                 } else {
-                    Intent intent = new Intent(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
+                    Activity activity = requireActivity();
+                    Intent intent = new Intent();
+                    intent.setAction(DevicePolicyManager.ACTION_ADD_DEVICE_ADMIN);
                     intent.putExtra(DevicePolicyManager.EXTRA_DEVICE_ADMIN, DeviceAdmin.getAdminComponent(context));
                     intent.putExtra(DevicePolicyManager.EXTRA_ADD_EXPLANATION, getString(R.string.device_admin_explanation));
-                    startActivityForResult(intent, SettingsActivity.ENABLE_DEVICE_ADMIN);
+                    activity.startActivityForResult(intent, SettingsActivity.ENABLE_DEVICE_ADMIN);
                 }
                 break;
             }
