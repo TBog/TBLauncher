@@ -15,42 +15,42 @@
         android:summary="@string/user_interface_summary"
         android:title="@string/title_ui">
 
+        <PreferenceScreen
+            android:key="ui-presets"
+            android:summary="@string/summary_presets"
+            android:title="@string/title_presets">
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@integer/default_color"
+                android:key="primary-color"
+                android:title="@string/primary_color"
+                android:widgetLayout="@layout/pref_color_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@integer/default_color_text"
+                android:key="secondary-color"
+                android:title="@string/secondary_color"
+                android:widgetLayout="@layout/pref_color_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:dialogLayout="@layout/pref_confirm"
+                android:key="generate-theme-simple"
+                android:summary="@string/generate_theme_simple_summary"
+                android:title="@string/generate_theme_simple" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:dialogLayout="@layout/pref_confirm"
+                android:key="generate-theme-highlight"
+                android:summary="@string/generate_theme_highlight_summary"
+                android:title="@string/generate_theme_highlight" />
+
+        </PreferenceScreen>
+
         <!-- Icons -->
         <PreferenceCategory
             android:key="icons-section"
             android:title="@string/icons_section"
             app:initialExpandedChildrenCount="2">
-
-            <PreferenceScreen
-                android:key="ui-presets"
-                android:summary="@string/summary_presets"
-                android:title="@string/title_presets">
-
-                <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                    android:defaultValue="@integer/default_color"
-                    android:key="primary-color"
-                    android:title="@string/primary_color"
-                    android:widgetLayout="@layout/pref_color_preview" />
-
-                <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                    android:defaultValue="@integer/default_color_text"
-                    android:key="secondary-color"
-                    android:title="@string/secondary_color"
-                    android:widgetLayout="@layout/pref_color_preview" />
-
-                <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                    android:dialogLayout="@layout/pref_confirm"
-                    android:key="generate-theme-simple"
-                    android:summary="@string/generate_theme_simple_summary"
-                    android:title="@string/generate_theme_simple" />
-
-                <rocks.tbog.tblauncher.preference.CustomDialogPreference
-                    android:dialogLayout="@layout/pref_confirm"
-                    android:key="generate-theme-highlight"
-                    android:summary="@string/generate_theme_highlight_summary"
-                    android:title="@string/generate_theme_highlight" />
-
-            </PreferenceScreen>
 
             <ListPreference
                 android:defaultValue="0"
@@ -406,8 +406,8 @@
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@integer/default_height_row"
-                android:dialogLayout="@layout/pref_slider"
                 android:dependency="result-list-row-height-manual"
+                android:dialogLayout="@layout/pref_slider"
                 android:key="result-list-row-height"
                 android:title="@string/result_list_row_height"
                 android:widgetLayout="@layout/pref_size_preview" />
@@ -542,8 +542,8 @@
             <androidx.preference.SwitchPreference
                 android:defaultValue="false"
                 android:key="tags-menu-icons"
-                app:isPreferenceVisible="false"
-                android:title="@string/tags_menu_icons" />
+                android:title="@string/tags_menu_icons"
+                app:isPreferenceVisible="false" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@integer/default_size_icon"
