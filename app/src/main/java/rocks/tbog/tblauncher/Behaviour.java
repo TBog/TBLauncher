@@ -1557,7 +1557,8 @@ public class Behaviour implements ISearchActivity {
             case "showSearchBarAndKeyboard":
                 TBApplication.state().setKeyboard(LauncherState.AnimatedVisibility.ANIM_TO_VISIBLE);
                 switchToDesktop(LauncherState.Desktop.SEARCH);
-                showKeyboard();
+                mSearchEditText.requestFocus();
+                mSearchEditText.post(this::showKeyboard);
                 return true;
             case "showWidgets":
                 switchToDesktop(LauncherState.Desktop.WIDGET);
