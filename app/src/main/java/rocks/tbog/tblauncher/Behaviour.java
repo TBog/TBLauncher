@@ -248,7 +248,9 @@ public class Behaviour implements ISearchActivity {
         mMenuButton = mSearchBarContainer.findViewById(R.id.menuButton);
 
         mTBLauncherActivity.customizeUI.setExpandedSearchPillListener(() -> {
-            if (TBApplication.state().isKeyboardHidden()) {
+            LauncherState state = TBApplication.state();
+            state.syncKeyboardVisibility(mSearchBarContainer);
+            if (state.isKeyboardHidden()) {
                 // pill search bar expanded with a hidden keyboard
                 showKeyboard();
             }
@@ -291,12 +293,13 @@ public class Behaviour implements ISearchActivity {
                     Log.i(TAG, "Keyboard - closeButton while keyboard hidden");
                     return false;
                 }
-                Log.i(TAG, "Keyboard - closeButton");
                 if (state.isSearchBarVisible() && PrefCache.linkKeyboardAndSearchBar(mPref)) {
                     // consume action to avoid closing the keyboard
+                    Log.i(TAG, "Keyboard - closeButton - linkKeyboardAndSearchBar");
                     return true;
                 }
                 // close the keyboard
+                Log.i(TAG, "Keyboard - closeButton - close");
                 return false;
             }
 
