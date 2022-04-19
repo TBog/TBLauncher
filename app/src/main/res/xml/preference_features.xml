@@ -5,83 +5,44 @@
     android:summary="@string/features_summary"
     android:title="@string/title_features">
 
-    <!-- Dock / Quick List -->
-    <androidx.preference.PreferenceCategory
-        android:icon="@drawable/ic_quick"
-        android:key="quick-list-section"
-        android:title="@string/quick_list_section">
-
-        <androidx.preference.SwitchPreference
-            android:defaultValue="true"
-            android:key="quick-list-enabled"
-            android:title="@string/quick_list_enabled" />
-
-        <androidx.preference.SwitchPreference
-            android:defaultValue="false"
-            android:dependency="quick-list-enabled"
-            android:key="quick-list-text-visible"
-            android:title="@string/quick_list_text_visible" />
-
-        <androidx.preference.SwitchPreference
-            android:defaultValue="true"
-            android:dependency="quick-list-enabled"
-            android:key="quick-list-icons-visible"
-            android:title="@string/quick_list_icons_visible" />
-
-        <androidx.preference.SwitchPreference
-            android:defaultValue="true"
-            android:dependency="quick-list-icons-visible"
-            android:key="quick-list-show-badge"
-            android:title="@string/quick_list_show_badge" />
-
-        <androidx.preference.SwitchPreference
-            android:defaultValue="true"
-            android:dependency="quick-list-enabled"
-            android:key="quick-list-animation"
-            android:title="@string/quick_list_animation" />
-
-        <rocks.tbog.tblauncher.preference.CustomDialogPreference
-            android:defaultValue="@integer/default_dock_height"
-            android:dependency="quick-list-enabled"
-            android:dialogLayout="@layout/pref_slider"
-            android:key="quick-list-height"
-            android:title="@string/quick_list_height"
-            android:widgetLayout="@layout/pref_size_preview" />
-
-        <rocks.tbog.tblauncher.preference.CustomDialogPreference
-            android:defaultValue="@integer/default_corner_radius"
-            android:dialogLayout="@layout/pref_slider"
-            android:key="quick-list-radius"
-            android:title="@string/corner_radius"
-            android:widgetLayout="@layout/pref_size_preview" />
-
-        <rocks.tbog.tblauncher.preference.CustomDialogPreference
-            android:dependency="quick-list-enabled"
-            android:dialogLayout="@layout/quick_list_editor"
-            android:key="quick-list-content"
-            android:summary="@string/quick_list_content_summary"
-            android:title="@string/quick_list_content" />
-
-        <ListPreference
-            android:defaultValue="under-result-list"
-            android:entries="@array/dockPositionEntries"
-            android:entryValues="@array/dockPositionValues"
-            android:key="quick-list-position"
-            android:title="@string/quick_list_position" />
-
-    </androidx.preference.PreferenceCategory>
-
     <!-- Search bar -->
     <PreferenceCategory
         android:icon="@drawable/ic_search_bar"
         android:key="search-bar-section"
         android:title="@string/search_bar_section">
 
+        <SwitchPreference
+            android:defaultValue="false"
+            android:disableDependentsState="true"
+            android:key="search-bar-gradient"
+            android:title="@string/gradient" />
+
+        <rocks.tbog.tblauncher.preference.CustomDialogPreference
+            android:defaultValue="@integer/default_corner_radius"
+            android:dialogLayout="@layout/pref_slider"
+            android:key="search-bar-radius"
+            android:title="@string/corner_radius"
+            android:widgetLayout="@layout/pref_size_preview" />
+
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
             android:defaultValue="@integer/default_search_bar_height"
             android:dialogLayout="@layout/pref_slider"
             android:key="search-bar-height"
             android:title="@string/search_bar_height"
+            android:widgetLayout="@layout/pref_size_preview" />
+
+        <rocks.tbog.tblauncher.preference.CustomDialogPreference
+            android:defaultValue="@integer/default_result_margin"
+            android:dialogLayout="@layout/pref_slider"
+            android:key="search-bar-margin-vertical"
+            android:title="@string/margin_vertical"
+            android:widgetLayout="@layout/pref_size_preview" />
+
+        <rocks.tbog.tblauncher.preference.CustomDialogPreference
+            android:defaultValue="@integer/default_result_margin"
+            android:dialogLayout="@layout/pref_slider"
+            android:key="search-bar-margin-horizontal"
+            android:title="@string/margin_horizontal"
             android:widgetLayout="@layout/pref_size_preview" />
 
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
@@ -158,6 +119,40 @@
             android:title="@string/result_fading_edge" />
 
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
+            android:defaultValue="@integer/default_corner_radius"
+            android:dialogLayout="@layout/pref_slider"
+            android:key="result-list-radius"
+            android:title="@string/corner_radius"
+            android:widgetLayout="@layout/pref_size_preview" />
+
+        <androidx.preference.SwitchPreference
+            android:defaultValue="false"
+            android:key="result-list-row-height-manual"
+            android:title="@string/result_list_row_height_manual" />
+
+        <rocks.tbog.tblauncher.preference.CustomDialogPreference
+            android:defaultValue="@integer/default_height_row"
+            android:dependency="result-list-row-height-manual"
+            android:dialogLayout="@layout/pref_slider"
+            android:key="result-list-row-height"
+            android:title="@string/result_list_row_height"
+            android:widgetLayout="@layout/pref_size_preview" />
+
+        <rocks.tbog.tblauncher.preference.CustomDialogPreference
+            android:defaultValue="@integer/default_result_margin"
+            android:dialogLayout="@layout/pref_slider"
+            android:key="result-list-margin-vertical"
+            android:title="@string/margin_vertical"
+            android:widgetLayout="@layout/pref_size_preview" />
+
+        <rocks.tbog.tblauncher.preference.CustomDialogPreference
+            android:defaultValue="@integer/default_result_margin"
+            android:dialogLayout="@layout/pref_slider"
+            android:key="result-list-margin-horizontal"
+            android:title="@string/margin_horizontal"
+            android:widgetLayout="@layout/pref_size_preview" />
+
+        <rocks.tbog.tblauncher.preference.CustomDialogPreference
             android:defaultValue="@integer/default_result_history_size"
             android:dialogLayout="@layout/pref_slider"
             android:key="result-history-size"
@@ -197,6 +192,72 @@
             android:title="@string/icons_visible" />
 
     </PreferenceCategory>
+
+    <!-- Dock / Quick List -->
+    <androidx.preference.PreferenceCategory
+        android:icon="@drawable/ic_quick"
+        android:key="quick-list-section"
+        android:title="@string/quick_list_section">
+
+        <androidx.preference.SwitchPreference
+            android:defaultValue="true"
+            android:key="quick-list-enabled"
+            android:title="@string/quick_list_enabled" />
+
+        <androidx.preference.SwitchPreference
+            android:defaultValue="false"
+            android:dependency="quick-list-enabled"
+            android:key="quick-list-text-visible"
+            android:title="@string/quick_list_text_visible" />
+
+        <androidx.preference.SwitchPreference
+            android:defaultValue="true"
+            android:dependency="quick-list-enabled"
+            android:key="quick-list-icons-visible"
+            android:title="@string/quick_list_icons_visible" />
+
+        <androidx.preference.SwitchPreference
+            android:defaultValue="true"
+            android:dependency="quick-list-icons-visible"
+            android:key="quick-list-show-badge"
+            android:title="@string/quick_list_show_badge" />
+
+        <androidx.preference.SwitchPreference
+            android:defaultValue="true"
+            android:dependency="quick-list-enabled"
+            android:key="quick-list-animation"
+            android:title="@string/quick_list_animation" />
+
+        <rocks.tbog.tblauncher.preference.CustomDialogPreference
+            android:defaultValue="@integer/default_dock_height"
+            android:dependency="quick-list-enabled"
+            android:dialogLayout="@layout/pref_slider"
+            android:key="quick-list-height"
+            android:title="@string/quick_list_height"
+            android:widgetLayout="@layout/pref_size_preview" />
+
+        <rocks.tbog.tblauncher.preference.CustomDialogPreference
+            android:defaultValue="@integer/default_corner_radius"
+            android:dialogLayout="@layout/pref_slider"
+            android:key="quick-list-radius"
+            android:title="@string/corner_radius"
+            android:widgetLayout="@layout/pref_size_preview" />
+
+        <rocks.tbog.tblauncher.preference.CustomDialogPreference
+            android:dependency="quick-list-enabled"
+            android:dialogLayout="@layout/quick_list_editor"
+            android:key="quick-list-content"
+            android:summary="@string/quick_list_content_summary"
+            android:title="@string/quick_list_content" />
+
+        <ListPreference
+            android:defaultValue="under-result-list"
+            android:entries="@array/dockPositionEntries"
+            android:entryValues="@array/dockPositionValues"
+            android:key="quick-list-position"
+            android:title="@string/quick_list_position" />
+
+    </androidx.preference.PreferenceCategory>
 
     <!-- Shortcut -->
     <androidx.preference.PreferenceCategory
