@@ -1562,6 +1562,10 @@ public class Behaviour implements ISearchActivity {
             case "showWidgets":
                 switchToDesktop(LauncherState.Desktop.WIDGET);
                 return true;
+            case "showWidgetsCenter":
+                switchToDesktop(LauncherState.Desktop.WIDGET);
+                mTBLauncherActivity.liveWallpaper.resetPosition();
+                return true;
             case "showEmpty":
                 switchToDesktop(LauncherState.Desktop.EMPTY);
                 return true;

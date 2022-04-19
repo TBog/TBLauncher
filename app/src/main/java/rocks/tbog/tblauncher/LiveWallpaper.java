@@ -172,6 +172,10 @@ public class LiveWallpaper {
         GestureDetectorHelper.setGestureDetectorTouchSlop(gestureDetector, UISizes.dp2px(mainActivity, GD_TOUCH_SLOP_DP));
     }
 
+    public void resetPosition() {
+        resetPageCount();
+    }
+
     private void resetPageCount() {
         Log.i(TAG, "resetPageCount " + SCREEN_COUNT_HORIZONTAL + "x" + SCREEN_COUNT_VERTICAL);
 
