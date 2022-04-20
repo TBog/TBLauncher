@@ -93,6 +93,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     private final static ArraySet<String> PREF_THAT_REQUIRE_LAYOUT_UPDATE = new ArraySet<>(Arrays.asList(
         "result-list-argb", "result-ripple-color", "result-list-radius", "result-list-row-height",
         "notification-bar-argb", "notification-bar-gradient", "black-notification-icons",
+        "navigation-bar-argb",
         "search-bar-height", "search-bar-text-size", "search-bar-radius", "search-bar-gradient", "search-bar-at-bottom",
         "search-bar-argb", "search-bar-text-color", "search-bar-icon-color",
         "search-bar-ripple-color", "search-bar-cursor-argb", "enable-suggestions-keyboard",
@@ -964,6 +965,25 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         setActionBarTextColor(activity, UIColors.getTextContrastColor(color));
     }
 
+    private static void applyNavigationBarColor(@NonNull SharedPreferences sharedPreferences, @Nullable Context context) {
+        int color = UIColors.getColor(sharedPreferences, "navigation-bar-argb");
+        Activity activity = Utilities.getActivity(context);
+        if (activity instanceof SettingsActivity)
+            UIColors.setNavigationBarColor((SettingsActivity) activity, color, color);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            View view = activity != null ? activity.findViewById(android.R.id.content) : null;
+            if (view == null && activity != null)
+                view = activity.getWindow() != null ? activity.getWindow().getDecorView() : null;
+            if (view != null) {
+                if (UIColors.isColorLight(color)) {
+                    SystemUiVisibility.setLightNavigationBar(view);
+                } else {
+                    SystemUiVisibility.clearLightNavigationBar(view);
+                }
+            }
+        }
+    }
+
     public static void onSharedPreferenceChanged(Context context, SharedPreferences sharedPreferences, String key) {
         TBApplication app = TBApplication.getApplication(context);
 
@@ -979,6 +999,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case "notification-bar-argb":
             case "black-notification-icons":
                 applyNotificationBarColor(sharedPreferences, context);
+                break;
+            case "navigation-bar-argb":
+                applyNavigationBarColor(sharedPreferences, context);
                 break;
             case "icon-scale-red":
             case "icon-scale-green":
