@@ -105,6 +105,11 @@ public class LauncherState {
     }
 
     @NonNull
+    public AnimatedVisibility getSearchBarVisibility() {
+        return searchBar;
+    }
+
+    @NonNull
     public AnimatedVisibility getResultListVisibility() {
         return resultList;
     }

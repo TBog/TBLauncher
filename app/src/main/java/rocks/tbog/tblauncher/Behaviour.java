@@ -248,12 +248,9 @@ public class Behaviour implements ISearchActivity {
         mMenuButton = mSearchBarContainer.findViewById(R.id.menuButton);
 
         mTBLauncherActivity.customizeUI.setExpandedSearchPillListener(() -> {
-            LauncherState state = TBApplication.state();
-            state.syncKeyboardVisibility(mSearchBarContainer);
-            if (state.isKeyboardHidden()) {
-                // pill search bar expanded with a hidden keyboard
-                showKeyboard();
-            }
+            // pill search bar expanded, show keyboard
+            mSearchEditText.requestFocus();
+            mSearchEditText.post(this::showKeyboard);
         });
     }
 
@@ -372,12 +369,15 @@ public class Behaviour implements ISearchActivity {
         mDecorView = window.getDecorView();
         KeyboardTriggerBehaviour keyboardListener = new KeyboardTriggerBehaviour(mTBLauncherActivity);
         keyboardListener.observe(mTBLauncherActivity, status -> {
+            LauncherState state = TBApplication.state();
             if (status == KeyboardTriggerBehaviour.Status.CLOSED) {
-                onKeyboardClosed();
-                if (TBApplication.state().isSearchBarVisible())
+                // don't call onKeyboardClosed() when we start the app
+                if (state.getSearchBarVisibility() != LauncherState.AnimatedVisibility.ANIM_TO_VISIBLE)
+                    onKeyboardClosed();
+                if (state.isSearchBarVisible())
                     mTBLauncherActivity.customizeUI.collapseSearchPill();
             } else {
-                if (TBApplication.state().isSearchBarVisible())
+                if (state.isSearchBarVisible())
                     mTBLauncherActivity.customizeUI.expandSearchPill();
             }
         });
@@ -1559,6 +1559,10 @@ public class Behaviour implements ISearchActivity {
                 switchToDesktop(LauncherState.Desktop.SEARCH);
                 mSearchEditText.requestFocus();
                 mSearchEditText.post(this::showKeyboard);
+                mSearchEditText.postDelayed(() -> {
+                    if (!WindowInsetsHelper.isKeyboardVisible(mSearchEditText))
+                        showKeyboard();
+                }, UI_ANIMATION_DURATION);
                 return true;
             case "showWidgets":
                 switchToDesktop(LauncherState.Desktop.WIDGET);
