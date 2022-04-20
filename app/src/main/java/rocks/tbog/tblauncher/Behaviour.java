@@ -247,11 +247,8 @@ public class Behaviour implements ISearchActivity {
         mClearButton = mSearchBarContainer.findViewById(R.id.clearButton);
         mMenuButton = mSearchBarContainer.findViewById(R.id.menuButton);
 
-        mTBLauncherActivity.customizeUI.setExpandedSearchPillListener(() -> {
-            // pill search bar expanded, show keyboard
-            mSearchEditText.requestFocus();
-            mSearchEditText.post(this::showKeyboard);
-        });
+        // when pill search bar expanded, show keyboard
+        mTBLauncherActivity.customizeUI.setExpandedSearchPillListener(this::showKeyboard);
     }
 
     private void initLauncherButton() {
@@ -802,8 +799,13 @@ public class Behaviour implements ISearchActivity {
     }
 
     public void showKeyboard() {
-        mKeyboardHandler.showKeyboard();
-        //mTBLauncherActivity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE);
+        mSearchEditText.requestFocus();
+        mSearchEditText.post(() -> mKeyboardHandler.showKeyboard());
+        // UI_ANIMATION_DURATION should be the exact time the full-screen animation ends
+        mSearchEditText.postDelayed(() -> {
+            if (!WindowInsetsHelper.isKeyboardVisible(mSearchEditText))
+                mKeyboardHandler.showKeyboard();
+        }, UI_ANIMATION_DURATION);
     }
 
     public void hideKeyboard() {
@@ -1445,10 +1447,7 @@ public class Behaviour implements ISearchActivity {
         if (hasFocus) {
             if (state.getDesktop() == LauncherState.Desktop.SEARCH) {
                 if (state.isSearchBarVisible() && PrefCache.linkKeyboardAndSearchBar(mPref)) {
-                    mSearchEditText.requestFocus();
-                    mSearchEditText.post(this::showKeyboard);
-                    // UI_ANIMATION_DURATION should be the exact time the full-screen animation ends
-                    mSearchEditText.postDelayed(this::showKeyboard, UI_ANIMATION_DURATION);
+                    showKeyboard();
                 }
                 if (TBApplication.state().isResultListVisible() && mResultAdapter.getItemCount() == 0)
                     showDesktop(TBApplication.state().getDesktop());
@@ -1557,12 +1556,7 @@ public class Behaviour implements ISearchActivity {
             case "showSearchBarAndKeyboard":
                 TBApplication.state().setKeyboard(LauncherState.AnimatedVisibility.ANIM_TO_VISIBLE);
                 switchToDesktop(LauncherState.Desktop.SEARCH);
-                mSearchEditText.requestFocus();
-                mSearchEditText.post(this::showKeyboard);
-                mSearchEditText.postDelayed(() -> {
-                    if (!WindowInsetsHelper.isKeyboardVisible(mSearchEditText))
-                        showKeyboard();
-                }, UI_ANIMATION_DURATION);
+                showKeyboard();
                 return true;
             case "showWidgets":
                 switchToDesktop(LauncherState.Desktop.WIDGET);

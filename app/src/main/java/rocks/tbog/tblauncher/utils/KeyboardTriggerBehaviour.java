@@ -45,6 +45,8 @@ public class KeyboardTriggerBehaviour extends LiveData<KeyboardTriggerBehaviour.
             Log.d(TAG, "onActive - GlobalLayoutListener");
             contentView.getViewTreeObserver().addOnGlobalLayoutListener(globalLayoutListener);
         }
+        // run the listener to update the current status
+        globalLayoutListener.onGlobalLayout();
     }
 
     @Override
