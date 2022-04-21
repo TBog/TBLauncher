@@ -368,9 +368,22 @@ public class Behaviour implements ISearchActivity {
         keyboardListener.observe(mTBLauncherActivity, status -> {
             LauncherState state = TBApplication.state();
             if (status == KeyboardTriggerBehaviour.Status.CLOSED) {
-                // don't call onKeyboardClosed() when we start the app
-                if (state.getSearchBarVisibility() != LauncherState.AnimatedVisibility.ANIM_TO_VISIBLE)
+                boolean keyboardClosedByUser = true;
+
+                if (state.getSearchBarVisibility() == LauncherState.AnimatedVisibility.ANIM_TO_VISIBLE) {
+                    Log.i(TAG, "keyboard closed - app start");
+                    // don't call onKeyboardClosed() when we start the app
+                    keyboardClosedByUser = false;
+                } else if (mRecycleScrollListener.isClosedOnScroll()) {
+                    Log.i(TAG, "keyboard closed - scrolling results");
+                    // keyboard closed because the result list was scrolled
+                    keyboardClosedByUser = false;
+                }
+
+                if (keyboardClosedByUser) {
+                    Log.i(TAG, "keyboard closed - user");
                     onKeyboardClosed();
+                }
                 if (state.isSearchBarVisible())
                     mTBLauncherActivity.customizeUI.collapseSearchPill();
             } else {
