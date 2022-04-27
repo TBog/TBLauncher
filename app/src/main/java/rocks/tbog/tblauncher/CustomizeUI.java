@@ -139,7 +139,7 @@ public class CustomizeUI {
         if (mSearchBarContainer instanceof MotionLayout)
             ((MotionLayout) mSearchBarContainer).addTransitionListener(mSearchBarTransition);
 
-        mWindowHelper = ViewCompat.getWindowInsetsController(mTBLauncherActivity.getWindow().getDecorView());
+        mWindowHelper = ViewCompat.getWindowInsetsController(mSearchBarContainer);
     }
 
     public void onStart() {
