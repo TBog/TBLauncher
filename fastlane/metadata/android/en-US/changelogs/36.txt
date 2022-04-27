@@ -1,0 +1,2 @@
+* fix Android Q crash
+* see v6.13 changelog
