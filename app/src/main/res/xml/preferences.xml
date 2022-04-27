@@ -236,6 +236,18 @@
 
         </PreferenceCategory>
 
+        <PreferenceCategory
+            android:key="navigation-bar-section"
+            android:title="@string/navigation_bar_section">
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@integer/default_background_argb"
+                android:key="navigation-bar-argb"
+                android:title="@string/color_and_opacity"
+                android:widgetLayout="@layout/pref_color_preview" />
+
+        </PreferenceCategory>
+
         <!-- Search bar -->
         <PreferenceCategory
             android:icon="@drawable/ic_search_bar"

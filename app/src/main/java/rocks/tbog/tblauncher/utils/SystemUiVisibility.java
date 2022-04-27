@@ -43,6 +43,20 @@ public class SystemUiVisibility {
         view.setSystemUiVisibility(flags);
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public static void setLightNavigationBar(View view) {
+        int flags = view.getSystemUiVisibility();
+        flags = setFlags(flags, View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+        view.setSystemUiVisibility(flags);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.O)
+    public static void clearLightNavigationBar(View view) {
+        int flags = view.getSystemUiVisibility();
+        flags = clearFlags(flags, View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR);
+        view.setSystemUiVisibility(flags);
+    }
+
     public static void setFullscreen(View view) {
         int flags = view.getSystemUiVisibility();
         flags = clearFlags(flags, SHOW_SYSTEM_BARS);

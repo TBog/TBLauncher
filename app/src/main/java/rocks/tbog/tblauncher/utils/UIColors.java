@@ -227,6 +227,18 @@ public final class UIColors {
         }
     }
 
+    public static void setNavigationBarColor(AppCompatActivity activity, int color, int divColor) {
+        Window window = activity.getWindow();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            window.clearFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
+            window.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
+            window.setNavigationBarColor(color);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                window.setNavigationBarDividerColor(divColor);
+            }
+        }
+    }
+
     public static int getSystemAccentColor(Context context) {
         if (CACHED_SYSTEM_ACCENT == 0) {
             int accent = getSystemAccent(context);

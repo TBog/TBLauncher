@@ -114,6 +114,7 @@
         <item>Show &#171;Search&#187; desktop</item>
         <item>Show &#171;Search&#187; desktop with keyboard</item>
         <item>Show &#171;Widget&#187; desktop</item>
+        <item>Show &#171;Widget&#187; desktop center</item>
         <item>Show &#171;Empty&#187; desktop</item>
         <item>Toggle between Search and Widget</item>
         <item>Toggle Search, Widget, Empty</item>
@@ -144,6 +145,7 @@
         <item>showSearchBar</item>
         <item>showSearchBarAndKeyboard</item>
         <item>showWidgets</item>
+        <item>showWidgetsCenter</item>
         <item>showEmpty</item>
         <item>toggleSearchAndWidget</item>
         <item>toggleSearchWidgetEmpty</item>

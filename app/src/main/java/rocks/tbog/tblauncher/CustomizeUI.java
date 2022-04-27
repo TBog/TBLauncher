@@ -25,6 +25,8 @@ import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.motion.widget.MotionLayout;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.preference.PreferenceManager;
 
 import rocks.tbog.tblauncher.drawable.LoadingDrawable;
@@ -32,7 +34,6 @@ import rocks.tbog.tblauncher.ui.RecyclerList;
 import rocks.tbog.tblauncher.ui.SearchEditText;
 import rocks.tbog.tblauncher.utils.EdgeGlowHelper;
 import rocks.tbog.tblauncher.utils.PrefCache;
-import rocks.tbog.tblauncher.utils.SystemUiVisibility;
 import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.UISizes;
 import rocks.tbog.tblauncher.utils.Utilities;
@@ -46,6 +47,7 @@ public class CustomizeUI {
     private ImageView mLauncherButton;
     private ImageView mMenuButton;
     private ImageView mClearButton;
+    private WindowInsetsControllerCompat mWindowHelper;
 
     /**
      * InputType that behaves as if the consuming IME is a standard-obeying
@@ -136,6 +138,8 @@ public class CustomizeUI {
 
         if (mSearchBarContainer instanceof MotionLayout)
             ((MotionLayout) mSearchBarContainer).addTransitionListener(mSearchBarTransition);
+
+        mWindowHelper = ViewCompat.getWindowInsetsController(mTBLauncherActivity.getWindow().getDecorView());
     }
 
     public void onStart() {
@@ -151,6 +155,7 @@ public class CustomizeUI {
             0, 0, 0, 0);
         adjustInputType(mSearchBar);
         setNotificationBarColor();
+        setNavigationBarColor();
     }
 
     private void setNotificationBarColor() {
@@ -172,15 +177,15 @@ public class CustomizeUI {
         }
 
         // Notification drawer icon color
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-            View view = mTBLauncherActivity.getWindow().getDecorView();
-            if (mPref.getBoolean("black-notification-icons", false)) {
-                SystemUiVisibility.setLightStatusBar(view);
-            } else {
-                SystemUiVisibility.clearLightStatusBar(view);
-            }
-        }
+        mWindowHelper.setAppearanceLightStatusBars(mPref.getBoolean("black-notification-icons", false));
+    }
 
+    private void setNavigationBarColor() {
+        int argb = UIColors.getColor(mPref, "navigation-bar-argb");
+        UIColors.setNavigationBarColor(mTBLauncherActivity, argb, UIColors.setAlpha(argb, 0xFF));
+
+        // Navigation bar icon color
+        mWindowHelper.setAppearanceLightNavigationBars(UIColors.isColorLight(argb));
     }
 
     private void setSearchBarPref() {

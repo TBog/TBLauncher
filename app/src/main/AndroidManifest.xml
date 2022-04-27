@@ -74,7 +74,7 @@
             android:allowTaskReparenting="true"
             android:exported="true"
             android:label="@string/menu_popup_launcher_settings"
-            android:launchMode="singleInstance"
+            android:launchMode="singleTask"
             android:parentActivityName=".TBLauncherActivity"
             android:screenOrientation="user"
             android:taskAffinity=".SettingsActivity"
