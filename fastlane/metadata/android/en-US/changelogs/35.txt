@@ -1,0 +1,7 @@
+* add support for icon pack studio
+* move close keyboard action to the new listener (fix #276)
+* fix keyboard not showing when search pill expanded
+* fix Device Admin not opening window
+* add `Show «Widget» desktop center`
+* fix `Show «Search» desktop with keyboard`
+* fix Scroll in Result Lists (issue #285)
