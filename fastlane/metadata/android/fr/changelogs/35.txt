@@ -1,0 +1,7 @@
+* Ajout du support pour le studio icon pack
+* déplacement de l'action de fermeture du clavier vers le nouvel écouteur (correction #276)
+* Correction du clavier qui ne s'affiche pas lorsque le pilier de recherche est étendu
+* Correction de la fenêtre de l'administrateur de périphérique qui ne s'ouvre pas
+* Ajout de l'option "Afficher le centre du bureau "Widget"".
+* Correction de l'option "Afficher le bureau "Recherche" avec le clavier".
+* Correction du défilement dans les listes de résultats (problème n° 285)

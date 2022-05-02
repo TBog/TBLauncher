@@ -1,0 +1,2 @@
+* Correction de la panne d'Android Q
+* voir le journal des modifications de la version 6.13

@@ -1,0 +1,6 @@
+* Correction de l'erreur manifeste d'Android 12
+* Ajout de l'action "Afficher les actions non marquées" dans le gestionnaire de balises et le menu des balises.
+* ajout d'une option pour choisir le type de mime des contacts
+* ajout de générateurs de thèmes simples et surlignés
+* ajout d'un fournisseur de numérotation (recherche)
+* autoriser les icônes personnalisées pour les résultats de recherche

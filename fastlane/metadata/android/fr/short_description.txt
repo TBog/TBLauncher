@@ -1,0 +1,1 @@
+Faible empreinte mémoire, prise en charge des packs d'icônes, personnalisation des couleurs et du comportement

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name_debug">Lanceur de débogage TinyBit</string>
+    <string name="app_name">Lanceur TinyBit</string>
+    <string name="hint_ui_search">Recherche dans les applications, les contacts…</string>
+    <string name="ui_item_visit">Visitez \"%1$s\"</string>
+    <string name="copy_confirmation">Copié \"%s\" ; dans le presse-papiers</string>
+    <string name="removed_item">Supprimé %s</string>
+    <string name="toast_hibernate_completed">%s hiberné, relancer pour réveiller</string>
+    <string name="toast_hibernate_error">[ERREUR] %s non hiberné</string>
+    <string name="cant_pin_shortcut">Impossible d\'ajouter un raccourci. TinyBit est-il votre lanceur par défaut \?</string>
+    <string name="menu_quick_list_add">Ajouter au dock</string>
+    <string name="menu_quick_list_remove">Retirer du dock</string>
+    <string name="menu_remove_history">Retirer de l\'histoire</string>
+    <string name="stub_application">Nom de l\'application</string>
+    <string name="stub_app_tag">liste de tags d\'applications</string>
+    <string name="permission_denied">Accordez d\'abord cette permission</string>
+    <string name="menu_exclude">Exclure…</string>
+    <string name="menu_show">Montrer</string>
+    <string name="menu_remove_shortcut">Déplacer</string>
+    <string name="menu_tags_edit">Modifier les tags</string>
+    <string name="unable_to_initialize_shortcuts">Impossible d\'accéder aux raccourcis. TinyBit est-il votre lanceur par défaut \?</string>
+    <string name="menu_hide">Masquer</string>
+    <string name="ui_item_search">Rechercher dans %1$s pour \"%2$s\" \?</string>
+    <string name="menu_tags_add">Ajouter des tags</string>
+</resources>

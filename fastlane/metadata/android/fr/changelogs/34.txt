@@ -1,0 +1,8 @@
+* ajout d'une préférence pour la disposition des pilules de la barre de recherche
+ * Correction de l'action d'ouverture et de fermeture du clavier
+ * ajout d'une préférence pour la position du dock
+ * Correction de l'arrière-plan des popups sur Lollipop
+ * Correction de l'arrière-plan des éléments de la balise d'édition
+ * modification de la préférence de commutation (basculer) pouce et piste pour les anciens Android
+ * Correction de la boîte de dialogue d'édition des moteurs de recherche
+ * Correction des raccourcis manifestes apparaissant dans les résultats

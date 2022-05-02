@@ -1,0 +1,9 @@
+* nouvelle icône
+* nouveau thème par défaut
+* ajout de gestes
+* Correction de pannes
+* ajout d'un sélecteur d'image pour les icônes
+* ajouter plus de paramètres d'interface utilisateur
+* fusion des paramètres de couleur et d'opacité
+* ajouter la migration des paramètres (permettre aux anciennes sauvegardes qui avaient une couleur et une opacité séparées d'être importées correctement)
+* ajouter l'activité des paramètres à la pile d'activités

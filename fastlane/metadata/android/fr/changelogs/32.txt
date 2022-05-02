@@ -1,0 +1,6 @@
+Veuillez rapporter tout problème que vous rencontrez, tout et n'importe quoi peut aller mal à cause des changements de version et de minify.
+* Activez minify sur la version release (la taille de l'apk devrait diminuer).
+* L'icône du contact Dial est personnalisable
+* Ajout d'une grille pour les résultats
+* Ajout d'un sélecteur d'icône de stockage
+* Ajout d'un dock et d'une barre de recherche indépendants de la hauteur et des préférences de taille de texte

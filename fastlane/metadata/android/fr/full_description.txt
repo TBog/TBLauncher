@@ -1,0 +1,23 @@
+Il s'agit du lanceur utilisé et développé par
+██████████████████████▀█
+█─▄─▄─█▄─▄─▀█─▄▄─█─▄▄▄▄█
+███─████─▄─▀█─██─█─██▄─█
+▀▀▄▄▄▀▀▄▄▄▄▀▀▄▄▄▄▀▄▄▄▄▄▀
+
+Motifs du développement de mon propre lanceur :
+🔹Propreté de l'écran principal pour profiter du fond d'écran.
+🔸Accès rapide aux applications par recherche
+🔹Compatibilité avec le Pack d'icônes
+🔸Possibilité de personnaliser les couleurs et les comportements.
+
+Nouvelles fonctionnalités :
+⦾ Mise à jour de la liste des apps lorsque des changements sont détectés.
+⦿ Formes d'icônes adaptatives
+⦾ Cache des icônes pour un affichage rapide des résultats.
+⦿ Balises pour mieux organiser les applis.
+⦾ Éléments du dock pour filtrer les résultats
+⦿ Aperçu des couleurs des préférences
+⦾ Raccourcis pour les apps, les contacts, etc.
+
+Code source https://github.com/TBog/TBLauncher
+L'idée initiale et le code proviennent de https://play.google.com/store/apps/details?id=fr.neamar.kiss
