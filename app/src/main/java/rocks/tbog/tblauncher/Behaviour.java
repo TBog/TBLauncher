@@ -378,6 +378,10 @@ public class Behaviour implements ISearchActivity {
                     Log.i(TAG, "keyboard closed - scrolling results");
                     // keyboard closed because the result list was scrolled
                     keyboardClosedByUser = false;
+                } else if (isFragmentDialogVisible()) {
+                    Log.i(TAG, "keyboard closed - fragment dialog");
+                    // don't send keyboard close event while we have a dialog open
+                    keyboardClosedByUser = false;
                 }
 
                 if (keyboardClosedByUser) {
