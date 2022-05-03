@@ -304,6 +304,11 @@
                 android:title="@string/search_bar_height"
                 android:widgetLayout="@layout/pref_size_preview" />
 
+            <androidx.preference.SwitchPreference
+                android:defaultValue="true"
+                android:key="search-bar-animation"
+                android:title="@string/search_bar_animation" />
+
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@integer/default_result_margin"
                 android:dialogLayout="@layout/pref_slider"

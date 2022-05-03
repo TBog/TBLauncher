@@ -472,6 +472,7 @@
     <string name="search_bar_layout">Layout</string>
     <string name="quick_list_position">Position</string>
     <string name="navigation_bar_section">Navigation bar</string>
+    <string name="search_bar_animation">Animate expand/collapse</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>

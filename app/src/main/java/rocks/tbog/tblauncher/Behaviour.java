@@ -384,11 +384,19 @@ public class Behaviour implements ISearchActivity {
                     Log.i(TAG, "keyboard closed - user");
                     onKeyboardClosed();
                 }
-                if (state.isSearchBarVisible())
-                    mTBLauncherActivity.customizeUI.collapseSearchPill();
+                if (state.isSearchBarVisible()) {
+                    int duration = 0;
+                    if (mPref.getBoolean("search-bar-animation", true))
+                        duration = UI_ANIMATION_DURATION;
+                    mTBLauncherActivity.customizeUI.collapseSearchPill(duration);
+                }
             } else {
-                if (state.isSearchBarVisible())
-                    mTBLauncherActivity.customizeUI.expandSearchPill();
+                if (state.isSearchBarVisible()) {
+                    int duration = 0;
+                    if (mPref.getBoolean("search-bar-animation", true))
+                        duration = UI_ANIMATION_DURATION;
+                    mTBLauncherActivity.customizeUI.expandSearchPill(duration);
+                }
             }
         });
 

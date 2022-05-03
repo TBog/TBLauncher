@@ -595,14 +595,18 @@ public class CustomizeUI {
         return mPref.getBoolean("enable-suggestions-keyboard", false);
     }
 
-    public void expandSearchPill() {
-        if (mSearchBarContainer instanceof MotionLayout)
+    public void expandSearchPill(int duration) {
+        if (mSearchBarContainer instanceof MotionLayout) {
+            ((MotionLayout) mSearchBarContainer).setTransitionDuration(duration);
             ((MotionLayout) mSearchBarContainer).transitionToEnd();
+        }
     }
 
-    public void collapseSearchPill() {
-        if (mSearchBarContainer instanceof MotionLayout)
+    public void collapseSearchPill(int duration) {
+        if (mSearchBarContainer instanceof MotionLayout) {
+            ((MotionLayout) mSearchBarContainer).setTransitionDuration(duration);
             ((MotionLayout) mSearchBarContainer).transitionToStart();
+        }
     }
 
     public void setExpandedSearchPillListener(Runnable listener) {
