@@ -30,20 +30,20 @@ public class DrawableCache {
 
     }
 
-    public void cacheDrawable(@NonNull String name, @Nullable Drawable drawable) {
+    public void cacheDrawable(@NonNull String cacheId, @Nullable Drawable drawable) {
         if (drawable == null) {
-            mCache.remove(name);
+            mCache.remove(cacheId);
             return;
         }
         if (!mEnabled)
             return;
         DrawableInfo info = new DrawableInfo(drawable);
-        mCache.put(name, info);
+        mCache.put(cacheId, info);
     }
 
     @Nullable
-    public Drawable getCachedDrawable(@NonNull String name) {
-        DrawableInfo info = mCache.get(name);
+    public Drawable getCachedDrawable(@NonNull String cacheId) {
+        DrawableInfo info = mCache.get(cacheId);
         if (info != null)
             return info.drawable;
         return null;

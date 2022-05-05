@@ -23,6 +23,8 @@ public interface IconPack<DrawableInfo> {
     @Nullable
     Drawable getComponentDrawable(@NonNull Context ctx, @NonNull ComponentName componentName, @NonNull UserHandleCompat userHandle);
 
+    boolean isComponentDynamic(@NonNull ComponentName componentName);
+
     @NonNull
     Drawable applyBackgroundAndMask(@NonNull Context ctx, @NonNull Drawable defaultBitmap, boolean fitInside);
 

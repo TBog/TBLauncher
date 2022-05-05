@@ -124,7 +124,7 @@ public final class ResultViewHelper {
             return;
 
         if (!Utilities.checkFlag(drawFlags, EntryItem.FLAG_DRAW_NO_CACHE)) {
-            Drawable cache = TBApplication.drawableCache(appIcon.getContext()).getCachedDrawable(entry.id);
+            Drawable cache = TBApplication.drawableCache(appIcon.getContext()).getCachedDrawable(cacheId);
             if (cache != null) {
                 Log.d(TAG, "cache found, view=" + Integer.toHexString(appIcon.hashCode()) + " entry=" + entry.getName() + " cacheId=" + cacheId);
                 // found the icon in cache
