@@ -25,23 +25,24 @@ import java.util.Set;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.SettingsActivity;
 import rocks.tbog.tblauncher.TBApplication;
-import rocks.tbog.tblauncher.handler.TagsHandler;
 import rocks.tbog.tblauncher.dataprovider.TagsProvider;
 import rocks.tbog.tblauncher.drawable.TextDrawable;
 import rocks.tbog.tblauncher.entry.ActionEntry;
 import rocks.tbog.tblauncher.entry.FilterEntry;
 import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.entry.TagEntry;
+import rocks.tbog.tblauncher.handler.TagsHandler;
 import rocks.tbog.tblauncher.utils.PrefOrderedListHelper;
 import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public class ContentLoadHelper {
     public static final CategoryItem[] RESULT_POPUP_CATEGORIES = {
-            new CategoryItem(R.string.popup_title_shortcut_dynamic, "dyn_shortcut"),
-            new CategoryItem(R.string.popup_title_hist_fav, "prefs"),
-            new CategoryItem(R.string.popup_title_customize, "customize"),
-            new CategoryItem(R.string.popup_title_link, "links"),
+        new CategoryItem(R.string.popup_title_shortcut_dynamic, "dyn_shortcut"),
+        new CategoryItem(R.string.popup_title_hist_fav, "prefs"),
+        new CategoryItem(R.string.popup_title_customize, "customize"),
+        new CategoryItem(R.string.popup_title_link, "links"),
+        new CategoryItem(R.string.popup_title_debug, "debug"),
     };
 
     public static OrderedMultiSelectListData generateResultPopupContent(@NonNull Context context, @NonNull SharedPreferences sharedPreferences) {

@@ -22,6 +22,7 @@ import java.util.Collection;
 import rocks.tbog.tblauncher.CustomizeUI;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
+import rocks.tbog.tblauncher.icons.DrawableInfo;
 import rocks.tbog.tblauncher.icons.IconPackXML;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
@@ -122,10 +123,10 @@ class IconPackPage extends PageAdapter.Page {
     private void refreshList() {
         iconDataList.clear();
         if (mIconPack != null) {
-            Collection<IconPackXML.DrawableInfo> drawables = mIconPack.getDrawableList();
+            Collection<DrawableInfo> drawables = mIconPack.getDrawableList();
             StringNormalizer.Result normalized = StringNormalizer.normalizeWithResult(mSearch.getText(), true);
             FuzzyScore fuzzyScore = new FuzzyScore(normalized.codePoints);
-            for (IconPackXML.DrawableInfo info : drawables) {
+            for (DrawableInfo info : drawables) {
                 if (fuzzyScore.match(info.getDrawableName()).match)
                     iconDataList.add(new IconData(mIconPack, info));
             }

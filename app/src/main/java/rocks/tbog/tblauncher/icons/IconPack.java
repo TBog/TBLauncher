@@ -21,7 +21,7 @@ public interface IconPack<DrawableInfo> {
     boolean isLoaded();
 
     @Nullable
-    Drawable getComponentDrawable(@NonNull Context ctx, @NonNull ComponentName componentName, @NonNull UserHandleCompat userHandle);
+    DrawableInfo getComponentDrawable(@NonNull Context ctx, @NonNull ComponentName componentName, @NonNull UserHandleCompat userHandle);
 
     boolean isComponentDynamic(@NonNull ComponentName componentName);
 
@@ -32,5 +32,5 @@ public interface IconPack<DrawableInfo> {
     Collection<DrawableInfo> getDrawableList();
 
     @Nullable
-    Drawable getDrawable(@NonNull DrawableInfo drawableInfo);
+    Drawable getDrawable(@Nullable DrawableInfo drawableInfo);
 }

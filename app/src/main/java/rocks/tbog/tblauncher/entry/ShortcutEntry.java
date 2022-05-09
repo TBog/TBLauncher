@@ -37,6 +37,7 @@ import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.db.ShortcutRecord;
 import rocks.tbog.tblauncher.handler.IconsHandler;
 import rocks.tbog.tblauncher.preference.ContentLoadHelper;
+import rocks.tbog.tblauncher.result.AsyncSetEntryDrawable;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
@@ -435,7 +436,7 @@ public final class ShortcutEntry extends EntryWithTags {
         customIcon = 0;
     }
 
-    public static class AsyncSetEntryIcon extends ResultViewHelper.AsyncSetEntryDrawable {
+    public static class AsyncSetEntryIcon extends AsyncSetEntryDrawable {
         Drawable subIcon = null;
 
         public AsyncSetEntryIcon(@NonNull ImageView image, int drawFlags, @NonNull EntryItem entryItem) {

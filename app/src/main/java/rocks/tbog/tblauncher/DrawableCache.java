@@ -9,6 +9,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.collection.LruCache;
 
+import java.util.Calendar;
 import java.util.Collection;
 
 public class DrawableCache {
@@ -20,14 +21,21 @@ public class DrawableCache {
         mCache.resize(maxSize);
     }
 
-    private static class DrawableInfo {
+    public void setCalendar(String cacheId) {
+        DrawableInfo info = mCache.get(cacheId);
+        if (info != null)
+            info.setToday();
+    }
 
-        final Drawable drawable;
-
-        DrawableInfo(Drawable drawable) {
-            this.drawable = drawable;
+    @Nullable
+    public Drawable getCachedDrawable(@NonNull String cacheId) {
+        DrawableInfo info = mCache.get(cacheId);
+        if (info != null) {
+            if (info.isToday())
+                return info.drawable;
+            mCache.remove(cacheId);
         }
-
+        return null;
     }
 
     public void cacheDrawable(@NonNull String cacheId, @Nullable Drawable drawable) {
@@ -41,12 +49,27 @@ public class DrawableCache {
         mCache.put(cacheId, info);
     }
 
-    @Nullable
-    public Drawable getCachedDrawable(@NonNull String cacheId) {
-        DrawableInfo info = mCache.get(cacheId);
-        if (info != null)
-            return info.drawable;
-        return null;
+    private static class DrawableInfo {
+        public final Drawable drawable;
+        public int dayOfMonth = 0;
+
+        DrawableInfo(Drawable drawable) {
+            this.drawable = drawable;
+        }
+
+        /**
+         * Set day for cached drawable. This is a number indicating the day of the month.
+         * The first day of the month has value 1.
+         */
+        public void setToday() {
+            dayOfMonth = Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
+        }
+
+        public boolean isToday() {
+            if (dayOfMonth == 0)
+                return true;
+            return dayOfMonth == Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
+        }
     }
 
     public void clearCache() {

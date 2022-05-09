@@ -29,6 +29,7 @@ import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.handler.IconsHandler;
 import rocks.tbog.tblauncher.normalizer.PhoneNormalizer;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
+import rocks.tbog.tblauncher.result.AsyncSetEntryDrawable;
 import rocks.tbog.tblauncher.result.ResultHelper;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.utils.PackageManagerUtils;
@@ -312,7 +313,7 @@ public class ContactEntry extends EntryItem {
         }
     }
 
-    public static class SetContactIconAsync extends ResultViewHelper.AsyncSetEntryDrawable {
+    public static class SetContactIconAsync extends AsyncSetEntryDrawable {
         public SetContactIconAsync(@NonNull ImageView image, int drawFlags, @NonNull EntryItem entryItem) {
             super(image, drawFlags, entryItem);
         }
@@ -324,7 +325,7 @@ public class ContactEntry extends EntryItem {
         }
     }
 
-    public static class SetAppIconAsync extends ResultViewHelper.AsyncSetEntryDrawable {
+    public static class SetAppIconAsync extends AsyncSetEntryDrawable {
         public SetAppIconAsync(@NonNull ImageView image, int drawFlags, @NonNull EntryItem entryItem) {
             super(image, drawFlags, entryItem);
         }

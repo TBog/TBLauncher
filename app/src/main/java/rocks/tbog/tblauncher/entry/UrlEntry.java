@@ -17,6 +17,7 @@ import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 
+import rocks.tbog.tblauncher.result.AsyncSetEntryDrawable;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.Utilities;
@@ -120,7 +121,7 @@ public abstract class UrlEntry extends SearchEntry {
             ResultViewHelper.applyListRowPreferences((ViewGroup) view);
     }
 
-    public static class AsyncSetUrlEntryIcon extends ResultViewHelper.AsyncSetEntryDrawable {
+    public static class AsyncSetUrlEntryIcon extends AsyncSetEntryDrawable {
         public AsyncSetUrlEntryIcon(@NonNull ImageView image, int drawFlags, @NonNull EntryItem entryItem) {
             super(image, drawFlags, entryItem);
         }

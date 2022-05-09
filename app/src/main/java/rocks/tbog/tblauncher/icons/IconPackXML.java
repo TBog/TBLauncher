@@ -17,7 +17,6 @@ import android.os.Build;
 import android.util.ArrayMap;
 import android.util.Log;
 
-import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.collection.ArraySet;
@@ -35,14 +34,13 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Random;
 
 import rocks.tbog.tblauncher.drawable.DrawableUtils;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
 
-public class IconPackXML implements IconPack<IconPackXML.DrawableInfo> {
+public class IconPackXML implements IconPack<DrawableInfo> {
     private final static String TAG = IconPackXML.class.getSimpleName();
     private final Map<String, ArraySet<DrawableInfo>> drawablesByComponent = new ArrayMap<>(0);
     private final LinkedHashSet<DrawableInfo> drawableList = new LinkedHashSet<>(0);
@@ -128,7 +126,7 @@ public class IconPackXML implements IconPack<IconPackXML.DrawableInfo> {
 
     @Override
     @Nullable
-    public Drawable getComponentDrawable(@NonNull Context ctx, @NonNull ComponentName componentName, @NonNull UserHandleCompat userHandle) {
+    public DrawableInfo getComponentDrawable(@NonNull Context ctx, @NonNull ComponentName componentName, @NonNull UserHandleCompat userHandle) {
         return getComponentDrawable(componentName.toString());
     }
 
@@ -148,18 +146,17 @@ public class IconPackXML implements IconPack<IconPackXML.DrawableInfo> {
     }
 
     @Nullable
-    public Drawable getComponentDrawable(String componentName) {
+    public DrawableInfo getComponentDrawable(String componentName) {
         CalendarDrawable calendar = getCalendarDrawable(componentName);
         if (calendar != null)
-            return getDrawable(calendar);
+            return calendar;
         ArraySet<DrawableInfo> drawables = drawablesByComponent.get(componentName);
-        DrawableInfo drawableInfo = drawables != null ? drawables.valueAt(0) : null;
-        return drawableInfo != null ? getDrawable(drawableInfo) : null;
+        return drawables != null ? drawables.valueAt(0) : null;
     }
 
     @Nullable
     @Override
-    public Drawable getDrawable(@NonNull DrawableInfo drawableInfo) {
+    public Drawable getDrawable(@Nullable DrawableInfo drawableInfo) {
         if (drawableInfo instanceof SimpleDrawable) {
             SimpleDrawable sd = (SimpleDrawable) drawableInfo;
             try {
@@ -449,63 +446,4 @@ public class IconPackXML implements IconPack<IconPackXML.DrawableInfo> {
         return iconPackPackageName;
     }
 
-    public static class DrawableInfo {
-        private final String drawableName;
-
-        protected DrawableInfo(@NonNull String drawableName) {
-            this.drawableName = drawableName;
-        }
-
-        @Override
-        public boolean equals(Object o) {
-            if (this == o)
-                return true;
-            if (o == null || getClass() != o.getClass())
-                return false;
-            DrawableInfo that = (DrawableInfo) o;
-            return drawableName.equals(that.drawableName);
-        }
-
-        @Override
-        public int hashCode() {
-            return Objects.hash(drawableName);
-        }
-
-        public String getDrawableName() {
-            return drawableName;
-        }
-    }
-
-    public static class SimpleDrawable extends DrawableInfo {
-        @DrawableRes
-        private final int drawableId;
-
-        public SimpleDrawable(@NonNull String drawableName, @DrawableRes int drawableId) {
-            super(drawableName);
-            this.drawableId = drawableId;
-        }
-
-        @DrawableRes
-        public int getResourceId() {
-            return drawableId;
-        }
-    }
-
-    public static class CalendarDrawable extends DrawableInfo {
-        private final int[] drawableForDay;
-
-        protected CalendarDrawable(@NonNull String drawableName) {
-            super(drawableName);
-            drawableForDay = new int[31];
-        }
-
-        public void setDayDrawable(int dayOfMonthIdx, @DrawableRes int drawableId) {
-            drawableForDay[dayOfMonthIdx] = drawableId;
-        }
-
-        @DrawableRes
-        public int getDayDrawable(int dayOfMonthIdx) {
-            return drawableForDay[dayOfMonthIdx];
-        }
-    }
 }

@@ -118,6 +118,7 @@
     <string name="popup_title_hist_fav">Preferences</string>
     <string name="popup_title_customize">Customize</string>
     <string name="popup_title_link">Links</string>
+    <string name="popup_title_debug">Debug info</string>
     <string name="shortcuts_no_host_permission">Make this your main launcher to access shortcuts.</string>
     <string name="pin_shortcut_message">Do you want to add this shortcut?</string>
     <string name="pin_shortcut_label">Choose shortcut label</string>
@@ -197,6 +198,7 @@
     <string name="debug_widget_add_info">Add extra widget info</string>
     <string name="debug_widget_info">Long press for extra widget info</string>
     <string name="debug_item_relevance">Search relevance</string>
+    <string name="debug_item_icon_info">Icon info</string>
     <string name="shortcut_section">Shortcut</string>
     <string name="shortcut_pin_auto_confirm">Auto-confirm shortcut</string>
     <string name="shortcut_show_badge">Show app badge</string>

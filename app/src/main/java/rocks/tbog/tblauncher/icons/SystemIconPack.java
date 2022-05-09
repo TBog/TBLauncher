@@ -20,7 +20,7 @@ import rocks.tbog.tblauncher.drawable.DrawableUtils;
 import rocks.tbog.tblauncher.utils.GoogleCalendarIcon;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 
-public class SystemIconPack implements IconPack<Void> {
+public class SystemIconPack implements IconPack<Drawable> {
 
     private static final String TAG = SystemIconPack.class.getSimpleName();
     private int mAdaptiveShape = DrawableUtils.SHAPE_NONE;
@@ -108,13 +108,13 @@ public class SystemIconPack implements IconPack<Void> {
 
     @NonNull
     @Override
-    public Collection<Void> getDrawableList() {
+    public Collection<Drawable> getDrawableList() {
         return Collections.emptyList();
     }
 
     @Nullable
     @Override
-    public Drawable getDrawable(@NonNull Void aVoid) {
-        return null;
+    public Drawable getDrawable(@Nullable Drawable drawable) {
+        return drawable;
     }
 }
