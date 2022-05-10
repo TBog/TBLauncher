@@ -131,9 +131,10 @@ public final class ResultViewHelper {
             }
         }
 
-        T task;
+        // Below we have 2 methods for getting rid of `entryItemClass` parameter
 
-        /* Getting the argument type this may be faster after the first run, but it needs further testing
+        /* METHOD 1: Get the actual type of EntryItem from template; this may be faster after the first run, but it needs further profiling
+        T task;
         var superClass = asyncSetEntryIconClass.getGenericSuperclass();
         Class<?> entryClass = EntryItem.class;
         if (superClass instanceof ParameterizedType) {
@@ -149,9 +150,10 @@ public final class ResultViewHelper {
             Log.e(TAG, "new <? extends AsyncSetEntryDrawable>, ?=" + asyncSetEntryIconClass.getName(), e);
             return;
         }
-        */
+        //*/
 
-        /* Find a constructor testing arguments by hand because we don't know the actual type of the EntryItem
+        /* METHOD 2: Find a constructor testing arguments by hand because we don't know the actual type of the EntryItem from asyncSetEntryIconClass
+        T task = null;
         @SuppressWarnings("unchecked")
         Constructor<T>[] declaredConstructors = (Constructor<T>[]) asyncSetEntryIconClass.getDeclaredConstructors();
         // find and call constructor for template class
@@ -160,7 +162,7 @@ public final class ResultViewHelper {
             if (paramTypes.length == 3
                 && paramTypes[0] == ImageView.class
                 && paramTypes[1] == int.class
-                && EntryItem.class.isAssignableFrom(paramTypes[2])) {
+                && paramTypes[2].isAssignableFrom(entry.getClass())) {
                 try {
                     task = constructor.newInstance(iconView, drawFlags, entry);
                 } catch (ReflectiveOperationException e) {
@@ -174,9 +176,10 @@ public final class ResultViewHelper {
             Log.e(TAG, "constructor not found for " + asyncSetEntryIconClass.getName() + "\n declaredConstructors=" + Arrays.toString(declaredConstructors));
             return;
         }
-        */
+        //*/
 
-        // make new task instance from class asyncSetEntryIconClass
+        // make new task instance from class `asyncSetEntryIconClass` using `entryItemClass`
+        T task;
         Constructor<T> constructor = null;
         try {
             constructor = asyncSetEntryIconClass.getConstructor(ImageView.class, int.class, entryItemClass);

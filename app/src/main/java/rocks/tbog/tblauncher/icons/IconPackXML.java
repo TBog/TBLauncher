@@ -429,6 +429,9 @@ public class IconPackXML implements IconPack<DrawableInfo> {
                                     }
                                 }
                                 break;
+                            default:
+                                // ignore
+                                break;
                         }
                     }
                     eventType = xpp.next();
