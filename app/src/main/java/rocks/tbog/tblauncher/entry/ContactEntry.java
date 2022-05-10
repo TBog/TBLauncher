@@ -170,7 +170,7 @@ public class ContactEntry extends EntryItem {
             else
                 ResultViewHelper.removeIconColorFilter(contactIcon);
             contactIcon.setVisibility(View.VISIBLE);
-            ResultViewHelper.setIconAsync(drawFlags, this, contactIcon, SetContactIconAsync.class);
+            ResultViewHelper.setIconAsync(drawFlags, this, contactIcon, SetContactIconAsync.class, ContactEntry.class);
         } else {
             contactIcon.setImageDrawable(null);
             contactIcon.setVisibility(View.GONE);
@@ -210,7 +210,7 @@ public class ContactEntry extends EntryItem {
             else
                 ResultViewHelper.removeIconColorFilter(contactIcon);
             contactIcon.setVisibility(View.VISIBLE);
-            ResultViewHelper.setIconAsync(drawFlags, this, contactIcon, SetContactIconAsync.class);
+            ResultViewHelper.setIconAsync(drawFlags, this, contactIcon, SetContactIconAsync.class, ContactEntry.class);
         } else {
             contactIcon.setImageDrawable(null);
             contactIcon.setVisibility(View.GONE);
@@ -226,7 +226,7 @@ public class ContactEntry extends EntryItem {
             if (getImData() != null) {
                 appIcon.setVisibility(View.VISIBLE);
                 // bypass cache or else the app icon is cached as the contact icon
-                ResultViewHelper.setIconAsync(drawFlags | FLAG_RELOAD | FLAG_DRAW_NO_CACHE, this, appIcon, SetAppIconAsync.class);
+                ResultViewHelper.setIconAsync(drawFlags | FLAG_RELOAD | FLAG_DRAW_NO_CACHE, this, appIcon, SetAppIconAsync.class, ContactEntry.class);
             } else {
                 appIcon.setVisibility(View.GONE);
             }

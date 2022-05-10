@@ -151,7 +151,7 @@ public abstract class StaticEntry extends EntryItem {
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
             ResultViewHelper.setIconColorFilter(appIcon, drawFlags);
             appIcon.setVisibility(View.VISIBLE);
-            ResultViewHelper.setIconAsync(drawFlags, this, appIcon, AsyncSetEntryIcon.class);
+            ResultViewHelper.setIconAsync(drawFlags, this, appIcon, AsyncSetEntryIcon.class, StaticEntry.class);
         } else {
             appIcon.setImageDrawable(null);
             appIcon.setVisibility(View.GONE);

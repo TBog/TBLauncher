@@ -110,7 +110,7 @@ public abstract class UrlEntry extends SearchEntry {
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
             ResultViewHelper.setIconColorFilter(appIcon, drawFlags);
             appIcon.setVisibility(View.VISIBLE);
-            ResultViewHelper.setIconAsync(drawFlags, this, appIcon, AsyncSetUrlEntryIcon.class);
+            ResultViewHelper.setIconAsync(drawFlags, this, appIcon, AsyncSetUrlEntryIcon.class, UrlEntry.class);
         } else {
             appIcon.setImageDrawable(null);
             appIcon.setVisibility(View.GONE);

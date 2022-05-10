@@ -171,7 +171,7 @@ public final class ShortcutEntry extends EntryWithTags {
             icon2.setVisibility(View.VISIBLE);
             ColorFilter colorFilter = ResultViewHelper.setIconColorFilter(icon1, drawFlags);
             icon2.setColorFilter(colorFilter);
-            ResultViewHelper.setIconAsync(drawFlags, this, icon1, AsyncSetEntryIcon.class);
+            ResultViewHelper.setIconAsync(drawFlags, this, icon1, AsyncSetEntryIcon.class, ShortcutEntry.class);
         } else {
             icon1.setImageDrawable(null);
             icon2.setImageDrawable(null);
@@ -210,7 +210,7 @@ public final class ShortcutEntry extends EntryWithTags {
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
             shortcutIcon.setVisibility(View.VISIBLE);
             appIcon.setVisibility(View.VISIBLE);
-            ResultViewHelper.setIconAsync(drawFlags, this, shortcutIcon, AsyncSetEntryIcon.class);
+            ResultViewHelper.setIconAsync(drawFlags, this, shortcutIcon, AsyncSetEntryIcon.class, ShortcutEntry.class);
             ColorFilter colorFilter = ResultViewHelper.setIconColorFilter(shortcutIcon, drawFlags);
             appIcon.setColorFilter(colorFilter);
         } else {

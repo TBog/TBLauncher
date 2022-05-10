@@ -226,7 +226,7 @@ public final class AppEntry extends EntryWithTags {
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
             ColorFilter colorFilter = ResultViewHelper.setIconColorFilter(appIcon, drawFlags);
             appIcon.setVisibility(View.VISIBLE);
-            ResultViewHelper.setIconAsync(drawFlags, this, appIcon, AsyncSetEntryIcon.class);
+            ResultViewHelper.setIconAsync(drawFlags, this, appIcon, AsyncSetEntryIcon.class, AppEntry.class);
 
             if (bottomRightIcon != null) {
                 if (isHiddenByUser()) {
@@ -269,7 +269,7 @@ public final class AppEntry extends EntryWithTags {
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
             ColorFilter colorFilter = ResultViewHelper.setIconColorFilter(appIcon, drawFlags);
             appIcon.setVisibility(View.VISIBLE);
-            ResultViewHelper.setIconAsync(drawFlags, this, appIcon, AsyncSetEntryIcon.class);
+            ResultViewHelper.setIconAsync(drawFlags, this, appIcon, AsyncSetEntryIcon.class, AppEntry.class);
 
             if (isHiddenByUser()) {
                 bottomRightIcon.setColorFilter(colorFilter);

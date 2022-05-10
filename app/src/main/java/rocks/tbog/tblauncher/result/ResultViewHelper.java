@@ -112,7 +112,7 @@ public final class ResultViewHelper {
         return matchFound;
     }
 
-    public static <E extends EntryItem, T extends AsyncSetEntryDrawable<E>> void setIconAsync(int drawFlags, @NonNull E entry, @NonNull ImageView iconView, @NonNull Class<T> asyncSetEntryIconClass) {
+    public static <E extends EntryItem, T extends AsyncSetEntryDrawable<E>> void setIconAsync(int drawFlags, @NonNull E entry, @NonNull ImageView iconView, @NonNull Class<T> asyncSetEntryIconClass, @NonNull Class<E> entryItemClass) {
         String cacheId = entry.getIconCacheId();
         if (cacheId.equals(iconView.getTag(R.id.tag_cacheId)) && !Utilities.checkFlag(drawFlags, EntryItem.FLAG_RELOAD))
             return;
@@ -179,13 +179,13 @@ public final class ResultViewHelper {
         // make new task instance from class asyncSetEntryIconClass
         Constructor<T> constructor = null;
         try {
-            constructor = asyncSetEntryIconClass.getConstructor(ImageView.class, int.class, entry.getClass());
+            constructor = asyncSetEntryIconClass.getConstructor(ImageView.class, int.class, entryItemClass);
             task = constructor.newInstance(iconView, drawFlags, entry);
         } catch (ReflectiveOperationException e) {
             if (constructor != null)
                 Log.e(TAG, "new " + constructor, e);
             else
-                Log.e(TAG, "constructor not found for " + asyncSetEntryIconClass.getName() + "\n declaredConstructors=" + Arrays.toString(asyncSetEntryIconClass.getDeclaredConstructors()));
+                Log.e(TAG, "constructor not found for `" + asyncSetEntryIconClass.getName() + "` and entry `" + entry.getClass() + "`\n declaredConstructors=" + Arrays.toString(asyncSetEntryIconClass.getDeclaredConstructors()));
             return;
         }
 
