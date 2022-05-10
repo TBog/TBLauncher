@@ -436,16 +436,16 @@ public final class ShortcutEntry extends EntryWithTags {
         customIcon = 0;
     }
 
-    public static class AsyncSetEntryIcon extends AsyncSetEntryDrawable {
+    public static class AsyncSetEntryIcon extends AsyncSetEntryDrawable<ShortcutEntry> {
         Drawable subIcon = null;
 
-        public AsyncSetEntryIcon(@NonNull ImageView image, int drawFlags, @NonNull EntryItem entryItem) {
-            super(image, drawFlags, entryItem);
+        public AsyncSetEntryIcon(@NonNull ImageView image, int drawFlags, @NonNull ShortcutEntry shortcutEntry) {
+            super(image, drawFlags, shortcutEntry);
         }
 
         @Override
         public Drawable getDrawable(Context context) {
-            ShortcutEntry shortcutEntry = (ShortcutEntry) entryItem;
+            ShortcutEntry shortcutEntry = entryItem;
             Drawable icon = shortcutEntry.getIcon(context);
             if (icon == null) {
                 subIcon = AppCompatResources.getDrawable(context, R.drawable.ic_send);

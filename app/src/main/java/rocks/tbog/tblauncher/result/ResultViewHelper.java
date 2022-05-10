@@ -112,31 +112,46 @@ public final class ResultViewHelper {
         return matchFound;
     }
 
-    public static <E extends EntryItem, T extends AsyncSetEntryDrawable<E>> void setIconAsync(int drawFlags, @NonNull E entry, @NonNull ImageView appIcon, @NonNull Class<T> asyncSetEntryIconClass) {
+    public static <E extends EntryItem, T extends AsyncSetEntryDrawable<E>> void setIconAsync(int drawFlags, @NonNull E entry, @NonNull ImageView iconView, @NonNull Class<T> asyncSetEntryIconClass) {
         String cacheId = entry.getIconCacheId();
-        if (cacheId.equals(appIcon.getTag(R.id.tag_cacheId)) && !Utilities.checkFlag(drawFlags, EntryItem.FLAG_RELOAD))
+        if (cacheId.equals(iconView.getTag(R.id.tag_cacheId)) && !Utilities.checkFlag(drawFlags, EntryItem.FLAG_RELOAD))
             return;
 
         if (!Utilities.checkFlag(drawFlags, EntryItem.FLAG_DRAW_NO_CACHE)) {
-            Drawable cache = TBApplication.drawableCache(appIcon.getContext()).getCachedDrawable(cacheId);
+            Drawable cache = TBApplication.drawableCache(iconView.getContext()).getCachedDrawable(cacheId);
             if (cache != null) {
-                Log.d(TAG, "cache found, view=" + Integer.toHexString(appIcon.hashCode()) + " entry=" + entry.getName() + " cacheId=" + cacheId);
+                Log.d(TAG, "cache found, view=" + Integer.toHexString(iconView.hashCode()) + " entry=" + entry.getName() + " cacheId=" + cacheId);
                 // found the icon in cache
-                appIcon.setImageDrawable(cache);
-                appIcon.setTag(R.id.tag_cacheId, cacheId);
-                appIcon.setTag(R.id.tag_iconTask, null);
+                iconView.setImageDrawable(cache);
+                iconView.setTag(R.id.tag_cacheId, cacheId);
+                iconView.setTag(R.id.tag_iconTask, null);
                 // continue to run the async task only if FLAG_RELOAD set
                 if (!Utilities.checkFlag(drawFlags, EntryItem.FLAG_RELOAD))
                     return;
             }
         }
 
-        T task = null;
-//        var superClass = asyncSetEntryIconClass.getGenericSuperclass();
-//        if (superClass instanceof ParameterizedType) {
-//            var actualTypeArguments = ((ParameterizedType)superClass).getActualTypeArguments();
-//            Log.d(TAG, Arrays.toString(actualTypeArguments));
-//        }
+        T task;
+
+        /* Getting the argument type this may be faster after the first run, but it needs further testing
+        var superClass = asyncSetEntryIconClass.getGenericSuperclass();
+        Class<?> entryClass = EntryItem.class;
+        if (superClass instanceof ParameterizedType) {
+            var actualTypeArguments = ((ParameterizedType) superClass).getActualTypeArguments();
+            if (actualTypeArguments.length == 1)
+                entryClass = (Class<?>) actualTypeArguments[0];
+        }
+        // make new task instance from class asyncSetEntryIconClass
+        try {
+            var constructor = asyncSetEntryIconClass.getConstructor(ImageView.class, int.class, entryClass);
+            task = constructor.newInstance(iconView, drawFlags, entry);
+        } catch (IllegalAccessException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {
+            Log.e(TAG, "new <? extends AsyncSetEntryDrawable>, ?=" + asyncSetEntryIconClass.getName(), e);
+            return;
+        }
+        */
+
+        /* Find a constructor testing arguments by hand because we don't know the actual type of the EntryItem
         @SuppressWarnings("unchecked")
         Constructor<T>[] declaredConstructors = (Constructor<T>[]) asyncSetEntryIconClass.getDeclaredConstructors();
         // find and call constructor for template class
@@ -147,7 +162,7 @@ public final class ResultViewHelper {
                 && paramTypes[1] == int.class
                 && EntryItem.class.isAssignableFrom(paramTypes[2])) {
                 try {
-                    task = constructor.newInstance(appIcon, drawFlags, entry);
+                    task = constructor.newInstance(iconView, drawFlags, entry);
                 } catch (ReflectiveOperationException e) {
                     Log.e(TAG, "new " + constructor, e);
                     return;
@@ -159,6 +174,21 @@ public final class ResultViewHelper {
             Log.e(TAG, "constructor not found for " + asyncSetEntryIconClass.getName() + "\n declaredConstructors=" + Arrays.toString(declaredConstructors));
             return;
         }
+        */
+
+        // make new task instance from class asyncSetEntryIconClass
+        Constructor<T> constructor = null;
+        try {
+            constructor = asyncSetEntryIconClass.getConstructor(ImageView.class, int.class, entry.getClass());
+            task = constructor.newInstance(iconView, drawFlags, entry);
+        } catch (ReflectiveOperationException e) {
+            if (constructor != null)
+                Log.e(TAG, "new " + constructor, e);
+            else
+                Log.e(TAG, "constructor not found for " + asyncSetEntryIconClass.getName() + "\n declaredConstructors=" + Arrays.toString(asyncSetEntryIconClass.getDeclaredConstructors()));
+            return;
+        }
+
         // run the async task
         task.execute();
     }

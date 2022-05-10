@@ -313,27 +313,26 @@ public class ContactEntry extends EntryItem {
         }
     }
 
-    public static class SetContactIconAsync extends AsyncSetEntryDrawable {
-        public SetContactIconAsync(@NonNull ImageView image, int drawFlags, @NonNull EntryItem entryItem) {
-            super(image, drawFlags, entryItem);
+    public static class SetContactIconAsync extends AsyncSetEntryDrawable<ContactEntry> {
+        public SetContactIconAsync(@NonNull ImageView image, int drawFlags, @NonNull ContactEntry contactEntry) {
+            super(image, drawFlags, contactEntry);
         }
 
         @Override
         protected Drawable getDrawable(Context ctx) {
-            ContactEntry contactEntry = (ContactEntry) entryItem;
-            return contactEntry.getIconDrawable(ctx);
+            return entryItem.getIconDrawable(ctx);
         }
     }
 
-    public static class SetAppIconAsync extends AsyncSetEntryDrawable {
-        public SetAppIconAsync(@NonNull ImageView image, int drawFlags, @NonNull EntryItem entryItem) {
-            super(image, drawFlags, entryItem);
+    public static class SetAppIconAsync extends AsyncSetEntryDrawable<ContactEntry> {
+        public SetAppIconAsync(@NonNull ImageView image, int drawFlags, @NonNull ContactEntry contactEntry) {
+            super(image, drawFlags, contactEntry);
         }
 
         @Override
         protected Drawable getDrawable(Context context) {
             IconsHandler iconsHandler = TBApplication.iconsHandler(context);
-            ImData imData = ((ContactEntry) entryItem).getImData();
+            ImData imData = entryItem.getImData();
             Drawable appDrawable;
             ComponentName componentName = TBApplication.mimeTypeCache(context).getComponentName(context, imData.getMimeType());
             if (componentName != null) {

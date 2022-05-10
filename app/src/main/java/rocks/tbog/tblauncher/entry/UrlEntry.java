@@ -121,15 +121,14 @@ public abstract class UrlEntry extends SearchEntry {
             ResultViewHelper.applyListRowPreferences((ViewGroup) view);
     }
 
-    public static class AsyncSetUrlEntryIcon extends AsyncSetEntryDrawable {
-        public AsyncSetUrlEntryIcon(@NonNull ImageView image, int drawFlags, @NonNull EntryItem entryItem) {
-            super(image, drawFlags, entryItem);
+    public static class AsyncSetUrlEntryIcon extends AsyncSetEntryDrawable<UrlEntry> {
+        public AsyncSetUrlEntryIcon(@NonNull ImageView image, int drawFlags, @NonNull UrlEntry urlEntry) {
+            super(image, drawFlags, urlEntry);
         }
 
         @Override
         public Drawable getDrawable(Context context) {
-            UrlEntry urlEntry = (UrlEntry) entryItem;
-            return urlEntry.getIconDrawable(context);
+            return entryItem.getIconDrawable(context);
         }
     }
 }
