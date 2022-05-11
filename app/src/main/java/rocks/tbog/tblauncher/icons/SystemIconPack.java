@@ -17,9 +17,10 @@ import java.util.Collections;
 import java.util.List;
 
 import rocks.tbog.tblauncher.drawable.DrawableUtils;
+import rocks.tbog.tblauncher.utils.GoogleCalendarIcon;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 
-public class SystemIconPack implements IconPack<Void> {
+public class SystemIconPack implements IconPack<Drawable> {
 
     private static final String TAG = SystemIconPack.class.getSimpleName();
     private int mAdaptiveShape = DrawableUtils.SHAPE_NONE;
@@ -51,20 +52,25 @@ public class SystemIconPack implements IconPack<Void> {
     @Override
     public Drawable getComponentDrawable(@NonNull Context ctx, @NonNull ComponentName componentName, @NonNull UserHandleCompat userHandle) {
         Drawable drawable = null;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            LauncherApps launcher = (LauncherApps) ctx.getSystemService(Context.LAUNCHER_APPS_SERVICE);
-            assert launcher != null;
-            List<LauncherActivityInfo> icons = launcher.getActivityList(componentName.getPackageName(), userHandle.getRealHandle());
-            for (LauncherActivityInfo info : icons) {
-                if (info.getComponentName().equals(componentName)) {
-                    drawable = info.getBadgedIcon(0);
-                    break;
+        if (isComponentDynamic(componentName)) {
+            drawable = GoogleCalendarIcon.getDrawable(ctx, componentName.getClassName());
+        }
+        if (drawable == null) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                LauncherApps launcher = (LauncherApps) ctx.getSystemService(Context.LAUNCHER_APPS_SERVICE);
+                assert launcher != null;
+                List<LauncherActivityInfo> icons = launcher.getActivityList(componentName.getPackageName(), userHandle.getRealHandle());
+                for (LauncherActivityInfo info : icons) {
+                    if (info.getComponentName().equals(componentName)) {
+                        drawable = info.getBadgedIcon(0);
+                        break;
+                    }
                 }
-            }
 
-            // This should never happen, let's just return the first icon
-            if (drawable == null && !icons.isEmpty())
-                drawable = icons.get(0).getBadgedIcon(0);
+                // This should never happen, let's just return the first icon
+                if (drawable == null && !icons.isEmpty())
+                    drawable = icons.get(0).getBadgedIcon(0);
+            }
         }
 
         if (drawable == null) {
@@ -89,6 +95,11 @@ public class SystemIconPack implements IconPack<Void> {
         return drawable;
     }
 
+    @Override
+    public boolean isComponentDynamic(@NonNull ComponentName componentName) {
+        return GoogleCalendarIcon.GOOGLE_CALENDAR.equals(componentName.getPackageName());
+    }
+
     @NonNull
     @Override
     public Drawable applyBackgroundAndMask(@NonNull Context ctx, @NonNull Drawable icon, boolean fitInside) {
@@ -97,13 +108,13 @@ public class SystemIconPack implements IconPack<Void> {
 
     @NonNull
     @Override
-    public Collection<Void> getDrawableList() {
+    public Collection<Drawable> getDrawableList() {
         return Collections.emptyList();
     }
 
     @Nullable
     @Override
-    public Drawable getDrawable(@NonNull Void aVoid) {
-        return null;
+    public Drawable getDrawable(@Nullable Drawable drawable) {
+        return drawable;
     }
 }

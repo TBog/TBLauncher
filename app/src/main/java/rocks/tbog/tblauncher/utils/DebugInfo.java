@@ -37,4 +37,8 @@ public class DebugInfo {
         return prefs.getBoolean("debug-provider-status", false);
     }
 
+    public static boolean itemIconInfo(Context context) {
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        return prefs.getBoolean("debug-item-icon-info", false);
+    }
 }

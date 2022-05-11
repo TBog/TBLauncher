@@ -1,6 +1,5 @@
 package rocks.tbog.tblauncher.result;
 
-import android.app.Activity;
 import android.content.Context;
 import android.graphics.ColorFilter;
 import android.graphics.drawable.Drawable;
@@ -18,20 +17,15 @@ import android.widget.TextView;
 import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.UiThread;
-import androidx.annotation.WorkerThread;
 import androidx.constraintlayout.widget.ConstraintLayout;
 
-import java.lang.ref.WeakReference;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
+import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
-import rocks.tbog.tblauncher.WorkAsync.AsyncTask;
-import rocks.tbog.tblauncher.WorkAsync.TaskRunner;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.EntryWithTags;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
@@ -118,34 +112,87 @@ public final class ResultViewHelper {
         return matchFound;
     }
 
-    public static void setIconAsync(int drawFlags, @NonNull EntryItem entry, @NonNull ImageView appIcon, @NonNull Class<? extends AsyncSetEntryDrawable> asyncSetEntryIconClass) {
+    public static <E extends EntryItem, T extends AsyncSetEntryDrawable<E>> void setIconAsync(int drawFlags, @NonNull E entry, @NonNull ImageView iconView, @NonNull Class<T> asyncSetEntryIconClass, @NonNull Class<E> entryItemClass) {
         String cacheId = entry.getIconCacheId();
-        if (cacheId.equals(appIcon.getTag(R.id.tag_cacheId)) && !Utilities.checkFlag(drawFlags, EntryItem.FLAG_RELOAD))
+        if (cacheId.equals(iconView.getTag(R.id.tag_cacheId)) && !Utilities.checkFlag(drawFlags, EntryItem.FLAG_RELOAD))
             return;
 
         if (!Utilities.checkFlag(drawFlags, EntryItem.FLAG_DRAW_NO_CACHE)) {
-            Drawable cache = TBApplication.drawableCache(appIcon.getContext()).getCachedDrawable(entry.id);
+            Drawable cache = TBApplication.drawableCache(iconView.getContext()).getCachedDrawable(cacheId);
             if (cache != null) {
-                Log.d(TAG, "cache found, view=" + Integer.toHexString(appIcon.hashCode()) + " entry=" + entry.getName() + " cacheId=" + cacheId);
+                Log.d(TAG, "cache found, view=" + Integer.toHexString(iconView.hashCode()) + " entry=" + entry.getName() + " cacheId=" + cacheId);
                 // found the icon in cache
-                appIcon.setImageDrawable(cache);
-                appIcon.setTag(R.id.tag_cacheId, cacheId);
-                appIcon.setTag(R.id.tag_iconTask, null);
+                iconView.setImageDrawable(cache);
+                iconView.setTag(R.id.tag_cacheId, cacheId);
+                iconView.setTag(R.id.tag_iconTask, null);
                 // continue to run the async task only if FLAG_RELOAD set
                 if (!Utilities.checkFlag(drawFlags, EntryItem.FLAG_RELOAD))
                     return;
             }
         }
 
-        // run the async task
-        AsyncSetEntryDrawable task;
+        // Below we have 2 methods for getting rid of `entryItemClass` parameter
+
+        /* METHOD 1: Get the actual type of EntryItem from template; this may be faster after the first run, but it needs further profiling
+        T task;
+        var superClass = asyncSetEntryIconClass.getGenericSuperclass();
+        Class<?> entryClass = EntryItem.class;
+        if (superClass instanceof ParameterizedType) {
+            var actualTypeArguments = ((ParameterizedType) superClass).getActualTypeArguments();
+            if (actualTypeArguments.length == 1)
+                entryClass = (Class<?>) actualTypeArguments[0];
+        }
+        // make new task instance from class asyncSetEntryIconClass
         try {
-            Constructor<? extends AsyncSetEntryDrawable> constructor = asyncSetEntryIconClass.getConstructor(ImageView.class, int.class, EntryItem.class);
-            task = constructor.newInstance(appIcon, drawFlags, entry);
+            var constructor = asyncSetEntryIconClass.getConstructor(ImageView.class, int.class, entryClass);
+            task = constructor.newInstance(iconView, drawFlags, entry);
         } catch (IllegalAccessException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {
             Log.e(TAG, "new <? extends AsyncSetEntryDrawable>, ?=" + asyncSetEntryIconClass.getName(), e);
             return;
         }
+        //*/
+
+        /* METHOD 2: Find a constructor testing arguments by hand because we don't know the actual type of the EntryItem from asyncSetEntryIconClass
+        T task = null;
+        @SuppressWarnings("unchecked")
+        Constructor<T>[] declaredConstructors = (Constructor<T>[]) asyncSetEntryIconClass.getDeclaredConstructors();
+        // find and call constructor for template class
+        for (Constructor<T> constructor : declaredConstructors) {
+            var paramTypes = constructor.getParameterTypes();
+            if (paramTypes.length == 3
+                && paramTypes[0] == ImageView.class
+                && paramTypes[1] == int.class
+                && paramTypes[2].isAssignableFrom(entry.getClass())) {
+                try {
+                    task = constructor.newInstance(iconView, drawFlags, entry);
+                } catch (ReflectiveOperationException e) {
+                    Log.e(TAG, "new " + constructor, e);
+                    return;
+                }
+                break;
+            }
+        }
+        if (task == null) {
+            Log.e(TAG, "constructor not found for " + asyncSetEntryIconClass.getName() + "\n declaredConstructors=" + Arrays.toString(declaredConstructors));
+            return;
+        }
+        //*/
+
+        // make new task instance from class `asyncSetEntryIconClass` using `entryItemClass`
+        T task;
+        Constructor<T> constructor = null;
+        try {
+            constructor = asyncSetEntryIconClass.getConstructor(ImageView.class, int.class, entryItemClass);
+            task = constructor.newInstance(iconView, drawFlags, entry);
+        } catch (ReflectiveOperationException e) {
+            if (constructor != null)
+                Log.e(TAG, "new " + constructor, e);
+            else
+                Log.e(TAG, "constructor not found for `" + asyncSetEntryIconClass.getName() + "` and entry `" + entry.getClass() + "`\n declaredConstructors=" + Arrays.toString(asyncSetEntryIconClass.getDeclaredConstructors()));
+            return;
+        }
+
+        // run the async task
         task.execute();
     }
 
@@ -230,131 +277,6 @@ public final class ResultViewHelper {
         int drawableId = PrefCache.getLoadingIconRes(image.getContext());
         image.setImageResource(drawableId);
         Utilities.startAnimatable(image);
-    }
-
-    public static abstract class AsyncSetEntryDrawable extends AsyncTask<Void, Drawable> {
-        private final WeakReference<ImageView> weakImage;
-        protected final String cacheId;
-        protected int drawFlags;
-        protected EntryItem entryItem;
-
-        public AsyncSetEntryDrawable(@NonNull ImageView image, int drawFlags, @NonNull EntryItem entryItem) {
-            super();
-            cacheId = entryItem.getIconCacheId();
-
-            Object tag_cacheId = image.getTag(R.id.tag_cacheId);
-            Object tag_iconTask = image.getTag(R.id.tag_iconTask);
-
-            image.setTag(R.id.tag_cacheId, cacheId);
-            image.setTag(R.id.tag_iconTask, this);
-
-            boolean keepIcon = false;
-            if (tag_iconTask instanceof AsyncSetEntryDrawable) {
-                AsyncSetEntryDrawable task = (AsyncSetEntryDrawable) tag_iconTask;
-                task.cancel(false);
-                // if the old task was loading the same entry we can keep the icon while we refresh it
-                keepIcon = entryItem.equals(task.entryItem);
-            } else if (tag_cacheId instanceof String) {
-                // if the tag equals cacheId then we can keep the icon while we refresh it
-                keepIcon = tag_cacheId.equals(cacheId);
-            }
-            Log.i(TAG, "start task=" + Integer.toHexString(hashCode()) +
-                " view=" + Integer.toHexString(image.hashCode()) +
-                " tag_iconTask=" + (tag_iconTask != null ? Integer.toHexString(tag_iconTask.hashCode()) : "null") +
-                " entry=`" + entryItem.getName() + "`" +
-                " keepIcon=" + keepIcon +
-                " tag_cacheId=" + tag_cacheId +
-                " cacheId=" + cacheId);
-            if (!keepIcon) {
-                setLoadingIcon(image);
-            }
-            this.weakImage = new WeakReference<>(image);
-            this.drawFlags = drawFlags;
-            this.entryItem = entryItem;
-        }
-
-        @Nullable
-        public ImageView getImageView() {
-            ImageView imageView = weakImage.get();
-            // make sure we have a valid activity
-            Activity act = Utilities.getActivity(imageView);
-            if (act == null)
-                return null;
-            return imageView;
-        }
-
-        @Override
-        protected Drawable doInBackground(Void param) {
-            ImageView image = getImageView();
-            if (isCancelled() || image == null) {
-                weakImage.clear();
-                return null;
-            }
-            Context ctx = image.getContext();
-            return getDrawable(ctx);
-        }
-
-        @WorkerThread
-        protected abstract Drawable getDrawable(Context context);
-
-        @UiThread
-        protected void setDrawable(ImageView image, Drawable drawable) {
-            image.setImageDrawable(drawable);
-            image.setTag(R.id.tag_iconTask, null);
-            Utilities.startAnimatable(image);
-        }
-
-        @Override
-        protected void onPostExecute(Drawable drawable) {
-            ImageView image = getImageView();
-            if (image == null || drawable == null) {
-                Log.i(TAG, "end task=" + Integer.toHexString(hashCode()) +
-                    " view=" + (image == null ? "null" : Integer.toHexString(image.hashCode())) +
-                    " drawable=" + drawable +
-                    " cacheId=`" + cacheId + "`");
-                weakImage.clear();
-                return;
-            }
-            Object tag_cacheId = image.getTag(R.id.tag_cacheId);
-            Object tag_iconTask = image.getTag(R.id.tag_iconTask);
-
-            if (cacheId != null && !Utilities.checkFlag(drawFlags, EntryItem.FLAG_DRAW_NO_CACHE))
-                TBApplication.drawableCache(image.getContext()).cacheDrawable(cacheId, drawable);
-
-            Log.i(TAG, "end task=" + Integer.toHexString(hashCode()) +
-                " view=" + Integer.toHexString(image.hashCode()) +
-                " tag_iconTask=" + (tag_iconTask != null ? Integer.toHexString(tag_iconTask.hashCode()) : "null") +
-                " cacheId=`" + cacheId + "`");
-            if (tag_iconTask instanceof AsyncSetEntryDrawable) {
-                AsyncSetEntryDrawable task = (AsyncSetEntryDrawable) tag_iconTask;
-                if (!entryItem.equals(task.entryItem)) {
-                    Log.d(TAG, "[task] skip reason: `" + entryItem.getName() + "` \u2260 `" + task.entryItem.getName() + "`");
-                    weakImage.clear();
-                    return;
-                }
-            } else {
-                Log.d(TAG, "[task] skip reason: tag_iconTask=null entry=`" + entryItem.getName() + "`");
-                weakImage.clear();
-                return;
-            }
-            // if the cacheId changed, skip
-            if (!tag_cacheId.equals(cacheId)) {
-                Log.d(TAG, "[cacheId] skip reason: `" + tag_cacheId + "` \u2260 `" + cacheId + "`");
-                weakImage.clear();
-                return;
-            }
-            setDrawable(image, drawable);
-        }
-
-        @Override
-        protected void onCancelled() {
-            ImageView image = getImageView();
-            Log.i(TAG, "cancelled task=" + Integer.toHexString(hashCode()) + " view=" + (image != null ? Integer.toHexString(image.hashCode()) : "null"));
-        }
-
-        public void execute() {
-            TaskRunner.executeOnExecutor(EXECUTOR_LOAD_ICON, this);
-        }
     }
 
 }

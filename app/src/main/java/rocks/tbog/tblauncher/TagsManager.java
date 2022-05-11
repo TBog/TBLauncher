@@ -380,7 +380,7 @@ public class TagsManager {
             if (content.icon == null) {
                 if (content.staticEntry != null) {
                     int drawFlags = EntryItem.FLAG_DRAW_ICON | EntryItem.FLAG_DRAW_NO_CACHE;
-                    ResultViewHelper.setIconAsync(drawFlags, content.staticEntry, iconView, StaticEntry.AsyncSetEntryIcon.class);
+                    ResultViewHelper.setIconAsync(drawFlags, content.staticEntry, iconView, StaticEntry.AsyncSetEntryIcon.class, StaticEntry.class);
                 } else {
                     Drawable icon = new CodePointDrawable(content.name);
                     icon = DrawableUtils.applyIconMaskShape(iconView.getContext(), icon, DrawableUtils.SHAPE_SQUIRCLE, false);

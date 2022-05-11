@@ -43,6 +43,7 @@ import rocks.tbog.tblauncher.entry.DialContactEntry;
 import rocks.tbog.tblauncher.entry.SearchEntry;
 import rocks.tbog.tblauncher.entry.ShortcutEntry;
 import rocks.tbog.tblauncher.entry.StaticEntry;
+import rocks.tbog.tblauncher.icons.DrawableInfo;
 import rocks.tbog.tblauncher.icons.IconPack;
 import rocks.tbog.tblauncher.icons.IconPackXML;
 import rocks.tbog.tblauncher.icons.SystemIconPack;
@@ -224,6 +225,78 @@ public class IconsHandler {
      * Get or generate icon for an app
      */
     @WorkerThread
+    @NonNull
+    public IconInfo getIconForPackage(ComponentName componentName, UserHandleCompat userHandle) {
+        IconInfo icon = new IconInfo();
+        // check the icon pack for a resource
+        if (mIconPack != null) {
+            // just checking will make this thread wait for the icon pack to load
+            if (!mIconPack.isLoaded()) {
+                String componentString = componentName.toString();
+                if (mLoadIconsPackTask == null) {
+                    Log.w(TAG, "icon pack `" + mIconPack.getPackPackageName() + "` not loaded, reload");
+                    SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(ctx);
+                    loadIconsPack(pref.getString("icons-pack", null));
+                    return icon.setCachedAppIcon(getCachedAppIcon(componentString));
+                }
+
+                Drawable cachedIcon = getCachedAppIcon(componentString);
+                if (cachedIcon != null) {
+                    Log.i(TAG, "icon pack `" + mIconPack.getPackPackageName() + "` not loaded, cached icon used");
+                    return icon.setCachedAppIcon(cachedIcon);
+                }
+
+                Log.w(TAG, "icon pack `" + mIconPack.getPackPackageName() + "` not loaded, wait");
+                try {
+                    mLoadIconsPackTask.wait();
+                } catch (Exception ignored) {
+                }
+                if (!mIconPack.isLoaded()) {
+                    Log.e(TAG, "icon pack `" + mIconPack.getPackPackageName() + "` waiting failed to load");
+                    return icon;
+                }
+            }
+            String componentString = componentName.toString();
+            DrawableInfo info = mIconPack.getComponentDrawable(componentString);
+            if (info != null && info.isDynamic())
+                icon.setDynamic();
+            Drawable drawable = mIconPack.getDrawable(info);
+            if (drawable != null) {
+                if (DrawableUtils.isAdaptiveIconDrawable(drawable) || mForceAdaptive) {
+                    int shape = mSystemPack.getAdaptiveShape();
+                    drawable = DrawableUtils.applyIconMaskShape(ctx, drawable, shape, true);
+                    return icon.setAdaptiveIcon(drawable);
+                } else {
+                    drawable = mIconPack.applyBackgroundAndMask(ctx, drawable, false);
+                    return icon.setFitInside(false).setNonAdaptiveIcon(drawable);
+                }
+            }
+        }
+
+        // if icon pack doesn't have the drawable, use system drawable
+        Drawable systemIcon = mSystemPack.getComponentDrawable(ctx, componentName, userHandle);
+        if (systemIcon == null)
+            return icon;
+
+        if (mSystemPack.isComponentDynamic(componentName))
+            icon.setDynamic();
+
+        // if the icon pack has a mask, use that instead of the adaptive shape
+        if (mIconPack != null && mIconPack.hasMask() && !mForceShape) {
+            Drawable drawable = mIconPack.applyBackgroundAndMask(ctx, systemIcon, false);
+            return icon.setPackMask().setFitInside(false).setNonAdaptiveIcon(drawable);
+        }
+
+        boolean fitInside = mForceAdaptive || !mForceShape;
+        Drawable drawable = mSystemPack.applyBackgroundAndMask(ctx, systemIcon, fitInside);
+        return icon.setFitInside(fitInside).setNonAdaptiveIcon(drawable);
+    }
+
+    /**
+     * Get or generate icon for an app
+     */
+    @WorkerThread
+    @Nullable
     public Drawable getDrawableIconForPackage(ComponentName componentName, UserHandleCompat userHandle) {
         // check the icon pack for a resource
         if (mIconPack != null) {
@@ -254,7 +327,8 @@ public class IconsHandler {
                 }
             }
             String componentString = componentName.toString();
-            Drawable drawable = mIconPack.getComponentDrawable(componentString);
+            DrawableInfo info = mIconPack.getComponentDrawable(componentString);
+            Drawable drawable = mIconPack.getDrawable(info);
             if (drawable != null) {
                 if (DrawableUtils.isAdaptiveIconDrawable(drawable) || mForceAdaptive) {
                     int shape = mSystemPack.getAdaptiveShape();
@@ -288,7 +362,8 @@ public class IconsHandler {
             if (!mIconPack.isLoaded())
                 return null;
             String componentString = componentName.toString();
-            Drawable drawable = mIconPack.getComponentDrawable(componentString);
+            DrawableInfo info = mIconPack.getComponentDrawable(componentString);
+            Drawable drawable = mIconPack.getDrawable(info);
             if (drawable != null) {
                 if (DrawableUtils.isAdaptiveIconDrawable(drawable) || mForceAdaptive) {
                     int shape = mSystemPack.getAdaptiveShape();
@@ -547,5 +622,51 @@ public class IconsHandler {
         }
 
         return (d == null) ? new ColorDrawable(UIColors.getDefaultColor(context)) : d;
+    }
+
+    public static class IconInfo {
+        private Drawable drawable = null;
+        private boolean isDynamic = false;
+        private Boolean fitInside = null;
+
+        public void setDynamic() {
+            isDynamic = true;
+        }
+
+        public boolean isDynamic() {
+            return isDynamic;
+        }
+
+        public IconInfo setCachedAppIcon(Drawable cachedAppIcon) {
+            drawable = cachedAppIcon;
+            return this;
+        }
+
+        public Drawable getDrawable() {
+            return drawable;
+        }
+
+        public IconInfo setAdaptiveIcon(Drawable drawable) {
+            this.drawable = drawable;
+            return this;
+        }
+
+        public IconInfo setNonAdaptiveIcon(Drawable drawable) {
+            this.drawable = drawable;
+            return this;
+        }
+
+        public IconInfo setPackMask() {
+            return this;
+        }
+
+        public IconInfo setFitInside(boolean fitInside) {
+            this.fitInside = fitInside;
+            return this;
+        }
+
+        public Boolean getFitInside() {
+            return fitInside;
+        }
     }
 }

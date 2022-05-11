@@ -278,8 +278,22 @@ public abstract class EntryItem {
         }
 
         if (DebugInfo.itemRelevance(context)) {
-            adapter.add(new LinearAdapter.ItemTitle("Debug info"));
-            adapter.add(new LinearAdapter.ItemString("Relevance: " + getRelevance()));
+            String debugTitle = context.getString(R.string.popup_title_debug);
+            int pos = -1;
+            // find title
+            for (int i = 0; i < adapter.getCount(); i += 1) {
+                if (debugTitle.equals(adapter.getItem(i).toString())) {
+                    pos = i + 1;
+                    break;
+                }
+            }
+            // if title not found, add title
+            if (pos == -1) {
+                adapter.add(new LinearAdapter.ItemTitle(debugTitle));
+                pos = adapter.getCount();
+            }
+            // add debug data after title
+            adapter.add(pos, new LinearAdapter.ItemString("Relevance: " + getRelevance()));
         }
 
         return menu;

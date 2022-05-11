@@ -17,6 +17,7 @@ import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 
+import rocks.tbog.tblauncher.result.AsyncSetEntryDrawable;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.Utilities;
@@ -109,7 +110,7 @@ public abstract class UrlEntry extends SearchEntry {
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
             ResultViewHelper.setIconColorFilter(appIcon, drawFlags);
             appIcon.setVisibility(View.VISIBLE);
-            ResultViewHelper.setIconAsync(drawFlags, this, appIcon, AsyncSetUrlEntryIcon.class);
+            ResultViewHelper.setIconAsync(drawFlags, this, appIcon, AsyncSetUrlEntryIcon.class, UrlEntry.class);
         } else {
             appIcon.setImageDrawable(null);
             appIcon.setVisibility(View.GONE);
@@ -120,15 +121,14 @@ public abstract class UrlEntry extends SearchEntry {
             ResultViewHelper.applyListRowPreferences((ViewGroup) view);
     }
 
-    public static class AsyncSetUrlEntryIcon extends ResultViewHelper.AsyncSetEntryDrawable {
-        public AsyncSetUrlEntryIcon(@NonNull ImageView image, int drawFlags, @NonNull EntryItem entryItem) {
-            super(image, drawFlags, entryItem);
+    public static class AsyncSetUrlEntryIcon extends AsyncSetEntryDrawable<UrlEntry> {
+        public AsyncSetUrlEntryIcon(@NonNull ImageView image, int drawFlags, @NonNull UrlEntry urlEntry) {
+            super(image, drawFlags, urlEntry);
         }
 
         @Override
         public Drawable getDrawable(Context context) {
-            UrlEntry urlEntry = (UrlEntry) entryItem;
-            return urlEntry.getIconDrawable(context);
+            return entryItem.getIconDrawable(context);
         }
     }
 }

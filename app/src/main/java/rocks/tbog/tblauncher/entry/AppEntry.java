@@ -39,10 +39,12 @@ import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.handler.IconsHandler;
 import rocks.tbog.tblauncher.preference.ContentLoadHelper;
+import rocks.tbog.tblauncher.result.AsyncSetEntryDrawable;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
+import rocks.tbog.tblauncher.utils.DebugInfo;
 import rocks.tbog.tblauncher.utils.DialogHelper;
 import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.RootHandler;
@@ -59,10 +61,33 @@ public final class AppEntry extends EntryWithTags {
     @NonNull
     private final UserHandleCompat userHandle;
 
-    private long customIcon = 0;
-    private int cacheIconId = 0;
+    private final IconInfo iconInfo = new IconInfo();
     private boolean hiddenByUser = false;
     private boolean excludedFromHistory = false;
+
+    private static class IconInfo {
+        public boolean isDynamic = false;
+        public Boolean fitInside = null;
+        public long customIcon = 0;
+        public int cacheIconId = 0;
+
+        public void setIconInfo(IconsHandler.IconInfo icon) {
+            isDynamic = icon.isDynamic();
+            fitInside = icon.getFitInside();
+        }
+
+        public void setCustomIcon(long dbId) {
+            customIcon = dbId;
+            cacheIconId += 1;
+            isDynamic = false;
+            fitInside = null;
+        }
+
+        public void clearCustomIcon() {
+            customIcon = 0;
+            cacheIconId = 0;
+        }
+    }
 
     public AppEntry(@NonNull ComponentName component, @NonNull UserHandleCompat user) {
         this(component.getPackageName(), component.getClassName(), user);
@@ -94,14 +119,14 @@ public final class AppEntry extends EntryWithTags {
     @NonNull
     @Override
     public String getIconCacheId() {
-        return id + cacheIconId;
+        return id + iconInfo.cacheIconId;
     }
 
     public String getUserComponentName() {
         return userHandle.getUserComponentName(componentName);
     }
 
-    public String getPackageName() {
+    protected String getPackageName() {
         return componentName.getPackageName();
     }
 
@@ -127,21 +152,23 @@ public final class AppEntry extends EntryWithTags {
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    public List<LauncherActivityInfo> getActivityList(LauncherApps launcher) {
+    protected List<LauncherActivityInfo> getActivityList(LauncherApps launcher) {
         return launcher.getActivityList(componentName.getPackageName(), userHandle.getRealHandle());
     }
 
     @WorkerThread
     public Drawable getIconDrawable(Context context) {
         IconsHandler iconsHandler = TBApplication.getApplication(context).iconsHandler();
-        if (customIcon != 0) {
+        if (iconInfo.customIcon != 0) {
             Drawable drawable = iconsHandler.getCustomIcon(getUserComponentName());
             if (drawable != null)
                 return drawable;
             else
                 iconsHandler.restoreDefaultIcon(this);
         }
-        return iconsHandler.getDrawableIconForPackage(componentName, userHandle);
+        IconsHandler.IconInfo icon = iconsHandler.getIconForPackage(componentName, userHandle);
+        iconInfo.setIconInfo(icon);
+        return icon.getDrawable();
     }
 
     @TargetApi(Build.VERSION_CODES.JELLY_BEAN_MR1)
@@ -150,17 +177,15 @@ public final class AppEntry extends EntryWithTags {
     }
 
     public void setCustomIcon(long dbId) {
-        customIcon = dbId;
-        cacheIconId += 1;
+        iconInfo.setCustomIcon(dbId);
     }
 
     public void clearCustomIcon() {
-        customIcon = 0;
-        cacheIconId = 0;
+        iconInfo.clearCustomIcon();
     }
 
     public long getCustomIcon() {
-        return customIcon;
+        return iconInfo.customIcon;
     }
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -201,7 +226,7 @@ public final class AppEntry extends EntryWithTags {
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
             ColorFilter colorFilter = ResultViewHelper.setIconColorFilter(appIcon, drawFlags);
             appIcon.setVisibility(View.VISIBLE);
-            ResultViewHelper.setIconAsync(drawFlags, this, appIcon, AsyncSetEntryIcon.class);
+            ResultViewHelper.setIconAsync(drawFlags, this, appIcon, AsyncSetEntryIcon.class, AppEntry.class);
 
             if (bottomRightIcon != null) {
                 if (isHiddenByUser()) {
@@ -244,7 +269,7 @@ public final class AppEntry extends EntryWithTags {
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
             ColorFilter colorFilter = ResultViewHelper.setIconColorFilter(appIcon, drawFlags);
             appIcon.setVisibility(View.VISIBLE);
-            ResultViewHelper.setIconAsync(drawFlags, this, appIcon, AsyncSetEntryIcon.class);
+            ResultViewHelper.setIconAsync(drawFlags, this, appIcon, AsyncSetEntryIcon.class, AppEntry.class);
 
             if (isHiddenByUser()) {
                 bottomRightIcon.setColorFilter(colorFilter);
@@ -353,6 +378,14 @@ public final class AppEntry extends EntryWithTags {
                         adapter.add(new ShortcutItem(label.toString(), info));
                         shortcutCount += 1;
                     }
+                }
+            } else if (titleStringId == R.string.popup_title_debug) {
+                if (DebugInfo.itemIconInfo(context)) {
+                    adapter.add(new LinearAdapter.ItemTitle(context, R.string.popup_title_debug));
+                    adapter.add(new LinearAdapter.ItemString("icon custom: " + getCustomIcon()));
+                    adapter.add(new LinearAdapter.ItemString("cacheIconId: " + iconInfo.cacheIconId));
+                    adapter.add(new LinearAdapter.ItemString("icon dynamic: " + iconInfo.isDynamic));
+                    adapter.add(new LinearAdapter.ItemString("icon fitInside: " + iconInfo.fitInside));
                 }
             }
         }
@@ -594,21 +627,21 @@ public final class AppEntry extends EntryWithTags {
         Toast.makeText(context, String.format(msg, getName()), Toast.LENGTH_SHORT).show();
     }
 
-    public static class AsyncSetEntryIcon extends ResultViewHelper.AsyncSetEntryDrawable {
-        public AsyncSetEntryIcon(@NonNull ImageView image, int drawFlags, @NonNull EntryItem entryItem) {
+    public static class AsyncSetEntryIcon extends AsyncSetEntryDrawable<AppEntry> {
+        public AsyncSetEntryIcon(@NonNull ImageView image, int drawFlags, @NonNull AppEntry entryItem) {
             super(image, drawFlags, entryItem);
         }
 
         @Override
         public Drawable getDrawable(Context context) {
-            AppEntry appEntry = (AppEntry) entryItem;
-            //TODO: enable Google Calendar Icon
-//            if (GoogleCalendarIcon.GOOGLE_CALENDAR.equals(appEntry.packageName)) {
-//                // Google Calendar has a special treatment and displays a custom icon every day
-//                icon = GoogleCalendarIcon.getDrawable(context, appEntry.activityName);
-//            }
+            return entryItem.getIconDrawable(context);
+        }
 
-            return appEntry.getIconDrawable(context);
+        @Override
+        protected void setDrawable(ImageView image, Drawable drawable) {
+            super.setDrawable(image, drawable);
+            if (entryItem.iconInfo.isDynamic)
+                TBApplication.drawableCache(image.getContext()).setCalendar(cacheId);
         }
     }
 }

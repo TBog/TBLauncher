@@ -26,6 +26,7 @@ import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.drawable.DrawableUtils;
 import rocks.tbog.tblauncher.handler.IconsHandler;
+import rocks.tbog.tblauncher.icons.DrawableInfo;
 import rocks.tbog.tblauncher.icons.IconPackXML;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
@@ -159,8 +160,9 @@ public class SystemPage extends CustomShapePage {
                 if (activity != null) {
                     IconPackXML pack = TBApplication.iconPackCache(activity).getIconPack(packPackageName);
                     pack.load(activity.getPackageManager());
-                    Drawable drawable = pack.getComponentDrawable(activity, componentName, userHandle);
-                    if (drawable!=null) {
+                    DrawableInfo info = pack.getComponentDrawable(activity, componentName, userHandle);
+                    Drawable drawable = pack.getDrawable(info);
+                    if (drawable != null) {
                         Drawable shapedDrawable = DrawableUtils.applyIconMaskShape(activity, drawable, mShape, mScale, mBackground);
                         NamedIconInfo iconInfo = new NamedIconInfo(packName, shapedDrawable, drawable);
                         options.add(iconInfo);

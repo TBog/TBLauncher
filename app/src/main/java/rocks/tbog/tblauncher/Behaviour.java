@@ -378,17 +378,30 @@ public class Behaviour implements ISearchActivity {
                     Log.i(TAG, "keyboard closed - scrolling results");
                     // keyboard closed because the result list was scrolled
                     keyboardClosedByUser = false;
+                } else if (isFragmentDialogVisible()) {
+                    Log.i(TAG, "keyboard closed - fragment dialog");
+                    // don't send keyboard close event while we have a dialog open
+                    keyboardClosedByUser = false;
                 }
 
                 if (keyboardClosedByUser) {
                     Log.i(TAG, "keyboard closed - user");
                     onKeyboardClosed();
                 }
-                if (state.isSearchBarVisible())
-                    mTBLauncherActivity.customizeUI.collapseSearchPill();
+                if (state.isSearchBarVisible()) {
+                    int duration = 0;
+                    if (mPref.getBoolean("search-bar-animation", true))
+                        duration = UI_ANIMATION_DURATION;
+                    mTBLauncherActivity.customizeUI.collapseSearchPill(duration);
+                }
             } else {
-                if (state.isSearchBarVisible())
-                    mTBLauncherActivity.customizeUI.expandSearchPill();
+                if (state.isSearchBarVisible()) {
+                    int duration = 0;
+                    if (mPref.getBoolean("search-bar-animation", true))
+                        duration = UI_ANIMATION_DURATION;
+                    mTBLauncherActivity.customizeUI.expandSearchPill(duration);
+                    mSearchEditText.requestFocus();
+                }
             }
         });
 

@@ -68,9 +68,9 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
         this(false, false, false);
     }
 
-    public CustomRecycleLayoutManager(boolean firstAtBottom, boolean rightToLeft, boolean reverseAdapter) {
+    public CustomRecycleLayoutManager(boolean bottomToTop, boolean rightToLeft, boolean reverseAdapter) {
         super();
-        mBottomToTop = firstAtBottom;
+        mBottomToTop = bottomToTop;
         mRightToLeft = rightToLeft;
         mReverseAdapter = reverseAdapter;
     }

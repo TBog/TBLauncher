@@ -44,8 +44,8 @@
     <string name="menu_popup_tags_manager">Tag manager</string>
     <string name="menu_popup_tags_menu">Tags menu</string>
     <string name="rate_the_app">Rate the app</string>
-    <string name="user_interface_summary">Colours, transparency and sizes for text and icons</string>
-    <string name="title_ui">Theme</string>
+     <string name="user_interface_summary">Themes, transparency and colors</string>
+    <string name="title_ui">User interface</string>
     <string name="notification_bar_section">Notification bar</string>
     <string name="color_and_opacity">Color and opacity</string>
     <string name="gradient">Gradient</string>
@@ -118,6 +118,7 @@
     <string name="popup_title_hist_fav">Preferences</string>
     <string name="popup_title_customize">Customize</string>
     <string name="popup_title_link">Links</string>
+    <string name="popup_title_debug">Debug info</string>
     <string name="shortcuts_no_host_permission">Make this your main launcher to access shortcuts.</string>
     <string name="pin_shortcut_message">Do you want to add this shortcut?</string>
     <string name="pin_shortcut_label">Choose shortcut label</string>
@@ -197,6 +198,7 @@
     <string name="debug_widget_add_info">Add extra widget info</string>
     <string name="debug_widget_info">Long press for extra widget info</string>
     <string name="debug_item_relevance">Search relevance</string>
+    <string name="debug_item_icon_info">Icon info</string>
     <string name="shortcut_section">Shortcut</string>
     <string name="shortcut_pin_auto_confirm">Auto-confirm shortcut</string>
     <string name="shortcut_show_badge">Show app badge</string>
@@ -474,6 +476,7 @@
     <string name="navigation_bar_section">Navigation bar</string>
     <string name="icons_section">Icons</string>
     <string name="options_section">Options</string>
+    <string name="search_bar_animation">Animate expand/collapse</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>

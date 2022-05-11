@@ -37,6 +37,7 @@ import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.db.ShortcutRecord;
 import rocks.tbog.tblauncher.handler.IconsHandler;
 import rocks.tbog.tblauncher.preference.ContentLoadHelper;
+import rocks.tbog.tblauncher.result.AsyncSetEntryDrawable;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
@@ -170,7 +171,7 @@ public final class ShortcutEntry extends EntryWithTags {
             icon2.setVisibility(View.VISIBLE);
             ColorFilter colorFilter = ResultViewHelper.setIconColorFilter(icon1, drawFlags);
             icon2.setColorFilter(colorFilter);
-            ResultViewHelper.setIconAsync(drawFlags, this, icon1, AsyncSetEntryIcon.class);
+            ResultViewHelper.setIconAsync(drawFlags, this, icon1, AsyncSetEntryIcon.class, ShortcutEntry.class);
         } else {
             icon1.setImageDrawable(null);
             icon2.setImageDrawable(null);
@@ -209,7 +210,7 @@ public final class ShortcutEntry extends EntryWithTags {
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
             shortcutIcon.setVisibility(View.VISIBLE);
             appIcon.setVisibility(View.VISIBLE);
-            ResultViewHelper.setIconAsync(drawFlags, this, shortcutIcon, AsyncSetEntryIcon.class);
+            ResultViewHelper.setIconAsync(drawFlags, this, shortcutIcon, AsyncSetEntryIcon.class, ShortcutEntry.class);
             ColorFilter colorFilter = ResultViewHelper.setIconColorFilter(shortcutIcon, drawFlags);
             appIcon.setColorFilter(colorFilter);
         } else {
@@ -435,16 +436,16 @@ public final class ShortcutEntry extends EntryWithTags {
         customIcon = 0;
     }
 
-    public static class AsyncSetEntryIcon extends ResultViewHelper.AsyncSetEntryDrawable {
+    public static class AsyncSetEntryIcon extends AsyncSetEntryDrawable<ShortcutEntry> {
         Drawable subIcon = null;
 
-        public AsyncSetEntryIcon(@NonNull ImageView image, int drawFlags, @NonNull EntryItem entryItem) {
-            super(image, drawFlags, entryItem);
+        public AsyncSetEntryIcon(@NonNull ImageView image, int drawFlags, @NonNull ShortcutEntry shortcutEntry) {
+            super(image, drawFlags, shortcutEntry);
         }
 
         @Override
         public Drawable getDrawable(Context context) {
-            ShortcutEntry shortcutEntry = (ShortcutEntry) entryItem;
+            ShortcutEntry shortcutEntry = entryItem;
             Drawable icon = shortcutEntry.getIcon(context);
             if (icon == null) {
                 subIcon = AppCompatResources.getDrawable(context, R.drawable.ic_send);

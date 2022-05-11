@@ -29,6 +29,7 @@ import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.handler.IconsHandler;
 import rocks.tbog.tblauncher.normalizer.PhoneNormalizer;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
+import rocks.tbog.tblauncher.result.AsyncSetEntryDrawable;
 import rocks.tbog.tblauncher.result.ResultHelper;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.utils.PackageManagerUtils;
@@ -169,7 +170,7 @@ public class ContactEntry extends EntryItem {
             else
                 ResultViewHelper.removeIconColorFilter(contactIcon);
             contactIcon.setVisibility(View.VISIBLE);
-            ResultViewHelper.setIconAsync(drawFlags, this, contactIcon, SetContactIconAsync.class);
+            ResultViewHelper.setIconAsync(drawFlags, this, contactIcon, SetContactIconAsync.class, ContactEntry.class);
         } else {
             contactIcon.setImageDrawable(null);
             contactIcon.setVisibility(View.GONE);
@@ -209,7 +210,7 @@ public class ContactEntry extends EntryItem {
             else
                 ResultViewHelper.removeIconColorFilter(contactIcon);
             contactIcon.setVisibility(View.VISIBLE);
-            ResultViewHelper.setIconAsync(drawFlags, this, contactIcon, SetContactIconAsync.class);
+            ResultViewHelper.setIconAsync(drawFlags, this, contactIcon, SetContactIconAsync.class, ContactEntry.class);
         } else {
             contactIcon.setImageDrawable(null);
             contactIcon.setVisibility(View.GONE);
@@ -225,7 +226,7 @@ public class ContactEntry extends EntryItem {
             if (getImData() != null) {
                 appIcon.setVisibility(View.VISIBLE);
                 // bypass cache or else the app icon is cached as the contact icon
-                ResultViewHelper.setIconAsync(drawFlags | FLAG_RELOAD | FLAG_DRAW_NO_CACHE, this, appIcon, SetAppIconAsync.class);
+                ResultViewHelper.setIconAsync(drawFlags | FLAG_RELOAD | FLAG_DRAW_NO_CACHE, this, appIcon, SetAppIconAsync.class, ContactEntry.class);
             } else {
                 appIcon.setVisibility(View.GONE);
             }
@@ -312,27 +313,26 @@ public class ContactEntry extends EntryItem {
         }
     }
 
-    public static class SetContactIconAsync extends ResultViewHelper.AsyncSetEntryDrawable {
-        public SetContactIconAsync(@NonNull ImageView image, int drawFlags, @NonNull EntryItem entryItem) {
-            super(image, drawFlags, entryItem);
+    public static class SetContactIconAsync extends AsyncSetEntryDrawable<ContactEntry> {
+        public SetContactIconAsync(@NonNull ImageView image, int drawFlags, @NonNull ContactEntry contactEntry) {
+            super(image, drawFlags, contactEntry);
         }
 
         @Override
         protected Drawable getDrawable(Context ctx) {
-            ContactEntry contactEntry = (ContactEntry) entryItem;
-            return contactEntry.getIconDrawable(ctx);
+            return entryItem.getIconDrawable(ctx);
         }
     }
 
-    public static class SetAppIconAsync extends ResultViewHelper.AsyncSetEntryDrawable {
-        public SetAppIconAsync(@NonNull ImageView image, int drawFlags, @NonNull EntryItem entryItem) {
-            super(image, drawFlags, entryItem);
+    public static class SetAppIconAsync extends AsyncSetEntryDrawable<ContactEntry> {
+        public SetAppIconAsync(@NonNull ImageView image, int drawFlags, @NonNull ContactEntry contactEntry) {
+            super(image, drawFlags, contactEntry);
         }
 
         @Override
         protected Drawable getDrawable(Context context) {
             IconsHandler iconsHandler = TBApplication.iconsHandler(context);
-            ImData imData = ((ContactEntry) entryItem).getImData();
+            ImData imData = entryItem.getImData();
             Drawable appDrawable;
             ComponentName componentName = TBApplication.mimeTypeCache(context).getComponentName(context, imData.getMimeType());
             if (componentName != null) {

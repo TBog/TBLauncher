@@ -22,6 +22,7 @@ import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.handler.DataHandler;
 import rocks.tbog.tblauncher.handler.IconsHandler;
 import rocks.tbog.tblauncher.preference.ContentLoadHelper;
+import rocks.tbog.tblauncher.result.AsyncSetEntryDrawable;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
@@ -150,7 +151,7 @@ public abstract class StaticEntry extends EntryItem {
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
             ResultViewHelper.setIconColorFilter(appIcon, drawFlags);
             appIcon.setVisibility(View.VISIBLE);
-            ResultViewHelper.setIconAsync(drawFlags, this, appIcon, AsyncSetEntryIcon.class);
+            ResultViewHelper.setIconAsync(drawFlags, this, appIcon, AsyncSetEntryIcon.class, StaticEntry.class);
         } else {
             appIcon.setImageDrawable(null);
             appIcon.setVisibility(View.GONE);
@@ -195,16 +196,15 @@ public abstract class StaticEntry extends EntryItem {
         return AppCompatResources.getDrawable(context, iconResource);
     }
 
-    public static class AsyncSetEntryIcon extends ResultViewHelper.AsyncSetEntryDrawable {
-        public AsyncSetEntryIcon(@NonNull ImageView image, int drawFlags, @NonNull EntryItem entryItem) {
-            super(image, drawFlags, entryItem);
+    public static class AsyncSetEntryIcon extends AsyncSetEntryDrawable<StaticEntry> {
+        public AsyncSetEntryIcon(@NonNull ImageView image, int drawFlags, @NonNull StaticEntry staticEntry) {
+            super(image, drawFlags, staticEntry);
         }
 
         @Override
         public Drawable getDrawable(Context context) {
-            StaticEntry entry = (StaticEntry) entryItem;
-            Drawable drawable = entry.getIconDrawable(context);
-            if (!entry.hasCustomIcon()) {
+            Drawable drawable = entryItem.getIconDrawable(context);
+            if (!entryItem.hasCustomIcon()) {
                 drawable = DrawableCompat.wrap(drawable);
                 int color = Utilities.checkFlag(drawFlags, FLAG_DRAW_WHITE_BG) ? Color.BLACK : Color.WHITE;
                 DrawableCompat.setTint(drawable, color);
