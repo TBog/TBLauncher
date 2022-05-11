@@ -400,6 +400,7 @@ public class Behaviour implements ISearchActivity {
                     if (mPref.getBoolean("search-bar-animation", true))
                         duration = UI_ANIMATION_DURATION;
                     mTBLauncherActivity.customizeUI.expandSearchPill(duration);
+                    mSearchEditText.requestFocus();
                 }
             }
         });
