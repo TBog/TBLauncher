@@ -274,16 +274,18 @@ public final class UIColors {
         return CACHED_COLOR_RESULT_TEXT2;
     }
 
-    public static int getQuickListToggleColor(SharedPreferences pref) {
+    public static int getQuickListToggleColor(Context context) {
         if (CACHED_COLOR_QL_TOGGLE == 0) {
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
             int highlightColor = getColor(pref, "quick-list-toggle-color");
             CACHED_COLOR_QL_TOGGLE = setAlpha(highlightColor, 0xFF);
         }
         return CACHED_COLOR_QL_TOGGLE;
     }
 
-    public static int getQuickListRipple(SharedPreferences pref) {
+    public static int getQuickListRipple(Context context) {
         if (CACHED_RIPPLE_QL == 0) {
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
             int color = UIColors.getColor(pref, "quick-list-ripple-color");
             int alpha = 0xFF;
             CACHED_RIPPLE_QL = setAlpha(color, alpha);

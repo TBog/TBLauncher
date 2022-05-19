@@ -335,7 +335,7 @@ public class EditQuickList {
         Context context = mQuickListContainer.getContext();
 
         mQuickListContainer.removeAllViews();
-        int drawFlags = QuickList.getDrawFlags(mPref) | EntryItem.FLAG_DRAW_NO_CACHE;
+        int drawFlags = RecycleAdapter.getDrawFlags(context) | EntryItem.FLAG_DRAW_NO_CACHE;
         for (EntryItem entry : mQuickList) {
             View view = LayoutInflater.from(context).inflate(entry.getResultLayout(drawFlags), mQuickListContainer, false);
             entry.displayResult(view, drawFlags);
