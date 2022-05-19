@@ -54,15 +54,13 @@ public final class ShortcutEntry extends EntryWithTags {
     public static final String SCHEME = "shortcut://";
     private static final String TAG = "shortcut";
     private static final int[] RESULT_LAYOUT = {R.layout.item_shortcut, R.layout.item_grid_shortcut, R.layout.item_dock_shortcut};
-
-    private final long dbId;
     @NonNull
     public final String packageName;
     @NonNull
     public final String shortcutData;
     @Nullable
     public final ShortcutInfo mShortcutInfo;
-
+    private final long dbId;
     protected int customIcon = 0;
 
     public ShortcutEntry(@NonNull String id, long dbId, @NonNull String packageName, @NonNull String shortcutData) {
@@ -91,147 +89,8 @@ public final class ShortcutEntry extends EntryWithTags {
         return SCHEME + rec.dbId + "/" + rec.packageName.toLowerCase(Locale.ROOT);
     }
 
-    @NonNull
-    @Override
-    public String getIconCacheId() {
-        return id + customIcon;
-    }
-
-    /**
-     * Oreo shortcuts do not have a real intentUri, instead they have a shortcut id
-     * and the Android system is responsible for safekeeping the Intent
-     */
-    public boolean isOreoShortcut() {
-        return mShortcutInfo != null;
-    }
-
-    public String getOreoId() {
-        // Oreo shortcuts encode their id in the unused intentUri field
-        return shortcutData;
-    }
-
-    public Drawable getIcon(@NonNull Context context) {
-        if (customIcon > 0) {
-            IconsHandler iconsHandler = TBApplication.getApplication(context).iconsHandler();
-            Drawable drawable = iconsHandler.getCustomIcon(this);
-            if (drawable != null)
-                return drawable;
-            else
-                iconsHandler.restoreDefaultIcon(this);
-        }
-
-        Bitmap bitmap = ShortcutUtil.getInitialIcon(context, dbId);
-        if (bitmap == null)
-            return null;
-
-        return TBApplication.iconsHandler(context).applyShortcutMask(context, bitmap);
-    }
-
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-    // Result methods
-    ///////////////////////////////////////////////////////////////////////////////////////////////
-
     public static int[] getResultLayout() {
         return RESULT_LAYOUT;
-    }
-
-    @Override
-    public int getResultLayout(int drawFlags) {
-        return Utilities.checkFlag(drawFlags, FLAG_DRAW_LIST) ? RESULT_LAYOUT[0] :
-            (Utilities.checkFlag(drawFlags, FLAG_DRAW_GRID) ? RESULT_LAYOUT[1] :
-                RESULT_LAYOUT[2]);
-    }
-
-    @Override
-    public void displayResult(@NonNull View view, int drawFlags) {
-        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_LIST)) {
-            displayListResult(view, drawFlags);
-            ResultViewHelper.applyListRowPreferences((ViewGroup) view);
-        } else {
-            displayGridResult(view, drawFlags);
-        }
-    }
-
-    private void displayGridResult(@NonNull View view, int drawFlags) {
-        final Context context = view.getContext();
-
-        drawFlags |= FLAG_RELOAD;
-        TextView nameView = view.findViewById(android.R.id.text1);
-        nameView.setTextColor(UIColors.getResultTextColor(context));
-        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_NAME)) {
-            ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, nameView);
-            nameView.setVisibility(View.VISIBLE);
-        } else
-            nameView.setVisibility(View.GONE);
-
-        ImageView icon1 = view.findViewById(android.R.id.icon1);
-        ImageView icon2 = view.findViewById(android.R.id.icon2);
-        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
-            icon1.setVisibility(View.VISIBLE);
-            icon2.setVisibility(View.VISIBLE);
-            ColorFilter colorFilter = ResultViewHelper.setIconColorFilter(icon1, drawFlags);
-            icon2.setColorFilter(colorFilter);
-            ResultViewHelper.setIconAsync(drawFlags, this, icon1, AsyncSetEntryIcon.class, ShortcutEntry.class);
-        } else {
-            icon1.setImageDrawable(null);
-            icon2.setImageDrawable(null);
-            icon1.setVisibility(View.GONE);
-            icon2.setVisibility(View.GONE);
-        }
-
-        ResultViewHelper.applyPreferences(drawFlags, nameView, icon1);
-    }
-
-    private void displayListResult(@NonNull View view, int drawFlags) {
-        drawFlags |= FLAG_RELOAD;
-        Context context = view.getContext();
-
-        TextView shortcutName = view.findViewById(R.id.item_app_name);
-        shortcutName.setTextColor(UIColors.getResultTextColor(context));
-
-        ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, shortcutName);
-
-        TextView tagsView = view.findViewById(R.id.item_app_tag);
-        tagsView.setTextColor(UIColors.getResultText2Color(context));
-
-        // Hide tags view if tags are empty
-        if (getTags().isEmpty()) {
-            tagsView.setVisibility(View.GONE);
-        } else if (ResultViewHelper.displayHighlighted(relevanceSource, getTags(), relevance, tagsView, context)
-                || Utilities.checkFlag(drawFlags, FLAG_DRAW_TAGS)) {
-            tagsView.setVisibility(View.VISIBLE);
-        } else {
-            tagsView.setVisibility(View.GONE);
-        }
-
-        final ImageView shortcutIcon = view.findViewById(android.R.id.icon1);
-        final ImageView appIcon = view.findViewById(android.R.id.icon2);
-
-        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
-            shortcutIcon.setVisibility(View.VISIBLE);
-            appIcon.setVisibility(View.VISIBLE);
-            ResultViewHelper.setIconAsync(drawFlags, this, shortcutIcon, AsyncSetEntryIcon.class, ShortcutEntry.class);
-            ColorFilter colorFilter = ResultViewHelper.setIconColorFilter(shortcutIcon, drawFlags);
-            appIcon.setColorFilter(colorFilter);
-        } else {
-            shortcutIcon.setImageDrawable(null);
-            appIcon.setImageDrawable(null);
-            shortcutIcon.setVisibility(View.GONE);
-            appIcon.setVisibility(View.GONE);
-        }
-
-        ResultViewHelper.applyPreferences(drawFlags, shortcutName, tagsView, shortcutIcon);
-    }
-
-    @Override
-    public void doLaunch(@NonNull View view, int flags) {
-        Context context = view.getContext();
-        if (isOreoShortcut()) {
-            // Oreo shortcuts
-            doOreoLaunch(context, view, mShortcutInfo);
-        } else {
-            doShortcutLaunch(context, view, shortcutData);
-        }
     }
 
     public static void doShortcutLaunch(@NonNull Context context, @NonNull View view, @NonNull String shortcutData) {
@@ -276,6 +135,224 @@ public final class ShortcutEntry extends EntryWithTags {
 
         // Application removed? Invalid shortcut? Shortcut to an app on an unmounted SD card?
         Toast.makeText(context, context.getString(R.string.application_not_found, shortcutInfo), Toast.LENGTH_LONG).show();
+    }
+
+    @WorkerThread
+    public static Drawable getAppDrawable(@NonNull Context context, @NonNull String shortcutData, @NonNull String packageName, @Nullable ShortcutInfo shortcutInfo, boolean isBadge) {
+        Drawable appDrawable = null;
+        final PackageManager packageManager = context.getPackageManager();
+        List<ResolveInfo> activities = null;
+        if (shortcutInfo == null) {
+            try {
+                Intent intent = Intent.parseUri(shortcutData, 0);
+                activities = packageManager.queryIntentActivities(intent, 0);
+            } catch (URISyntaxException e) {
+                Log.e("Shortcut", "parse `" + shortcutData + "`", e);
+            }
+        }
+
+        final IconsHandler iconsHandler = TBApplication.iconsHandler(context);
+        if (activities != null && !activities.isEmpty()) {
+            ResolveInfo mainPackage = activities.get(0);
+            String packName = mainPackage.activityInfo.applicationInfo.packageName;
+            String actName = mainPackage.activityInfo.name;
+            ComponentName className = new ComponentName(packName, actName);
+            appDrawable = isBadge
+                ? iconsHandler.getDrawableBadgeForPackage(className, UserHandleCompat.CURRENT_USER)
+                : iconsHandler.getDrawableIconForPackage(className, UserHandleCompat.CURRENT_USER);
+        }
+
+        if (appDrawable == null && shortcutInfo != null) {
+            // Can't make sense of the intent URI (Oreo shortcut, or a shortcut from an activity that was removed from an installed app)
+            // Retrieve app icon
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
+                UserHandleCompat user = new UserHandleCompat(context, shortcutInfo.getUserHandle());
+                ComponentName componentName = shortcutInfo.getActivity();
+                appDrawable = isBadge
+                    ? iconsHandler.getDrawableBadgeForPackage(componentName, user)
+                    : iconsHandler.getDrawableIconForPackage(componentName, user);
+                if (appDrawable == null)
+                    try {
+                        appDrawable = packageManager.getActivityIcon(componentName);
+                    } catch (PackageManager.NameNotFoundException e) {
+                        Log.e(TAG, "Unable to find activity icon " + componentName.toString(), e);
+                    }
+
+            }
+        }
+
+        if (appDrawable == null) {
+            try {
+                appDrawable = packageManager.getApplicationIcon(packageName);
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.e(TAG, "get app shortcut icon", e);
+                return null;
+            }
+            appDrawable = iconsHandler.getIconPack().applyBackgroundAndMask(context, appDrawable, true);
+        }
+
+        return appDrawable;
+    }
+
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+    // Result methods
+    ///////////////////////////////////////////////////////////////////////////////////////////////
+
+    public static void setIcons(int drawFlags, @NonNull ImageView icon1, Drawable shortcutDrawable, Drawable appDrawable) {
+        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON_BADGE)) {
+            if (icon1.getParent() instanceof View) {
+                ImageView icon2 = ((View) icon1.getParent()).findViewById(android.R.id.icon2);
+                if (shortcutDrawable != null) {
+                    icon2.setImageDrawable(appDrawable);
+                } else {
+                    // If no icon found for this shortcut, use app icon
+                    icon1.setImageDrawable(appDrawable);
+                    icon2.setImageResource(R.drawable.ic_send);
+                }
+            }
+        } else {
+            if (shortcutDrawable == null) {
+                // If no icon found for this shortcut, use app icon
+                icon1.setImageDrawable(appDrawable);
+            }
+        }
+    }
+
+    @NonNull
+    @Override
+    public String getIconCacheId() {
+        return id + customIcon;
+    }
+
+    /**
+     * Oreo shortcuts do not have a real intentUri, instead they have a shortcut id
+     * and the Android system is responsible for safekeeping the Intent
+     */
+    public boolean isOreoShortcut() {
+        return mShortcutInfo != null;
+    }
+
+    public String getOreoId() {
+        // Oreo shortcuts encode their id in the unused intentUri field
+        return shortcutData;
+    }
+
+    public Drawable getIcon(@NonNull Context context) {
+        if (customIcon > 0) {
+            IconsHandler iconsHandler = TBApplication.getApplication(context).iconsHandler();
+            Drawable drawable = iconsHandler.getCustomIcon(this);
+            if (drawable != null)
+                return drawable;
+            else
+                iconsHandler.restoreDefaultIcon(this);
+        }
+
+        Bitmap bitmap = ShortcutUtil.getInitialIcon(context, dbId);
+        if (bitmap == null)
+            return null;
+
+        return TBApplication.iconsHandler(context).applyShortcutMask(context, bitmap);
+    }
+
+    @Override
+    public int getResultLayout(int drawFlags) {
+        return Utilities.checkFlag(drawFlags, FLAG_DRAW_LIST) ? RESULT_LAYOUT[0] :
+            (Utilities.checkFlag(drawFlags, FLAG_DRAW_GRID) ? RESULT_LAYOUT[1] :
+                RESULT_LAYOUT[2]);
+    }
+
+    @Override
+    public void displayResult(@NonNull View view, int drawFlags) {
+        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_LIST)) {
+            displayListResult(view, drawFlags);
+            ResultViewHelper.applyListRowPreferences((ViewGroup) view);
+        } else {
+            displayGridResult(view, drawFlags);
+        }
+    }
+
+    private void displayGridResult(@NonNull View view, int drawFlags) {
+        final Context context = view.getContext();
+
+        drawFlags |= FLAG_RELOAD;
+        TextView nameView = view.findViewById(android.R.id.text1);
+        nameView.setTextColor(UIColors.getResultTextColor(context));
+        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_NAME)) {
+            ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, nameView);
+            nameView.setVisibility(View.VISIBLE);
+        } else {
+            nameView.setText(getName());
+            nameView.setVisibility(View.GONE);
+        }
+
+        ImageView icon1 = view.findViewById(android.R.id.icon1);
+        ImageView icon2 = view.findViewById(android.R.id.icon2);
+        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
+            icon1.setVisibility(View.VISIBLE);
+            icon2.setVisibility(View.VISIBLE);
+            ColorFilter colorFilter = ResultViewHelper.setIconColorFilter(icon1, drawFlags);
+            icon2.setColorFilter(colorFilter);
+            ResultViewHelper.setIconAsync(drawFlags, this, icon1, AsyncSetEntryIcon.class, ShortcutEntry.class);
+        } else {
+            icon1.setImageDrawable(null);
+            icon2.setImageDrawable(null);
+            icon1.setVisibility(View.GONE);
+            icon2.setVisibility(View.GONE);
+        }
+
+        ResultViewHelper.applyPreferences(drawFlags, nameView, icon1);
+    }
+
+    private void displayListResult(@NonNull View view, int drawFlags) {
+        drawFlags |= FLAG_RELOAD;
+        Context context = view.getContext();
+
+        TextView shortcutName = view.findViewById(R.id.item_app_name);
+        shortcutName.setTextColor(UIColors.getResultTextColor(context));
+
+        ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, shortcutName);
+
+        TextView tagsView = view.findViewById(R.id.item_app_tag);
+        tagsView.setTextColor(UIColors.getResultText2Color(context));
+
+        // Hide tags view if tags are empty
+        if (getTags().isEmpty()) {
+            tagsView.setVisibility(View.GONE);
+        } else if (ResultViewHelper.displayHighlighted(relevanceSource, getTags(), relevance, tagsView, context)
+            || Utilities.checkFlag(drawFlags, FLAG_DRAW_TAGS)) {
+            tagsView.setVisibility(View.VISIBLE);
+        } else {
+            tagsView.setVisibility(View.GONE);
+        }
+
+        final ImageView shortcutIcon = view.findViewById(android.R.id.icon1);
+        final ImageView appIcon = view.findViewById(android.R.id.icon2);
+
+        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON)) {
+            shortcutIcon.setVisibility(View.VISIBLE);
+            appIcon.setVisibility(View.VISIBLE);
+            ResultViewHelper.setIconAsync(drawFlags, this, shortcutIcon, AsyncSetEntryIcon.class, ShortcutEntry.class);
+            ColorFilter colorFilter = ResultViewHelper.setIconColorFilter(shortcutIcon, drawFlags);
+            appIcon.setColorFilter(colorFilter);
+        } else {
+            shortcutIcon.setImageDrawable(null);
+            appIcon.setImageDrawable(null);
+            shortcutIcon.setVisibility(View.GONE);
+            appIcon.setVisibility(View.GONE);
+        }
+
+        ResultViewHelper.applyPreferences(drawFlags, shortcutName, tagsView, shortcutIcon);
+    }
+
+    @Override
+    public void doLaunch(@NonNull View view, int flags) {
+        Context context = view.getContext();
+        if (isOreoShortcut()) {
+            // Oreo shortcuts
+            doOreoLaunch(context, view, mShortcutInfo);
+        } else {
+            doShortcutLaunch(context, view, shortcutData);
+        }
     }
 
     @Override
@@ -337,95 +414,18 @@ public final class ShortcutEntry extends EntryWithTags {
 
     private void launchRenameDialog(@NonNull Context ctx) {
         DialogHelper.makeRenameDialog(ctx, getName(), (dialog, newName) -> {
-            Context context = dialog.getContext();
-            setName(newName);
-            TBApplication app = TBApplication.getApplication(context);
-            app.getDataHandler().renameShortcut(this, newName);
-            app.behaviour().refreshSearchRecord(ShortcutEntry.this);
+                Context context = dialog.getContext();
+                setName(newName);
+                TBApplication app = TBApplication.getApplication(context);
+                app.getDataHandler().renameShortcut(this, newName);
+                app.behaviour().refreshSearchRecord(ShortcutEntry.this);
 
-            // Show toast message
-            String msg = context.getString(R.string.shortcut_rename_confirmation, getName());
-            Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
-        })
-                .setTitle(R.string.title_shortcut_rename)
-                .show();
-    }
-
-    @WorkerThread
-    public static Drawable getAppDrawable(@NonNull Context context, @NonNull String shortcutData, @NonNull String packageName, @Nullable ShortcutInfo shortcutInfo, boolean isBadge) {
-        Drawable appDrawable = null;
-        final PackageManager packageManager = context.getPackageManager();
-        List<ResolveInfo> activities = null;
-        if (shortcutInfo == null) {
-            try {
-                Intent intent = Intent.parseUri(shortcutData, 0);
-                activities = packageManager.queryIntentActivities(intent, 0);
-            } catch (URISyntaxException e) {
-                Log.e("Shortcut", "parse `" + shortcutData + "`", e);
-            }
-        }
-
-        final IconsHandler iconsHandler = TBApplication.iconsHandler(context);
-        if (activities != null && !activities.isEmpty()) {
-            ResolveInfo mainPackage = activities.get(0);
-            String packName = mainPackage.activityInfo.applicationInfo.packageName;
-            String actName = mainPackage.activityInfo.name;
-            ComponentName className = new ComponentName(packName, actName);
-            appDrawable = isBadge
-                    ? iconsHandler.getDrawableBadgeForPackage(className, UserHandleCompat.CURRENT_USER)
-                    : iconsHandler.getDrawableIconForPackage(className, UserHandleCompat.CURRENT_USER);
-        }
-
-        if (appDrawable == null && shortcutInfo != null) {
-            // Can't make sense of the intent URI (Oreo shortcut, or a shortcut from an activity that was removed from an installed app)
-            // Retrieve app icon
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N_MR1) {
-                UserHandleCompat user = new UserHandleCompat(context, shortcutInfo.getUserHandle());
-                ComponentName componentName = shortcutInfo.getActivity();
-                appDrawable = isBadge
-                        ? iconsHandler.getDrawableBadgeForPackage(componentName, user)
-                        : iconsHandler.getDrawableIconForPackage(componentName, user);
-                if (appDrawable == null)
-                    try {
-                        appDrawable = packageManager.getActivityIcon(componentName);
-                    } catch (PackageManager.NameNotFoundException e) {
-                        Log.e(TAG, "Unable to find activity icon " + componentName.toString(), e);
-                    }
-
-            }
-        }
-
-        if (appDrawable == null) {
-            try {
-                appDrawable = packageManager.getApplicationIcon(packageName);
-            } catch (PackageManager.NameNotFoundException e) {
-                Log.e(TAG, "get app shortcut icon", e);
-                return null;
-            }
-            appDrawable = iconsHandler.getIconPack().applyBackgroundAndMask(context, appDrawable, true);
-        }
-
-        return appDrawable;
-    }
-
-    public static void setIcons(int drawFlags, @NonNull ImageView icon1, Drawable shortcutDrawable, Drawable appDrawable) {
-        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_ICON_BADGE)) {
-            if (icon1.getParent() instanceof View) {
-                ImageView icon2 = ((View) icon1.getParent()).findViewById(android.R.id.icon2);
-                if (shortcutDrawable != null) {
-                    icon2.setImageDrawable(appDrawable);
-                } else {
-                    // If no icon found for this shortcut, use app icon
-                    icon1.setImageDrawable(appDrawable);
-                    icon2.setImageResource(R.drawable.ic_send);
-                }
-            }
-        } else {
-            if (shortcutDrawable == null) {
-                // If no icon found for this shortcut, use app icon
-                icon1.setImageDrawable(appDrawable);
-            }
-        }
+                // Show toast message
+                String msg = context.getString(R.string.shortcut_rename_confirmation, getName());
+                Toast.makeText(context, msg, Toast.LENGTH_SHORT).show();
+            })
+            .setTitle(R.string.title_shortcut_rename)
+            .show();
     }
 
     public void setCustomIcon() {

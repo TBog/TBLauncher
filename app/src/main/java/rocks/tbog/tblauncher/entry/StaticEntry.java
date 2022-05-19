@@ -89,18 +89,18 @@ public abstract class StaticEntry extends EntryItem {
 
     private void launchRenameDialog(@NonNull Context c) {
         DialogHelper.makeRenameDialog(c, getName(), (dialog, newName) -> {
-            Context ctx = dialog.getContext();
+                Context ctx = dialog.getContext();
 
-            // Set new name
-            setName(newName);
-            TBApplication app = TBApplication.getApplication(ctx);
-            app.getDataHandler().renameStaticEntry(this, newName);
-            app.behaviour().refreshSearchRecord(StaticEntry.this);
+                // Set new name
+                setName(newName);
+                TBApplication app = TBApplication.getApplication(ctx);
+                app.getDataHandler().renameStaticEntry(this, newName);
+                app.behaviour().refreshSearchRecord(StaticEntry.this);
 
-            // Show toast message
-            String msg = ctx.getString(R.string.entry_rename_confirmation, getName());
-            Toast.makeText(ctx, msg, Toast.LENGTH_SHORT).show();
-        })
+                // Show toast message
+                String msg = ctx.getString(R.string.entry_rename_confirmation, getName());
+                Toast.makeText(ctx, msg, Toast.LENGTH_SHORT).show();
+            })
             .setTitle(R.string.title_static_rename)
             .setNeutralButton(R.string.custom_name_set_default, (dialog, which) -> {
                 Context ctx = dialog.requireContext();
@@ -141,10 +141,10 @@ public abstract class StaticEntry extends EntryItem {
     public void displayResult(@NonNull View view, int drawFlags) {
         TextView nameView = view.findViewById(android.R.id.text1);
         nameView.setTextColor(UIColors.getResultTextColor(view.getContext()));
-        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_NAME)) {
-            nameView.setText(getName());
+        nameView.setText(getName());
+        if (Utilities.checkFlag(drawFlags, FLAG_DRAW_NAME))
             nameView.setVisibility(View.VISIBLE);
-        } else
+        else
             nameView.setVisibility(View.GONE);
 
         ImageView appIcon = view.findViewById(android.R.id.icon);

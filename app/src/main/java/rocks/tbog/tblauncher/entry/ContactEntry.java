@@ -159,8 +159,10 @@ public class ContactEntry extends EntryItem {
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_NAME)) {
             ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, nameView);
             nameView.setVisibility(View.VISIBLE);
-        } else
+        } else {
+            nameView.setText(getName());
             nameView.setVisibility(View.GONE);
+        }
 
         // Contact photo
         ImageView contactIcon = view.findViewById(android.R.id.icon);

@@ -218,8 +218,10 @@ public final class AppEntry extends EntryWithTags {
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_NAME)) {
             ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, nameView);
             nameView.setVisibility(View.VISIBLE);
-        } else
+        } else {
+            nameView.setText(getName());
             nameView.setVisibility(View.GONE);
+        }
 
         ImageView appIcon = view.findViewById(android.R.id.icon);
         ImageView bottomRightIcon = view.findViewById(android.R.id.icon2);
