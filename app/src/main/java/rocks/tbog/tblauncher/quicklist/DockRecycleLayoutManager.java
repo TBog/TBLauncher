@@ -20,6 +20,9 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager {
     private boolean mRefreshViews = false;
     /* First position visible at any point (adapter index) */
     private int mFirstVisiblePosition;
+    /* Consistent size applied to all child views */
+    private int mDecoratedChildWidth = 0;
+    private int mDecoratedChildHeight = 0;
 
     private int mColumnCount = 6;
     private int mRowCount = 1;
@@ -167,6 +170,9 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager {
             mFirstVisiblePosition = 0;
         }
 
+        // Always update the visible row/column counts
+        updateSizing();
+
         logDebug("onLayoutChildren" +
             " childCount=" + getChildCount() +
             " itemCount=" + getItemCount() +
@@ -181,6 +187,16 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager {
     public void onLayoutCompleted(RecyclerView.State state) {
         super.onLayoutCompleted(state);
         //TODO: auto-scroll after resize
+    }
+
+    private void updateSizing() {
+        final int width = getColumnWidth();
+        final int height = getRowHeight();
+        if (mDecoratedChildWidth != width || mDecoratedChildHeight != height) {
+            mRefreshViews = true;
+            mDecoratedChildWidth = width;
+            mDecoratedChildHeight = height;
+        }
     }
 
     /* Example of 3 pages each with 2 rows and 3 columns
@@ -239,7 +255,7 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager {
         if (columnIdx < 0 || columnIdx >= mColumnCount) {
             Log.e(TAG, "getColumnPosition(" + columnIdx + "); mColumnCount=" + mColumnCount);
         }
-        return getPaddingLeft() + columnIdx * getColumnWidth();
+        return getPaddingLeft() + columnIdx * mDecoratedChildWidth;
     }
 
     private int getRowPosition(int rowIdx) {
@@ -297,7 +313,7 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager {
             detachCachedChildren(recycler);
         }
 
-        final int nextLeftPosDelta = mRightToLeft ? -getColumnWidth() : getColumnWidth();
+        final int nextLeftPosDelta = mRightToLeft ? -mDecoratedChildWidth : mDecoratedChildWidth;
 
         int visibleAdapterPos = mFirstVisiblePosition;
         int colIdx = getColumnIdx(visibleAdapterPos);
@@ -370,7 +386,7 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager {
     }
 
     private void layoutChildView(View view, int left, int top) {
-        layoutChildView(view, left, top, getColumnWidth(), getRowHeight());
+        layoutChildView(view, left, top, mDecoratedChildWidth, mDecoratedChildHeight);
     }
 
     private void layoutChildView(View view, int left, int top, int width, int height) {
@@ -512,9 +528,9 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager {
             if (checkLeft) {
                 adapterPosition = leftAdapterItemIdx(adapterPosition);
                 newFirstVisible = leftAdapterItemIdx(newFirstVisible);
-                left -= getColumnWidth();
+                left -= mDecoratedChildWidth;
             } else {
-                left += getColumnWidth();
+                left += mDecoratedChildWidth;
                 adapterPosition = rightAdapterItemIdx(adapterPosition);
                 newFirstVisible = rightAdapterItemIdx(newFirstVisible);
             }
@@ -543,7 +559,7 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager {
             return false;
         if (checkLeft)
             return left > 0;
-        return (left + getColumnWidth()) < getWidth();
+        return (left + mDecoratedChildWidth) < getWidth();
     }
 
     /**
