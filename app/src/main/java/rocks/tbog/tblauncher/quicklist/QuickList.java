@@ -159,9 +159,8 @@ public class QuickList {
         mQuickList.setHasFixedSize(true);
         mQuickList.setAdapter(mAdapter);
 
-//        GridLayoutManager layoutManager = new GridLayoutManager(tbLauncherActivity, 1);
-//        layoutManager.setOrientation(RecyclerView.HORIZONTAL);
-        mQuickList.setLayoutManager(new DockRecycleLayoutManager());
+        mQuickList.setLayoutManager(new DockRecycleLayoutManager(8, 1));
+        mQuickList.addOnScrollListener(new PagedScrollListener());
 
         mRetryCountdown = RETRY_COUNT;
         mListDirty = true;

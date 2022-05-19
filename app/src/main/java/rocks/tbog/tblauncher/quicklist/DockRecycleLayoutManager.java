@@ -1,17 +1,20 @@
 package rocks.tbog.tblauncher.quicklist;
 
+import android.graphics.PointF;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+import androidx.recyclerview.widget.LinearSmoothScroller;
 import androidx.recyclerview.widget.RecyclerView;
 
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.utils.SparseArrayWrapper;
 
-public class DockRecycleLayoutManager extends RecyclerView.LayoutManager {
+public class DockRecycleLayoutManager extends RecyclerView.LayoutManager implements RecyclerView.SmoothScroller.ScrollVectorProvider {
     private static final String TAG = "DRLM";
     private static final Boolean LOG_DEBUG = true;
     // Reusable array. This should only be used used transiently and should not be used to retain any state over time.
@@ -28,8 +31,18 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager {
     private int mRowCount = 1;
     private boolean mRightToLeft = false;
 
-    public DockRecycleLayoutManager() {
+    public DockRecycleLayoutManager(int columnCount, int rowCount) {
         super();
+        setColumnCount(columnCount);
+        setRowCount(rowCount);
+    }
+
+    public void setColumnCount(int count) {
+        mColumnCount = count;
+    }
+
+    public void setRowCount(int count) {
+        mRowCount = count;
     }
 
     private static int adapterPosition(@NonNull View child) {
@@ -187,6 +200,13 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager {
     public void onLayoutCompleted(RecyclerView.State state) {
         super.onLayoutCompleted(state);
         //TODO: auto-scroll after resize
+    }
+
+    @Override
+    public void smoothScrollToPosition(RecyclerView recyclerView, RecyclerView.State state, int position) {
+        LinearSmoothScroller scroller = new LinearSmoothScroller(recyclerView.getContext());
+        scroller.setTargetPosition(position);
+        startSmoothScroll(scroller);
     }
 
     private void updateSizing() {
@@ -657,5 +677,39 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager {
             return getItemCount() - 1;
         }
         return rightIdx;
+    }
+
+    /**
+     * 0 for leftmost scroll and page count for rightmost
+     *
+     * @return page and scroll
+     */
+    public float getPageScroll() {
+        if (getChildCount() == 0)
+            return 0f;
+        View view = getChildAt(0);
+        if (view == null)
+            return 0f;
+        int col = getColumnIdx(adapterPosition(view));
+        int pageWidth = getHorizontalSpace();
+        float scroll = (getDecoratedLeft(view) - getColumnPosition(col)) / (float) pageWidth;
+        return Math.max(0f, -scroll);
+    }
+
+    public int getPageAdapterPosition(int page) {
+        int col = page * mColumnCount;
+        return getAdapterIdx(col, 0);
+    }
+
+    @Nullable
+    @Override
+    public PointF computeScrollVectorForPosition(int targetPosition) {
+        if (getChildCount() == 0)
+            return null;
+        View view = getChildAt(0);
+        if (view == null)
+            return null;
+        int pos = adapterPosition(view);
+        return new PointF(targetPosition - pos, 0f);
     }
 }
