@@ -279,6 +279,14 @@ public class PrefCache {
         return pref.getBoolean("result-fading-edge", false);
     }
 
+    public static int getDockColumnCount(SharedPreferences pref) {
+        return pref.getInt("quick-list-columns", 1);
+    }
+
+    public static int getDockRowCount(SharedPreferences pref) {
+        return pref.getInt("quick-list-rows", 1);
+    }
+
     public static boolean isMigrateRequired(@NonNull SharedPreferences pref) {
         Map<String, ?> allPref = pref.getAll();
         for (String key : PREF_THAT_REQUIRE_MIGRATION)

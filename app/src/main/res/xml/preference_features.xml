@@ -262,6 +262,20 @@
             android:key="quick-list-position"
             android:title="@string/quick_list_position" />
 
+        <rocks.tbog.tblauncher.preference.CustomDialogPreference
+            android:defaultValue="@integer/default_dock_columns"
+            android:dialogLayout="@layout/pref_slider"
+            android:key="quick-list-columns"
+            android:title="@string/quick_list_columns"
+            android:widgetLayout="@layout/pref_size_preview" />
+
+        <rocks.tbog.tblauncher.preference.CustomDialogPreference
+            android:defaultValue="@integer/default_dock_rows"
+            android:dialogLayout="@layout/pref_slider"
+            android:key="quick-list-rows"
+            android:title="@string/quick_list_rows"
+            android:widgetLayout="@layout/pref_size_preview" />
+
     </androidx.preference.PreferenceCategory>
 
     <!-- Shortcut -->

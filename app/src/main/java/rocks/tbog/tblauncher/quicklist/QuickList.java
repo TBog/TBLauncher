@@ -18,6 +18,7 @@ import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.preference.PreferenceManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -103,6 +104,8 @@ public class QuickList {
             barHeight = resources.getInteger(R.integer.default_dock_height);
         barHeight = UISizes.dp2px(ctx, barHeight);
 
+        setGridSize(quickList);
+
         if (quickList.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
             ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) quickList.getLayoutParams();
             // set layout height
@@ -138,6 +141,25 @@ public class QuickList {
         } else {
             quickList.setBackgroundColor(color);
         }
+    }
+
+    private static void setGridSize(View quickList) {
+        DockRecycleLayoutManager layoutManager = null;
+        if (quickList instanceof RecyclerList)
+        {
+            RecyclerView.LayoutManager mgr = ((RecyclerList) quickList).getLayoutManager();
+            if (mgr instanceof DockRecycleLayoutManager)
+                layoutManager = (DockRecycleLayoutManager) mgr;
+        }
+        if (layoutManager == null)
+            return;
+        Context context = quickList.getContext();
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+        int colCount = PrefCache.getDockColumnCount(pref);
+        int rowCount = PrefCache.getDockRowCount(pref);
+        layoutManager.setColumnCount(colCount);
+        layoutManager.setRowCount(rowCount);
+        quickList.requestLayout();
     }
 
     public static int getBackgroundColor(SharedPreferences pref) {

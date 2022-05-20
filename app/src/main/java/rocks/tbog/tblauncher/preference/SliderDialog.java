@@ -62,6 +62,8 @@ public class SliderDialog extends BasePreferenceDialog {
             case "quick-list-radius":
                 ((TextView) root.findViewById(android.R.id.text1)).setText(R.string.corner_radius);
                 break;
+            default:
+                break;
         }
 
         // because we can't set minimum below API 26 we make our own
@@ -103,6 +105,16 @@ public class SliderDialog extends BasePreferenceDialog {
             case "icon-saturation":
                 minValue = -100;
                 seekBar.setMax(100 - minValue);
+                break;
+            case "quick-list-columns":
+                minValue = 1;
+                seekBar.setMax(32 - minValue);
+                break;
+            case "quick-list-rows":
+                minValue = 1;
+                seekBar.setMax(8 - minValue);
+                break;
+            default:
                 break;
         }
 

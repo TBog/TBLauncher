@@ -473,6 +473,8 @@
     <string name="shortcut_dynamic_in_results_summary">Dynamic shortcuts will be considered as possible results when searching</string>
     <string name="search_bar_layout">Layout</string>
     <string name="quick_list_position">Position</string>
+    <string name="quick_list_columns">Columns</string>
+    <string name="quick_list_rows">Rows</string>
     <string name="navigation_bar_section">Navigation bar</string>
     <string name="icons_section">Icons</string>
     <string name="options_section">Options</string>
