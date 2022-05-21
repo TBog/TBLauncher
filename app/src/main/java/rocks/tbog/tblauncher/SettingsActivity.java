@@ -1097,6 +1097,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case "quick-list-text-visible":
             case "quick-list-icons-visible":
             case "quick-list-show-badge":
+            case "quick-list-columns":
+            case "quick-list-rows":
                 if (activity != null)
                     activity.queueDockReload();
                 break;
