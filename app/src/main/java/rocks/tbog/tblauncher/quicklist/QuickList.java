@@ -34,6 +34,7 @@ import rocks.tbog.tblauncher.dataprovider.Provider;
 import rocks.tbog.tblauncher.dataprovider.QuickListProvider;
 import rocks.tbog.tblauncher.entry.ActionEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
+import rocks.tbog.tblauncher.entry.PlaceholderEntry;
 import rocks.tbog.tblauncher.entry.TagEntry;
 import rocks.tbog.tblauncher.handler.DataHandler;
 import rocks.tbog.tblauncher.searcher.Searcher;
@@ -242,7 +243,16 @@ public class QuickList {
 //                else
 //                    oldItems.add(entry.id);
 //            }
+            for (EntryItem entry : list) {
+                if (entry instanceof PlaceholderEntry) {
+                    mListDirty = true;
+                    break;
+                }
+            }
+
             mAdapter.updateResults(list);
+        } else {
+            mListDirty = true;
         }
 /*
         // keep a list of the old views so we can reuse them
