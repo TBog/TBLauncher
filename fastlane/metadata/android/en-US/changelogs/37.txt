@@ -1,0 +1,8 @@
+* add search bar expand/collapse animation toggle preference
+* ignore keyboard close event when dialog open
+* add dynamic calendar icon support
+* refactor `asyncSetEntryIcon`
+* ensure edit text is focused during pill animation
+* rename preference screens `UI` and `Features`
+* add `Options` screen to preferences
+* rename "User interface" to "Theme" (see issue #271)
