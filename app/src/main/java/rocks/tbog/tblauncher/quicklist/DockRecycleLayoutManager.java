@@ -470,6 +470,8 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
 
     @Override
     public boolean canScrollHorizontally() {
+        if (getItemCount() > (mColumnCount * mRowCount))
+            return true;
         if (getChildCount() > 0) {
             //We do allow scrolling
             if (getDecoratedLeft(getLeftView()) < getPaddingLeft())
@@ -487,32 +489,30 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
 
         final int amount;
         // compute amount of scroll without going beyond the bound
-        if (dx < 0) { // finger is moving from right to left
+        if (dx < 0) { // finger is moving from left to right
             View leftView = getLeftView();
             boolean leftBoundReached = adapterPosition(leftView) == leftAdapterItemIdx();
             final int leftBound = getPaddingLeft();
             final int childLeft = getDecoratedLeft(leftView);
             if (leftBoundReached && (childLeft - dx) > leftBound) {
                 //If top bound reached, enforce limit
-                int topOffset = leftBound - childLeft;
+                int leftOffset = leftBound - childLeft;
 
-                amount = -Math.min(-dx, topOffset);
+                amount = -Math.min(-dx, leftOffset);
             } else {
                 amount = dx;
             }
-        } else if (dx > 0) { // finger is moving from left to right
-            View rightView = getRightView();
-            boolean rightBoundReached = adapterPosition(rightView) == rightAdapterItemIdx();
-            final int rightBound = getWidth() - getPaddingRight();
-            final int childRight = getDecoratedRight(rightView);
-            if (rightBoundReached && (childRight - dx) < rightBound) {
-                //If we've reached the last row, enforce limits
-                int rightOffset = childRight - rightBound;
-
-                amount = Math.min(dx, rightOffset);
-            } else {
-                amount = dx;
-            }
+        } else if (dx > 0) { // finger is moving from right to left
+            int lastPage = getPageIdx(getItemCount() - 1);
+            float pageScroll = getPageScroll();
+            int pageWidth = getHorizontalSpace();
+            float lastPageVisibleWidth = (1f - (lastPage - pageScroll)) * pageWidth;
+            logDebug("scrollHorizontallyBy " + dx +
+                " lastPage=" + lastPage +
+                " pageScroll=" + pageScroll +
+                " visibleWidth=" + lastPageVisibleWidth +
+                " pageWidth=" + pageWidth);
+            amount = Math.min(dx, pageWidth - (int) lastPageVisibleWidth);
         } else {
             amount = dx;
         }
