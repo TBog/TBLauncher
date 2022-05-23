@@ -21,8 +21,6 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
     private final SparseArrayWrapper<View> mViewCache = new SparseArrayWrapper<>();
     private RecyclerView mRecyclerView = null;
     private boolean mRefreshViews = false;
-    /* First position visible at any point (adapter index) */
-    private int mFirstVisiblePosition;
     /* Consistent size applied to all child views */
     private int mDecoratedChildWidth = 0;
     private int mDecoratedChildHeight = 0;
@@ -178,11 +176,6 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
             return;
         }
 
-        if (getChildCount() == 0) {
-            // First or empty layout
-            mFirstVisiblePosition = 0;
-        }
-
         // Always update the visible row/column counts
         updateSizing();
 
@@ -236,7 +229,7 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
 
     private int getAdapterIdx(int colIdx, int rowIdx) {
         if (mRightToLeft)
-            throw new IllegalStateException("implement getAdapterIdx when mRightToLeft==true");
+            throw new IllegalStateException("TODO: implement getAdapterIdx when mRightToLeft==true");
         int columnInPage = colIdx % mColumnCount;
         int page = colIdx / mColumnCount;
         return page * mColumnCount * mRowCount + rowIdx * mColumnCount + columnInPage;
@@ -244,7 +237,7 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
 
     private int getColumnIdx(int adapterPos) {
         if (mRightToLeft)
-            throw new IllegalStateException("implement getColumnIdx when mRightToLeft==true");
+            throw new IllegalStateException("TODO: implement getColumnIdx when mRightToLeft==true");
         int columnInPage = adapterPos % (mColumnCount * mRowCount) % mColumnCount;
         int page = getPageIdx(adapterPos);
         return page * mColumnCount + columnInPage;
@@ -252,14 +245,14 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
 
     private int getRowIdx(int adapterPos) {
         if (mRightToLeft)
-            throw new IllegalStateException("implement getRowIdx when mRightToLeft==true");
+            throw new IllegalStateException("TODO: implement getRowIdx when mRightToLeft==true");
         int group = adapterPos / mColumnCount;
         return group % mRowCount;
     }
 
     private int getPageIdx(int adapterPos) {
         if (mRightToLeft)
-            throw new IllegalStateException("implement getPageIdx when mRightToLeft==true");
+            throw new IllegalStateException("TODO: implement getPageIdx when mRightToLeft==true");
         return adapterPos / (mColumnCount * mRowCount);
     }
 
@@ -272,6 +265,8 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
     }
 
     private int getColumnPosition(int columnIdx) {
+        if (mRightToLeft)
+            throw new IllegalStateException("TODO: implement getColumnPosition when mRightToLeft==true");
         if (columnIdx < 0 || columnIdx >= mColumnCount) {
             Log.e(TAG, "getColumnPosition(" + columnIdx + "); mColumnCount=" + mColumnCount);
         }
@@ -311,10 +306,11 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
 
         // compute scroll position after we populate `mViewCache`
         final int scrollOffset = computeHorizontalScrollOffset();
+        final int firstVisiblePos = findFirstVisiblePosition();
 
         logDebug("layoutChildren" +
-            " mFirstVisiblePosition=" + mFirstVisiblePosition +
             " scrollOffset=" + scrollOffset +
+            " firstVisiblePos=" + firstVisiblePos +
             " padding=" + getPaddingLeft() + " " + getPaddingTop() + " " + getPaddingRight() + " " + getPaddingBottom() +
             " verticalSpace=" + getVerticalSpace() +
             " horizontalSpace=" + getHorizontalSpace());
@@ -335,9 +331,8 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
 
         final int nextLeftPosDelta = mRightToLeft ? -mDecoratedChildWidth : mDecoratedChildWidth;
 
-        int visibleAdapterPos = mFirstVisiblePosition;
-        int colIdx = getColumnIdx(visibleAdapterPos);
-        int rowIdx = getRowIdx(visibleAdapterPos);
+        int colIdx = getColumnIdx(firstVisiblePos);
+        int rowIdx = getRowIdx(firstVisiblePos);
 
         int topPos = getRowPosition(rowIdx);
         int scrolledPosition = scrollOffset + getColumnPosition(colIdx);
@@ -361,6 +356,41 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
             topPos = getRowPosition(rowIdx);
         }
         clearViewCache(recycler);
+    }
+
+    /**
+     * Find adapter index of the first visible item.
+     * It will be the left-most if (mRightToLeft == false) and the right-most otherwise.
+     *
+     * @return adapter index of the first visible view
+     */
+    private int findFirstVisiblePosition() {
+        int colIdx;
+        int left;
+        View child = getChildCount() > 0 ? getChildAt(0) : null;
+        if (child != null) {
+            colIdx = getColumnIdx(adapterPosition(child));
+            left = getDecoratedLeft(child);
+        } else if (mViewCache.size() > 0) {
+            child = mViewCache.valueAt(0);
+            int adapterPos = mViewCache.keyAt(0);
+            colIdx = getColumnIdx(adapterPos);
+            left = getDecoratedLeft(child);
+        } else {
+            colIdx = 0;
+            left = getColumnPosition(colIdx);
+        }
+        // check if column is left of the left margin
+        while ((left + mDecoratedChildWidth) < 0) {
+            colIdx += 1;
+            left += mDecoratedChildWidth;
+        }
+        // check if column is right of the left margin
+        while (colIdx > 0 && left > 0) {
+            colIdx -= 1;
+            left -= mDecoratedChildWidth;
+        }
+        return getAdapterIdx(colIdx, 0);
     }
 
     /**
@@ -398,6 +428,7 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
             attachView(child);
             logDebug("cache #" + indexOfChild(child) + " pos=" + adapterPos +
                 " (" + child.getLeft() + " " + child.getTop() + " " + child.getRight() + " " + child.getBottom() + ")" +
+                " left=" + leftPos +
                 " top=" + topPos +
                 " " + getDebugInfo(child) + " " + getDebugName(child));
             mViewCache.remove(adapterPos);
@@ -490,29 +521,17 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
         final int amount;
         // compute amount of scroll without going beyond the bound
         if (dx < 0) { // finger is moving from left to right
-            View leftView = getLeftView();
-            boolean leftBoundReached = adapterPosition(leftView) == leftAdapterItemIdx();
-            final int leftBound = getPaddingLeft();
-            final int childLeft = getDecoratedLeft(leftView);
-            if (leftBoundReached && (childLeft - dx) > leftBound) {
-                //If top bound reached, enforce limit
-                int leftOffset = leftBound - childLeft;
-
-                amount = -Math.min(-dx, leftOffset);
-            } else {
-                amount = dx;
-            }
-        } else if (dx > 0) { // finger is moving from right to left
-            int lastPage = getPageIdx(getItemCount() - 1);
+            int pageIdx = getPageIdx(mRightToLeft ? (getItemCount() - 1) : 0);
             float pageScroll = getPageScroll();
             int pageWidth = getHorizontalSpace();
-            float lastPageVisibleWidth = (1f - (lastPage - pageScroll)) * pageWidth;
-            logDebug("scrollHorizontallyBy " + dx +
-                " lastPage=" + lastPage +
-                " pageScroll=" + pageScroll +
-                " visibleWidth=" + lastPageVisibleWidth +
-                " pageWidth=" + pageWidth);
-            amount = Math.min(dx, pageWidth - (int) lastPageVisibleWidth);
+            float pageVisibleWidth = (1f - (pageIdx - pageScroll)) * pageWidth;
+            amount = Math.max(dx, pageWidth - (int) pageVisibleWidth);
+        } else if (dx > 0) { // finger is moving from right to left
+            int pageIdx = getPageIdx(mRightToLeft ? 0 : (getItemCount() - 1));
+            float pageScroll = getPageScroll();
+            int pageWidth = getHorizontalSpace();
+            float pageVisibleWidth = (1f - (pageIdx - pageScroll)) * pageWidth;
+            amount = Math.min(dx, pageWidth - (int) pageVisibleWidth);
         } else {
             amount = dx;
         }
@@ -527,8 +546,9 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
         offsetChildrenHorizontal(-amount);
 
         // check if we need to layout after the scroll
-        checkVisibilityAfterScroll(recycler, true);
-        checkVisibilityAfterScroll(recycler, false);
+        if (checkVisibilityAfterScroll(true) ||
+            checkVisibilityAfterScroll(false))
+            layoutChildren(recycler);
 
         /*
          * Return value determines if a boundary has been reached
@@ -539,33 +559,30 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
         return amount;
     }
 
-    private void checkVisibilityAfterScroll(RecyclerView.Recycler recycler, boolean checkLeft) {
+    private boolean checkVisibilityAfterScroll(boolean checkLeft) {
         View child = checkLeft ? getLeftView() : getRightView();
         int adapterPosition = adapterPosition(child);
         int left = getDecoratedLeft(child);
-        int newFirstVisible = mFirstVisiblePosition;
-        while (needsVisibilityChange(adapterPosition, left, checkLeft)) {
+        boolean needsLayout = checkLeft ? left > 0 : (left + mDecoratedChildWidth) < getWidth();
+        if (needsLayout) {
             if (checkLeft) {
-                adapterPosition = leftAdapterItemIdx(adapterPosition);
-                newFirstVisible = leftAdapterItemIdx(newFirstVisible);
-                left -= mDecoratedChildWidth;
+                int firstVisiblePosition = findFirstVisiblePosition();
+                logDebug("checkVisibilityAfterScroll" +
+                    " checkLeft=  true" +
+                    " left = " + left +
+                    " adapterPosition=" + adapterPosition +
+                    " newFirstVisible=" + firstVisiblePosition);
+                if (adapterPosition == firstVisiblePosition)
+                    needsLayout = false;
             } else {
-                left += mDecoratedChildWidth;
-                adapterPosition = rightAdapterItemIdx(adapterPosition);
-                newFirstVisible = rightAdapterItemIdx(newFirstVisible);
+                logDebug("checkVisibilityAfterScroll" +
+                    " checkLeft= false" +
+                    " right = " + (left + mDecoratedChildWidth) +
+                    " width = " + getWidth() +
+                    " adapterPosition=" + adapterPosition);
             }
         }
-        changeFirstVisible(recycler, newFirstVisible);
-    }
-
-    private void changeFirstVisible(RecyclerView.Recycler recycler, int value) {
-        int oldValue = mFirstVisiblePosition;
-        int newValue = Math.max(Math.min(value, getItemCount() - 1), 0);
-        if (oldValue != newValue) {
-            logDebug("mFirstVisiblePosition changed from " + oldValue + " to " + newValue);
-            mFirstVisiblePosition = newValue;
-            layoutChildren(recycler);
-        }
+        return needsLayout;
     }
 
     /**
@@ -583,7 +600,7 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
     }
 
     /**
-     * Return left child view on screen (may not be visible)
+     * Return left-most child view from row 0 (may not be visible on screen)
      *
      * @return child view
      */
@@ -599,6 +616,8 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
             if (row == 0)
                 break;
             leftChildIdx += mRightToLeft ? -1 : 1;
+            if (leftChildIdx < 0 || leftChildIdx >= getChildCount())
+                break;
             child = getChildAt(leftChildIdx);
             if (child == null)
                 throw new IllegalStateException("null child when count=" + getChildCount() + " and leftChildIdx=" + leftChildIdx);
@@ -607,7 +626,7 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
     }
 
     /**
-     * Return right child view on screen (may not be visible)
+     * Return right-most child view from row 0 (may not be visible on screen)
      *
      * @return child view
      */
@@ -623,6 +642,8 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
             if (row == 0)
                 break;
             rightChildIdx -= mRightToLeft ? -1 : 1;
+            if (rightChildIdx < 0 || rightChildIdx >= getChildCount())
+                break;
             child = getChildAt(rightChildIdx);
             if (child == null)
                 throw new IllegalStateException("null child when count=" + getChildCount() + " and rightChildIdx=" + rightChildIdx);
@@ -693,7 +714,7 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
         int col = getColumnIdx(adapterPosition(view));
         int pageWidth = getHorizontalSpace();
         float scroll = (getDecoratedLeft(view) - getColumnPosition(col)) / (float) pageWidth;
-        return Math.max(0f, -scroll);
+        return -scroll;
     }
 
     public int getPageAdapterPosition(int page) {
