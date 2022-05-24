@@ -394,8 +394,10 @@ public class TBApplication extends Application {
 
     @NonNull
     public DataHandler getDataHandler() {
-        if (dataHandler == null) {
-            dataHandler = new DataHandler(this);
+        synchronized (this) {
+            if (dataHandler == null) {
+                dataHandler = new DataHandler(this);
+            }
         }
         return dataHandler;
     }
@@ -406,9 +408,12 @@ public class TBApplication extends Application {
     }
 
     public void initDataHandler() {
-        if (dataHandler == null) {
-            dataHandler = new DataHandler(this);
-        } else if (dataHandler.fullLoadOverSent()) {
+        synchronized (this) {
+            if (dataHandler == null) {
+                dataHandler = new DataHandler(this);
+            }
+        }
+        if (dataHandler.fullLoadOverSent()) {
             // Already loaded! We still need to fire the FULL_LOAD event
             Intent i = new Intent(TBLauncherActivity.FULL_LOAD_OVER);
             sendBroadcast(i);

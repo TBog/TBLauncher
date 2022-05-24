@@ -267,8 +267,11 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
     private int getColumnPosition(int columnIdx) {
         if (mRightToLeft)
             throw new IllegalStateException("TODO: implement getColumnPosition when mRightToLeft==true");
-        if (columnIdx < 0 || columnIdx >= mColumnCount) {
-            Log.e(TAG, "getColumnPosition(" + columnIdx + "); mColumnCount=" + mColumnCount);
+        if (columnIdx < 0 || (columnIdx * mRowCount) >= getItemCount()) {
+            Log.w(TAG, "getColumnPosition(" + columnIdx + ");" +
+                " mColumnCount=" + mColumnCount +
+                " mRowCount=" + mRowCount +
+                " itemCount=" + getItemCount());
         }
         return getPaddingLeft() + columnIdx * mDecoratedChildWidth;
     }
@@ -277,7 +280,7 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
         if (rowIdx < 0 || rowIdx >= mRowCount) {
             Log.e(TAG, "getRowPosition(" + rowIdx + "); mRowCount=" + mRowCount);
         }
-        return getPaddingTop() + rowIdx * getRowHeight();
+        return getPaddingTop() + rowIdx * mDecoratedChildHeight;
     }
 
     /**
@@ -359,7 +362,7 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
     }
 
     /**
-     * Find adapter index of the first visible item.
+     * Find adapter index of the first visible item on row 0.
      * It will be the left-most if (mRightToLeft == false) and the right-most otherwise.
      *
      * @return adapter index of the first visible view
@@ -367,18 +370,22 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
     private int findFirstVisiblePosition() {
         int colIdx;
         int left;
-        View child = getChildCount() > 0 ? getChildAt(0) : null;
-        if (child != null) {
-            colIdx = getColumnIdx(adapterPosition(child));
-            left = getDecoratedLeft(child);
-        } else if (mViewCache.size() > 0) {
+        final View child;
+        if (mViewCache.size() > 0) {
             child = mViewCache.valueAt(0);
             int adapterPos = mViewCache.keyAt(0);
             colIdx = getColumnIdx(adapterPos);
             left = getDecoratedLeft(child);
         } else {
-            colIdx = 0;
-            left = getColumnPosition(colIdx);
+            child = getChildCount() > 0 ? getChildAt(0) : null;
+            if (child != null) {
+                int adapterPos = adapterPosition(child);
+                colIdx = getColumnIdx(adapterPos);
+                left = getDecoratedLeft(child);
+            } else {
+                colIdx = 0;
+                left = getColumnPosition(colIdx);
+            }
         }
         // check if column is left of the left margin
         while ((left + mDecoratedChildWidth) < 0) {
@@ -417,7 +424,7 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
              * It is prudent to measure/layout each new view we receive from the Recycler.
              * We don't have to do this for views we are just re-arranging.
              */
-            measureChildWithMargins(child, 0, 0);
+            measureChildWithMargins(child, getHorizontalSpace() - mDecoratedChildWidth, getVerticalSpace() - mDecoratedChildHeight);
 
             layoutChildView(child, leftPos, topPos);
 
@@ -586,20 +593,6 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
     }
 
     /**
-     * @param adapterPosition needed to stop checking if adapter start or end reached
-     * @param left            child decorated left
-     * @param checkLeft       `bound` is the left position or the right
-     * @return if we need to change `mFirstVisiblePosition`
-     */
-    private boolean needsVisibilityChange(int adapterPosition, int left, boolean checkLeft) {
-        if (adapterPosition <= 0 || adapterPosition >= (getItemCount() - 1))
-            return false;
-        if (checkLeft)
-            return left > 0;
-        return (left + mDecoratedChildWidth) < getWidth();
-    }
-
-    /**
      * Return left-most child view from row 0 (may not be visible on screen)
      *
      * @return child view
@@ -649,55 +642,6 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
                 throw new IllegalStateException("null child when count=" + getChildCount() + " and rightChildIdx=" + rightChildIdx);
         }
         return child;
-    }
-
-    /**
-     * First (or last) item from the adapter that can be displayed at the left of the list
-     *
-     * @return index from adapter
-     */
-    private int leftAdapterItemIdx() {
-        int idx = mRightToLeft ? (getItemCount() - 1) : 0;
-        int row = getRowIdx(idx);
-        if (row == 0)
-            return idx;
-        return getAdapterIdx(0, 0);
-    }
-
-    /**
-     * First (or last) item from the adapter that can be displayed at the right of the list
-     *
-     * @return index from adapter
-     */
-    private int rightAdapterItemIdx() {
-        int idx = mRightToLeft ? 0 : (getItemCount() - 1);
-        int row = getRowIdx(idx);
-        if (row == 0)
-            return idx;
-        int page = getPageIdx(idx);
-        return getAdapterIdx((page + 1) * mColumnCount - 1, 0);
-    }
-
-    private int leftAdapterItemIdx(int idx) {
-        int col = getColumnIdx(idx);
-        int rightIdx = getAdapterIdx(col - 1, 0);
-        if (rightIdx < 0) {
-            return 0;
-        } else if (rightIdx >= getItemCount()) {
-            return getItemCount() - 1;
-        }
-        return rightIdx;
-    }
-
-    private int rightAdapterItemIdx(int idx) {
-        int col = getColumnIdx(idx);
-        int rightIdx = getAdapterIdx(col + 1, 0);
-        if (rightIdx < 0) {
-            return 0;
-        } else if (rightIdx >= getItemCount()) {
-            return getItemCount() - 1;
-        }
-        return rightIdx;
     }
 
     /**

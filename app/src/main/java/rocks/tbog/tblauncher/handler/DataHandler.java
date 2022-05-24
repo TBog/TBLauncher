@@ -129,7 +129,22 @@ public class DataHandler extends BroadcastReceiver
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         prefs.registerOnSharedPreferenceChangeListener(this);
 
-        // Connect to initial providers
+        // add DB providers
+        basicProviders();
+
+        // add providers that may be toggled by preferences
+        toggleableProviders(prefs);
+
+        // start STEP_1 providers
+        for (ProviderEntry entry : providers.values()) {
+            if (entry.provider == null)
+                return;
+            if (IProvider.LOAD_STEP_1 == entry.provider.getLoadStep() && !entry.provider.isLoaded()) {
+                entry.provider.reload(false);
+            }
+        }
+
+        // Connect to complex providers
         // Those are the complex providers, that are defined as Android services
         // to survive even if the app's UI is killed
         // (this way, we don't need to reload the app list as often)
@@ -138,13 +153,19 @@ public class DataHandler extends BroadcastReceiver
                 this.connectToProvider(providerName, 0);
             }
         }
+    }
 
-        /*
-         * Some basic providers are defined directly, as we don't need the overhead of a service
-         * for them. These providers don't expose a service connection, and you can't bind / unbind
-         * to them dynamically.
-         */
+    @NonNull
+    public Context getContext() {
+        return context;
+    }
 
+    /*
+     * Some basic providers are defined directly, as we don't need the overhead of a service
+     * for them. These providers don't expose a service connection, and you can't bind / unbind
+     * to them dynamically.
+     */
+    private void basicProviders() {
         // Filters
         {
             ProviderEntry providerEntry = new ProviderEntry();
@@ -179,14 +200,6 @@ public class DataHandler extends BroadcastReceiver
             providerEntry.provider = new QuickListProvider(context);
             providers.put("quickList", providerEntry);
         }
-
-        // add providers that may be toggled by preferences
-        toggleableProviders(prefs);
-    }
-
-    @NonNull
-    public Context getContext() {
-        return context;
     }
 
     private void toggleableProviders(SharedPreferences prefs) {

@@ -146,8 +146,7 @@ public class QuickList {
 
     private static void setGridSize(View quickList) {
         DockRecycleLayoutManager layoutManager = null;
-        if (quickList instanceof RecyclerList)
-        {
+        if (quickList instanceof RecyclerList) {
             RecyclerView.LayoutManager mgr = ((RecyclerList) quickList).getLayoutManager();
             if (mgr instanceof DockRecycleLayoutManager)
                 layoutManager = (DockRecycleLayoutManager) mgr;
@@ -185,9 +184,7 @@ public class QuickList {
         mQuickList.setLayoutManager(new DockRecycleLayoutManager(8, 1));
         mQuickList.addOnScrollListener(new PagedScrollListener());
 
-        mRetryCountdown = RETRY_COUNT;
-        mListDirty = true;
-        runCleanList.run();
+        reload();
     }
 
     public void reload() {

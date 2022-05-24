@@ -121,7 +121,6 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
 
         final TBApplication app = TBApplication.getApplication(this);
         app.onCreateActivity(this);
-        app.initDataHandler();
 
         /*
          * Initialize preferences
@@ -144,6 +143,9 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
         registerReceiver(mReceiver, intentFilterLoad);
         registerReceiver(mReceiver, intentFilterLoadOver);
         registerReceiver(mReceiver, intentFilterFullLoadOver);
+
+        // init DataHandler after we register the receiver
+        app.initDataHandler();
 
         setContentView(R.layout.activity_fullscreen);
         debugTextView = findViewById(R.id.debugText);
