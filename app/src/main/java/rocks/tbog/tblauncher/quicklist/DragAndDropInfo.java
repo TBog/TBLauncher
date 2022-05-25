@@ -2,17 +2,9 @@ package rocks.tbog.tblauncher.quicklist;
 
 import android.view.View;
 
-import java.util.ArrayList;
-
-import rocks.tbog.tblauncher.entry.EntryItem;
-
 class DragAndDropInfo {
-    public final ArrayList<EntryItem> list;
+    // the initial view that started the drag
     public View draggedView;
-    public EntryItem draggedEntry;
+    // child index from ViewGroup
     public int overChildIdx;
-
-    DragAndDropInfo(ArrayList<EntryItem> quickList) {
-        list = quickList;
-    }
 }

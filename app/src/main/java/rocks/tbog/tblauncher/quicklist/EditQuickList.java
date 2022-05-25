@@ -43,24 +43,23 @@ import rocks.tbog.tblauncher.utils.DebugInfo;
 public class EditQuickList {
 
     private static final String TAG = "EQL";
-    private final ArrayList<EntryItem> mQuickList = new ArrayList<>();
-    //private LinearLayout mQuickListContainer;
     private RecyclerList mQuickListPreview;
     private RecycleAdapter mAdapter;
     ViewPager mViewPager;
-    private SharedPreferences mPref;
     private final AdapterView.OnItemClickListener mAddToQuickList = (parent, view, pos, id) -> {
         Object item = parent.getAdapter().getItem(pos);
         if (item instanceof EntryItem) {
-            mQuickList.add((EntryItem) item);
-            populateList();
+            mAdapter.addResult((EntryItem) item);
         }
     };
 
     public void applyChanges(@NonNull Context context) {
-        ArrayList<String> idList = new ArrayList<>(mQuickList.size());
-        for (EntryItem entry : mQuickList)
+        final int itemCount = mAdapter.getItemCount();
+        ArrayList<String> idList = new ArrayList<>(itemCount);
+        for (int i = 0; i < itemCount; i++) {
+            EntryItem entry = mAdapter.getItem(i);
             idList.add(entry.id);
+        }
         TBApplication.dataHandler(context).setQuickList(idList);
     }
 
@@ -159,7 +158,7 @@ public class EditQuickList {
     public void bindView(@NonNull View view) {
         final Context context = view.getContext();
 
-        mAdapter = new RecycleAdapter(context, mQuickList);
+        mAdapter = new RecycleAdapter(context, new ArrayList<>());
         // the correct grid size will be set later
         DockRecycleLayoutManager layoutManager = new DockRecycleLayoutManager(4, 1);
 
@@ -176,13 +175,16 @@ public class EditQuickList {
 
         // when user clicks, remove the view and the list item
         mAdapter.setOnClickListener((entry, v) -> mAdapter.removeResult(entry));
-        mAdapter.setOnLongClickListener((entry, v) -> previewStartDrag(v, mQuickList));
+        mAdapter.setOnLongClickListener(EditQuickList::previewStartDrag);
 
-        mPref = PreferenceManager.getDefaultSharedPreferences(context);
-        QuickList.applyUiPref(mPref, mQuickListPreview);
+        SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+        QuickList.applyUiPref(pref, mQuickListPreview);
+        if (!QuickList.populateList(context, mAdapter)) {
+            TBApplication.behaviour(context).closeFragmentDialog();
+            Toast.makeText(context, "Failed!", Toast.LENGTH_SHORT).show();
+        }
         //TODO: allow drag and drop for multiple rows
         layoutManager.setRowCount(1);
-        populateList();
 
         mViewPager = view.findViewById(R.id.viewPager);
         {
@@ -219,17 +221,16 @@ public class EditQuickList {
     /**
      * Start drag and drop action.
      *
-     * @param v         The view we are dragging
-     * @param quickList The list we intend to reorder
+     * @param entry the EntryItem we are moving
+     * @param v     The view we are dragging
      * @return if the startDrag method completes successfully
      */
-    private static boolean previewStartDrag(@NonNull View v, @NonNull ArrayList<EntryItem> quickList) {
-        final DragAndDropInfo dragDropInfo = new DragAndDropInfo(quickList);
+    private static boolean previewStartDrag(@NonNull EntryItem entry, @NonNull View v) {
+        final DragAndDropInfo dragDropInfo = new DragAndDropInfo();
         int idx = ((ViewGroup) v.getParent()).indexOfChild(v);
         dragDropInfo.overChildIdx = idx;
-        dragDropInfo.draggedEntry = quickList.get(idx);
         dragDropInfo.draggedView = v;
-        ClipData clipData = ClipData.newPlainText(Integer.toString(idx), dragDropInfo.draggedEntry.id);
+        ClipData clipData = ClipData.newPlainText(Integer.toString(idx), entry.id);
         View.DragShadowBuilder shadow = new View.DragShadowBuilder(v);
         v.setVisibility(View.INVISIBLE);
         return startDragAndDrop(v, clipData, shadow, dragDropInfo);
@@ -334,41 +335,21 @@ public class EditQuickList {
                     child.animate().cancel();
                     child.setTranslationX(0f);
                 }
-                final int initialPosition;
-                final int newPosition;
                 RecyclerView.Adapter<?> adapter = quickList instanceof RecyclerList ? ((RecyclerList) quickList).getAdapter() : null;
                 if (adapter instanceof RecycleAdapter) {
-                    initialPosition = ((RecyclerView.LayoutParams) dragDropInfo.draggedView.getLayoutParams()).getViewAdapterPosition();
-                    ;
+                    int initialPosition = ((RecyclerView.LayoutParams) dragDropInfo.draggedView.getLayoutParams()).getViewAdapterPosition();
                     View overChild = quickList.getChildAt(dragDropInfo.overChildIdx);
-                    newPosition = ((RecyclerView.LayoutParams) overChild.getLayoutParams()).getViewAdapterPosition();
-                } else {
-                    initialPosition = dragDropInfo.list.indexOf(dragDropInfo.draggedEntry);
-                    newPosition = dragDropInfo.overChildIdx;
-                }
-                // check event.getResult() if dropping outside should matter
-                if (initialPosition != newPosition) {
-                    if (adapter instanceof RecycleAdapter) {
+                    int newPosition = ((RecyclerView.LayoutParams) overChild.getLayoutParams()).getViewAdapterPosition();
+                    if (initialPosition != newPosition) {
                         ((RecycleAdapter) adapter).moveResult(initialPosition, newPosition);
+                        //TODO: I see a flicker when the first entry from a page is moved, investigate!
                         quickList.post(() -> PagedScrollListener.snapToPage((RecyclerList) quickList));
-                    } else {
-                        quickList.removeViewAt(initialPosition);
-                        quickList.addView(dragDropInfo.draggedView, dragDropInfo.overChildIdx);
-                        dragDropInfo.list.remove(dragDropInfo.draggedEntry);
-                        dragDropInfo.list.add(dragDropInfo.overChildIdx, dragDropInfo.draggedEntry);
                     }
                 }
+                // check event.getResult() if dropping outside should matter
                 dragDropInfo.draggedView.setVisibility(View.VISIBLE);
                 return false;
             }
-        }
-    }
-
-    private void populateList() {
-        Context context = mQuickListPreview.getContext();
-        if (!QuickList.populateList(context, mAdapter)) {
-            TBApplication.behaviour(context).closeFragmentDialog();
-            Toast.makeText(context, "Failed!", Toast.LENGTH_SHORT).show();
         }
     }
 }

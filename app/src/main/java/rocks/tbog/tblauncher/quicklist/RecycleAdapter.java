@@ -180,6 +180,11 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
             notifyItemChanged(position);
     }
 
+    public void addResult(EntryItem item) {
+        notifyItemInserted(results.size());
+        results.add(item);
+    }
+
     public static class Holder extends RecyclerView.ViewHolder {
 
         public Holder(@NonNull View itemView) {
