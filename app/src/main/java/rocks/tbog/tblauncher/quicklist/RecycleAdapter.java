@@ -8,7 +8,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Filter;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -19,12 +18,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import rocks.tbog.tblauncher.CustomizeUI;
-import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.FilterEntry;
-import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.result.ResultHelper;
-import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.UIColors;
 
 public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> {
@@ -36,16 +32,23 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
     @NonNull
     private final ArrayList<EntryItem> results;
     @Nullable
-    private ArrayList<EntryItem> resultsOriginal = null;
+    private OnClickListener mOnClickListener = null;
+    private OnLongClickListener mOnLongClickListener = null;
 
     private int mDrawFlags;
-
-    private Filter mFilter = new FilterById();
 
     public RecycleAdapter(@NonNull Context context, @NonNull ArrayList<EntryItem> results) {
         this.results = results;
         setHasStableIds(true);
         setGridLayout(context, false);
+    }
+
+    public void setOnClickListener(@Nullable OnClickListener listener) {
+        mOnClickListener = listener;
+    }
+
+    public void setOnLongClickListener(@Nullable OnLongClickListener listener) {
+        mOnLongClickListener = listener;
     }
 
     @Override
@@ -109,8 +112,15 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
             return;
         }
 
-        holder.setOnClickListener(view -> onClick(entry, view));
-        holder.setOnLongClickListener(view -> onLongClick(entry, view));
+        if (mOnClickListener != null)
+            holder.setOnClickListener(v -> mOnClickListener.onClick(entry, v));
+        else
+            holder.setOnClickListener(null);
+
+        if (mOnLongClickListener != null)
+            holder.setOnLongClickListener(v -> mOnLongClickListener.onLongClick(entry, v));
+        else
+            holder.setOnLongClickListener(null);
 
         results.get(position).displayResult(holder.itemView, mDrawFlags);
 
@@ -133,41 +143,7 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
         return results.get(index);
     }
 
-    public void onClick(int index, View anyView) {
-        final EntryItem result;
-        try {
-            result = results.get(index);
-        } catch (IndexOutOfBoundsException e) {
-            Log.e(TAG, "pos=" + index + " size=" + results.size(), e);
-            return;
-        }
-
-        onClick(result, anyView);
-    }
-
-    public static void onClick(final EntryItem entry, View v) {
-        if (entry instanceof StaticEntry) {
-            entry.doLaunch(v, EntryItem.LAUNCHED_FROM_QUICK_LIST);
-        } else {
-            ResultHelper.launch(v, entry);
-        }
-    }
-
-    public static boolean onLongClick(final EntryItem entry, View v) {
-        ListPopup menu = entry.getPopupMenu(v, EntryItem.LAUNCHED_FROM_QUICK_LIST);
-
-        // show menu only if it contains elements
-        if (!menu.getAdapter().isEmpty()) {
-            TBApplication.getApplication(v.getContext()).registerPopup(menu);
-            menu.show(v);
-            return true;
-        }
-
-        return false;
-    }
-
     public void clear() {
-        resultsOriginal = null;
         final int itemCount = results.size();
         results.clear();
         notifyItemRangeRemoved(0, itemCount);
@@ -180,7 +156,6 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
 
     @SuppressLint("NotifyDataSetChanged")
     public void updateResults(Collection<? extends EntryItem> results) {
-        resultsOriginal = null;
         this.results.clear();
         this.results.addAll(results);
         notifyDataSetChanged();
@@ -189,9 +164,13 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
     public void removeResult(EntryItem result) {
         int position = results.indexOf(result);
         results.remove(result);
-        if (resultsOriginal != null)
-            resultsOriginal.remove(result);
         notifyItemRemoved(position);
+    }
+
+    public void moveResult(int sourceIdx, int destIdx) {
+        notifyItemMoved(sourceIdx, destIdx);
+        EntryItem entryItem = results.remove(sourceIdx);
+        results.add(destIdx, entryItem);
     }
 
     public void notifyItemChanged(EntryItem result) {
@@ -199,12 +178,6 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
         Log.d(TAG, "notifyItemChanged #" + position + " id=" + result.id);
         if (position >= 0)
             notifyItemChanged(position);
-    }
-
-    public Filter getFilter() {
-        if (resultsOriginal == null)
-            resultsOriginal = new ArrayList<>(results);
-        return mFilter;
     }
 
     public static class Holder extends RecyclerView.ViewHolder {
@@ -221,47 +194,22 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
 
         public void setOnClickListener(@Nullable View.OnClickListener listener) {
             itemView.setOnClickListener(listener);
+            if (listener == null)
+                itemView.setClickable(false);
         }
 
         public void setOnLongClickListener(@Nullable View.OnLongClickListener listener) {
             itemView.setOnLongClickListener(listener);
+            if (listener == null)
+                itemView.setLongClickable(false);
         }
     }
 
-    private class FilterById extends Filter {
+    public interface OnClickListener {
+        void onClick(EntryItem entryItem, View view);
+    }
 
-        //Invoked in a worker thread to filter the data according to the constraint.
-        @Override
-        protected FilterResults performFiltering(CharSequence constraint) {
-            if (constraint == null || constraint.length() == 0 || resultsOriginal == null)
-                return null;
-            String schema = constraint.toString();
-            ArrayList<EntryItem> filterList = new ArrayList<>();
-            for (EntryItem entryItem : resultsOriginal) {
-                if (entryItem.id.startsWith(schema))
-                    filterList.add(entryItem);
-            }
-            FilterResults filterResults = new FilterResults();
-            filterResults.values = filterList;
-            filterResults.count = filterList.size();
-            return filterResults;
-        }
-
-        //Invoked in the UI thread to publish the filtering results in the user interface.
-        @SuppressWarnings("unchecked")
-        @SuppressLint("NotifyDataSetChanged")
-        @Override
-        protected void publishResults(CharSequence constraint, FilterResults filterResults) {
-            if (filterResults != null) {
-                results.clear();
-                results.addAll((ArrayList<EntryItem>) filterResults.values);
-                notifyDataSetChanged();
-            } else if (resultsOriginal != null) {
-                results.clear();
-                results.addAll(resultsOriginal);
-                resultsOriginal = null;
-                notifyDataSetChanged();
-            }
-        }
+    public interface OnLongClickListener {
+        boolean onLongClick(EntryItem entryItem, View view);
     }
 }

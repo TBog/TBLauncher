@@ -15,17 +15,26 @@
         android:text="@string/edit_quick_list_preview" />
 
     <!-- The preview will get the same margin as the real thing (25% of the height) -->
-    <LinearLayout
-        android:id="@+id/preview"
+    <rocks.tbog.tblauncher.ui.RecyclerList
+        android:id="@+id/dockPreview"
         android:layout_width="match_parent"
         android:layout_height="@dimen/large_bar_height"
-        android:layout_marginHorizontal="@dimen/dialog_padding_horizontal"
         android:background="@null"
         android:gravity="center"
-        android:measureWithLargestChild="true"
         android:orientation="horizontal"
         tools:background="@drawable/tab_background_light"
-        tools:backgroundTint="@color/colorAccent" />
+        tools:backgroundTint="@color/colorAccent"/>
+<!--    <LinearLayout-->
+<!--        android:id="@+id/preview"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="@dimen/large_bar_height"-->
+<!--        android:layout_marginHorizontal="@dimen/dialog_padding_horizontal"-->
+<!--        android:background="@null"-->
+<!--        android:gravity="center"-->
+<!--        android:measureWithLargestChild="true"-->
+<!--        android:orientation="horizontal"-->
+<!--        tools:background="@drawable/tab_background_light"-->
+<!--        tools:backgroundTint="@color/colorAccent" />-->
 
     <androidx.viewpager.widget.ViewPager
         android:id="@+id/viewPager"

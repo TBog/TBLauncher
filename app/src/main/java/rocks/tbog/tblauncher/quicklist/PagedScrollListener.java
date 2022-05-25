@@ -19,12 +19,7 @@ public class PagedScrollListener extends RecyclerView.OnScrollListener {
         }
     }
 
-    @Override
-    public void onScrolled(@NonNull RecyclerView recyclerView, int dx, int dy) {
-        super.onScrolled(recyclerView, dx, dy);
-    }
-
-    private void snapToPage(@NonNull RecyclerView recyclerView) {
+    public static void snapToPage(@NonNull RecyclerView recyclerView) {
         if (recyclerView.getLayoutManager() instanceof DockRecycleLayoutManager) {
             DockRecycleLayoutManager dockRecycleLayoutManager = (DockRecycleLayoutManager) recyclerView.getLayoutManager();
             float scroll = dockRecycleLayoutManager.getPageScroll();

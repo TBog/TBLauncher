@@ -4,4 +4,5 @@
     <item name="tag_actionId" type="id" />
     <item name="tag_cacheId" type="id" />
     <item name="tag_iconTask" type="id" />
+    <item name="iconPreview" type="id" />
 </resources>

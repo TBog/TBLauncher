@@ -35,9 +35,12 @@ import rocks.tbog.tblauncher.dataprovider.QuickListProvider;
 import rocks.tbog.tblauncher.entry.ActionEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.PlaceholderEntry;
+import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.entry.TagEntry;
 import rocks.tbog.tblauncher.handler.DataHandler;
+import rocks.tbog.tblauncher.result.ResultHelper;
 import rocks.tbog.tblauncher.searcher.Searcher;
+import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.ui.RecyclerList;
 import rocks.tbog.tblauncher.ui.ViewStubPreview;
 import rocks.tbog.tblauncher.utils.PrefCache;
@@ -166,6 +169,27 @@ public class QuickList {
         return UIColors.getColor(pref, "quick-list-argb");
     }
 
+    public static void onClick(final EntryItem entry, View v) {
+        if (entry instanceof StaticEntry) {
+            entry.doLaunch(v, EntryItem.LAUNCHED_FROM_QUICK_LIST);
+        } else {
+            ResultHelper.launch(v, entry);
+        }
+    }
+
+    public static boolean onLongClick(final EntryItem entry, View v) {
+        ListPopup menu = entry.getPopupMenu(v, EntryItem.LAUNCHED_FROM_QUICK_LIST);
+
+        // show menu only if it contains elements
+        if (!menu.getAdapter().isEmpty()) {
+            TBApplication.getApplication(v.getContext()).registerPopup(menu);
+            menu.show(v);
+            return true;
+        }
+
+        return false;
+    }
+
     public Context getContext() {
         return mTBLauncherActivity;
     }
@@ -176,7 +200,8 @@ public class QuickList {
 
         inflateQuickListView();
         mAdapter = new RecycleAdapter(getContext(), new ArrayList<>());
-        //mAdapter.setGridLayout();
+        mAdapter.setOnClickListener(QuickList::onClick);
+        mAdapter.setOnLongClickListener(QuickList::onLongClick);
 
         mQuickList.setHasFixedSize(true);
         mQuickList.setAdapter(mAdapter);
@@ -218,147 +243,47 @@ public class QuickList {
     }
 
     private void populateList() {
-        if (mAdapter != null) {
+        if (isQuickListEnabled()) {
+            mListDirty = !populateList(getContext(), mAdapter);
+        } else {
             mListDirty = false;
-            final List<EntryItem> list;
-            if (isQuickListEnabled()) {
-                QuickListProvider provider = TBApplication.dataHandler(getContext()).getQuickListProvider();
-                if (provider != null && provider.isLoaded()) {
-                    List<EntryItem> pojos = provider.getPojos();
-                    list = pojos != null ? pojos : Collections.emptyList();
-                } else {
-                    list = Collections.emptyList();
-                    mListDirty = true;
-                }
-            } else {
-                list = Collections.emptyList();
-                mQuickList.setVisibility(View.GONE);
-            }
-//            for (EntryItem entry : list) {
-//                if (entry instanceof PlaceholderEntry)
-//                    oldItems.add("placeholder:" + entry.id);
-//                else
-//                    oldItems.add(entry.id);
-//            }
-            for (EntryItem entry : list) {
-                if (entry instanceof PlaceholderEntry) {
-                    mListDirty = true;
-                    break;
-                }
-            }
-
-            mAdapter.updateResults(list);
-        } else {
-            mListDirty = true;
-        }
-/*
-        // keep a list of the old views so we can reuse them
-        final View[] oldList = new View[mQuickList.getChildCount()];
-        for (int nChild = 0; nChild < oldList.length; nChild += 1)
-            oldList[nChild] = mQuickList.getChildAt(nChild);
-        //Log.d("QL", "oldList.length=" + oldList.length + " getChildCount=" + mQuickList.getChildCount());
-
-        // clean the QuickList
-        if (!isQuickListEnabled()) {
-            mQuickList.removeAllViews();
-            mQuickListItems.clear();
+            mAdapter.updateResults(Collections.emptyList());
             mQuickList.setVisibility(View.GONE);
-            return;
         }
+    }
 
-        mListDirty = false;
+    /**
+     * Set dock adapter content. May return false if the QuickListProvider is not loaded or it
+     * contains at least one PlaceholderEntry
+     *
+     * @param context for the DataHandler
+     * @param adapter to store the dock items
+     * @return true if the adapter was populated with valid entries
+     */
+    public static boolean populateList(Context context, RecycleAdapter adapter) {
+        if (adapter == null)
+            return false;
 
-        // get list of entries we must show
+        boolean validEntries = true;
         final List<EntryItem> list;
-        {
-            QuickListProvider provider = TBApplication.dataHandler(getContext()).getQuickListProvider();
-            if (provider != null && provider.isLoaded()) {
-                List<EntryItem> pojos = provider.getPojos();
-                list = pojos != null ? pojos : Collections.emptyList();
-            } else {
-                list = Collections.emptyList();
-                mListDirty = true;
-            }
-        }
-
-        // get old item ids
-        final List<String> oldItems;
-        // if the two lists have the same length, assume we can reuse the views
-        if (mQuickListItems.size() == oldList.length) {
-            oldItems = new ArrayList<>(mQuickListItems.size());
-            for (EntryItem entry : mQuickListItems) {
-                if (entry instanceof PlaceholderEntry)
-                    oldItems.add("placeholder:" + entry.id);
-                else
-                    oldItems.add(entry.id);
-                //Log.i("QL", "oldItem[" + (oldItems.size() - 1) + "]=" + oldItems.get(oldItems.size() - 1));
-            }
+        QuickListProvider provider = TBApplication.dataHandler(context).getQuickListProvider();
+        if (provider != null && provider.isLoaded()) {
+            List<EntryItem> pojos = provider.getPojos();
+            list = pojos != null ? pojos : Collections.emptyList();
         } else {
-            oldItems = Collections.emptyList();
+            list = Collections.emptyList();
+            validEntries = false;
         }
 
-        final SharedPreferences prefs = mSharedPreferences;
-        int drawFlags = getDrawFlags(prefs);
-        LayoutInflater inflater = LayoutInflater.from(getContext());
-
-        // clear old items before we add the new ones
-        mQuickListItems.clear();
-        int listSize = list.size();
-        for (int idx = 0; idx < listSize; idx++) {
-            EntryItem entry = list.get(idx);
-            if (entry instanceof PlaceholderEntry)
-                mListDirty = true;
-            View view;
-            int oldPos = oldItems.indexOf(entry.id);
-            //Log.d("QL", "oldPos=" + oldPos + " for " + entry.id);
-            if (oldPos > -1 && oldPos < oldList.length) {
-                //Log.i("QL", "[" + oldPos + "] reuse view for " + entry.id);
-                view = oldList[oldPos];
-            } else {
-                //Log.i("QL", "inflate view for " + entry.id);
-                view = inflater.inflate(entry.getResultLayout(drawFlags), mQuickList, false);
+        for (EntryItem entry : list) {
+            if (entry instanceof PlaceholderEntry) {
+                validEntries = false;
+                break;
             }
-            entry.displayResult(view, drawFlags);
-
-            int childIdx = mQuickList.indexOfChild(view);
-            if (childIdx != idx) {
-                if (childIdx != -1)
-                    mQuickList.removeViewAt(childIdx);
-                mQuickList.addView(view, idx);
-            }
-            mQuickListItems.add(entry);
-
-            view.setOnClickListener(v -> {
-                if (entry instanceof StaticEntry) {
-                    entry.doLaunch(v, EntryItem.LAUNCHED_FROM_QUICK_LIST);
-                } else {
-                    ResultHelper.launch(v, entry);
-                }
-            });
-            view.setOnLongClickListener(v -> {
-                ListPopup menu = entry.getPopupMenu(v, EntryItem.LAUNCHED_FROM_QUICK_LIST);
-
-                // show menu only if it contains elements
-                if (!menu.getAdapter().isEmpty()) {
-                    TBApplication.getApplication(v.getContext()).registerPopup(menu);
-                    menu.show(v);
-                    return true;
-                }
-
-                return false;
-            });
-            final int color;
-            if (entry instanceof FilterEntry)
-                color = UIColors.getQuickListToggleColor(prefs);
-            else
-                color = UIColors.getQuickListRipple(prefs);
-            Drawable selector = CustomizeUI.getSelectorDrawable(view, color, true);
-            view.setBackground(selector);
         }
-        mQuickList.removeViews(listSize, mQuickList.getChildCount() - listSize);
-        //mQuickList.setVisibility(mQuickList.getChildCount() == 0 ? View.GONE : View.VISIBLE);
-        mQuickList.requestLayout();
- */
+
+        adapter.updateResults(list);
+        return validEntries;
     }
 
     public void toggleSearch(@NonNull View v, @NonNull String query, @NonNull Class<? extends Searcher> searcherClass) {

@@ -69,7 +69,7 @@ public class EditTagsDialog extends DialogFragment<Set<String>> {
         if (entry != null) {
             int drawFlags = EntryItem.FLAG_DRAW_LIST | EntryItem.FLAG_DRAW_NAME | EntryItem.FLAG_DRAW_ICON;
             View entryView = dialogInflater.inflate(entry.getResultLayout(drawFlags), wrapper, false);
-            entryView.setId(R.id.preview);
+            entryView.setId(R.id.iconPreview);
             wrapper.addView(entryView, 0);
             CustomizeUI.setResultListPref(entryView);
         }
@@ -98,7 +98,7 @@ public class EditTagsDialog extends DialogFragment<Set<String>> {
             return;
         }
         int drawFlags = EntryItem.FLAG_DRAW_LIST | EntryItem.FLAG_DRAW_NAME | EntryItem.FLAG_DRAW_ICON;
-        entry.displayResult(view.findViewById(R.id.preview), drawFlags);
+        entry.displayResult(view.findViewById(R.id.iconPreview), drawFlags);
 
         // prepare the grid with all the tags
         mAdapter = new TagsAdapter(mTagList);

@@ -10,7 +10,7 @@ class DragAndDropInfo {
     public final ArrayList<EntryItem> list;
     public View draggedView;
     public EntryItem draggedEntry;
-    public int location;
+    public int overChildIdx;
 
     DragAndDropInfo(ArrayList<EntryItem> quickList) {
         list = quickList;

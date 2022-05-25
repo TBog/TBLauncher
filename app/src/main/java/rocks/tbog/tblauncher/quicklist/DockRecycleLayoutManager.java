@@ -137,6 +137,12 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
     }
 
     @Override
+    public void onItemsMoved(@NonNull RecyclerView recyclerView, int from, int to, int itemCount) {
+        logDebug("onItemsMoved from=" + from + " to=" + to + " count=" + itemCount);
+        mRefreshViews = true;
+    }
+
+    @Override
     public RecyclerView.LayoutParams generateDefaultLayoutParams() {
         return new RecyclerView.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
     }

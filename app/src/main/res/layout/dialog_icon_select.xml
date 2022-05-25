@@ -61,7 +61,6 @@
             android:layout_weight="1"
             android:drawablePadding="@dimen/icon_margin_right"
             android:gravity="center_vertical|end"
-            android:labelFor="@id/preview"
             android:lines="2"
             android:paddingVertical="@dimen/icon_margin_vertical"
             android:shadowColor="?attr/resultShadowColor"

@@ -11,11 +11,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.GridView;
-import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.preference.PreferenceManager;
+import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
 
 import com.google.android.material.tabs.TabLayout;
@@ -29,7 +30,6 @@ import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.dataprovider.ActionProvider;
 import rocks.tbog.tblauncher.dataprovider.FilterProvider;
-import rocks.tbog.tblauncher.dataprovider.QuickListProvider;
 import rocks.tbog.tblauncher.dataprovider.TagsProvider;
 import rocks.tbog.tblauncher.db.ModRecord;
 import rocks.tbog.tblauncher.entry.EntryItem;
@@ -37,13 +37,16 @@ import rocks.tbog.tblauncher.entry.TagEntry;
 import rocks.tbog.tblauncher.handler.DataHandler;
 import rocks.tbog.tblauncher.result.EntryAdapter;
 import rocks.tbog.tblauncher.result.LoadDataForAdapter;
+import rocks.tbog.tblauncher.ui.RecyclerList;
 import rocks.tbog.tblauncher.utils.DebugInfo;
 
 public class EditQuickList {
 
     private static final String TAG = "EQL";
     private final ArrayList<EntryItem> mQuickList = new ArrayList<>();
-    private LinearLayout mQuickListContainer;
+    //private LinearLayout mQuickListContainer;
+    private RecyclerList mQuickListPreview;
+    private RecycleAdapter mAdapter;
     ViewPager mViewPager;
     private SharedPreferences mPref;
     private final AdapterView.OnItemClickListener mAddToQuickList = (parent, view, pos, id) -> {
@@ -155,16 +158,30 @@ public class EditQuickList {
 
     public void bindView(@NonNull View view) {
         final Context context = view.getContext();
+
+        mAdapter = new RecycleAdapter(context, mQuickList);
+        // the correct grid size will be set later
+        DockRecycleLayoutManager layoutManager = new DockRecycleLayoutManager(4, 1);
+
         // keep the preview the same as the actual thing
-        mQuickListContainer = view.findViewById(R.id.preview);
-        {
-            QuickListProvider provider = TBApplication.dataHandler(context).getQuickListProvider();
-            List<? extends EntryItem> list = provider != null ? provider.getPojos() : null;
-            if (list != null)
-                mQuickList.addAll(list);
-        }
+        mQuickListPreview = view.findViewById(R.id.dockPreview);
+        mQuickListPreview.setAdapter(mAdapter);
+        mQuickListPreview.setHasFixedSize(true);
+        // the default item animator will mess up when drag and dropping
+        mQuickListPreview.setItemAnimator(null);
+        mQuickListPreview.setLayoutManager(layoutManager);
+        mQuickListPreview.addOnScrollListener(new PagedScrollListener());
+        mQuickListPreview.setOnDragListener(EditQuickList::previewDragListener);
+        mQuickListPreview.requestLayout();
+
+        // when user clicks, remove the view and the list item
+        mAdapter.setOnClickListener((entry, v) -> mAdapter.removeResult(entry));
+        mAdapter.setOnLongClickListener((entry, v) -> previewStartDrag(v, mQuickList));
+
         mPref = PreferenceManager.getDefaultSharedPreferences(context);
-        QuickList.applyUiPref(mPref, mQuickListContainer);
+        QuickList.applyUiPref(mPref, mQuickListPreview);
+        //TODO: allow drag and drop for multiple rows
+        layoutManager.setRowCount(1);
         populateList();
 
         mViewPager = view.findViewById(R.id.viewPager);
@@ -173,7 +190,7 @@ public class EditQuickList {
             tabLayout.setupWithViewPager(mViewPager);
         }
         {
-            ArrayList<ViewPagerAdapter.PageInfo> pages = new ArrayList<>();
+            ArrayList<ViewPagerAdapter.PageInfo> pages = new ArrayList<>(3);
             LayoutInflater inflater = LayoutInflater.from(context);
 
             // actions
@@ -209,7 +226,7 @@ public class EditQuickList {
     private static boolean previewStartDrag(@NonNull View v, @NonNull ArrayList<EntryItem> quickList) {
         final DragAndDropInfo dragDropInfo = new DragAndDropInfo(quickList);
         int idx = ((ViewGroup) v.getParent()).indexOfChild(v);
-        dragDropInfo.location = idx;
+        dragDropInfo.overChildIdx = idx;
         dragDropInfo.draggedEntry = quickList.get(idx);
         dragDropInfo.draggedView = v;
         ClipData clipData = ClipData.newPlainText(Integer.toString(idx), dragDropInfo.draggedEntry.id);
@@ -289,7 +306,7 @@ public class EditQuickList {
                 }
 
                 // check if we already processed this location
-                if (dragDropInfo.location == location)
+                if (dragDropInfo.overChildIdx == location)
                     return true;
 
                 final int emptyLocation = quickList.indexOfChild(dragDropInfo.draggedView);
@@ -299,14 +316,14 @@ public class EditQuickList {
                     repositionViews(quickList, emptyLocation + 1, 0, location + 1);
                 }
 
-                dragDropInfo.location = location;
+                dragDropInfo.overChildIdx = location;
 //                Log.d(TAG, "location = " + location);
                 return true;
             }
             case DragEvent.ACTION_DRAG_EXITED:
                 // if dragging outside, reset locations
-                dragDropInfo.location = quickList.indexOfChild(dragDropInfo.draggedView);
-                repositionViews(quickList, dragDropInfo.location, 0, 0);
+                dragDropInfo.overChildIdx = quickList.indexOfChild(dragDropInfo.draggedView);
+                repositionViews(quickList, dragDropInfo.overChildIdx, 0, 0);
                 return true;
             case DragEvent.ACTION_DRAG_ENDED:
             default: {
@@ -317,13 +334,29 @@ public class EditQuickList {
                     child.animate().cancel();
                     child.setTranslationX(0f);
                 }
-                int initialLocation = quickList.indexOfChild(dragDropInfo.draggedView);
+                final int initialPosition;
+                final int newPosition;
+                RecyclerView.Adapter<?> adapter = quickList instanceof RecyclerList ? ((RecyclerList) quickList).getAdapter() : null;
+                if (adapter instanceof RecycleAdapter) {
+                    initialPosition = ((RecyclerView.LayoutParams) dragDropInfo.draggedView.getLayoutParams()).getViewAdapterPosition();
+                    ;
+                    View overChild = quickList.getChildAt(dragDropInfo.overChildIdx);
+                    newPosition = ((RecyclerView.LayoutParams) overChild.getLayoutParams()).getViewAdapterPosition();
+                } else {
+                    initialPosition = dragDropInfo.list.indexOf(dragDropInfo.draggedEntry);
+                    newPosition = dragDropInfo.overChildIdx;
+                }
                 // check event.getResult() if dropping outside should matter
-                if (initialLocation != dragDropInfo.location) {
-                    quickList.removeViewAt(initialLocation);
-                    quickList.addView(dragDropInfo.draggedView, dragDropInfo.location);
-                    dragDropInfo.list.remove(dragDropInfo.draggedEntry);
-                    dragDropInfo.list.add(dragDropInfo.location, dragDropInfo.draggedEntry);
+                if (initialPosition != newPosition) {
+                    if (adapter instanceof RecycleAdapter) {
+                        ((RecycleAdapter) adapter).moveResult(initialPosition, newPosition);
+                        quickList.post(() -> PagedScrollListener.snapToPage((RecyclerList) quickList));
+                    } else {
+                        quickList.removeViewAt(initialPosition);
+                        quickList.addView(dragDropInfo.draggedView, dragDropInfo.overChildIdx);
+                        dragDropInfo.list.remove(dragDropInfo.draggedEntry);
+                        dragDropInfo.list.add(dragDropInfo.overChildIdx, dragDropInfo.draggedEntry);
+                    }
                 }
                 dragDropInfo.draggedView.setVisibility(View.VISIBLE);
                 return false;
@@ -332,27 +365,10 @@ public class EditQuickList {
     }
 
     private void populateList() {
-        Context context = mQuickListContainer.getContext();
-
-        mQuickListContainer.removeAllViews();
-        int drawFlags = RecycleAdapter.getDrawFlags(context) | EntryItem.FLAG_DRAW_NO_CACHE;
-        for (EntryItem entry : mQuickList) {
-            View view = LayoutInflater.from(context).inflate(entry.getResultLayout(drawFlags), mQuickListContainer, false);
-            entry.displayResult(view, drawFlags);
-            mQuickListContainer.addView(view);
-
-            // when user clicks, remove the view and the list item
-            view.setOnClickListener((v) -> {
-                if (v.getParent() instanceof ViewGroup) {
-                    int idx = ((ViewGroup) v.getParent()).indexOfChild(v);
-                    ((ViewGroup) v.getParent()).removeViewAt(idx);
-                    mQuickList.remove(idx);
-                }
-            });
-
-            view.setOnLongClickListener(v -> previewStartDrag(v, mQuickList));
+        Context context = mQuickListPreview.getContext();
+        if (!QuickList.populateList(context, mAdapter)) {
+            TBApplication.behaviour(context).closeFragmentDialog();
+            Toast.makeText(context, "Failed!", Toast.LENGTH_SHORT).show();
         }
-        mQuickListContainer.setOnDragListener(EditQuickList::previewDragListener);
-        mQuickListContainer.requestLayout();
     }
 }
