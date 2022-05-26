@@ -22,11 +22,11 @@ public class PagedScrollListener extends RecyclerView.OnScrollListener {
     public static void snapToPage(@NonNull RecyclerView recyclerView) {
         if (recyclerView.getLayoutManager() instanceof DockRecycleLayoutManager) {
             DockRecycleLayoutManager dockRecycleLayoutManager = (DockRecycleLayoutManager) recyclerView.getLayoutManager();
-            float scroll = dockRecycleLayoutManager.getPageScroll();
-            int page = (int) (scroll + .5f);
-            float delta = scroll - page;
-            Log.d(TAG, "onScrollStateChanged: pageScroll=" + scroll + " delta=" + delta);
-            int pos;
+            final float scroll = dockRecycleLayoutManager.getPageScroll();
+            final int page = (int) (scroll + .5f);
+            final float delta = scroll - page;
+            Log.d(TAG, "snapToPage: pageScroll=" + scroll + " delta=" + delta);
+            final int pos;
             if (delta > .01f) {
                 pos = dockRecycleLayoutManager.getPageAdapterPosition(page);
             } else if (delta < -0.01f) {

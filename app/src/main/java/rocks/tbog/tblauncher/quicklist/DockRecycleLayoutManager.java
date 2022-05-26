@@ -27,6 +27,8 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
 
     private int mColumnCount = 6;
     private int mRowCount = 1;
+    private int mScrollToAdapterPosition = -1;
+    private int mScrollAmountHorizontal = 0;
     private boolean mRightToLeft = false;
 
     public DockRecycleLayoutManager(int columnCount, int rowCount) {
@@ -208,6 +210,11 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
         startSmoothScroll(scroller);
     }
 
+    @Override
+    public void scrollToPosition(int position) {
+        mScrollToAdapterPosition = position;
+    }
+
     private void updateSizing() {
         final int width = getColumnWidth();
         final int height = getRowHeight();
@@ -289,20 +296,10 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
         return getPaddingTop() + rowIdx * mDecoratedChildHeight;
     }
 
-    /**
-     * Compute horizontal scroll offset based on mViewCache
-     *
-     * @return difference between child left position and initial layout position
-     */
-    private int computeHorizontalScrollOffset() {
-        if (mViewCache.size() > 0) {
-            int adapterPos = mViewCache.keyAt(0);
-            int colIdx = getColumnIdx(adapterPos);
-            int colPosition = getColumnPosition(colIdx);
-            View child = mViewCache.valueAt(0);
-            return getDecoratedLeft(child) - colPosition;
-        }
-        return 0;
+    private int getPagePosition(int pageIdx) {
+        if (mRightToLeft)
+            throw new IllegalStateException("TODO: implement getPagePosition when mRightToLeft==true");
+        return pageIdx * mColumnCount * mDecoratedChildWidth;
     }
 
     private void layoutChildren(RecyclerView.Recycler recycler) {
@@ -313,9 +310,25 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
          */
         cacheChildren();
 
+        // if scrollToPosition is valid, force-scroll to that page
+        if (mScrollToAdapterPosition >= 0 && mScrollToAdapterPosition < getItemCount()) {
+            int pageIdx = getPageIdx(mScrollToAdapterPosition);
+            int pagePosition = getPagePosition(pageIdx);
+            // force-scroll the child views
+            int dx = -pagePosition - mScrollAmountHorizontal;
+            logDebug("scrollToPosition " + mScrollToAdapterPosition +
+                " pageIdx=" + pageIdx +
+                " pagePos=" + pagePosition +
+                " dx=" + dx);
+            offsetChildrenHorizontal(dx);
+            mScrollAmountHorizontal += dx;
+        }
+        // turn off scrollToPosition
+        mScrollToAdapterPosition = -1;
+
         // compute scroll position after we populate `mViewCache`
-        final int scrollOffset = computeHorizontalScrollOffset();
-        final int firstVisiblePos = findFirstVisiblePosition();
+        final int scrollOffset = mScrollAmountHorizontal;
+        final int firstVisiblePos = findFirstVisibleAdapterPosition();
 
         logDebug("layoutChildren" +
             " scrollOffset=" + scrollOffset +
@@ -347,7 +360,7 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
         int scrolledPosition = scrollOffset + getColumnPosition(colIdx);
         while (scrolledPosition < getWidth()) {
             int adapterIdx = getAdapterIdx(colIdx, rowIdx);
-            //logDebug("col=" + colIdx + " row=" + rowIdx + " adapterIdx=" + adapterIdx);
+            logDebug("col=" + colIdx + " row=" + rowIdx + " adapterIdx=" + adapterIdx + " scrolledPosition=" + scrolledPosition);
             View child = layoutAdapterPos(recycler, adapterIdx, scrolledPosition, topPos);
             if (child == null) {
                 logDebug("null view in" +
@@ -373,36 +386,11 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
      *
      * @return adapter index of the first visible view
      */
-    private int findFirstVisiblePosition() {
-        int colIdx;
-        int left;
-        final View child;
-        if (mViewCache.size() > 0) {
-            child = mViewCache.valueAt(0);
-            int adapterPos = mViewCache.keyAt(0);
-            colIdx = getColumnIdx(adapterPos);
-            left = getDecoratedLeft(child);
-        } else {
-            child = getChildCount() > 0 ? getChildAt(0) : null;
-            if (child != null) {
-                int adapterPos = adapterPosition(child);
-                colIdx = getColumnIdx(adapterPos);
-                left = getDecoratedLeft(child);
-            } else {
-                colIdx = 0;
-                left = getColumnPosition(colIdx);
-            }
-        }
-        // check if column is left of the left margin
-        while ((left + mDecoratedChildWidth) < 0) {
-            colIdx += 1;
-            left += mDecoratedChildWidth;
-        }
-        // check if column is right of the left margin
-        while (colIdx > 0 && left > 0) {
-            colIdx -= 1;
-            left -= mDecoratedChildWidth;
-        }
+    private int findFirstVisibleAdapterPosition() {
+        if (mRightToLeft)
+            throw new IllegalStateException("TODO: implement findFirstVisiblePosition when mRightToLeft==true");
+
+        int colIdx = -mScrollAmountHorizontal / mDecoratedChildWidth;
         return getAdapterIdx(colIdx, 0);
     }
 
@@ -432,7 +420,9 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
              */
             measureChildWithMargins(child, getHorizontalSpace() - mDecoratedChildWidth, getVerticalSpace() - mDecoratedChildHeight);
 
-            layoutChildView(child, leftPos, topPos);
+            layoutDecorated(child, leftPos, topPos,
+                leftPos + mDecoratedChildWidth,
+                topPos + mDecoratedChildHeight);
 
             logDebug("child #" + indexOfChild(child) + " pos=" + adapterPos +
                 " (" + child.getLeft() + " " + child.getTop() + " " + child.getRight() + " " + child.getBottom() + ")" +
@@ -447,16 +437,6 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
             mViewCache.remove(adapterPos);
         }
         return child;
-    }
-
-    private void layoutChildView(View view, int left, int top) {
-        layoutChildView(view, left, top, mDecoratedChildWidth, mDecoratedChildHeight);
-    }
-
-    private void layoutChildView(View view, int left, int top, int width, int height) {
-        layoutDecorated(view, left, top,
-            left + width,
-            top + height);
     }
 
     /**
@@ -516,11 +496,13 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
     public boolean canScrollHorizontally() {
         if (getItemCount() > (mColumnCount * mRowCount))
             return true;
+        if (mScrollAmountHorizontal != 0)
+            return true;
         if (getChildCount() > 0) {
-            //We do allow scrolling
-            if (getDecoratedLeft(getLeftView()) < getPaddingLeft())
+            // Allow scrolling if child views are outside visible range
+            if (getDecoratedLeft(getLeftChildView()) < getPaddingLeft())
                 return true;
-            return getDecoratedRight(getRightView()) > (getPaddingLeft() + getHorizontalSpace());
+            return getDecoratedRight(getRightChildView()) > (getPaddingLeft() + getHorizontalSpace());
         }
         return false;
     }
@@ -557,10 +539,10 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
 
         // scroll children
         offsetChildrenHorizontal(-amount);
+        mScrollAmountHorizontal -= amount;
 
         // check if we need to layout after the scroll
-        if (checkVisibilityAfterScroll(true) ||
-            checkVisibilityAfterScroll(false))
+        if (checkVisibilityAfterScroll())
             layoutChildren(recycler);
 
         /*
@@ -572,30 +554,21 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
         return amount;
     }
 
-    private boolean checkVisibilityAfterScroll(boolean checkLeft) {
-        View child = checkLeft ? getLeftView() : getRightView();
-        int adapterPosition = adapterPosition(child);
-        int left = getDecoratedLeft(child);
-        boolean needsLayout = checkLeft ? left > 0 : (left + mDecoratedChildWidth) < getWidth();
-        if (needsLayout) {
-            if (checkLeft) {
-                int firstVisiblePosition = findFirstVisiblePosition();
-                logDebug("checkVisibilityAfterScroll" +
-                    " checkLeft=  true" +
-                    " left = " + left +
-                    " adapterPosition=" + adapterPosition +
-                    " newFirstVisible=" + firstVisiblePosition);
-                if (adapterPosition == firstVisiblePosition)
-                    needsLayout = false;
-            } else {
-                logDebug("checkVisibilityAfterScroll" +
-                    " checkLeft= false" +
-                    " right = " + (left + mDecoratedChildWidth) +
-                    " width = " + getWidth() +
-                    " adapterPosition=" + adapterPosition);
-            }
-        }
-        return needsLayout;
+    /**
+     * Check if child views became invisible after scroll or if we need to layout more views
+     *
+     * @return true if we need la re-layout
+     */
+    private boolean checkVisibilityAfterScroll() {
+        View leftChild = getLeftChildView();
+        View rightChild = getRightChildView();
+        int left = getDecoratedLeft(leftChild);
+        int right = getDecoratedRight(rightChild);
+        // check if we should remove views
+        if ((left + mDecoratedChildWidth) < 0 || (right - mDecoratedChildWidth) > getWidth())
+            return true;
+        // check if we should add views
+        return left > 0 || right < getWidth();
     }
 
     /**
@@ -604,7 +577,7 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
      * @return child view
      */
     @NonNull
-    private View getLeftView() {
+    private View getLeftChildView() {
         int leftChildIdx = mRightToLeft ? (getChildCount() - 1) : 0;
         View child = getChildAt(leftChildIdx);
         if (child == null)
@@ -630,7 +603,7 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
      * @return child view
      */
     @NonNull
-    private View getRightView() {
+    private View getRightChildView() {
         int rightChildIdx = mRightToLeft ? 0 : (getChildCount() - 1);
         View child = getChildAt(rightChildIdx);
         if (child == null)

@@ -169,7 +169,8 @@ public class EditQuickList {
         // the default item animator will mess up when drag and dropping
         mQuickListPreview.setItemAnimator(null);
         mQuickListPreview.setLayoutManager(layoutManager);
-        mQuickListPreview.addOnScrollListener(new PagedScrollListener());
+        // don't snap to pages or else we can't move items between them
+        //mQuickListPreview.addOnScrollListener(new PagedScrollListener());
         mQuickListPreview.setOnDragListener(EditQuickList::previewDragListener);
         mQuickListPreview.requestLayout();
 
@@ -342,8 +343,7 @@ public class EditQuickList {
                     int newPosition = ((RecyclerView.LayoutParams) overChild.getLayoutParams()).getViewAdapterPosition();
                     if (initialPosition != newPosition) {
                         ((RecycleAdapter) adapter).moveResult(initialPosition, newPosition);
-                        //TODO: I see a flicker when the first entry from a page is moved, investigate!
-                        quickList.post(() -> PagedScrollListener.snapToPage((RecyclerList) quickList));
+                        ((RecyclerList) quickList).scrollToPosition(newPosition);
                     }
                 }
                 // check event.getResult() if dropping outside should matter
