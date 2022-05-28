@@ -28,7 +28,7 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
     private int mColumnCount = 6;
     private int mRowCount = 1;
     private int mScrollToAdapterPosition = -1;
-    private int mScrollAmountHorizontal = 0;
+    private int mScrollOffsetHorizontal = 0;
     private boolean mRightToLeft = false;
 
     public DockRecycleLayoutManager(int columnCount, int rowCount) {
@@ -43,6 +43,10 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
 
     public void setRowCount(int count) {
         mRowCount = count;
+    }
+
+    public void setRightToLeft(boolean rightToLeft) {
+        mRightToLeft = rightToLeft;
     }
 
     private static int adapterPosition(@NonNull View child) {
@@ -225,47 +229,44 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
         }
     }
 
-    /* Example of 3 pages each with 2 rows and 3 columns
+    /* Example for 15 items placed on 3 columns and 2 rows (3 pages)
      *
      * mRightToLeft == false
-     *      + - - - - - - - - - - - - - - - - +
-     *      |  0  1  2 |  6  7  8 | 12 13 14  |
-     *      |  3  4  5 |  9 10 11 | 15 16 17  |
-     *      + - - - - - - - - - - - - - - - - +
+     *       page 0      page 1     page 2
+     *       + - - - - - - - - - - - - - - - - +
+     * row 0 |  0  1  2 |  6  7  8 | 12 13 14  |
+     * row 1 |  3  4  5 |  9 10 11 | 15        |
+     *       + - - - - - - - - - - - - - - - - +
+     * column   0  1  2    3  4  5    6  7  8
+     *
      *
      * mRightToLeft == true
-     *      + - - - - - - - - - - - - - - - - +
-     *      | 14 13 12 |  8  7  6 |  2  1  0  |
-     *      | 17 16 15 | 11 10  9 |  5  4  3  |
-     *      + - - - - - - - - - - - - - - - - +
+     *       page 2      page 1     page 0
+     *       + - - - - - - - - - - - - - - - - +
+     * row 0 | 14 13 12 |  8  7  6 |  2  1  0  |
+     * row 1 |       15 | 11 10  9 |  5  4  3  |
+     *       + - - - - - - - - - - - - - - - - +
+     * column   8  7  6    5  4  3    2  1  0
      */
 
     private int getAdapterIdx(int colIdx, int rowIdx) {
-        if (mRightToLeft)
-            throw new IllegalStateException("TODO: implement getAdapterIdx when mRightToLeft==true");
         int columnInPage = colIdx % mColumnCount;
         int page = colIdx / mColumnCount;
         return page * mColumnCount * mRowCount + rowIdx * mColumnCount + columnInPage;
     }
 
     private int getColumnIdx(int adapterPos) {
-        if (mRightToLeft)
-            throw new IllegalStateException("TODO: implement getColumnIdx when mRightToLeft==true");
         int columnInPage = adapterPos % (mColumnCount * mRowCount) % mColumnCount;
         int page = getPageIdx(adapterPos);
         return page * mColumnCount + columnInPage;
     }
 
     private int getRowIdx(int adapterPos) {
-        if (mRightToLeft)
-            throw new IllegalStateException("TODO: implement getRowIdx when mRightToLeft==true");
         int group = adapterPos / mColumnCount;
         return group % mRowCount;
     }
 
     private int getPageIdx(int adapterPos) {
-        if (mRightToLeft)
-            throw new IllegalStateException("TODO: implement getPageIdx when mRightToLeft==true");
         return adapterPos / (mColumnCount * mRowCount);
     }
 
@@ -278,15 +279,20 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
     }
 
     private int getColumnPosition(int columnIdx) {
-        if (mRightToLeft)
-            throw new IllegalStateException("TODO: implement getColumnPosition when mRightToLeft==true");
-        if (columnIdx < 0 || (columnIdx * mRowCount) >= getItemCount()) {
-            Log.w(TAG, "getColumnPosition(" + columnIdx + ");" +
+        int lastPageIdx = getPageIdx(getItemCount() - 1);
+        int maxColumns = (lastPageIdx + 1) * mColumnCount;
+        if (columnIdx < 0 || columnIdx >= maxColumns) {
+            Log.e(TAG, "getColumnPosition(" + columnIdx + ")" +
                 " mColumnCount=" + mColumnCount +
                 " mRowCount=" + mRowCount +
-                " itemCount=" + getItemCount());
+                " itemCount=" + getItemCount() +
+                " lastPageIdx=" + lastPageIdx +
+                " maxColumns=" + maxColumns);
         }
-        return getPaddingLeft() + columnIdx * mDecoratedChildWidth;
+        final int columnOffset = columnIdx * mDecoratedChildWidth;
+        if (mRightToLeft)
+            return getWidth() - getPaddingRight() - columnOffset - mDecoratedChildWidth;
+        return getPaddingLeft() + columnOffset;
     }
 
     private int getRowPosition(int rowIdx) {
@@ -297,9 +303,11 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
     }
 
     private int getPagePosition(int pageIdx) {
+        final int pageWidth = mColumnCount * mDecoratedChildWidth;
+        final int pageOffset = pageIdx * pageWidth;
         if (mRightToLeft)
-            throw new IllegalStateException("TODO: implement getPagePosition when mRightToLeft==true");
-        return pageIdx * mColumnCount * mDecoratedChildWidth;
+            return getWidth() - getPaddingRight() - pageOffset - pageWidth;
+        return getPaddingLeft() + pageOffset;
     }
 
     private void layoutChildren(RecyclerView.Recycler recycler) {
@@ -315,19 +323,19 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
             int pageIdx = getPageIdx(mScrollToAdapterPosition);
             int pagePosition = getPagePosition(pageIdx);
             // force-scroll the child views
-            int dx = -pagePosition - mScrollAmountHorizontal;
+            int dx = -pagePosition - mScrollOffsetHorizontal;
             logDebug("scrollToPosition " + mScrollToAdapterPosition +
                 " pageIdx=" + pageIdx +
                 " pagePos=" + pagePosition +
                 " dx=" + dx);
             offsetChildrenHorizontal(dx);
-            mScrollAmountHorizontal += dx;
+            mScrollOffsetHorizontal += dx;
         }
         // turn off scrollToPosition
         mScrollToAdapterPosition = -1;
 
         // compute scroll position after we populate `mViewCache`
-        final int scrollOffset = mScrollAmountHorizontal;
+        final int scrollOffset = mScrollOffsetHorizontal;
         final int firstVisiblePos = findFirstVisibleAdapterPosition();
 
         logDebug("layoutChildren" +
@@ -358,7 +366,7 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
 
         int topPos = getRowPosition(rowIdx);
         int scrolledPosition = scrollOffset + getColumnPosition(colIdx);
-        while (scrolledPosition < getWidth()) {
+        while (scrolledPosition < getWidth() && (scrolledPosition + mDecoratedChildWidth) > 0) {
             int adapterIdx = getAdapterIdx(colIdx, rowIdx);
             logDebug("col=" + colIdx + " row=" + rowIdx + " adapterIdx=" + adapterIdx + " scrolledPosition=" + scrolledPosition);
             View child = layoutAdapterPos(recycler, adapterIdx, scrolledPosition, topPos);
@@ -387,10 +395,11 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
      * @return adapter index of the first visible view
      */
     private int findFirstVisibleAdapterPosition() {
+        final int colIdx;
         if (mRightToLeft)
-            throw new IllegalStateException("TODO: implement findFirstVisiblePosition when mRightToLeft==true");
-
-        int colIdx = -mScrollAmountHorizontal / mDecoratedChildWidth;
+            colIdx = mScrollOffsetHorizontal / mDecoratedChildWidth;
+        else
+            colIdx = -mScrollOffsetHorizontal / mDecoratedChildWidth;
         return getAdapterIdx(colIdx, 0);
     }
 
@@ -496,7 +505,7 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
     public boolean canScrollHorizontally() {
         if (getItemCount() > (mColumnCount * mRowCount))
             return true;
-        if (mScrollAmountHorizontal != 0)
+        if (mScrollOffsetHorizontal != 0)
             return true;
         if (getChildCount() > 0) {
             // Allow scrolling if child views are outside visible range
@@ -516,17 +525,37 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
         final int amount;
         // compute amount of scroll without going beyond the bound
         if (dx < 0) { // finger is moving from left to right
-            int pageIdx = getPageIdx(mRightToLeft ? (getItemCount() - 1) : 0);
-            float pageScroll = getPageScroll();
-            int pageWidth = getHorizontalSpace();
-            float pageVisibleWidth = (1f - (pageIdx - pageScroll)) * pageWidth;
-            amount = Math.max(dx, pageWidth - (int) pageVisibleWidth);
+            if (mRightToLeft) {
+                int lastPageIdx = getPageIdx(getItemCount() - 1);
+                int pageWidth = getHorizontalSpace();
+                int maxScroll = lastPageIdx * pageWidth;
+                logDebug("dx=" + dx +
+                    " lastPageIdx=" + lastPageIdx +
+                    " pageWidth=" + pageWidth +
+                    " maxScroll=" + maxScroll +
+                    " mScroll=" + mScrollOffsetHorizontal);
+                amount = Math.max(dx, mScrollOffsetHorizontal - maxScroll);
+            } else {
+                logDebug("dx=" + dx +
+                    " mScroll=" + mScrollOffsetHorizontal);
+                amount = Math.max(dx, mScrollOffsetHorizontal);
+            }
         } else if (dx > 0) { // finger is moving from right to left
-            int pageIdx = getPageIdx(mRightToLeft ? 0 : (getItemCount() - 1));
-            float pageScroll = getPageScroll();
-            int pageWidth = getHorizontalSpace();
-            float pageVisibleWidth = (1f - (pageIdx - pageScroll)) * pageWidth;
-            amount = Math.min(dx, pageWidth - (int) pageVisibleWidth);
+            if (mRightToLeft) {
+                logDebug("dx=" + dx +
+                    " mScroll=" + mScrollOffsetHorizontal);
+                amount = Math.min(dx, mScrollOffsetHorizontal);
+            } else {
+                int lastPageIdx = getPageIdx(getItemCount() - 1);
+                int pageWidth = getHorizontalSpace();
+                int maxScroll = lastPageIdx * -pageWidth;
+                logDebug("dx=" + dx +
+                    " lastPageIdx=" + lastPageIdx +
+                    " pageWidth=" + pageWidth +
+                    " maxScroll=" + maxScroll +
+                    " mScroll=" + mScrollOffsetHorizontal);
+                amount = Math.min(dx, mScrollOffsetHorizontal - maxScroll);
+            }
         } else {
             amount = dx;
         }
@@ -539,7 +568,7 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
 
         // scroll children
         offsetChildrenHorizontal(-amount);
-        mScrollAmountHorizontal -= amount;
+        mScrollOffsetHorizontal -= amount;
 
         // check if we need to layout after the scroll
         if (checkVisibilityAfterScroll())
@@ -637,7 +666,7 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
         int col = getColumnIdx(adapterPosition(view));
         int pageWidth = getHorizontalSpace();
         float scroll = (getDecoratedLeft(view) - getColumnPosition(col)) / (float) pageWidth;
-        return -scroll;
+        return mRightToLeft ? scroll : -scroll;
     }
 
     public int getPageAdapterPosition(int page) {

@@ -43,7 +43,6 @@ import rocks.tbog.tblauncher.utils.DebugInfo;
 public class EditQuickList {
 
     private static final String TAG = "EQL";
-    private RecyclerList mQuickListPreview;
     private RecycleAdapter mAdapter;
     ViewPager mViewPager;
     private final AdapterView.OnItemClickListener mAddToQuickList = (parent, view, pos, id) -> {
@@ -163,29 +162,31 @@ public class EditQuickList {
         DockRecycleLayoutManager layoutManager = new DockRecycleLayoutManager(4, 1);
 
         // keep the preview the same as the actual thing
-        mQuickListPreview = view.findViewById(R.id.dockPreview);
-        mQuickListPreview.setAdapter(mAdapter);
-        mQuickListPreview.setHasFixedSize(true);
+        RecyclerList quickListPreview = view.findViewById(R.id.dockPreview);
+        quickListPreview.setAdapter(mAdapter);
+        quickListPreview.setHasFixedSize(true);
         // the default item animator will mess up when drag and dropping
-        mQuickListPreview.setItemAnimator(null);
-        mQuickListPreview.setLayoutManager(layoutManager);
+        quickListPreview.setItemAnimator(null);
+        quickListPreview.setLayoutManager(layoutManager);
         // don't snap to pages or else we can't move items between them
-        //mQuickListPreview.addOnScrollListener(new PagedScrollListener());
-        mQuickListPreview.setOnDragListener(EditQuickList::previewDragListener);
-        mQuickListPreview.requestLayout();
+        //quickListPreview.addOnScrollListener(new PagedScrollListener());
+        quickListPreview.setOnDragListener(EditQuickList::previewDragListener);
+        quickListPreview.requestLayout();
 
         // when user clicks, remove the view and the list item
         mAdapter.setOnClickListener((entry, v) -> mAdapter.removeResult(entry));
         mAdapter.setOnLongClickListener(EditQuickList::previewStartDrag);
 
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
-        QuickList.applyUiPref(pref, mQuickListPreview);
+        QuickList.applyUiPref(pref, quickListPreview);
         if (!QuickList.populateList(context, mAdapter)) {
             TBApplication.behaviour(context).closeFragmentDialog();
             Toast.makeText(context, "Failed!", Toast.LENGTH_SHORT).show();
         }
-        //TODO: allow drag and drop for multiple rows
+        //TODO: implement drag and drop for multiple rows
         layoutManager.setRowCount(1);
+        //TODO: implement drag and drop for right to left layout
+        layoutManager.setRightToLeft(false);
 
         mViewPager = view.findViewById(R.id.viewPager);
         {

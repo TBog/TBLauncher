@@ -276,6 +276,11 @@
             android:title="@string/quick_list_rows"
             android:widgetLayout="@layout/pref_size_preview" />
 
+        <androidx.preference.SwitchPreference
+            android:defaultValue="false"
+            android:key="quick-list-rtl"
+            android:title="@string/quick_list_rtl" />
+
     </androidx.preference.PreferenceCategory>
 
     <!-- Shortcut -->

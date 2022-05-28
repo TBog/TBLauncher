@@ -109,6 +109,7 @@ public class QuickList {
         barHeight = UISizes.dp2px(ctx, barHeight);
 
         setGridSize(quickList);
+        setLayoutDirection(quickList, pref.getBoolean("quick-list-rtl", false));
 
         if (quickList.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
             ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) quickList.getLayoutParams();
@@ -163,6 +164,18 @@ public class QuickList {
         layoutManager.setColumnCount(colCount);
         layoutManager.setRowCount(rowCount);
         quickList.requestLayout();
+    }
+
+    private static void setLayoutDirection(View quickList, boolean rightToLeft) {
+        DockRecycleLayoutManager layoutManager = null;
+        if (quickList instanceof RecyclerList) {
+            RecyclerView.LayoutManager mgr = ((RecyclerList) quickList).getLayoutManager();
+            if (mgr instanceof DockRecycleLayoutManager)
+                layoutManager = (DockRecycleLayoutManager) mgr;
+        }
+        if (layoutManager == null)
+            return;
+        layoutManager.setRightToLeft(rightToLeft);
     }
 
     public static int getBackgroundColor(SharedPreferences pref) {
