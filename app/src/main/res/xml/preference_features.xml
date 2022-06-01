@@ -209,16 +209,51 @@
             android:key="quick-list-enabled"
             android:title="@string/quick_list_enabled" />
 
+        <rocks.tbog.tblauncher.preference.CustomDialogPreference
+            android:defaultValue="@integer/default_dock_columns"
+            android:dependency="quick-list-enabled"
+            android:dialogLayout="@layout/pref_slider"
+            android:key="quick-list-columns"
+            android:summary="@string/quick_list_columns_summary"
+            android:title="@string/quick_list_columns"
+            android:widgetLayout="@layout/pref_size_preview" />
+
+        <rocks.tbog.tblauncher.preference.CustomDialogPreference
+            android:defaultValue="@integer/default_dock_rows"
+            android:dependency="quick-list-enabled"
+            android:dialogLayout="@layout/pref_slider"
+            android:key="quick-list-rows"
+            android:summary="@string/quick_list_rows_summary"
+            android:title="@string/quick_list_rows"
+            android:widgetLayout="@layout/pref_size_preview" />
+
+        <rocks.tbog.tblauncher.preference.CustomDialogPreference
+            android:defaultValue="@integer/default_dock_height"
+            android:dependency="quick-list-enabled"
+            android:dialogLayout="@layout/pref_slider"
+            android:key="quick-list-height"
+            android:title="@string/quick_list_height"
+            android:widgetLayout="@layout/pref_size_preview" />
+
+        <androidx.preference.SwitchPreference
+            android:defaultValue="false"
+            android:dependency="quick-list-enabled"
+            android:key="quick-list-rtl"
+            android:summary="@string/quick_list_rtl_summary"
+            android:title="@string/quick_list_rtl" />
+
         <androidx.preference.SwitchPreference
             android:defaultValue="false"
             android:dependency="quick-list-enabled"
             android:key="quick-list-text-visible"
+            android:summary="@string/quick_list_text_visible_summary"
             android:title="@string/quick_list_text_visible" />
 
         <androidx.preference.SwitchPreference
             android:defaultValue="true"
             android:dependency="quick-list-enabled"
             android:key="quick-list-icons-visible"
+            android:summary="@string/quick_list_icons_visible_summary"
             android:title="@string/quick_list_icons_visible" />
 
         <androidx.preference.SwitchPreference
@@ -234,15 +269,8 @@
             android:title="@string/quick_list_animation" />
 
         <rocks.tbog.tblauncher.preference.CustomDialogPreference
-            android:defaultValue="@integer/default_dock_height"
-            android:dependency="quick-list-enabled"
-            android:dialogLayout="@layout/pref_slider"
-            android:key="quick-list-height"
-            android:title="@string/quick_list_height"
-            android:widgetLayout="@layout/pref_size_preview" />
-
-        <rocks.tbog.tblauncher.preference.CustomDialogPreference
             android:defaultValue="@integer/default_corner_radius"
+            android:dependency="quick-list-enabled"
             android:dialogLayout="@layout/pref_slider"
             android:key="quick-list-radius"
             android:title="@string/corner_radius"
@@ -257,29 +285,11 @@
 
         <ListPreference
             android:defaultValue="under-result-list"
+            android:dependency="quick-list-enabled"
             android:entries="@array/dockPositionEntries"
             android:entryValues="@array/dockPositionValues"
             android:key="quick-list-position"
             android:title="@string/quick_list_position" />
-
-        <rocks.tbog.tblauncher.preference.CustomDialogPreference
-            android:defaultValue="@integer/default_dock_columns"
-            android:dialogLayout="@layout/pref_slider"
-            android:key="quick-list-columns"
-            android:title="@string/quick_list_columns"
-            android:widgetLayout="@layout/pref_size_preview" />
-
-        <rocks.tbog.tblauncher.preference.CustomDialogPreference
-            android:defaultValue="@integer/default_dock_rows"
-            android:dialogLayout="@layout/pref_slider"
-            android:key="quick-list-rows"
-            android:title="@string/quick_list_rows"
-            android:widgetLayout="@layout/pref_size_preview" />
-
-        <androidx.preference.SwitchPreference
-            android:defaultValue="false"
-            android:key="quick-list-rtl"
-            android:title="@string/quick_list_rtl" />
 
     </androidx.preference.PreferenceCategory>
 

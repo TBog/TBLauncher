@@ -1,5 +1,6 @@
 package rocks.tbog.tblauncher.preference;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.SeekBar;
@@ -8,6 +9,7 @@ import android.widget.TextView;
 import androidx.preference.DialogPreference;
 
 import rocks.tbog.tblauncher.R;
+import rocks.tbog.tblauncher.utils.PrefCache;
 
 public class SliderDialog extends BasePreferenceDialog {
 
@@ -40,7 +42,8 @@ public class SliderDialog extends BasePreferenceDialog {
         final String key = preference.getKey();
 
         // initialize value
-        preference.setValue(preference.getSharedPreferences().getInt(key, 255));
+        SharedPreferences sharedPreferences = preference.getSharedPreferences();
+        preference.setValue(sharedPreferences.getInt(key, 255));
 
         SeekBar seekBar = root.findViewById(R.id.seekBar); // seekBar default minimum is set to 0
         if (key.endsWith("-alpha")) {
@@ -79,9 +82,12 @@ public class SliderDialog extends BasePreferenceDialog {
             case "result-text2-size":
             case "search-bar-text-size":
             case "search-bar-height":
-            case "quick-list-height":
                 minValue = 2;
                 seekBar.setMax(seekBar.getMax() - minValue);
+                break;
+            case "quick-list-height":
+                minValue = 2 * PrefCache.getDockRowCount(sharedPreferences);
+                seekBar.setMax(100 * PrefCache.getDockRowCount(sharedPreferences) - minValue);
                 break;
             case "result-history-size":
             case "result-history-adaptive":
