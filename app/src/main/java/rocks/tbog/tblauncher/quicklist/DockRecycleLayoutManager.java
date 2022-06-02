@@ -150,7 +150,7 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
 
     @Override
     public RecyclerView.LayoutParams generateDefaultLayoutParams() {
-        return new RecyclerView.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        return new RecyclerView.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
     }
 
     private int getVerticalSpace() {
@@ -223,6 +223,10 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
         final int width = getColumnWidth();
         final int height = getRowHeight();
         if (mDecoratedChildWidth != width || mDecoratedChildHeight != height) {
+            if (mDecoratedChildWidth != width)
+                logDebug("mDecoratedChildWidth changed from " + mDecoratedChildWidth + " to " + width);
+            if (mDecoratedChildHeight != width)
+                logDebug("mDecoratedChildHeight changed from " + mDecoratedChildHeight + " to " + height);
             mRefreshViews = true;
             mDecoratedChildWidth = width;
             mDecoratedChildHeight = height;
@@ -428,13 +432,22 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
              * We don't have to do this for views we are just re-arranging.
              */
             measureChildWithMargins(child, getHorizontalSpace() - mDecoratedChildWidth, getVerticalSpace() - mDecoratedChildHeight);
+            final RecyclerView.LayoutParams lp = (RecyclerView.LayoutParams) child.getLayoutParams();
+            final int left = leftPos + lp.leftMargin;
+            final int top = topPos + lp.topMargin;
+            final int measuredWidth = child.getMeasuredWidth();
+            final int measuredHeight = child.getMeasuredHeight();
+            //TODO: if measured size is 0 (probably MeasureSpec.UNSPECIFIED) then fix it and measure again.
 
-            layoutDecorated(child, leftPos, topPos,
-                leftPos + mDecoratedChildWidth,
-                topPos + mDecoratedChildHeight);
+            layoutDecorated(child, left, top,
+                left + measuredWidth,
+                top + measuredHeight);
 
             logDebug("child #" + indexOfChild(child) + " pos=" + adapterPos +
                 " (" + child.getLeft() + " " + child.getTop() + " " + child.getRight() + " " + child.getBottom() + ")" +
+                " left=" + leftPos +
+                " top=" + topPos +
+                " measured=" + measuredWidth + "x" + measuredHeight +
                 " " + getDebugInfo(child) + " " + getDebugName(child));
         } else {
             attachView(child);

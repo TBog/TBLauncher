@@ -70,10 +70,6 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
         LayoutInflater inflater = LayoutInflater.from(context);
         View itemView = inflater.inflate(layoutRes, parent, false);
 
-        ViewGroup.LayoutParams layoutParams = itemView.getLayoutParams();
-        layoutParams.width = parent.getWidth() / 6;
-        itemView.setLayoutParams(layoutParams);
-
         return new Holder(itemView);
     }
 
