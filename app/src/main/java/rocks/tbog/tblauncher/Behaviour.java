@@ -843,6 +843,7 @@ public class Behaviour implements ISearchActivity {
         mSearchEditText.post(() -> mKeyboardHandler.showKeyboard());
         // UI_ANIMATION_DURATION should be the exact time the full-screen animation ends
         mSearchEditText.postDelayed(() -> {
+            mSearchEditText.requestFocus();
             if (!WindowInsetsHelper.isKeyboardVisible(mSearchEditText))
                 mKeyboardHandler.showKeyboard();
         }, UI_ANIMATION_DURATION);
@@ -1138,7 +1139,7 @@ public class Behaviour implements ISearchActivity {
         RecyclerView.LayoutManager layoutManager = mResultList.getLayoutManager();
         if (!(layoutManager instanceof CustomRecycleLayoutManager)) {
             mResultList.setLayoutManager(layoutManager = new CustomRecycleLayoutManager());
-            ((CustomRecycleLayoutManager)layoutManager).setOverScrollListener(mRecycleScrollListener);
+            ((CustomRecycleLayoutManager) layoutManager).setOverScrollListener(mRecycleScrollListener);
         }
 
         CustomRecycleLayoutManager lm = (CustomRecycleLayoutManager) layoutManager;
@@ -1158,7 +1159,7 @@ public class Behaviour implements ISearchActivity {
         RecyclerView.LayoutManager layoutManager = mResultList.getLayoutManager();
         if (!(layoutManager instanceof CustomRecycleLayoutManager)) {
             mResultList.setLayoutManager(layoutManager = new CustomRecycleLayoutManager());
-            ((CustomRecycleLayoutManager)layoutManager).setOverScrollListener(mRecycleScrollListener);
+            ((CustomRecycleLayoutManager) layoutManager).setOverScrollListener(mRecycleScrollListener);
         }
 
         CustomRecycleLayoutManager lm = (CustomRecycleLayoutManager) layoutManager;
