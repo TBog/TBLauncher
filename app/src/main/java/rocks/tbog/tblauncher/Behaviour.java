@@ -73,12 +73,14 @@ import rocks.tbog.tblauncher.searcher.QuerySearcher;
 import rocks.tbog.tblauncher.searcher.Searcher;
 import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
 import rocks.tbog.tblauncher.ui.DialogFragment;
+import rocks.tbog.tblauncher.ui.KeyboardHandler;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.ui.RecyclerList;
 import rocks.tbog.tblauncher.ui.ViewStubPreview;
 import rocks.tbog.tblauncher.ui.WindowInsetsHelper;
 import rocks.tbog.tblauncher.ui.dialog.TagsManagerDialog;
+import rocks.tbog.tblauncher.utils.KeyboardToggleHelper;
 import rocks.tbog.tblauncher.utils.KeyboardTriggerBehaviour;
 import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.SystemUiVisibility;
@@ -192,7 +194,7 @@ public class Behaviour implements ISearchActivity {
         }
     };
     private View mNotificationBackground;
-    private WindowInsetsHelper mKeyboardHandler = null;
+    private KeyboardToggleHelper mKeyboardHandler = null;
     private RecycleScrollListener mRecycleScrollListener;
     private SharedPreferences mPref;
 
@@ -220,7 +222,18 @@ public class Behaviour implements ISearchActivity {
         if (mResultList == null)
             throw new IllegalStateException("mResultList==null");
 
-        mRecycleScrollListener = new RecycleScrollListener(mKeyboardHandler);
+        mRecycleScrollListener = new RecycleScrollListener(new KeyboardHandler() {
+            @Override
+            public void showKeyboard() {
+                mKeyboardHandler.showKeyboard();
+            }
+
+            @Override
+            public void hideKeyboard() {
+                mKeyboardHandler.hideKeyboard();
+                mKeyboardHandler.mKeyboardHiddenByScrolling = true;
+            }
+        });
 
         mResultAdapter = new RecycleAdapter(getContext(), new ArrayList<>());
 
@@ -309,7 +322,7 @@ public class Behaviour implements ISearchActivity {
     }
 
     private void initKeyboardScrollHider() {
-        mKeyboardHandler = new WindowInsetsHelper(findViewById(R.id.root_layout)) {
+        mKeyboardHandler = new KeyboardToggleHelper(findViewById(R.id.root_layout)) {
             @Override
             public void showKeyboard() {
                 LauncherState state = TBApplication.state();
@@ -374,7 +387,7 @@ public class Behaviour implements ISearchActivity {
                     Log.i(TAG, "keyboard closed - app start");
                     // don't call onKeyboardClosed() when we start the app
                     keyboardClosedByUser = false;
-                } else if (mRecycleScrollListener.isClosedOnScroll()) {
+                } else if (mKeyboardHandler != null && mKeyboardHandler.mKeyboardHiddenByScrolling) {
                     Log.i(TAG, "keyboard closed - scrolling results");
                     // keyboard closed because the result list was scrolled
                     keyboardClosedByUser = false;
@@ -395,6 +408,10 @@ public class Behaviour implements ISearchActivity {
                     mTBLauncherActivity.customizeUI.collapseSearchPill(duration);
                 }
             } else {
+                // reset HiddenByScrolling flag when keyboard opens
+                if (mKeyboardHandler != null)
+                    mKeyboardHandler.mKeyboardHiddenByScrolling = false;
+
                 if (state.isSearchBarVisible()) {
                     int duration = 0;
                     if (mPref.getBoolean("search-bar-animation", true))

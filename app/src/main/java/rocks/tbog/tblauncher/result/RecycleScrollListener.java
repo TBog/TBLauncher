@@ -77,10 +77,6 @@ public class RecycleScrollListener extends RecyclerView.OnScrollListener impleme
         this.handler = handler;
     }
 
-    public boolean isClosedOnScroll() {
-        return mState.resizeInProgress || mState.resizeFinished;
-    }
-
     @Override
     public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState) {
         if (mHideKeyboardThreshold == -1) {
