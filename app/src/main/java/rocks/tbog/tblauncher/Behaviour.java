@@ -572,7 +572,8 @@ public class Behaviour implements ISearchActivity {
         if (currentMode != null) {
             switch (currentMode) {
                 case SEARCH:
-                    hideSearchBar();
+                    resetTask();
+                    hideSearchBar(UI_ANIMATION_DELAY, true);
                     break;
                 case WIDGET:
                     hideWidgets();
@@ -767,12 +768,6 @@ public class Behaviour implements ISearchActivity {
     private void hideWidgets() {
         TBApplication.state().setWidgetScreen(LauncherState.AnimatedVisibility.HIDDEN);
         mWidgetContainer.setVisibility(View.GONE);
-
-//        hideResultList(false);
-    }
-
-    private void hideSearchBar() {
-        hideSearchBar(UI_ANIMATION_DELAY, true);
     }
 
     private void hideSearchBar(int startDelay, boolean animate) {
