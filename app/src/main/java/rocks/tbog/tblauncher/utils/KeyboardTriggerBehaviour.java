@@ -24,7 +24,7 @@ public class KeyboardTriggerBehaviour extends LiveData<KeyboardTriggerBehaviour.
             TBApplication.state().syncKeyboardVisibility(contentView);
             boolean closed = TBApplication.state().isKeyboardHidden();
             Status status = getValue();
-            Log.d(TAG, "[listener] isKeyboardHidden=" + closed + " status=" + status);
+            Log.d(TAG, "[listener] state().isKeyboardHidden=" + closed + " status=" + status);
             if (closed && status != Status.CLOSED)
                 postValue(Status.CLOSED);
             else if (!closed && status != Status.OPEN)

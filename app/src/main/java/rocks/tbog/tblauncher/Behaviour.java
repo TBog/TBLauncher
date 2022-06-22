@@ -231,7 +231,7 @@ public class Behaviour implements ISearchActivity {
             @Override
             public void hideKeyboard() {
                 mKeyboardHandler.hideKeyboard();
-                mKeyboardHandler.mKeyboardHiddenByScrolling = true;
+                mKeyboardHandler.mHiddenByScrolling = true;
             }
         });
 
@@ -337,7 +337,6 @@ public class Behaviour implements ISearchActivity {
                 }
 
                 Log.i(TAG, "Keyboard - SHOW");
-                state.setKeyboard(LauncherState.AnimatedVisibility.VISIBLE);
                 dismissPopup();
 
                 if (mSearchEditText != null)
@@ -358,7 +357,6 @@ public class Behaviour implements ISearchActivity {
                 }
 
                 Log.i(TAG, "Keyboard - HIDE");
-                TBApplication.state().setKeyboard(LauncherState.AnimatedVisibility.HIDDEN);
                 dismissPopup();
 
                 View focus = mTBLauncherActivity.getCurrentFocus();
@@ -387,7 +385,7 @@ public class Behaviour implements ISearchActivity {
                     Log.i(TAG, "keyboard closed - app start");
                     // don't call onKeyboardClosed() when we start the app
                     keyboardClosedByUser = false;
-                } else if (mKeyboardHandler != null && mKeyboardHandler.mKeyboardHiddenByScrolling) {
+                } else if (mKeyboardHandler != null && mKeyboardHandler.mHiddenByScrolling) {
                     Log.i(TAG, "keyboard closed - scrolling results");
                     // keyboard closed because the result list was scrolled
                     keyboardClosedByUser = false;
@@ -398,8 +396,13 @@ public class Behaviour implements ISearchActivity {
                 }
 
                 if (keyboardClosedByUser) {
-                    Log.i(TAG, "keyboard closed - user");
-                    onKeyboardClosed();
+                    if (mKeyboardHandler != null && mKeyboardHandler.mRequestOpen) {
+                        Log.i(TAG, "keyboard closed - while mRequestOpen true");
+                        mKeyboardHandler.mRequestOpen = false;
+                    } else {
+                        Log.i(TAG, "keyboard closed - user");
+                        onKeyboardClosed();
+                    }
                 }
                 if (state.isSearchBarVisible()) {
                     int duration = 0;
@@ -408,9 +411,12 @@ public class Behaviour implements ISearchActivity {
                     mTBLauncherActivity.customizeUI.collapseSearchPill(duration);
                 }
             } else {
-                // reset HiddenByScrolling flag when keyboard opens
-                if (mKeyboardHandler != null)
-                    mKeyboardHandler.mKeyboardHiddenByScrolling = false;
+                if (mKeyboardHandler != null) {
+                    // keyboard opened, request finished
+                    mKeyboardHandler.mRequestOpen = false;
+                    // reset HiddenByScrolling flag when keyboard opens
+                    mKeyboardHandler.mHiddenByScrolling = false;
+                }
 
                 if (state.isSearchBarVisible()) {
                     int duration = 0;
@@ -839,19 +845,24 @@ public class Behaviour implements ISearchActivity {
     }
 
     public void showKeyboard() {
+        mKeyboardHandler.mRequestOpen = true;
+
         mSearchEditText.requestFocus();
         mSearchEditText.post(() -> mKeyboardHandler.showKeyboard());
         // UI_ANIMATION_DURATION should be the exact time the full-screen animation ends
         mSearchEditText.postDelayed(() -> {
             mSearchEditText.requestFocus();
-            if (!WindowInsetsHelper.isKeyboardVisible(mSearchEditText))
+            if (WindowInsetsHelper.isKeyboardVisible(mSearchEditText))
+                mKeyboardHandler.mRequestOpen = false;
+            else
                 mKeyboardHandler.showKeyboard();
         }, UI_ANIMATION_DURATION);
     }
 
     public void hideKeyboard() {
+        mKeyboardHandler.mRequestOpen = false;
+
         mKeyboardHandler.hideKeyboard();
-        //mTBLauncherActivity.getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
     }
 
     @Override
@@ -1490,6 +1501,11 @@ public class Behaviour implements ISearchActivity {
                 if (state.isSearchBarVisible() && PrefCache.linkKeyboardAndSearchBar(mPref)) {
                     showKeyboard();
                 }
+                //TODO: find why keyboard gets hidden after onWindowFocusChanged
+                Log.d(TAG, "state().isKeyboardHidden=" + TBApplication.state().isKeyboardHidden() + " mRequestOpen=" + mKeyboardHandler.mRequestOpen);
+                if (mKeyboardHandler.mRequestOpen) {
+                    showKeyboard();
+                }
                 if (TBApplication.state().isResultListVisible() && mResultAdapter.getItemCount() == 0)
                     showDesktop(TBApplication.state().getDesktop());
                 else if (TBApplication.state().isResultListVisible()) {
@@ -1577,6 +1593,7 @@ public class Behaviour implements ISearchActivity {
             // only do stuff if we are the current activity
             return false;
         }
+        Log.d(TAG, "executeAction( action=" + action + " source=" + source + " )");
         switch (action) {
             case "lockScreen":
                 if (DeviceAdmin.isAdminActive(mTBLauncherActivity)) {
@@ -1595,7 +1612,6 @@ public class Behaviour implements ISearchActivity {
                 switchToDesktop(LauncherState.Desktop.SEARCH);
                 return true;
             case "showSearchBarAndKeyboard":
-                TBApplication.state().setKeyboard(LauncherState.AnimatedVisibility.ANIM_TO_VISIBLE);
                 switchToDesktop(LauncherState.Desktop.SEARCH);
                 showKeyboard();
                 return true;
