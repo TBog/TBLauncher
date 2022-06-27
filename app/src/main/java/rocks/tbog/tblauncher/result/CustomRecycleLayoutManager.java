@@ -837,6 +837,8 @@ public class CustomRecycleLayoutManager extends RecyclerView.LayoutManager imple
      */
     @Override
     public boolean canScrollVertically() {
+        if (getItemCount() != getChildCount())
+            return true;
         if (getChildCount() > 0) {
             //We do allow scrolling
             if (getDecoratedTop(getTopView()) < getPaddingTop())
