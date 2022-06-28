@@ -193,6 +193,26 @@ public class Behaviour implements ISearchActivity {
             //mTBLauncherActivity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS);
         }
     };
+    private final Runnable mShowKeyboardRunnable = () -> {
+        if (WindowInsetsHelper.isKeyboardVisible(mSearchEditText))
+            this.mKeyboardHandler.mRequestOpen = false;
+        else
+            this.mKeyboardHandler.showKeyboard();
+    };
+    private final Runnable mOnKeyboardClosedByUser = () -> {
+        Log.i(TAG, "on keyboard closed by user");
+        if (dismissPopup())
+            return;
+        LauncherState state = TBApplication.state();
+        if (LauncherState.Desktop.SEARCH == state.getDesktop()) {
+            if (PrefCache.linkCloseKeyboardToBackButton(this.mPref))
+                onBackPressed();
+        }
+        if (LauncherState.Desktop.SEARCH == state.getDesktop()) {
+            if (state.isKeyboardHidden() && PrefCache.modeSearchFullscreen(this.mPref))
+                enableFullscreen(0);
+        }
+    };
     private View mNotificationBackground;
     private KeyboardToggleHelper mKeyboardHandler = null;
     private RecycleScrollListener mRecycleScrollListener;
@@ -255,6 +275,9 @@ public class Behaviour implements ISearchActivity {
         } else {
             mSearchBarContainer = inflateViewStub(R.id.stubSearchTop, layout);
         }
+        if (mSearchBarContainer == null)
+            throw new IllegalStateException("mSearchBarContainer==null");
+
         mLauncherButton = mSearchBarContainer.findViewById(R.id.launcherButton);
         mSearchEditText = mSearchBarContainer.findViewById(R.id.launcherSearch);
         mClearButton = mSearchBarContainer.findViewById(R.id.clearButton);
@@ -264,8 +287,47 @@ public class Behaviour implements ISearchActivity {
         mTBLauncherActivity.customizeUI.setExpandedSearchPillListener(this::showKeyboard);
     }
 
-    private void initLauncherButton() {
+    private void initLauncherButtons() {
         mLauncherButton.setOnClickListener((v) -> executeButtonAction("button-launcher"));
+
+        // menu button / 3 dot button actions
+        mMenuButton.setOnClickListener(v -> {
+            Context ctx = v.getContext();
+            ListPopup menu = getMenuPopup(ctx);
+            registerPopup(menu);
+            menu.showCenter(v);
+        });
+        mMenuButton.setOnLongClickListener(v -> {
+            Context ctx = v.getContext();
+            ListPopup menu = getMenuPopup(ctx);
+
+            // check if menu contains elements and if yes show it
+            if (!menu.getAdapter().isEmpty()) {
+                registerPopup(menu);
+                menu.show(v, 0f);
+                return true;
+            }
+
+            return false;
+        });
+
+        // clear button actions
+        mClearButton.setOnClickListener(v -> clearSearch());
+        mClearButton.setOnLongClickListener(v -> {
+            clearSearch();
+
+            Context ctx = v.getContext();
+            ListPopup menu = getMenuPopup(ctx);
+
+            // check if menu contains elements and if yes show it
+            if (!menu.getAdapter().isEmpty()) {
+                registerPopup(menu);
+                menu.show(v);
+                return true;
+            }
+
+            return false;
+        });
     }
 
     private void setSearchHint() {
@@ -321,8 +383,8 @@ public class Behaviour implements ISearchActivity {
         });
     }
 
-    private void initKeyboardScrollHider() {
-        mKeyboardHandler = new KeyboardToggleHelper(findViewById(R.id.root_layout)) {
+    private KeyboardToggleHelper newKeyboardHandler() {
+        return new KeyboardToggleHelper(mSearchEditText) {
             @Override
             public void showKeyboard() {
                 LauncherState state = TBApplication.state();
@@ -339,8 +401,7 @@ public class Behaviour implements ISearchActivity {
                 Log.i(TAG, "Keyboard - SHOW");
                 dismissPopup();
 
-                if (mSearchEditText != null)
-                    mSearchEditText.requestFocus();
+                mSearchEditText.requestFocus();
 
                 super.showKeyboard();
             }
@@ -362,8 +423,7 @@ public class Behaviour implements ISearchActivity {
                 View focus = mTBLauncherActivity.getCurrentFocus();
                 if (focus != null)
                     focus.clearFocus();
-                if (mSearchEditText != null)
-                    mSearchEditText.clearFocus();
+                mSearchEditText.clearFocus();
 
                 super.hideKeyboard();
             }
@@ -379,8 +439,9 @@ public class Behaviour implements ISearchActivity {
         keyboardListener.observe(mTBLauncherActivity, status -> {
             LauncherState state = TBApplication.state();
             if (status == KeyboardTriggerBehaviour.Status.CLOSED) {
-                boolean keyboardClosedByUser = true;
+                //-->> keyboard CLOSED event <<--//
 
+                boolean keyboardClosedByUser = true;
                 if (state.getSearchBarVisibility() == LauncherState.AnimatedVisibility.ANIM_TO_VISIBLE) {
                     Log.i(TAG, "keyboard closed - app start");
                     // don't call onKeyboardClosed() when we start the app
@@ -401,9 +462,13 @@ public class Behaviour implements ISearchActivity {
                         mKeyboardHandler.mRequestOpen = false;
                     } else {
                         Log.i(TAG, "keyboard closed - user");
-                        onKeyboardClosed();
+                        // delay keyboard closed event to make sure the keyboard is not just glitching
+                        mDecorView.removeCallbacks(mOnKeyboardClosedByUser);
+                        mDecorView.postDelayed(mOnKeyboardClosedByUser, UI_ANIMATION_DURATION);
                     }
                 }
+
+                // collapse search pill
                 if (state.isSearchBarVisible()) {
                     int duration = 0;
                     if (mPref.getBoolean("search-bar-animation", true))
@@ -411,13 +476,19 @@ public class Behaviour implements ISearchActivity {
                     mTBLauncherActivity.customizeUI.collapseSearchPill(duration);
                 }
             } else {
+                //-->> keyboard OPEN event <<--//
+
                 if (mKeyboardHandler != null) {
-                    // keyboard opened, request finished
+                    // request to open fulfilled
                     mKeyboardHandler.mRequestOpen = false;
                     // reset HiddenByScrolling flag when keyboard opens
                     mKeyboardHandler.mHiddenByScrolling = false;
                 }
 
+                // don't call the keyboard closed event if keyboard opened
+                mDecorView.removeCallbacks(mOnKeyboardClosedByUser);
+
+                // expand search pill
                 if (state.isSearchBarVisible()) {
                     int duration = 0;
                     if (mPref.getBoolean("search-bar-animation", true))
@@ -428,71 +499,17 @@ public class Behaviour implements ISearchActivity {
             }
         });
 
-        initKeyboardScrollHider();
         initResultLayout();
         initSearchBarContainer();
 
+        // KeyboardHandler needs SearchEditText initialized
+        mKeyboardHandler = newKeyboardHandler();
+
         mNotificationBackground = findViewById(R.id.notificationBackground);
         mWidgetContainer = findViewById(R.id.widgetContainer);
-//        mSearchBarContainer = findViewById(R.id.searchBarContainer);
-//        mLauncherButton = mSearchBarContainer.findViewById(R.id.launcherButton);
-//        mSearchEditText = mSearchBarContainer.findViewById(R.id.launcherSearch);
-//        mClearButton = mSearchBarContainer.findViewById(R.id.clearButton);
-//        mMenuButton = mSearchBarContainer.findViewById(R.id.menuButton);
 
-//        WindowCompat.setDecorFitsSystemWindows(window, false);
-//        ViewCompat.setOnApplyWindowInsetsListener(window.getDecorView(), (v, insets) -> {
-//            int left = v.getPaddingLeft();
-//            int top = v.getPaddingTop();
-//            int right = v.getPaddingRight();
-//            int bottom = v.getPaddingBottom();
-//            @WindowInsetsCompat.Type.InsetsType
-//            int type = WindowInsetsCompat.Type.systemBars() | WindowInsetsCompat.Type.ime();
-//            v.setPadding(left, top, right, insets.getInsets(type).bottom);
-//            return insets;
-//        });
-
-        initLauncherButton();
+        initLauncherButtons();
         initLauncherSearchEditText();
-
-        // menu button / 3 dot button actions
-        mMenuButton.setOnClickListener(v -> {
-            Context ctx = v.getContext();
-            ListPopup menu = getMenuPopup(ctx);
-            registerPopup(menu);
-            menu.showCenter(v);
-        });
-        mMenuButton.setOnLongClickListener(v -> {
-            Context ctx = v.getContext();
-            ListPopup menu = getMenuPopup(ctx);
-
-            // check if menu contains elements and if yes show it
-            if (!menu.getAdapter().isEmpty()) {
-                registerPopup(menu);
-                menu.show(v, 0f);
-                return true;
-            }
-
-            return false;
-        });
-
-        // clear button actions
-        mClearButton.setOnClickListener(v -> clearSearch());
-        mClearButton.setOnLongClickListener(v -> {
-            clearSearch();
-
-            Context ctx = v.getContext();
-            ListPopup menu = getMenuPopup(ctx);
-
-            // check if menu contains elements and if yes show it
-            if (!menu.getAdapter().isEmpty()) {
-                registerPopup(menu);
-                menu.show(v);
-                return true;
-            }
-
-            return false;
-        });
     }
 
     public void onStart() {
@@ -631,7 +648,8 @@ public class Behaviour implements ISearchActivity {
                     // try to execute the action
                     mLauncherButton.postDelayed(() ->
                             TBApplication.dataHandler(getContext()).runAfterLoadOver(() -> {
-                                if (!TBApplication.state().isResultListVisible())
+                                LauncherState state = TBApplication.state();
+                                if (!state.isResultListVisible() && state.getDesktop() == LauncherState.Desktop.SEARCH)
                                     executeAction(openResult, "dm-search-open-result");
                             }),
                         KEYBOARD_ANIMATION_DELAY);
@@ -847,21 +865,17 @@ public class Behaviour implements ISearchActivity {
     public void showKeyboard() {
         mKeyboardHandler.mRequestOpen = true;
 
-        mSearchEditText.requestFocus();
-        mSearchEditText.post(() -> mKeyboardHandler.showKeyboard());
+        mKeyboardHandler.showKeyboard();
+
+        mDecorView.removeCallbacks(mShowKeyboardRunnable);
         // UI_ANIMATION_DURATION should be the exact time the full-screen animation ends
-        mSearchEditText.postDelayed(() -> {
-            mSearchEditText.requestFocus();
-            if (WindowInsetsHelper.isKeyboardVisible(mSearchEditText))
-                mKeyboardHandler.mRequestOpen = false;
-            else
-                mKeyboardHandler.showKeyboard();
-        }, UI_ANIMATION_DURATION);
+        mDecorView.postDelayed(mShowKeyboardRunnable, UI_ANIMATION_DELAY);
     }
 
     public void hideKeyboard() {
         mKeyboardHandler.mRequestOpen = false;
 
+        mDecorView.removeCallbacks(mShowKeyboardRunnable);
         mKeyboardHandler.hideKeyboard();
     }
 
@@ -941,7 +955,8 @@ public class Behaviour implements ISearchActivity {
         Log.d(TAG, "updateAdapter " + results.size() + " result(s); isRefresh=" + isRefresh);
 
         if (!isFragmentDialogVisible()) {
-            if (!TBApplication.state().isResultListVisible())
+            LauncherState state = TBApplication.state();
+            if (!state.isResultListVisible() && state.getDesktop() == LauncherState.Desktop.SEARCH)
                 showResultList(false);
         }
         mResultAdapter.updateResults(results);
@@ -1219,20 +1234,6 @@ public class Behaviour implements ISearchActivity {
         return TBApplication.isDefaultLauncher(mTBLauncherActivity);
     }
 
-    void onKeyboardClosed() {
-        if (dismissPopup())
-            return;
-        LauncherState state = TBApplication.state();
-        if (LauncherState.Desktop.SEARCH == state.getDesktop()) {
-            if (PrefCache.linkCloseKeyboardToBackButton(mPref))
-                onBackPressed();
-        }
-        if (LauncherState.Desktop.SEARCH == state.getDesktop()) {
-            if (state.isKeyboardHidden() && PrefCache.modeSearchFullscreen(mPref))
-                enableFullscreen(0);
-        }
-    }
-
     @NonNull
     public static IconSelectDialog getCustomIconDialog(@NonNull Context ctx, boolean hideResultList) {
         IconSelectDialog dialog = new IconSelectDialog();
@@ -1499,12 +1500,14 @@ public class Behaviour implements ISearchActivity {
         if (hasFocus) {
             if (state.getDesktop() == LauncherState.Desktop.SEARCH) {
                 if (state.isSearchBarVisible() && PrefCache.linkKeyboardAndSearchBar(mPref)) {
+                    Log.d(TAG, "SearchBarVisible and linkKeyboardAndSearchBar");
                     showKeyboard();
-                }
-                //TODO: find why keyboard gets hidden after onWindowFocusChanged
-                Log.d(TAG, "state().isKeyboardHidden=" + TBApplication.state().isKeyboardHidden() + " mRequestOpen=" + mKeyboardHandler.mRequestOpen);
-                if (mKeyboardHandler.mRequestOpen) {
-                    showKeyboard();
+                } else {
+                    //TODO: find why keyboard gets hidden after onWindowFocusChanged
+                    Log.d(TAG, "state().isKeyboardHidden=" + TBApplication.state().isKeyboardHidden() + " mRequestOpen=" + mKeyboardHandler.mRequestOpen);
+                    if (mKeyboardHandler.mRequestOpen) {
+                        showKeyboard();
+                    }
                 }
                 if (TBApplication.state().isResultListVisible() && mResultAdapter.getItemCount() == 0)
                     showDesktop(TBApplication.state().getDesktop());

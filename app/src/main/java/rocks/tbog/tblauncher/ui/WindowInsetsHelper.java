@@ -19,10 +19,16 @@ import rocks.tbog.tblauncher.R;
 
 public class WindowInsetsHelper implements KeyboardHandler {
     private final WindowInsetsControllerCompat controller;
-    private View mRoot;
+    private final View mRoot;
 
+    /**
+     * Initialize WindowInsetsControllerCompat. It's best to have the root as an EditText to
+     * simplify the `showKeyboard` code
+     * @param root any view in the window. Used to get the context and window token.
+     */
     public WindowInsetsHelper(View root) {
-        super();
+        if (root == null)
+            throw new IllegalStateException("WindowInsetsHelper root == null");
         mRoot = root;
         controller = ViewCompat.getWindowInsetsController(root);
         if (controller == null)
@@ -37,7 +43,7 @@ public class WindowInsetsHelper implements KeyboardHandler {
             Context ctx = mRoot.getContext();
             InputMethodManager imm = (InputMethodManager) ctx.getSystemService(Context.INPUT_METHOD_SERVICE);
             View view = mRoot;
-            if (view != null && (view.isInEditMode() || view.onCheckIsTextEditor())) {
+            if (view.isInEditMode() || view.onCheckIsTextEditor()) {
                 view.requestFocus();
             } else {
                 Window window = findWindow(ctx);
