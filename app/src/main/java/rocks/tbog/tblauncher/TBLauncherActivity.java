@@ -29,25 +29,6 @@ import rocks.tbog.tblauncher.utils.DeviceUtils;
 
 public class TBLauncherActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback {
 
-    /**
-     * Whether or not the system UI should be auto-hidden after
-     * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
-     */
-    private static final boolean AUTO_HIDE = true;
-
-    /**
-     * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after
-     * user interaction before hiding the system UI.
-     */
-    private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
-
-    /**
-     * Some older devices needs a small delay between UI widget updates
-     * and a change of the status and navigation bar.
-     */
-    private static final int UI_ANIMATION_DELAY = 300;
-    private static final int UI_ANIMATION_DURATION = 300;
-
     private static final String TAG = "TBL";
     public static final String START_LOAD = "fr.neamar.summon.START_LOAD";
     public static final String LOAD_OVER = "fr.neamar.summon.LOAD_OVER";
@@ -168,6 +149,8 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
         Log.d(TAG, "onStart(" + this + ")");
         super.onStart();
 
+        behaviour.setActivityOrientation(this);
+
         if (DebugInfo.providerStatus(this)) {
             debugTextView.setVisibility(View.VISIBLE);
         }
@@ -188,6 +171,7 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
         Log.d(TAG, "onRestart(" + this + ")");
         super.onRestart();
 
+        behaviour.setActivityOrientation(this);
     }
 
     @Override

@@ -1447,22 +1447,6 @@ public class Behaviour implements ISearchActivity {
     public void onResume() {
         Log.i(TAG, "onResume");
 
-        // set activity orientation
-        {
-            final Activity act = mTBLauncherActivity;
-            if (mPref.getBoolean("lock-portrait", true)) {
-                if (mPref.getBoolean("sensor-orientation", true))
-                    act.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
-                else
-                    act.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT);
-            } else {
-                if (mPref.getBoolean("sensor-orientation", true))
-                    act.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
-                else
-                    act.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_USER);
-            }
-        }
-
         LauncherState.Desktop desktop = TBApplication.state().getDesktop();
         showDesktop(desktop);
 
@@ -1520,6 +1504,20 @@ public class Behaviour implements ISearchActivity {
                     hideKeyboard();
                 }
             }
+        }
+    }
+
+    public void setActivityOrientation(@NonNull Activity act) {
+        if (mPref.getBoolean("lock-portrait", true)) {
+            if (mPref.getBoolean("sensor-orientation", true))
+                act.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
+            else
+                act.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT);
+        } else {
+            if (mPref.getBoolean("sensor-orientation", true))
+                act.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
+            else
+                act.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_USER);
         }
     }
 
