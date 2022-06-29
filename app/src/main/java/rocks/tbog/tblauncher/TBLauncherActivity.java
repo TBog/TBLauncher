@@ -145,6 +145,12 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
     }
 
     @Override
+    public boolean dispatchKeyEvent(KeyEvent event) {
+        Log.d(TAG, "dispatchKeyEvent " + event);
+        return super.dispatchKeyEvent(event);
+    }
+
+    @Override
     protected void onStart() {
         Log.d(TAG, "onStart(" + this + ")");
         super.onStart();

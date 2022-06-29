@@ -24,6 +24,7 @@ public class WindowInsetsHelper implements KeyboardHandler {
     /**
      * Initialize WindowInsetsControllerCompat. It's best to have the root as an EditText to
      * simplify the `showKeyboard` code
+     *
      * @param root any view in the window. Used to get the context and window token.
      */
     public WindowInsetsHelper(View root) {
@@ -108,6 +109,13 @@ public class WindowInsetsHelper implements KeyboardHandler {
         } else {
             controller.hide(WindowInsetsCompat.Type.ime());
         }
+
+        // we need to keep focus on some window view or else the keyboard may eat the next back press
+        // example: "Multiling O Keyboard + emoji" by Honso (kl.ime.oh) will not send the key event KEYCODE_BACK
+        // after we hide the keyboard by scrolling
+        Window window = findWindow(mRoot.getContext());
+        if (window != null)
+            window.getDecorView().requestFocus();
     }
 
     public void showSystemBars() {
