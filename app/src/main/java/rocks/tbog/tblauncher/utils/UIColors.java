@@ -34,6 +34,7 @@ public final class UIColors {
     private static int CACHED_COLOR_HIGHLIGHT = 0;
     private static int CACHED_COLOR_RESULT_TEXT = 0;
     private static int CACHED_COLOR_RESULT_TEXT2 = 0;
+    private static int CACHED_COLOR_RESULT_SHADOW = 0;
     private static int CACHED_COLOR_QL_TOGGLE = 0;
     private static int CACHED_RIPPLE_QL = 0;
     private static int CACHED_COLOR_CONTACT_ACTION = 0;
@@ -57,6 +58,7 @@ public final class UIColors {
         CACHED_COLOR_HIGHLIGHT = 0;
         CACHED_COLOR_RESULT_TEXT = 0;
         CACHED_COLOR_RESULT_TEXT2 = 0;
+        CACHED_COLOR_RESULT_SHADOW = 0;
         CACHED_COLOR_QL_TOGGLE = 0;
         CACHED_RIPPLE_QL = 0;
         CACHED_COLOR_CONTACT_ACTION = 0;
@@ -272,6 +274,15 @@ public final class UIColors {
             CACHED_COLOR_RESULT_TEXT2 = setAlpha(highlightColor, 0xFF);
         }
         return CACHED_COLOR_RESULT_TEXT2;
+    }
+
+    public static int getShadowColor(Context context) {
+        if (CACHED_COLOR_RESULT_SHADOW == 0) {
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+            int color = UIColors.getColor(pref, "result-shadow-color");
+            CACHED_COLOR_RESULT_SHADOW = setAlpha(color, 0xFF);
+        }
+        return CACHED_COLOR_RESULT_SHADOW;
     }
 
     public static int getQuickListToggleColor(Context context) {

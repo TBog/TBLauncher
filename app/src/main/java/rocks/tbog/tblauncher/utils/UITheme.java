@@ -2,6 +2,7 @@ package rocks.tbog.tblauncher.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.widget.TextView;
 
 import androidx.annotation.AnyRes;
 import androidx.annotation.NonNull;
@@ -20,6 +21,7 @@ public class UITheme {
         "notification-bar-argb",
         "search-bar-argb",
         "result-list-argb",
+        "result-shadow-color",
         "quick-list-argb",
         "popup-background-argb",
     };
@@ -141,6 +143,21 @@ public class UITheme {
                 prefColor = UIColors.setAlpha(color, 0);
             }
             editor.putInt(prefName, prefColor);
+        }
+    }
+
+    public static void applyTextShadow(@NonNull TextView textView) {
+        Context ctx = textView.getContext();
+        float radius = UISizes.getShadowRadius(ctx);
+        float dx = UISizes.getShadowOffsetHorizontal(ctx);
+        float dy = UISizes.getShadowOffsetVertical(ctx);
+        int color = UIColors.getShadowColor(ctx);
+
+        if (radius != textView.getShadowRadius()
+            || dx != textView.getShadowDx()
+            || dy != textView.getShadowDy()
+            || color != textView.getShadowColor()) {
+            textView.setShadowLayer(radius, dx, dy, color);
         }
     }
 }

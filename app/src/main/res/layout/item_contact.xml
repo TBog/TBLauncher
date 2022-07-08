@@ -5,6 +5,8 @@
     android:id="@+id/relativeLayout"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
+    android:clipChildren="false"
+    android:clipToPadding="false"
     android:descendantFocusability="blocksDescendants"
     android:paddingHorizontal="@dimen/result_margin_horizontal"
     tools:layout_height="58dp">

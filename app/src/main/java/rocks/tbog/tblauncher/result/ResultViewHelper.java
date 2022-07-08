@@ -196,11 +196,27 @@ public final class ResultViewHelper {
         task.execute();
     }
 
+    private static void applyResultShadow(@NonNull TextView textView) {
+        Context ctx = textView.getContext();
+        float radius = UISizes.getShadowRadius(ctx);
+        float dx = UISizes.getShadowOffsetHorizontal(ctx);
+        float dy = UISizes.getShadowOffsetVertical(ctx);
+        int color = UIColors.getShadowColor(ctx);
+
+        if (radius != textView.getShadowRadius()
+            || dx != textView.getShadowDx()
+            || dy != textView.getShadowDy()
+            || color != textView.getShadowColor()) {
+            textView.setShadowLayer(radius, dx, dy, color);
+        }
+    }
+
     public static void applyPreferences(int drawFlags, TextView nameView, ImageView iconView) {
         Context ctx = nameView.getContext();
 
         nameView.setTextColor(UIColors.getResultTextColor(ctx));
         nameView.setTextSize(TypedValue.COMPLEX_UNIT_PX, UISizes.getResultTextSize(ctx));
+        applyResultShadow(nameView);
 
         if (Utilities.checkAnyFlag(drawFlags, EntryItem.FLAG_DRAW_LIST | EntryItem.FLAG_DRAW_GRID)) {
             ViewGroup.LayoutParams params = iconView.getLayoutParams();

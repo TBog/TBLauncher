@@ -4,6 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginVertical="@dimen/result_margin_vertical"
+    android:clipChildren="false"
+    android:clipToPadding="false"
     tools:layout_height="180dp"
     tools:layout_width="180dp"
     tools:theme="@style/AppThemeTransparent">

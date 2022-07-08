@@ -44,18 +44,20 @@ public class CustomDialogPreference extends androidx.preference.DialogPreference
         mValue = value;
     }
 
-    public void persistValue() {
+    public boolean persistValue() {
         Object value = getValue();
         if (value instanceof String)
-            persistString((String) value);
+            return persistString((String) value);
         else if (value instanceof Integer)
-            persistInt((Integer) value);
+            return persistInt((Integer) value);
+        else if (value instanceof Float)
+            return persistFloat((Float) value);
+        return false;
     }
 
     public boolean persistValueIfAllowed() {
         if (callChangeListener(getValue())) {
-            persistValue();
-            return true;
+            return persistValue();
         }
         return false;
     }
@@ -63,8 +65,7 @@ public class CustomDialogPreference extends androidx.preference.DialogPreference
     public boolean persistValueIfAllowed(Object value) {
         if (callChangeListener(value)) {
             setValue(value);
-            persistValue();
-            return true;
+            return persistValue();
         }
         return false;
     }
@@ -81,7 +82,11 @@ public class CustomDialogPreference extends androidx.preference.DialogPreference
         try {
             return a.getInteger(index, 0);
         } catch (UnsupportedOperationException e) {
-            return a.getString(index);
+            try {
+                return a.getFloat(index, 0f);
+            } catch (UnsupportedOperationException ignored) {
+                return a.getString(index);
+            }
         }
     }
 
@@ -134,12 +139,17 @@ public class CustomDialogPreference extends androidx.preference.DialogPreference
         {
             View view = holder.findViewById(R.id.prefSizePreview);
             if (view instanceof TextView) {
-                int size = -1;
-                if ("result-search-cap".equals(key))
-                    size = PrefCache.getResultSearcherCap(getContext());
-                else if (value instanceof Integer)
-                    size = (int) value;
-                ((TextView) view).setText(view.getResources().getString(R.string.size, size));
+                if (value instanceof Float) {
+                    float size = (float) value;
+                    ((TextView) view).setText(view.getResources().getString(R.string.size_float, size));
+                } else {
+                    int size = -1;
+                    if ("result-search-cap".equals(key))
+                        size = PrefCache.getResultSearcherCap(getContext());
+                    else if (value instanceof Integer)
+                        size = (int) value;
+                    ((TextView) view).setText(view.getResources().getString(R.string.size, size));
+                }
             }
         }
     }

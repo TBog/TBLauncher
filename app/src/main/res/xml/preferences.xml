@@ -387,6 +387,33 @@
                 android:widgetLayout="@layout/pref_size_preview" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="0"
+                android:key="result-shadow-color"
+                android:title="@string/result_shadow_color"
+                android:widgetLayout="@layout/pref_color_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@dimen/default_result_shadow_dx"
+                android:dialogLayout="@layout/pref_slider"
+                android:key="result-shadow-dx"
+                android:title="@string/result_shadow_dx"
+                android:widgetLayout="@layout/pref_size_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@dimen/default_result_shadow_dy"
+                android:dialogLayout="@layout/pref_slider"
+                android:key="result-shadow-dy"
+                android:title="@string/result_shadow_dy"
+                android:widgetLayout="@layout/pref_size_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@dimen/default_result_shadow_radius"
+                android:dialogLayout="@layout/pref_slider"
+                android:key="result-shadow-radius"
+                android:title="@string/result_shadow_radius"
+                android:widgetLayout="@layout/pref_size_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@integer/default_color_text"
                 android:key="contact-action-color"
                 android:title="@string/contact_action_color"

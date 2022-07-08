@@ -1032,7 +1032,11 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case "result-highlight-color":
             case "result-text-color":
             case "result-text2-color":
+            case "result-shadow-color":
             case "contact-action-color":
+                if (activity != null)
+                    activity.refreshSearchRecords();
+                // fallthrough
             case "search-bar-text-color":
             case "popup-background-argb":
             case "popup-border-argb":
@@ -1048,9 +1052,15 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case "result-text-size":
             case "result-text2-size":
             case "result-icon-size":
+            case "result-shadow-radius":
+            case "result-shadow-dx":
+            case "result-shadow-dy":
+            case "result-list-row-height":
+                if (activity != null)
+                    activity.refreshSearchRecords();
+                // fallthrough
             case "tags-menu-icon-size":
             case "popup-corner-radius":
-            case "result-list-row-height":
                 UISizes.resetCache();
                 break;
             case "result-history-size":

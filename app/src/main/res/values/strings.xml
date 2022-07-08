@@ -73,7 +73,9 @@
     <string name="icons_pack">Choose pack</string>
     <string name="icons_pack_default_name">System icons</string>
     <string name="value">value %d</string>
+    <string name="value_float">value %.2f</string>
     <string name="size">&lt;%d&gt;</string>
+    <string name="size_float">&lt;%.2f&gt;</string>6
 
     <string name="menu_app_rename">Rename app</string>
     <string name="menu_action_rename">Rename</string>
@@ -214,6 +216,10 @@
     <string name="result_icon_size">Icon size</string>
     <string name="result_text_color">Text color</string>
     <string name="result_text2_color">Secondary text color</string>
+    <string name="result_shadow_color">Text shadow color</string>
+    <string name="result_shadow_dx">Shadow offset horizontal</string>
+    <string name="result_shadow_dy">Shadow offset vertical</string>
+    <string name="result_shadow_radius">Shadow size</string>
     <string name="search_bar_text_color">Text color</string>
     <string name="search_bar_icon_color">Icons color</string>
     <string name="menu_popup_quick_list_customize">Edit dock</string>
@@ -384,6 +390,8 @@
     <string name="icon_scale_alpha">Scale transparency</string>
     <string name="reset_matrix">Set default values</string>
     <string name="corner_radius">Corner radius</string>
+    <string name="shadow_offset">Shadow offset</string>
+    <string name="shadow_radius">Shadow size</string>
     <string name="behaviour_section">Behaviour</string>
     <string name="behaviour_link_keyboard_search_bar">Link keyboard to search bar visibility</string>
     <string name="behaviour_widget_after_launch">Widget mode after launch</string>

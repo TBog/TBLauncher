@@ -85,6 +85,7 @@ import rocks.tbog.tblauncher.utils.KeyboardTriggerBehaviour;
 import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.SystemUiVisibility;
 import rocks.tbog.tblauncher.utils.UISizes;
+import rocks.tbog.tblauncher.utils.UITheme;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
 
@@ -774,6 +775,7 @@ public class Behaviour implements ISearchActivity {
     private void showSearchBar() {
         mSearchEditText.setEnabled(true);
         setSearchHint();
+        UITheme.applyTextShadow(mSearchEditText);
 
         mSearchBarContainer.animate().cancel();
         mSearchBarContainer.setVisibility(View.VISIBLE);
@@ -1453,6 +1455,7 @@ public class Behaviour implements ISearchActivity {
         mLauncherTime = null;
         if (PrefCache.searchBarHasTimer(mPref)) {
             mLauncherTime = mSearchBarContainer.findViewById(R.id.launcherTime);
+            UITheme.applyTextShadow(mLauncherTime);
             mLauncherTime.post(mUpdateTime);
         }
     }
