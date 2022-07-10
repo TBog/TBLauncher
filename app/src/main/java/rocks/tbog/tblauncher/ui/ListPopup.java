@@ -24,6 +24,7 @@ import rocks.tbog.tblauncher.CustomizeUI;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.UISizes;
+import rocks.tbog.tblauncher.utils.UITheme;
 
 public class ListPopup extends PopupWindow {
     private static final String TAG = "Popup";
@@ -174,7 +175,9 @@ public class ListPopup extends PopupWindow {
      */
     private static boolean setTextColorRecursive(View view, int color) {
         if (view instanceof TextView) {
-            ((TextView) view).setTextColor(color);
+            TextView textView = (TextView) view;
+            textView.setTextColor(color);
+            UITheme.applyPopupTextShadow(textView);
             return true;
         } else if (view instanceof ViewGroup) {
             int childCount = ((ViewGroup) view).getChildCount();
@@ -251,7 +254,7 @@ public class ListPopup extends PopupWindow {
         View rootView = getContentView().getRootView();
         rootView.forceLayout();
         rootView.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
-                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
 
         int xOffset = anchorPos[0] + anchor.getPaddingLeft();
         if (xOffset + rootView.getMeasuredWidth() > displayFrame.right)
@@ -308,7 +311,7 @@ public class ListPopup extends PopupWindow {
         View rootView = getContentView().getRootView();
         rootView.forceLayout();
         rootView.measure(View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
-                View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
+            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED));
 
         int width = rootView.getMeasuredWidth();
         int height = rootView.getMeasuredHeight();
@@ -394,7 +397,7 @@ public class ListPopup extends PopupWindow {
             super();
             this.stringId = stringId;
             this.string = context.getResources()
-                    .getString(stringId);
+                .getString(stringId);
         }
 
         public Item(String string) {
@@ -421,7 +424,7 @@ public class ListPopup extends PopupWindow {
             final int x = (int) event.getX();
             final int y = (int) event.getY();
             if ((event.getAction() == MotionEvent.ACTION_DOWN)
-                    && ((x < 0) || (x >= getWidth()) || (y < 0) || (y >= getHeight()))) {
+                && ((x < 0) || (x >= getWidth()) || (y < 0) || (y >= getHeight()))) {
                 dismiss();
                 return true;
             } else if (event.getAction() == MotionEvent.ACTION_OUTSIDE) {

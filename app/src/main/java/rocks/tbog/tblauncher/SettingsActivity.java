@@ -1038,11 +1038,13 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     activity.refreshSearchRecords();
                 // fallthrough
             case "search-bar-text-color":
+            case "search-bar-shadow-color":
             case "popup-background-argb":
             case "popup-border-argb":
             case "popup-ripple-color":
             case "popup-text-color":
             case "popup-title-color":
+            case "popup-shadow-color":
                 UIColors.resetCache();
                 break;
             case "quick-list-icon-size":
@@ -1060,7 +1062,13 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                     activity.refreshSearchRecords();
                 // fallthrough
             case "tags-menu-icon-size":
+            case "search-bar-shadow-dx":
+            case "search-bar-shadow-dy":
+            case "search-bar-shadow-radius":
             case "popup-corner-radius":
+            case "popup-shadow-dx":
+            case "popup-shadow-dy":
+            case "popup-shadow-radius":
                 UISizes.resetCache();
                 break;
             case "result-history-size":

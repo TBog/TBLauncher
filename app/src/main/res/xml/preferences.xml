@@ -301,6 +301,33 @@
                 android:widgetLayout="@layout/pref_color_preview" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="0"
+                android:key="search-bar-shadow-color"
+                android:title="@string/search_bar_shadow_color"
+                android:widgetLayout="@layout/pref_color_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@dimen/default_result_shadow_dx"
+                android:dialogLayout="@layout/pref_slider"
+                android:key="search-bar-shadow-dx"
+                android:title="@string/search_bar_shadow_dx"
+                android:widgetLayout="@layout/pref_size_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@dimen/default_result_shadow_dy"
+                android:dialogLayout="@layout/pref_slider"
+                android:key="search-bar-shadow-dy"
+                android:title="@string/search_bar_shadow_dy"
+                android:widgetLayout="@layout/pref_size_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@dimen/default_result_shadow_radius"
+                android:dialogLayout="@layout/pref_slider"
+                android:key="search-bar-shadow-radius"
+                android:title="@string/search_bar_shadow_radius"
+                android:widgetLayout="@layout/pref_size_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@integer/default_search_bar_height"
                 android:dialogLayout="@layout/pref_slider"
                 android:key="search-bar-height"
@@ -557,6 +584,33 @@
                 android:key="popup-title-color"
                 android:title="@string/popup_title_color"
                 android:widgetLayout="@layout/pref_color_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="0"
+                android:key="popup-shadow-color"
+                android:title="@string/popup_shadow_color"
+                android:widgetLayout="@layout/pref_color_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@dimen/default_result_shadow_dx"
+                android:dialogLayout="@layout/pref_slider"
+                android:key="popup-shadow-dx"
+                android:title="@string/popup_shadow_dx"
+                android:widgetLayout="@layout/pref_size_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@dimen/default_result_shadow_dy"
+                android:dialogLayout="@layout/pref_slider"
+                android:key="popup-shadow-dy"
+                android:title="@string/popup_shadow_dy"
+                android:widgetLayout="@layout/pref_size_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@dimen/default_result_shadow_radius"
+                android:dialogLayout="@layout/pref_slider"
+                android:key="popup-shadow-radius"
+                android:title="@string/popup_shadow_radius"
+                android:widgetLayout="@layout/pref_size_preview" />
 
         </PreferenceCategory>
 

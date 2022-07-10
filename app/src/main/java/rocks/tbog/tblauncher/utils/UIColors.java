@@ -47,6 +47,7 @@ public final class UIColors {
     private static int CACHED_RIPPLE_POPUP = 0;
     private static int CACHED_COLOR_POPUP_TEXT = 0;
     private static int CACHED_COLOR_POPUP_TITLE = 0;
+    private static int CACHED_COLOR_POPUP_SHADOW = 0;
     private static boolean CACHED_MAT_ICON = false;
     private static ColorMatrix COLOR_MATRIX_ICON = null;
 
@@ -71,6 +72,7 @@ public final class UIColors {
         CACHED_RIPPLE_POPUP = 0;
         CACHED_COLOR_POPUP_TEXT = 0;
         CACHED_COLOR_POPUP_TITLE = 0;
+        CACHED_COLOR_POPUP_SHADOW = 0;
         CACHED_MAT_ICON = false;
     }
 
@@ -276,7 +278,7 @@ public final class UIColors {
         return CACHED_COLOR_RESULT_TEXT2;
     }
 
-    public static int getShadowColor(Context context) {
+    public static int getResultListShadowColor(Context context) {
         if (CACHED_COLOR_RESULT_SHADOW == 0) {
             SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
             int color = UIColors.getColor(pref, "result-shadow-color");
@@ -320,6 +322,15 @@ public final class UIColors {
             CACHED_COLOR_SEARCH_TEXT = setAlpha(highlightColor, 0xFF);
         }
         return CACHED_COLOR_SEARCH_TEXT;
+    }
+
+    public static int getSearchShadowColor(Context context) {
+        if (CACHED_COLOR_RESULT_SHADOW == 0) {
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+            int color = UIColors.getColor(pref, "search-bar-shadow-color");
+            CACHED_COLOR_RESULT_SHADOW = setAlpha(color, 0xFF);
+        }
+        return CACHED_COLOR_RESULT_SHADOW;
     }
 
     public static int getResultListBackground(Context context) {
@@ -401,6 +412,15 @@ public final class UIColors {
             CACHED_COLOR_POPUP_TITLE = setAlpha(color, 0xFF);
         }
         return CACHED_COLOR_POPUP_TITLE;
+    }
+
+    public static int getPopupShadowColor(Context context) {
+        if (CACHED_COLOR_POPUP_SHADOW == 0) {
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+            int color = UIColors.getColor(pref, "popup-shadow-color");
+            CACHED_COLOR_POPUP_SHADOW = setAlpha(color, 0xFF);
+        }
+        return CACHED_COLOR_POPUP_SHADOW;
     }
 
     public static Drawable getPreviewDrawable(int color, int border, float radius) {

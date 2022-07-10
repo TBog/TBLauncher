@@ -77,9 +77,15 @@ public class SliderDialog extends BasePreferenceDialog {
                 break;
             case "result-shadow-dx":
             case "result-shadow-dy":
+            case "popup-shadow-dx":
+            case "popup-shadow-dy":
+            case "search-bar-shadow-dx":
+            case "search-bar-shadow-dy":
                 ((TextView) root.findViewById(android.R.id.text1)).setText(R.string.shadow_offset);
                 break;
             case "result-shadow-radius":
+            case "popup-shadow-radius":
+            case "search-bar-shadow-radius":
                 ((TextView) root.findViewById(android.R.id.text1)).setText(R.string.shadow_radius);
                 break;
             default:
@@ -140,11 +146,17 @@ public class SliderDialog extends BasePreferenceDialog {
                 break;
             case "result-shadow-dx":
             case "result-shadow-dy":
+            case "popup-shadow-dx":
+            case "popup-shadow-dy":
+            case "search-bar-shadow-dx":
+            case "search-bar-shadow-dy":
                 incrementByFloat = .1f;
                 minValue = (int) (-5 / incrementByFloat);
                 seekBar.setMax((int) (5 / incrementByFloat) - minValue);
                 break;
             case "result-shadow-radius":
+            case "popup-shadow-radius":
+            case "search-bar-shadow-radius":
                 incrementByFloat = .1f;
                 seekBar.setMax((int) (10 / incrementByFloat) - minValue);
                 break;

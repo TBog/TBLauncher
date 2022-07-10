@@ -367,6 +367,10 @@
     <string name="popup_border_argb">Border color</string>
     <string name="popup_text_color">Text color</string>
     <string name="popup_title_color">Title color</string>
+    <string name="popup_shadow_color">Text shadow color</string>
+    <string name="popup_shadow_dx">Shadow offset horizontal</string>
+    <string name="popup_shadow_dy">Shadow offset vertical</string>
+    <string name="popup_shadow_radius">Shadow size</string>
     <string name="settings_theme">Settings theme</string>
     <string name="settings_default">Default</string>
     <string name="settings_8bit">8bit</string>
@@ -390,8 +394,8 @@
     <string name="icon_scale_alpha">Scale transparency</string>
     <string name="reset_matrix">Set default values</string>
     <string name="corner_radius">Corner radius</string>
-    <string name="shadow_offset">Shadow offset</string>
-    <string name="shadow_radius">Shadow size</string>
+    <string name="shadow_offset">Select pixel amount for shadow offset</string>
+    <string name="shadow_radius">Shadow size <em>(zero size will disable shadow)</em></string>
     <string name="behaviour_section">Behaviour</string>
     <string name="behaviour_link_keyboard_search_bar">Link keyboard to search bar visibility</string>
     <string name="behaviour_widget_after_launch">Widget mode after launch</string>
@@ -409,6 +413,10 @@
     <string name="search_bar_at_bottom">Position at bottom</string>
     <string name="search_bar_ripple_color">Touch color</string>
     <string name="search_bar_cursor_argb">Cursor color</string>
+    <string name="search_bar_shadow_color">Text shadow color</string>
+    <string name="search_bar_shadow_dx">Shadow offset horizontal</string>
+    <string name="search_bar_shadow_dy">Shadow offset vertical</string>
+    <string name="search_bar_shadow_radius">Shadow size</string>
     <string name="back_device_key">Back button</string>
     <string name="action_show_untagged">Untagged</string>
     <string name="dm_search_open_result">Initial result list</string>

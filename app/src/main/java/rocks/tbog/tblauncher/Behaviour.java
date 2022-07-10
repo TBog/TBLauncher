@@ -775,7 +775,7 @@ public class Behaviour implements ISearchActivity {
     private void showSearchBar() {
         mSearchEditText.setEnabled(true);
         setSearchHint();
-        UITheme.applyTextShadow(mSearchEditText);
+        UITheme.applySearchBarTextShadow(mSearchEditText);
 
         mSearchBarContainer.animate().cancel();
         mSearchBarContainer.setVisibility(View.VISIBLE);
@@ -1455,7 +1455,7 @@ public class Behaviour implements ISearchActivity {
         mLauncherTime = null;
         if (PrefCache.searchBarHasTimer(mPref)) {
             mLauncherTime = mSearchBarContainer.findViewById(R.id.launcherTime);
-            UITheme.applyTextShadow(mLauncherTime);
+            UITheme.applySearchBarTextShadow(mLauncherTime);
             mLauncherTime.post(mUpdateTime);
         }
     }
