@@ -321,6 +321,7 @@ public final class ShortcutEntry extends EntryWithTags {
         } else if (ResultViewHelper.displayHighlighted(relevanceSource, getTags(), relevance, tagsView, context)
             || Utilities.checkFlag(drawFlags, FLAG_DRAW_TAGS)) {
             tagsView.setVisibility(View.VISIBLE);
+            ResultViewHelper.applyResultItemShadow(tagsView);
         } else {
             tagsView.setVisibility(View.GONE);
         }

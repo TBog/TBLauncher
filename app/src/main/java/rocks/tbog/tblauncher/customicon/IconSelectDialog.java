@@ -43,6 +43,7 @@ import rocks.tbog.tblauncher.entry.ShortcutEntry;
 import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.handler.IconsHandler;
 import rocks.tbog.tblauncher.icons.IconPack;
+import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.ui.DialogFragment;
 import rocks.tbog.tblauncher.ui.DialogWrapper;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
@@ -136,6 +137,7 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
         mViewPager = view.findViewById(R.id.viewPager);
 
         CustomizeUI.setResultListPref(mPreviewLabel);
+        ResultViewHelper.applyResultItemShadow(mPreviewLabel);
 
         PageAdapter pageAdapter = new PageAdapter();
         mViewPager.setAdapter(pageAdapter);

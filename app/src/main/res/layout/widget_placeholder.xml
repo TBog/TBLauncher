@@ -23,6 +23,8 @@
         android:layout_gravity="center"
         android:background="@color/black_overlay"
         android:gravity="center"
+        android:shadowColor="@android:color/black"
+        android:shadowRadius="4"
         android:maxLines="3"
         android:minLines="1"
         android:textAppearance="?android:attr/textAppearance"

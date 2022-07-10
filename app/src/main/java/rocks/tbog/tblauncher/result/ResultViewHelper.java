@@ -196,7 +196,7 @@ public final class ResultViewHelper {
         task.execute();
     }
 
-    private static void applyResultItemShadow(@NonNull TextView textView) {
+    public static void applyResultItemShadow(@NonNull TextView textView) {
         Context ctx = textView.getContext();
         float radius = UISizes.getResultListShadowRadius(ctx);
         float dx = UISizes.getResultListShadowOffsetHorizontal(ctx);
