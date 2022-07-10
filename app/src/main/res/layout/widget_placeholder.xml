@@ -25,10 +25,6 @@
         android:gravity="center"
         android:maxLines="3"
         android:minLines="1"
-        android:shadowColor="?attr/resultShadowColor"
-        android:shadowDx="3"
-        android:shadowDy="3"
-        android:shadowRadius="?attr/textShadowRadius"
         android:textAppearance="?android:attr/textAppearance"
         android:text="@string/widget_placeholder" />
 
