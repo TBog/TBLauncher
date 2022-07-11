@@ -39,6 +39,7 @@ public final class UIColors {
     private static int CACHED_RIPPLE_QL = 0;
     private static int CACHED_COLOR_CONTACT_ACTION = 0;
     private static int CACHED_COLOR_SEARCH_TEXT = 0;
+    private static int CACHED_COLOR_SEARCH_SHADOW = 0;
     private static Integer CACHED_BACKGROUND_RESULT_LIST = null;
     private static int CACHED_RIPPLE_RESULT_LIST = 0;
     private static Integer CACHED_BACKGROUND_ICON = null;
@@ -64,6 +65,7 @@ public final class UIColors {
         CACHED_RIPPLE_QL = 0;
         CACHED_COLOR_CONTACT_ACTION = 0;
         CACHED_COLOR_SEARCH_TEXT = 0;
+        CACHED_COLOR_SEARCH_SHADOW = 0;
         CACHED_BACKGROUND_RESULT_LIST = null;
         CACHED_RIPPLE_RESULT_LIST = 0;
         CACHED_BACKGROUND_ICON = null;
@@ -325,12 +327,12 @@ public final class UIColors {
     }
 
     public static int getSearchShadowColor(Context context) {
-        if (CACHED_COLOR_RESULT_SHADOW == 0) {
+        if (CACHED_COLOR_SEARCH_SHADOW == 0) {
             SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
             int color = UIColors.getColor(pref, "search-bar-shadow-color");
-            CACHED_COLOR_RESULT_SHADOW = setAlpha(color, 0xFF);
+            CACHED_COLOR_SEARCH_SHADOW = setAlpha(color, 0xFF);
         }
-        return CACHED_COLOR_RESULT_SHADOW;
+        return CACHED_COLOR_SEARCH_SHADOW;
     }
 
     public static int getResultListBackground(Context context) {
