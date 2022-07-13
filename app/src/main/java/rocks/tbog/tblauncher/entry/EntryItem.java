@@ -97,10 +97,7 @@ public abstract class EntryItem {
     private
     String name = "";
 
-    // How relevant is this record? The higher, the most probable it will be displayed
-    protected FuzzyScore.MatchInfo relevance = null;
-    // Pointer to the normalizedName that the above relevance was calculated, used for highlighting
-    protected StringNormalizer.Result relevanceSource = null;
+    protected final ResultRelevance relevance = new ResultRelevance();
 
     public EntryItem(@NonNull String id) {
         this.id = id;
@@ -156,22 +153,23 @@ public abstract class EntryItem {
     }
 
     public int getRelevance() {
-        return relevance == null ? 0 : relevance.score;
+        return relevance.getRelevance();
     }
 
-    public void setRelevance(StringNormalizer.Result normalizedName, @Nullable FuzzyScore.MatchInfo matchInfo) {
-        relevanceSource = normalizedName;
-        relevance = matchInfo != null ? new FuzzyScore.MatchInfo(matchInfo) : new FuzzyScore.MatchInfo();
+    public void addResultMatch(@NonNull StringNormalizer.Result normalizedName, @Nullable FuzzyScore.MatchInfo matchInfo) {
+        relevance.addMatchInfo(normalizedName, matchInfo);
+    }
+
+    public void setRelevance(@NonNull StringNormalizer.Result normalizedName, @Nullable FuzzyScore.MatchInfo matchInfo) {
+        relevance.setMatchInfo(normalizedName, matchInfo);
     }
 
     public void boostRelevance(int boost) {
-        if (relevance != null)
-            relevance.score += boost;
+        relevance.boostRelevance(boost);
     }
 
-    public void resetRelevance() {
-        this.relevanceSource = null;
-        this.relevance = null;
+    public void resetResultInfo() {
+        relevance.resetRelevance();
     }
 
     /**
@@ -203,13 +201,10 @@ public abstract class EntryItem {
     public static class RelevanceComparator implements java.util.Comparator<EntryItem> {
         @Override
         public int compare(EntryItem lhs, EntryItem rhs) {
-            if (lhs.getRelevance() == rhs.getRelevance()) {
-                if (lhs.relevanceSource != null && rhs.relevanceSource != null)
-                    return rhs.relevanceSource.compareTo(lhs.relevanceSource);
-                else
-                    return rhs.name.compareTo(lhs.name);
-            }
-            return rhs.getRelevance() - lhs.getRelevance();
+            int difference = rhs.relevance.compareTo(lhs.relevance);
+            if (difference != 0)
+                return difference;
+            return rhs.name.compareTo(lhs.name);
         }
 
     }

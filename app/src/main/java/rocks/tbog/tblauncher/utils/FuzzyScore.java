@@ -3,6 +3,7 @@ package rocks.tbog.tblauncher.utils;
 import android.util.Pair;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -73,6 +74,10 @@ public class FuzzyScore {
         this(pattern, true);
     }
 
+    public int getPatternLength() {
+        return patternLength;
+    }
+
     public void setAdjacencyBonus(int adjacency_bonus) {
         this.adjacency_bonus = adjacency_bonus;
     }
@@ -97,10 +102,44 @@ public class FuzzyScore {
         this.unmatched_letter_penalty = unmatched_letter_penalty;
     }
 
+    public static String patternToString(int[] pattern) {
+        if (pattern == null)
+            return "null";
+        int iMax = pattern.length - 1;
+        if (iMax == -1)
+            return "[]";
+
+        StringBuilder b = new StringBuilder();
+        b.append('[');
+        for (int i = 0; ; i++) {
+            b.appendCodePoint(pattern[i]);
+            if (i == iMax)
+                return b.append(']').toString();
+        }
+    }
+
+    @NonNull
+    @Override
+    public String toString() {
+        return "FuzzyScore{" +
+            "patternLength=" + patternLength +
+            ", patternChar=" + patternToString(patternChar) +
+            ", patternLower=" + patternToString(patternLower) +
+            ", adjacency_bonus=" + adjacency_bonus +
+            ", separator_bonus=" + separator_bonus +
+            ", camel_bonus=" + camel_bonus +
+            ", leading_letter_penalty=" + leading_letter_penalty +
+            ", max_leading_letter_penalty=" + max_leading_letter_penalty +
+            ", unmatched_letter_penalty=" + unmatched_letter_penalty +
+            ", matchInfo=" + matchInfo +
+            '}';
+    }
+
     /**
      * @param text string where to search
      * @return true if each character in pattern is found sequentially within text
      */
+    @NonNull
     public MatchInfo match(CharSequence text) {
         int idx = 0;
         int idxCodepoint = 0;
@@ -119,6 +158,7 @@ public class FuzzyScore {
      * @param text string converted to codepoints
      * @return true if each character in pattern is found sequentially within text
      */
+    @NonNull
     public MatchInfo match(int[] text) {
         // Loop variables
         int score = 0;
@@ -234,14 +274,14 @@ public class FuzzyScore {
         return matchInfo;
     }
 
-    public static class MatchInfo {
+    public static final class MatchInfo {
         /**
          * higher is better match. Value has no intrinsic meaning. Range varies with pattern.
          * Can only compare scores with same search pattern.
          */
-        public int score;
-        public boolean match;
-        final ArrayList<Integer> matchedIndices;
+        public int score = 0;
+        public boolean match = false;
+        public final ArrayList<Integer> matchedIndices;
 
         public MatchInfo() {
             matchedIndices = null;
@@ -257,24 +297,53 @@ public class FuzzyScore {
             matchedIndices = o.matchedIndices != null ? new ArrayList<>(o.matchedIndices) : null;
         }
 
+        @NonNull
         public List<Pair<Integer, Integer>> getMatchedSequences() {
+            return getMatchedSequences(matchedIndices);
+        }
+
+        @NonNull
+        public static List<Pair<Integer, Integer>> getMatchedSequences(@Nullable List<Integer> matchedIndices) {
             if (matchedIndices == null)
                 return Collections.emptyList();
             // compute pair match indices
-            List<Pair<Integer, Integer>> positions = new ArrayList<>(this.matchedIndices.size());
-            int start = this.matchedIndices.get(0);
+            List<Pair<Integer, Integer>> positions = new ArrayList<>(matchedIndices.size());
+            int start = matchedIndices.get(0);
             int end = start + 1;
-            for (int i = 1; i < this.matchedIndices.size(); i += 1) {
-                if (end == this.matchedIndices.get(i)) {
+            for (int i = 1; i < matchedIndices.size(); i += 1) {
+                if (end == matchedIndices.get(i)) {
                     end += 1;
                 } else {
                     positions.add(new Pair<>(start, end));
-                    start = this.matchedIndices.get(i);
+                    start = matchedIndices.get(i);
                     end = start + 1;
                 }
             }
             positions.add(new Pair<>(start, end));
             return positions;
+        }
+
+        public static MatchInfo copyOrNewInstance(@NonNull MatchInfo source, @Nullable MatchInfo destination) {
+            if (destination == null || (destination.matchedIndices == null && source.matchedIndices != null))
+                return new MatchInfo(source);
+            destination.score = source.score;
+            destination.match = source.match;
+            if (destination.matchedIndices != null) {
+                destination.matchedIndices.clear();
+                if (source.matchedIndices != null)
+                    destination.matchedIndices.addAll(source.matchedIndices);
+            }
+            return destination;
+        }
+
+        @NonNull
+        @Override
+        public String toString() {
+            return "MatchInfo{" +
+                "score=" + score +
+                ", match=" + match +
+                ", matchedIndices=" + matchedIndices +
+                '}';
         }
     }
 }

@@ -19,12 +19,9 @@ import java.util.Objects;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.broadcast.PackageAddedRemovedHandler;
 import rocks.tbog.tblauncher.entry.AppEntry;
-import rocks.tbog.tblauncher.entry.EntryWithTags;
 import rocks.tbog.tblauncher.loader.LoadAppEntry;
 import rocks.tbog.tblauncher.loader.LoadCacheApps;
-import rocks.tbog.tblauncher.normalizer.StringNormalizer;
-import rocks.tbog.tblauncher.searcher.Searcher;
-import rocks.tbog.tblauncher.utils.FuzzyScore;
+import rocks.tbog.tblauncher.searcher.ISearcher;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 
 public class AppProvider extends Provider<AppEntry> {
@@ -68,8 +65,8 @@ public class AppProvider extends Provider<AppEntry> {
                 final UserManager manager = (UserManager) context.getSystemService(Context.USER_SERVICE);
                 assert manager != null;
                 PackageAddedRemovedHandler.handleEvent(context,
-                        "android.intent.action.PACKAGE_ADDED",
-                        packageName, new UserHandleCompat(manager.getSerialNumberForUser(user), user), false
+                    "android.intent.action.PACKAGE_ADDED",
+                    packageName, new UserHandleCompat(manager.getSerialNumberForUser(user), user), false
                 );
             }
         }
@@ -80,8 +77,8 @@ public class AppProvider extends Provider<AppEntry> {
                 final UserManager manager = (UserManager) context.getSystemService(Context.USER_SERVICE);
                 assert manager != null;
                 PackageAddedRemovedHandler.handleEvent(context,
-                        "android.intent.action.PACKAGE_ADDED",
-                        packageName, new UserHandleCompat(manager.getSerialNumberForUser(user), user), true
+                    "android.intent.action.PACKAGE_ADDED",
+                    packageName, new UserHandleCompat(manager.getSerialNumberForUser(user), user), true
                 );
             }
         }
@@ -92,8 +89,8 @@ public class AppProvider extends Provider<AppEntry> {
                 final UserManager manager = (UserManager) context.getSystemService(Context.USER_SERVICE);
                 assert manager != null;
                 PackageAddedRemovedHandler.handleEvent(context,
-                        "android.intent.action.PACKAGE_REMOVED",
-                        packageName, new UserHandleCompat(manager.getSerialNumberForUser(user), user), false
+                    "android.intent.action.PACKAGE_REMOVED",
+                    packageName, new UserHandleCompat(manager.getSerialNumberForUser(user), user), false
                 );
             }
         }
@@ -104,8 +101,8 @@ public class AppProvider extends Provider<AppEntry> {
                 final UserManager manager = (UserManager) context.getSystemService(Context.USER_SERVICE);
                 assert manager != null;
                 PackageAddedRemovedHandler.handleEvent(context,
-                        "android.intent.action.MEDIA_MOUNTED",
-                        null, new UserHandleCompat(manager.getSerialNumberForUser(user), user), false
+                    "android.intent.action.MEDIA_MOUNTED",
+                    null, new UserHandleCompat(manager.getSerialNumberForUser(user), user), false
                 );
             }
         }
@@ -116,8 +113,8 @@ public class AppProvider extends Provider<AppEntry> {
                 final UserManager manager = (UserManager) context.getSystemService(Context.USER_SERVICE);
                 assert manager != null;
                 PackageAddedRemovedHandler.handleEvent(context,
-                        "android.intent.action.MEDIA_UNMOUNTED",
-                        null, new UserHandleCompat(manager.getSerialNumberForUser(user), user), false
+                    "android.intent.action.MEDIA_UNMOUNTED",
+                    null, new UserHandleCompat(manager.getSerialNumberForUser(user), user), false
                 );
             }
         }
@@ -201,49 +198,12 @@ public class AppProvider extends Provider<AppEntry> {
 
     @WorkerThread
     @Override
-    public void requestResults(String query, Searcher searcher) {
-        StringNormalizer.Result queryNormalized = StringNormalizer.normalizeWithResult(query, false);
+    public void requestResults(String query, ISearcher searcher) {
+        for (AppEntry pojo : pojos)
+            pojo.resetResultInfo();
 
-        if (queryNormalized.codePoints.length == 0) {
-            return;
-        }
-
-        FuzzyScore fuzzyScore = new FuzzyScore(queryNormalized.codePoints);
-
-        checkAppResults(pojos, fuzzyScore, searcher);
+        EntryToResultUtils.recursiveWordCheck(pojos, query, searcher, EntryToResultUtils::tagsCheckResults, AppEntry.class);
     }
-
-    @WorkerThread
-    static void checkAppResults(Iterable<AppEntry> pojos, FuzzyScore fuzzyScore, Searcher searcher) {
-        FuzzyScore.MatchInfo matchInfo;
-        boolean match;
-
-        for (AppEntry pojo : pojos) {
-            if (pojo.isHiddenByUser()) {
-                continue;
-            }
-
-            matchInfo = fuzzyScore.match(pojo.normalizedName.codePoints);
-            match = matchInfo.match;
-            pojo.setRelevance(pojo.normalizedName, matchInfo);
-
-            if (searcher.tagsEnabled()) {
-                // check relevance for tags
-                for (EntryWithTags.TagDetails tag : pojo.getTags()) {
-                    matchInfo = fuzzyScore.match(tag.normalized.codePoints);
-                    if (matchInfo.match && (!match || matchInfo.score > pojo.getRelevance())) {
-                        match = true;
-                        pojo.setRelevance(tag.normalized, matchInfo);
-                    }
-                }
-            }
-
-            if (match && !searcher.addResult(pojo)) {
-                return;
-            }
-        }
-    }
-
 
     /**
      * Return a Pojo

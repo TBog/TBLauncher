@@ -144,7 +144,7 @@ public class AppsHandler {
         synchronized (AppsHandler.this) {
             if (mIsLoaded) {
                 for (AppEntry appEntry : mAppsCache.values()) {
-                    appEntry.resetRelevance();
+                    appEntry.resetResultInfo();
                     records.add(appEntry);
                 }
             }
