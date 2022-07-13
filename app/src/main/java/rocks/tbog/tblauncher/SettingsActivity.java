@@ -73,6 +73,7 @@ import rocks.tbog.tblauncher.preference.IconListPreferenceDialog;
 import rocks.tbog.tblauncher.preference.OrderListPreferenceDialog;
 import rocks.tbog.tblauncher.preference.PreferenceColorDialog;
 import rocks.tbog.tblauncher.preference.QuickListPreferenceDialog;
+import rocks.tbog.tblauncher.preference.ShadowDialog;
 import rocks.tbog.tblauncher.preference.SliderDialog;
 import rocks.tbog.tblauncher.preference.TagOrderListPreferenceDialog;
 import rocks.tbog.tblauncher.ui.dialog.PleaseWaitDialog;
@@ -700,6 +701,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                             dialogFragment = PreferenceColorDialog.newInstance(key);
                     } else if (R.layout.pref_slider == dialogLayout) {
                         dialogFragment = SliderDialog.newInstance(key);
+                    } else if (R.layout.pref_shadow == dialogLayout) {
+                        dialogFragment = ShadowDialog.newInstance(key);
                     } else if (R.layout.pref_confirm == dialogLayout) {
                         dialogFragment = ConfirmDialog.newInstance(key);
                     }

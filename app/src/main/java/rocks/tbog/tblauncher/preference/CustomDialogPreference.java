@@ -8,8 +8,11 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.preference.PreferenceViewHolder;
+
+import java.util.Collections;
 
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.utils.PrefCache;
@@ -91,10 +94,12 @@ public class CustomDialogPreference extends androidx.preference.DialogPreference
     }
 
     @Override
-    public void onBindViewHolder(PreferenceViewHolder holder) {
+    public void onBindViewHolder(@NonNull PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
         final String key = getKey();
-        Object value = getSharedPreferences().getAll().get(key);
+        final var pref = getSharedPreferences();
+        final var prefMap = pref != null ? pref.getAll() : Collections.emptyMap();
+        Object value = prefMap.get(key);
 
         {
             View view = holder.findViewById(R.id.prefAmountPreview);
@@ -149,6 +154,22 @@ public class CustomDialogPreference extends androidx.preference.DialogPreference
                     else if (value instanceof Integer)
                         size = (int) value;
                     ((TextView) view).setText(view.getResources().getString(R.string.size, size));
+                }
+            }
+        }
+        {
+            View view = holder.findViewById(R.id.prefShadowPreview);
+            if (view instanceof TextView) {
+                // used for shadow
+                Object value2 = prefMap.get(key.replace("-dx", "-dy"));
+                Object value3 = prefMap.get(key.replace("-dx", "-radius"));
+                if (value instanceof Float && value2 instanceof Float && value3 instanceof Float) {
+                    float v1 = (float) value;
+                    float v2 = (float) value2;
+                    float v3 = (float) value3;
+                    ((TextView) view).setText(view.getResources().getString(R.string.shadow_preview, v1, v2, v3));
+                } else {
+                    ((TextView) view).setText("");
                 }
             }
         }

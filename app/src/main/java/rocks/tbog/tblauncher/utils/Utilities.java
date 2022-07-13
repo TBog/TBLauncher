@@ -341,7 +341,7 @@ public class Utilities {
         return task;
     }
 
-    public static RunnableTask runAsync(@NonNull TaskRunner.AsyncRunnable background, @NonNull TaskRunner.AsyncRunnable after) {
+    public static RunnableTask runAsync(@NonNull TaskRunner.AsyncRunnable background, @Nullable TaskRunner.AsyncRunnable after) {
         RunnableTask task = TaskRunner.newTask(background, after);
         TaskRunner.runOnUiThread(() -> EXECUTOR_RUN_ASYNC.execute(task));
         return task;

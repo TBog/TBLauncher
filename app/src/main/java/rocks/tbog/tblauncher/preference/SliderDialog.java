@@ -7,6 +7,8 @@ import android.view.View;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.preference.DialogPreference;
 
 import rocks.tbog.tblauncher.R;
@@ -165,100 +167,41 @@ public class SliderDialog extends BasePreferenceDialog {
         }
 
         // set slider value
-        final int seekBarProgress;
-        if (preference.getValue() instanceof Integer) {
-            seekBarProgress = (Integer) preference.getValue() - minValue;
-        } else if (preference.getValue() instanceof Float) {
-            float incrementBy = incrementByFloat != null ? incrementByFloat : 1f;
-            seekBarProgress = Math.round(((Float) preference.getValue()) / incrementBy) - minValue;
-        } else {
-            seekBarProgress = 0;
-        }
-        seekBar.setProgress(seekBarProgress);
+        setProgressFromPreference(seekBar, preference.getValue(), minValue, incrementByFloat);
 
         final TextView text2 = root.findViewById(android.R.id.text2);
-        final ProgressChanged<?> listener;
+        final SeekBarChangeListener<?> listener;
 
         // default change listener uses integers
         if (incrementByFloat == null) {
-            listener = new ProgressChangedInt(minValue, text2, (integer) -> {
+            listener = new SeekBarChangeListener.ProgressChangedInt(minValue, text2, (integer) -> {
                 CustomDialogPreference pref = ((CustomDialogPreference) SliderDialog.this.getPreference());
                 pref.setValue(integer);
             });
         } else {
-            listener = new ProgressChangedFloat(minValue, incrementByFloat, text2, (aFloat) -> {
+            listener = new SeekBarChangeListener.ProgressChangedFloat(minValue, incrementByFloat, text2, (aFloat) -> {
                 CustomDialogPreference pref = ((CustomDialogPreference) SliderDialog.this.getPreference());
                 pref.setValue(aFloat);
             });
         }
 
         // update display value
-        listener.onProgressChanged(seekBar, seekBarProgress, false);
+        listener.onProgressChanged(seekBar, seekBar.getProgress(), false);
 
         // set change listener
         seekBar.setOnSeekBarChangeListener(listener);
     }
 
-    interface ValueChanged<T> {
-        void valueChanged(T newValue);
-    }
-
-    private static abstract class ProgressChanged<T> implements SeekBar.OnSeekBarChangeListener {
-        protected final int offset;
-        protected final TextView textView;
-        protected final ValueChanged<T> listener;
-
-        public ProgressChanged(int offset, TextView textView, ValueChanged<T> listener) {
-            this.offset = offset;
-            this.textView = textView;
-            this.listener = listener;
+    public static void setProgressFromPreference(@NonNull SeekBar seekBar, @Nullable Object prefValue, int minValue, @Nullable Float incrementByFloat) {
+        final int seekBarProgress;
+        if (prefValue instanceof Integer) {
+            seekBarProgress = (Integer) prefValue - minValue;
+        } else if (prefValue instanceof Float) {
+            float incrementBy = incrementByFloat != null ? incrementByFloat : 1f;
+            seekBarProgress = Math.round(((Float) prefValue) / incrementBy) - minValue;
+        } else {
+            seekBarProgress = 0;
         }
-
-        @Override
-        public void onStartTrackingTouch(SeekBar seekBar) {
-            // do nothing
-        }
-    }
-
-    private static class ProgressChangedInt extends ProgressChanged<Integer> {
-
-        public ProgressChangedInt(int offset, TextView textView, ValueChanged<Integer> listener) {
-            super(offset, textView, listener);
-        }
-
-        @Override
-        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-            final int newValue = progress + offset;
-            textView.setText(textView.getResources().getString(R.string.value, newValue));
-        }
-
-        @Override
-        public void onStopTrackingTouch(SeekBar seekBar) {
-            int progress = seekBar.getProgress();
-            progress += offset;
-            listener.valueChanged(progress);
-        }
-    }
-
-    private static class ProgressChangedFloat extends ProgressChanged<Float> {
-        protected float incrementBy;
-
-        public ProgressChangedFloat(int offset, float incrementBy, TextView textView, ValueChanged<Float> listener) {
-            super(offset, textView, listener);
-            this.incrementBy = incrementBy;
-        }
-
-        @Override
-        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-            final float newValue = (progress + offset) * incrementBy;
-            textView.setText(textView.getResources().getString(R.string.value_float, newValue));
-        }
-
-        @Override
-        public void onStopTrackingTouch(SeekBar seekBar) {
-            float progress = seekBar.getProgress();
-            progress = (progress + offset) * incrementBy;
-            listener.valueChanged(progress);
-        }
+        seekBar.setProgress(seekBarProgress);
     }
 }
