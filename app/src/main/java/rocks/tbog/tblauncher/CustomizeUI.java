@@ -217,7 +217,7 @@ public class CustomizeUI {
 
         // text size
         {
-            mSearchBar.setTextSize(TypedValue.COMPLEX_UNIT_DIP, textSize);
+            mSearchBar.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
         }
 
         final int searchBarRipple = UIColors.setAlpha(UIColors.getColor(mPref, "search-bar-ripple-color"), 0xFF);
@@ -310,7 +310,7 @@ public class CustomizeUI {
 
         // text size
         {
-            mSearchBar.setTextSize(TypedValue.COMPLEX_UNIT_DIP, textSize);
+            mSearchBar.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
         }
 
         final int searchBarRipple = UIColors.setAlpha(UIColors.getColor(mPref, "search-bar-ripple-color"), 0xFF);
