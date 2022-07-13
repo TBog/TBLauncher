@@ -12,6 +12,7 @@ import android.view.View;
 import androidx.annotation.Nullable;
 
 import rocks.tbog.tblauncher.R;
+import rocks.tbog.tblauncher.utils.UISizes;
 
 public class CustomizeShadowView extends View {
     private final Rect targetRect = new Rect();
@@ -21,6 +22,7 @@ public class CustomizeShadowView extends View {
     private float shadowRadius;
     private int shadowColor;
     private int textColor;
+    private float textSize;
     private int bgColor1;
     private int bgColor2;
     private final int _gridSize;
@@ -59,6 +61,7 @@ public class CustomizeShadowView extends View {
         shadowRadius = 5f;
         shadowColor = 0xFF000000;
         textColor = 0xFFffffff;
+        textSize = UISizes.sp2px(context, getResources().getInteger(R.integer.default_size_text));
         text = getResources().getText(R.string.shadow_offset_preview).toString();
 
         paint.setTextAlign(Paint.Align.CENTER);
@@ -76,10 +79,11 @@ public class CustomizeShadowView extends View {
         invalidate();
     }
 
-    public void setTextParameters(@Nullable CharSequence text, int color) {
+    public void setTextParameters(@Nullable CharSequence text, int color, int size) {
         if (text != null)
             this.text = text.toString();
         textColor = color;
+        textSize = size;
         invalidate();
     }
 
@@ -113,17 +117,26 @@ public class CustomizeShadowView extends View {
                     }
         }
 
-        // draw text with shadow
+        paint.setShadowLayer(shadowRadius, offsetX, offsetY, shadowColor);
+
+        final float centerX = targetRect.centerX();
+        // draw small text
+        paint.setColor(textColor);
+        paint.setTextSize(textSize);
+        canvas.drawText(text, centerX, targetRect.top - paint.ascent(), paint);
+        canvas.drawText(text, centerX, targetRect.bottom - paint.descent(), paint);
+
+        // prepare big text
         String[] lines = text.split("\\s");
         paint.setTextSize(targetRect.height() / (lines.length + 2f));
-        float lineHeight = paint.descent() - paint.ascent();
-        float lineY = (targetRect.height() - lineHeight * lines.length) / 2f;
-        paint.setColor(textColor);
-        paint.setShadowLayer(shadowRadius, offsetX, offsetY, shadowColor);
+        final float lineHeight = paint.descent() - paint.ascent();
+        float lineY = targetRect.centerY() - (lineHeight * lines.length) / 2f;
+        // write big text split by whitespace
         for (String line : lines) {
             lineY += lineHeight;
-            canvas.drawText(line, targetRect.width() * .5f, lineY, paint);
+            canvas.drawText(line, centerX, lineY, paint);
         }
+
         paint.clearShadowLayer();
 
         // draw offset circle

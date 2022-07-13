@@ -15,6 +15,7 @@ import androidx.preference.DialogPreference;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.ui.CustomizeShadowView;
 import rocks.tbog.tblauncher.utils.UIColors;
+import rocks.tbog.tblauncher.utils.UISizes;
 
 public class ShadowDialog extends BasePreferenceDialog {
     private static final String TAG = ShadowDialog.class.getSimpleName();
@@ -112,30 +113,37 @@ public class ShadowDialog extends BasePreferenceDialog {
         // set view parameters
         //setShadowParameters(viewXY, shadowColor);
 
-        final Context ctx = getContext();
+        final Context ctx = requireContext();
 
         // initialize shadow preview
-        int color1, color2, textColor;
+        int color1;
+        int color2;
+        int textColor;
+        int textSize;
         switch (keyX) {
             case "result-shadow-dx":
                 color1 = UIColors.getResultListBackground(ctx);
                 color2 = UIColors.getResultListRipple(ctx);
                 textColor = UIColors.getResultTextColor(ctx);
+                textSize = UISizes.getResultTextSize(ctx);
                 break;
             case "popup-shadow-dx":
                 color1 = UIColors.getPopupBackgroundColor(ctx);
                 color2 = UIColors.getPopupRipple(ctx);
                 textColor = UIColors.getPopupTextColor(ctx);
+                textSize = getResources().getDimensionPixelSize(R.dimen.result_small_size);
                 break;
             case "search-bar-shadow-dx":
                 color1 = UIColors.getColor(sharedPreferences, "search-bar-argb");
                 color2 = UIColors.getColor(sharedPreferences, "search-bar-ripple-color");
                 textColor = UIColors.getSearchTextColor(ctx);
+                textSize = UISizes.sp2px(ctx, sharedPreferences.getInt("search-bar-text-size", getResources().getInteger(R.integer.default_size_text)));
                 break;
             default:
                 color1 = 0;
                 color2 = 0;
                 textColor = 0;
+                textSize = UISizes.sp2px(ctx, getResources().getInteger(R.integer.default_size_text));
                 break;
         }
         if (color1 != 0) {
@@ -144,7 +152,7 @@ public class ShadowDialog extends BasePreferenceDialog {
             viewXY.setBackgroundParameters(color1, color2);
         }
         if (textColor != 0)
-            viewXY.setTextParameters(null, textColor);
+            viewXY.setTextParameters(null, textColor, textSize);
 
         viewXY.setOnOffsetChanged((dx, dy) -> {
             offsetX.postValue(dx);
@@ -204,7 +212,9 @@ public class ShadowDialog extends BasePreferenceDialog {
     }
 
     private static class LiveShadowParameters {
-        Float dx, dy, radius;
+        Float dx;
+        Float dy;
+        Float radius;
 
         public LiveShadowParameters(Float radius, Float dx, Float dy) {
             this.dx = dx;

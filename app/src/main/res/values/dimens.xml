@@ -68,5 +68,5 @@
     <dimen name="dialog_padding_horizontal">10dp</dimen>
     <dimen name="dialog_padding_vertical">10dp</dimen>
 
-    <integer name="shadow_preview_grid">5</integer>
+    <integer name="shadow_preview_grid">6</integer>
 </resources>
