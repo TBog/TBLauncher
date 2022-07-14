@@ -1,27 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-    android:orientation="vertical"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:paddingHorizontal="@dimen/dialog_padding_horizontal"
     android:paddingVertical="@dimen/dialog_padding_vertical">
 
-    <TextView
-        android:id="@android:id/text1"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="@string/shadow_offset"
-        android:textColor="?android:attr/textColorPrimary" />
+        android:orientation="vertical">
 
-    <rocks.tbog.tblauncher.ui.CustomizeShadowView
-        android:id="@+id/viewXY"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        <TextView
+            android:id="@android:id/text1"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/shadow_offset"
+            android:textColor="?android:attr/textColorPrimary" />
 
-    <TextView
-        android:id="@+id/textValueXY"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        <rocks.tbog.tblauncher.ui.CustomizeShadowView
+            android:id="@+id/viewXY"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+
+        <TextView
+            android:id="@+id/textValueXY"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
         android:text="@string/value_float_xy"
         android:textColor="?android:attr/textColorPrimary" />
 
@@ -33,17 +37,18 @@
         android:text="@string/shadow_radius"
         android:textColor="?android:attr/textColorPrimary" />
 
-    <SeekBar
-        android:id="@+id/seekBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:paddingVertical="10dp" />
+        <SeekBar
+            android:id="@+id/seekBar"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingVertical="10dp" />
 
-    <TextView
-        android:id="@+id/textValueSlider"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/value"
-        android:textColor="?android:attr/textColorPrimary" />
+        <TextView
+            android:id="@+id/textValueSlider"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="@string/value"
+            android:textColor="?android:attr/textColorPrimary" />
 
-</LinearLayout>
+    </LinearLayout>
+</ScrollView>
