@@ -34,6 +34,7 @@ public class CustomizeShadowView extends View {
     private final float _sampleFrameRadius;
     private final float _sampleShadowRadius;
     private String text;
+    private String[] lines;
     private OnOffsetChanged onOffsetChanged = null;
     private final int colorSampleFrame;
     private final int colorSampleShadow;
@@ -60,9 +61,7 @@ public class CustomizeShadowView extends View {
 
         shadowRadius = 5f;
         shadowColor = 0xFF000000;
-        textColor = 0xFFffffff;
-        textSize = UISizes.sp2px(context, getResources().getInteger(R.integer.default_size_text));
-        text = getResources().getText(R.string.shadow_offset_preview).toString();
+        setTextParameters(getResources().getText(R.string.shadow_offset_preview), 0xFFffffff, UISizes.sp2px(context, getResources().getInteger(R.integer.default_size_text)));
 
         paint.setTextAlign(Paint.Align.CENTER);
         setLayerType(LAYER_TYPE_SOFTWARE, paint);
@@ -80,8 +79,10 @@ public class CustomizeShadowView extends View {
     }
 
     public void setTextParameters(@Nullable CharSequence text, int color, int size) {
-        if (text != null)
+        if (text != null) {
             this.text = text.toString();
+            lines = this.text.split("\\s");
+        }
         textColor = color;
         textSize = size;
         invalidate();
@@ -99,7 +100,7 @@ public class CustomizeShadowView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         if (targetRect.isEmpty())
-            targetRect.set(0, 0, getWidth(), getHeight());
+            canvas.getClipBounds(targetRect);
 
         paint.setColor(bgColor1);
         canvas.drawRect(targetRect, paint);
@@ -123,14 +124,13 @@ public class CustomizeShadowView extends View {
         // draw small text
         paint.setColor(textColor);
         paint.setTextSize(textSize);
-        canvas.drawText(text, centerX, targetRect.top - paint.ascent(), paint);
-        canvas.drawText(text, centerX, targetRect.bottom - paint.descent(), paint);
+        canvas.drawText(text, centerX, targetRect.top - paint.ascent() + _offsetScale, paint);
+        canvas.drawText(text, centerX, targetRect.bottom - paint.descent() - _offsetScale, paint);
 
         // prepare big text
-        String[] lines = text.split("\\s");
         paint.setTextSize(targetRect.height() / (lines.length + 2f));
         final float lineHeight = paint.descent() - paint.ascent();
-        float lineY = targetRect.centerY() - (lineHeight * lines.length) / 2f;
+        float lineY = targetRect.centerY() - (lineHeight * lines.length) / 2f - paint.descent();
         // write big text split by whitespace
         for (String line : lines) {
             lineY += lineHeight;

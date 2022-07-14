@@ -16,9 +16,7 @@
     <rocks.tbog.tblauncher.ui.CustomizeShadowView
         android:id="@+id/viewXY"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginStart="@dimen/mm2d_cc_hsv_margin"
-        android:layout_marginEnd="@dimen/mm2d_cc_hsv_margin" />
+        android:layout_height="wrap_content" />
 
     <TextView
         android:id="@+id/textValueXY"
