@@ -892,6 +892,15 @@ public class DataHandler extends BroadcastReceiver
         }
     }
 
+    public void setCustomButtonIcon(String buttonId, Bitmap bitmap) {
+        final Context context = getContext();
+        byte[] array = Utilities.bitmapToByteArray(bitmap);
+        if (array != null) {
+            DBHelper.setCustomStaticEntryIcon(context, buttonId, array);
+            // we expect calling function to refresh buttons
+        }
+    }
+
     public Bitmap getCachedAppIcon(String componentName) {
         final Context context = getContext();
         byte[] bytes = DBHelper.getCachedAppIcon(context, componentName);
@@ -916,6 +925,11 @@ public class DataHandler extends BroadcastReceiver
     public void removeCustomStaticEntryIcon(String entryId) {
         final Context context = getContext();
         DBHelper.removeCustomStaticEntryIcon(context, entryId);
+    }
+
+    public void removeCustomButtonIcon(String buttonId) {
+        final Context context = getContext();
+        DBHelper.removeMod(context, buttonId);
     }
 
     public Bitmap getCustomEntryIconById(@NonNull String entryId) {

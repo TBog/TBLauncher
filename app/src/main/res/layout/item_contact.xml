@@ -112,10 +112,13 @@
 
     <ImageButton
         android:id="@+id/item_contact_action_message"
-        android:layout_width="@dimen/icon_size"
-        android:layout_height="@dimen/icon_size"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:paddingVertical="@dimen/result_margin_vertical"
         android:background="?attr/appSelectableItemBackground"
         android:contentDescription="@string/cd_item_contact_message"
+        android:scaleType="fitCenter"
+        app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/item_contact_action_phone"
         app:layout_constraintTop_toTopOf="parent"
@@ -123,10 +126,13 @@
 
     <ImageButton
         android:id="@+id/item_contact_action_phone"
-        android:layout_width="@dimen/icon_size"
-        android:layout_height="@dimen/icon_size"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:paddingVertical="@dimen/result_margin_vertical"
         android:background="?attr/appSelectableItemBackground"
         android:contentDescription="@string/cd_item_contact_call"
+        android:scaleType="fitCenter"
+        app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@id/item_contact_action_open"
         app:layout_constraintTop_toTopOf="parent"
@@ -134,11 +140,14 @@
 
     <ImageButton
         android:id="@+id/item_contact_action_open"
-        android:layout_width="@dimen/icon_size"
-        android:layout_height="@dimen/icon_size"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:paddingVertical="@dimen/result_margin_vertical"
         android:background="?attr/appSelectableItemBackground"
         android:contentDescription="@string/cd_item_contact_open"
+        android:scaleType="fitCenter"
         android:visibility="gone"
+        app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toTopOf="parent"

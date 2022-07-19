@@ -22,6 +22,7 @@ import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.StringRes;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.viewpager.widget.ViewPager;
 
 import com.github.dhaval2404.imagepicker.ImagePicker;
@@ -241,6 +242,10 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
             String entryName = args.getString("searchName", "");
             String pageName = context.getString(R.string.tab_search_icon);
             mCustomShapePage = addSearchEntryPage(inflater, mViewPager, entryName, pageName);
+        } else if (args.containsKey("buttonId")) {
+            int defaultIcon = args.getInt("defaultIcon");
+            String pageName = context.getString(R.string.tab_button_icon);
+            mCustomShapePage = addButtonPage(inflater, mViewPager, defaultIcon, pageName);
         }
     }
 
@@ -318,6 +323,14 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
         return page;
     }
 
+    public ButtonPage addButtonPage(LayoutInflater inflater, ViewPager container, int defaultIcon, String pageName) {
+        View view = inflater.inflate(R.layout.dialog_custom_shape_icon_select_page, container, false);
+        ButtonPage page = new ButtonPage(pageName, view, defaultIcon);
+        PageAdapter adapter = (PageAdapter) mViewPager.getAdapter();
+        adapter.addPage(page);
+        return page;
+    }
+
     public ListPopup getIconPackMenu(IconData iconData) {
         final Context ctx = requireContext();
         LinearAdapter adapter = new LinearAdapter();
@@ -359,6 +372,14 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
             customIconShortcut(args);
         else if (args.containsKey("searchEntryId"))
             customIconSearchEntry(args);
+        else if (args.containsKey("buttonId"))
+            customIconButton(args);
+        else {
+            dismiss();
+            Context ctx = requireContext();
+            Toast.makeText(Utilities.getActivity(ctx), ctx.getString(R.string.entry_not_found, ""), Toast.LENGTH_LONG).show();
+            return;
+        }
 
         // OK button
         {
@@ -462,6 +483,11 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
 
         // Preview
         initPreviewIcon(mPreviewLabel, shortcutEntry::getIcon);
+    }
+
+    private void customIconButton(Bundle args) {
+        final int defaultIcon = args.getInt("defaultIcon", 0);
+        initPreviewIcon(mPreviewLabel, ctx -> ResourcesCompat.getDrawable(getResources(), defaultIcon, null));
     }
 
     @Override

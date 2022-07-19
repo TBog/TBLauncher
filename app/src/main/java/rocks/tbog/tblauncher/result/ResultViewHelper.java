@@ -24,6 +24,7 @@ import java.util.Arrays;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import rocks.tbog.tblauncher.DrawableCache;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.entry.EntryItem;
@@ -110,6 +111,33 @@ public final class ResultViewHelper {
         view.setText(builder);
 
         return matchFound;
+    }
+
+    public static void setButtonIconAsync(@NonNull ImageView iconView, String buttonId, @NonNull Utilities.GetDrawable getDefaultIcon) {
+        Context context = iconView.getContext();
+        var cache = TBApplication.drawableCache(context).getCachedInfo(buttonId);
+        if (cache != null) {
+            Log.d(TAG, "cache found, view=" + Integer.toHexString(iconView.hashCode()) + " button=" + buttonId);
+            final Drawable drawable;
+            if (cache.drawable != null) {
+                // found the icon in cache
+                drawable = cache.drawable;
+            } else {
+                drawable = getDefaultIcon.getDrawable(context);
+            }
+            iconView.setImageDrawable(drawable);
+            return;
+        }
+
+        Utilities.setIconAsync(iconView, ctx -> {
+            Drawable buttonIcon = TBApplication.iconsHandler(ctx).getButtonIcon(buttonId);
+            if (buttonIcon == null) {
+                TBApplication.drawableCache(ctx).setCachedInfo(buttonId, new DrawableCache.DrawableInfo(null));
+                return getDefaultIcon.getDrawable(ctx);
+            }
+            TBApplication.drawableCache(ctx).cacheDrawable(buttonId, buttonIcon);
+            return buttonIcon;
+        });
     }
 
     public static <E extends EntryItem, T extends AsyncSetEntryDrawable<E>> void setIconAsync(int drawFlags, @NonNull E entry, @NonNull ImageView iconView, @NonNull Class<T> asyncSetEntryIconClass, @NonNull Class<E> entryItemClass) {

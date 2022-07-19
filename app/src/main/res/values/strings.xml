@@ -253,6 +253,7 @@
     <string name="tab_app_icons">%s\n[app icons]</string>
     <string name="tab_static_icons">Default icon</string>
     <string name="tab_search_icon">Search icon</string>
+    <string name="tab_button_icon">Button icon</string>
     <string name="icon_pack_loading">Loading from icon packs…</string>
     <string name="gesture_section">Gestures</string>
     <string name="gesture_fling_down_left">Fling from |<b>←</b>|, <b>↓</b></string>
@@ -485,6 +486,9 @@
     <string name="icons_section">Icons</string>
     <string name="options_section">Options</string>
     <string name="search_bar_animation">Animate expand/collapse</string>
+    <string name="contact_button_set_default">Make default action</string>
+    <string name="contact_button_reset_default">Reset default action</string>
+    <string name="done_key_contact_action">Done key contact action</string>
 
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>
