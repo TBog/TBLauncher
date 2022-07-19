@@ -38,6 +38,22 @@ public class DrawableCache {
         return null;
     }
 
+    @Nullable
+    public DrawableInfo getCachedInfo(@NonNull String cacheId) {
+        return mCache.get(cacheId);
+    }
+
+    public void setCachedInfo(@NonNull String cacheId, @Nullable DrawableInfo cache) {
+        if (cache == null)
+        {
+            mCache.remove(cacheId);
+            return;
+        }
+        if (!mEnabled)
+            return;
+        mCache.put(cacheId, cache);
+    }
+
     public void cacheDrawable(@NonNull String cacheId, @Nullable Drawable drawable) {
         if (drawable == null) {
             mCache.remove(cacheId);
@@ -49,11 +65,11 @@ public class DrawableCache {
         mCache.put(cacheId, info);
     }
 
-    private static class DrawableInfo {
+    public static class DrawableInfo {
         public final Drawable drawable;
         public int dayOfMonth = 0;
 
-        DrawableInfo(Drawable drawable) {
+        public DrawableInfo(Drawable drawable) {
             this.drawable = drawable;
         }
 

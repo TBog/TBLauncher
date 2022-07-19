@@ -744,6 +744,13 @@
                 android:key="enable-suggestions-keyboard"
                 android:title="@string/keyboard_suggestions" />
 
+            <ListPreference
+                android:defaultValue="phone"
+                android:entries="@array/contactActionEntries"
+                android:entryValues="@array/contactActionValues"
+                android:key="default-contact-action"
+                android:title="@string/done_key_contact_action"/>
+
         </androidx.preference.PreferenceCategory>
 
         <!-- Behaviour -->

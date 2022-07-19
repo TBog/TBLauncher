@@ -233,6 +233,17 @@
         <item>3</item>
     </string-array>
 
+    <string-array name="contactActionEntries">
+        <item>Call</item>
+        <item>Message</item>
+        <item>Send</item>
+    </string-array>
+    <string-array name="contactActionValues" translatable="false">
+        <item>phone</item>
+        <item>message</item>
+        <item>open</item>
+    </string-array>
+
     <array name="material_colors">
         <item>@array/mm2d_cc_red</item>
         <item>@array/mm2d_cc_pink</item>

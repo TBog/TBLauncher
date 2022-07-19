@@ -15,9 +15,12 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
+import androidx.annotation.StringRes;
 import androidx.annotation.WorkerThread;
 import androidx.appcompat.content.res.AppCompatResources;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.preference.PreferenceManager;
 
 import java.io.FileNotFoundException;
@@ -32,6 +35,8 @@ import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.result.AsyncSetEntryDrawable;
 import rocks.tbog.tblauncher.result.ResultHelper;
 import rocks.tbog.tblauncher.result.ResultViewHelper;
+import rocks.tbog.tblauncher.ui.LinearAdapter;
+import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.PackageManagerUtils;
 import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.UIColors;
@@ -41,7 +46,12 @@ import rocks.tbog.tblauncher.utils.Utilities;
 public class ContactEntry extends EntryItem {
     public static final String SCHEME = "contact://";
     private static final int[] RESULT_LAYOUT = {R.layout.item_contact, R.layout.item_grid, R.layout.item_dock};
-
+    private static final String BTN_ACTION_PHONE = "phone";
+    private static final String BTN_ID_PHONE = "button://item_contact_action_phone";
+    private static final String BTN_ACTION_MESSAGE = "message";
+    private static final String BTN_ID_MESSAGE = "button://item_contact_action_message";
+    private static final String BTN_ACTION_OPEN = "open";
+    private static final String BTN_ID_OPEN = "button://item_contact_action_open";
     public String lookupKey;
 
     protected String phone;
@@ -258,11 +268,16 @@ public class ContactEntry extends EntryItem {
             ImageButton phoneButton = root.findViewById(R.id.item_contact_action_phone);
             if (hasPhone) {
                 phoneButton.setVisibility(View.VISIBLE);
-                phoneButton.setColorFilter(contactActionColor, PorterDuff.Mode.MULTIPLY);
+                phoneButton.clearColorFilter();
+                ResultViewHelper.setButtonIconAsync(phoneButton, BTN_ID_PHONE, ctx -> {
+                    phoneButton.post(() -> phoneButton.setColorFilter(contactActionColor, PorterDuff.Mode.MULTIPLY));
+                    return ResourcesCompat.getDrawable(ctx.getResources(), R.drawable.ic_phone, null);
+                });
                 phoneButton.setOnClickListener(v -> {
                     ResultHelper.recordLaunch(this, context);
                     ResultHelper.launchCall(v.getContext(), v, phone);
                 });
+                phoneButton.setOnLongClickListener(v -> showButtonPopup(v, BTN_ID_PHONE, R.drawable.ic_phone));
             } else {
                 phoneButton.setVisibility(View.GONE);
             }
@@ -273,11 +288,16 @@ public class ContactEntry extends EntryItem {
             ImageButton messageButton = root.findViewById(R.id.item_contact_action_message);
             if (hasPhone && !isHomeNumber()) {
                 messageButton.setVisibility(View.VISIBLE);
-                messageButton.setColorFilter(contactActionColor, PorterDuff.Mode.MULTIPLY);
+                messageButton.clearColorFilter();
+                ResultViewHelper.setButtonIconAsync(messageButton, BTN_ID_MESSAGE, ctx -> {
+                    messageButton.post(() -> messageButton.setColorFilter(contactActionColor, PorterDuff.Mode.MULTIPLY));
+                    return ResourcesCompat.getDrawable(ctx.getResources(), R.drawable.ic_message, null);
+                });
                 messageButton.setOnClickListener(v -> {
                     ResultHelper.recordLaunch(this, context);
                     ResultHelper.launchMessaging(this, v);
                 });
+                messageButton.setOnLongClickListener(v -> showButtonPopup(v, BTN_ID_MESSAGE, R.drawable.ic_message));
             } else {
                 messageButton.setVisibility(View.GONE);
             }
@@ -288,11 +308,16 @@ public class ContactEntry extends EntryItem {
             ImageButton openButton = root.findViewById(R.id.item_contact_action_open);
             if (getImData() != null) {
                 openButton.setVisibility(View.VISIBLE);
-                openButton.setColorFilter(contactActionColor, PorterDuff.Mode.MULTIPLY);
+                openButton.clearColorFilter();
+                ResultViewHelper.setButtonIconAsync(openButton, BTN_ID_OPEN, ctx -> {
+                    openButton.post(() -> openButton.setColorFilter(contactActionColor, PorterDuff.Mode.MULTIPLY));
+                    return ResourcesCompat.getDrawable(ctx.getResources(), R.drawable.ic_send, null);
+                });
                 openButton.setOnClickListener(v -> {
                     ResultHelper.recordLaunch(this, context);
                     ResultHelper.launchIm(getImData(), v);
                 });
+                openButton.setOnLongClickListener(v -> showButtonPopup(v, BTN_ID_OPEN, R.drawable.ic_send));
             } else {
                 openButton.setVisibility(View.GONE);
             }
@@ -302,17 +327,106 @@ public class ContactEntry extends EntryItem {
     @Override
     public void doLaunch(@NonNull View v, int flags) {
         Context context = v.getContext();
-        SharedPreferences settingPrefs = PreferenceManager.getDefaultSharedPreferences(v.getContext());
-        boolean callContactOnClick = settingPrefs.getBoolean("call-contact-on-click", false);
+        ResultHelper.recordLaunch(this, context);
 
-        if (callContactOnClick) {
-            if (phone != null)
-                ResultHelper.launchCall(context, v, phone);
-            else if (getImData() != null)
-                ResultHelper.launchIm(getImData(), v);
-        } else {
-            ResultHelper.launchContactView(this, context, v);
+        SharedPreferences settingPrefs = PreferenceManager.getDefaultSharedPreferences(v.getContext());
+        String btnAction = settingPrefs.getString("default-contact-action", "");
+
+        switch (btnAction) {
+            case BTN_ACTION_PHONE:
+                if (phone != null)
+                    ResultHelper.launchCall(context, v, phone);
+                else if (getImData() != null)
+                    ResultHelper.launchIm(getImData(), v);
+                break;
+            case BTN_ACTION_MESSAGE:
+                ResultHelper.launchMessaging(this, v);
+                break;
+            case BTN_ACTION_OPEN:
+                if (getImData() != null)
+                    ResultHelper.launchIm(getImData(), v);
+                else if (phone != null)
+                    ResultHelper.launchCall(context, v, phone);
+                break;
+            default:
+                ResultHelper.launchContactView(this, context, v);
+                break;
         }
+    }
+
+    private static boolean showButtonPopup(View v, @NonNull String buttonId, @DrawableRes int defaultIconRes) {
+        final Context ctx = v.getContext();
+        ListPopup menu = getButtonPopup(ctx, buttonId, defaultIconRes);
+
+        // check if menu contains elements and if yes show it
+        if (!menu.getAdapter().isEmpty()) {
+            TBApplication.getApplication(ctx).registerPopup(menu);
+            menu.show(v);
+            return true;
+        }
+
+        return false;
+    }
+
+    @NonNull
+    private static String getButtonIdFromAction(@NonNull String btnPref) {
+        switch (btnPref) {
+            case BTN_ACTION_PHONE:
+                return BTN_ID_PHONE;
+            case BTN_ACTION_MESSAGE:
+                return BTN_ID_MESSAGE;
+            case BTN_ACTION_OPEN:
+                return BTN_ACTION_OPEN;
+            default:
+                return "";
+        }
+    }
+
+    private static ListPopup getButtonPopup(Context ctx, @NonNull String buttonId, @DrawableRes int defaultButtonIcon) {
+        String btnAction = PreferenceManager.getDefaultSharedPreferences(ctx).getString("default-contact-action", "");
+        String defaultBtnId = getButtonIdFromAction(btnAction);
+
+        LinearAdapter adapter = new LinearAdapter();
+        adapter.add(new LinearAdapter.Item(ctx, R.string.menu_custom_icon));
+        if (!defaultBtnId.equals(buttonId))
+            adapter.add(new LinearAdapter.Item(ctx, R.string.contact_button_set_default));
+        else
+            adapter.add(new LinearAdapter.Item(ctx, R.string.contact_button_reset_default));
+
+        ListPopup menu = ListPopup.create(ctx, adapter);
+        return menu.setOnItemClickListener((a, view, pos) -> {
+            LinearAdapter.MenuItem menuItem = ((LinearAdapter) a).getItem(pos);
+            @StringRes int id = 0;
+            if (menuItem instanceof LinearAdapter.Item) {
+                id = ((LinearAdapter.Item) a.getItem(pos)).stringId;
+            }
+            if (id == R.string.menu_custom_icon) {
+                TBApplication.behaviour(ctx).launchCustomIconDialog(buttonId, defaultButtonIcon);
+            } else if (id == R.string.contact_button_set_default) {
+                SharedPreferences settingPrefs = PreferenceManager.getDefaultSharedPreferences(ctx);
+                var editor = settingPrefs.edit();
+                switch (buttonId) {
+                    case BTN_ID_PHONE:
+                        editor.putString("default-contact-action", BTN_ACTION_PHONE).apply();
+                        //editor.putBoolean("call-contact-on-click", true).apply();
+                        break;
+                    case BTN_ID_MESSAGE:
+                        editor.putString("default-contact-action", BTN_ACTION_MESSAGE).apply();
+                        break;
+                    case BTN_ID_OPEN:
+                        editor.putString("default-contact-action", BTN_ACTION_OPEN).apply();
+                        break;
+                    default:
+                        editor.putString("default-contact-action", "").apply();
+                        break;
+                }
+            } else if (id == R.string.contact_button_reset_default) {
+                PreferenceManager.getDefaultSharedPreferences(ctx)
+                    .edit()
+                    .putString("default-contact-action", "")
+                    .apply();
+            }
+        });
     }
 
     public static class SetContactIconAsync extends AsyncSetEntryDrawable<ContactEntry> {

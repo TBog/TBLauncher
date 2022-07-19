@@ -88,6 +88,15 @@ public abstract class DialogFragment<Output> extends androidx.fragment.app.Dialo
         return this;
     }
 
+    public DialogFragment<Output> putArgInt(@Nullable String key, int value) {
+        Bundle args = getArguments();
+        if (args == null)
+            args = new Bundle();
+        args.putInt(key, value);
+        setArguments(args);
+        return this;
+    }
+
     @Override
     public void onDismiss(@NonNull DialogInterface dialog) {
         if (mOnDismissListener != null)

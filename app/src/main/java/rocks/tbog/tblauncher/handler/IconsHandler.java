@@ -462,6 +462,14 @@ public class IconsHandler {
         return null;
     }
 
+    @Nullable
+    public Drawable getButtonIcon(String buttonId) {
+        Bitmap bitmap = TBApplication.dataHandler(ctx).getCustomEntryIconById(buttonId);
+        if (bitmap != null)
+            return new BitmapDrawable(ctx.getResources(), bitmap);
+        return null;
+    }
+
     @WorkerThread
     public Drawable getCachedAppIcon(String componentName) {
         Bitmap bitmap = TBApplication.dataHandler(ctx).getCachedAppIcon(componentName);
@@ -540,6 +548,14 @@ public class IconsHandler {
         app.drawableCache().cacheDrawable(dialContactEntry.getIconCacheId(), drawable);
     }
 
+    public void changeIcon(@NonNull String buttonId, Drawable drawable) {
+        Bitmap bitmap = getIconBitmap(ctx, drawable);
+        TBApplication app = TBApplication.getApplication(ctx);
+        app.getDataHandler().setCustomButtonIcon(buttonId, bitmap);
+        // we expect calling function to refresh buttons
+        app.drawableCache().cacheDrawable(buttonId, drawable);
+    }
+
     public void restoreDefaultIcon(AppEntry appEntry) {
         TBApplication app = TBApplication.getApplication(ctx);
         app.getDataHandler().removeCustomAppIcon(appEntry.getUserComponentName());
@@ -578,6 +594,13 @@ public class IconsHandler {
 
         app.drawableCache().cacheDrawable(dialContactEntry.getIconCacheId(), null);
         dialContactEntry.clearCustomIcon();
+    }
+
+    public void restoreDefaultIcon(@NonNull String buttonId) {
+        TBApplication app = TBApplication.getApplication(ctx);
+        app.getDataHandler().removeCustomButtonIcon(buttonId);
+
+        app.drawableCache().cacheDrawable(buttonId, null);
     }
 
     public Drawable applyContactMask(@NonNull Context ctx, @NonNull Drawable drawable) {

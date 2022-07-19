@@ -1360,6 +1360,25 @@ public class Behaviour implements ISearchActivity {
         showDialog(dialog, DIALOG_CUSTOM_ICON);
     }
 
+
+    public void launchCustomIconDialog(@NonNull String buttonId, int defaultButtonIcon) {
+        IconSelectDialog dialog = getCustomIconDialog(getContext(), true);
+        dialog
+            .putArgString("buttonId", buttonId)
+            .putArgInt("defaultIcon", defaultButtonIcon);
+
+        dialog.setOnConfirmListener(drawable -> {
+            var iconsHandler = TBApplication.iconsHandler(getContext());
+            if (drawable == null)
+                iconsHandler.restoreDefaultIcon(buttonId);
+            else
+                iconsHandler.changeIcon(buttonId, drawable);
+            // force a result refresh to update the icons from all buttons
+            refreshSearchRecords();
+        });
+        showDialog(dialog, DIALOG_CUSTOM_ICON);
+    }
+
     public void launchEditTagsDialog(EntryWithTags entry) {
         EditTagsDialog dialog = new EditTagsDialog();
         openFragmentDialog(dialog, DIALOG_EDIT_TAGS);
