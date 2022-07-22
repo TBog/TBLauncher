@@ -9,7 +9,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:7.1.1'
+        classpath 'com.android.tools.build:gradle:7.2.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         // see https://keepsafe.github.io/dexcount-gradle-plugin/ for how to use dex method count
         classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:3.1.0'
