@@ -3,12 +3,12 @@ apply plugin: 'kotlin-android'
 apply plugin: 'com.getkeepsafe.dexcount'
 
 android {
-    compileSdkVersion 31
+    compileSdkVersion 32
 
     defaultConfig {
         applicationId "rocks.tbog.tblauncher"
         minSdkVersion 19
-        targetSdkVersion 31
+        targetSdkVersion 32
         versionCode 37
         versionName "6.15"
         vectorDrawables.useSupportLibrary = true
