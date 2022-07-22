@@ -25,6 +25,7 @@ import android.widget.ImageView;
 import androidx.annotation.ColorInt;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.StyleableRes;
 
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.utils.UIColors;
@@ -565,6 +566,7 @@ public class DrawableUtils {
 
     @Nullable
     public static Drawable getProgressBarIndeterminate(Context context) {
+        @SuppressLint("ResourceType") @StyleableRes
         final int[] attrs = {android.R.attr.indeterminateDrawable};
         final int attrs_indeterminateDrawable_index = 0;
         TypedArray a = context.obtainStyledAttributes(android.R.style.Widget_ProgressBar, attrs);
