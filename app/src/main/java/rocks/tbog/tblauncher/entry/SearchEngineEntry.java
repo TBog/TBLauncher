@@ -9,11 +9,13 @@ import android.util.Log;
 import android.view.View;
 
 import androidx.annotation.NonNull;
+import androidx.preference.PreferenceManager;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 
 import rocks.tbog.tblauncher.R;
+import rocks.tbog.tblauncher.ui.LinearAdapter;
 
 public final class SearchEngineEntry extends UrlEntry {
     public static final String SCHEME = "search-engine://";
@@ -29,6 +31,31 @@ public final class SearchEngineEntry extends UrlEntry {
     @Override
     protected String getResultText(Context context) {
         return String.format(context.getString(R.string.ui_item_search), getName(), query);
+    }
+
+    @Override
+    protected void buildPopupMenuCategory(Context context, @NonNull LinearAdapter adapter, int titleStringId) {
+        if (titleStringId == R.string.popup_title_hist_fav) {
+            String defaultSearchProvider = PreferenceManager
+                .getDefaultSharedPreferences(context)
+                .getString("default-search-provider", "Google");
+            if (!defaultSearchProvider.equals(getName()))
+                adapter.add(new LinearAdapter.Item(context, R.string.search_engine_set_default));
+        }
+        super.buildPopupMenuCategory(context, adapter, titleStringId);
+    }
+
+    @Override
+    protected boolean popupMenuClickHandler(@NonNull View view, @NonNull LinearAdapter.MenuItem item, int stringId, View parentView) {
+        if (stringId == R.string.search_engine_set_default) {
+            PreferenceManager
+                .getDefaultSharedPreferences(view.getContext())
+                .edit()
+                .putString("default-search-provider", getName())
+                .apply();
+            return true;
+        }
+        return super.popupMenuClickHandler(view, item, stringId, parentView);
     }
 
     @Override
