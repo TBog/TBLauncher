@@ -2,16 +2,21 @@ package rocks.tbog.tblauncher.preference;
 
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.preference.DialogPreference;
 
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.utils.PrefCache;
 
 public class SliderDialog extends BasePreferenceDialog {
+
+    private static final String TAG = SliderDialog.class.getSimpleName();
 
     public static SliderDialog newInstance(String key) {
         SliderDialog fragment = new SliderDialog();
@@ -43,8 +48,15 @@ public class SliderDialog extends BasePreferenceDialog {
 
         // initialize value
         SharedPreferences sharedPreferences = preference.getSharedPreferences();
-        preference.setValue(sharedPreferences.getInt(key, 255));
-
+        if (sharedPreferences == null) {
+            Log.e(TAG, "getSharedPreferences == null for preference `" + key + "`");
+            return;
+        }
+        {
+            Object value = sharedPreferences.getAll().get(key);
+            if (value != null)
+                preference.setValue(value);
+        }
         SeekBar seekBar = root.findViewById(R.id.seekBar); // seekBar default minimum is set to 0
         if (key.endsWith("-alpha")) {
             seekBar.setMax(255);
@@ -65,12 +77,26 @@ public class SliderDialog extends BasePreferenceDialog {
             case "quick-list-radius":
                 ((TextView) root.findViewById(android.R.id.text1)).setText(R.string.corner_radius);
                 break;
+            case "result-shadow-dx":
+            case "result-shadow-dy":
+            case "popup-shadow-dx":
+            case "popup-shadow-dy":
+            case "search-bar-shadow-dx":
+            case "search-bar-shadow-dy":
+                ((TextView) root.findViewById(android.R.id.text1)).setText(R.string.shadow_offset);
+                break;
+            case "result-shadow-radius":
+            case "popup-shadow-radius":
+            case "search-bar-shadow-radius":
+                ((TextView) root.findViewById(android.R.id.text1)).setText(R.string.shadow_radius);
+                break;
             default:
                 break;
         }
 
         // because we can't set minimum below API 26 we make our own
         int minValue = 0;
+        Float incrementByFloat = null;
         switch (key) {
             case "result-icon-size":
             case "quick-list-icon-size":
@@ -120,59 +146,62 @@ public class SliderDialog extends BasePreferenceDialog {
                 minValue = 1;
                 seekBar.setMax(8 - minValue);
                 break;
+            case "result-shadow-dx":
+            case "result-shadow-dy":
+            case "popup-shadow-dx":
+            case "popup-shadow-dy":
+            case "search-bar-shadow-dx":
+            case "search-bar-shadow-dy":
+                incrementByFloat = .1f;
+                minValue = (int) (-5 / incrementByFloat);
+                seekBar.setMax((int) (5 / incrementByFloat) - minValue);
+                break;
+            case "result-shadow-radius":
+            case "popup-shadow-radius":
+            case "search-bar-shadow-radius":
+                incrementByFloat = .1f;
+                seekBar.setMax((int) (10 / incrementByFloat) - minValue);
+                break;
             default:
                 break;
         }
 
         // set slider value
-        int seekBarProgress = (Integer) preference.getValue() - minValue;
-        seekBar.setProgress(seekBarProgress);
+        setProgressFromPreference(seekBar, preference.getValue(), minValue, incrementByFloat);
 
-        // make change listener
-        TextView text2 = root.findViewById(android.R.id.text2);
-        ProgressChanged listener = new ProgressChanged(minValue, text2, (progress) -> {
-            CustomDialogPreference pref = ((CustomDialogPreference) SliderDialog.this.getPreference());
-            pref.setValue(progress);
-        });
+        final TextView text2 = root.findViewById(android.R.id.text2);
+        final SeekBarChangeListener<?> listener;
+
+        // default change listener uses integers
+        if (incrementByFloat == null) {
+            listener = new SeekBarChangeListener.ProgressChangedInt(minValue, text2, (integer) -> {
+                CustomDialogPreference pref = ((CustomDialogPreference) SliderDialog.this.getPreference());
+                pref.setValue(integer);
+            });
+        } else {
+            listener = new SeekBarChangeListener.ProgressChangedFloat(minValue, incrementByFloat, text2, (aFloat) -> {
+                CustomDialogPreference pref = ((CustomDialogPreference) SliderDialog.this.getPreference());
+                pref.setValue(aFloat);
+            });
+        }
 
         // update display value
-        listener.onProgressChanged(seekBar, seekBarProgress, false);
+        listener.onProgressChanged(seekBar, seekBar.getProgress(), false);
 
         // set change listener
         seekBar.setOnSeekBarChangeListener(listener);
     }
 
-    interface ValueChanged {
-        void valueChanged(int newValue);
-    }
-
-    private static class ProgressChanged implements SeekBar.OnSeekBarChangeListener {
-        private final int offset;
-        private final TextView textView;
-        private final ValueChanged listener;
-
-        public ProgressChanged(int offset, TextView textView, ValueChanged listener) {
-            this.offset = offset;
-            this.textView = textView;
-            this.listener = listener;
+    public static void setProgressFromPreference(@NonNull SeekBar seekBar, @Nullable Object prefValue, int minValue, @Nullable Float incrementByFloat) {
+        final int seekBarProgress;
+        if (prefValue instanceof Integer) {
+            seekBarProgress = (Integer) prefValue - minValue;
+        } else if (prefValue instanceof Float) {
+            float incrementBy = incrementByFloat != null ? incrementByFloat : 1f;
+            seekBarProgress = Math.round(((Float) prefValue) / incrementBy) - minValue;
+        } else {
+            seekBarProgress = 0;
         }
-
-        @Override
-        public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-            progress += offset;
-            textView.setText(textView.getResources().getString(R.string.value, progress));
-        }
-
-        @Override
-        public void onStartTrackingTouch(SeekBar seekBar) {
-            // do nothing
-        }
-
-        @Override
-        public void onStopTrackingTouch(SeekBar seekBar) {
-            int progress = seekBar.getProgress();
-            progress += offset;
-            listener.valueChanged(progress);
-        }
+        seekBar.setProgress(seekBarProgress);
     }
 }

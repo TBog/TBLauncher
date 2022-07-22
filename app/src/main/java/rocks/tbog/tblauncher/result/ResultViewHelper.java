@@ -224,11 +224,27 @@ public final class ResultViewHelper {
         task.execute();
     }
 
+    public static void applyResultItemShadow(@NonNull TextView textView) {
+        Context ctx = textView.getContext();
+        float radius = UISizes.getResultListShadowRadius(ctx);
+        float dx = UISizes.getResultListShadowOffsetHorizontal(ctx);
+        float dy = UISizes.getResultListShadowOffsetVertical(ctx);
+        int color = UIColors.getResultListShadowColor(ctx);
+
+        if (radius != textView.getShadowRadius()
+            || dx != textView.getShadowDx()
+            || dy != textView.getShadowDy()
+            || color != textView.getShadowColor()) {
+            textView.setShadowLayer(radius, dx, dy, color);
+        }
+    }
+
     public static void applyPreferences(int drawFlags, TextView nameView, ImageView iconView) {
         Context ctx = nameView.getContext();
 
         nameView.setTextColor(UIColors.getResultTextColor(ctx));
         nameView.setTextSize(TypedValue.COMPLEX_UNIT_PX, UISizes.getResultTextSize(ctx));
+        applyResultItemShadow(nameView);
 
         if (Utilities.checkAnyFlag(drawFlags, EntryItem.FLAG_DRAW_LIST | EntryItem.FLAG_DRAW_GRID)) {
             ViewGroup.LayoutParams params = iconView.getLayoutParams();

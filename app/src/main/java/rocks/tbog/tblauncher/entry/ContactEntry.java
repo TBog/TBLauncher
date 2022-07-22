@@ -204,10 +204,12 @@ public class ContactEntry extends EntryItem {
             contactPhone.setVisibility(View.VISIBLE);
             contactPhone.setTextColor(UIColors.getResultText2Color(context));
             ResultViewHelper.displayHighlighted(relevanceSource, normalizedPhone, phone, relevance, contactPhone);
+            ResultViewHelper.applyResultItemShadow(contactPhone);
         } else if (getImData() != null && getImData().label != null) {
             contactPhone.setVisibility(View.VISIBLE);
             contactPhone.setTextColor(UIColors.getResultText2Color(context));
             contactPhone.setText(getImData().label);
+            ResultViewHelper.applyResultItemShadow(contactPhone);
         } else {
             contactPhone.setVisibility(View.GONE);
         }
@@ -257,6 +259,7 @@ public class ContactEntry extends EntryItem {
         } else {
             contactNickname.setVisibility(View.VISIBLE);
             ResultViewHelper.displayHighlighted(relevanceSource, normalizedNickname, nickname, relevance, contactNickname);
+            ResultViewHelper.applyResultItemShadow(contactNickname);
         }
     }
 

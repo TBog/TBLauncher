@@ -2,6 +2,7 @@ package rocks.tbog.tblauncher.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.widget.TextView;
 
 import androidx.annotation.AnyRes;
 import androidx.annotation.NonNull;
@@ -20,6 +21,9 @@ public class UITheme {
         "notification-bar-argb",
         "search-bar-argb",
         "result-list-argb",
+        "result-shadow-color",
+        "popup-shadow-color",
+        "search-bar-shadow-color",
         "quick-list-argb",
         "popup-background-argb",
     };
@@ -141,6 +145,36 @@ public class UITheme {
                 prefColor = UIColors.setAlpha(color, 0);
             }
             editor.putInt(prefName, prefColor);
+        }
+    }
+
+    public static void applySearchBarTextShadow(@NonNull TextView textView) {
+        Context ctx = textView.getContext();
+        float radius = UISizes.getSearchBarShadowRadius(ctx);
+        float dx = UISizes.getSearchBarShadowOffsetHorizontal(ctx);
+        float dy = UISizes.getSearchBarShadowOffsetVertical(ctx);
+        int color = UIColors.getSearchShadowColor(ctx);
+
+        if (radius != textView.getShadowRadius()
+            || dx != textView.getShadowDx()
+            || dy != textView.getShadowDy()
+            || color != textView.getShadowColor()) {
+            textView.setShadowLayer(radius, dx, dy, color);
+        }
+    }
+
+    public static void applyPopupTextShadow(@NonNull TextView textView) {
+        Context ctx = textView.getContext();
+        float radius = UISizes.getPopupShadowRadius(ctx);
+        float dx = UISizes.getPopupShadowOffsetHorizontal(ctx);
+        float dy = UISizes.getPopupShadowOffsetVertical(ctx);
+        int color = UIColors.getPopupShadowColor(ctx);
+
+        if (radius != textView.getShadowRadius()
+            || dx != textView.getShadowDx()
+            || dy != textView.getShadowDy()
+            || color != textView.getShadowColor()) {
+            textView.setShadowLayer(radius, dx, dy, color);
         }
     }
 }

@@ -2,9 +2,13 @@ package rocks.tbog.tblauncher.utils;
 
 import android.content.Context;
 import android.content.SharedPreferences;
+import android.content.res.Resources;
+import android.os.Build;
 import android.util.TypedValue;
 import android.view.ViewGroup;
 
+import androidx.annotation.DimenRes;
+import androidx.annotation.NonNull;
 import androidx.preference.PreferenceManager;
 
 import rocks.tbog.tblauncher.R;
@@ -20,7 +24,13 @@ public final class UISizes {
     private static int CACHED_SIZE_DOCK_ICON = 0;
     private static int CACHED_SIZE_STATUS_BAR = 0;
     private static int CACHED_RADIUS_POPUP_CORNER = -1;
-    private static Integer CACHED_ROW_HEIGHT_RESULT_LIST = null;
+    private static Float CACHED_RADIUS_POPUP_SHADOW = null;
+    private static Float CACHED_DX_POPUP_SHADOW = null;
+    private static Float CACHED_DY_POPUP_SHADOW = null;
+    private static Integer CACHED_HEIGHT_RESULT_LIST_ROW = null;
+    private static Float CACHED_RADIUS_RESULT_LIST_SHADOW = null;
+    private static Float CACHED_DX_RESULT_LIST_SHADOW = null;
+    private static Float CACHED_DY_RESULT_LIST_SHADOW = null;
 
     private UISizes() {
     }
@@ -33,7 +43,13 @@ public final class UISizes {
         CACHED_SIZE_DOCK_ICON = 0;
         CACHED_SIZE_STATUS_BAR = 0;
         CACHED_RADIUS_POPUP_CORNER = -1;
-        CACHED_ROW_HEIGHT_RESULT_LIST = null;
+        CACHED_RADIUS_POPUP_SHADOW = null;
+        CACHED_DX_POPUP_SHADOW = null;
+        CACHED_DY_POPUP_SHADOW = null;
+        CACHED_HEIGHT_RESULT_LIST_ROW = null;
+        CACHED_RADIUS_RESULT_LIST_SHADOW = null;
+        CACHED_DX_RESULT_LIST_SHADOW = null;
+        CACHED_DY_RESULT_LIST_SHADOW = null;
     }
 
     public static int sp2px(Context context, int size) {
@@ -108,23 +124,53 @@ public final class UISizes {
     }
 
     public static int getResultListRowHeight(Context context) {
-        if (CACHED_ROW_HEIGHT_RESULT_LIST == null) {
+        if (CACHED_HEIGHT_RESULT_LIST_ROW == null) {
             SharedPreferences pref = TBApplication.getApplication(context).preferences();
             boolean manual = pref.getBoolean("result-list-row-height-manual", false);
             if (manual) {
                 int height = pref.getInt("result-list-row-height", 0);
                 if (height <= 0)
-                    CACHED_ROW_HEIGHT_RESULT_LIST = ViewGroup.LayoutParams.WRAP_CONTENT;
+                    CACHED_HEIGHT_RESULT_LIST_ROW = ViewGroup.LayoutParams.WRAP_CONTENT;
                 else
-                    CACHED_ROW_HEIGHT_RESULT_LIST = dp2px(context, height);
+                    CACHED_HEIGHT_RESULT_LIST_ROW = dp2px(context, height);
             } else {
                 int iconSize = getResultIconSize(context);
                 int resultMargin = context.getResources().getDimensionPixelSize(R.dimen.result_margin_vertical);
                 int iconMargin = context.getResources().getDimensionPixelSize(R.dimen.icon_margin_vertical);
-                CACHED_ROW_HEIGHT_RESULT_LIST = iconSize + 2 * resultMargin + 2 * iconMargin;
+                CACHED_HEIGHT_RESULT_LIST_ROW = iconSize + 2 * resultMargin + 2 * iconMargin;
             }
         }
-        return CACHED_ROW_HEIGHT_RESULT_LIST;
+        return CACHED_HEIGHT_RESULT_LIST_ROW;
+    }
+
+    public static float getResultListShadowRadius(Context context) {
+        if (CACHED_RADIUS_RESULT_LIST_SHADOW == null) {
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+            final float defaultSize = getFloatResource(context.getResources(), R.dimen.default_result_shadow_radius);
+            final float size = pref.getFloat("result-shadow-radius", defaultSize);
+            CACHED_RADIUS_RESULT_LIST_SHADOW = size < 0.001f ? 0f : size;
+        }
+        return CACHED_RADIUS_RESULT_LIST_SHADOW;
+    }
+
+    public static float getResultListShadowOffsetHorizontal(Context context) {
+        if (CACHED_DX_RESULT_LIST_SHADOW == null) {
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+            final float defaultSize = getFloatResource(context.getResources(), R.dimen.default_result_shadow_dx);
+            final float size = pref.getFloat("result-shadow-dx", defaultSize);
+            CACHED_DX_RESULT_LIST_SHADOW = Math.abs(size) < 0.001f ? 0f : size;
+        }
+        return CACHED_DX_RESULT_LIST_SHADOW;
+    }
+
+    public static float getResultListShadowOffsetVertical(Context context) {
+        if (CACHED_DY_RESULT_LIST_SHADOW == null) {
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+            final float defaultSize = getFloatResource(context.getResources(), R.dimen.default_result_shadow_dy);
+            final float size = pref.getFloat("result-shadow-dy", defaultSize);
+            CACHED_DY_RESULT_LIST_SHADOW = Math.abs(size) < 0.001f ? 0f : size;
+        }
+        return CACHED_DY_RESULT_LIST_SHADOW;
     }
 
     public static int getTagsMenuIconSize(Context context) {
@@ -164,6 +210,36 @@ public final class UISizes {
         return CACHED_RADIUS_POPUP_CORNER;
     }
 
+    public static float getPopupShadowRadius(Context context) {
+        if (CACHED_RADIUS_POPUP_SHADOW == null) {
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+            final float defaultSize = getFloatResource(context.getResources(), R.dimen.default_result_shadow_radius);
+            final float size = pref.getFloat("popup-shadow-radius", defaultSize);
+            CACHED_RADIUS_POPUP_SHADOW = size < 0.001f ? 0f : size;
+        }
+        return CACHED_RADIUS_POPUP_SHADOW;
+    }
+
+    public static float getPopupShadowOffsetHorizontal(Context context) {
+        if (CACHED_DX_POPUP_SHADOW == null) {
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+            final float defaultSize = getFloatResource(context.getResources(), R.dimen.default_result_shadow_dx);
+            final float size = pref.getFloat("popup-shadow-dx", defaultSize);
+            CACHED_DX_POPUP_SHADOW = Math.abs(size) < 0.001f ? 0f : size;
+        }
+        return CACHED_DX_POPUP_SHADOW;
+    }
+
+    public static float getPopupShadowOffsetVertical(Context context) {
+        if (CACHED_DY_POPUP_SHADOW == null) {
+            SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
+            final float defaultSize = getFloatResource(context.getResources(), R.dimen.default_result_shadow_dy);
+            final float size = pref.getFloat("popup-shadow-dy", defaultSize);
+            CACHED_DY_POPUP_SHADOW = Math.abs(size) < 0.001f ? 0f : size;
+        }
+        return CACHED_DY_POPUP_SHADOW;
+    }
+
 //    /**
 //     * Example usage: `int size = UISizes.getTextAppearanceTextSize(context, android.R.attr.textAppearanceMedium);`
 //     *
@@ -200,6 +276,27 @@ public final class UISizes {
         return dp2px(context, margin);
     }
 
+    public static float getSearchBarShadowRadius(Context context) {
+        SharedPreferences pref = TBApplication.getApplication(context).preferences();
+        final float defaultSize = getFloatResource(context.getResources(), R.dimen.default_result_shadow_radius);
+        final float size = pref.getFloat("search-bar-shadow-radius", defaultSize);
+        return size < 0.001f ? 0f : size;
+    }
+
+    public static float getSearchBarShadowOffsetHorizontal(Context context) {
+        SharedPreferences pref = TBApplication.getApplication(context).preferences();
+        final float defaultSize = getFloatResource(context.getResources(), R.dimen.default_result_shadow_dx);
+        final float size = pref.getFloat("search-bar-shadow-dx", defaultSize);
+        return Math.abs(size) < 0.001f ? 0f : size;
+    }
+
+    public static float getSearchBarShadowOffsetVertical(Context context) {
+        SharedPreferences pref = TBApplication.getApplication(context).preferences();
+        final float defaultSize = getFloatResource(context.getResources(), R.dimen.default_result_shadow_dy);
+        final float size = pref.getFloat("search-bar-shadow-dy", defaultSize);
+        return Math.abs(size) < 0.001f ? 0f : size;
+    }
+
     public static int getQuickListMarginVertical(Context context) {
         SharedPreferences pref = TBApplication.getApplication(context).preferences();
         int margin = pref.getInt("quick-list-margin-vertical", 0);
@@ -210,5 +307,23 @@ public final class UISizes {
         SharedPreferences pref = TBApplication.getApplication(context).preferences();
         int margin = pref.getInt("quick-list-margin-horizontal", 0);
         return dp2px(context, margin);
+    }
+
+    private static float getFloatResource(@NonNull Resources resources, @DimenRes int resId) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            return resources.getFloat(resId);
+        } else {
+            final TypedValue value = new TypedValue();
+            try {
+                resources.getValue(resId, value, true);
+                if (value.type == TypedValue.TYPE_FLOAT) {
+                    return value.getFloat();
+                }
+                throw new Resources.NotFoundException("Resource ID #0x" + Integer.toHexString(resId)
+                    + " type #0x" + Integer.toHexString(value.type) + " is not valid");
+            } catch (Resources.NotFoundException e) {
+                return 0f;
+            }
+        }
     }
 }
