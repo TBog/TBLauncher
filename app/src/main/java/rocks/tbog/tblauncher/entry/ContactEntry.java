@@ -1,5 +1,9 @@
 package rocks.tbog.tblauncher.entry;
 
+import static rocks.tbog.tblauncher.customicon.ButtonHelper.BTN_ID_MESSAGE;
+import static rocks.tbog.tblauncher.customicon.ButtonHelper.BTN_ID_OPEN;
+import static rocks.tbog.tblauncher.customicon.ButtonHelper.BTN_ID_PHONE;
+
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -29,6 +33,7 @@ import java.io.InputStream;
 import rocks.tbog.tblauncher.BuildConfig;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
+import rocks.tbog.tblauncher.customicon.ButtonHelper;
 import rocks.tbog.tblauncher.handler.IconsHandler;
 import rocks.tbog.tblauncher.normalizer.PhoneNormalizer;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
@@ -47,11 +52,8 @@ public class ContactEntry extends EntryItem {
     public static final String SCHEME = "contact://";
     private static final int[] RESULT_LAYOUT = {R.layout.item_contact, R.layout.item_grid, R.layout.item_dock};
     private static final String BTN_ACTION_PHONE = "phone";
-    private static final String BTN_ID_PHONE = "button://item_contact_action_phone";
     private static final String BTN_ACTION_MESSAGE = "message";
-    private static final String BTN_ID_MESSAGE = "button://item_contact_action_message";
     private static final String BTN_ACTION_OPEN = "open";
-    private static final String BTN_ID_OPEN = "button://item_contact_action_open";
     public String lookupKey;
 
     protected String phone;
@@ -354,20 +356,6 @@ public class ContactEntry extends EntryItem {
         }
     }
 
-    private static boolean showButtonPopup(View v, @NonNull String buttonId, @DrawableRes int defaultIconRes) {
-        final Context ctx = v.getContext();
-        ListPopup menu = getButtonPopup(ctx, buttonId, defaultIconRes);
-
-        // check if menu contains elements and if yes show it
-        if (!menu.getAdapter().isEmpty()) {
-            TBApplication.getApplication(ctx).registerPopup(menu);
-            menu.show(v);
-            return true;
-        }
-
-        return false;
-    }
-
     @NonNull
     private static String getButtonIdFromAction(@NonNull String btnPref) {
         switch (btnPref) {
@@ -382,7 +370,14 @@ public class ContactEntry extends EntryItem {
         }
     }
 
-    private static ListPopup getButtonPopup(Context ctx, @NonNull String buttonId, @DrawableRes int defaultButtonIcon) {
+    private static boolean showButtonPopup(@NonNull View view, @NonNull String buttonId, @DrawableRes int defaultButtonIcon) {
+        final Context context = view.getContext();
+        ListPopup buttonMenu = getButtonPopup(context, buttonId, defaultButtonIcon);
+        return ButtonHelper.showButtonPopup(view, buttonMenu);
+    }
+
+    @NonNull
+    public static ListPopup getButtonPopup(Context ctx, @NonNull String buttonId, @DrawableRes int defaultButtonIcon) {
         String btnAction = PreferenceManager.getDefaultSharedPreferences(ctx).getString("default-contact-action", "");
         String defaultBtnId = getButtonIdFromAction(btnAction);
 
@@ -393,8 +388,7 @@ public class ContactEntry extends EntryItem {
         else
             adapter.add(new LinearAdapter.Item(ctx, R.string.contact_button_reset_default));
 
-        ListPopup menu = ListPopup.create(ctx, adapter);
-        return menu.setOnItemClickListener((a, view, pos) -> {
+        return ListPopup.create(ctx, adapter).setOnItemClickListener((a, view, pos) -> {
             LinearAdapter.MenuItem menuItem = ((LinearAdapter) a).getItem(pos);
             @StringRes int id = 0;
             if (menuItem instanceof LinearAdapter.Item) {

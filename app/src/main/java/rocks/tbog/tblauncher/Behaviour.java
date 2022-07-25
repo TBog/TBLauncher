@@ -30,6 +30,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.DrawableRes;
 import androidx.annotation.IdRes;
 import androidx.annotation.LayoutRes;
 import androidx.annotation.NonNull;
@@ -50,6 +51,7 @@ import java.util.List;
 import java.util.Random;
 import java.util.Set;
 
+import rocks.tbog.tblauncher.customicon.ButtonHelper;
 import rocks.tbog.tblauncher.customicon.IconSelectDialog;
 import rocks.tbog.tblauncher.dataprovider.IProvider;
 import rocks.tbog.tblauncher.dataprovider.TagsProvider;
@@ -288,7 +290,14 @@ public class Behaviour implements ISearchActivity {
     }
 
     private void initLauncherButtons() {
+        final ListPopup buttonMenu;
+        if (PrefCache.getSearchBarLayout(mPref) == R.layout.search_pill)
+            buttonMenu = getButtonPopup(getContext(), ButtonHelper.BTN_ID_LAUNCHER_PILL, R.drawable.launcher_pill);
+        else
+            buttonMenu = getButtonPopup(getContext(), ButtonHelper.BTN_ID_LAUNCHER_WHITE, R.drawable.launcher_white);
+
         mLauncherButton.setOnClickListener((v) -> executeButtonAction("button-launcher"));
+        mLauncherButton.setOnLongClickListener((v) -> ButtonHelper.showButtonPopup(v, buttonMenu));
 
         // menu button / 3 dot button actions
         mMenuButton.setOnClickListener(v -> {
@@ -1232,6 +1241,24 @@ public class Behaviour implements ISearchActivity {
         // Calling super.onBackPressed() will quit the launcher, only do this if this is not the user's default home.
         // Action not handled (return false) if not the default launcher.
         return TBApplication.isDefaultLauncher(mTBLauncherActivity);
+    }
+
+    @NonNull
+    public static ListPopup getButtonPopup(@NonNull Context ctx, @NonNull String buttonId, @DrawableRes int defaultButtonIcon) {
+        LinearAdapter adapter = new LinearAdapter();
+        adapter.add(new LinearAdapter.ItemTitle(ctx, R.string.popup_title_customize));
+        adapter.add(new LinearAdapter.Item(ctx, R.string.menu_custom_icon));
+
+        return ListPopup.create(ctx, adapter).setOnItemClickListener((a, view, pos) -> {
+            LinearAdapter.MenuItem menuItem = ((LinearAdapter) a).getItem(pos);
+            @StringRes int id = 0;
+            if (menuItem instanceof LinearAdapter.Item) {
+                id = ((LinearAdapter.Item) a.getItem(pos)).stringId;
+            }
+            if (id == R.string.menu_custom_icon) {
+                TBApplication.behaviour(ctx).launchCustomIconDialog(buttonId, defaultButtonIcon);
+            }
+        });
     }
 
     @NonNull
