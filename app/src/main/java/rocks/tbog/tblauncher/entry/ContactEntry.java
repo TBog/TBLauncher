@@ -395,7 +395,13 @@ public class ContactEntry extends EntryItem {
                 id = ((LinearAdapter.Item) a.getItem(pos)).stringId;
             }
             if (id == R.string.menu_custom_icon) {
-                TBApplication.behaviour(ctx).launchCustomIconDialog(buttonId, defaultButtonIcon);
+                TBApplication.behaviour(ctx).launchCustomIconDialog(buttonId, defaultButtonIcon, () -> {
+                    // force a result refresh to update the icons from all contact buttons
+                    var activity = TBApplication.launcherActivity(ctx);
+                    if (activity != null)
+                        activity.refreshSearchRecords();
+
+                });
             } else if (id == R.string.contact_button_set_default) {
                 SharedPreferences settingPrefs = PreferenceManager.getDefaultSharedPreferences(ctx);
                 var editor = settingPrefs.edit();

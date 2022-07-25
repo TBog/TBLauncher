@@ -1,5 +1,8 @@
 package rocks.tbog.tblauncher;
 
+import static rocks.tbog.tblauncher.customicon.ButtonHelper.BTN_ID_LAUNCHER_PILL;
+import static rocks.tbog.tblauncher.customicon.ButtonHelper.BTN_ID_LAUNCHER_WHITE;
+
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.ColorStateList;
@@ -25,11 +28,13 @@ import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.constraintlayout.motion.widget.MotionLayout;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 import androidx.preference.PreferenceManager;
 
 import rocks.tbog.tblauncher.drawable.LoadingDrawable;
+import rocks.tbog.tblauncher.result.ResultViewHelper;
 import rocks.tbog.tblauncher.ui.RecyclerList;
 import rocks.tbog.tblauncher.ui.SearchEditText;
 import rocks.tbog.tblauncher.utils.EdgeGlowHelper;
@@ -143,10 +148,7 @@ public class CustomizeUI {
     }
 
     public void onStart() {
-        if (PrefCache.getSearchBarLayout(mPref) == R.layout.search_pill)
-            setSearchPillPref();
-        else
-            setSearchBarPref();
+        refreshSearchBar();
         View resultLayout = findViewById(R.id.resultLayout);
         setResultListPref(resultLayout, true);
         resultLayout.addOnLayoutChangeListener(updateResultFadeOut);
@@ -186,6 +188,13 @@ public class CustomizeUI {
 
         // Navigation bar icon color
         mWindowHelper.setAppearanceLightNavigationBars(UIColors.isColorLight(argb));
+    }
+
+    public void refreshSearchBar() {
+        if (PrefCache.getSearchBarLayout(mPref) == R.layout.search_pill)
+            setSearchPillPref();
+        else
+            setSearchBarPref();
     }
 
     private void setSearchBarPref() {
@@ -241,11 +250,14 @@ public class CustomizeUI {
         }
 
         // icon
-        mLauncherButton.setImageDrawable(new LoadingDrawable());
+        ResultViewHelper.setButtonIconAsync(mLauncherButton, BTN_ID_LAUNCHER_WHITE, context -> {
+            Drawable drawable = new LoadingDrawable();
+            Utilities.setColorFilterMultiply(drawable, searchIconColor);
+            return drawable;
+        });
 
         // icon color
         {
-            Utilities.setColorFilterMultiply(mLauncherButton, searchIconColor);
             Utilities.setColorFilterMultiply(mMenuButton, searchIconColor);
             Utilities.setColorFilterMultiply(mClearButton, searchIconColor);
             mLauncherButton.setBackground(getSelectorDrawable(mLauncherButton, searchBarRipple, true));
@@ -333,9 +345,17 @@ public class CustomizeUI {
             Utilities.setTextSelectHandleColor(mSearchBar, searchBarRipple);
         }
 
+        // set icon
+        {
+            ResultViewHelper.setButtonIconAsync(mLauncherButton, BTN_ID_LAUNCHER_PILL, context -> {
+                Drawable drawable = ResourcesCompat.getDrawable(context.getResources(), R.drawable.launcher_pill, null);
+                Utilities.setColorFilterMultiply(drawable, searchIconColor);
+                return drawable;
+            });
+        }
+
         // icon color
         {
-            Utilities.setColorFilterMultiply(mLauncherButton, searchIconColor);
             Utilities.setColorFilterMultiply(mMenuButton, searchIconColor);
             Utilities.setColorFilterMultiply(mClearButton, searchIconColor);
             mLauncherButton.setBackground(getSelectorDrawable(mLauncherButton, searchBarRipple, true));

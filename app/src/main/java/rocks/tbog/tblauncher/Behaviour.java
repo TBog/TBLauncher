@@ -1256,7 +1256,10 @@ public class Behaviour implements ISearchActivity {
                 id = ((LinearAdapter.Item) a.getItem(pos)).stringId;
             }
             if (id == R.string.menu_custom_icon) {
-                TBApplication.behaviour(ctx).launchCustomIconDialog(buttonId, defaultButtonIcon);
+                TBApplication.behaviour(ctx).launchCustomIconDialog(buttonId, defaultButtonIcon, () -> {
+                    // refresh search bar preferences to reload the icon
+                    TBApplication.ui(ctx).refreshSearchBar();
+                });
             }
         });
     }
@@ -1388,7 +1391,7 @@ public class Behaviour implements ISearchActivity {
     }
 
 
-    public void launchCustomIconDialog(@NonNull String buttonId, int defaultButtonIcon) {
+    public void launchCustomIconDialog(@NonNull String buttonId, int defaultButtonIcon, @Nullable Runnable afterConfirmation) {
         IconSelectDialog dialog = getCustomIconDialog(getContext(), true);
         dialog
             .putArgString("buttonId", buttonId)
@@ -1400,8 +1403,8 @@ public class Behaviour implements ISearchActivity {
                 iconsHandler.restoreDefaultIcon(buttonId);
             else
                 iconsHandler.changeIcon(buttonId, drawable);
-            // force a result refresh to update the icons from all buttons
-            refreshSearchRecords();
+            if (afterConfirmation != null)
+                afterConfirmation.run();
         });
         showDialog(dialog, DIALOG_CUSTOM_ICON);
     }
