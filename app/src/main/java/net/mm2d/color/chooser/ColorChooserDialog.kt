@@ -26,9 +26,9 @@ import rocks.tbog.tblauncher.databinding.Mm2dCcColorChooserBinding
  */
 object ColorChooserDialog {
     private const val KEY_REQUEST_KEY = "KEY_REQUEST_KEY"
-    private const val KEY_INITIAL_COLOR = "KEY_INITIAL_COLOR"
+    const val KEY_INITIAL_COLOR = "KEY_INITIAL_COLOR"
     private const val KEY_WITH_ALPHA = "KEY_WITH_ALPHA"
-    private const val KEY_INITIAL_TAB = "KEY_INITIAL_TAB"
+    const val KEY_INITIAL_TAB = "KEY_INITIAL_TAB"
     private const val RESULT_KEY_COLOR = "RESULT_KEY_COLOR"
     private const val RESULT_KEY_CANCEL = "RESULT_KEY_CANCEL"
     private const val TAG = "ColorChooserDialog"
