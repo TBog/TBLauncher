@@ -27,13 +27,13 @@ internal class ColorSliderView
     private val paint = Paint().also {
         it.isAntiAlias = true
     }
-    private val _padding = getPixels(R.dimen.mm2d_cc_panel_margin)
-    private val _width = getPixels(R.dimen.mm2d_cc_slider_width) + _padding * 2
-    private val _height = getPixels(R.dimen.mm2d_cc_slider_height) + _padding * 2
-    private val _sampleRadius = getDimension(R.dimen.mm2d_cc_sample_radius)
-    private val _sampleFrameRadius = _sampleRadius + getDimension(R.dimen.mm2d_cc_sample_frame)
-    private val _sampleShadowRadius =
-        _sampleFrameRadius + getDimension(R.dimen.mm2d_cc_sample_shadow)
+    private val requestPadding = getPixels(R.dimen.mm2d_cc_panel_margin)
+    private val requestWidth = getPixels(R.dimen.mm2d_cc_slider_width) + requestPadding * 2
+    private val requestHeight = getPixels(R.dimen.mm2d_cc_slider_height) + requestPadding * 2
+    private val sampleRadius = getDimension(R.dimen.mm2d_cc_sample_radius)
+    private val sampleFrameRadius = sampleRadius + getDimension(R.dimen.mm2d_cc_sample_frame)
+    private val sampleShadowRadius =
+        sampleFrameRadius + getDimension(R.dimen.mm2d_cc_sample_shadow)
     private val frameLineWidth = getDimension(R.dimen.mm2d_cc_sample_frame)
     private val shadowLineWidth = getDimension(R.dimen.mm2d_cc_sample_shadow)
     private val gradationRect = Rect(0, 0, RANGE, 1)
@@ -41,14 +41,14 @@ internal class ColorSliderView
     private val colorSampleFrame = getColor(R.color.mm2d_cc_sample_frame)
     private val colorSampleShadow = getColor(R.color.mm2d_cc_sample_shadow)
     private var checker: Bitmap? = null
-    private var _value: Float = 0f
+    private var floatValue: Float = 0f
     private var maxColor: Int = Color.WHITE
     private var gradation: Bitmap
     private var baseColor: Int = Color.BLACK
     private var alphaMode: Boolean = true
     var onValueChanged: ((value: Int, fromUser: Boolean) -> Unit)? = null
     val value: Int
-        get() = (_value * MAX).toInt()
+        get() = (floatValue * MAX).toInt()
 
     init {
         context.withStyledAttributes(attrs, R.styleable.ColorSliderView) {
@@ -67,7 +67,7 @@ internal class ColorSliderView
     }
 
     fun setValue(value: Int) {
-        _value = (value / MAX.toFloat()).coerceIn(0f, 1f)
+        floatValue = (value / MAX.toFloat()).coerceIn(0f, 1f)
         onValueChanged?.invoke(value, false)
         invalidate()
     }
@@ -90,7 +90,7 @@ internal class ColorSliderView
         if (event.action == MotionEvent.ACTION_DOWN) {
             parent.requestDisallowInterceptTouchEvent(true)
         }
-        _value = ((event.x - targetRect.left) / targetRect.width().toFloat()).coerceIn(0f, 1f)
+        floatValue = ((event.x - targetRect.left) / targetRect.width().toFloat()).coerceIn(0f, 1f)
         onValueChanged?.invoke(value, true)
         invalidate()
         return true
@@ -98,10 +98,10 @@ internal class ColorSliderView
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
         targetRect.set(
-            paddingLeft + _padding,
-            paddingTop + _padding,
-            width - paddingRight - _padding,
-            height - paddingBottom - _padding
+            paddingLeft + requestPadding,
+            paddingTop + requestPadding,
+            width - paddingRight - requestPadding,
+            height - paddingBottom - requestPadding
         )
     }
 
@@ -130,26 +130,26 @@ internal class ColorSliderView
             canvas.drawRect(targetRect, paint)
         }
         canvas.drawBitmap(gradation, gradationRect, targetRect, paint)
-        val x = _value * targetRect.width() + targetRect.left
+        val x = floatValue * targetRect.width() + targetRect.left
         val y = targetRect.centerY().toFloat()
         paint.color = colorSampleShadow
-        canvas.drawCircle(x, y, _sampleShadowRadius, paint)
+        canvas.drawCircle(x, y, sampleShadowRadius, paint)
         paint.color = colorSampleFrame
-        canvas.drawCircle(x, y, _sampleFrameRadius, paint)
+        canvas.drawCircle(x, y, sampleFrameRadius, paint)
         paint.color = baseColor
-        canvas.drawCircle(x, y, _sampleRadius, paint)
+        canvas.drawCircle(x, y, sampleRadius, paint)
         paint.color = maxColor.setAlpha(value)
-        canvas.drawCircle(x, y, _sampleRadius, paint)
+        canvas.drawCircle(x, y, sampleRadius, paint)
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         setMeasuredDimension(
             getDefaultSize(
-                maxOf(_width + paddingLeft + paddingRight, suggestedMinimumWidth),
+                maxOf(requestWidth + paddingLeft + paddingRight, suggestedMinimumWidth),
                 widthMeasureSpec
             ),
             resolveSizeAndState(
-                maxOf(_height + paddingTop + paddingBottom, suggestedMinimumHeight),
+                maxOf(requestHeight + paddingTop + paddingBottom, suggestedMinimumHeight),
                 heightMeasureSpec,
                 MeasureSpec.UNSPECIFIED
             )

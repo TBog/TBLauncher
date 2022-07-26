@@ -31,14 +31,14 @@ internal class HueView
     private var color: Int = Color.RED
     private val paint = Paint()
     private val bitmap: Bitmap = createMaskBitmap()
-    private val _padding = getPixels(R.dimen.mm2d_cc_panel_margin)
-    private val _width = getPixels(R.dimen.mm2d_cc_hue_width) + _padding * 2
-    private val _height = getPixels(R.dimen.mm2d_cc_hsv_size) + _padding * 2
-    private val _sampleRadius = getDimension(R.dimen.mm2d_cc_sample_radius)
-    private val _sampleFrameRadius =
-        _sampleRadius + getDimension(R.dimen.mm2d_cc_sample_frame)
+    private val requestPadding = getPixels(R.dimen.mm2d_cc_panel_margin)
+    private val requestWidth = getPixels(R.dimen.mm2d_cc_hue_width) + requestPadding * 2
+    private val requestHeight = getPixels(R.dimen.mm2d_cc_hsv_size) + requestPadding * 2
+    private val sampleRadius = getDimension(R.dimen.mm2d_cc_sample_radius)
+    private val sampleFrameRadius =
+        sampleRadius + getDimension(R.dimen.mm2d_cc_sample_frame)
     private val _sampleShadowRadius =
-        _sampleFrameRadius + getDimension(R.dimen.mm2d_cc_sample_shadow)
+        sampleFrameRadius + getDimension(R.dimen.mm2d_cc_sample_shadow)
     private val bitmapRect = Rect(0, 0, 1, RANGE)
     private val targetRect = Rect()
     private var hue: Float = 0f
@@ -68,10 +68,10 @@ internal class HueView
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
         targetRect.set(
-            paddingLeft + _padding,
-            paddingTop + _padding,
-            width - paddingRight - _padding,
-            height - paddingBottom - _padding
+            paddingLeft + requestPadding,
+            paddingTop + requestPadding,
+            width - paddingRight - requestPadding,
+            height - paddingBottom - requestPadding
         )
     }
 
@@ -82,20 +82,20 @@ internal class HueView
         paint.color = colorSampleShadow
         canvas.drawCircle(x, y, _sampleShadowRadius, paint)
         paint.color = colorSampleFrame
-        canvas.drawCircle(x, y, _sampleFrameRadius, paint)
+        canvas.drawCircle(x, y, sampleFrameRadius, paint)
         paint.color = color
-        canvas.drawCircle(x, y, _sampleRadius, paint)
+        canvas.drawCircle(x, y, sampleRadius, paint)
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         setMeasuredDimension(
             resolveSizeAndState(
-                max(_width + paddingLeft + paddingRight, suggestedMinimumWidth),
+                max(requestWidth + paddingLeft + paddingRight, suggestedMinimumWidth),
                 widthMeasureSpec,
                 MeasureSpec.UNSPECIFIED
             ),
             resolveSizeAndState(
-                max(_height + paddingTop + paddingBottom, suggestedMinimumHeight),
+                max(requestHeight + paddingTop + paddingBottom, suggestedMinimumHeight),
                 heightMeasureSpec,
                 MeasureSpec.UNSPECIFIED
             )

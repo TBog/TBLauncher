@@ -19,6 +19,7 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.graphics.alpha
 import androidx.core.view.ViewCompat
 import androidx.core.view.isVisible
+import androidx.lifecycle.Observer
 import net.mm2d.color.chooser.util.resolveColor
 import net.mm2d.color.chooser.util.setAlpha
 import net.mm2d.color.chooser.util.toOpacity
@@ -31,10 +32,8 @@ internal class ControlView
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : ConstraintLayout(context, attrs, defStyleAttr), ColorObserver {
-    private val colorChangeMediator by lazy {
-        findColorChangeMediator()
-    }
+) : ConstraintLayout(context, attrs, defStyleAttr), Observer<Int> {
+    private val delegate = ColorObserverDelegate(this)
     private val normalTint =
         ColorStateList.valueOf(context.resolveColor(R.attr.colorAccent, Color.BLUE))
     private val errorTint =
@@ -74,12 +73,22 @@ internal class ControlView
                     clearError()
                     binding.colorPreview.setColor(color)
                     binding.seekAlpha.setValue(color.alpha)
-                    colorChangeMediator?.onChangeColor(color.toOpacity())
+                    delegate.post(color.toOpacity())
                 } catch (e: IllegalArgumentException) {
                     setError()
                 }
             }
         })
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        delegate.onAttachedToWindow()
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        delegate.onDetachedFromWindow()
     }
 
     fun setAlpha(alpha: Int) {
@@ -110,7 +119,7 @@ internal class ControlView
     }
 
     override fun onChanged(color: Int?) {
-        if (color == null) return
+        color ?: return
         if (this.color.toOpacity() == color) return
         this.color = color.setAlpha(binding.seekAlpha.value)
         binding.colorPreview.setColor(this.color)

@@ -8,20 +8,18 @@
 package net.mm2d.color.chooser
 
 import android.app.Dialog
+import android.content.DialogInterface
 import android.graphics.Color
 import android.os.Bundle
-import android.view.LayoutInflater
-import android.view.View
-import android.view.ViewGroup
 import androidx.annotation.ColorInt
+import androidx.appcompat.app.AlertDialog
 import androidx.core.os.bundleOf
+import androidx.fragment.app.DialogFragment
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
 import androidx.fragment.app.FragmentManager
 import androidx.lifecycle.LifecycleOwner
 import rocks.tbog.tblauncher.databinding.Mm2dCcColorChooserBinding
-import rocks.tbog.tblauncher.ui.DialogFragment
-import rocks.tbog.tblauncher.utils.UIColors
 
 /**
  * Color chooser dialog
@@ -32,6 +30,7 @@ object ColorChooserDialog {
     private const val KEY_WITH_ALPHA = "KEY_WITH_ALPHA"
     private const val KEY_INITIAL_TAB = "KEY_INITIAL_TAB"
     private const val RESULT_KEY_COLOR = "RESULT_KEY_COLOR"
+    private const val RESULT_KEY_CANCEL = "RESULT_KEY_CANCEL"
     private const val TAG = "ColorChooserDialog"
     const val TAB_PALETTE: Int = 0
     const val TAB_HSV: Int = 1
@@ -42,6 +41,7 @@ object ColorChooserDialog {
      *
      * Register using registerListener at the timing of onCreate of activity or onViewCreated of fragment.
      */
+    @Deprecated("Use lambda expression")
     fun interface ColorChooserListener {
         /**
          * Called when the color selection is confirmed.
@@ -62,16 +62,23 @@ object ColorChooserDialog {
      * @param requestKey Request Key, pass the same value to the `show`
      * @param listener Listener receiving the result
      */
+    @Deprecated(
+        "Use the lambda version",
+        ReplaceWith(
+            "registerListener(activity, requestKey, { listener.onColorSelected(it) }, {},)",
+            "net.mm2d.color.chooser.ColorChooserDialog.registerListener"
+        )
+    )
     fun registerListener(
         activity: FragmentActivity,
         requestKey: String,
         listener: ColorChooserListener
     ) {
         registerListener(
-            activity.supportFragmentManager,
-            requestKey,
             activity,
-            listener
+            requestKey,
+            { listener.onColorSelected(it) },
+            {},
         )
     }
 
@@ -84,16 +91,73 @@ object ColorChooserDialog {
      * @param requestKey Request Key, pass the same value to the `show`
      * @param listener Listener receiving the result
      */
+    @Deprecated(
+        "Use the lambda version",
+        ReplaceWith(
+            "registerListener(fragment, requestKey, { listener.onColorSelected(it) }, {},)",
+            "net.mm2d.color.chooser.ColorChooserDialog.registerListener"
+        )
+    )
     fun registerListener(
         fragment: Fragment,
         requestKey: String,
         listener: ColorChooserListener
     ) {
         registerListener(
+            fragment,
+            requestKey,
+            { listener.onColorSelected(it) },
+            {},
+        )
+    }
+
+    /**
+     * Register result listener.
+     *
+     * Call at the timing of onCreate of activity.
+     *
+     * @param activity Caller fragment activity
+     * @param requestKey Request Key, pass the same value to the `show`
+     * @param onSelect Listener receiving the result
+     * @param onCancel Listener receiving a cancel event
+     */
+    fun registerListener(
+        activity: FragmentActivity,
+        requestKey: String,
+        onSelect: (color: Int) -> Unit,
+        onCancel: (() -> Unit)? = null,
+    ) {
+        registerListener(
+            activity.supportFragmentManager,
+            requestKey,
+            activity,
+            onSelect,
+            onCancel,
+        )
+    }
+
+    /**
+     * Register result listener.
+     *
+     * Call at the timing of onViewCreated of fragment.
+     *
+     * @param fragment Caller fragment
+     * @param requestKey Request Key, pass the same value to the `show`
+     * @param onSelect Listener receiving the result
+     * @param onCancel Listener receiving a cancel event
+     */
+    fun registerListener(
+        fragment: Fragment,
+        requestKey: String,
+        onSelect: (color: Int) -> Unit,
+        onCancel: (() -> Unit)? = null,
+    ) {
+        registerListener(
             fragment.childFragmentManager,
             requestKey,
             fragment.viewLifecycleOwner,
-            listener
+            onSelect,
+            onCancel,
         )
     }
 
@@ -101,10 +165,15 @@ object ColorChooserDialog {
         manager: FragmentManager,
         requestKey: String,
         lifecycleOwner: LifecycleOwner,
-        listener: ColorChooserListener
+        onSelect: (color: Int) -> Unit,
+        onCancel: (() -> Unit)?,
     ) {
         manager.setFragmentResultListener(requestKey, lifecycleOwner) { _, result ->
-            listener.onColorSelected(result.getInt(RESULT_KEY_COLOR))
+            if (result.getBoolean(RESULT_KEY_CANCEL)) {
+                onCancel?.invoke()
+            } else {
+                onSelect.invoke(result.getInt(RESULT_KEY_COLOR))
+            }
         }
     }
 
@@ -170,33 +239,36 @@ object ColorChooserDialog {
         }.show(manager, TAG)
     }
 
-    internal class ColorChooserDialogImpl : DialogFragment<Int>() {
-        private var _colorChooserView: ColorChooserView? = null
-        private val colorChooserView: ColorChooserView
-            get() = _colorChooserView ?: throw IllegalStateException()
+    internal class ColorChooserDialogImpl : DialogFragment() {
+        private lateinit var colorChooserView: ColorChooserView
 
-        override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-            val dialogContext = requireDialog().context
-
-            setupDefaultButtonOkCancel(dialogContext)
-            setOnPositiveClickListener { _, _ -> notifySelect() }
+        override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+            val activity = requireActivity()
+            colorChooserView =
+                Mm2dCcColorChooserBinding.inflate(activity.layoutInflater).root
 
             if (savedInstanceState != null) {
-                val tab = savedInstanceState.getInt(KEY_INITIAL_TAB, TAB_RGB)
-                val color = savedInstanceState.getInt(KEY_INITIAL_COLOR, UIColors.COLOR_DEFAULT)
+                val tab = savedInstanceState.getInt(KEY_INITIAL_TAB, 0)
+                colorChooserView.setCurrentItem(tab)
+                val color = savedInstanceState.getInt(KEY_INITIAL_COLOR, 0)
+                colorChooserView.init(color)
+            } else {
                 val arguments = requireArguments()
-                arguments.putInt(KEY_INITIAL_TAB, tab)
-                arguments.putInt(KEY_INITIAL_COLOR, color)
+                val tab = arguments.getInt(KEY_INITIAL_TAB, 0)
+                colorChooserView.setCurrentItem(tab)
+                val color = arguments.getInt(KEY_INITIAL_COLOR, 0)
+                colorChooserView.init(color)
             }
-
-            // make sure we use the dialog context
-            val dialogInflater = inflater.cloneInContext(dialogContext)
-            return super.onCreateView(dialogInflater, container, savedInstanceState)
-        }
-
-        override fun onDestroyView() {
-            super.onDestroyView()
-            _colorChooserView = null
+            colorChooserView.setWithAlpha(requireArguments().getBoolean(KEY_WITH_ALPHA))
+            return AlertDialog.Builder(activity)
+                .setView(colorChooserView)
+                .setPositiveButton("OK") { _, _ ->
+                    notifySelect()
+                }
+                .setNegativeButton("Cancel") { dialog, _ ->
+                    dialog.cancel()
+                }
+                .create()
         }
 
         override fun onSaveInstanceState(outState: Bundle) {
@@ -205,27 +277,21 @@ object ColorChooserDialog {
             outState.putInt(KEY_INITIAL_COLOR, colorChooserView.color)
         }
 
-        private fun notifySelect() {
+        override fun onCancel(dialog: DialogInterface) {
             val key = requireArguments().getString(KEY_REQUEST_KEY) ?: return
             parentFragmentManager.setFragmentResult(
-                key, bundleOf(RESULT_KEY_COLOR to colorChooserView.color)
+                key, bundleOf(RESULT_KEY_CANCEL to true)
             )
         }
 
-        override fun layoutRes(): Int {
-            // We'll override inflateLayoutRes so we don't need this
-            return 0;
-        }
-
-        override fun inflateLayoutRes(inflater: LayoutInflater, container: ViewGroup?): View {
-            _colorChooserView = Mm2dCcColorChooserBinding.inflate(inflater).root
-
-            val arguments = requireArguments()
-            colorChooserView.setCurrentItem(arguments.getInt(KEY_INITIAL_TAB, TAB_RGB))
-            colorChooserView.init(arguments.getInt(KEY_INITIAL_COLOR, UIColors.COLOR_DEFAULT), this)
-            colorChooserView.setWithAlpha(arguments.getBoolean(KEY_WITH_ALPHA))
-
-            return colorChooserView
+        private fun notifySelect() {
+            val key = requireArguments().getString(KEY_REQUEST_KEY) ?: return
+            parentFragmentManager.setFragmentResult(
+                key, bundleOf(
+                    RESULT_KEY_CANCEL to false,
+                    RESULT_KEY_COLOR to colorChooserView.color,
+                )
+            )
         }
     }
 }

@@ -12,6 +12,7 @@ import android.graphics.Color
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import androidx.constraintlayout.widget.ConstraintLayout
+import androidx.lifecycle.Observer
 import rocks.tbog.tblauncher.databinding.Mm2dCcViewSliderBinding
 
 internal class SliderView
@@ -19,10 +20,8 @@ internal class SliderView
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : ConstraintLayout(context, attrs, defStyleAttr), ColorObserver {
-    private val colorChangeMediator by lazy {
-        findColorChangeMediator()
-    }
+) : ConstraintLayout(context, attrs, defStyleAttr), Observer<Int> {
+    private val delegate = ColorObserverDelegate(this)
     private val binding: Mm2dCcViewSliderBinding =
         Mm2dCcViewSliderBinding.inflate(LayoutInflater.from(context), this)
 
@@ -41,8 +40,18 @@ internal class SliderView
         }
     }
 
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        delegate.onAttachedToWindow()
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        delegate.onDetachedFromWindow()
+    }
+
     override fun onChanged(color: Int?) {
-        if (color == null) return
+        color ?: return
         binding.seekRed.setValue(Color.red(color))
         binding.seekGreen.setValue(Color.green(color))
         binding.seekBlue.setValue(Color.blue(color))
@@ -55,6 +64,6 @@ internal class SliderView
             binding.seekGreen.value,
             binding.seekBlue.value
         )
-        colorChangeMediator?.onChangeColor(color)
+        delegate.post(color)
     }
 }

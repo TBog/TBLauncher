@@ -34,13 +34,13 @@ internal class SvView
     private var maxColor: Int = Color.RED
     private var maskBitmap: Bitmap? = null
     private val paint = Paint().also { it.isAntiAlias = true }
-    private val _padding = getPixels(R.dimen.mm2d_cc_panel_margin)
-    private val _width = getPixels(R.dimen.mm2d_cc_hsv_size) + _padding * 2
-    private val _height = getPixels(R.dimen.mm2d_cc_hsv_size) + _padding * 2
-    private val _sampleRadius = getDimension(R.dimen.mm2d_cc_sample_radius)
-    private val _sampleFrameRadius = _sampleRadius + getDimension(R.dimen.mm2d_cc_sample_frame)
-    private val _sampleShadowRadius =
-        _sampleFrameRadius + getDimension(R.dimen.mm2d_cc_sample_shadow)
+    private val requestPadding = getPixels(R.dimen.mm2d_cc_panel_margin)
+    private val requestWidth = getPixels(R.dimen.mm2d_cc_hsv_size) + requestPadding * 2
+    private val requestHeight = getPixels(R.dimen.mm2d_cc_hsv_size) + requestPadding * 2
+    private val sampleRadius = getDimension(R.dimen.mm2d_cc_sample_radius)
+    private val sampleFrameRadius = sampleRadius + getDimension(R.dimen.mm2d_cc_sample_frame)
+    private val sampleShadowRadius =
+        sampleFrameRadius + getDimension(R.dimen.mm2d_cc_sample_shadow)
     private val maskRect = Rect(0, 0, TONE_SIZE, TONE_SIZE)
     private val targetRect = Rect()
     private var hue: Float = 0f
@@ -107,10 +107,10 @@ internal class SvView
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
         targetRect.set(
-            paddingLeft + _padding,
-            paddingTop + _padding,
-            width - paddingRight - _padding,
-            height - paddingBottom - _padding
+            paddingLeft + requestPadding,
+            paddingTop + requestPadding,
+            width - paddingRight - requestPadding,
+            height - paddingBottom - requestPadding
         )
     }
 
@@ -122,11 +122,11 @@ internal class SvView
         val x = saturation * targetRect.width() + targetRect.left
         val y = (1f - value) * targetRect.height() + targetRect.top
         paint.color = colorSampleShadow
-        canvas.drawCircle(x, y, _sampleShadowRadius, paint)
+        canvas.drawCircle(x, y, sampleShadowRadius, paint)
         paint.color = colorSampleFrame
-        canvas.drawCircle(x, y, _sampleFrameRadius, paint)
+        canvas.drawCircle(x, y, sampleFrameRadius, paint)
         paint.color = color
-        canvas.drawCircle(x, y, _sampleRadius, paint)
+        canvas.drawCircle(x, y, sampleRadius, paint)
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
@@ -138,12 +138,12 @@ internal class SvView
         if (!resizeWidth && !resizeHeight) {
             setMeasuredDimension(
                 resolveSizeAndState(
-                    max(_width + paddingHorizontal, suggestedMinimumWidth),
+                    max(requestWidth + paddingHorizontal, suggestedMinimumWidth),
                     widthMeasureSpec,
                     MeasureSpec.UNSPECIFIED
                 ),
                 resolveSizeAndState(
-                    max(_height + paddingVertical, suggestedMinimumHeight),
+                    max(requestHeight + paddingVertical, suggestedMinimumHeight),
                     heightMeasureSpec,
                     MeasureSpec.UNSPECIFIED
                 )
@@ -151,8 +151,8 @@ internal class SvView
             return
         }
 
-        var widthSize = resolveAdjustedSize(_width + paddingHorizontal, widthMeasureSpec)
-        var heightSize = resolveAdjustedSize(_height + paddingVertical, heightMeasureSpec)
+        var widthSize = resolveAdjustedSize(requestWidth + paddingHorizontal, widthMeasureSpec)
+        var heightSize = resolveAdjustedSize(requestHeight + paddingVertical, heightMeasureSpec)
         val actualAspect =
             (widthSize - paddingHorizontal).toFloat() / (heightSize - paddingVertical)
         if (abs(actualAspect - 1f) < 0.0000001) {

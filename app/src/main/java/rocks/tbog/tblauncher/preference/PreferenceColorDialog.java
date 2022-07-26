@@ -72,7 +72,7 @@ public class PreferenceColorDialog extends BasePreferenceDialog {
         }
 
         mChooseView.setCurrentItem(ColorChooserDialog.TAB_PALETTE);
-        mChooseView.init((int) selectedColor, this);
+        mChooseView.init((int) selectedColor);
         mChooseView.setWithAlpha(getPreference().getKey().endsWith("-argb"));
 
         return mChooseView;

@@ -12,18 +12,17 @@ import android.graphics.Color
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import androidx.constraintlayout.widget.ConstraintLayout
-import net.mm2d.color.chooser.util.ColorUtils
+import androidx.lifecycle.Observer
 import rocks.tbog.tblauncher.databinding.Mm2dCcViewHsvBinding
+import net.mm2d.color.chooser.util.ColorUtils
 
 internal class HsvView
 @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : ConstraintLayout(context, attrs, defStyleAttr), ColorObserver {
-    private val colorChangeMediator by lazy {
-        findColorChangeMediator()
-    }
+) : ConstraintLayout(context, attrs, defStyleAttr), Observer<Int> {
+    private val delegate = ColorObserverDelegate(this)
     private var color: Int = Color.BLACK
     private val binding: Mm2dCcViewHsvBinding =
         Mm2dCcViewHsvBinding.inflate(LayoutInflater.from(context), this)
@@ -31,17 +30,27 @@ internal class HsvView
     init {
         binding.svView.onColorChanged = {
             color = it
-            colorChangeMediator?.onChangeColor(color)
+            delegate.post(color)
         }
         binding.hueView.onHueChanged = {
             color = ColorUtils.hsvToColor(it, binding.svView.saturation, binding.svView.value)
             binding.svView.setHue(it)
-            colorChangeMediator?.onChangeColor(color)
+            delegate.post(color)
         }
     }
 
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        delegate.onAttachedToWindow()
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        delegate.onDetachedFromWindow()
+    }
+
     override fun onChanged(color: Int?) {
-        if (color == null) return
+        color ?: return
         if (this.color == color) return
         this.color = color
         binding.svView.setColor(color)

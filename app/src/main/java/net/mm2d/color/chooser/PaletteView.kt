@@ -7,7 +7,6 @@
 
 package net.mm2d.color.chooser
 
-import kotlin.collections.forEach as kForEach
 import android.annotation.SuppressLint
 import android.content.Context
 import android.content.res.Resources
@@ -22,22 +21,22 @@ import androidx.core.content.res.getColorOrThrow
 import androidx.core.content.res.getResourceIdOrThrow
 import androidx.core.content.res.use
 import androidx.core.view.children
+import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import net.mm2d.color.chooser.element.PaletteCell
 import net.mm2d.color.chooser.util.toPixelsAsDp
 import rocks.tbog.tblauncher.R
 import java.lang.ref.SoftReference
+import kotlin.collections.forEach as kForEach
 
 internal class PaletteView
 @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : RecyclerView(context, attrs, defStyleAttr), ColorObserver {
-    private val colorChangeMediator by lazy {
-        findColorChangeMediator()
-    }
+) : RecyclerView(context, attrs, defStyleAttr), Observer<Int> {
+    private val delegate = ColorObserverDelegate(this)
     private val cellHeight = 48.toPixelsAsDp(context)
     private val cellAdapter = CellAdapter(context)
     private val linearLayoutManager = LinearLayoutManager(context)
@@ -54,8 +53,18 @@ internal class PaletteView
         isVerticalFadingEdgeEnabled = true
         setFadingEdgeLength(padding)
         cellAdapter.onColorChanged = {
-            colorChangeMediator?.onChangeColor(it)
+            delegate.post(it)
         }
+    }
+
+    override fun onAttachedToWindow() {
+        super.onAttachedToWindow()
+        delegate.onAttachedToWindow()
+    }
+
+    override fun onDetachedFromWindow() {
+        super.onDetachedFromWindow()
+        delegate.onDetachedFromWindow()
     }
 
     override fun isPaddingOffsetRequired(): Boolean = true
@@ -63,7 +72,7 @@ internal class PaletteView
     override fun getBottomPaddingOffset(): Int = paddingBottom
 
     override fun onChanged(color: Int?) {
-        if (color == null) return
+        color ?: return
         cellAdapter.setColor(color)
     }
 

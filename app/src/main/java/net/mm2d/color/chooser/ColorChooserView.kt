@@ -11,12 +11,9 @@ import android.content.Context
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.core.graphics.alpha
 import androidx.core.view.doOnLayout
-import androidx.core.view.forEach
-import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.MutableLiveData
 import com.google.android.material.tabs.TabLayoutMediator
 import rocks.tbog.tblauncher.databinding.Mm2dCcViewDialogBinding
@@ -27,15 +24,15 @@ internal class ColorChooserView
     context: Context,
     attrs: AttributeSet? = null,
     defStyleAttr: Int = 0
-) : ConstraintLayout(context, attrs, defStyleAttr), ColorChangeMediator {
-    private val liveData: MutableLiveData<Int> = MutableLiveData()
+) : ConstraintLayout(context, attrs, defStyleAttr), ColorLiveDataOwner {
+    private val colorLiveData: MutableLiveData<Int> = MutableLiveData()
     private val binding: Mm2dCcViewDialogBinding =
         Mm2dCcViewDialogBinding.inflate(LayoutInflater.from(context), this)
     val color: Int
         get() = binding.controlView.color
 
-    fun init(color: Int, lifecycleOwner: LifecycleOwner) {
-        onChangeColor(color.toOpacity())
+    fun init(color: Int) {
+        colorLiveData.value = color.toOpacity()
         binding.controlView.setAlpha(color.alpha)
         val pageTitles: List<String> = listOf("palette", "hsv", "rgb")
         val pageViews: List<View> = listOf(
@@ -45,8 +42,6 @@ internal class ColorChooserView
         TabLayoutMediator(binding.tabLayout, binding.viewPager) { tab, position ->
             tab.text = pageTitles[position]
         }.attach()
-        pageViews.forEach { observeRecursively(it, lifecycleOwner) }
-        observeRecursively(binding.controlView, lifecycleOwner)
     }
 
     fun setCurrentItem(position: Int) {
@@ -59,17 +54,9 @@ internal class ColorChooserView
 
     fun getCurrentItem(): Int = binding.viewPager.currentItem
 
-    private fun observeRecursively(view: View, lifecycleOwner: LifecycleOwner) {
-        if (view is ColorObserver) liveData.observe(lifecycleOwner, view)
-        (view as? ViewGroup)?.forEach { observeRecursively(it, lifecycleOwner) }
-    }
-
     fun setWithAlpha(withAlpha: Boolean) {
         binding.controlView.setWithAlpha(withAlpha)
     }
 
-    override fun onChangeColor(color: Int) {
-        if (liveData.value == color) return
-        liveData.value = color
-    }
+    override fun getColorLiveData(): MutableLiveData<Int> = colorLiveData
 }

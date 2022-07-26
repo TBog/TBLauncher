@@ -28,8 +28,8 @@ internal class PreviewView
     private val paint = Paint().also {
         it.isAntiAlias = true
     }
-    private val _width = getPixels(R.dimen.mm2d_cc_preview_width)
-    private val _height = getPixels(R.dimen.mm2d_cc_preview_height)
+    private val requestWidth = getPixels(R.dimen.mm2d_cc_preview_width)
+    private val requestHeight = getPixels(R.dimen.mm2d_cc_preview_height)
     private val frameLineWidth = getDimension(R.dimen.mm2d_cc_sample_frame)
     private val shadowLineWidth = getDimension(R.dimen.mm2d_cc_sample_shadow)
     private val colorSampleFrame = getColor(R.color.mm2d_cc_sample_frame)
@@ -86,12 +86,12 @@ internal class PreviewView
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         setMeasuredDimension(
             resolveSizeAndState(
-                max(_width, suggestedMinimumWidth),
+                max(requestWidth, suggestedMinimumWidth),
                 widthMeasureSpec,
                 MeasureSpec.UNSPECIFIED
             ),
             resolveSizeAndState(
-                max(_height, suggestedMinimumHeight),
+                max(requestHeight, suggestedMinimumHeight),
                 heightMeasureSpec,
                 MeasureSpec.UNSPECIFIED
             )
