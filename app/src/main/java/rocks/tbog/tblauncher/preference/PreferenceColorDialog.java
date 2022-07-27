@@ -1,23 +1,37 @@
 package rocks.tbog.tblauncher.preference;
 
-import android.app.Dialog;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
+import android.transition.Fade;
+import android.transition.TransitionManager;
+import android.transition.TransitionSet;
+import android.util.Log;
+import android.util.TypedValue;
+import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.animation.AccelerateInterpolator;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
+import androidx.asynclayoutinflater.view.AsyncLayoutInflater;
+import androidx.constraintlayout.widget.ConstraintLayout;
+import androidx.constraintlayout.widget.ConstraintSet;
 import androidx.preference.DialogPreference;
 
 import net.mm2d.color.chooser.ColorChooserDialog;
 import net.mm2d.color.chooser.ColorChooserView;
 
+import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.databinding.Mm2dCcColorChooserBinding;
+import rocks.tbog.tblauncher.utils.Timer;
 import rocks.tbog.tblauncher.utils.UIColors;
 
 public class PreferenceColorDialog extends BasePreferenceDialog {
+    private static final String TAG = PreferenceColorDialog.class.getSimpleName();
     private ColorChooserView mChooseView = null;
+    private int mInitialTab;
+    private int mInitialColor;
 
     public static PreferenceColorDialog newInstance(String key) {
         final PreferenceColorDialog fragment = new PreferenceColorDialog();
@@ -55,51 +69,73 @@ public class PreferenceColorDialog extends BasePreferenceDialog {
             CustomDialogPreference preference = (CustomDialogPreference) dialogPreference;
             preference.setValue(color);
         }
+
+        if (savedInstanceState != null) {
+            mInitialTab = savedInstanceState.getInt(ColorChooserDialog.KEY_INITIAL_TAB, ColorChooserDialog.TAB_PALETTE);
+            mInitialColor = savedInstanceState.getInt(ColorChooserDialog.KEY_INITIAL_COLOR, color);
+        } else {
+            mInitialTab = ColorChooserDialog.TAB_PALETTE;
+            mInitialColor = color;
+        }
     }
 
     @Override
     protected View onCreateDialogView(@NonNull Context context) {
-        mChooseView = Mm2dCcColorChooserBinding.inflate(LayoutInflater.from(context)).getRoot();
-        return mChooseView;
+        Log.d(TAG, "onCreateDialogView start");
+        var t = Timer.startNano();
+
+        TypedValue outValue = new TypedValue();
+        context.getTheme().resolveAttribute(R.attr.alertDialogTheme, outValue, true);
+        var themeWrapper = new ContextThemeWrapper(context, outValue.resourceId);
+
+        var inflater = LayoutInflater.from(themeWrapper);
+        @SuppressLint("InflateParams")
+        View view = inflater.inflate(R.layout.dialog_preference_color_chooser, null, false);
+
+        final ConstraintLayout rootLayout = view instanceof ConstraintLayout ? (ConstraintLayout) view : null;
+        if (rootLayout == null)
+            return view;
+
+        new AsyncLayoutInflater(themeWrapper).inflate(R.layout.mm2d_cc_color_chooser, rootLayout, (v, resid, parent) -> {
+            mChooseView = Mm2dCcColorChooserBinding.bind(v).getRoot();
+            mChooseView.setId(View.generateViewId());
+            mChooseView.setVisibility(View.GONE);
+            rootLayout.addView(mChooseView);
+            t.stop();
+            Log.d(TAG, "onCreateDialogView finished " + t);
+
+            // initialize color-chooser
+            mChooseView.setCurrentItem(mInitialTab);
+            mChooseView.init(mInitialColor);
+            mChooseView.setWithAlpha(getPreference().getKey().endsWith("-argb"));
+
+            // set new constraints to hide loading and place the button bar below the color-chooser
+            var constraintSet = new ConstraintSet();
+            constraintSet.clone(rootLayout);
+            constraintSet.setVisibility(R.id.iconLoadingBar, ConstraintSet.GONE);
+            constraintSet.setVisibility(mChooseView.getId(), ConstraintSet.VISIBLE);
+            constraintSet.connect(R.id.buttonPanel, ConstraintSet.TOP, mChooseView.getId(), ConstraintSet.BOTTOM);
+
+            // set transition without the button bar
+            var transition = new TransitionSet();
+            transition.setOrdering(TransitionSet.ORDERING_TOGETHER);
+            transition.addTransition(new Fade(Fade.OUT));
+            transition.addTransition(new Fade(Fade.IN));
+            transition.setInterpolator(new AccelerateInterpolator());
+            transition.excludeTarget(R.id.buttonPanel, true);
+
+            // start the transition
+            TransitionManager.beginDelayedTransition(parent, transition);
+            constraintSet.applyTo(rootLayout);
+        });
+
+        return rootLayout;
     }
 
     @Override
     public void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
-        outState.putInt(ColorChooserDialog.KEY_INITIAL_TAB, mChooseView.getCurrentItem());
-        outState.putInt(ColorChooserDialog.KEY_INITIAL_COLOR, mChooseView.getColor());
-    }
-
-    @NonNull
-    @Override
-    public Dialog onCreateDialog(@Nullable Bundle savedInstanceState) {
-        // we expect super.onCreateDialog to call this.onCreateDialogView and initialize mChooseView
-        Dialog dialog = super.onCreateDialog(savedInstanceState);
-        if (mChooseView == null)
-            return dialog;
-
-        if (savedInstanceState != null) {
-            var tab = savedInstanceState.getInt(ColorChooserDialog.KEY_INITIAL_TAB, 0);
-            mChooseView.setCurrentItem(tab);
-            var color = savedInstanceState.getInt(ColorChooserDialog.KEY_INITIAL_COLOR, 0);
-            mChooseView.init(color);
-        } else {
-            Object selectedColor = null;
-            {
-                DialogPreference dialogPreference = getPreference();
-                if (dialogPreference instanceof CustomDialogPreference) {
-                    CustomDialogPreference preference = (CustomDialogPreference) dialogPreference;
-                    selectedColor = preference.getValue();
-                }
-            }
-            if (!(selectedColor instanceof Integer)) {
-                selectedColor = UIColors.COLOR_DEFAULT;
-            }
-
-            mChooseView.setCurrentItem(ColorChooserDialog.TAB_PALETTE);
-            mChooseView.init((int) selectedColor);
-        }
-        mChooseView.setWithAlpha(getPreference().getKey().endsWith("-argb"));
-        return dialog;
+        outState.putInt(ColorChooserDialog.KEY_INITIAL_TAB, mInitialTab = mChooseView.getCurrentItem());
+        outState.putInt(ColorChooserDialog.KEY_INITIAL_COLOR, mInitialColor = mChooseView.getColor());
     }
 }
