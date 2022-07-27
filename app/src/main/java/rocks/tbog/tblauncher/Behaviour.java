@@ -975,7 +975,7 @@ public class Behaviour implements ISearchActivity {
             mResultList.scrollToFirstItem();
         }
 
-        TBApplication.quickList(getContext()).adapterUpdated();
+        mTBLauncherActivity.quickList.adapterUpdated();
         mClearButton.setVisibility(View.VISIBLE);
         mMenuButton.setVisibility(View.INVISIBLE);
     }

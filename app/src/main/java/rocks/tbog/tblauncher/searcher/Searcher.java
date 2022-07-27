@@ -99,24 +99,26 @@ public abstract class Searcher extends AsyncTask<Void, Void> {
     }
 
     private void displayActivityLoader() {
-        ISearchActivity activity = activityWeakReference.get();
+        ISearchActivity searchActivity = activityWeakReference.get();
+        Activity activity = searchActivity != null ? Utilities.getActivity(searchActivity.getContext()) : null;
         if (activity == null)
             return;
 
-        activity.displayLoader(true);
+        searchActivity.displayLoader(true);
     }
 
     @Override
     protected void onPostExecute(Void param) {
-        ISearchActivity activity = activityWeakReference.get();
+        ISearchActivity searchActivity = activityWeakReference.get();
+        Activity activity = searchActivity != null ? Utilities.getActivity(searchActivity.getContext()) : null;
         if (activity == null)
             return;
 
         // Loader should still be displayed until all the providers have finished loading
-        activity.displayLoader(!TBApplication.getApplication(activity.getContext()).getDataHandler().fullLoadOverSent());
+        searchActivity.displayLoader(!TBApplication.getApplication(activity).getDataHandler().fullLoadOverSent());
 
         if (this.processedPojos.isEmpty()) {
-            activity.clearAdapter();
+            searchActivity.clearAdapter();
         } else {
             PriorityQueue<EntryItem> queue = this.processedPojos;
             ArrayList<EntryItem> results = new ArrayList<>(queue.size());
@@ -124,10 +126,10 @@ public abstract class Searcher extends AsyncTask<Void, Void> {
                 results.add(queue.poll());
             }
 
-            activity.updateAdapter(results, isRefresh);
+            searchActivity.updateAdapter(results, isRefresh);
         }
 
-        activity.resetTask();
+        searchActivity.resetTask();
 
         long time = System.currentTimeMillis() - start;
         Log.v("Timing", "Time to run query `" + query + "` on " + getClass().getSimpleName() + " to completion: " + time + "ms");
