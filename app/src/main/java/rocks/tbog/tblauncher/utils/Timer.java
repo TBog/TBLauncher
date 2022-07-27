@@ -50,8 +50,8 @@ public class Timer {
     @NonNull
     @Override
     public String toString() {
-        if (mUnit == TimeUnit.NANOSECONDS) {
-            long deltaTime = mUnit.convert(mStop - mStart, TimeUnit.NANOSECONDS);
+        if (mUnit == TimeUnit.NANOSECONDS && mUnit.toSeconds(mStop - mStart) == 0) {
+            long deltaTime = mUnit.toNanos(mStop - mStart);
             long ms = TimeUnit.NANOSECONDS.toMillis(deltaTime);
             if (ms == 0)
                 return deltaTime + "ns";
@@ -65,7 +65,7 @@ public class Timer {
 
     @NonNull
     public String toStringSeconds() {
-        long deltaTime = mUnit.convert(mStop - mStart, TimeUnit.MILLISECONDS);
+        long deltaTime = mUnit.toMillis(mStop - mStart);
         long s = TimeUnit.MILLISECONDS.toSeconds(deltaTime);
         long ms = deltaTime - TimeUnit.SECONDS.toMillis(s);
         if (s == 0)
