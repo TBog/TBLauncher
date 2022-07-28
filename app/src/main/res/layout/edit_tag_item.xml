@@ -14,10 +14,6 @@
         android:layout_height="match_parent"
         android:gravity="center"
         android:padding="@dimen/edit_tag_padding"
-        android:shadowColor="?attr/resultShadowColor"
-        android:shadowDx="1"
-        android:shadowDy="2"
-        android:shadowRadius="?attr/textShadowRadius"
         android:text="@string/app_name"
         android:textAlignment="center"
         android:textColor="?android:attr/textColorPrimary" />

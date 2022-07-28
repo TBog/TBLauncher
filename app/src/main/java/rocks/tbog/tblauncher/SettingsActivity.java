@@ -73,6 +73,7 @@ import rocks.tbog.tblauncher.preference.IconListPreferenceDialog;
 import rocks.tbog.tblauncher.preference.OrderListPreferenceDialog;
 import rocks.tbog.tblauncher.preference.PreferenceColorDialog;
 import rocks.tbog.tblauncher.preference.QuickListPreferenceDialog;
+import rocks.tbog.tblauncher.preference.ShadowDialog;
 import rocks.tbog.tblauncher.preference.SliderDialog;
 import rocks.tbog.tblauncher.preference.TagOrderListPreferenceDialog;
 import rocks.tbog.tblauncher.ui.dialog.PleaseWaitDialog;
@@ -700,6 +701,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                             dialogFragment = PreferenceColorDialog.newInstance(key);
                     } else if (R.layout.pref_slider == dialogLayout) {
                         dialogFragment = SliderDialog.newInstance(key);
+                    } else if (R.layout.pref_shadow == dialogLayout) {
+                        dialogFragment = ShadowDialog.newInstance(key);
                     } else if (R.layout.pref_confirm == dialogLayout) {
                         dialogFragment = ConfirmDialog.newInstance(key);
                     }
@@ -1032,13 +1035,19 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case "result-highlight-color":
             case "result-text-color":
             case "result-text2-color":
+            case "result-shadow-color":
             case "contact-action-color":
+                if (activity != null)
+                    activity.refreshSearchRecords();
+                // fallthrough
             case "search-bar-text-color":
+            case "search-bar-shadow-color":
             case "popup-background-argb":
             case "popup-border-argb":
             case "popup-ripple-color":
             case "popup-text-color":
             case "popup-title-color":
+            case "popup-shadow-color":
                 UIColors.resetCache();
                 break;
             case "quick-list-icon-size":
@@ -1048,9 +1057,21 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case "result-text-size":
             case "result-text2-size":
             case "result-icon-size":
-            case "tags-menu-icon-size":
-            case "popup-corner-radius":
+            case "result-shadow-radius":
+            case "result-shadow-dx":
+            case "result-shadow-dy":
             case "result-list-row-height":
+                if (activity != null)
+                    activity.refreshSearchRecords();
+                // fallthrough
+            case "tags-menu-icon-size":
+            case "search-bar-shadow-dx":
+            case "search-bar-shadow-dy":
+            case "search-bar-shadow-radius":
+            case "popup-corner-radius":
+            case "popup-shadow-dx":
+            case "popup-shadow-dy":
+            case "popup-shadow-radius":
                 UISizes.resetCache();
                 break;
             case "result-history-size":

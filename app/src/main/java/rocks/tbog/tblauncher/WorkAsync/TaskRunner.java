@@ -22,12 +22,12 @@ public class TaskRunner {
     }
 
     @NonNull
-    public static RunnableTask newTask(@NonNull Lifecycle lifecycle, @NonNull AsyncRunnable worker, @NonNull AsyncRunnable main) {
+    public static RunnableTask newTask(@NonNull Lifecycle lifecycle, @NonNull AsyncRunnable worker, @Nullable AsyncRunnable main) {
         return new RunnableTask(worker, main, lifecycle);
     }
 
     @NonNull
-    public static RunnableTask newTask(@NonNull AsyncRunnable worker, @NonNull AsyncRunnable main) {
+    public static RunnableTask newTask(@NonNull AsyncRunnable worker, @Nullable AsyncRunnable main) {
         return new RunnableTask(worker, main);
     }
 

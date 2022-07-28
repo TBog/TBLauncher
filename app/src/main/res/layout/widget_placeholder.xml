@@ -23,12 +23,10 @@
         android:layout_gravity="center"
         android:background="@color/black_overlay"
         android:gravity="center"
+        android:shadowColor="@android:color/black"
+        android:shadowRadius="4"
         android:maxLines="3"
         android:minLines="1"
-        android:shadowColor="?attr/resultShadowColor"
-        android:shadowDx="3"
-        android:shadowDy="3"
-        android:shadowRadius="?attr/textShadowRadius"
         android:textAppearance="?android:attr/textAppearance"
         android:text="@string/widget_placeholder" />
 

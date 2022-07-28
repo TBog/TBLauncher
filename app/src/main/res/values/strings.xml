@@ -73,7 +73,11 @@
     <string name="icons_pack">Choose pack</string>
     <string name="icons_pack_default_name">System icons</string>
     <string name="value">value %d</string>
+    <string name="value_float">value %.2f</string>
+    <string name="value_float_xy">horizontal %1$.2f | vertical %2$.2f</string>
     <string name="size">&lt;%d&gt;</string>
+    <string name="size_float">&lt;%.1f&gt;</string>
+    <string name="shadow_preview">&lt;%3$.1f&gt;\n&lt;%1$.1f&#215;%2$.1f&gt;</string>
 
     <string name="menu_app_rename">Rename app</string>
     <string name="menu_action_rename">Rename</string>
@@ -214,6 +218,8 @@
     <string name="result_icon_size">Icon size</string>
     <string name="result_text_color">Text color</string>
     <string name="result_text2_color">Secondary text color</string>
+    <string name="result_shadow_color">Text shadow color</string>
+    <string name="result_shadow_radius_dx_dy">Shadow size and offset</string>
     <string name="search_bar_text_color">Text color</string>
     <string name="search_bar_icon_color">Icons color</string>
     <string name="menu_popup_quick_list_customize">Edit dock</string>
@@ -362,6 +368,8 @@
     <string name="popup_border_argb">Border color</string>
     <string name="popup_text_color">Text color</string>
     <string name="popup_title_color">Title color</string>
+    <string name="popup_shadow_color">Text shadow color</string>
+    <string name="popup_shadow_radius_dx_dy">Shadow size and offset</string>
     <string name="settings_theme">Settings theme</string>
     <string name="settings_default">Default</string>
     <string name="settings_8bit">8bit</string>
@@ -385,6 +393,9 @@
     <string name="icon_scale_alpha">Scale transparency</string>
     <string name="reset_matrix">Set default values</string>
     <string name="corner_radius">Corner radius</string>
+    <string name="shadow_offset">Select pixel amount for shadow offset</string>
+    <string name="shadow_offset_preview">Touch or drag inside.</string>
+    <string name="shadow_radius">Shadow size <em>(zero size will disable shadow)</em></string>
     <string name="behaviour_section">Behaviour</string>
     <string name="behaviour_link_keyboard_search_bar">Link keyboard to search bar visibility</string>
     <string name="behaviour_widget_after_launch">Widget mode after launch</string>
@@ -402,6 +413,8 @@
     <string name="search_bar_at_bottom">Position at bottom</string>
     <string name="search_bar_ripple_color">Touch color</string>
     <string name="search_bar_cursor_argb">Cursor color</string>
+    <string name="search_bar_shadow_color">Text shadow color</string>
+    <string name="search_bar_shadow_radius_dx_dy">Shadow size and offset</string>
     <string name="back_device_key">Back button</string>
     <string name="action_show_untagged">Untagged</string>
     <string name="dm_search_open_result">Initial result list</string>
