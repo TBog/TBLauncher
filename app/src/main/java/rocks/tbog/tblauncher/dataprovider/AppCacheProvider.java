@@ -13,7 +13,7 @@ import java.util.concurrent.CountDownLatch;
 import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.handler.AppsHandler;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
-import rocks.tbog.tblauncher.searcher.Searcher;
+import rocks.tbog.tblauncher.searcher.ISearcher;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
 import rocks.tbog.tblauncher.utils.Timer;
 
@@ -27,7 +27,7 @@ public class AppCacheProvider implements IProvider<AppEntry> {
 
     @WorkerThread
     @Override
-    public void requestResults(String query, Searcher searcher) {
+    public void requestResults(String query, ISearcher searcher) {
         StringNormalizer.Result queryNormalized = StringNormalizer.normalizeWithResult(query, false);
 
         if (queryNormalized.codePoints.length == 0) {
@@ -48,7 +48,7 @@ public class AppCacheProvider implements IProvider<AppEntry> {
 
         FuzzyScore fuzzyScore = new FuzzyScore(queryNormalized.codePoints);
 
-        AppProvider.checkAppResults(entries, fuzzyScore, searcher);
+        EntryToResultUtils.tagsCheckResults(entries, fuzzyScore, searcher);
     }
 
     public void reload(boolean cancelCurrentLoadTask) {

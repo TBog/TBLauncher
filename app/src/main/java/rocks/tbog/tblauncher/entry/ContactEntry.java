@@ -169,7 +169,7 @@ public class ContactEntry extends EntryItem {
         TextView nameView = view.findViewById(android.R.id.text1);
         nameView.setTextColor(UIColors.getResultTextColor(context));
         if (Utilities.checkFlag(drawFlags, FLAG_DRAW_NAME)) {
-            ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, nameView);
+            ResultViewHelper.displayHighlighted(relevance, normalizedName, getName(), nameView);
             nameView.setVisibility(View.VISIBLE);
         } else {
             nameView.setText(getName());
@@ -198,14 +198,14 @@ public class ContactEntry extends EntryItem {
         // Contact name
         TextView contactName = view.findViewById(R.id.item_contact_name);
         contactName.setTextColor(UIColors.getResultTextColor(context));
-        ResultViewHelper.displayHighlighted(relevanceSource, normalizedName, getName(), relevance, contactName);
+        ResultViewHelper.displayHighlighted(relevance, normalizedName, getName(), contactName);
 
         // Contact phone
         TextView contactPhone = view.findViewById(R.id.item_contact_phone);
         if (phone != null) {
             contactPhone.setVisibility(View.VISIBLE);
             contactPhone.setTextColor(UIColors.getResultText2Color(context));
-            ResultViewHelper.displayHighlighted(relevanceSource, normalizedPhone, phone, relevance, contactPhone);
+            ResultViewHelper.displayHighlighted(relevance, normalizedPhone, phone, contactPhone);
             ResultViewHelper.applyResultItemShadow(contactPhone);
         } else if (getImData() != null && getImData().label != null) {
             contactPhone.setVisibility(View.VISIBLE);
@@ -260,7 +260,7 @@ public class ContactEntry extends EntryItem {
             contactNickname.setVisibility(View.GONE);
         } else {
             contactNickname.setVisibility(View.VISIBLE);
-            ResultViewHelper.displayHighlighted(relevanceSource, normalizedNickname, nickname, relevance, contactNickname);
+            ResultViewHelper.displayHighlighted(relevance, normalizedNickname, nickname, contactNickname);
             ResultViewHelper.applyResultItemShadow(contactNickname);
         }
     }

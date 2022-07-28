@@ -1,7 +1,5 @@
 package rocks.tbog.tblauncher.normalizer;
 
-import androidx.annotation.NonNull;
-
 import java.nio.CharBuffer;
 import java.text.Normalizer;
 import java.util.Arrays;
@@ -45,18 +43,17 @@ public class StringNormalizer {
             String decomposedCharString;
             // Is it within the basic latin range?
             // If so, we can skip the expensive call to Normalizer.normalize
-            if(codepoint < 'z') {
+            if (codepoint < 'z') {
                 // Ascii range, no need to normalize!
                 // Add directly if it's not a dash
                 // (HYPHEN-MINUS is the only character before 'z' in one of the
                 //  NON_SPACING_MARK / COMBINING_SPACING_MARK / DASH_PUNCTUATION
                 //  category, so we can skip the Character.getType() and explicitly check for it)
-                if(codepoint != '-') {
+                if (codepoint != '-') {
                     codePoints.add(makeLowercase ? Character.toLowerCase(codepoint) : codepoint);
                     resultMap.add(i);
                 }
-            }
-            else {
+            } else {
                 // Otherwise, we'll need to normalize the code point to a letter and potential accentuation
                 buffer.put(Character.toChars(codepoint));
                 buffer.flip();
@@ -133,21 +130,23 @@ public class StringNormalizer {
         }
 
         @Override
-        public int compareTo(@NonNull Result that) {
+        public int compareTo(Result that) {
             // this optimization is usually worthwhile, and can always be added
             if (this == that)
                 return 0;
+            if (that == null)
+                return 1;
 
-            int result;
             int minLength = Math.min(this.codePoints.length, that.codePoints.length);
             for (int i = 0; i < minLength; i += 1) {
-                if ((result = Character.toLowerCase(this.codePoints[i]) - Character.toLowerCase(that.codePoints[i])) != 0)
-                    return result;
+                final int cmp = Character.toLowerCase(this.codePoints[i]) - Character.toLowerCase(that.codePoints[i]);
+                if (cmp != 0)
+                    return cmp;
             }
 
             if (this.codePoints.length != that.codePoints.length)
                 return this.codePoints.length - that.codePoints.length;
-            
+
             // equal
             return 0;
         }

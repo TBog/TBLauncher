@@ -11,7 +11,7 @@ import rocks.tbog.tblauncher.calculator.Result;
 import rocks.tbog.tblauncher.calculator.ShuntingYard;
 import rocks.tbog.tblauncher.calculator.Tokenizer;
 import rocks.tbog.tblauncher.entry.CalculatorEntry;
-import rocks.tbog.tblauncher.searcher.Searcher;
+import rocks.tbog.tblauncher.searcher.ISearcher;
 
 
 public class CalculatorProvider extends SimpleProvider<CalculatorEntry> {
@@ -28,7 +28,7 @@ public class CalculatorProvider extends SimpleProvider<CalculatorEntry> {
     }
 
     @Override
-    public void requestResults(String query, Searcher searcher) {
+    public void requestResults(String query, ISearcher searcher) {
         String spacelessQuery = query.replaceAll("\\s+", "");
         // Now create matcher object.
         Matcher m = computableRegexp.matcher(spacelessQuery);

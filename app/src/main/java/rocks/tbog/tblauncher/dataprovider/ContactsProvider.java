@@ -5,14 +5,17 @@ import android.database.ContentObserver;
 import android.provider.ContactsContract;
 import android.util.Log;
 
+import androidx.annotation.WorkerThread;
 import androidx.preference.PreferenceManager;
+
+import java.util.Collection;
 
 import rocks.tbog.tblauncher.Permission;
 import rocks.tbog.tblauncher.entry.ContactEntry;
 import rocks.tbog.tblauncher.loader.LoadContactsEntry;
 import rocks.tbog.tblauncher.normalizer.PhoneNormalizer;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
-import rocks.tbog.tblauncher.searcher.Searcher;
+import rocks.tbog.tblauncher.searcher.ISearcher;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
 
 public class ContactsProvider extends Provider<ContactEntry> {
@@ -64,44 +67,48 @@ public class ContactsProvider extends Provider<ContactEntry> {
     }
 
     @Override
-    public void requestResults(String query, Searcher searcher) {
-        StringNormalizer.Result queryNormalized = StringNormalizer.normalizeWithResult(query, false);
+    public void requestResults(String query, ISearcher searcher) {
+        for (ContactEntry pojo : pojos)
+            pojo.resetResultInfo();
 
-        if (queryNormalized.codePoints.length == 0) {
-            return;
-        }
+        EntryToResultUtils.recursiveWordCheck(pojos, query, searcher, ContactsProvider::checkResults, ContactEntry.class);
+    }
 
-        FuzzyScore fuzzyScore = new FuzzyScore(queryNormalized.codePoints);
-        FuzzyScore.MatchInfo matchInfo;
-        boolean match;
+    @WorkerThread
+    public static void checkResults(Collection<ContactEntry> entries, FuzzyScore fuzzyScore, ISearcher searcher) {
+        Log.d(TAG, "checkResults count=" + entries.size() + " " + fuzzyScore);
 
-        for (ContactEntry pojo : pojos) {
-            matchInfo = fuzzyScore.match(pojo.normalizedName.codePoints);
-            match = matchInfo.match;
-            pojo.setRelevance(pojo.normalizedName, matchInfo);
+        for (ContactEntry entry : entries) {
+            FuzzyScore.MatchInfo scoreInfo = fuzzyScore.match(entry.normalizedName.codePoints);
 
-            if (pojo.normalizedNickname != null) {
-                matchInfo = fuzzyScore.match(pojo.normalizedNickname.codePoints);
-                if (matchInfo.match && (!match || matchInfo.score > pojo.getRelevance())) {
-                    match = true;
-                    pojo.setRelevance(pojo.normalizedNickname, matchInfo);
+            StringNormalizer.Result matchedText = entry.normalizedName;
+            FuzzyScore.MatchInfo matchedInfo = FuzzyScore.MatchInfo.copyOrNewInstance(scoreInfo, null);
+
+            if (entry.normalizedNickname != null) {
+                scoreInfo = fuzzyScore.match(entry.normalizedNickname.codePoints);
+                if (scoreInfo.match && (!matchedInfo.match || scoreInfo.score > matchedInfo.score)) {
+                    matchedText = entry.normalizedNickname;
+                    matchedInfo = FuzzyScore.MatchInfo.copyOrNewInstance(scoreInfo, matchedInfo);
+                }
+            }
+            if (!matchedInfo.match && entry.normalizedPhone != null && fuzzyScore.getPatternLength() > 2) {
+                // search for the phone number
+                scoreInfo = fuzzyScore.match(entry.normalizedPhone.codePoints);
+                if (scoreInfo.match && scoreInfo.score > matchedInfo.score) {
+                    matchedText = entry.normalizedPhone;
+                    matchedInfo = FuzzyScore.MatchInfo.copyOrNewInstance(scoreInfo, matchedInfo);
                 }
             }
 
-            if (!match && pojo.normalizedPhone != null && queryNormalized.length() > 2) {
-                // search for the phone number
-                matchInfo = fuzzyScore.match(pojo.normalizedPhone.codePoints);
-                match = matchInfo.match;
-                pojo.setRelevance(pojo.normalizedPhone, matchInfo);
-            }
+            entry.addResultMatch(matchedText, matchedInfo);
 
-            if (match) {
-                int boost = Math.min(30, pojo.getTimesContacted());
-                if (pojo.isStarred()) {
+            if (matchedInfo.match) {
+                int boost = Math.min(30, entry.getTimesContacted());
+                if (entry.isStarred()) {
                     boost += 40;
                 }
-                pojo.boostRelevance(boost);
-                if (!searcher.addResult(pojo))
+                entry.boostRelevance(boost);
+                if (!searcher.addResult(entry))
                     return;
             }
         }

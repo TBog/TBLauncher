@@ -21,7 +21,7 @@ import rocks.tbog.tblauncher.entry.OpenUrlEntry;
 import rocks.tbog.tblauncher.entry.SearchEngineEntry;
 import rocks.tbog.tblauncher.entry.SearchEntry;
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
-import rocks.tbog.tblauncher.searcher.Searcher;
+import rocks.tbog.tblauncher.searcher.ISearcher;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
 
 public class SearchProvider extends SimpleProvider<SearchEntry> {
@@ -116,8 +116,8 @@ public class SearchProvider extends SimpleProvider<SearchEntry> {
     }
 
     @Override
-    public void requestResults(String s, Searcher searcher) {
-        searcher.addResult(getResults(s).toArray(new SearchEntry[0]));
+    public void requestResults(String query, ISearcher searcher) {
+        searcher.addResult(getResults(query).toArray(new SearchEntry[0]));
     }
 
     @NonNull

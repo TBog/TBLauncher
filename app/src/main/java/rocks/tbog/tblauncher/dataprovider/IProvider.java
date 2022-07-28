@@ -7,7 +7,7 @@ import androidx.annotation.WorkerThread;
 import java.util.List;
 
 import rocks.tbog.tblauncher.entry.EntryItem;
-import rocks.tbog.tblauncher.searcher.Searcher;
+import rocks.tbog.tblauncher.searcher.ISearcher;
 import rocks.tbog.tblauncher.utils.Timer;
 
 /**
@@ -21,12 +21,11 @@ public interface IProvider<T extends EntryItem> {
 
     /**
      * Post search results for the given query string to the searcher
-     *
-     * @param s        Some string query (usually provided by an user)
+     *  @param query        Some string query (usually provided by the user)
      * @param searcher The receiver of results
      */
     @WorkerThread
-    void requestResults(String s, Searcher searcher);
+    void requestResults(String query, ISearcher searcher);
 
     /**
      * Reload the data stored in this provider
