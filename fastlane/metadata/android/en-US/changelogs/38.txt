@@ -1,0 +1,6 @@
+* added dock pages
+* allow for custom button icons
+* text shadow preferences
+* split query by words
+* fix keyboard related issues
+* change color chooser dialog internally
