@@ -503,6 +503,8 @@
     <string name="contact_button_reset_default">Reset default action</string>
     <string name="done_key_contact_action">Done key contact action</string>
 
+    <string name="loading">Loading…</string>
+
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>
         <item quantity="other">%d entries</item>

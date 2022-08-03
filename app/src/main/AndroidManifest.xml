@@ -90,6 +90,18 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity>
+        <activity
+            android:name=".PickAppWidgetActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:parentActivityName=".TBLauncherActivity"
+            android:screenOrientation="portrait"
+            android:taskAffinity=".SettingsActivity"
+            android:theme="@style/NoTitleDialogTheme">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value=".TBLauncherActivity" />
+        </activity>
 
         <activity
             android:name=".PinShortcutConfirm"
