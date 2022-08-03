@@ -16,7 +16,7 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
+import androidx.core.text.HtmlCompat;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -26,22 +26,18 @@ import rocks.tbog.tblauncher.utils.ViewHolderAdapter;
 import rocks.tbog.tblauncher.utils.ViewHolderListAdapter;
 
 public class PickAppWidgetActivity extends AppCompatActivity {
-    private static final int APPWIDGET_HOST_ID = 1337;
     private static final String TAG = "PickAppWidget";
-    //private PermissionsManager permissionsManager = null;
 
     private static class WidgetInfo {
         final String appName;
         final String widgetName;
         final String widgetDesc;
-        final Drawable preview;
         final AppWidgetProviderInfo appWidgetInfo;
 
-        private WidgetInfo(String app, String name, String description, Drawable preview, AppWidgetProviderInfo appWidgetInfo) {
+        private WidgetInfo(String app, String name, String description, AppWidgetProviderInfo appWidgetInfo) {
             this.appName = app;
             this.widgetName = name;
             this.widgetDesc = description;
-            this.preview = preview;
             this.appWidgetInfo = appWidgetInfo;
         }
     }
@@ -108,25 +104,6 @@ public class PickAppWidgetActivity extends AppCompatActivity {
                         description = desc.toString();
                 }
 
-                // get widget preview
-                Drawable preview = null;
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    preview = providerInfo.loadPreviewImage(context, Math.round(context.getResources().getDisplayMetrics().density * 160));
-                }
-                if (preview == null) {
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                        preview = providerInfo.loadIcon(context, Math.round(context.getResources().getDisplayMetrics().density * 160));
-                    }
-                }
-                //if (preview == null) {
-                //    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                //        LayoutInflater.from(context).inflate(providerInfo.previewLayout, null, false);
-                //    }
-                //}
-                if (preview == null) {
-                    preview = ContextCompat.getDrawable(context, providerInfo.previewImage);
-                }
-
                 String appName = providerInfo.provider.getPackageName();
                 try {
                     var appInfo = context.getPackageManager().getApplicationInfo(providerInfo.provider.getPackageName(), 0);
@@ -134,7 +111,7 @@ public class PickAppWidgetActivity extends AppCompatActivity {
                 } catch (Exception e) {
                     Log.e(TAG, "get `" + providerInfo.provider.getPackageName() + "` label");
                 }
-                infoArrayList.add(new WidgetInfo(appName, label, description, preview, providerInfo));
+                infoArrayList.add(new WidgetInfo(appName, label, description, providerInfo));
             }
             Collections.sort(infoArrayList, (o1, o2) -> {
                 return o1.appName.compareTo(o2.appName);
@@ -150,6 +127,20 @@ public class PickAppWidgetActivity extends AppCompatActivity {
             }
             widgetLoadingGroup.setVisibility(View.GONE);
         });
+    }
+
+    private static Drawable getWidgetPreview(@NonNull Context context, @NonNull AppWidgetProviderInfo info) {
+        Drawable preview = null;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            preview = info.loadPreviewImage(context, context.getResources().getDisplayMetrics().densityDpi);
+        }
+        if (preview != null)
+            return preview;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            preview = info.loadIcon(context, context.getResources().getDisplayMetrics().densityDpi);
+        }
+        return preview;
     }
 
     @Override
@@ -239,13 +230,17 @@ public class PickAppWidgetActivity extends AppCompatActivity {
         protected void setContent(MenuItem content, int position, @NonNull ViewHolderAdapter<MenuItem, ? extends ViewHolderAdapter.ViewHolder<MenuItem>> adapter) {
             if (content instanceof ItemWidget) {
                 WidgetInfo info = ((ItemWidget) content).info;
-                text1.setLines(3);
+                final String text;
                 if (info.widgetDesc != null) {
-                    text1.setText(info.widgetName + "\n" + info.widgetDesc);
+                    text1.setSingleLine(false);
+                    text1.setMinLines(1);
+                    text = text1.getResources().getString(R.string.widget_name_and_desc, info.widgetName, info.widgetDesc);
                 } else {
-                    text1.setText(info.widgetName);
+                    text1.setSingleLine();
+                    text = text1.getResources().getString(R.string.widget_name, info.widgetName);
                 }
-                icon.setImageDrawable(info.preview);
+                text1.setText(HtmlCompat.fromHtml(text, HtmlCompat.FROM_HTML_MODE_LEGACY));
+                Utilities.setIconAsync(icon, context -> getWidgetPreview(context, info.appWidgetInfo));
             } else {
                 text1.setSingleLine();
                 text1.setText(content.getName());
