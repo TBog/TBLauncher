@@ -311,6 +311,8 @@
     <string name="widget_placeholder">Click to restore %s</string>
     <string name="add_widget_failed">Could not add widget</string>
     <string name="bind_widget_failed">Missing permission to create widgets</string>
+    <string name="widget_name"><![CDATA[<b>%s</b>]]></string>
+    <string name="widget_name_and_desc"><![CDATA[<b>%1$s</b><br />%2$s]]></string>
     <string name="widget_placeholder_remove">Remove the placeholder?</string>
     <string name="choose_file_activity_not_found">Please install a file manager.</string>
     <string name="result_history_size">History size</string>
