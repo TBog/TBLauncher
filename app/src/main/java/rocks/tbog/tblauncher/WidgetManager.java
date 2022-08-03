@@ -681,11 +681,18 @@ public class WidgetManager {
                     showRemoveWidgetPopup();
                     break;
                 case R.string.menu_popup_launcher_settings:
-                    //TBApplication.behaviour(v.getContext()).beforeLaunchOccurred();
+                    var intent = new Intent(Utilities.getActivity(mLayout), SettingsActivity.class);
+                    Utilities.setIntentSourceBounds(intent, v);
+                    Bundle startActivityOptions = Utilities.makeStartActivityOptions(v);
                     mLayout.postDelayed(() -> {
-                        Context c = mLayout.getContext();
-                        c.startActivity(new Intent(c, SettingsActivity.class));
-                        //TBApplication.behaviour(c).afterLaunchOccurred();
+                        var act = Utilities.getActivity(mLayout);
+                        if (act == null)
+                            return;
+                        try {
+                            act.startActivity(intent, startActivityOptions);
+                        } catch (ActivityNotFoundException ignored) {
+                            // ignored
+                        }
                     }, Behaviour.LAUNCH_DELAY);
                     break;
             }
