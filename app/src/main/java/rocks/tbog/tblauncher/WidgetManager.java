@@ -14,6 +14,8 @@ import android.graphics.PointF;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.view.ContextThemeWrapper;
@@ -60,7 +62,9 @@ public class WidgetManager {
     private final ArrayList<PlaceholderWidgetRecord> mPlaceholders = new ArrayList<>(0);
     private static final int APPWIDGET_HOST_ID = 1337;
     private static final int REQUEST_PICK_APPWIDGET = 101;
-    private static final int REQUEST_CREATE_APPWIDGET = 102;
+    private static final int REQUEST_CONFIGURE_APPWIDGET = 102;
+    private static final int REQUEST_BIND_APPWIDGET = 103;
+    public static final String EXTRA_WIDGET_BIND_ALLOWED = "widgetBindAllowed";
 
     /**
      * Registers the AppWidgetHost to listen for updates to any widgets this app has.
@@ -445,9 +449,10 @@ public class WidgetManager {
      */
     public void showSelectWidget(Activity activity) {
         int appWidgetId = this.mAppWidgetHost.allocateAppWidgetId();
-        Intent pickIntent = new Intent(AppWidgetManager.ACTION_APPWIDGET_PICK);
+        Intent pickIntent = new Intent(activity, PickAppWidgetActivity.class);
+        //Intent pickIntent = new Intent(AppWidgetManager.ACTION_APPWIDGET_PICK);
+        //addEmptyData(pickIntent);
         pickIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
-        addEmptyData(pickIntent);
         activity.startActivityForResult(pickIntent, REQUEST_PICK_APPWIDGET);
     }
 
@@ -458,11 +463,39 @@ public class WidgetManager {
      * <p>
      * See more: http://code.google.com/p/android/issues/detail?id=4272
      */
-    private void addEmptyData(Intent pickIntent) {
-        ArrayList<AppWidgetProviderInfo> customInfo = new ArrayList<>();
+    public static void addEmptyData(Intent pickIntent) {
+        ArrayList<AppWidgetProviderInfo> customInfo = new ArrayList<>(1);
         pickIntent.putParcelableArrayListExtra(AppWidgetManager.EXTRA_CUSTOM_INFO, customInfo);
-        ArrayList<Bundle> customExtras = new ArrayList<>();
+        ArrayList<Bundle> customExtras = new ArrayList<>(1);
         pickIntent.putParcelableArrayListExtra(AppWidgetManager.EXTRA_CUSTOM_EXTRAS, customExtras);
+    }
+
+    private static void bindWidget(@NonNull Activity activity, @NonNull Intent data) {
+        Bundle extras = data.getExtras();
+        if (extras == null)
+            return;
+        final int appWidgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID, INVALID_WIDGET_ID);
+        final ComponentName provider = extras.getParcelable(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER);
+        final UserHandle profile;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+            profile = extras.getParcelable(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER_PROFILE);
+        } else {
+            profile = null;
+        }
+
+        new Handler().postDelayed(() -> {
+            Log.d(TAG, "asking for permission");
+
+            Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_BIND);
+            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
+            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, provider);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER_PROFILE, profile);
+            }
+            addEmptyData(intent);
+
+            activity.startActivityForResult(intent, REQUEST_BIND_APPWIDGET);
+        }, 500);
     }
 
     /**
@@ -490,13 +523,13 @@ public class WidgetManager {
 
         if (appWidgetInfo.configure != null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                startConfigActivity(appWidgetId, activity, REQUEST_CREATE_APPWIDGET);
+                startConfigActivity(appWidgetId, activity, REQUEST_CONFIGURE_APPWIDGET);
             } else {
                 Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_CONFIGURE);
                 intent.setComponent(appWidgetInfo.configure);
                 intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
                 try {
-                    activity.startActivityForResult(intent, REQUEST_CREATE_APPWIDGET);
+                    activity.startActivityForResult(intent, REQUEST_CONFIGURE_APPWIDGET);
                 } catch (SecurityException e) {
                     Log.e(TAG, "ACTION_APPWIDGET_CONFIGURE", e);
                     Toast.makeText(activity, e.getMessage(), Toast.LENGTH_LONG).show();
@@ -574,13 +607,19 @@ public class WidgetManager {
      *                    (various data can be attached to Intent "extras").
      * @return if this result was processed here
      */
-    public boolean onActivityResult(Activity activity, int requestCode, int resultCode, @Nullable Intent data) {
+    public boolean onActivityResult(@NonNull Activity activity, int requestCode, int resultCode, @Nullable Intent data) {
         switch (resultCode) {
             case Activity.RESULT_OK:
                 if (requestCode == REQUEST_PICK_APPWIDGET) {
+                    if (data != null && !data.getBooleanExtra(EXTRA_WIDGET_BIND_ALLOWED, false))
+                        bindWidget(activity, data);
+                    else
+                        configureWidget(activity, data);
+                    return true;
+                } else if (requestCode == REQUEST_BIND_APPWIDGET) {
                     configureWidget(activity, data);
                     return true;
-                } else if (requestCode == REQUEST_CREATE_APPWIDGET) {
+                } else if (requestCode == REQUEST_CONFIGURE_APPWIDGET) {
                     createWidget(activity, data);
                     return true;
                 }
