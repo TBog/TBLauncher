@@ -470,7 +470,7 @@ public class WidgetManager {
         pickIntent.putParcelableArrayListExtra(AppWidgetManager.EXTRA_CUSTOM_EXTRAS, customExtras);
     }
 
-    private static void bindWidget(@NonNull Activity activity, @NonNull Intent data) {
+    private static void requestBindWidget(@NonNull Activity activity, @NonNull Intent data) {
         Bundle extras = data.getExtras();
         if (extras == null)
             return;
@@ -612,7 +612,7 @@ public class WidgetManager {
             case Activity.RESULT_OK:
                 if (requestCode == REQUEST_PICK_APPWIDGET) {
                     if (data != null && !data.getBooleanExtra(EXTRA_WIDGET_BIND_ALLOWED, false))
-                        bindWidget(activity, data);
+                        requestBindWidget(activity, data);
                     else
                         configureWidget(activity, data);
                     return true;
@@ -633,6 +633,8 @@ public class WidgetManager {
                     }
                 } else if (requestCode == REQUEST_PICK_APPWIDGET) {
                     Toast.makeText(activity, R.string.add_widget_failed, Toast.LENGTH_LONG).show();
+                } else if (requestCode == REQUEST_BIND_APPWIDGET) {
+                    Toast.makeText(activity, R.string.bind_widget_failed, Toast.LENGTH_LONG).show();
                 }
                 break;
         }
