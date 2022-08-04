@@ -44,10 +44,10 @@ public abstract class ViewHolderListAdapter<T, VH extends ViewHolderAdapter.View
     }
 
     @Nullable
-    public <L extends LoadAsyncList<T>> L newLoadAsyncList(@NonNull Class<L> loadAsyncClass, @NonNull LoadAsyncData.LoadInBackground<T> loadInBackground) {
+    public <L extends LoadAsyncList<T, ?, ?>> L newLoadAsyncList(@NonNull Class<L> loadAsyncClass, @NonNull LoadAsyncData.LoadInBackground<T> loadInBackground) {
         L loadAsync = null;
         try {
-            loadAsync = loadAsyncClass.getDeclaredConstructor(this.getClass(), loadInBackground.getClass()).newInstance(this, loadInBackground);
+            loadAsync = loadAsyncClass.getDeclaredConstructor(this.getClass(), LoadAsyncData.LoadInBackground.class).newInstance(this, loadInBackground);
         } catch (ReflectiveOperationException e) {
             Log.e("VHLA", "LoadAsync can't be instantiated (make sure class and constructor are public)", e);
         }
@@ -55,23 +55,19 @@ public abstract class ViewHolderListAdapter<T, VH extends ViewHolderAdapter.View
     }
 
     @NonNull
-    public LoadAsyncList<T> newLoadAsyncList(@NonNull LoadAsyncData.LoadInBackground<T> loadInBackground) {
+    public LoadAsyncList<T, ?, ?> newLoadAsyncList(@NonNull LoadAsyncData.LoadInBackground<T> loadInBackground) {
         return new LoadAsyncList<>(this, loadInBackground);
     }
 
-    public static class LoadAsyncList<T> extends LoadAsyncData<T> {
+    public static class LoadAsyncList<T, VH extends ViewHolderAdapter.ViewHolder<T>, A extends ViewHolderListAdapter<T, VH>> extends LoadAsyncData<T, A> {
 
-        public LoadAsyncList(@NonNull ViewHolderListAdapter<T, ? extends ViewHolder<T>> adapter, @NonNull LoadInBackground<T> loadInBackground) {
+        public LoadAsyncList(@NonNull A adapter, @NonNull LoadInBackground<T> loadInBackground) {
             super(adapter, loadInBackground);
         }
 
-        @SuppressWarnings("unchecked")
         @Override
-        protected void onDataLoadFinished(@NonNull ViewHolderAdapter<T, ? extends ViewHolder<T>> adapter, @NonNull Collection<T> data) {
-            ViewHolderListAdapter<T, ? extends ViewHolder<T>> listAdapter;
-            //noinspection unchecked
-            listAdapter = (ViewHolderListAdapter<T, ? extends ViewHolder<T>>) adapter;
-            listAdapter.addItems(data);
+        protected void onDataLoadFinished(@NonNull A adapter, @NonNull Collection<T> data) {
+            adapter.addItems(data);
         }
     }
 }

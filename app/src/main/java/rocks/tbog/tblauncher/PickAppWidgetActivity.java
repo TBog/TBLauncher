@@ -4,6 +4,8 @@ import android.appwidget.AppWidgetManager;
 import android.appwidget.AppWidgetProviderInfo;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -12,17 +14,20 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.res.ResourcesCompat;
 import androidx.core.text.HtmlCompat;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
+import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
 import rocks.tbog.tblauncher.utils.ViewHolderAdapter;
 import rocks.tbog.tblauncher.utils.ViewHolderListAdapter;
@@ -85,7 +90,7 @@ public class PickAppWidgetActivity extends AppCompatActivity {
         final View widgetLoadingGroup = findViewById(R.id.widgetLoadingGroup);
         widgetLoadingGroup.setVisibility(View.VISIBLE);
 
-        var loadWidgetsAsync = adapter.newLoadAsyncList(LoadWidgetsAsync.class, () -> {
+        LoadWidgetsAsync loadWidgetsAsync = adapter.newLoadAsyncList(LoadWidgetsAsync.class, () -> {
             // get widget list
             var widgetList = getWidgetList(context);
 
@@ -109,6 +114,9 @@ public class PickAppWidgetActivity extends AppCompatActivity {
         if (loadWidgetsAsync != null) {
             loadWidgetsAsync.whenDone = () -> widgetLoadingGroup.setVisibility(View.GONE);
             loadWidgetsAsync.execute();
+        } else {
+            finish();
+            Toast.makeText(context, R.string.add_widget_failed, Toast.LENGTH_LONG).show();
         }
     }
 
@@ -151,28 +159,55 @@ public class PickAppWidgetActivity extends AppCompatActivity {
     @WorkerThread
     private static Drawable getWidgetPreview(@NonNull Context context, @NonNull AppWidgetProviderInfo info) {
         Drawable preview = null;
+        final int density = context.getResources().getDisplayMetrics().densityDpi;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            preview = info.loadPreviewImage(context, context.getResources().getDisplayMetrics().densityDpi);
+            preview = info.loadPreviewImage(context, density);
         }
         if (preview != null)
             return preview;
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            preview = info.loadIcon(context, context.getResources().getDisplayMetrics().densityDpi);
+            preview = info.loadIcon(context, density);
         }
-        return preview;
+        if (preview != null)
+            return preview;
+
+        Resources resources = null;
+        try {
+            resources = context.getPackageManager().getResourcesForApplication(info.provider.getPackageName());
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.w(TAG, "getResourcesForApplication " + info.provider.getPackageName(), e);
+        }
+        if (resources != null) {
+            try {
+                preview = ResourcesCompat.getDrawableForDensity(resources, info.previewImage, density, null);
+            } catch (Resources.NotFoundException ignored) {
+                //ignored
+            }
+            if (preview != null)
+                return preview;
+
+            try {
+                preview = ResourcesCompat.getDrawableForDensity(resources, info.icon, density, null);
+            } catch (Resources.NotFoundException ignored) {
+                //ignored
+            }
+            if (preview != null)
+                return preview;
+        }
+
+        UserHandleCompat userHandle = UserHandleCompat.CURRENT_USER;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            userHandle = new UserHandleCompat(context, info.getProfile());
+        }
+        var icon = TBApplication.iconsHandler(context).getIconForPackage(info.provider, userHandle);
+        return icon.getDrawable();
     }
 
     @Override
     public void onBackPressed() {
         setResult(RESULT_CANCELED, getIntent());
         super.onBackPressed();
-    }
-
-    @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        //permissionsManager.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     private interface MenuItem {
@@ -209,9 +244,9 @@ public class PickAppWidgetActivity extends AppCompatActivity {
         }
     }
 
-    private static class WidgetListAdapter extends ViewHolderListAdapter<MenuItem, InfoViewHolder> {
+    public static class WidgetListAdapter extends ViewHolderListAdapter<MenuItem, InfoViewHolder> {
 
-        protected WidgetListAdapter() {
+        public WidgetListAdapter() {
             super(InfoViewHolder.class, R.layout.popup_list_item_icon, new ArrayList<>());
         }
 
@@ -236,11 +271,11 @@ public class PickAppWidgetActivity extends AppCompatActivity {
         }
     }
 
-    public static class LoadWidgetsAsync extends ViewHolderListAdapter.LoadAsyncList<MenuItem> {
+    public static class LoadWidgetsAsync extends ViewHolderListAdapter.LoadAsyncList<MenuItem, InfoViewHolder, WidgetListAdapter> {
         @Nullable
         public Runnable whenDone = null;
 
-        public LoadWidgetsAsync(@NonNull ViewHolderListAdapter<MenuItem, ? extends ViewHolderAdapter.ViewHolder<MenuItem>> adapter, @NonNull LoadInBackground<MenuItem> loadInBackground) {
+        public LoadWidgetsAsync(@NonNull WidgetListAdapter adapter, @NonNull LoadInBackground<MenuItem> loadInBackground) {
             super(adapter, loadInBackground);
         }
 
