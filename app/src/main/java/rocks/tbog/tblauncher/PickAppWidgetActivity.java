@@ -15,10 +15,12 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.WorkerThread;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.text.HtmlCompat;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 
 import rocks.tbog.tblauncher.utils.Utilities;
@@ -83,52 +85,70 @@ public class PickAppWidgetActivity extends AppCompatActivity {
         final View widgetLoadingGroup = findViewById(R.id.widgetLoadingGroup);
         widgetLoadingGroup.setVisibility(View.VISIBLE);
 
-        final ArrayList<WidgetInfo> infoArrayList = new ArrayList<>();
-        Utilities.runAsync(getLifecycle(), task -> {
-            var appWidgetManager = AppWidgetManager.getInstance(context);
-            for (var providerInfo : appWidgetManager.getInstalledProviders()) {
-                // get widget name
-                String label = null;
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    label = providerInfo.loadLabel(context.getPackageManager());
-                }
-                if (label == null) {
-                    label = providerInfo.label;
-                }
+        var loadWidgetsAsync = adapter.newLoadAsyncList(LoadWidgetsAsync.class, () -> {
+            // get widget list
+            var widgetList = getWidgetList(context);
 
-                // get widget description
-                String description = null;
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                    var desc = providerInfo.loadDescription(context);
-                    if (desc != null)
-                        description = desc.toString();
-                }
-
-                String appName = providerInfo.provider.getPackageName();
-                try {
-                    var appInfo = context.getPackageManager().getApplicationInfo(providerInfo.provider.getPackageName(), 0);
-                    appName = appInfo.loadLabel(context.getPackageManager()).toString();
-                } catch (Exception e) {
-                    Log.e(TAG, "get `" + providerInfo.provider.getPackageName() + "` label");
-                }
-                infoArrayList.add(new WidgetInfo(appName, label, description, providerInfo));
-            }
-            Collections.sort(infoArrayList, (o1, o2) -> {
+            // sort list
+            Collections.sort(widgetList, (o1, o2) -> {
                 return o1.appName.compareTo(o2.appName);
             });
-        }, task -> {
+
+            // assuming the list is sorted by apps, add titles with app name
+            ArrayList<MenuItem> adapterList = new ArrayList<>(widgetList.size());
             String lastApp = null;
-            for (var item : infoArrayList) {
+            for (var item : widgetList) {
                 if (!item.appName.equals(lastApp)) {
                     lastApp = item.appName;
-                    adapter.addItem(new ItemTitle(item.appName));
+                    adapterList.add(new ItemTitle(item.appName));
                 }
-                adapter.addItem(new ItemWidget(item));
+                adapterList.add(new ItemWidget(item));
             }
-            widgetLoadingGroup.setVisibility(View.GONE);
+            return adapterList;
         });
+        if (loadWidgetsAsync != null) {
+            loadWidgetsAsync.whenDone = () -> widgetLoadingGroup.setVisibility(View.GONE);
+            loadWidgetsAsync.execute();
+        }
     }
 
+    @WorkerThread
+    private static ArrayList<WidgetInfo> getWidgetList(@NonNull Context context) {
+        var appWidgetManager = AppWidgetManager.getInstance(context);
+        var installedProviders = appWidgetManager.getInstalledProviders();
+        var infoArrayList = new ArrayList<WidgetInfo>(installedProviders.size());
+        var packageManager = context.getPackageManager();
+        for (var providerInfo : installedProviders) {
+            // get widget name
+            String label = null;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                label = providerInfo.loadLabel(packageManager);
+            }
+            if (label == null) {
+                label = providerInfo.label;
+            }
+
+            // get widget description
+            String description = null;
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                var desc = providerInfo.loadDescription(context);
+                if (desc != null)
+                    description = desc.toString();
+            }
+
+            String appName = providerInfo.provider.getPackageName();
+            try {
+                var appInfo = packageManager.getApplicationInfo(providerInfo.provider.getPackageName(), 0);
+                appName = appInfo.loadLabel(packageManager).toString();
+            } catch (Exception e) {
+                Log.e(TAG, "get `" + providerInfo.provider.getPackageName() + "` label");
+            }
+            infoArrayList.add(new WidgetInfo(appName, label, description, providerInfo));
+        }
+        return infoArrayList;
+    }
+
+    @WorkerThread
     private static Drawable getWidgetPreview(@NonNull Context context, @NonNull AppWidgetProviderInfo info) {
         Drawable preview = null;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
@@ -213,6 +233,22 @@ public class PickAppWidgetActivity extends AppCompatActivity {
 
         public int getViewTypeCount() {
             return 2;
+        }
+    }
+
+    public static class LoadWidgetsAsync extends ViewHolderListAdapter.LoadAsyncList<MenuItem> {
+        @Nullable
+        public Runnable whenDone = null;
+
+        public LoadWidgetsAsync(@NonNull ViewHolderListAdapter<MenuItem, ? extends ViewHolderAdapter.ViewHolder<MenuItem>> adapter, @NonNull LoadInBackground<MenuItem> loadInBackground) {
+            super(adapter, loadInBackground);
+        }
+
+        @Override
+        protected void onPostExecute(Collection<MenuItem> data) {
+            super.onPostExecute(data);
+            if (whenDone != null)
+                whenDone.run();
         }
     }
 

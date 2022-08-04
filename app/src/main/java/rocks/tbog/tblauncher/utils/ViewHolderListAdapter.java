@@ -44,8 +44,8 @@ public abstract class ViewHolderListAdapter<T, VH extends ViewHolderAdapter.View
     }
 
     @Nullable
-    public LoadAsyncList<T> newLoadAsyncList(@NonNull Class<LoadAsyncList<T>> loadAsyncClass, @NonNull LoadAsyncData.LoadInBackground<T> loadInBackground) {
-        LoadAsyncList<T> loadAsync = null;
+    public <L extends LoadAsyncList<T>> L newLoadAsyncList(@NonNull Class<L> loadAsyncClass, @NonNull LoadAsyncData.LoadInBackground<T> loadInBackground) {
+        L loadAsync = null;
         try {
             loadAsync = loadAsyncClass.getDeclaredConstructor(this.getClass(), loadInBackground.getClass()).newInstance(this, loadInBackground);
         } catch (ReflectiveOperationException e) {
