@@ -97,8 +97,8 @@ public abstract class ViewHolderAdapter<T, VH extends ViewHolderAdapter.ViewHold
         protected abstract void setContent(T content, int position, @NonNull ViewHolderAdapter<T, ? extends ViewHolder<T>> adapter);
     }
 
-    public static abstract class LoadAsyncData<T> extends AsyncTask<Void, Collection<T>> {
-        private final ViewHolderAdapter<T, ? extends ViewHolder<T>> adapter;
+    public static abstract class LoadAsyncData<T, A extends ViewHolderAdapter<T, ? extends ViewHolder<T>>> extends AsyncTask<Void, Collection<T>> {
+        protected final A adapter;
         private final LoadInBackground<T> task;
 
         public interface LoadInBackground<T> {
@@ -106,7 +106,7 @@ public abstract class ViewHolderAdapter<T, VH extends ViewHolderAdapter.ViewHold
             Collection<T> loadInBackground();
         }
 
-        public LoadAsyncData(@NonNull ViewHolderAdapter<T, ? extends ViewHolder<T>> adapter, @NonNull LoadInBackground<T> loadInBackground) {
+        public LoadAsyncData(@NonNull A adapter, @NonNull LoadInBackground<T> loadInBackground) {
             super();
             this.adapter = adapter;
             task = loadInBackground;
@@ -125,7 +125,7 @@ public abstract class ViewHolderAdapter<T, VH extends ViewHolderAdapter.ViewHold
             onDataLoadFinished(adapter, data);
         }
 
-        protected abstract void onDataLoadFinished(@NonNull ViewHolderAdapter<T, ? extends ViewHolder<T>> adapter, @NonNull Collection<T> data);
+        protected abstract void onDataLoadFinished(@NonNull A adapter, @NonNull Collection<T> data);
 
         public void execute() {
             Utilities.executeAsync(this);
