@@ -27,11 +27,14 @@ import android.widget.ListAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResultLauncher;
+import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.StringRes;
 import androidx.appcompat.app.AlertDialog;
+import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.res.ResourcesCompat;
 
 import java.util.ArrayList;
@@ -47,6 +50,7 @@ import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.ui.WidgetLayout;
 import rocks.tbog.tblauncher.ui.WidgetView;
 import rocks.tbog.tblauncher.utils.DebugInfo;
+import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public class WidgetManager {
@@ -61,10 +65,14 @@ public class WidgetManager {
     private final ArrayMap<Integer, WidgetRecord> mWidgets = new ArrayMap<>(0);
     private final ArrayList<PlaceholderWidgetRecord> mPlaceholders = new ArrayList<>(0);
     private static final int APPWIDGET_HOST_ID = 1337;
-    private static final int REQUEST_PICK_APPWIDGET = 101;
     private static final int REQUEST_CONFIGURE_APPWIDGET = 102;
-    private static final int REQUEST_BIND_APPWIDGET = 103;
     public static final String EXTRA_WIDGET_BIND_ALLOWED = "widgetBindAllowed";
+
+    // called after widget was picked by the user
+    ActivityResultLauncher<Intent> widgetPickerResult;
+
+    // called after user responded to permission request
+    ActivityResultLauncher<Intent> widgetBindResult;
 
     /**
      * Registers the AppWidgetHost to listen for updates to any widgets this app has.
@@ -92,7 +100,7 @@ public class WidgetManager {
     /**
      * Called on the creation of the activity.
      */
-    public void onCreateActivity(Activity activity) {
+    public void onCreateActivity(AppCompatActivity activity) {
         mLayout = activity.findViewById(R.id.widgetContainer);
         mLayout.setPageCount(LiveWallpaper.SCREEN_COUNT_HORIZONTAL, LiveWallpaper.SCREEN_COUNT_VERTICAL);
         restoreWidgets();
@@ -102,19 +110,42 @@ public class WidgetManager {
             PointF offset = lw.getWallpaperOffset();
             WidgetManager.this.scroll(offset.x, offset.y);
         });
-//        mLayout.post(new Runnable() {
-//            @Override
-//            public void run() {
-//                if (mLayout.getMeasuredWidth() == 0) {
-//                    // layout did not happen yet, wait some more
-//                    mLayout.removeCallbacks(this);
-//                    mLayout.post(this);
-//                    return;
-//                }
-//                PointF offset = lw.getWallpaperOffset();
-//                WidgetManager.this.scroll(offset.x, offset.y);
-//            }
-//        });
+
+        widgetPickerResult =
+            activity.registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                var data = result.getData();
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    if (data != null && !data.getBooleanExtra(EXTRA_WIDGET_BIND_ALLOWED, false))
+                        requestBindWidget(data);
+                    else
+                        configureWidget(activity, data);
+                } else {
+                    if (data != null) {
+                        int appWidgetId = data.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, INVALID_WIDGET_ID);
+                        if (appWidgetId != INVALID_WIDGET_ID) {
+                            removeWidget(appWidgetId);
+                        }
+                    } else {
+                        Toast.makeText(activity, R.string.add_widget_failed, Toast.LENGTH_LONG).show();
+                    }
+                }
+            });
+
+        widgetBindResult =
+            activity.registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                var data = result.getData();
+                if (result.getResultCode() == Activity.RESULT_OK) {
+                    configureWidget(activity, data);
+                } else {
+                    if (data != null) {
+                        int appWidgetId = data.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, INVALID_WIDGET_ID);
+                        if (appWidgetId != INVALID_WIDGET_ID) {
+                            removeWidget(appWidgetId);
+                        }
+                    }
+                    Toast.makeText(activity, R.string.bind_widget_failed, Toast.LENGTH_LONG).show();
+                }
+            });
     }
 
     private void loadFromDB(Context context) {
@@ -393,20 +424,25 @@ public class WidgetManager {
                 return;
 
             int appWidgetId = mAppWidgetHost.allocateAppWidgetId();
-            boolean hasPermission;
-            try {
-                hasPermission = mAppWidgetManager.bindAppWidgetIdIfAllowed(appWidgetId, provider);
-            } catch (Throwable ignored) {
-                hasPermission = false;
+            boolean bindAllowed;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
+                UserHandleCompat userHandle = UserHandleCompat.CURRENT_USER;
+                bindAllowed = mAppWidgetManager.bindAppWidgetIdIfAllowed(appWidgetId, userHandle.getRealHandle(), provider, null);
+            } else {
+                bindAllowed = mAppWidgetManager.bindAppWidgetIdIfAllowed(appWidgetId, provider);
             }
 
             Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_BIND);
             intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
-            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, provider);
-            if (hasPermission) {
+            if (bindAllowed) {
                 configureWidget(activity, intent);
             } else {
-                activity.startActivityForResult(intent, REQUEST_PICK_APPWIDGET/*REQUEST_BIND*/);
+                intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, provider);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    UserHandleCompat userHandle = UserHandleCompat.CURRENT_USER;
+                    intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER_PROFILE, userHandle.getRealHandle());
+                }
+                requestBindWidget(intent);
             }
             //Toast.makeText(activity, provider.flattenToString(), Toast.LENGTH_SHORT).show();
         });
@@ -439,21 +475,15 @@ public class WidgetManager {
         mLayout.addPlaceholder(placeholder, provider);
     }
 
-    public boolean usingActivity(Activity activity) {
-        return activity.findViewById(R.id.widgetContainer) == mLayout;
-    }
-
     /**
      * Launches the menu to select the widget. The selected widget will be on
      * the result of the activity.
      */
-    public void showSelectWidget(Activity activity) {
-        int appWidgetId = this.mAppWidgetHost.allocateAppWidgetId();
+    public void showSelectWidget(AppCompatActivity activity) {
         Intent pickIntent = new Intent(activity, PickAppWidgetActivity.class);
-        //Intent pickIntent = new Intent(AppWidgetManager.ACTION_APPWIDGET_PICK);
-        //addEmptyData(pickIntent);
+        int appWidgetId = mAppWidgetHost.allocateAppWidgetId();
         pickIntent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
-        activity.startActivityForResult(pickIntent, REQUEST_PICK_APPWIDGET);
+        widgetPickerResult.launch(pickIntent);
     }
 
     /**
@@ -470,7 +500,7 @@ public class WidgetManager {
         pickIntent.putParcelableArrayListExtra(AppWidgetManager.EXTRA_CUSTOM_EXTRAS, customExtras);
     }
 
-    private static void requestBindWidget(@NonNull Activity activity, @NonNull Intent data) {
+    private void requestBindWidget(@NonNull Intent data) {
         Bundle extras = data.getExtras();
         if (extras == null)
             return;
@@ -494,7 +524,7 @@ public class WidgetManager {
             }
             addEmptyData(intent);
 
-            activity.startActivityForResult(intent, REQUEST_BIND_APPWIDGET);
+            widgetBindResult.launch(intent);
         }, 500);
     }
 
@@ -610,16 +640,7 @@ public class WidgetManager {
     public boolean onActivityResult(@NonNull Activity activity, int requestCode, int resultCode, @Nullable Intent data) {
         switch (resultCode) {
             case Activity.RESULT_OK:
-                if (requestCode == REQUEST_PICK_APPWIDGET) {
-                    if (data != null && !data.getBooleanExtra(EXTRA_WIDGET_BIND_ALLOWED, false))
-                        requestBindWidget(activity, data);
-                    else
-                        configureWidget(activity, data);
-                    return true;
-                } else if (requestCode == REQUEST_BIND_APPWIDGET) {
-                    configureWidget(activity, data);
-                    return true;
-                } else if (requestCode == REQUEST_CONFIGURE_APPWIDGET) {
+                if (requestCode == REQUEST_CONFIGURE_APPWIDGET) {
                     createWidget(activity, data);
                     return true;
                 }
@@ -631,10 +652,6 @@ public class WidgetManager {
                         removeWidget(appWidgetId);
                         return true;
                     }
-                } else if (requestCode == REQUEST_PICK_APPWIDGET) {
-                    Toast.makeText(activity, R.string.add_widget_failed, Toast.LENGTH_LONG).show();
-                } else if (requestCode == REQUEST_BIND_APPWIDGET) {
-                    Toast.makeText(activity, R.string.bind_widget_failed, Toast.LENGTH_LONG).show();
                 }
                 break;
         }
@@ -673,7 +690,7 @@ public class WidgetManager {
      * @param activity used to start the widget select popup
      * @return the popup menu
      */
-    public ListPopup getConfigPopup(Activity activity) {
+    public ListPopup getConfigPopup(AppCompatActivity activity) {
         LinearAdapter adapter = new LinearAdapter();
 
         adapter.add(new LinearAdapter.ItemTitle(activity, R.string.menu_widget_title));
