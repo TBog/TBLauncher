@@ -183,8 +183,9 @@ public class LiveWallpaper {
         float yStep = (SCREEN_COUNT_VERTICAL > 1) ? (1.f / (SCREEN_COUNT_VERTICAL - 1)) : 0.f;
         mWallpaperManager.setWallpaperOffsetSteps(xStep, yStep);
 
-        if (isPreferenceLWPScrollPages())
-            TBApplication.widgetManager(mTBLauncherActivity).setPageCount(SCREEN_COUNT_HORIZONTAL, SCREEN_COUNT_VERTICAL);
+        if (isPreferenceLWPScrollPages()) {
+            mTBLauncherActivity.widgetManager.setPageCount(SCREEN_COUNT_HORIZONTAL, SCREEN_COUNT_VERTICAL);
+        }
 
         int centerScreenX = SCREEN_COUNT_HORIZONTAL / 2;
         int centerScreenY = SCREEN_COUNT_VERTICAL / 2;
@@ -192,10 +193,14 @@ public class LiveWallpaper {
     }
 
     private static boolean onClick(View view) {
+        if (!view.isAttachedToWindow())
+            return false;
         return TBApplication.behaviour(view.getContext()).onClick();
     }
 
     private static boolean onDoubleClick(View view) {
+        if (!view.isAttachedToWindow())
+            return false;
         return TBApplication.behaviour(view.getContext()).onDoubleClick();
     }
 
@@ -204,7 +209,9 @@ public class LiveWallpaper {
     }
 
     private boolean onFling(View view, float xMove, float yMove, float xVel, float yVel) {
-        final Behaviour behaviour = TBApplication.behaviour(view.getContext());
+        if (!view.isAttachedToWindow())
+            return false;
+        final Behaviour behaviour = mTBLauncherActivity.behaviour;
 
         final int angle;
 //        if (-minMovement < xMove && xMove < minMovement && -minMovement < yMove && yMove < minMovement) {
@@ -247,9 +254,8 @@ public class LiveWallpaper {
             return;
         }
         view.performHapticFeedback(HapticFeedbackConstants.LONG_PRESS);
-        Context ctx = view.getContext();
-        ListPopup menu = TBApplication.widgetManager(ctx).getConfigPopup(mTBLauncherActivity);
-        TBApplication.getApplication(getContext()).registerPopup(menu);
+        ListPopup menu = mTBLauncherActivity.widgetManager.getConfigPopup(mTBLauncherActivity);
+        TBApplication.getApplication(mTBLauncherActivity).registerPopup(menu);
         int x = (int) (mLastTouchPos.x + .5f);
         int y = (int) (mLastTouchPos.y + .5f);
         menu.showAtLocation(view, Gravity.START | Gravity.TOP, x, y);
@@ -440,8 +446,9 @@ public class LiveWallpaper {
         offsetX = Math.max(0.f, Math.min(1.f, offsetX));
         offsetY = Math.max(0.f, Math.min(1.f, offsetY));
         mWallpaperOffset.set(offsetX, offsetY);
-        if (isPreferenceLWPScrollPages())
-            TBApplication.widgetManager(mTBLauncherActivity).scroll(offsetX, offsetY);
+        if (isPreferenceLWPScrollPages()) {
+            mTBLauncherActivity.widgetManager.scroll(offsetX, offsetY);
+        }
         if (isPreferenceWPDragAnimate()) {
             android.os.IBinder iBinder = getWindowToken();
             if (iBinder != null) {
