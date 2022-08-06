@@ -85,4 +85,10 @@
         </item>
     </style>
 
+    <!-- This is the copy/cut/paste bar
+    see: https://stackoverflow.com/a/30997664/6761564 -->
+    <style name="ActionModeStyle">
+        <item name="background">@android:color/transparent</item>
+    </style>
+
 </resources>

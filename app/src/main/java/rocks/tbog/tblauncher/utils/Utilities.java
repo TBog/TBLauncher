@@ -568,16 +568,16 @@ public class Utilities {
     }
 
     private static void setTextSelectHandle(@NonNull TextView editText, @NonNull String fieldName, @NonNull String editorField, Drawable drawable) {
-        String fieldNameRes = fieldName + "Res";
-        if (classContainsDeclaredField(TextView.class, fieldNameRes)) {
-            try {
-                Field f_handleRes = TextView.class.getDeclaredField(fieldNameRes);
-                f_handleRes.setAccessible(true);
-                f_handleRes.setInt(editText, 0);
-            } catch (Throwable t) {
-                Log.w(TAG, "set `" + fieldNameRes + "` from " + editText.getClass(), t);
-            }
-        }
+//        String fieldNameRes = fieldName + "Res";
+//        if (classContainsDeclaredField(TextView.class, fieldNameRes)) {
+//            try {
+//                Field f_handleRes = TextView.class.getDeclaredField(fieldNameRes);
+//                f_handleRes.setAccessible(true);
+//                f_handleRes.setInt(editText, 0);
+//            } catch (Throwable t) {
+//                Log.w(TAG, "set `" + fieldNameRes + "` from " + editText.getClass(), t);
+//            }
+//        }
         if (classContainsDeclaredField(TextView.class, fieldName)) {
             try {
                 Field f_handle = TextView.class.getDeclaredField(fieldName);
