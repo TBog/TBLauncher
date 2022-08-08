@@ -1,5 +1,5 @@
 ---
-title: TinyBit launcher privacy policy
+title: TinyBit launcher
 layout: simple
 ---
 
