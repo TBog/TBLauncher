@@ -361,6 +361,42 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
                 removePreference("pin-auto-confirm");
             }
+            if (!BuildConfig.SHOW_RATE_APP) {
+                removePreference("rate-app");
+            }
+            if (!BuildConfig.SHOW_PRIVACY_POLICY) {
+                removePreference("privacy-policy");
+            }
+            // set app name and version
+            {
+                Preference appVer = findPreference("app-version");
+                if (appVer != null) {
+                    var version = appVer.getContext().getString(R.string.app_version, BuildConfig.VERSION_NAME);
+                    var appName = appVer.getContext().getText(R.string.app_name);
+                    String appStore;
+                    switch (BuildConfig.FLAVOR) {
+                        case "playstore":
+                            appStore = "Google Play";
+                            break;
+                        case "fdroid":
+                            appStore = "F-Droid";
+                            break;
+                        case "github":
+                            appStore = "GitHub";
+                            break;
+                        default:
+                            throw new IllegalStateException("Undefined flavor");
+                    }
+                    var summary = appVer.getContext().getString(R.string.app_version_summary, appName, appStore);
+                    appVer.setTitle(version);
+                    appVer.setSummary(summary);
+
+                    // add link to the launcher webpage if app not installed from a store
+                    if (!BuildConfig.SHOW_RATE_APP) {
+                        appVer.setEnabled(true);
+                    }
+                }
+            }
 
             final Activity activity = requireActivity();
 
