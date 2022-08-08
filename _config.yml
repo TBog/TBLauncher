@@ -1,2 +1,5 @@
+description: Android launcher with icon pack support, search to launch apps and contacts, color and behaviour customizable
 show_downloads: true
 theme: jekyll-theme-hacker
+github:
+  apk_url: https://github.com/TBog/TBLauncher/releases/latest/download/app-release.apk
