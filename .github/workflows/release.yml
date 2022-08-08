@@ -30,10 +30,10 @@ jobs:
           java-version: '11'
 
       - name: Build debug APK
-        run: bash ./gradlew assembleDebug --stacktrace
+        run: bash ./gradlew assembleGithubDebug --stacktrace
         
       - name: Upload APK
         uses: actions/upload-artifact@v1
         with:
           name: app
-          path: app/build/outputs/apk/debug/app-debug.apk
+          path: app/build/outputs/apk/github/debug/app-github-debug.apk
