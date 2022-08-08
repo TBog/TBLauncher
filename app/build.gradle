@@ -30,6 +30,21 @@ android {
             resValue "string", "app_name_dynamic", "@string/app_name_debug"
         }
     }
+    flavorDimensions "default"
+    productFlavors {
+        playstore {
+            buildConfigField 'boolean', 'SHOW_PRIVACY_POLICY', 'true'
+            buildConfigField 'boolean', 'SHOW_RATE_APP', 'true'
+        }
+        fdroid {
+            buildConfigField 'boolean', 'SHOW_PRIVACY_POLICY', 'false'
+            buildConfigField 'boolean', 'SHOW_RATE_APP', 'true'
+        }
+        github {
+            buildConfigField 'boolean', 'SHOW_PRIVACY_POLICY', 'false'
+            buildConfigField 'boolean', 'SHOW_RATE_APP', 'false'
+        }
+    }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11

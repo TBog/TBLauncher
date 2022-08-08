@@ -44,7 +44,10 @@
     <string name="menu_popup_tags_manager">Tag manager</string>
     <string name="menu_popup_tags_menu">Tags menu</string>
     <string name="rate_the_app">Rate the app</string>
-     <string name="user_interface_summary">Themes, transparency and colors</string>
+    <string name="privacy_policy">Privacy Policy</string>
+    <string name="app_version">Version %s</string>
+    <string name="app_version_summary">%1$s - %2$s</string>
+    <string name="user_interface_summary">Themes, transparency and colors</string>
     <string name="title_ui">User interface</string>
     <string name="notification_bar_section">Notification bar</string>
     <string name="color_and_opacity">Color and opacity</string>
