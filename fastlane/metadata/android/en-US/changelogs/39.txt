@@ -1,0 +1,3 @@
+* added app version in the settings
+* fix action mode bar background
+* fix live wallpaper drag animation crash
