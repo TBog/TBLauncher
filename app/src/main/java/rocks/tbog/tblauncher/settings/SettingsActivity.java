@@ -19,6 +19,7 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import androidx.annotation.IdRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.ActionBar;
@@ -75,6 +76,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     public static final int ENABLE_DEVICE_ADMIN = 60;
     private static final String TAG = "SettAct";
 
+    @IdRes
+    private int mPageViewId = R.id.settings_page;
+
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         int theme = UITheme.getSettingsTheme(this);
@@ -82,6 +86,11 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             setTheme(theme);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_settings);
+        @IdRes
+        int menuViewId = R.id.settings_menu;
+        mPageViewId = R.id.settings_page;
+        if (findViewById(mPageViewId) == null)
+            mPageViewId = menuViewId;
 
         if (savedInstanceState == null) {
             // Create the fragment only when the activity is created for the first time.
@@ -93,7 +102,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
             getSupportFragmentManager()
                 .beginTransaction()
-                .replace(R.id.settings_container, fragment, SettingsFragment.FRAGMENT_TAG)
+                .replace(menuViewId, fragment, SettingsFragment.FRAGMENT_TAG)
                 .commit();
 
             restoreBackStack();
@@ -133,15 +142,12 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     }
 
     private void addToBackStack(@NonNull String key) {
-        View page = findViewById(R.id.settings_page);
-        if (page != null)
-            page.setVisibility(View.VISIBLE);
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         SettingsFragment fragment = new SettingsFragment();
         Bundle args = new Bundle();
         args.putString(PreferenceFragmentCompat.ARG_PREFERENCE_ROOT, key);
         fragment.setArguments(args);
-        ft.replace(R.id.settings_page, fragment, key);
+        ft.replace(mPageViewId, fragment, key);
         ft.addToBackStack(key);
         ft.commit();
     }
@@ -225,11 +231,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         if (getSupportFragmentManager().popBackStackImmediate()) {
             final int count = getSupportFragmentManager().getBackStackEntryCount();
             CharSequence title = null;
-            if (count == 0) {
-                View page = findViewById(R.id.settings_page);
-                if (page != null)
-                    page.setVisibility(View.GONE);
-            }
             if (count > 0) {
                 String tag = getSupportFragmentManager().getBackStackEntryAt(count - 1).getName();
                 if (tag != null) {
@@ -324,9 +325,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
      * @param fragmentManager the fragmentManager to clear.
      */
     private void clearBackStack(FragmentManager fragmentManager) {
-        View page = findViewById(R.id.settings_page);
-        if (page != null)
-            page.setVisibility(View.GONE);
         if (fragmentManager.getBackStackEntryCount() > 0) {
             FragmentManager.BackStackEntry entry = fragmentManager.getBackStackEntryAt(0);
             fragmentManager.popBackStack(entry.getId(), FragmentManager.POP_BACK_STACK_INCLUSIVE);
