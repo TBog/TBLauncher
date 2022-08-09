@@ -52,6 +52,7 @@ import rocks.tbog.tblauncher.db.DBHelper;
 import rocks.tbog.tblauncher.db.PlaceholderWidgetRecord;
 import rocks.tbog.tblauncher.db.WidgetRecord;
 import rocks.tbog.tblauncher.drawable.DrawableUtils;
+import rocks.tbog.tblauncher.settings.SettingsActivity;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.LinearAdapterPlus;
 import rocks.tbog.tblauncher.ui.ListPopup;
