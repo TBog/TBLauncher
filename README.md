@@ -28,7 +28,7 @@ Motives for developing ~~a new~~ my own launcher:
 
 | Homescreen | Search `tbl` | Edit QuickList | Launcher settings | Customize any icon |
 | :---: | :---: | :---: | :---: | :---: |
-| [![Homescreen](https://imgur.com/Idkhx5v.png)](https://imgur.com/Idkhx5v) | ![Search `tbl`](/fastlane/metadata/android/en-US/images/phoneScreenshots/2_en-US.jpeg?raw=true) | ![Edit QuickList](/fastlane/metadata/android/en-US/images/phoneScreenshots/4_en-US.jpeg?raw=true) | [![Settings](https://imgur.com/J8EslbJ.png)](https://imgur.com/J8EslbJ) | [![Customize any icon](https://imgur.com/jxvRmzV.png)](https://imgur.com/jxvRmzV) |
+| [![Homescreen](https://imgur.com/Idkhx5v.png)](https://imgur.com/Idkhx5v) | ![Search `tbl`](https://raw.githubusercontent.com/TBog/TBLauncher/master/fastlane/metadata/android/en-US/images/phoneScreenshots/2_en-US.jpeg) | ![Edit QuickList](https://raw.githubusercontent.com/TBog/TBLauncher/master/fastlane/metadata/android/en-US/images/phoneScreenshots/4_en-US.jpeg) | [![Settings](https://imgur.com/J8EslbJ.png)](https://imgur.com/J8EslbJ) | [![Customize any icon](https://imgur.com/jxvRmzV.png)](https://imgur.com/jxvRmzV) |
 
 ### Where one can get it
 
