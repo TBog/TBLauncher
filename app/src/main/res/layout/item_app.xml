@@ -52,7 +52,7 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:importantForAccessibility="no"
-        android:src="@drawable/notification_dot"
+        app:srcCompat="@drawable/notification_dot"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@android:id/icon"
         app:layout_constraintLeft_toLeftOf="@android:id/icon"
