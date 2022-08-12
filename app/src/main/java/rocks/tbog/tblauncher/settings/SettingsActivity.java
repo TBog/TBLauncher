@@ -282,6 +282,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 case FILE_SELECT_XML_SET:
                     method = ExportedData.Method.SET;
                     break;
+                default:
+                    Toast.makeText(this, "Unknown request " + requestCode, Toast.LENGTH_LONG).show();
+                    break;
             }
             if (method != null) {
                 Uri uri = data != null ? data.getData() : null;

@@ -91,10 +91,6 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
     private static ContentLoadHelper.OrderedMultiSelectListData ResultPopupContent = null;
     private static Pair<CharSequence[], CharSequence[]> MimeTypeListContent = null;
 
-    public SettingsFragment() {
-        super();
-    }
-
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
         if (rootKey != null && rootKey.startsWith("feature-"))
@@ -457,7 +453,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
     @Override
     public void onDisplayPreferenceDialog(@NonNull Preference preference) {
         // Try if the preference is one of our custom Preferences
-        DialogFragment dialogFragment = null;
+        DialogFragment dialogFragment;
         if (preference instanceof CustomDialogPreference) {
             // Create a new instance of CustomDialog with the key of the related Preference
             String key = preference.getKey();
@@ -478,6 +474,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
                     break;
                 default:
                     dialogFragment = null;
+                    break;
             }
             if (dialogFragment == null) {
                 @LayoutRes
@@ -517,6 +514,8 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
             } else {
                 dialogFragment = BaseMultiSelectListPreferenceDialog.newInstance(key);
             }
+        } else {
+            dialogFragment = null;
         }
 
         // If it was one of our custom Preferences, show its dialog
