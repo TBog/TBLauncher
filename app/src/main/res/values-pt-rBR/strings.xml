@@ -288,7 +288,7 @@
     <string name="quick_list_rtl">Direita para esquerda</string>
     <string name="quick_list_rtl_summary">Itens de layout da direita para a esquerda</string>
     <plurals name="tag_entry_count">
-        <item quantity="one">uma entrada</item>
+        <item quantity="one">%d uma entrada</item>
         <item quantity="other">%d entradas</item>
     </plurals>
     <string name="search_bar_animation">Animação expandir/recolher</string>
