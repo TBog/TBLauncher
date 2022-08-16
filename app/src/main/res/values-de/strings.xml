@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">TinyBit Launcher</string>
+    <string name="app_name_debug">TinyBit debug Launcher</string>
+    <string name="hint_ui_search">Suche in Apps, Kontakten, …</string>
+    <string name="menu_exclude">Ausgenommen…</string>
+</resources>
