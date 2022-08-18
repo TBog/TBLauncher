@@ -367,7 +367,10 @@ class CustomShapePage extends PageAdapter.Page {
         if (!(activity instanceof AppCompatActivity))
             return;
 
-        ColorChooserDialog.INSTANCE.registerListener((AppCompatActivity) activity, "request color", listener::onColorChanged);
+        ColorChooserDialog.INSTANCE.registerListener((AppCompatActivity) activity, "request color", color -> {
+            listener.onColorChanged(color);
+            return Unit.INSTANCE;
+        }, null);
         ColorChooserDialog.INSTANCE.show((AppCompatActivity) activity, "request color", selectedColor, true, ColorChooserDialog.TAB_PALETTE);
 
 //        Context themeWrapper = UITheme.getDialogThemedContext(context);
