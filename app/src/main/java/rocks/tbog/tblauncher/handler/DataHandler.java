@@ -205,13 +205,15 @@ public class DataHandler extends BroadcastReceiver
     private void toggleableProviders(SharedPreferences prefs) {
         final Context context = getContext();
 
-        // Search engine provider,
+        // Search engine provider. The grid handles the provider autonomously
         {
+            boolean bSearchGrid = prefs.getBoolean("search-engine-grid", false);
+            boolean bSearch = !bSearchGrid && prefs.getBoolean("enable-search", true);
+            boolean bURL = prefs.getBoolean("enable-url", true);
             String providerName = "search";
-            if (prefs.getBoolean("enable-search", true) ||
-                prefs.getBoolean("enable-url", true)) {
+            if (bSearch || bURL) {
                 ProviderEntry providerEntry = new ProviderEntry();
-                providerEntry.provider = new SearchProvider(context, prefs);
+                providerEntry.provider = new SearchProvider(context, bSearch, bURL);
                 providers.put(providerName, providerEntry);
             } else {
                 providers.remove(providerName);

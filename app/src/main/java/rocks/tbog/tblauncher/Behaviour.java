@@ -66,6 +66,7 @@ import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.handler.DataHandler;
 import rocks.tbog.tblauncher.quicklist.EditQuickListDialog;
 import rocks.tbog.tblauncher.result.CustomRecycleLayoutManager;
+import rocks.tbog.tblauncher.result.ListResultAdapter;
 import rocks.tbog.tblauncher.result.RecycleAdapter;
 import rocks.tbog.tblauncher.result.RecycleScrollListener;
 import rocks.tbog.tblauncher.result.ResultHelper;
@@ -118,6 +119,8 @@ public class Behaviour implements ISearchActivity {
     private View mClearButton;
     private View mMenuButton;
     private TextView mLauncherTime = null;
+
+    private final SearchEngineGrid mSearchEngineGrid = new SearchEngineGrid();
     private final Runnable mUpdateTime = new Runnable() {
         @Override
         public void run() {
@@ -149,6 +152,7 @@ public class Behaviour implements ISearchActivity {
                 String text = s.toString();
                 if (lastText.equals(text))
                     return;
+                mSearchEngineGrid.setQuery(text);
                 if (text == null || text.isEmpty())
                     clearAdapter();
                 else
@@ -239,6 +243,7 @@ public class Behaviour implements ISearchActivity {
     }
 
     private void initResultLayout() {
+        mSearchEngineGrid.initLayout(findViewById(R.id.searchEngines), new ListResultAdapter());
         mResultLayout = inflateViewStub(R.id.resultLayout);
 
         mResultList = mResultLayout.findViewById(R.id.resultList);
@@ -918,6 +923,8 @@ public class Behaviour implements ISearchActivity {
     @Override
     public void clearAdapter() {
         mResultAdapter.clear();
+        mSearchEngineGrid.setQuery(null);
+        mSearchEngineGrid.updateAdapter(mPref);
         TBApplication.quickList(getContext()).adapterCleared();
 
         if (TBApplication.state().isResultListVisible())
@@ -980,6 +987,8 @@ public class Behaviour implements ISearchActivity {
             // Make sure the first item is visible when we search
             mResultList.scrollToFirstItem();
         }
+
+        mSearchEngineGrid.updateAdapter(mPref);
 
         mTBLauncherActivity.quickList.adapterUpdated();
         mClearButton.setVisibility(View.VISIBLE);
@@ -1063,6 +1072,7 @@ public class Behaviour implements ISearchActivity {
         if (mResultLayout.getVisibility() == View.VISIBLE)
             return;
         mResultLayout.setVisibility(View.VISIBLE);
+        mSearchEngineGrid.setVisibility(View.VISIBLE);
         Log.d(TAG, "mResultLayout set VISIBLE (anim " + animate + ")");
         if (animate) {
             TBApplication.state().setResultList(LauncherState.AnimatedVisibility.ANIM_TO_VISIBLE);
@@ -1103,6 +1113,7 @@ public class Behaviour implements ISearchActivity {
                         TBApplication.state().setResultList(LauncherState.AnimatedVisibility.HIDDEN);
                         Log.d(TAG, "mResultLayout set INVISIBLE");
                         mResultLayout.setVisibility(View.INVISIBLE);
+                        mSearchEngineGrid.setVisibility(View.INVISIBLE);
                     }
                 })
                 .start();
@@ -1110,6 +1121,7 @@ public class Behaviour implements ISearchActivity {
             TBApplication.state().setResultList(LauncherState.AnimatedVisibility.HIDDEN);
             Log.d(TAG, "mResultLayout set INVISIBLE");
             mResultLayout.setVisibility(View.INVISIBLE);
+            mSearchEngineGrid.setVisibility(View.INVISIBLE);
         }
     }
 
@@ -1279,8 +1291,12 @@ public class Behaviour implements ISearchActivity {
             if (TBApplication.state().isResultListVisible()) {
                 final Behaviour behaviour = TBApplication.behaviour(ctx);
                 behaviour.mResultLayout.setVisibility(View.INVISIBLE);
+                behaviour.mSearchEngineGrid.setVisibility(View.INVISIBLE);
                 // OnDismiss: We restore mResultLayout visibility
-                dialog.setOnDismissListener(dlg -> behaviour.mResultLayout.setVisibility(View.VISIBLE));
+                dialog.setOnDismissListener(dlg -> {
+                    behaviour.mResultLayout.setVisibility(View.VISIBLE);
+                    behaviour.mSearchEngineGrid.setVisibility(View.VISIBLE);
+                });
             }
         }
 

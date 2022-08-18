@@ -17,6 +17,7 @@ import java.util.regex.Pattern;
 
 import rocks.tbog.tblauncher.BuildConfig;
 import rocks.tbog.tblauncher.R;
+import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.entry.OpenUrlEntry;
 import rocks.tbog.tblauncher.entry.SearchEngineEntry;
 import rocks.tbog.tblauncher.entry.SearchEntry;
@@ -27,9 +28,11 @@ import rocks.tbog.tblauncher.utils.FuzzyScore;
 public class SearchProvider extends SimpleProvider<SearchEntry> {
     private static final String URL_REGEX = "^(?:[a-z]+://)?(?:[a-z0-9-]|[^\\x00-\\x7F])+(?:[.](?:[a-z0-9-]|[^\\x00-\\x7F])+)+.*$";
     public static final Pattern urlPattern = Pattern.compile(URL_REGEX);
-    private final SharedPreferences prefs;
     private final ArrayList<SearchEngineEntry> searchEngines = new ArrayList<>();
     private final Context context;
+    private final boolean mEnableSearch;
+    private final boolean mEnableUrl;
+    private String mDefaultSearchProvider;
 
     @NonNull
     public static Set<String> getDefaultSearchProviders(Context context) {
@@ -77,10 +80,18 @@ public class SearchProvider extends SimpleProvider<SearchEntry> {
         return url;
     }
 
-    public SearchProvider(Context context, SharedPreferences sharedPreferences) {
+//    public SearchProvider(Context context, SharedPreferences sharedPreferences) {
+//        super();
+//        this.context = context.getApplicationContext();
+//        this.prefs = sharedPreferences;
+//        reload(false);
+//    }
+
+    public SearchProvider(Context context, boolean bSearch, boolean bURL) {
         super();
         this.context = context.getApplicationContext();
-        this.prefs = sharedPreferences;
+        mEnableSearch = bSearch;
+        mEnableUrl = bURL;
         reload(false);
     }
 
@@ -88,6 +99,8 @@ public class SearchProvider extends SimpleProvider<SearchEntry> {
     public void reload(boolean cancelCurrentLoadTask) {
         searchEngines.clear();
 
+        var prefs = TBApplication.getApplication(context).preferences();
+        mDefaultSearchProvider = prefs.getString("default-search-provider", "Google");
         Set<String> availableSearchProviders = SearchProvider.getAvailableSearchProviders(context, prefs);
         Set<String> selectedProviderNames = SearchProvider.getSelectedProviderNames(context, prefs);
 
@@ -129,15 +142,14 @@ public class SearchProvider extends SimpleProvider<SearchEntry> {
             return records;
         }
 
-        if (prefs.getBoolean("enable-search", true)) {
+        if (mEnableSearch) {
             // Get default search engine
-            String defaultSearchEngine = prefs.getString("default-search-provider", "Google");
             for (SearchEngineEntry entry : searchEngines) {
                 entry.setQuery(query);
                 entry.setRelevance(entry.normalizedName, null);
                 // Super low relevance, should never be displayed before anything
                 entry.boostRelevance(-500);
-                if (entry.getName().equals(defaultSearchEngine))
+                if (entry.getName().equals(mDefaultSearchProvider))
                     // Display default search engine slightly higher
                     entry.boostRelevance(100);
 
@@ -145,7 +157,7 @@ public class SearchProvider extends SimpleProvider<SearchEntry> {
             }
         }
 
-        if (prefs.getBoolean("enable-url", true)) {
+        if (mEnableUrl) {
             FuzzyScore fuzzyScore = new FuzzyScore(queryNormalized.codePoints);
 
             // Open URLs directly (if I type http://something.com for instance)
