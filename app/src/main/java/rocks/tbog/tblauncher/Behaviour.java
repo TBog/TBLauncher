@@ -525,6 +525,7 @@ public class Behaviour implements ISearchActivity {
 
         initLauncherButtons();
         initLauncherSearchEditText();
+        mSearchEngineGrid.loadProvider(mTBLauncherActivity);
     }
 
     public void onStart() {
@@ -693,6 +694,7 @@ public class Behaviour implements ISearchActivity {
                 break;
             case EMPTY:
             default:
+                mSearchEngineGrid.setVisibility(View.INVISIBLE);
                 // hide/show the QuickList
                 TBApplication.quickList(getContext()).updateVisibility();
                 // enable/disable fullscreen (status and navigation bar)
@@ -876,6 +878,7 @@ public class Behaviour implements ISearchActivity {
         mWidgetContainer.setVisibility(View.VISIBLE);
 
         hideResultList(false);
+        mSearchEngineGrid.setVisibility(View.INVISIBLE);
     }
 
     public void showKeyboard() {
@@ -923,7 +926,6 @@ public class Behaviour implements ISearchActivity {
     @Override
     public void clearAdapter() {
         mResultAdapter.clear();
-        mSearchEngineGrid.setQuery(null);
         mSearchEngineGrid.updateAdapter(mPref);
         TBApplication.quickList(getContext()).adapterCleared();
 
@@ -1041,6 +1043,8 @@ public class Behaviour implements ISearchActivity {
         mSearchEditText.removeTextChangedListener(mSearchTextWatcher);
         mSearchEditText.setText("");
         mSearchEditText.addTextChangedListener(mSearchTextWatcher);
+
+        mSearchEngineGrid.setVisibility(View.INVISIBLE);
     }
 
     public void clearSearch() {
@@ -1113,7 +1117,6 @@ public class Behaviour implements ISearchActivity {
                         TBApplication.state().setResultList(LauncherState.AnimatedVisibility.HIDDEN);
                         Log.d(TAG, "mResultLayout set INVISIBLE");
                         mResultLayout.setVisibility(View.INVISIBLE);
-                        mSearchEngineGrid.setVisibility(View.INVISIBLE);
                     }
                 })
                 .start();
@@ -1121,7 +1124,6 @@ public class Behaviour implements ISearchActivity {
             TBApplication.state().setResultList(LauncherState.AnimatedVisibility.HIDDEN);
             Log.d(TAG, "mResultLayout set INVISIBLE");
             mResultLayout.setVisibility(View.INVISIBLE);
-            mSearchEngineGrid.setVisibility(View.INVISIBLE);
         }
     }
 
