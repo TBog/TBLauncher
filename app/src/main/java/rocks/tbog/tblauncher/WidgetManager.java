@@ -11,6 +11,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.PointF;
+import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
@@ -50,6 +51,7 @@ import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.ui.WidgetLayout;
 import rocks.tbog.tblauncher.ui.WidgetView;
 import rocks.tbog.tblauncher.utils.DebugInfo;
+import rocks.tbog.tblauncher.utils.UISizes;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
 
@@ -347,6 +349,55 @@ public class WidgetManager {
         }
     }
 
+    private void updateAppWidgetOptions(AppWidgetHostView hostView, AppWidgetProviderInfo appWidgetInfo, WidgetRecord rec) {
+        Context ctx = hostView.getContext();
+        Rect padding = new Rect();
+        AppWidgetHostView.getDefaultPaddingForWidget(ctx, appWidgetInfo.provider, padding);
+        float density = ctx.getResources().getDisplayMetrics().density;
+
+        int xPaddingDips = (int) ((padding.left + padding.right) / density);
+        int yPaddingDips = (int) ((padding.top + padding.bottom) / density);
+
+        int minWidth = UISizes.px2dp(ctx, rec.width);
+        int minHeight = UISizes.px2dp(ctx, rec.height);
+        int maxWidth = minWidth;
+        int maxHeight = minHeight;
+        boolean ignorePadding = false;
+
+        int newMinWidth = minWidth - (ignorePadding ? 0 : xPaddingDips);
+        int newMinHeight = minHeight - (ignorePadding ? 0 : yPaddingDips);
+        int newMaxWidth = maxWidth - (ignorePadding ? 0 : xPaddingDips);
+        int newMaxHeight = maxHeight - (ignorePadding ? 0 : yPaddingDips);
+
+        Bundle oldOpt = null;
+        try {
+            oldOpt = mAppWidgetManager.getAppWidgetOptions(rec.appWidgetId);
+        } catch (Exception e) {
+            Log.e(TAG, "getAppWidgetOptions(" + rec.appWidgetId + ") " + appWidgetInfo.provider, e);
+        }
+
+        if (oldOpt == null
+            || newMinWidth != oldOpt.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)
+            || newMinHeight != oldOpt.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT)
+            || newMaxWidth != oldOpt.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH)
+            || newMaxHeight != oldOpt.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT)) {
+
+            Bundle opt = new Bundle();
+            opt.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, newMinWidth);
+            opt.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, newMinHeight);
+            opt.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, newMaxWidth);
+            opt.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, newMaxHeight);
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                opt.putParcelableArrayList(AppWidgetManager.OPTION_APPWIDGET_SIZES,
+                    new ArrayList<PointF>());
+            }
+
+            // send update
+            hostView.updateAppWidgetOptions(opt);
+        }
+    }
+
     private void addWidgetToLayout(AppWidgetHostView hostView, AppWidgetProviderInfo appWidgetInfo, WidgetRecord rec) {
         View placeholder = mLayout.getPlaceholder(appWidgetInfo.provider);
         WidgetLayout.LayoutParams params = null;
@@ -363,7 +414,7 @@ public class WidgetManager {
         hostView.setMinimumHeight(appWidgetInfo.minHeight);
 
         hostView.setAppWidget(rec.appWidgetId, appWidgetInfo);
-        hostView.updateAppWidgetSize(null, rec.width, rec.height, rec.width, rec.height);
+        updateAppWidgetOptions(hostView, appWidgetInfo, rec);
 
         hostView.setOnLongClickListener(v -> {
             if (v instanceof WidgetView) {
@@ -1009,15 +1060,16 @@ public class WidgetManager {
 
     private void saveWidgetProperties(WidgetView view) {
         final int appWidgetId = view.getAppWidgetId();
-//        WidgetRecord rec = mWidgets.get(appWidgetId);
-//        if (rec == null)
-//            return;
         mLayout.addOnAfterLayoutTask(() -> {
             WidgetRecord rec = mWidgets.get(appWidgetId);
             AppWidgetHostView widgetHostView = mLayout.getWidget(appWidgetId);
             if (rec != null && widgetHostView != null) {
                 rec.saveProperties(widgetHostView);
                 Utilities.runAsync(() -> DBHelper.setWidgetProperties(mLayout.getContext(), rec));
+
+                AppWidgetProviderInfo appWidgetInfo = mAppWidgetManager.getAppWidgetInfo(appWidgetId);
+                if (appWidgetInfo != null)
+                    updateAppWidgetOptions(widgetHostView, appWidgetInfo, rec);
             }
         });
         mLayout.requestLayout();

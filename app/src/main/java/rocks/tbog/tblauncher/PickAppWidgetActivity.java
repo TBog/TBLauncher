@@ -27,6 +27,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
+import rocks.tbog.tblauncher.utils.UISizes;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
 import rocks.tbog.tblauncher.utils.ViewHolderAdapter;
@@ -99,16 +100,29 @@ public class PickAppWidgetActivity extends AppCompatActivity {
                 return o1.appName.compareTo(o2.appName);
             });
 
+            //StringBuilder dbgList = new StringBuilder();
             // assuming the list is sorted by apps, add titles with app name
             ArrayList<MenuItem> adapterList = new ArrayList<>(widgetList.size());
             String lastApp = null;
             for (var item : widgetList) {
                 if (!item.appName.equals(lastApp)) {
+                    //dbgList
+                    //    .append("\napp=`")
+                    //    .append(item.appName)
+                    //    .append("`");
+
                     lastApp = item.appName;
                     adapterList.add(new ItemTitle(item.appName));
                 }
+                //dbgList
+                //    .append("\n\twidget=`")
+                //    .append(item.widgetName)
+                //    .append("`\n\t\tdesc=`")
+                //    .append(item.widgetDesc)
+                //    .append("`");
                 adapterList.add(new ItemWidget(item));
             }
+            //Log.d(TAG, dbgList.toString());
             return adapterList;
         });
         if (loadWidgetsAsync != null) {
@@ -135,6 +149,8 @@ public class PickAppWidgetActivity extends AppCompatActivity {
             if (label == null) {
                 label = providerInfo.label;
             }
+            if (label == null)
+                label = providerInfo.provider.flattenToShortString();
 
             // get widget description
             String description = null;
@@ -143,6 +159,10 @@ public class PickAppWidgetActivity extends AppCompatActivity {
                 if (desc != null)
                     description = desc.toString();
             }
+
+            // it's useless to have the description the same as the label
+            if (label.equals(description))
+                description = null;
 
             String appName = providerInfo.provider.getPackageName();
             try {
@@ -299,25 +319,31 @@ public class PickAppWidgetActivity extends AppCompatActivity {
 
         @Override
         protected void setContent(MenuItem content, int position, @NonNull ViewHolderAdapter<MenuItem, ? extends ViewHolderAdapter.ViewHolder<MenuItem>> adapter) {
+            final CharSequence text;
             if (content instanceof ItemWidget) {
                 WidgetInfo info = ((ItemWidget) content).info;
-                final String text;
-                if (info.widgetDesc != null) {
-                    text1.setSingleLine(false);
-                    text1.setMinLines(1);
-                    text = text1.getResources().getString(R.string.widget_name_and_desc, info.widgetName, info.widgetDesc);
-                } else {
-                    text1.setSingleLine();
-                    text = text1.getResources().getString(R.string.widget_name, info.widgetName);
+                int sizeX = UISizes.px2dp(text1.getContext(), info.appWidgetInfo.minWidth);
+                int sizeY = UISizes.px2dp(text1.getContext(), info.appWidgetInfo.minHeight);
+                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
+                    if (info.appWidgetInfo.targetCellWidth != 0 && info.appWidgetInfo.targetCellHeight != 0) {
+                        sizeX = info.appWidgetInfo.targetCellWidth;
+                        sizeY = info.appWidgetInfo.targetCellHeight;
+                    }
                 }
-                text1.setText(HtmlCompat.fromHtml(text, HtmlCompat.FROM_HTML_MODE_LEGACY));
+                final String html;
+                if (info.widgetDesc != null) {
+                    html = text1.getResources().getString(R.string.widget_name_and_desc, info.widgetName, info.widgetDesc, sizeX, sizeY);
+                } else {
+                    html = text1.getResources().getString(R.string.widget_name, info.widgetName, sizeX, sizeY);
+                }
+                text = HtmlCompat.fromHtml(html, HtmlCompat.FROM_HTML_MODE_LEGACY);
                 Utilities.setIconAsync(icon, context -> getWidgetPreview(context, info.appWidgetInfo));
             } else {
-                text1.setSingleLine();
-                text1.setText(content.getName());
+                text = content.getName();
                 if (icon != null)
                     icon.setImageDrawable(null);
             }
+            text1.setText(text);
         }
     }
 }
