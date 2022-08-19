@@ -525,10 +525,10 @@ public class Behaviour implements ISearchActivity {
 
         initLauncherButtons();
         initLauncherSearchEditText();
-        mSearchEngineGrid.loadProvider(mTBLauncherActivity);
     }
 
     public void onStart() {
+        mSearchEngineGrid.loadProvider(mTBLauncherActivity);
         String initialDesktop = mPref.getString("initial-desktop", null);
         if (executeAction(initialDesktop, null))
             return;

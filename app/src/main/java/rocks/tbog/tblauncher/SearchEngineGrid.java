@@ -55,7 +55,7 @@ public class SearchEngineGrid implements ISearcher {
 
     public void setVisibility(int visibility) {
         mGridView.setVisibility(visibility);
-        if (visibility == View.INVISIBLE && !mGridAdapter.isEmpty()) {
+        if (visibility != View.VISIBLE && !mGridAdapter.isEmpty()) {
             mQuery = null;
             mGridAdapter.setItems(Collections.emptyList());
         }
@@ -63,12 +63,12 @@ public class SearchEngineGrid implements ISearcher {
 
     public void updateAdapter(SharedPreferences pref) {
         if (mQuery == null || mQuery.isEmpty()) {
-            mGridAdapter.setItems(Collections.emptyList());
+            setVisibility(View.GONE);//mGridAdapter.setItems(Collections.emptyList());
         } else if (mSearchProvider != null && pref.getBoolean("search-engine-grid", false)) {
             mSearchProvider.requestResults(mQuery, this);
         }
-        if (mGridAdapter.isEmpty())
-            setVisibility(View.INVISIBLE);
+        if (!mGridAdapter.isEmpty())
+            setVisibility(View.VISIBLE);
     }
 
     @Override
@@ -83,14 +83,14 @@ public class SearchEngineGrid implements ISearcher {
     }
 
     private void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-        if (parent.getAdapter() != mGridAdapter)
+        if (parent.getAdapter() != mGridAdapter || mGridAdapter.getItemId(position) != id)
             return;
         var result = mGridAdapter.getItem(position);
         ResultHelper.launch(view, result);
     }
 
     private boolean onItemLongClick(AdapterView<?> parent, View v, int position, long id) {
-        if (parent.getAdapter() != mGridAdapter)
+        if (parent.getAdapter() != mGridAdapter || mGridAdapter.getItemId(position) != id)
             return false;
 
         var result = mGridAdapter.getItem(position);
