@@ -114,7 +114,11 @@ public class PreferenceColorDialog extends BasePreferenceDialog {
             constraintSet.clone(rootLayout);
             constraintSet.setVisibility(R.id.iconLoadingBar, ConstraintSet.GONE);
             constraintSet.setVisibility(mChooseView.getId(), ConstraintSet.VISIBLE);
+            constraintSet.connect(mChooseView.getId(), ConstraintSet.TOP, ConstraintSet.PARENT_ID, ConstraintSet.TOP);
+            constraintSet.connect(mChooseView.getId(), ConstraintSet.BOTTOM, R.id.buttonPanel, ConstraintSet.TOP);
             constraintSet.connect(R.id.buttonPanel, ConstraintSet.TOP, mChooseView.getId(), ConstraintSet.BOTTOM);
+            constraintSet.constrainDefaultHeight(mChooseView.getId(), ConstraintSet.MATCH_CONSTRAINT_WRAP);
+            constraintSet.constrainHeight(mChooseView.getId(), ConstraintSet.MATCH_CONSTRAINT);
 
             // set transition without the button bar
             var transition = new TransitionSet();
