@@ -25,7 +25,7 @@ import androidx.lifecycle.Observer
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import net.mm2d.color.chooser.element.PaletteCell
-import net.mm2d.color.chooser.util.toPixelsAsDp
+import net.mm2d.color.chooser.util.getPixels
 import rocks.tbog.tblauncher.R
 import java.lang.ref.SoftReference
 import kotlin.collections.forEach as kForEach
@@ -37,7 +37,7 @@ internal class PaletteView
     defStyleAttr: Int = 0
 ) : RecyclerView(context, attrs, defStyleAttr), Observer<Int> {
     private val delegate = ColorObserverDelegate(this)
-    private val cellHeight = 48.toPixelsAsDp(context)
+    private val cellHeight = getPixels(R.dimen.mm2d_cc_palette_cell_height)
     private val cellAdapter = CellAdapter(context)
     private val linearLayoutManager = LinearLayoutManager(context)
 

@@ -23,7 +23,7 @@
 
     <style name="palette_cell">
         <item name="android:layout_width">0dp</item>
-        <item name="android:layout_height">48dp</item>
+        <item name="android:layout_height">@dimen/mm2d_cc_palette_cell_height</item>
         <item name="android:layout_weight">1</item>
     </style>
 

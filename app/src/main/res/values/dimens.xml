@@ -59,6 +59,7 @@
     <dimen name="mm2d_cc_rgb_size">24dp</dimen>
     <dimen name="mm2d_cc_color_text">12dp</dimen>
     <dimen name="mm2d_cc_palette_padding">24dp</dimen>
+    <dimen name="mm2d_cc_palette_cell_height">48dp</dimen>
     <dimen name="mm2d_cc_checker_size">6dp</dimen>
     <dimen name="mm2d_cc_page_margin">16dp</dimen>
     <dimen name="mm2d_cc_hsv_margin">4dp</dimen>
