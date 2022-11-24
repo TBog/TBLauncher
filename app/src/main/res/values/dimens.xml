@@ -43,7 +43,7 @@
     <dimen name="widget_preview_height">64dp</dimen>
     <dimen name="widget_preview_padding_vertical">5dp</dimen>
     
-    <dimen name="mm2d_cc_seek_padding">4dp</dimen>
+    <dimen name="mm2d_cc_seek_padding">2dp</dimen>
     <dimen name="mm2d_cc_sample_radius">5dp</dimen>
     <dimen name="mm2d_cc_sample_frame">2dp</dimen>
     <dimen name="mm2d_cc_sample_shadow">1dp</dimen>
@@ -54,12 +54,12 @@
     <dimen name="mm2d_cc_hue_width">24dp</dimen>
     <dimen name="mm2d_cc_slider_height">32dp</dimen>
     <dimen name="mm2d_cc_slider_width">256dp</dimen>
-    <dimen name="mm2d_cc_panel_margin">8dp</dimen>
+    <dimen name="mm2d_cc_panel_margin">4dp</dimen>
     <dimen name="mm2d_cc_panel_height">200dp</dimen>
     <dimen name="mm2d_cc_rgb_size">24dp</dimen>
     <dimen name="mm2d_cc_color_text">12dp</dimen>
     <dimen name="mm2d_cc_palette_padding">24dp</dimen>
-    <dimen name="mm2d_cc_palette_cell_height">48dp</dimen>
+    <dimen name="mm2d_cc_palette_cell_height">32dp</dimen>
     <dimen name="mm2d_cc_checker_size">6dp</dimen>
     <dimen name="mm2d_cc_page_margin">16dp</dimen>
     <dimen name="mm2d_cc_hsv_margin">4dp</dimen>
