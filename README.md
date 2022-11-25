@@ -12,7 +12,7 @@
 [<img src="https://img.shields.io/f-droid/v/rocks.tbog.tblauncher.svg?logo=f-droid&label=F-Droid"
       alt="F-Droid Releases"
       height="22"/>](https://f-droid.org/packages/rocks.tbog.tblauncher/)
-[<img src="https://img.shields.io/endpoint?label=Play%20Store&style=flat&cacheSeconds=65536&url=https%3A%2F%2Fplayshields.herokuapp.com%2Fplay%3Fi%3Drocks.tbog.tblauncher%26l%3DAndroid%26m%3D%24version"
+[<img src="https://img.shields.io/endpoint?label=Play%20Store&style=flat&cacheSeconds=65536&url=https%3A%2F%2Fplay.cuzi.workers.dev%2Fplay%3Fi%3Drocks.tbog.tblauncher%26l%3DGoogle%2520Play%26m%3D%24version"
       alt="Playstore"
       height="22"/>](https://play.google.com/store/apps/details?id=rocks.tbog.tblauncher)
 
