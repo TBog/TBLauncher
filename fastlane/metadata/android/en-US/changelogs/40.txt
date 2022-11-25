@@ -1,0 +1,2 @@
+* update translations
+* fix color chooser dialog dimensions
