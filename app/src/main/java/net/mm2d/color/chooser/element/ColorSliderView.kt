@@ -15,8 +15,9 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import androidx.core.content.withStyledAttributes
-import rocks.tbog.tblauncher.R
 import net.mm2d.color.chooser.util.*
+import rocks.tbog.tblauncher.R
+import kotlin.math.max
 
 internal class ColorSliderView
 @JvmOverloads constructor(
@@ -27,15 +28,16 @@ internal class ColorSliderView
     private val paint = Paint().also {
         it.isAntiAlias = true
     }
-    private val requestPadding = getPixels(R.dimen.mm2d_cc_panel_margin)
-    private val requestWidth = getPixels(R.dimen.mm2d_cc_slider_width) + requestPadding * 2
-    private val requestHeight = getPixels(R.dimen.mm2d_cc_slider_height) + requestPadding * 2
     private val sampleRadius = getDimension(R.dimen.mm2d_cc_sample_radius)
     private val sampleFrameRadius = sampleRadius + getDimension(R.dimen.mm2d_cc_sample_frame)
     private val sampleShadowRadius =
         sampleFrameRadius + getDimension(R.dimen.mm2d_cc_sample_shadow)
     private val frameLineWidth = getDimension(R.dimen.mm2d_cc_sample_frame)
     private val shadowLineWidth = getDimension(R.dimen.mm2d_cc_sample_shadow)
+    private val requestPaddingH = max(getPixels(R.dimen.mm2d_cc_panel_margin), sampleShadowRadius.toInt())
+    private val requestPaddingV = max(getPixels(R.dimen.mm2d_cc_panel_margin), (frameLineWidth * 2 + shadowLineWidth).toInt())
+    private val requestWidth = getPixels(R.dimen.mm2d_cc_slider_width) + requestPaddingH * 2
+    private val requestHeight = getPixels(R.dimen.mm2d_cc_slider_height) + requestPaddingV * 2
     private val gradationRect = Rect(0, 0, RANGE, 1)
     private val targetRect = Rect()
     private val colorSampleFrame = getColor(R.color.mm2d_cc_sample_frame)
@@ -98,10 +100,10 @@ internal class ColorSliderView
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
         targetRect.set(
-            paddingLeft + requestPadding,
-            paddingTop + requestPadding,
-            width - paddingRight - requestPadding,
-            height - paddingBottom - requestPadding
+            paddingLeft + requestPaddingH,
+            paddingTop + requestPaddingV,
+            width - paddingRight - requestPaddingH,
+            height - paddingBottom - requestPaddingV
         )
     }
 

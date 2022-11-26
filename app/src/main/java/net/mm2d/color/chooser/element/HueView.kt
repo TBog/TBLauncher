@@ -14,11 +14,11 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import androidx.annotation.ColorInt
-import rocks.tbog.tblauncher.R
 import net.mm2d.color.chooser.util.ColorUtils
 import net.mm2d.color.chooser.util.getColor
 import net.mm2d.color.chooser.util.getDimension
 import net.mm2d.color.chooser.util.getPixels
+import rocks.tbog.tblauncher.R
 import kotlin.math.max
 
 internal class HueView
@@ -31,14 +31,15 @@ internal class HueView
     private var color: Int = Color.RED
     private val paint = Paint()
     private val bitmap: Bitmap = createMaskBitmap()
-    private val requestPadding = getPixels(R.dimen.mm2d_cc_panel_margin)
-    private val requestWidth = getPixels(R.dimen.mm2d_cc_hue_width) + requestPadding * 2
-    private val requestHeight = getPixels(R.dimen.mm2d_cc_hsv_size) + requestPadding * 2
     private val sampleRadius = getDimension(R.dimen.mm2d_cc_sample_radius)
     private val sampleFrameRadius =
         sampleRadius + getDimension(R.dimen.mm2d_cc_sample_frame)
-    private val _sampleShadowRadius =
+    private val sampleShadowRadius =
         sampleFrameRadius + getDimension(R.dimen.mm2d_cc_sample_shadow)
+    private val requestPaddingH = getPixels(R.dimen.mm2d_cc_panel_margin)
+    private val requestPaddingV = max(getPixels(R.dimen.mm2d_cc_panel_margin), sampleShadowRadius.toInt())
+    private val requestWidth = getPixels(R.dimen.mm2d_cc_hue_width) + requestPaddingH * 2
+    private val requestHeight = getPixels(R.dimen.mm2d_cc_hsv_size) + requestPaddingV * 2
     private val bitmapRect = Rect(0, 0, 1, RANGE)
     private val targetRect = Rect()
     private var hue: Float = 0f
@@ -68,10 +69,10 @@ internal class HueView
 
     override fun onLayout(changed: Boolean, left: Int, top: Int, right: Int, bottom: Int) {
         targetRect.set(
-            paddingLeft + requestPadding,
-            paddingTop + requestPadding,
-            width - paddingRight - requestPadding,
-            height - paddingBottom - requestPadding
+            paddingLeft + requestPaddingH,
+            paddingTop + requestPaddingV,
+            width - paddingRight - requestPaddingH,
+            height - paddingBottom - requestPaddingV
         )
     }
 
@@ -80,7 +81,7 @@ internal class HueView
         val x = targetRect.centerX().toFloat()
         val y = hue * targetRect.height() + targetRect.top
         paint.color = colorSampleShadow
-        canvas.drawCircle(x, y, _sampleShadowRadius, paint)
+        canvas.drawCircle(x, y, sampleShadowRadius, paint)
         paint.color = colorSampleFrame
         canvas.drawCircle(x, y, sampleFrameRadius, paint)
         paint.color = color

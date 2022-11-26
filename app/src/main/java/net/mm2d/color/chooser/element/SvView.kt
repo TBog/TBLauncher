@@ -14,11 +14,11 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import androidx.annotation.ColorInt
-import rocks.tbog.tblauncher.R
 import net.mm2d.color.chooser.util.ColorUtils
 import net.mm2d.color.chooser.util.getColor
 import net.mm2d.color.chooser.util.getDimension
 import net.mm2d.color.chooser.util.getPixels
+import rocks.tbog.tblauncher.R
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -34,13 +34,13 @@ internal class SvView
     private var maxColor: Int = Color.RED
     private var maskBitmap: Bitmap? = null
     private val paint = Paint().also { it.isAntiAlias = true }
-    private val requestPadding = getPixels(R.dimen.mm2d_cc_panel_margin)
-    private val requestWidth = getPixels(R.dimen.mm2d_cc_hsv_size) + requestPadding * 2
-    private val requestHeight = getPixels(R.dimen.mm2d_cc_hsv_size) + requestPadding * 2
     private val sampleRadius = getDimension(R.dimen.mm2d_cc_sample_radius)
     private val sampleFrameRadius = sampleRadius + getDimension(R.dimen.mm2d_cc_sample_frame)
     private val sampleShadowRadius =
         sampleFrameRadius + getDimension(R.dimen.mm2d_cc_sample_shadow)
+    private val requestPadding = max(getPixels(R.dimen.mm2d_cc_panel_margin), sampleShadowRadius.toInt())
+    private val requestWidth = getPixels(R.dimen.mm2d_cc_hsv_size) + requestPadding * 2
+    private val requestHeight = getPixels(R.dimen.mm2d_cc_hsv_size) + requestPadding * 2
     private val maskRect = Rect(0, 0, TONE_SIZE, TONE_SIZE)
     private val targetRect = Rect()
     private var hue: Float = 0f

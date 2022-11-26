@@ -42,8 +42,7 @@
     <dimen name="widget_preview_width">128dp</dimen>
     <dimen name="widget_preview_height">64dp</dimen>
     <dimen name="widget_preview_padding_vertical">5dp</dimen>
-    
-    <dimen name="mm2d_cc_seek_padding">2dp</dimen>
+
     <dimen name="mm2d_cc_sample_radius">5dp</dimen>
     <dimen name="mm2d_cc_sample_frame">2dp</dimen>
     <dimen name="mm2d_cc_sample_shadow">1dp</dimen>
