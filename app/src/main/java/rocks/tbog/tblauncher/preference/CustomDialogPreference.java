@@ -127,7 +127,6 @@ public class CustomDialogPreference extends androidx.preference.DialogPreference
                 int border = UISizes.dp2px(ctx, 1);
                 Drawable drawable = UIColors.getPreviewDrawable(color, border, radius);
                 ((ImageView) view).setImageDrawable(drawable);
-                view.setPadding(border, border, border, border);
                 return;
             }
         }
