@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ImageView xmlns:android="http://schemas.android.com/apk/res/android"
+<rocks.tbog.tblauncher.ui.SquareImageView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/prefColorPreview"
-    android:layout_width="@dimen/color_preview_size"
-    android:layout_height="@dimen/color_preview_size"
+    android:layout_width="wrap_content"
+    android:layout_height="match_parent"
     android:importantForAccessibility="no"
+    android:scaleType="fitXY"
+    android:layout_marginVertical="@dimen/icon_margin_vertical"
     android:src="@color/colorPrimary" />
 
