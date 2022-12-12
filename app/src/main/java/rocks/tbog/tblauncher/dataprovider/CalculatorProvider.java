@@ -3,6 +3,7 @@ package rocks.tbog.tblauncher.dataprovider;
 import java.math.BigDecimal;
 import java.text.NumberFormat;
 import java.util.ArrayDeque;
+import java.util.Collections;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -72,7 +73,7 @@ public class CalculatorProvider extends SimpleProvider<CalculatorEntry> {
             pojo.setRelevance(pojo.normalizedName, null);
 
             pojo.boostRelevance(19);
-            searcher.addResult(pojo);
+            searcher.addResult(Collections.singletonList(pojo));
         }
     }
 }

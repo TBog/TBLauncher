@@ -591,7 +591,7 @@ public class DataHandler extends BroadcastReceiver
             List<? extends EntryItem> pojos = entry.provider.getPojos();
             if (pojos == null)
                 continue;
-            boolean accept = searcher.addResult(pojos.toArray(new EntryItem[0]));
+            boolean accept = searcher.addResult(pojos);
             // if searcher will not accept any more results, exit
             if (!accept)
                 break;
@@ -620,12 +620,12 @@ public class DataHandler extends BroadcastReceiver
      *
      * @param itemCount          max number of items to retrieve, total number may be less (search or calls are not returned for instance)
      * @param historyMode        Recency vs Frecency vs Frequency vs Adaptive
-     * @param sortHistory        Sort history entries alphabetically
+     * @param sortByName         Sort history entries alphabetically
      * @param itemsToExcludeById Items to exclude from history by their id
      * @return pojos in recent history
      */
     public List<EntryItem> getHistory(int itemCount, DBHelper.HistoryMode historyMode,
-                                      boolean sortHistory, Set<String> itemsToExcludeById) {
+                                      boolean sortByName, Set<String> itemsToExcludeById) {
         // Max sure that we get enough items, regardless of how many may be excluded
         int extendedItemCount = itemCount + itemsToExcludeById.size();
 
@@ -651,7 +651,7 @@ public class DataHandler extends BroadcastReceiver
         }
 
         // sort the list if needed
-        if (sortHistory)
+        if (sortByName)
             Collections.sort(history, Comparator.comparing(EntryItem::getName));
 
         // enforce item count after the sort operation
