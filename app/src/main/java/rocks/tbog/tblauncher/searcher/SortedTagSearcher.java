@@ -7,26 +7,31 @@ import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.PriorityQueue;
 
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.EntryWithTags;
+import rocks.tbog.tblauncher.entry.TagSortEntry;
+import rocks.tbog.tblauncher.handler.DataHandler;
 import rocks.tbog.tblauncher.utils.Utilities;
 
-public class TagSearcher extends Searcher {
+public class SortedTagSearcher extends Searcher {
     final EntryWithTags.TagDetails tagDetails;
+    final TagSortEntry.TagDetails tagSort;
     final HashSet<String> foundIdSet = new HashSet<>();
 
-    public TagSearcher(ISearchActivity activity, @NonNull String query) {
-        super(activity, query);
-        tagDetails = new EntryWithTags.TagDetails(query);
+    public SortedTagSearcher(ISearchActivity activity, @NonNull String tagSortId) {
+        super(activity, tagSortId);
+        tagSort = new TagSortEntry.TagDetails(tagSortId);
+        tagDetails = new EntryWithTags.TagDetails(tagSort.name);
     }
 
     @Override
     protected PriorityQueue<EntryItem> getPojoProcessor(ISearchActivity activity) {
-        return new PriorityQueue<>(INITIAL_CAPACITY, EntryItem.NAME_COMPARATOR);
+        return new PriorityQueue<>(INITIAL_CAPACITY, tagSort.getComparator());
     }
 
     @WorkerThread
@@ -68,8 +73,31 @@ public class TagSearcher extends Searcher {
         if (context == null)
             return null;
 
-        // Request results via "addResult"
-        TBApplication.getApplication(context).getDataHandler().requestAllRecords(this);
+        DataHandler dh = TBApplication.dataHandler(context);
+
+        switch (tagSort.order) {
+            case TagSortEntry.SORT_AZ:
+            case TagSortEntry.SORT_ZA:
+                // Request all results via "addResult"
+                dh.requestAllRecords(this);
+                break;
+            case TagSortEntry.HISTORY_REC:
+            case TagSortEntry.HISTORY_FREQ:
+            case TagSortEntry.HISTORY_FREC:
+            case TagSortEntry.HISTORY_ADAPTIVE:
+            {
+                var history = dh.getHistory(Integer.MAX_VALUE, DataHandler.getHistoryMode(query), false, Collections.emptySet());
+                int order = 0;
+                for (var entry : history) {
+                    entry.resetResultInfo();
+                    entry.boostRelevance(order++);
+                }
+                addResult(history);
+                break;
+            }
+            default:
+                break;
+        }
         return null;
     }
 }

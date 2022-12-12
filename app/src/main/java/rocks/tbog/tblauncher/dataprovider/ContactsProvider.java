@@ -9,6 +9,7 @@ import androidx.annotation.WorkerThread;
 import androidx.preference.PreferenceManager;
 
 import java.util.Collection;
+import java.util.Collections;
 
 import rocks.tbog.tblauncher.Permission;
 import rocks.tbog.tblauncher.entry.ContactEntry;
@@ -108,7 +109,7 @@ public class ContactsProvider extends Provider<ContactEntry> {
                     boost += 40;
                 }
                 entry.boostRelevance(boost);
-                if (!searcher.addResult(entry))
+                if (!searcher.addResult(Collections.singletonList(entry)))
                     return;
             }
         }

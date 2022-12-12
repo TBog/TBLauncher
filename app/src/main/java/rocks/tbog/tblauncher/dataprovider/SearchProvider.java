@@ -117,7 +117,7 @@ public class SearchProvider extends SimpleProvider<SearchEntry> {
 
     @Override
     public void requestResults(String query, ISearcher searcher) {
-        searcher.addResult(getResults(query).toArray(new SearchEntry[0]));
+        searcher.addResult(getResults(query));
     }
 
     @NonNull
