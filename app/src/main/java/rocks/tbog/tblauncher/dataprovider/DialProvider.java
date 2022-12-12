@@ -2,6 +2,7 @@ package rocks.tbog.tblauncher.dataprovider;
 
 import androidx.annotation.NonNull;
 
+import java.util.Collections;
 import java.util.regex.Pattern;
 
 import rocks.tbog.tblauncher.entry.ContactEntry;
@@ -36,7 +37,7 @@ public class DialProvider extends SimpleProvider<ContactEntry> {
     public void requestResults(String query, ISearcher searcher) {
         // Append an item only if query looks like a phone number and device has phone capabilities
         if (phonePattern.matcher(query).find()) {
-            searcher.addResult(getResult(query));
+            searcher.addResult(Collections.singletonList(getResult(query)));
         }
     }
 
