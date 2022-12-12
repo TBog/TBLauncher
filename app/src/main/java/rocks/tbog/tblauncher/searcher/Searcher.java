@@ -12,7 +12,7 @@ import androidx.annotation.WorkerThread;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.PriorityQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -71,10 +71,11 @@ public abstract class Searcher extends AsyncTask<Void, Void> implements ISearche
 
     /**
      * This is called from the background thread by the providers
+     * @param pojos
      */
     @WorkerThread
     @Override
-    public boolean addResult(EntryItem... pojos) {
+    public boolean addResult(Collection<? extends EntryItem> pojos) {
         if (isCancelled())
             return false;
 
@@ -83,7 +84,7 @@ public abstract class Searcher extends AsyncTask<Void, Void> implements ISearche
         if (activity == null)
             return false;
 
-        Collections.addAll(processedPojos, pojos);
+        processedPojos.addAll(pojos);
         while (processedPojos.size() > maxResults)
             processedPojos.poll();
 

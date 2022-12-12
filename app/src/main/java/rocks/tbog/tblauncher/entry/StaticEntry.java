@@ -52,25 +52,30 @@ public abstract class StaticEntry extends EntryItem {
 
     @Override
     protected ListPopup buildPopupMenu(Context context, LinearAdapter adapter, View parentView, int flags) {
-
         List<ContentLoadHelper.CategoryItem> categoryTitle = PrefCache.getResultPopupOrder(context);
-
         for (ContentLoadHelper.CategoryItem categoryItem : categoryTitle) {
-            int titleStringId = categoryItem.textId;
-            if (titleStringId == R.string.popup_title_customize) {
-                adapter.add(new LinearAdapter.ItemTitle(context, R.string.popup_title_customize));
-                adapter.add(new LinearAdapter.Item(context, R.string.menu_action_rename));
-                adapter.add(new LinearAdapter.Item(context, R.string.menu_custom_icon));
-            }
+            int pos = adapter.getCount();
+            buildPopupMenuCategory(context, adapter, categoryItem.textId);
+            if (pos != adapter.getCount())
+                adapter.add(pos, new LinearAdapter.ItemTitle(context, categoryItem.textId));
         }
 
         if (Utilities.checkFlag(flags, LAUNCHED_FROM_QUICK_LIST)) {
             adapter.add(new LinearAdapter.ItemTitle(context, R.string.menu_popup_title_settings));
-            adapter.add(new LinearAdapter.Item(context, R.string.menu_quick_list_remove));
-            adapter.add(new LinearAdapter.Item(context, R.string.menu_popup_quick_list_customize));
+            buildPopupMenuCategory(context, adapter, R.string.menu_popup_title_settings);
         }
 
         return inflatePopupMenu(context, adapter);
+    }
+
+    protected void buildPopupMenuCategory(Context context, @NonNull LinearAdapter adapter, int titleStringId) {
+        if (titleStringId == R.string.popup_title_customize) {
+            adapter.add(new LinearAdapter.Item(context, R.string.menu_action_rename));
+            adapter.add(new LinearAdapter.Item(context, R.string.menu_custom_icon));
+        } else if (titleStringId == R.string.menu_popup_title_settings) {
+            adapter.add(new LinearAdapter.Item(context, R.string.menu_quick_list_remove));
+            adapter.add(new LinearAdapter.Item(context, R.string.menu_popup_quick_list_customize));
+        }
     }
 
     @Override

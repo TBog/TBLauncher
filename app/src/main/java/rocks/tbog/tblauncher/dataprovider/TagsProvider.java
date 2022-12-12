@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import rocks.tbog.tblauncher.db.ModRecord;
+import rocks.tbog.tblauncher.entry.TagSortEntry;
 import rocks.tbog.tblauncher.entry.TagEntry;
 import rocks.tbog.tblauncher.handler.DataHandler;
 
@@ -25,13 +26,20 @@ public class TagsProvider extends DBProvider<TagEntry> {
 
     @Nullable
     public static TagEntry newTagEntryCheckId(String id) {
+        TagEntry tagEntry = null;
+        // first check if this is a TagAction
+        if (TagSortEntry.isTagSort(id)) {
+            tagEntry = new TagSortEntry(id);
+            // set default name (based on id)
+            tagEntry.setName(null);
+        }
+        // now check if it's a tag
         if (id.startsWith(TagEntry.SCHEME)) {
-            TagEntry tagEntry = new TagEntry(id);
+            tagEntry = new TagEntry(id);
             String tagName = id.substring(TagEntry.SCHEME.length());
             tagEntry.setName(tagName);
-            return tagEntry;
         }
-        return null;
+        return tagEntry;
     }
 
     @NonNull

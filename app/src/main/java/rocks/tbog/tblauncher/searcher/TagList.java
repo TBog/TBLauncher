@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 import androidx.preference.PreferenceManager;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.PriorityQueue;
@@ -39,7 +40,7 @@ public class TagList extends Searcher {
 
     @WorkerThread
     @Override
-    public boolean addResult(EntryItem... pojos) {
+    public boolean addResult(Collection<? extends EntryItem> pojos) {
         if (isCancelled())
             return false;
 
