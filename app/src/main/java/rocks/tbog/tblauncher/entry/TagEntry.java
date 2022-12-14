@@ -22,9 +22,10 @@ public class TagEntry extends StaticEntry {
         super(id, 0);
         if (BuildConfig.DEBUG) {
             if (!id.startsWith(SCHEME))
-                throw new IllegalStateException("Invalid " + TagEntry.class.getSimpleName() + " id `" + id + "`");
-            if (!(this instanceof TagSortEntry) && TagSortEntry.isTagSort(id))
-                throw new IllegalStateException(TagEntry.class.getSimpleName() + " instantiated with id `" + id + "`");
+                throw new IllegalStateException("Invalid " + getClass().getSimpleName() + " id `" + id + "`");
+            if ((!(this instanceof TagSortEntry) && TagSortEntry.isTagSort(id))
+                || ((this instanceof TagSortEntry) && !TagSortEntry.isTagSort(id)))
+                throw new IllegalStateException(getClass().getSimpleName() + " instantiated with id `" + id + "`");
         }
     }
 
