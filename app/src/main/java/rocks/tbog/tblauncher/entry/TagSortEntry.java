@@ -2,7 +2,6 @@ package rocks.tbog.tblauncher.entry;
 
 import android.content.Context;
 import android.view.View;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
@@ -13,6 +12,7 @@ import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.searcher.SortedTagSearcher;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
+import rocks.tbog.tblauncher.ui.ListPopup;
 
 public class TagSortEntry extends TagEntry {
     public static final String SORT_AZ = "sort/byName/";
@@ -37,8 +37,31 @@ public class TagSortEntry extends TagEntry {
             // find the default name from the id
             String action = getTagSortOrder(id);
             super.setName(id.substring(SCHEME.length() + action.length()));
+        } else {
+            super.setName(name);
         }
-        super.setName(name);
+    }
+
+    @Override
+    ListPopup inflatePopupMenu(@NonNull Context context, @NonNull LinearAdapter adapter) {
+        // this tag is already sorted, remove the option to sort it the same
+        var sortOrder = getTagSortOrder(id);
+        for (int i = 0; i < adapter.getCount(); i += 1) {
+            LinearAdapter.MenuItem item = adapter.getItem(i);
+            if (item instanceof LinearAdapter.Item) {
+                var itemStringId = ((LinearAdapter.Item) item).stringId;
+                if ((itemStringId == R.string.menu_tag_sort_az && SORT_AZ.equals(sortOrder))
+                    || (itemStringId == R.string.menu_tag_sort_za && SORT_ZA.equals(sortOrder))
+                    || (itemStringId == R.string.menu_tag_sort_hist_rec && HISTORY_REC.equals(sortOrder))
+                    || (itemStringId == R.string.menu_tag_sort_hist_freq && HISTORY_FREQ.equals(sortOrder))
+                    || (itemStringId == R.string.menu_tag_sort_hist_frec && HISTORY_FREC.equals(sortOrder))
+                    || (itemStringId == R.string.menu_tag_sort_hist_adaptive && HISTORY_ADAPTIVE.equals(sortOrder))) {
+                    adapter.remove(item);
+                    break;
+                }
+            }
+        }
+        return super.inflatePopupMenu(context, adapter);
     }
 
     @Override
@@ -47,42 +70,6 @@ public class TagSortEntry extends TagEntry {
             return;
         Context ctx = v.getContext();
         TBApplication.quickList(ctx).toggleSearch(v, id, SortedTagSearcher.class);
-    }
-
-    @Override
-    protected void buildPopupMenuCategory(Context context, @NonNull LinearAdapter adapter, int titleStringId) {
-        if (titleStringId == R.string.popup_title_hist_fav) {
-            adapter.add(new LinearAdapter.Item(context, R.string.menu_tag_sort_az));
-            adapter.add(new LinearAdapter.Item(context, R.string.menu_tag_sort_za));
-            adapter.add(new LinearAdapter.Item(context, R.string.menu_tag_sort_hist_rec));
-            adapter.add(new LinearAdapter.Item(context, R.string.menu_tag_sort_hist_freq));
-            adapter.add(new LinearAdapter.Item(context, R.string.menu_tag_sort_hist_frec));
-            adapter.add(new LinearAdapter.Item(context, R.string.menu_tag_sort_hist_adaptive));
-        }
-    }
-
-    @Override
-    boolean popupMenuClickHandler(@NonNull View view, @NonNull LinearAdapter.MenuItem item, int stringId, View parentView) {
-        if (stringId == R.string.menu_tag_sort_az) {
-            Toast.makeText(view.getContext(), "WIP: sort AZ", Toast.LENGTH_SHORT).show();
-            return true;
-        } else if (stringId == R.string.menu_tag_sort_za) {
-            Toast.makeText(view.getContext(), "WIP: sort ZA", Toast.LENGTH_SHORT).show();
-            return true;
-        }else if (stringId == R.string.menu_tag_sort_hist_rec) {
-            Toast.makeText(view.getContext(), "WIP: sort hist rec", Toast.LENGTH_SHORT).show();
-            return true;
-        }else if (stringId == R.string.menu_tag_sort_hist_freq) {
-            Toast.makeText(view.getContext(), "WIP: sort hist freq", Toast.LENGTH_SHORT).show();
-            return true;
-        }else if (stringId == R.string.menu_tag_sort_hist_frec) {
-            Toast.makeText(view.getContext(), "WIP: sort hist frec", Toast.LENGTH_SHORT).show();
-            return true;
-        }else if (stringId == R.string.menu_tag_sort_hist_adaptive) {
-            Toast.makeText(view.getContext(), "WIP: sort hist adaptive", Toast.LENGTH_SHORT).show();
-            return true;
-        }
-        return super.popupMenuClickHandler(view, item, stringId, parentView);
     }
 
     @NonNull
@@ -104,7 +91,7 @@ public class TagSortEntry extends TagEntry {
     }
 
     public static boolean isTagSort(String id) {
-        return !getTagSortOrder(id).isEmpty();
+        return id.startsWith(SCHEME) && !getTagSortOrder(id).isEmpty();
     }
 
     public static class TagDetails {

@@ -26,6 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -580,6 +581,8 @@ public class DataHandler extends BroadcastReceiver
             List<? extends EntryItem> pojos = entry.provider.getPojos();
             if (pojos == null)
                 continue;
+            for (var item : pojos)
+                item.resetResultInfo();
             boolean accept = searcher.addResult(pojos);
             // if searcher will not accept any more results, exit
             if (!accept)
@@ -646,6 +649,31 @@ public class DataHandler extends BroadcastReceiver
         // enforce item count after the sort operation
         if (history.size() > itemCount)
             history.subList(itemCount, history.size()).clear();
+
+        return history;
+    }
+
+    public Map<EntryItem, Integer> getHistoryOrder(DBHelper.HistoryMode historyMode, Set<String> itemsToExcludeById) {
+        // Read history
+        final Context context = getContext();
+        List<ValuedHistoryRecord> ids = DBHelper.getHistory(context, Integer.MAX_VALUE, historyMode);
+
+        // Pre-allocate array slots that are likely to be used
+        HashMap<EntryItem, Integer> history = new HashMap<>(ids.size());
+
+        // Find associated items
+        for (int i = 0; i < ids.size(); i++) {
+            // Ask all providers if they know this id
+            EntryItem entryItem = getPojo(ids.get(i).record);
+
+            if (entryItem == null)
+                continue;
+
+            if (itemsToExcludeById.contains(entryItem.id))
+                continue;
+
+            history.put(entryItem, i);
+        }
 
         return history;
     }
@@ -1068,7 +1096,11 @@ public class DataHandler extends BroadcastReceiver
             }
         }
 
-        // refresh relevant providers
+        afterQuickListChanged();
+    }
+
+    public void afterQuickListChanged() {
+        // refresh relevant providers for the Dock
         {
             IProvider<?> provider = getModProvider();
             if (provider != null)

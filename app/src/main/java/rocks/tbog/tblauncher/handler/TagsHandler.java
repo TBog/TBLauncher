@@ -95,8 +95,8 @@ public class TagsHandler {
             apply.run();
         } else {
             Utilities.runAsync(
-                    (t) -> load.run(),
-                    (t) -> apply.run());
+                (t) -> load.run(),
+                (t) -> apply.run());
         }
     }
 
@@ -385,24 +385,24 @@ public class TagsHandler {
         // Known clock implementations
         // See http://stackoverflow.com/questions/3590955/intent-to-launch-the-clock-application-on-android
         String[][] clockImpls = {
-                // Nexus
-                {"com.android.deskclock", "com.android.deskclock.DeskClock"},
-                // Samsung
-                {"com.sec.android.app.clockpackage", "com.sec.android.app.clockpackage.ClockPackage"},
-                // HTC
-                {"com.htc.android.worldclock", "com.htc.android.worldclock.WorldClockTabControl"},
-                // Standard Android
-                {"com.android.deskclock", "com.android.deskclock.AlarmClock"},
-                // New Android versions
-                {"com.google.android.deskclock", "com.android.deskclock.AlarmClock"},
-                // Froyo
-                {"com.google.android.deskclock", "com.android.deskclock.DeskClock"},
-                // Motorola
-                {"com.motorola.blur.alarmclock", "com.motorola.blur.alarmclock.AlarmClock"},
-                // Sony
-                {"com.sonyericsson.organizer", "com.sonyericsson.organizer.Organizer_WorldClock"},
-                // ASUS Tablets
-                {"com.asus.deskclock", "com.asus.deskclock.DeskClock"}
+            // Nexus
+            {"com.android.deskclock", "com.android.deskclock.DeskClock"},
+            // Samsung
+            {"com.sec.android.app.clockpackage", "com.sec.android.app.clockpackage.ClockPackage"},
+            // HTC
+            {"com.htc.android.worldclock", "com.htc.android.worldclock.WorldClockTabControl"},
+            // Standard Android
+            {"com.android.deskclock", "com.android.deskclock.AlarmClock"},
+            // New Android versions
+            {"com.google.android.deskclock", "com.android.deskclock.AlarmClock"},
+            // Froyo
+            {"com.google.android.deskclock", "com.android.deskclock.DeskClock"},
+            // Motorola
+            {"com.motorola.blur.alarmclock", "com.motorola.blur.alarmclock.AlarmClock"},
+            // Sony
+            {"com.sonyericsson.organizer", "com.sonyericsson.organizer.Organizer_WorldClock"},
+            // ASUS Tablets
+            {"com.asus.deskclock", "com.asus.deskclock.DeskClock"}
         };
 
         UserHandleCompat user = UserHandleCompat.CURRENT_USER;
@@ -504,6 +504,42 @@ public class TagsHandler {
 
         // rename tags from database
         return DBHelper.renameTag(getContext(), tagName, newName, tagEntry, newEntry) > 0;
+    }
+
+    /**
+     * Replace the id of the current TagEntry with the new one. The tag name should remain
+     *
+     * @param tagId    id of the TagEntry (or TagSortEntry) you want to sort
+     * @param newTagId id on the TagSortEntry
+     * @return true if at least one entry was renamed (sort order and id are linked)
+     */
+    public boolean changeTagSort(String tagId, String newTagId) {
+        DataHandler dataHandler = mApplication.getDataHandler();
+        // change tag id from favorites
+        TagEntry tagEntry = null;
+        TagEntry newEntry = null;
+        TagsProvider tagsProvider = dataHandler.getTagsProvider();
+        if (tagsProvider != null) {
+            tagEntry = tagsProvider.findById(tagId);
+            if (tagEntry != null && tagEntry.hasCustomIcon()) {
+                newEntry = tagsProvider.getTagEntry(newTagId);
+            }
+        }
+        if (tagEntry == null)
+            tagEntry = TagsProvider.newTagEntryCheckId(tagId);
+        if (tagEntry == null) {
+            Log.e(TAG, "Can't change sort order of invalid tag id `" + tagId + "`");
+            return false;
+        }
+        if (newEntry == null)
+            newEntry = TagsProvider.newTagEntryCheckId(newTagId);
+        if (newEntry == null) {
+            Log.e(TAG, "Can't change sort order from `" + tagId + "` to invalid tag id `" + newTagId + "`");
+            return false;
+        }
+
+        // rename tags from database
+        return DBHelper.changeTagSort(getContext(), tagEntry, newEntry) > 0;
     }
 
     /**
