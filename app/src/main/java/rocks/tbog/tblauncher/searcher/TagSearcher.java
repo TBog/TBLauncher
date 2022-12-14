@@ -25,7 +25,7 @@ public class TagSearcher extends Searcher {
     }
 
     @Override
-    protected PriorityQueue<EntryItem> getPojoProcessor(ISearchActivity activity) {
+    protected PriorityQueue<EntryItem> newResultQueue() {
         return new PriorityQueue<>(INITIAL_CAPACITY, EntryItem.NAME_COMPARATOR);
     }
 
@@ -55,6 +55,7 @@ public class TagSearcher extends Searcher {
         if (!foundIdSet.add(entryItem.id))
             return;
 
+        var processedPojos = getResultQueue();
         processedPojos.add(entryItem);
         if (processedPojos.size() > maxResults)
             processedPojos.poll();
