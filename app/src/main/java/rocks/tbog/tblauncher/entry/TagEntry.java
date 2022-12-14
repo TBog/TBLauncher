@@ -20,8 +20,11 @@ public class TagEntry extends StaticEntry {
 
     public TagEntry(@NonNull String id) {
         super(id, 0);
-        if (BuildConfig.DEBUG && !id.startsWith(SCHEME)) {
-            throw new IllegalStateException("Invalid " + TagEntry.class.getSimpleName() + " id `" + id + "`");
+        if (BuildConfig.DEBUG) {
+            if (!id.startsWith(SCHEME))
+                throw new IllegalStateException("Invalid " + TagEntry.class.getSimpleName() + " id `" + id + "`");
+            if (!(this instanceof TagSortEntry) && TagSortEntry.isTagSort(id))
+                throw new IllegalStateException(TagEntry.class.getSimpleName() + " instantiated with id `" + id + "`");
         }
     }
 
@@ -37,10 +40,41 @@ public class TagEntry extends StaticEntry {
     }
 
     @Override
+    protected void buildPopupMenuCategory(Context context, @NonNull LinearAdapter adapter, int titleStringId) {
+        if (titleStringId == R.string.popup_title_hist_fav) {
+            adapter.add(new LinearAdapter.Item(context, R.string.menu_tag_sort_az));
+            adapter.add(new LinearAdapter.Item(context, R.string.menu_tag_sort_za));
+            adapter.add(new LinearAdapter.Item(context, R.string.menu_tag_sort_hist_rec));
+            adapter.add(new LinearAdapter.Item(context, R.string.menu_tag_sort_hist_freq));
+            adapter.add(new LinearAdapter.Item(context, R.string.menu_tag_sort_hist_frec));
+            adapter.add(new LinearAdapter.Item(context, R.string.menu_tag_sort_hist_adaptive));
+        }
+        super.buildPopupMenuCategory(context, adapter, titleStringId);
+    }
+
+    @Override
     boolean popupMenuClickHandler(@NonNull View view, @NonNull LinearAdapter.MenuItem item, int stringId, View parentView) {
+        Context ctx = view.getContext();
+        boolean changesMade = false;
         if (stringId == R.string.menu_action_rename) {
-            Context ctx = view.getContext();
             launchRenameDialog(ctx);
+            changesMade = true;
+        } else if (stringId == R.string.menu_tag_sort_az) {
+            changesMade = TBApplication.tagsHandler(ctx).changeTagSort(id, SCHEME + TagSortEntry.SORT_AZ + getName());
+        } else if (stringId == R.string.menu_tag_sort_za) {
+            changesMade = TBApplication.tagsHandler(ctx).changeTagSort(id, SCHEME + TagSortEntry.SORT_ZA + getName());
+        } else if (stringId == R.string.menu_tag_sort_hist_rec) {
+            changesMade = TBApplication.tagsHandler(ctx).changeTagSort(id, SCHEME + TagSortEntry.HISTORY_REC + getName());
+        } else if (stringId == R.string.menu_tag_sort_hist_freq) {
+            changesMade = TBApplication.tagsHandler(ctx).changeTagSort(id, SCHEME + TagSortEntry.HISTORY_FREQ + getName());
+        } else if (stringId == R.string.menu_tag_sort_hist_frec) {
+            changesMade = TBApplication.tagsHandler(ctx).changeTagSort(id, SCHEME + TagSortEntry.HISTORY_FREC + getName());
+        } else if (stringId == R.string.menu_tag_sort_hist_adaptive) {
+            changesMade = TBApplication.tagsHandler(ctx).changeTagSort(id, SCHEME + TagSortEntry.HISTORY_ADAPTIVE + getName());
+        }
+        if (changesMade) {
+            // update providers, we're expecting the tag to be in the Dock
+            TBApplication.dataHandler(ctx).afterQuickListChanged();
             return true;
         }
         return super.popupMenuClickHandler(view, item, stringId, parentView);
@@ -67,17 +101,17 @@ public class TagEntry extends StaticEntry {
 
     private void launchRenameDialog(@NonNull Context c) {
         DialogHelper.makeRenameDialog(c, getName(), (dialog, newName) -> {
-            Context ctx = dialog.getContext();
+                Context ctx = dialog.getContext();
 
-            String oldName = getName();
+                String oldName = getName();
 
-            TBApplication app = TBApplication.getApplication(ctx);
-            app.tagsHandler().renameTag(oldName, newName);
-            app.behaviour().refreshSearchRecord(TagEntry.this);
+                TBApplication app = TBApplication.getApplication(ctx);
+                app.tagsHandler().renameTag(oldName, newName);
+                app.behaviour().refreshSearchRecord(TagEntry.this);
 
-            // update providers and refresh views
-            TagsManager.afterChangesMade(ctx);
-        })
+                // update providers and refresh views
+                TagsManager.afterChangesMade(ctx);
+            })
             .setTitle(R.string.title_rename_tag)
             .setHint(R.string.hint_rename_tag)
             .show();

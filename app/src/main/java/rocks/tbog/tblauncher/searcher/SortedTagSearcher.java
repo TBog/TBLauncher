@@ -9,9 +9,11 @@ import androidx.annotation.WorkerThread;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.PriorityQueue;
 
 import rocks.tbog.tblauncher.TBApplication;
+import rocks.tbog.tblauncher.db.DBHelper;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.EntryWithTags;
 import rocks.tbog.tblauncher.entry.TagSortEntry;
@@ -19,9 +21,10 @@ import rocks.tbog.tblauncher.handler.DataHandler;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 public class SortedTagSearcher extends Searcher {
-    final EntryWithTags.TagDetails tagDetails;
-    final TagSortEntry.TagDetails tagSort;
-    final HashSet<String> foundIdSet = new HashSet<>();
+    private final EntryWithTags.TagDetails tagDetails;
+    private final TagSortEntry.TagDetails tagSort;
+    private final HashSet<String> foundIdSet = new HashSet<>();
+    private Map<EntryItem, Integer> order = null;
 
     public SortedTagSearcher(ISearchActivity activity, @NonNull String tagSortId) {
         super(activity, tagSortId);
@@ -30,7 +33,7 @@ public class SortedTagSearcher extends Searcher {
     }
 
     @Override
-    protected PriorityQueue<EntryItem> getPojoProcessor(ISearchActivity activity) {
+    protected PriorityQueue<EntryItem> newResultQueue() {
         return new PriorityQueue<>(INITIAL_CAPACITY, tagSort.getComparator());
     }
 
@@ -60,9 +63,31 @@ public class SortedTagSearcher extends Searcher {
         if (!foundIdSet.add(entryItem.id))
             return;
 
+        if (order != null) {
+            var priority = order.get(entryItem);
+            if (priority != null)
+                entryItem.boostRelevance(priority);
+        }
+
+        var processedPojos = getResultQueue();
         processedPojos.add(entryItem);
         if (processedPojos.size() > maxResults)
             processedPojos.poll();
+    }
+
+    @NonNull
+    private DBHelper.HistoryMode getHistoryMode() {
+        switch (tagSort.order) {
+            case TagSortEntry.HISTORY_REC:
+                return DBHelper.HistoryMode.RECENCY;
+            case TagSortEntry.HISTORY_FREQ:
+                return DBHelper.HistoryMode.FREQUENCY;
+            case TagSortEntry.HISTORY_FREC:
+                return DBHelper.HistoryMode.FRECENCY;
+            case TagSortEntry.HISTORY_ADAPTIVE:
+            default:
+                return DBHelper.HistoryMode.ADAPTIVE;
+        }
     }
 
     @WorkerThread
@@ -78,21 +103,17 @@ public class SortedTagSearcher extends Searcher {
         switch (tagSort.order) {
             case TagSortEntry.SORT_AZ:
             case TagSortEntry.SORT_ZA:
-                // Request all results via "addResult"
+                // Request all results via "addResult", the queue will sort by name
                 dh.requestAllRecords(this);
                 break;
             case TagSortEntry.HISTORY_REC:
             case TagSortEntry.HISTORY_FREQ:
             case TagSortEntry.HISTORY_FREC:
-            case TagSortEntry.HISTORY_ADAPTIVE:
-            {
-                var history = dh.getHistory(Integer.MAX_VALUE, DataHandler.getHistoryMode(query), false, Collections.emptySet());
-                int order = 0;
-                for (var entry : history) {
-                    entry.resetResultInfo();
-                    entry.boostRelevance(order++);
-                }
-                addResult(history);
+            case TagSortEntry.HISTORY_ADAPTIVE: {
+                // boost relevance according to history order in `addProcessedPojo`
+                order = dh.getHistoryOrder(getHistoryMode(), Collections.emptySet());
+                // Request all results via "addResult", the queue will sort by relevance
+                dh.requestAllRecords(this);
                 break;
             }
             default:

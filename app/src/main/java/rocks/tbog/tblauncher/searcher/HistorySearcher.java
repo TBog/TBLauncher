@@ -36,6 +36,7 @@ public class HistorySearcher extends Searcher {
 
 //        int maxResults = getMaxResultCount(activity);
 
+        var processedPojos = getResultQueue();
         processedPojos.clear();
         List<EntryItem> history = getHistory(activity, mHistoryMode);
         int order = history.size();
