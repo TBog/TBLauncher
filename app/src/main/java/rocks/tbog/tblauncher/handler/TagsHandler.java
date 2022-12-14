@@ -521,9 +521,7 @@ public class TagsHandler {
         TagsProvider tagsProvider = dataHandler.getTagsProvider();
         if (tagsProvider != null) {
             tagEntry = tagsProvider.findById(tagId);
-            if (tagEntry != null && tagEntry.hasCustomIcon()) {
-                newEntry = tagsProvider.getTagEntry(newTagId);
-            }
+            newEntry = tagsProvider.findById(newTagId);
         }
         if (tagEntry == null)
             tagEntry = TagsProvider.newTagEntryCheckId(tagId);
