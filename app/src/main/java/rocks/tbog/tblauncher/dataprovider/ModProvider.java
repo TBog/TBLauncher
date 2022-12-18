@@ -47,16 +47,16 @@ public class ModProvider extends DBProvider<EntryItem> {
                 if (entry == null)
                     continue;
                 else if (entry instanceof StaticEntry) {
-                    if (fav.hasCustomIcon())
+                    if (fav.hasCustomIcon() && !((StaticEntry) entry).hasCustomIcon())
                         ((StaticEntry) entry).setCustomIcon();
                     if (fav.hasCustomName())
                         entry.setName(fav.displayName);
                 }
                 else if (entry instanceof SearchEntry) {
-                    if (fav.hasCustomIcon())
+                    if (fav.hasCustomIcon() && !((SearchEntry) entry).hasCustomIcon())
                         ((SearchEntry) entry).setCustomIcon();
                 } else if (entry instanceof DialContactEntry) {
-                    if (fav.hasCustomIcon())
+                    if (fav.hasCustomIcon() && !((DialContactEntry) entry).hasCustomIcon())
                         ((DialContactEntry) entry).setCustomIcon();
                 }
                 favList.add(entry);
