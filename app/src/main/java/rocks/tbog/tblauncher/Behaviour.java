@@ -1640,9 +1640,8 @@ public class Behaviour implements ISearchActivity {
         if (item instanceof AppEntry) {
             ResultHelper.launch(mLauncherButton, item, LAUNCHED_FROM_GESTURE);
             return true;
-        } else {
-            Toast.makeText(ctx, ctx.getString(R.string.application_not_found, appId), Toast.LENGTH_SHORT).show();
         }
+        Toast.makeText(ctx, ctx.getString(R.string.application_not_found, appId), Toast.LENGTH_SHORT).show();
         return false;
     }
 

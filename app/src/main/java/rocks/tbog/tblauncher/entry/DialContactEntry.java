@@ -18,7 +18,7 @@ import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.Utilities;
 
-public class DialContactEntry extends ContactEntry {
+public class DialContactEntry extends ContactEntry implements ICustomIconEntry{
     public static final String SCHEME = ContactEntry.SCHEME + "dial/";
 
     private int customIcon = 0;
@@ -40,14 +40,17 @@ public class DialContactEntry extends ContactEntry {
         return id + "/ic" + customIcon;
     }
 
+    @Override
     public void setCustomIcon() {
         customIcon += 1;
     }
 
+    @Override
     public void clearCustomIcon() {
         customIcon = 0;
     }
 
+    @Override
     public boolean hasCustomIcon() {
         return customIcon > 0;
     }

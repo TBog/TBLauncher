@@ -6,10 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import rocks.tbog.tblauncher.db.ModRecord;
-import rocks.tbog.tblauncher.entry.DialContactEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
-import rocks.tbog.tblauncher.entry.SearchEntry;
-import rocks.tbog.tblauncher.entry.StaticEntry;
+import rocks.tbog.tblauncher.entry.ICustomIconEntry;
 import rocks.tbog.tblauncher.handler.DataHandler;
 
 /**
@@ -46,19 +44,12 @@ public class ModProvider extends DBProvider<EntryItem> {
                 EntryItem entry = dataHandler.getPojo(fav.record);
                 if (entry == null)
                     continue;
-                else if (entry instanceof StaticEntry) {
-                    if (fav.hasCustomIcon() && !((StaticEntry) entry).hasCustomIcon())
-                        ((StaticEntry) entry).setCustomIcon();
-                    if (fav.hasCustomName())
-                        entry.setName(fav.displayName);
+                else if (entry instanceof ICustomIconEntry) {
+                    if (fav.hasCustomIcon() && !((ICustomIconEntry) entry).hasCustomIcon())
+                        ((ICustomIconEntry) entry).setCustomIcon();
                 }
-                else if (entry instanceof SearchEntry) {
-                    if (fav.hasCustomIcon() && !((SearchEntry) entry).hasCustomIcon())
-                        ((SearchEntry) entry).setCustomIcon();
-                } else if (entry instanceof DialContactEntry) {
-                    if (fav.hasCustomIcon() && !((DialContactEntry) entry).hasCustomIcon())
-                        ((DialContactEntry) entry).setCustomIcon();
-                }
+                if (fav.hasCustomName())
+                    entry.setName(fav.displayName);
                 favList.add(entry);
             }
 
