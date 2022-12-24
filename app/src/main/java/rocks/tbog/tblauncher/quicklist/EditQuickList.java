@@ -48,7 +48,7 @@ public class EditQuickList {
     private final AdapterView.OnItemClickListener mAddToQuickList = (parent, view, pos, id) -> {
         Object item = parent.getAdapter().getItem(pos);
         if (item instanceof EntryItem) {
-            mAdapter.addResult((EntryItem) item);
+            mAdapter.addItem((EntryItem) item);
         }
     };
 
@@ -57,6 +57,10 @@ public class EditQuickList {
         ArrayList<String> idList = new ArrayList<>(itemCount);
         for (int i = 0; i < itemCount; i++) {
             EntryItem entry = mAdapter.getItem(i);
+            if (entry == null) {
+                Log.e(TAG, "Adapter item #" + i + " of " + itemCount + " is null");
+                continue;
+            }
             idList.add(entry.id);
         }
         TBApplication.dataHandler(context).setQuickList(idList);
@@ -76,7 +80,8 @@ public class EditQuickList {
                 FilterProvider provider = TBApplication.dataHandler(ctx).getFilterProvider();
                 if (provider != null) {
                     List<? extends EntryItem> entryItems = provider.getPojos();
-                    data.addAll(entryItems);
+                    if (entryItems != null)
+                        data.addAll(entryItems);
                 }
             }
             return data;
@@ -98,7 +103,8 @@ public class EditQuickList {
                 ActionProvider provider = TBApplication.dataHandler(ctx).getActionProvider();
                 if (provider != null) {
                     List<? extends EntryItem> entryItems = provider.getPojos();
-                    data.addAll(entryItems);
+                    if (entryItems != null)
+                        data.addAll(entryItems);
                 }
             }
             return data;
@@ -174,7 +180,7 @@ public class EditQuickList {
         quickListPreview.requestLayout();
 
         // when user clicks, remove the view and the list item
-        mAdapter.setOnClickListener((entry, v) -> mAdapter.removeResult(entry));
+        mAdapter.setOnClickListener((entry, v) -> mAdapter.removeItem(entry));
         mAdapter.setOnLongClickListener(EditQuickList::previewStartDrag);
 
         SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);

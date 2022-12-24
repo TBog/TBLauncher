@@ -260,7 +260,7 @@ public class QuickList {
             mListDirty = !populateList(getContext(), mAdapter);
         } else {
             mListDirty = false;
-            mAdapter.updateResults(Collections.emptyList());
+            mAdapter.updateItems(Collections.emptyList());
             mQuickList.setVisibility(View.GONE);
         }
     }
@@ -295,7 +295,7 @@ public class QuickList {
             }
         }
 
-        adapter.updateResults(list);
+        adapter.updateItems(list);
         return validEntries;
     }
 
