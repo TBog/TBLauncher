@@ -63,7 +63,9 @@ public class EntryAdapter extends BaseAdapter {
         final View view;
         EntryItem content = getItem(position);
         if (convertView == null) {
-            view = LayoutInflater.from(parent.getContext()).inflate(content.getResultLayout(mDrawFlags), parent, false);
+            //final int viewType = ResultHelper.getItemViewLayout(getItemViewType(position));
+            final int viewType = content.getResultLayout(mDrawFlags);
+            view = LayoutInflater.from(parent.getContext()).inflate(viewType, parent, false);
         } else {
             view = convertView;
         }

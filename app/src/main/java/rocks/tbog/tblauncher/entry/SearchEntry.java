@@ -19,7 +19,7 @@ import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.Utilities;
 
-public abstract class SearchEntry extends EntryItem {
+public abstract class SearchEntry extends EntryItem implements ICustomIconEntry {
 
     private static final int[] RESULT_LAYOUT = {R.layout.item_builtin, R.layout.item_grid, R.layout.item_dock};
 
@@ -46,14 +46,17 @@ public abstract class SearchEntry extends EntryItem {
         return id + "/ic" + customIcon;
     }
 
+    @Override
     public void setCustomIcon() {
         customIcon += 1;
     }
 
+    @Override
     public void clearCustomIcon() {
         customIcon = 0;
     }
 
+    @Override
     public boolean hasCustomIcon() {
         return customIcon > 0;
     }

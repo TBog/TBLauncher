@@ -266,27 +266,11 @@ public class ResultHelper {
         return layout;
     }
 
-    public static int getItemViewType(EntryItem item, int drawFlags) {
+    public static int getItemViewType(@NonNull EntryItem item, int drawFlags) {
         int layout = item.getResultLayout(drawFlags);
         int viewType = sEntryViewType.indexOf(layout);
         if (viewType < 0)
             throw new IllegalStateException("no view type for " + item.getClass().getName() + " drawFlags=" + drawFlags);
         return viewType;
-
-//        if (item instanceof AppEntry)
-//            return 1;
-//        if (item instanceof ContactEntry)
-//            return 2;
-//        if (item instanceof FilterEntry)
-//            return 3;
-//        if (item instanceof ShortcutEntry)
-//            return 4;
-//        if (item instanceof StaticEntry)
-//            return 5;
-//        if (item instanceof SearchEntry)
-//            return 6;
-//        if (BuildConfig.DEBUG)
-//            throw new IllegalStateException("view type not set for adapter");
-//        return 0;
     }
 }
