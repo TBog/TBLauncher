@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="adaptive_shape_name">Adaptacyjny kształt ikon</string>
+    <string name="force_adaptive">Wymuś ikony adaptacyjne</string>
+    <string name="force_adaptive_summary">W przypadku ikon nieadaptacyjnych, zmniejsz skalę i umieść na ukształtowanym tle</string>
+    <string name="force_shape">Wymuś kształt adaptacyjny</string>
+    <string name="force_shape_summary">Użyj maski adaptacyjnej na ikonach nieadaptacyjnych</string>
+</resources>
