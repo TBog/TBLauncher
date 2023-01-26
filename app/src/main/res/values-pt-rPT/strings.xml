@@ -19,7 +19,7 @@
     <string name="cfg_widget_front">Mover <b>acima</b> todos</string>
     <string name="shortcut_with_appName">%1$s: %2$s</string>
     <string name="debug_section">Debug</string>
-    <string name="invalid_rename_search_engine">Já existe um motor de busca \"%s\".</string>
+    <string name="invalid_rename_search_engine">Já existe um motor de busca \"%s\"</string>
     <string name="provider_section">Fornecedores</string>
     <string name="enable_search">Motor de busca</string>
     <string name="enable_url">URL da Web</string>
@@ -60,8 +60,8 @@
     <string name="menu_quick_list_add">Adicionar à doca</string>
     <string name="menu_quick_list_remove">Retirar da doca</string>
     <string name="menu_remove_history">Remover da história</string>
-    <string name="stub_application">Nome do aplicativo</string>
-    <string name="stub_app_tag">lista de etiquetas da aplicação</string>
+    <string name="stub_application">Nome da app</string>
+    <string name="stub_app_tag">lista de etiquetas da app</string>
     <string name="permission_denied">Conceder esta permissão primeiro</string>
     <string name="menu_exclude">Excluir…</string>
     <string name="menu_hide">Esconder</string>
@@ -84,7 +84,7 @@
     <string name="menu_widget_configure">Personalizar o Widget…</string>
     <string name="menu_popup_title">Menu principal</string>
     <string name="menu_popup_title_settings">Definições</string>
-    <string name="menu_popup_android_settings">Configurações do dispositivo</string>
+    <string name="menu_popup_android_settings">Configurações do aparelho</string>
     <string name="menu_popup_launcher_settings">Configurações TinyBit</string>
     <string name="menu_popup_tags_manager">Gestor de etiquetas</string>
     <string name="menu_popup_tags_menu">Menu de etiquetas</string>
@@ -117,10 +117,10 @@
     <string name="result_list_section">Lista de resultados</string>
     <string name="icons_pack">Escolher pacote</string>
     <string name="icons_pack_default_name">Ícones do sistema</string>
-    <string name="value_float">valor %d</string>
+    <string name="value_float">valor %.2f</string>
     <string name="value_float_xy">horizontal %1$.2f | vertical %2$.2f</string>
     <string name="size">&lt;%d&gt;</string>
-    <string name="size_float">&lt;%d&gt;</string>
+    <string name="size_float">&lt;%.1f&gt;</string>
     <string name="shadow_preview">&lt;%3$.1f&gt;
 \n&lt;%1$.1f×%2$.1f&gt;</string>
     <string name="menu_app_rename">Renomear aplicação</string>
@@ -135,9 +135,9 @@
     <string name="title_rename_search_hint">Escolha um nome diferente para esta dica de pesquisa</string>
     <string name="title_edit_url_search_engine">Escolha um URL diferente para este motor de busca</string>
     <string name="title_shortcut_rename">Escolha um nome personalizado para este atalho</string>
-    <string name="app_rename_confirmation">O nome do aplicativo é agora %s</string>
-    <string name="shortcut_rename_confirmation">O nome do atalho é agora \"%s\".</string>
-    <string name="entry_rename_confirmation">O nome é agora \"%s\".</string>
+    <string name="app_rename_confirmation">O nome da app é agora %s</string>
+    <string name="shortcut_rename_confirmation">O nome do atalho é agora \"%s\"</string>
+    <string name="entry_rename_confirmation">O nome é agora \"%s\"</string>
     <string name="hint_custom_icon">Filtrar pelo nome</string>
     <string name="default_icon">ícone predefinido</string>
     <string name="default_static_icon">%s ícone predefinido</string>
@@ -179,7 +179,7 @@
     <string name="exit_the_app_confirm">Fechar o lançador\?</string>
     <string name="exit_the_app_description">O seu lançador por defeito será aberto, ou ser-lhe-á perguntado qual deles quer utilizar.</string>
     <string name="reset_default_launcher_confirm">Mudar o lançador padrão\?</string>
-    <string name="reset_default_launcher_description">Pede para a aplicação abrir depois de pressionar a tela inicial.</string>
+    <string name="reset_default_launcher_description">Pede para a aplicação abrir depois de pressionar ao ecrã inicial.</string>
     <string name="reset_default_launcher">Alterar lançador padrão</string>
     <string name="filter_apps">Filtro de aplicação</string>
     <string name="filter_contacts">Filtro de contacto</string>
@@ -210,7 +210,7 @@
     <string name="screen_off_cache_clear_summary">Cache vazia quando o ecrã é desligado</string>
     <string name="memory_section">Memória</string>
     <string name="cache_half_apps">Pequeno tamanho de cache</string>
-    <string name="cache_half_apps_summary">Fazer a cache LRU com metade do número de aplicações instaladas</string>
+    <string name="cache_half_apps_summary">Fazer a cache LRU com metade da quanitade de apps instaladas</string>
     <string name="icon_pack_section">Pacote de ícones</string>
     <string name="icon_pack_content_list">Ícones de
 \n%s</string>
@@ -221,9 +221,9 @@
     <string name="lock_portrait">Retrato de eclusa</string>
     <string name="sensor_orientation">Orientação de sensores</string>
     <string name="wp_drag_animate">Papel de parede de pergaminho</string>
-    <string name="wp_drag_animate_desc">Arrastar &lt;b&gt;&lt;/b&gt; &lt;/b&gt; &lt;b&gt; → ← para percorrer o papel de parede</string>
+    <string name="wp_drag_animate_desc">Arrastar <b>←</b> <b>→</b> para percorrer o papel de parede</string>
     <string name="wp_animate_sides">Papel de parede de pau lateral</string>
-    <string name="wp_animate_sides_desc">O papel de parede ficará no <b> <b> </b> ou ← →</b> após a rolagem</string>
+    <string name="wp_animate_sides_desc">O papel de parede ficará no <b>←</b> ou <b>→</b> após a rolagem</string>
     <string name="cfg_widget_move_switch">Mudança de movimento</string>
     <string name="cfg_widget_move_exit">Sair em movimento</string>
     <string name="cfg_widget_resize">Redimensionar</string>
@@ -235,8 +235,8 @@
     <string name="debug_item_icon_info">Informação de ícones</string>
     <string name="shortcut_section">Atalho</string>
     <string name="shortcut_pin_auto_confirm">Atalho de auto-confirmação</string>
-    <string name="shortcut_show_badge">Mostrar crachá da aplicação</string>
-    <string name="shortcut_show_badge_summary">Mostrar o ícone do aplicativo que criou o atalho</string>
+    <string name="shortcut_show_badge">Mostrar crachá da app</string>
+    <string name="shortcut_show_badge_summary">Mostrar o ícone da app que criou o atalho</string>
     <string name="quick_list_show_badge">Mostrar crachá de atalho na doca</string>
     <string name="result_list_argb">Cor de fundo e opacidade</string>
     <string name="result_highlight_color">Cor em destaque</string>
@@ -253,7 +253,7 @@
     <string name="menu_popup_quick_list_customize">Editar a doca</string>
     <string name="result_text_size">Tamanho do texto</string>
     <string name="result_text2_size">Tamanho do texto secundário</string>
-    <string name="invalid_rename_tag">Já existe uma etiqueta \"%s\".</string>
+    <string name="invalid_rename_tag">Já existe uma etiqueta \"%s\"</string>
     <string name="enable_dial">Pesquisa por marcação</string>
     <string name="enable_contacts">Contactos telefónicos</string>
     <string name="selected_contact_mime_types">Seleccione os contactos a serem mostrados</string>
@@ -284,7 +284,7 @@
     <string name="icon_pack_loading">Carregamento a partir de pacotes de ícones…</string>
     <string name="gesture_section">Gestos</string>
     <string name="gesture_fling_down_left">Fling de |<b> <b> </b> |, ← ↓</b></string>
-    <string name="gesture_fling_down_left_summary">Iniciar a partir do <b> <b> </b> lado do ecrã e atirar ← ↓</b></string>
+    <string name="gesture_fling_down_left_summary">Iniciar a partir do <b>←</b> lado do ecrã e atirar <b>↓</b></string>
     <string name="gesture_fling_down_right">Fling de |<b>→</b>|, <b>↓</b></string>
     <string name="gesture_fling_down_right_summary">Comece a partir do <b>→</b> lado do ecrã e atire <b>↓</b></string>
     <string name="gesture_fling_up">Fling ↑</string>
@@ -327,7 +327,7 @@
     <string name="widget_placeholder_remove">Retirar o local\?</string>
     <string name="choose_file_activity_not_found">Por favor, instale um gestor de ficheiros.</string>
     <string name="result_history_size">Tamanho da história</string>
-    <string name="result_history_size_summary">Número máximo de itens ao mostrar a história</string>
+    <string name="result_history_size_summary">Quanitade máxima de itens ao mostrar a história</string>
     <string name="action_show_history_recency">História recente</string>
     <string name="action_show_history_frequency">Mais acessados</string>
     <string name="action_show_history_frecency">Recentes e frequentes</string>
@@ -335,12 +335,12 @@
     <string name="show_tags_list">Menu de etiquetas como resultados</string>
     <string name="show_tags_list_reversed">Menu de etiquetas invertido como resultados</string>
     <string name="result_history_adaptive">Duração adaptativa</string>
-    <string name="result_history_adaptive_summary">Número de horas para história adaptativa</string>
+    <string name="result_history_adaptive_summary">Quantidade de horas para história adaptativa</string>
     <string name="adaptive_shape_name">Forma de ícone</string>
-    <string name="force_adaptive">Fundo do ícone do conjunto</string>
+    <string name="force_adaptive">Definir fundo de ícone</string>
     <string name="force_adaptive_summary">Reduzir a escala de ícones e colocar sobre um fundo moldado</string>
-    <string name="force_shape">Forma da força</string>
-    <string name="force_shape_summary">Usar fundo personalizado para todos</string>
+    <string name="force_shape">Forçar forma</string>
+    <string name="force_shape_summary">Usar fundo moldado personalizado para todos</string>
     <string name="contact_pack_mask_summary">Usar a forma de pacote de ícones para contactos</string>
     <string name="contacts_shape_name">Forma de contacto-icónico</string>
     <string name="contacts_shape_summary">Forma do ícone de contacto</string>
@@ -430,9 +430,9 @@
     <string name="behaviour_link_close_keyboard_back_button">Acção \"Voltar\" ao fechar o teclado</string>
     <string name="keyboard_suggestions">Auto-completamento/sugestões</string>
     <string name="device_admin_explanation">Usado para bloquear o ecrã</string>
-    <string name="device_admin">Administração do dispositivo</string>
+    <string name="device_admin">Administração do aparelho</string>
     <string name="device_admin_disable">Retirar esta permissão\?</string>
-    <string name="device_admin_required">Acesso aos dispositivos necessário</string>
+    <string name="device_admin_required">Acesso aos aparelhos necessário</string>
     <string name="gesture_double_click">Ecrã de toque duplo</string>
     <string name="loading_icon">Ícone de carregamento</string>
     <string name="keyboard_section">Teclado</string>
@@ -456,7 +456,7 @@
     <string name="tags_menu_untagged">Mostrar sem marcação</string>
     <string name="result_popup_order">Ordem de categoria de toque longo</string>
     <string name="result_popup_order_summary">Encomenda por categoria para artigos de toque longo popup</string>
-    <string name="debug_favorites_summary">Mostrar entradas da tabela DB `favorites\'.</string>
+    <string name="debug_favorites_summary">Mostrar entradas da tabela DB `favorites\'</string>
     <string name="title_presets">Pré-selecção da cor</string>
     <string name="summary_presets">Predefinição e geração de cores</string>
     <string name="primary_color">Cor primária</string>
@@ -466,8 +466,8 @@
     <string name="generate_theme_highlight">Tema em destaque</string>
     <string name="generate_theme_highlight_summary">Usar primário para fundo e secundário para destaque</string>
     <string name="result_first_at_bottom">Primeiro no fundo</string>
-    <string name="result_right_to_left">Da direita para a esquerda</string>
-    <string name="result_right_to_left_summary">Linha da grelha de disposição da direita para a esquerda</string>
+    <string name="result_right_to_left">Da direita à esquerda</string>
+    <string name="result_right_to_left_summary">Linha da grelha de disposição da direita à esquerda</string>
     <string name="debug_provider_status">Estatuto de fornecedor</string>
     <string name="exit_tags_manager_confirm">Fechar o gestor de etiquetas\?</string>
     <string name="exit_tags_manager_description">Perderá todas as alterações se fechar o gestor de Etiquetas.
@@ -484,9 +484,9 @@
     <string name="search_bar_layout">Layout</string>
     <string name="quick_list_position">Posição</string>
     <string name="quick_list_columns">Colunas</string>
-    <string name="quick_list_columns_summary">Número de artigos por fila</string>
-    <string name="quick_list_rtl">Da direita para a esquerda</string>
-    <string name="quick_list_rtl_summary">Layout itens da direita para a esquerda</string>
+    <string name="quick_list_columns_summary">Quantidade de artigos por fila</string>
+    <string name="quick_list_rtl">Da direita à esquerda</string>
+    <string name="quick_list_rtl_summary">Layout itens da direita à esquerda</string>
     <string name="navigation_bar_section">Barra de navegação</string>
     <string name="icons_section">Ícones</string>
     <string name="options_section">Opções</string>
@@ -496,7 +496,7 @@
     <string name="done_key_contact_action">Feito acção chave de contacto</string>
     <plurals name="tag_entry_count">
         <item quantity="one">uma entrada</item>
-        <item quantity="many"></item>
-        <item quantity="other"></item>
+        <item quantity="many"/>
+        <item quantity="other"/>
     </plurals>
 </resources>
