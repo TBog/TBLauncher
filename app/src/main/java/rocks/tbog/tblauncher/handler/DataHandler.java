@@ -25,6 +25,7 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -640,7 +641,7 @@ public class DataHandler extends BroadcastReceiver
 
         // sort the list if needed
         if (sortHistory)
-            Collections.sort(history, (a, b) -> a.getName().compareTo(b.getName()));
+            Collections.sort(history, Comparator.comparing(EntryItem::getName));
 
         // enforce item count after the sort operation
         if (history.size() > itemCount)

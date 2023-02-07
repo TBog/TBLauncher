@@ -31,6 +31,7 @@ import androidx.preference.PreferenceManager;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Objects;
 import java.util.Set;
 
@@ -82,7 +83,7 @@ public class EditSearchEngines extends AndroidViewModel {
                 searchEngineInfo.selected = true;
                 list.add(searchEngineInfo);
             }
-            Collections.sort(list, (lhs, rhs) -> lhs.provider.compareTo(rhs.provider));
+            Collections.sort(list, Comparator.comparing(lhs -> lhs.provider));
 
             searchEngineInfoList.postValue(list);
             defaultProviderName.postValue("Google");
@@ -103,7 +104,7 @@ public class EditSearchEngines extends AndroidViewModel {
                 searchEngineInfo.selected = selectedProviderNames.contains(searchEngineInfo.name);
                 list.add(searchEngineInfo);
             }
-            Collections.sort(list, (lhs, rhs) -> lhs.provider.compareTo(rhs.provider));
+            Collections.sort(list, Comparator.comparing(lhs -> lhs.provider));
             searchEngineInfoList.postValue(list);
 
             // get default search engine name

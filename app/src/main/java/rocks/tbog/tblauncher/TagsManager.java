@@ -20,6 +20,7 @@ import androidx.appcompat.content.res.AppCompatResources;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Objects;
 
 import rocks.tbog.tblauncher.WorkAsync.RunnableTask;
@@ -179,7 +180,7 @@ public class TagsManager {
                 tagInfo.setInfo(tagName, tagsHandler.getValidEntryIds(tagName).size());
                 tags.add(tagInfo);
             }
-            Collections.sort(tags, (lhs, rhs) -> lhs.tagName.compareTo(rhs.tagName));
+            Collections.sort(tags, Comparator.comparing(lhs -> lhs.tagName));
 
             EntryItem untaggedEntry = TBApplication.dataHandler(context).getPojo(ActionEntry.SCHEME + "show/untagged");
             if (untaggedEntry instanceof ActionEntry) {

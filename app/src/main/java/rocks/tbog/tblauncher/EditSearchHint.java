@@ -18,6 +18,7 @@ import androidx.preference.PreferenceManager;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -154,7 +155,7 @@ public class EditSearchHint {
             hintInfo.selected = selectedHints.contains(hintInfo.hint);
             mAdapter.addItem(hintInfo);
         }
-        Collections.sort(mAdapter.getItems(), (lhs, rhs) -> lhs.hint.compareTo(rhs.hint));
+        Collections.sort(mAdapter.getItems(), Comparator.comparing(lhs -> lhs.hint));
         mAdapter.notifyDataSetChanged();
     }
 
@@ -165,7 +166,7 @@ public class EditSearchHint {
             searchEngineInfo.selected = true;
             mAdapter.addItem(searchEngineInfo);
         }
-        Collections.sort(mAdapter.getItems(), (lhs, rhs) -> lhs.hint.compareTo(rhs.hint));
+        Collections.sort(mAdapter.getItems(), Comparator.comparing(lhs -> lhs.hint));
         mAdapter.notifyDataSetChanged();
     }
 
