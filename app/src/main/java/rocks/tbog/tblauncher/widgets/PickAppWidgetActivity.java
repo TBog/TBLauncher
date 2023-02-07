@@ -1,17 +1,15 @@
 package rocks.tbog.tblauncher.widgets;
 
 import android.appwidget.AppWidgetManager;
-import android.appwidget.AppWidgetProviderInfo;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.res.Resources;
-import android.graphics.drawable.Drawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextUtils;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -20,37 +18,22 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.res.ResourcesCompat;
-import androidx.core.text.HtmlCompat;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.Iterator;
 
 import rocks.tbog.tblauncher.R;
-import rocks.tbog.tblauncher.TBApplication;
-import rocks.tbog.tblauncher.utils.UISizes;
-import rocks.tbog.tblauncher.utils.UserHandleCompat;
-import rocks.tbog.tblauncher.utils.Utilities;
-import rocks.tbog.tblauncher.utils.ViewHolderAdapter;
-import rocks.tbog.tblauncher.utils.ViewHolderListAdapter;
+import rocks.tbog.tblauncher.normalizer.StringNormalizer;
+import rocks.tbog.tblauncher.utils.FuzzyScore;
 
 public class PickAppWidgetActivity extends AppCompatActivity {
     private static final String TAG = "PickAppWidget";
-
-    private static class WidgetInfo {
-        final String appName;
-        final String widgetName;
-        final String widgetDesc;
-        final AppWidgetProviderInfo appWidgetInfo;
-
-        private WidgetInfo(String app, String name, String description, AppWidgetProviderInfo appWidgetInfo) {
-            this.appName = app;
-            this.widgetName = name;
-            this.widgetDesc = description;
-            this.appWidgetInfo = appWidgetInfo;
-        }
-    }
+    private TextView mSearch;
+    View widgetLoadingGroup;
+    WidgetListAdapter adapter;
+    LoadWidgetsAsync loadWidgetsAsync = null;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -59,7 +42,9 @@ public class PickAppWidgetActivity extends AppCompatActivity {
 
         final Context context = getApplicationContext();
         final ListView list = findViewById(android.R.id.list);
-        final WidgetListAdapter adapter = new WidgetListAdapter();
+        adapter = new WidgetListAdapter();
+        widgetLoadingGroup = findViewById(R.id.widgetLoadingGroup);
+
         list.setAdapter(adapter);
         list.setOnItemClickListener((parent, view, position, id) -> {
             Object item = parent.getAdapter().getItem(position);
@@ -90,17 +75,56 @@ public class PickAppWidgetActivity extends AppCompatActivity {
             finish();
         });
 
-        final View widgetLoadingGroup = findViewById(R.id.widgetLoadingGroup);
+        // set page search bar
+        mSearch = findViewById(R.id.search);
+        mSearch.addTextChangedListener(new TextWatcher() {
+            public void afterTextChanged(Editable s) {
+                // Auto left-trim text.
+                if (s.length() > 0 && s.charAt(0) == ' ')
+                    s.delete(0, 1);
+            }
+
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+            }
+
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                mSearch.post(() -> refreshList());
+            }
+        });
+        mSearch.requestFocus();
+        refreshList();
+    }
+
+    private synchronized void refreshList() {
+        final Context context = getApplicationContext();
         widgetLoadingGroup.setVisibility(View.VISIBLE);
 
-        LoadWidgetsAsync loadWidgetsAsync = adapter.newLoadAsyncList(LoadWidgetsAsync.class, () -> {
+        adapter.clearList();
+
+        if (loadWidgetsAsync != null)
+            loadWidgetsAsync.cancel(false);
+
+        loadWidgetsAsync = adapter.newLoadAsyncList(LoadWidgetsAsync.class, () -> {
             // get widget list
             var widgetList = getWidgetList(context);
 
+            var text = mSearch.getText();
+            if (text.length() > 0) {
+                StringNormalizer.Result normalized = StringNormalizer.normalizeWithResult(text, true);
+                FuzzyScore fuzzyScore = new FuzzyScore(normalized.codePoints);
+                for (Iterator<WidgetInfo> iterator = widgetList.iterator(); iterator.hasNext(); ) {
+                    WidgetInfo widgetInfo = iterator.next();
+                    var matchAppName = !TextUtils.isEmpty(widgetInfo.appName) && fuzzyScore.match(widgetInfo.appName).match;
+                    var matchWidgetName = !TextUtils.isEmpty(widgetInfo.widgetName) && fuzzyScore.match(widgetInfo.widgetName).match;
+                    var matchDescription = !TextUtils.isEmpty(widgetInfo.widgetDesc) && fuzzyScore.match(widgetInfo.widgetDesc).match;
+
+                    if (!matchAppName && !matchWidgetName && !matchDescription)
+                        iterator.remove();
+                }
+            }
+
             // sort list
-            Collections.sort(widgetList, (o1, o2) -> {
-                return o1.appName.compareTo(o2.appName);
-            });
+            Collections.sort(widgetList, Comparator.comparing(o -> o.appName));
 
             //StringBuilder dbgList = new StringBuilder();
             // assuming the list is sorted by apps, add titles with app name
@@ -125,10 +149,17 @@ public class PickAppWidgetActivity extends AppCompatActivity {
                 adapterList.add(new ItemWidget(item));
             }
             //Log.d(TAG, dbgList.toString());
+            Log.d(TAG, "list size=" + adapterList.size());
             return adapterList;
         });
+
         if (loadWidgetsAsync != null) {
-            loadWidgetsAsync.whenDone = () -> widgetLoadingGroup.setVisibility(View.GONE);
+            loadWidgetsAsync.whenDone = () -> {
+                widgetLoadingGroup.setVisibility(View.GONE);
+                synchronized (PickAppWidgetActivity.this) {
+                    loadWidgetsAsync = null;
+                }
+            };
             loadWidgetsAsync.execute();
         } else {
             finish();
@@ -178,174 +209,10 @@ public class PickAppWidgetActivity extends AppCompatActivity {
         return infoArrayList;
     }
 
-    @WorkerThread
-    private static Drawable getWidgetPreview(@NonNull Context context, @NonNull AppWidgetProviderInfo info) {
-        Drawable preview = null;
-        final int density = context.getResources().getDisplayMetrics().densityDpi;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            preview = info.loadPreviewImage(context, density);
-        }
-        if (preview != null)
-            return preview;
-
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            preview = info.loadIcon(context, density);
-        }
-        if (preview != null)
-            return preview;
-
-        Resources resources = null;
-        try {
-            resources = context.getPackageManager().getResourcesForApplication(info.provider.getPackageName());
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.w(TAG, "getResourcesForApplication " + info.provider.getPackageName(), e);
-        }
-        if (resources != null) {
-            try {
-                preview = ResourcesCompat.getDrawableForDensity(resources, info.previewImage, density, null);
-            } catch (Resources.NotFoundException ignored) {
-                //ignored
-            }
-            if (preview != null)
-                return preview;
-
-            try {
-                preview = ResourcesCompat.getDrawableForDensity(resources, info.icon, density, null);
-            } catch (Resources.NotFoundException ignored) {
-                //ignored
-            }
-            if (preview != null)
-                return preview;
-        }
-
-        UserHandleCompat userHandle = UserHandleCompat.CURRENT_USER;
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            userHandle = new UserHandleCompat(context, info.getProfile());
-        }
-        var icon = TBApplication.iconsHandler(context).getIconForPackage(info.provider, userHandle);
-        return icon.getDrawable();
-    }
-
     @Override
     public void onBackPressed() {
         setResult(RESULT_CANCELED, getIntent());
         super.onBackPressed();
     }
 
-    private interface MenuItem {
-        @NonNull
-        String getName();
-    }
-
-    private static class ItemTitle implements MenuItem {
-        @NonNull
-        private final String name;
-
-        private ItemTitle(@NonNull String string) {
-            this.name = string;
-        }
-
-        @NonNull
-        @Override
-        public String getName() {
-            return name;
-        }
-    }
-
-    private static class ItemWidget implements MenuItem {
-        private final WidgetInfo info;
-
-        public ItemWidget(@NonNull WidgetInfo info) {
-            this.info = info;
-        }
-
-        @NonNull
-        @Override
-        public String getName() {
-            return info.widgetName;
-        }
-    }
-
-    public static class WidgetListAdapter extends ViewHolderListAdapter<MenuItem, InfoViewHolder> {
-
-        public WidgetListAdapter() {
-            super(InfoViewHolder.class, R.layout.popup_list_item_icon, new ArrayList<>());
-        }
-
-        @Override
-        public boolean isEnabled(int position) {
-            return !(getItem(position) instanceof ItemTitle);
-        }
-
-        @Override
-        protected int getItemViewTypeLayout(int viewType) {
-            if (viewType == 1)
-                return R.layout.popup_title;
-            return super.getItemViewTypeLayout(viewType);
-        }
-
-        public int getItemViewType(int position) {
-            return getItem(position) instanceof ItemTitle ? 1 : 0;
-        }
-
-        public int getViewTypeCount() {
-            return 2;
-        }
-    }
-
-    public static class LoadWidgetsAsync extends ViewHolderListAdapter.LoadAsyncList<MenuItem, InfoViewHolder, WidgetListAdapter> {
-        @Nullable
-        public Runnable whenDone = null;
-
-        public LoadWidgetsAsync(@NonNull WidgetListAdapter adapter, @NonNull LoadInBackground<MenuItem> loadInBackground) {
-            super(adapter, loadInBackground);
-        }
-
-        @Override
-        protected void onPostExecute(Collection<MenuItem> data) {
-            super.onPostExecute(data);
-            if (whenDone != null)
-                whenDone.run();
-        }
-    }
-
-    public static class InfoViewHolder extends ViewHolderAdapter.ViewHolder<MenuItem> {
-        TextView text1;
-        ImageView icon;
-
-        public InfoViewHolder(View view) {
-            super(view);
-            text1 = view.findViewById(android.R.id.text1);
-            icon = view.findViewById(android.R.id.icon);
-        }
-
-        @Override
-        protected void setContent(MenuItem content, int position, @NonNull ViewHolderAdapter<MenuItem, ? extends ViewHolderAdapter.ViewHolder<MenuItem>> adapter) {
-            final CharSequence text;
-            if (content instanceof ItemWidget) {
-                WidgetInfo info = ((ItemWidget) content).info;
-                int sizeX = UISizes.px2dp(text1.getContext(), info.appWidgetInfo.minWidth);
-                int sizeY = UISizes.px2dp(text1.getContext(), info.appWidgetInfo.minHeight);
-                if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
-                    if (info.appWidgetInfo.targetCellWidth != 0 && info.appWidgetInfo.targetCellHeight != 0) {
-                        sizeX = info.appWidgetInfo.targetCellWidth;
-                        sizeY = info.appWidgetInfo.targetCellHeight;
-                    }
-                }
-                final String html;
-                if (info.widgetDesc != null) {
-                    html = text1.getResources().getString(R.string.widget_name_and_desc, info.widgetName, info.widgetDesc, sizeX, sizeY);
-                } else {
-                    html = text1.getResources().getString(R.string.widget_name, info.widgetName, sizeX, sizeY);
-                }
-                text = HtmlCompat.fromHtml(html, HtmlCompat.FROM_HTML_MODE_LEGACY);
-                Utilities.setIconAsync(icon, context -> getWidgetPreview(context, info.appWidgetInfo));
-            } else {
-                text = content.getName();
-                if (icon != null)
-                    icon.setImageDrawable(null);
-            }
-            text1.setText(text);
-        }
-    }
 }

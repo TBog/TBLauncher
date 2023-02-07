@@ -67,7 +67,8 @@ public abstract class ViewHolderListAdapter<T, VH extends ViewHolderAdapter.View
 
         @Override
         protected void onDataLoadFinished(@NonNull A adapter, @NonNull Collection<T> data) {
-            adapter.addItems(data);
+            if (!isCancelled())
+                adapter.addItems(data);
         }
     }
 }

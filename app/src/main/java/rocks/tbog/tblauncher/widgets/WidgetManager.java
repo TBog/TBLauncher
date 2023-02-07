@@ -10,6 +10,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
@@ -34,6 +35,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.StringRes;
+import androidx.annotation.WorkerThread;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.res.ResourcesCompat;
@@ -508,21 +510,21 @@ public class WidgetManager {
             final CharSequence placeholderName = text != null ? text.getText() : "null";
             ContextThemeWrapper ctxDialog = new ContextThemeWrapper(activity, R.style.TitleDialogTheme);
             new AlertDialog.Builder(ctxDialog)
-                    .setTitle(R.string.widget_placeholder_remove)
-                    .setMessage(placeholderName + "\n" + provider.flattenToShortString())
-                    .setPositiveButton(android.R.string.ok, (dialog, which) -> {
-                        mLayout.removeView(placeholderView);
-                        for (Iterator<PlaceholderWidgetRecord> iterator = mPlaceholders.iterator(); iterator.hasNext(); ) {
-                            PlaceholderWidgetRecord placeholderWidgetRecord = iterator.next();
-                            if (provider.equals(placeholderWidgetRecord.provider)) {
-                                DBHelper.removeWidgetPlaceholder(activity, INVALID_WIDGET_ID, placeholderWidgetRecord.provider.flattenToString());
-                                iterator.remove();
-                            }
+                .setTitle(R.string.widget_placeholder_remove)
+                .setMessage(placeholderName + "\n" + provider.flattenToShortString())
+                .setPositiveButton(android.R.string.ok, (dialog, which) -> {
+                    mLayout.removeView(placeholderView);
+                    for (Iterator<PlaceholderWidgetRecord> iterator = mPlaceholders.iterator(); iterator.hasNext(); ) {
+                        PlaceholderWidgetRecord placeholderWidgetRecord = iterator.next();
+                        if (provider.equals(placeholderWidgetRecord.provider)) {
+                            DBHelper.removeWidgetPlaceholder(activity, INVALID_WIDGET_ID, placeholderWidgetRecord.provider.flattenToString());
+                            iterator.remove();
                         }
-                        dialog.dismiss();
-                    })
-                    .setNegativeButton(android.R.string.cancel, (dialog, which) -> dialog.dismiss())
-                    .show();
+                    }
+                    dialog.dismiss();
+                })
+                .setNegativeButton(android.R.string.cancel, (dialog, which) -> dialog.dismiss())
+                .show();
             return true;
         });
 
@@ -1139,35 +1141,53 @@ public class WidgetManager {
         return name == null ? "[null]" : name;
     }
 
+    @WorkerThread
     @NonNull
-    public static Drawable getWidgetPreview(Context ctx, @Nullable AppWidgetProviderInfo info) {
-        Drawable icon = null;
-        if (info != null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                icon = info.loadPreviewImage(ctx, 0);
-            } else {
-                icon = ctx.getPackageManager().getDrawable(info.provider.getPackageName(), info.previewImage, null);
-            }
-            if (icon == null) {
-                try {
-                    icon = ctx.getPackageManager().getApplicationLogo(info.provider.getPackageName());
-                } catch (PackageManager.NameNotFoundException ignored) {
-                }
-            }
+    public static Drawable getWidgetPreview(@NonNull Context context, @NonNull AppWidgetProviderInfo info) {
+        Drawable preview = null;
+        final int density = context.getResources().getDisplayMetrics().densityDpi;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            preview = info.loadPreviewImage(context, density);
         }
-        if (icon == null) {
-            if (info == null) {
-                icon = ResourcesCompat.getDrawable(ctx.getResources(), R.drawable.ic_android, null);
-            } else {
-                try {
-                    icon = ctx.getPackageManager().getApplicationIcon(info.provider.getPackageName());
-                } catch (PackageManager.NameNotFoundException ignored) {
-                    icon = ResourcesCompat.getDrawable(ctx.getResources(), R.drawable.ic_android, null);
-                }
-            }
+        if (preview != null)
+            return preview;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            preview = info.loadIcon(context, density);
         }
-        assert icon != null;
-        return icon;
+        if (preview != null)
+            return preview;
+
+        Resources resources = null;
+        try {
+            resources = context.getPackageManager().getResourcesForApplication(info.provider.getPackageName());
+        } catch (PackageManager.NameNotFoundException e) {
+            Log.w(TAG, "getResourcesForApplication " + info.provider.getPackageName(), e);
+        }
+        if (resources != null) {
+            try {
+                preview = ResourcesCompat.getDrawableForDensity(resources, info.previewImage, density, null);
+            } catch (Resources.NotFoundException ignored) {
+                //ignored
+            }
+            if (preview != null)
+                return preview;
+
+            try {
+                preview = ResourcesCompat.getDrawableForDensity(resources, info.icon, density, null);
+            } catch (Resources.NotFoundException ignored) {
+                //ignored
+            }
+            if (preview != null)
+                return preview;
+        }
+
+        UserHandleCompat userHandle = UserHandleCompat.CURRENT_USER;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            userHandle = new UserHandleCompat(context, info.getProfile());
+        }
+        var icon = TBApplication.iconsHandler(context).getIconForPackage(info.provider, userHandle);
+        return icon.getDrawable();
     }
 
     static class WidgetOptionItem extends LinearAdapter.Item {
@@ -1217,6 +1237,7 @@ public class WidgetManager {
         static WidgetPopupItem create(Context ctx, AppWidgetManager appWidgetManager, int appWidgetId) {
             AppWidgetProviderInfo info = appWidgetManager.getAppWidgetInfo(appWidgetId);
             String name = getWidgetName(ctx, info);
+            //TODO: make preview icon loading async
             Drawable icon = getWidgetPreview(ctx, info);
             return new WidgetPopupItem(name, appWidgetId, icon);
         }

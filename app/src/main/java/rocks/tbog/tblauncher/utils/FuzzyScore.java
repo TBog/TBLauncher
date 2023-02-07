@@ -48,7 +48,7 @@ public class FuzzyScore {
 
     private final MatchInfo matchInfo;
 
-    public FuzzyScore(int[] pattern, boolean detailedMatchIndices) {
+    public FuzzyScore(@NonNull int[] pattern, boolean detailedMatchIndices) {
         super();
         patternLength = pattern.length;
         patternChar = new int[patternLength];
@@ -70,7 +70,7 @@ public class FuzzyScore {
         }
     }
 
-    public FuzzyScore(int[] pattern) {
+    public FuzzyScore(@NonNull int[] pattern) {
         this(pattern, true);
     }
 
@@ -102,7 +102,7 @@ public class FuzzyScore {
         this.unmatched_letter_penalty = unmatched_letter_penalty;
     }
 
-    public static String patternToString(int[] pattern) {
+    public static String patternToString(@Nullable int[] pattern) {
         if (pattern == null)
             return "null";
         int iMax = pattern.length - 1;
@@ -140,7 +140,7 @@ public class FuzzyScore {
      * @return true if each character in pattern is found sequentially within text
      */
     @NonNull
-    public MatchInfo match(CharSequence text) {
+    public MatchInfo match(@NonNull CharSequence text) {
         int idx = 0;
         int idxCodepoint = 0;
         int textLength = text.length();
@@ -159,7 +159,7 @@ public class FuzzyScore {
      * @return true if each character in pattern is found sequentially within text
      */
     @NonNull
-    public MatchInfo match(int[] text) {
+    public MatchInfo match(@NonNull int[] text) {
         // Loop variables
         int score = 0;
         int patternIdx = 0;
