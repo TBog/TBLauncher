@@ -1,0 +1,6 @@
+* bump library versions
+* improve preference color preview
+* add and update translations
+* fix edit tags dialog
+* fix color picker dialog animation
+* customize widget picker
