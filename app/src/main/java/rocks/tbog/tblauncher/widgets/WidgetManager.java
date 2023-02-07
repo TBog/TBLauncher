@@ -1,4 +1,4 @@
-package rocks.tbog.tblauncher;
+package rocks.tbog.tblauncher.widgets;
 
 import android.app.Activity;
 import android.appwidget.AppWidgetHost;
@@ -41,6 +41,11 @@ import androidx.core.content.res.ResourcesCompat;
 import java.util.ArrayList;
 import java.util.Iterator;
 
+import rocks.tbog.tblauncher.Behaviour;
+import rocks.tbog.tblauncher.LiveWallpaper;
+import rocks.tbog.tblauncher.R;
+import rocks.tbog.tblauncher.SettingsActivity;
+import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.db.DBHelper;
 import rocks.tbog.tblauncher.db.PlaceholderWidgetRecord;
 import rocks.tbog.tblauncher.db.WidgetRecord;
@@ -48,8 +53,6 @@ import rocks.tbog.tblauncher.drawable.DrawableUtils;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.LinearAdapterPlus;
 import rocks.tbog.tblauncher.ui.ListPopup;
-import rocks.tbog.tblauncher.ui.WidgetLayout;
-import rocks.tbog.tblauncher.ui.WidgetView;
 import rocks.tbog.tblauncher.utils.DebugInfo;
 import rocks.tbog.tblauncher.utils.UISizes;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
@@ -79,7 +82,7 @@ public class WidgetManager {
     /**
      * Registers the AppWidgetHost to listen for updates to any widgets this app has.
      */
-    boolean start(Context context) {
+    public boolean start(Context context) {
         Context ctx = context.getApplicationContext();
         mAppWidgetManager = AppWidgetManager.getInstance(ctx);
         try {
@@ -94,7 +97,7 @@ public class WidgetManager {
         return true;
     }
 
-    void stop() {
+    public void stop() {
         mAppWidgetHost.stopListening();
         mAppWidgetHost = null;
     }

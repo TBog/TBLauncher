@@ -91,7 +91,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".PickAppWidgetActivity"
+            android:name=".widgets.PickAppWidgetActivity"
             android:exported="false"
             android:launchMode="singleTop"
             android:parentActivityName=".TBLauncherActivity"

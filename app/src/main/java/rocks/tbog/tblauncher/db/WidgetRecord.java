@@ -13,8 +13,8 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 
-import rocks.tbog.tblauncher.WidgetManager;
-import rocks.tbog.tblauncher.ui.WidgetLayout;
+import rocks.tbog.tblauncher.widgets.WidgetManager;
+import rocks.tbog.tblauncher.widgets.WidgetLayout;
 import rocks.tbog.tblauncher.utils.SimpleXmlWriter;
 
 public class WidgetRecord {

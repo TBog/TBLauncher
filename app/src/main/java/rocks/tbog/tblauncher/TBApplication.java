@@ -35,6 +35,7 @@ import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.RootHandler;
 import rocks.tbog.tblauncher.utils.Utilities;
+import rocks.tbog.tblauncher.widgets.WidgetManager;
 
 public class TBApplication extends Application {
     private static final String TAG = "APP";

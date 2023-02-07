@@ -26,6 +26,7 @@ import rocks.tbog.tblauncher.quicklist.QuickList;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.DebugInfo;
 import rocks.tbog.tblauncher.utils.DeviceUtils;
+import rocks.tbog.tblauncher.widgets.WidgetManager;
 
 public class TBLauncherActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback {
 

@@ -1,4 +1,4 @@
-package rocks.tbog.tblauncher.ui;
+package rocks.tbog.tblauncher.widgets;
 
 import android.annotation.SuppressLint;
 import android.appwidget.AppWidgetHostView;

@@ -21,7 +21,7 @@ import java.util.Set;
 
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.handler.TagsHandler;
-import rocks.tbog.tblauncher.WidgetManager;
+import rocks.tbog.tblauncher.widgets.WidgetManager;
 import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
 import rocks.tbog.tblauncher.utils.SimpleXmlWriter;
 
