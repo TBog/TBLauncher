@@ -56,6 +56,10 @@ android {
     buildFeatures {
         viewBinding true
     }
+    lintOptions {
+        // disable quantity translation errors
+        disable 'ImpliedQuantity'
+    }
 }
 
 def preference_version = "1.2.0"
