@@ -32,7 +32,7 @@ public class PackageAddedRemovedHandler extends BroadcastReceiver {
 
         if (PreferenceManager.getDefaultSharedPreferences(ctx).getBoolean("enable-app-history", true)) {
             // Insert into history new packages (not updated ones)
-            if ("android.intent.action.PACKAGE_ADDED".equals(action) && !replacing) {
+            if (Intent.ACTION_PACKAGE_ADDED.equals(action) && !replacing) {
                 // Add new package to history
                 Intent launchIntent = ctx.getPackageManager().getLaunchIntentForPackage(packageName);
                 if (launchIntent == null || launchIntent.getComponent() == null) {

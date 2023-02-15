@@ -27,7 +27,7 @@ import rocks.tbog.tblauncher.utils.UserHandleCompat;
 public class AppProvider extends Provider<AppEntry> {
 
     boolean mInitialLoad = true;
-    AppsCallback appsCallback = null;
+    AppsCallback mAppsCallback = null;
     final BroadcastReceiver mProfileReceiver = new BroadcastReceiver() {
         @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
         @Override
@@ -61,60 +61,52 @@ public class AppProvider extends Provider<AppEntry> {
 
         @Override
         public void onPackageAdded(String packageName, android.os.UserHandle user) {
-            if (!Process.myUserHandle().equals(user)) {
-                final UserManager manager = (UserManager) context.getSystemService(Context.USER_SERVICE);
-                assert manager != null;
-                PackageAddedRemovedHandler.handleEvent(context,
-                    "android.intent.action.PACKAGE_ADDED",
-                    packageName, new UserHandleCompat(manager.getSerialNumberForUser(user), user), false
-                );
-            }
+            handleEvent(Intent.ACTION_PACKAGE_ADDED, packageName, user, false);
         }
 
         @Override
         public void onPackageChanged(String packageName, android.os.UserHandle user) {
-            if (!Process.myUserHandle().equals(user)) {
-                final UserManager manager = (UserManager) context.getSystemService(Context.USER_SERVICE);
-                assert manager != null;
-                PackageAddedRemovedHandler.handleEvent(context,
-                    "android.intent.action.PACKAGE_ADDED",
-                    packageName, new UserHandleCompat(manager.getSerialNumberForUser(user), user), true
-                );
-            }
+            handleEvent(Intent.ACTION_PACKAGE_CHANGED, packageName, user, true);
         }
 
         @Override
         public void onPackageRemoved(String packageName, android.os.UserHandle user) {
-            if (!Process.myUserHandle().equals(user)) {
-                final UserManager manager = (UserManager) context.getSystemService(Context.USER_SERVICE);
-                assert manager != null;
-                PackageAddedRemovedHandler.handleEvent(context,
-                    "android.intent.action.PACKAGE_REMOVED",
-                    packageName, new UserHandleCompat(manager.getSerialNumberForUser(user), user), false
-                );
-            }
+            handleEvent(Intent.ACTION_PACKAGE_REMOVED, packageName, user, false);
         }
 
         @Override
         public void onPackagesAvailable(String[] packageNames, android.os.UserHandle user, boolean replacing) {
-            if (!Process.myUserHandle().equals(user)) {
-                final UserManager manager = (UserManager) context.getSystemService(Context.USER_SERVICE);
-                assert manager != null;
-                PackageAddedRemovedHandler.handleEvent(context,
-                    "android.intent.action.MEDIA_MOUNTED",
-                    null, new UserHandleCompat(manager.getSerialNumberForUser(user), user), false
-                );
+            handleEvent(Intent.ACTION_MEDIA_MOUNTED, null, user, replacing);
+        }
+
+
+        @Override
+        public void onPackagesUnavailable(String[] packageNames, android.os.UserHandle user, boolean replacing) {
+            handleEvent(Intent.ACTION_MEDIA_UNMOUNTED, null, user, replacing);
+        }
+
+        @Override
+        public void onPackagesSuspended(String[] packageNames, android.os.UserHandle user) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                handleEvent(Intent.ACTION_PACKAGES_SUSPENDED, null, user, false);
             }
         }
 
         @Override
-        public void onPackagesUnavailable(String[] packageNames, android.os.UserHandle user, boolean replacing) {
+        public void onPackagesUnsuspended(String[] packageNames, android.os.UserHandle user) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                handleEvent(Intent.ACTION_PACKAGES_UNSUSPENDED, null, user, false);
+            }
+        }
+
+        private void handleEvent(String action, String packageName, android.os.UserHandle user, boolean replacing) {
             if (!Process.myUserHandle().equals(user)) {
                 final UserManager manager = (UserManager) context.getSystemService(Context.USER_SERVICE);
-                assert manager != null;
                 PackageAddedRemovedHandler.handleEvent(context,
-                    "android.intent.action.MEDIA_UNMOUNTED",
-                    null, new UserHandleCompat(manager.getSerialNumberForUser(user), user), false
+                    action,
+                    packageName,
+                    new UserHandleCompat(manager.getSerialNumberForUser(user), user),
+                    replacing
                 );
             }
         }
@@ -129,8 +121,8 @@ public class AppProvider extends Provider<AppEntry> {
             final LauncherApps launcher = (LauncherApps) this.getSystemService(Context.LAUNCHER_APPS_SERVICE);
             assert launcher != null;
 
-            appsCallback = new AppsCallback(this);
-            launcher.registerCallback(appsCallback);
+            mAppsCallback = new AppsCallback(this);
+            launcher.registerCallback(mAppsCallback);
 
             // Try to clean up app-related data when profile is removed
             IntentFilter filter = new IntentFilter();
@@ -142,9 +134,16 @@ public class AppProvider extends Provider<AppEntry> {
         // Get notified when app changes on standard user profile
         IntentFilter appChangedFilter = new IntentFilter();
         appChangedFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
+        appChangedFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
         appChangedFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         appChangedFilter.addAction(Intent.ACTION_MEDIA_MOUNTED);
         appChangedFilter.addAction(Intent.ACTION_MEDIA_REMOVED);
+        appChangedFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE);
+        appChangedFilter.addAction(Intent.ACTION_EXTERNAL_APPLICATIONS_UNAVAILABLE);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            appChangedFilter.addAction(Intent.ACTION_PACKAGES_SUSPENDED);
+            appChangedFilter.addAction(Intent.ACTION_PACKAGES_UNSUSPENDED);
+        }
         appChangedFilter.addDataScheme("package");
         appChangedFilter.addDataScheme("file");
         this.registerReceiver(mPackageAddedRemovedHandler, appChangedFilter);
@@ -159,7 +158,7 @@ public class AppProvider extends Provider<AppEntry> {
         if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.LOLLIPOP) {
             LauncherApps launcher = (LauncherApps) this.getSystemService(Context.LAUNCHER_APPS_SERVICE);
             assert launcher != null;
-            launcher.unregisterCallback(appsCallback);
+            launcher.unregisterCallback(mAppsCallback);
         }
         super.onDestroy();
     }
