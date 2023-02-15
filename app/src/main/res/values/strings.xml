@@ -387,6 +387,7 @@
     <string name="letters_toggle">Letter icons</string>
     <string name="button_launcher">Launcher button</string>
     <string name="button_home">Home button</string>
+    <string name="button_assist">Opened as assist app</string>
     <string name="icon_contrast">Contrast</string>
     <string name="icon_brightness">Brightness</string>
     <string name="icon_hue">Hue</string>

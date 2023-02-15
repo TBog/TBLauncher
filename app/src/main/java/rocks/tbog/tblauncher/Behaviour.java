@@ -1556,6 +1556,10 @@ public class Behaviour implements ISearchActivity {
                 ShortcutUtil.addShortcut(mTBLauncherActivity, intent);
                 return;
             }
+            if (Intent.ACTION_ASSIST.equals(action)) {
+                executeButtonAction("button-assist");
+                return;
+            }
         }
 
         executeButtonAction("button-home");
