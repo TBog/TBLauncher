@@ -317,15 +317,15 @@
                 android:defaultValue="@dimen/default_result_shadow_dy"
                 android:dialogLayout="@layout/pref_shadow"
                 android:key="search-bar-shadow-dy"
-                app:isPreferenceVisible="false"
-                android:widgetLayout="@layout/pref_size_preview" />
+                android:widgetLayout="@layout/pref_size_preview"
+                app:isPreferenceVisible="false" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@dimen/default_result_shadow_radius"
                 android:dialogLayout="@layout/pref_shadow"
                 android:key="search-bar-shadow-radius"
-                app:isPreferenceVisible="false"
-                android:widgetLayout="@layout/pref_size_preview" />
+                android:widgetLayout="@layout/pref_size_preview"
+                app:isPreferenceVisible="false" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@integer/default_search_bar_height"
@@ -430,15 +430,15 @@
                 android:defaultValue="@dimen/default_result_shadow_dy"
                 android:dialogLayout="@layout/pref_shadow"
                 android:key="result-shadow-dy"
-                app:isPreferenceVisible="false"
-                android:widgetLayout="@layout/pref_size_preview" />
+                android:widgetLayout="@layout/pref_size_preview"
+                app:isPreferenceVisible="false" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@dimen/default_result_shadow_radius"
                 android:dialogLayout="@layout/pref_slider"
                 android:key="result-shadow-radius"
-                app:isPreferenceVisible="false"
-                android:widgetLayout="@layout/pref_size_preview" />
+                android:widgetLayout="@layout/pref_size_preview"
+                app:isPreferenceVisible="false" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@integer/default_color_text"
@@ -602,15 +602,15 @@
                 android:defaultValue="@dimen/default_result_shadow_dy"
                 android:dialogLayout="@layout/pref_shadow"
                 android:key="popup-shadow-dy"
-                app:isPreferenceVisible="false"
-                android:widgetLayout="@layout/pref_size_preview" />
+                android:widgetLayout="@layout/pref_size_preview"
+                app:isPreferenceVisible="false" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference
                 android:defaultValue="@dimen/default_result_shadow_radius"
                 android:dialogLayout="@layout/pref_slider"
                 android:key="popup-shadow-radius"
-                app:isPreferenceVisible="false"
-                android:widgetLayout="@layout/pref_size_preview" />
+                android:widgetLayout="@layout/pref_size_preview"
+                app:isPreferenceVisible="false" />
 
         </PreferenceCategory>
 
@@ -830,7 +830,7 @@
                 android:entries="@array/contactActionEntries"
                 android:entryValues="@array/contactActionValues"
                 android:key="default-contact-action"
-                android:title="@string/done_key_contact_action"/>
+                android:title="@string/done_key_contact_action" />
 
         </androidx.preference.PreferenceCategory>
 
@@ -1124,6 +1124,17 @@
             <Preference
                 android:key="default-search-provider"
                 app:isPreferenceVisible="false" />
+
+        </androidx.preference.PreferenceCategory>
+
+        <androidx.preference.PreferenceCategory
+            android:key="history-section"
+            android:title="@string/history_section">
+
+            <androidx.preference.SwitchPreference
+                android:defaultValue="false"
+                android:key="enable-phone-history"
+                android:title="@string/phone_history" />
 
         </androidx.preference.PreferenceCategory>
 

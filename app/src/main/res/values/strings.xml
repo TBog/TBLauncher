@@ -237,6 +237,9 @@
     <string name="enable_dial">Dial search</string>
     <string name="enable_contacts">Phone contacts</string>
 
+    <string name="history_section">History</string>
+    <string name="phone_history">Contact history</string>
+
     <string name="selected_contact_mime_types">Select contacts to be shown</string>
 
     <string name="edit_search_engines">Edit search engines</string>

@@ -28,7 +28,7 @@ public class Permission {
     // to ensure classes requesting permission can access activity.requestPermission()
     private static WeakReference<Activity> currentActivity = new WeakReference<>(null);
 
-    private static ArrayList<PermissionResultListener> permissionListeners = null;
+    private static final ArrayList<PermissionResultListener> permissionListeners = new ArrayList<>(3);
 
     public static boolean checkPermission(Context context, int permission) {
         return Build.VERSION.SDK_INT < Build.VERSION_CODES.M || context.checkSelfPermission(permissions[permission]) == PackageManager.PERMISSION_GRANTED;
@@ -40,9 +40,6 @@ public class Permission {
         }
         if (listener != null) {
             listener.permission = permission;
-            if (permissionListeners == null) {
-                permissionListeners = new ArrayList<>();
-            }
             permissionListeners.add(listener);
         }
 
@@ -62,20 +59,18 @@ public class Permission {
             return;
         }
 
-        if (permissionListeners != null) {
-            // Iterator allows to remove while iterating
-            ListIterator<PermissionResultListener> it = permissionListeners.listIterator();
-            PermissionResultListener permissionListener;
-            while (it.hasNext()) {
-                permissionListener = it.next();
-                if (permissionListener.permission == requestCode) {
-                    if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                        permissionListener.onGranted();
-                    } else {
-                        permissionListener.onDenied();
-                    }
-                    it.remove();
+        // Iterator allows to remove while iterating
+        ListIterator<PermissionResultListener> it = permissionListeners.listIterator();
+        PermissionResultListener permissionListener;
+        while (it.hasNext()) {
+            permissionListener = it.next();
+            if (permissionListener.permission == requestCode) {
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    permissionListener.onGranted();
+                } else {
+                    permissionListener.onDenied();
                 }
+                it.remove();
             }
         }
     }
