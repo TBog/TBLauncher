@@ -5,20 +5,24 @@ import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
 
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
 
 public class ResultRelevance implements Comparable<ResultRelevance> {
 
-    private final ArrayList<ResultInfo> infoList = new ArrayList<>();
+    private final List<ResultInfo> infoList = Collections.synchronizedList(new ArrayList<>(3));
     private int scoreBoost = 0;
 
     public int getRelevance() {
-        int score = scoreBoost;
-        for (ResultInfo info : infoList)
-            score += info.relevance.score;
-        return score;
+        synchronized (infoList) {
+            int score = scoreBoost;
+            for (ResultInfo info : infoList)
+                score += info.relevance.score;
+            return score;
+        }
     }
 
     public void addMatchInfo(@NonNull StringNormalizer.Result matchedText, @Nullable FuzzyScore.MatchInfo matchInfo) {
@@ -50,17 +54,19 @@ public class ResultRelevance implements Comparable<ResultRelevance> {
 
     @Override
     public int compareTo(ResultRelevance o) {
-        int difference = getRelevance() - o.getRelevance();
-        if (difference == 0) {
-            difference = scoreBoost - o.scoreBoost;
+        synchronized (infoList) {
+            int difference = getRelevance() - o.getRelevance();
             if (difference == 0) {
-                StringNormalizer.Result rSource = infoList.size() > 0 ? infoList.get(0).relevanceSource : null;
-                StringNormalizer.Result o_rSource = o.infoList.size() > 0 ? o.infoList.get(0).relevanceSource : null;
-                if (rSource != null && o_rSource != null)
-                    return rSource.compareTo(o_rSource);
+                difference = scoreBoost - o.scoreBoost;
+                if (difference == 0) {
+                    StringNormalizer.Result rSource = infoList.size() > 0 ? infoList.get(0).relevanceSource : null;
+                    StringNormalizer.Result o_rSource = o.infoList.size() > 0 ? o.infoList.get(0).relevanceSource : null;
+                    if (rSource != null && o_rSource != null)
+                        return rSource.compareTo(o_rSource);
+                }
             }
+            return difference;
         }
-        return difference;
     }
 
     @Override
