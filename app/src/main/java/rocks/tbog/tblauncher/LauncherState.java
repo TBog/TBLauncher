@@ -118,4 +118,7 @@ public class LauncherState {
     public AnimatedVisibility getNotificationBarVisibility() {
         return notificationBar;
     }
+    
+    @NonNull
+    public AnimatedVisibility getWidgetScreenVisibility() { return widgetScreen; }
 }
