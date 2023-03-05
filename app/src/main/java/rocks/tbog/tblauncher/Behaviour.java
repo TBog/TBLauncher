@@ -623,7 +623,7 @@ public class Behaviour implements ISearchActivity {
             switch (currentMode) {
                 case SEARCH:
                     resetTask();
-                    hideSearchBar(UI_ANIMATION_DELAY, true);
+                    hideSearchBar(0, true);
                     break;
                 case WIDGET:
                     hideWidgets();
@@ -677,7 +677,7 @@ public class Behaviour implements ISearchActivity {
                 break;
             case WIDGET:
                 // show widgets
-                showWidgets();
+                showWidgets(true);
                 // hide/show the QuickList
                 TBApplication.quickList(getContext()).updateVisibility();
                 // enable/disable fullscreen (status and navigation bar)
@@ -866,11 +866,44 @@ public class Behaviour implements ISearchActivity {
         mSearchEditText.setEnabled(false);
     }
 
-    private void showWidgets() {
-        TBApplication.state().setWidgetScreen(LauncherState.AnimatedVisibility.VISIBLE);
-        mWidgetContainer.setVisibility(View.VISIBLE);
+    private void showWidgets(boolean animate) {
+        // Create a new Handler
+        Handler handler = new Handler();
 
-        hideResultList(false);
+        // Create a Runnable that calls the doSomething() method
+        Runnable runnable = new Runnable() {
+            @Override
+            public void run() {
+                Log.d(TAG, "showWidgets (anim " + animate + ")");
+                if (TBApplication.state().getWidgetScreenVisibility() != LauncherState.AnimatedVisibility.ANIM_TO_VISIBLE)
+                    mWidgetContainer.animate().cancel();
+                if (mWidgetContainer.getVisibility() == View.VISIBLE)
+                    return;
+                mWidgetContainer.setVisibility(View.VISIBLE);
+                Log.d(TAG, "mResultLayout set VISIBLE (anim " + animate + ")");
+                if (animate) {
+                    TBApplication.state().setWidgetScreen(LauncherState.AnimatedVisibility.ANIM_TO_VISIBLE);
+                    mWidgetContainer.setAlpha(0f);
+                    mWidgetContainer.animate()
+                        .alpha(1f)
+                        .setDuration(UI_ANIMATION_DURATION)
+                        .setListener(new AnimatorListenerAdapter() {
+                            @Override
+                            public void onAnimationEnd(Animator animation) {
+                                TBApplication.state().setWidgetScreen(LauncherState.AnimatedVisibility.VISIBLE);
+                            }
+                        })
+                        .start();
+                } else {
+                    TBApplication.state().setWidgetScreen(LauncherState.AnimatedVisibility.VISIBLE);
+                    mWidgetContainer.setAlpha(1f);
+                }
+                hideResultList(true);
+            }
+        };
+
+        // Post the Runnable with a delay
+        handler.postDelayed(runnable, UI_ANIMATION_DURATION);
     }
 
     public void showKeyboard() {
