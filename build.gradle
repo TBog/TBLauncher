@@ -4,7 +4,7 @@ buildscript {
     ext.kotlin_version = '1.7.22'
     ext.multidex_version = '2.0.1'
     ext.preference_version = '1.2.0'
-    ext.lifecycle_version = '2.5.1'
+    ext.lifecycle_version = '2.6.0'
 
     repositories {
         mavenCentral()
