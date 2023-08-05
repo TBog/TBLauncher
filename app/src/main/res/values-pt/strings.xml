@@ -469,4 +469,11 @@
     <string name="search_bar_animation">Animar expansão/colapso</string>
     <string name="contact_button_set_default">Fazer acções por defeito</string>
     <string name="done_key_contact_action">Feito acção chave de contacto</string>
+    <string name="force_adaptive">Definir plano de fundo do ícone</string>
+    <string name="menu_remove_shortcut">Desafixar</string>
+    <string name="menu_app_hibernate">Hibernar</string>
+    <string name="value_float">valor %.2f</string>
+    <string name="size_float">&lt;%.1f&gt;</string>
+    <string name="action_show_apps">Apps A→Z</string>
+    <string name="bind_widget_failed">Permissões insuficientes para criar widgets</string>
 </resources>
