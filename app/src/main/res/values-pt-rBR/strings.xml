@@ -498,4 +498,8 @@
     <string name="dm_empty_quick_list">Mostrar encaixe</string>
     <string name="dm_search_quick_list">Mostrar encaixe</string>
     <string name="dm_widget_quick_list">Mostrar encaixe</string>
+    <string name="bind_widget_failed">Permissões insuficientes para criar widgets</string>
+    <string name="loading">Carregando…</string>
+    <string name="widget_name"><b>%1$s</b><br/>%2$d×%3$d</string>
+    <string name="widget_name_and_desc"><b>%1$s</b><br/>%3$d×%4$d<br/>%2$s</string>
 </resources>
