@@ -476,4 +476,20 @@
     <string name="size_float">&lt;%.1f&gt;</string>
     <string name="action_show_apps">Apps A→Z</string>
     <string name="bind_widget_failed">Permissões insuficientes para criar widgets</string>
+    <string name="adaptive_shape_name">Forma de ícone</string>
+    <string name="force_adaptive_summary">Reduzir a escala de ícones e colocar sobre um fundo moldado</string>
+    <string name="shortcut_rename_confirmation">O nome do atalho é agora \"%s\"</string>
+    <string name="entry_rename_confirmation">O nome é agora \"%s\"</string>
+    <string name="custom_icon_application">app</string>
+    <string name="action_show_apps_reversed">Apps Z→A</string>
+    <string name="wp_drag_animate_desc">Arrastar <b>←</b> <b>→</b> para percorrer o papel de parede</string>
+    <string name="wp_animate_sides_desc">O papel de parede ficará no <b>←</b> ou <b>→</b> após a rolagem</string>
+    <string name="invalid_rename_tag">Já existe uma etiqueta \"%s\"</string>
+    <string name="invalid_rename_search_engine">Já existe um motor de busca \"%s\"</string>
+    <string name="settings_deep_blues">DeepBlues</string>
+    <string name="gesture_fling_down_left_summary">Iniciar a partir do <b>←</b> lado do ecrã e atirar <b>↓</b></string>
+    <string name="gesture_fling_up">Fling ↑</string>
+    <string name="gesture_fling_left">Fling ←</string>
+    <string name="gesture_fling_right">Fling →</string>
+    <string name="debug_favorites_summary">Mostrar entradas da tabela DB `favorites\'</string>
 </resources>
