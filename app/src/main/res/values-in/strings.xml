@@ -71,4 +71,55 @@
     <string name="menu_custom_icon">Ubah ikon</string>
     <string name="app_rename_confirmation">Nama aplikasi sekarang %s</string>
     <string name="custom_icon_activity">aktivitas</string>
+    <string name="toast_hibernate_completed">%s hibernasi, luncurkan kembali untuk bangun</string>
+    <string name="toast_hibernate_error">[ERROR] %s tidak hibernasi</string>
+    <string name="menu_show">Buka</string>
+    <string name="stub_app_tag">daftar tag aplikasi</string>
+    <string name="menu_exclude">Kecualikan…</string>
+    <string name="menu_remove_shortcut">Lepaskan pin</string>
+    <string name="menu_tags_edit">Edit tag</string>
+    <string name="menu_app_hibernate">Hibernasi</string>
+    <string name="menu_popup_tags_manager">Manajer tag</string>
+    <string name="menu_popup_tags_menu">Menu tag</string>
+    <string name="color_and_opacity">Warna dan keburaman</string>
+    <string name="cd_add_tag">Tambah tag</string>
+    <string name="cd_undo_remove_tag">Batalkan penghapusan tag</string>
+    <string name="cd_remove_tag">Hapus tag</string>
+    <string name="value">nilai %d</string>
+    <string name="value_float">nilai %.2f</string>
+    <string name="title_rename_tag">Ganti di mana pun tag ini muncul</string>
+    <string name="hint_rename_tag">Pilih nama berbeda untuk tag ini</string>
+    <string name="title_rename_search_hint">Pilih nama lain untuk petunjuk pencarian ini</string>
+    <string name="default_static_icon">%s ikon default</string>
+    <string name="privacy_policy">Kebijakan Privasi</string>
+    <string name="app_version">Versi %s</string>
+    <string name="app_version_summary">%1$s - %2$s</string>
+    <string name="cd_icon_tag">Atur ikon tag</string>
+    <string name="cd_main_clear">bersihkan bilah pencarian</string>
+    <string name="cd_rename_tag">Ganti nama tag</string>
+    <string name="title_select_alpha">Seret penggeser untuk memilih keburaman yang diinginkan</string>
+    <string name="title_select_size">Seret penggeser untuk memilih ukuran yang diinginkan</string>
+    <string name="value_float_xy">horizontal %1$.2f | vertikal %2$.2f</string>
+    <string name="size">&lt;%d&gt;</string>
+    <string name="size_float">&lt;%.1f&gt;</string>
+    <string name="shadow_preview">&lt;%3$.1f&gt;
+\n&lt;%1$.1f×%2$.1f&gt;</string>
+    <string name="custom_icon_activity_adaptive_no_background">latar belakang kustom aktivitas</string>
+    <string name="current_icon_preview_label">Saat ini
+\nikon</string>
+    <string name="custom_icon_preview_label">Dipilih
+\nikon</string>
+    <string name="custom_name_set_default">Nama default</string>
+    <string name="hint_new_tag">tambah tag</string>
+    <string name="icons_visible">Tampilkan Ikon</string>
+    <string name="custom_icon_badged">berlencana</string>
+    <string name="default_icon_preview_label">Default
+\nikon</string>
+    <string name="tags_section">Tag</string>
+    <string name="fuzzy_search_tags">Tag pencarian fuzzy</string>
+    <string name="fuzzy_search_tags_summary">Saat mencari, sertakan tag sebagai kandidat yang mungkin cocok</string>
+    <string name="tags_enabled">Tampilkan tag untuk aplikasi</string>
+    <string name="tags_enabled_summary">Tampilkan tag untuk setiap aplikasi dalam daftar hasil</string>
+    <string name="popup_title_shortcut_dynamic">Pintasan</string>
+    <string name="popup_title_hist_fav">Preferensi</string>
 </resources>
