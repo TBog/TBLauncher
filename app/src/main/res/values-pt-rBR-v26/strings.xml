@@ -5,4 +5,11 @@
     <string name="force_adaptive_summary">Para ícones não-adaptativos, reduza a escala e coloque sobre um fundo estruturado</string>
     <string name="force_shape">Forçar forma adaptativa</string>
     <string name="force_shape_summary">Usar máscara adaptativa em ícones não-adaptativos</string>
+    <string name="app_name">Iniciador do TinyBit</string>
+    <string name="app_name_debug">Iniciador de depuração do TinyBit</string>
+    <string name="hint_ui_search">Pesquise em aplicativos, contatos, …</string>
+    <string name="ui_item_search">Pesquisar em %1$s por \"%2$s\"\?</string>
+    <string name="cant_pin_shortcut">Não foi possível adicionar o atalho. O TinyBit é seu iniciador padrão\?</string>
+    <string name="unable_to_initialize_shortcuts">Não foi possível acessar os atalhos. O Tiny Bit é seu iniciador padrão\?</string>
+    <string name="menu_quick_list_add">Adicionar ao encaixe</string>
 </resources>

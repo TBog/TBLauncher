@@ -1,0 +1,23 @@
+𝙏𝙝𝙞𝙨 𝙞𝙨 𝙩𝙝𝙚 𝙡𝙖𝙪𝙣𝙘𝙝𝙚𝙧 𝙪𝙨𝙚𝙙 𝙡𝙤𝙥𝙚𝙙 𝙗𝙮
+██████████████████████▀█
+█─▄─▄─█▄─▄─▀█─▄▄─█─▄▄▄▄█
+███─████─▄─▀█─██─█─██▄─█
+▀▀▄▄▄▀▀▄▄▄▄▀▀▄▄▄▄▀▄▄▄▄▄▀
+
+Motivos para desenvolver meu próprio launcher:
+🔹Limpe a tela principal para aproveitar o papel de parede
+🔸Acesso rápido a aplicativos pesquisando
+🔹Compatível com pacote de ícones
+🔸Capacidade de personalizar cores e comportamentos
+
+Novas características:
+⦾ Atualize a lista de aplicativos quando forem detectadas alterações
+⦿ Formas de ícones adaptáveis
+⦾ Ícones de cache para exibição rápida de resultados
+⦿ Tags para organizar melhor os apps
+⦾ Encaixar itens para filtrar resultados
+⦿ Pré-visualização de cores de preferência
+⦾ Atalhos para aplicativos, contatos, etc.
+
+Código-fonte https://github.com/TBog/TBLauncher
+A ideia inicial e o código vieram de https://play.google.com/store/apps/details?id=fr.neamar.kiss
