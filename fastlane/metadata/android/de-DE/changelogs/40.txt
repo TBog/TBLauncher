@@ -1,0 +1,2 @@
+* Aktualisiere Übersetzungen
+* Verbessern der Farbwähler-Größe

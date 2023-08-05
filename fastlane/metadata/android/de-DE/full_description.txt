@@ -1,0 +1,23 @@
+Das ist der Launcher verwendet und entwickelt von
+██████████████████████▀█
+█─▄─▄─█▄─▄─▀█─▄▄─█─▄▄▄▄█
+███─████─▄─▀█─██─█─██▄─█
+▀▀▄▄▄▀▀▄▄▄▄▀▀▄▄▄▄▀▄▄▄▄▄▀
+
+Warum ich meinen eigenen Launcher entwickle:
+🔹Sauberes Hauptschirm um das Hintergrundbild zu genießen
+🔸Schneller Appzugriff durch suchS
+🔹Icon Pack kompatibel
+🔸Möglichkeit die Farben und das Verhalten anzupassen
+
+Neue Funktionen:
+⦾ Updaten der Appliste bei Änderungen
+⦿ Adaptive Icon-Formen
+⦾ Cachen von Icons für ein schnelleres darstellen
+⦿ Tags zum besseren organisieren von Apps
+⦾ Hefte Elemente zum filtern an
+⦿ Farbeintellungsvorschau
+⦾ Verknüpfung für Apps, Kontakte, etc.
+
+Programmcode https://github.com/TBog/TBLauncher
+Ursprüngliche Idee und Code von https://play.google.com/store/apps/details?id=fr.neamar.kiss
