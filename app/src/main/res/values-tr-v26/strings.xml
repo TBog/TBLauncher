@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="adaptive_shape_name">Uyarlanabilir simge şekli</string>
+    <string name="force_adaptive">Uyarlanabilir simgeleri zorla</string>
+    <string name="force_shape">Uyarlanabilir şekli zorla</string>
+    <string name="force_shape_summary">Uyarlanabilir olmayan simgelerde uyarlanabilir maske kullanın</string>
+    <string name="force_adaptive_summary">Uyarlanabilir olmayan simgeler için ölçeği küçültün ve şekilli bir arka plan üzerine yerleştirin</string>
+</resources>

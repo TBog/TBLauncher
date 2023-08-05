@@ -1,0 +1,3 @@
+* ayarlara uygulama sürümü eklendi
+* eylem modu çubuğu arka planını düzeltildi
+* canlı duvar kağıdı sürükleme animasyonu çökmesi düzeltildi

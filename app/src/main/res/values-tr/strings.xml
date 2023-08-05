@@ -172,7 +172,7 @@
     <string name="title_desktop_mode_search">Masaüstü modu \"Arama\"</string>
     <plurals name="tag_entry_count">
         <item quantity="one">bir giriş</item>
-        <item quantity="other"></item>
+        <item quantity="other"/>
     </plurals>
     <string name="cd_icon_tag">Etiket simgesini ayarla</string>
     <string name="menu_shortcut_rename">Kısayolu yeniden adlandır</string>
@@ -201,13 +201,13 @@
     <string name="stub_application">Uygulama adı</string>
     <string name="stub_app_tag">uygulama etiket listesi</string>
     <string name="permission_denied">Önce bu izni verin</string>
-    <string name="menu_exclude">Hariç…</string>
+    <string name="menu_exclude">Hariç tut…</string>
     <string name="menu_hide">Gizle</string>
     <string name="menu_app_details">Uygulama bilgisi</string>
     <string name="menu_app_store">Mağazada görüntüle</string>
-    <string name="menu_app_uninstall">Kaldırma</string>
-    <string name="menu_app_hibernate">Hazırda Beklet</string>
-    <string name="menu_exclude_history">Tarihten</string>
+    <string name="menu_app_uninstall">Kaldır</string>
+    <string name="menu_app_hibernate">Uyut</string>
+    <string name="menu_exclude_history">geçmişten</string>
     <string name="menu_exclude_kiss">TinyBit\'ten</string>
     <string name="application_not_found">\"%s\" uygulaması başlatılamıyor</string>
     <string name="entry_not_found">\"%s\" bulunamadı;</string>
@@ -477,4 +477,28 @@
     <string name="result_list_argb">Arka plan rengi ve opaklık</string>
     <string name="quick_list_toggle_color">Arka plan rengini değiştir</string>
     <string name="contact_action_color">Eylem simgesi rengi</string>
+    <string name="size_float">&lt;%.1f&gt;</string>
+    <string name="result_shadow_color">Metin gölge rengi</string>
+    <string name="bind_widget_failed">Widget oluşturmak için izin eksik</string>
+    <string name="widget_name_and_desc"><b>%1$s</b><br/>%3$d×%4$d<br/>%2$s</string>
+    <string name="widget_name"><b>%1$s</b><br/>%2$d×%3$d</string>
+    <string name="shadow_offset">Gölge ofseti için piksel miktarını seçin</string>
+    <string name="shadow_offset_preview">Dokunun veya içeri sürükleyin.</string>
+    <string name="shadow_radius">Gölge boyutu <em>(sıfır boyut gölgeyi devre dışı bırakır)</em></string>
+    <string name="search_bar_shadow_color">Metin gölge rengi</string>
+    <string name="search_bar_shadow_radius_dx_dy">Gölge boyutu ve ofset</string>
+    <string name="contact_button_set_default">Varsayılan eylem yap</string>
+    <string name="loading">Yükleniyor…</string>
+    <string name="tab_button_icon">Düğme simgesi</string>
+    <string name="popup_shadow_radius_dx_dy">Gölge boyutu ve ofset</string>
+    <string name="privacy_policy">Gizlilik Politikası</string>
+    <string name="app_version">Sürüm %s</string>
+    <string name="value_float">değer %.2f</string>
+    <string name="value_float_xy">yatay %1$.2f | dikey %2$.2f</string>
+    <string name="shadow_preview">&lt;%3$.1f&gt;
+\n&lt;%1$.1f×%2$.1f&gt;</string>
+    <string name="app_version_summary">%1$s - %2$s</string>
+    <string name="result_shadow_radius_dx_dy">Gölge boyutu ve ofset</string>
+    <string name="contact_button_reset_default">Varsayılan eylemi sıfırla</string>
+    <string name="popup_shadow_color">Metin gölge rengi</string>
 </resources>

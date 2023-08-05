@@ -1,0 +1,2 @@
+* çeviriler güncellendi
+* renk seçici iletişim kutusu boyutlarını düzeltildi

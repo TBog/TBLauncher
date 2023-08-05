@@ -13,7 +13,7 @@ Kendi başlatıcımı geliştirme nedenlerim:
 Yeni Özellikler:
 ⦾ Değişiklikler algılandığında uygulama listesini güncelle
 ⦿ Uyarlanabilir simge şekilleri
-⦾ Hızlı sonuç gösterimi için önbellek simgeleri
+⦾ Sonuçları daha hızlı gösytermek için simgeleri ön belleğe al
 ⦿ Uygulamaları daha iyi organize etmek için etiketler
 ⦾ Sonuçları filtrelemek için öğeleri yerleştirin
 ⦿ Tercih renk önizlemesi
