@@ -85,7 +85,7 @@ public class PreferenceColorDialog extends BasePreferenceDialog {
         var t = Timer.startNano();
 
         TypedValue outValue = new TypedValue();
-        context.getTheme().resolveAttribute(R.attr.alertDialogTheme, outValue, true);
+        context.getTheme().resolveAttribute(com.google.android.material.R.attr.alertDialogTheme, outValue, true);
         var themeWrapper = new ContextThemeWrapper(context, outValue.resourceId);
 
         var inflater = LayoutInflater.from(themeWrapper);

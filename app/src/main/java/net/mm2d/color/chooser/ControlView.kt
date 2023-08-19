@@ -23,7 +23,7 @@ import androidx.lifecycle.Observer
 import net.mm2d.color.chooser.util.resolveColor
 import net.mm2d.color.chooser.util.setAlpha
 import net.mm2d.color.chooser.util.toOpacity
-import rocks.tbog.tblauncher.R
+import com.google.android.material.R
 import rocks.tbog.tblauncher.databinding.Mm2dCcViewControlBinding
 import java.util.*
 

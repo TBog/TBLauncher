@@ -146,7 +146,7 @@ public abstract class DialogFragment<Output> extends androidx.fragment.app.Dialo
         //Log.i(TAG, "---> onCreateDialog <---");
         Context themeWrapper = new ContextThemeWrapper(requireContext(), getTheme());
         TypedValue outValue = new TypedValue();
-        themeWrapper.getTheme().resolveAttribute(R.attr.alertDialogTheme, outValue, true);
+        themeWrapper.getTheme().resolveAttribute(com.google.android.material.R.attr.alertDialogTheme, outValue, true);
         int dialogStyle = outValue.resourceId;
         DialogWrapper dialog = new DialogWrapper(themeWrapper, dialogStyle);
         //Log.i(TAG, "dialog=" + dialog);

@@ -413,7 +413,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
             final Context context = requireContext();
 
-            tintPreferenceIcons(getPreferenceScreen(), UIColors.getThemeColor(context, R.attr.colorAccent));
+            tintPreferenceIcons(getPreferenceScreen(), UIColors.getThemeColor(context, com.google.android.material.R.attr.colorAccent));
 
             SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 

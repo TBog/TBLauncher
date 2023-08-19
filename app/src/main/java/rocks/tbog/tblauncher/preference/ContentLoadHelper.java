@@ -155,7 +155,7 @@ public class ContentLoadHelper {
 
         int layoutDirection = context.getResources().getConfiguration().getLayoutDirection();
         int iconSize = context.getResources().getDimensionPixelSize(R.dimen.icon_preview_size);
-        int tintColor = UIColors.getThemeColor(context, R.attr.colorAccent);
+        int tintColor = UIColors.getThemeColor(context, com.google.android.material.R.attr.colorAccent);
 
         for (int idx = 0; idx < size; idx++) {
             StaticEntry entry = entryToShowList.get(idx);
