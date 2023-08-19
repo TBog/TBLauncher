@@ -5,7 +5,7 @@ apply plugin: 'com.dipien.byebyejetifier'
 
 android {
     namespace 'rocks.tbog.tblauncher'
-    compileSdkVersion 33
+    compileSdk 33
 
     defaultConfig {
         applicationId "rocks.tbog.tblauncher"
@@ -31,17 +31,20 @@ android {
             resValue "string", "app_name_dynamic", "@string/app_name_debug"
         }
     }
-    flavorDimensions "default"
+    flavorDimensions = ["store"]
     productFlavors {
         playstore {
+            dimension "store"
             buildConfigField 'boolean', 'SHOW_PRIVACY_POLICY', 'true'
             buildConfigField 'boolean', 'SHOW_RATE_APP', 'true'
         }
         fdroid {
+            dimension "store"
             buildConfigField 'boolean', 'SHOW_PRIVACY_POLICY', 'false'
             buildConfigField 'boolean', 'SHOW_RATE_APP', 'true'
         }
         github {
+            dimension "store"
             buildConfigField 'boolean', 'SHOW_PRIVACY_POLICY', 'false'
             buildConfigField 'boolean', 'SHOW_RATE_APP', 'false'
         }
@@ -56,6 +59,7 @@ android {
     }
     buildFeatures {
         viewBinding true
+        buildConfig = true
     }
     lint {
         // disable quantity translation errors
