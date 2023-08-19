@@ -71,9 +71,8 @@ internal class PaletteView
     override fun getTopPaddingOffset(): Int = -paddingTop
     override fun getBottomPaddingOffset(): Int = paddingBottom
 
-    override fun onChanged(color: Int?) {
-        color ?: return
-        cellAdapter.setColor(color)
+    override fun onChanged(value: Int) {
+        cellAdapter.setColor(value)
     }
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {

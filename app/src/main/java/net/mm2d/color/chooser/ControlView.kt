@@ -118,13 +118,12 @@ internal class ControlView
         ViewCompat.setBackgroundTintList(binding.editHex, normalTint)
     }
 
-    override fun onChanged(color: Int?) {
-        color ?: return
-        if (this.color.toOpacity() == color) return
-        this.color = color.setAlpha(binding.seekAlpha.value)
+    override fun onChanged(value: Int) {
+        if (this.color.toOpacity() == value) return
+        this.color = value.setAlpha(binding.seekAlpha.value)
         binding.colorPreview.setColor(this.color)
         setColorToHexText()
-        binding.seekAlpha.setMaxColor(color)
+        binding.seekAlpha.setMaxColor(value)
     }
 
     @SuppressLint("SetTextI18n")

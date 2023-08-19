@@ -50,11 +50,10 @@ internal class SliderView
         delegate.onDetachedFromWindow()
     }
 
-    override fun onChanged(color: Int?) {
-        color ?: return
-        binding.seekRed.setValue(Color.red(color))
-        binding.seekGreen.setValue(Color.green(color))
-        binding.seekBlue.setValue(Color.blue(color))
+    override fun onChanged(value: Int) {
+        binding.seekRed.setValue(Color.red(value))
+        binding.seekGreen.setValue(Color.green(value))
+        binding.seekBlue.setValue(Color.blue(value))
     }
 
     private fun updateBySeekBar(fromUser: Boolean) {

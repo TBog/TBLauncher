@@ -49,11 +49,10 @@ internal class HsvView
         delegate.onDetachedFromWindow()
     }
 
-    override fun onChanged(color: Int?) {
-        color ?: return
-        if (this.color == color) return
-        this.color = color
-        binding.svView.setColor(color)
-        binding.hueView.setColor(color)
+    override fun onChanged(value: Int) {
+        if (this.color == value) return
+        this.color = value
+        binding.svView.setColor(value)
+        binding.hueView.setColor(value)
     }
 }
