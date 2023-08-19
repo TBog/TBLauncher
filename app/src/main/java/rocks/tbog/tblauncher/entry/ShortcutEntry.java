@@ -391,24 +391,21 @@ public final class ShortcutEntry extends EntryWithTags {
     @Override
     boolean popupMenuClickHandler(@NonNull View view, @NonNull LinearAdapter.MenuItem item, int stringId, View parentView) {
         Context ctx = view.getContext();
-        switch (stringId) {
-            case R.string.menu_remove_shortcut: {
-                TBApplication app = TBApplication.getApplication(ctx);
-                app.getDataHandler().removeShortcut(this);
-                app.behaviour().removeResult(this);
-                //Toast.makeText(ctx, "Shortcut `" + getName() + "` removed.", Toast.LENGTH_LONG).show();
-                return true;
-            }
-            case R.string.menu_tags_add:
-            case R.string.menu_tags_edit:
-                TBApplication.behaviour(ctx).launchEditTagsDialog(this);
-                return true;
-            case R.string.menu_shortcut_rename:
-                launchRenameDialog(ctx);
-                return true;
-            case R.string.menu_custom_icon:
-                TBApplication.behaviour(ctx).launchCustomIconDialog(this);
-                return true;
+        if (stringId == R.string.menu_remove_shortcut) {
+            TBApplication app = TBApplication.getApplication(ctx);
+            app.getDataHandler().removeShortcut(this);
+            app.behaviour().removeResult(this);
+            //Toast.makeText(ctx, "Shortcut `" + getName() + "` removed.", Toast.LENGTH_LONG).show();
+            return true;
+        } else if (stringId == R.string.menu_tags_add || stringId == R.string.menu_tags_edit) {
+            TBApplication.behaviour(ctx).launchEditTagsDialog(this);
+            return true;
+        } else if (stringId == R.string.menu_shortcut_rename) {
+            launchRenameDialog(ctx);
+            return true;
+        } else if (stringId == R.string.menu_custom_icon) {
+            TBApplication.behaviour(ctx).launchCustomIconDialog(this);
+            return true;
         }
         return super.popupMenuClickHandler(view, item, stringId, parentView);
     }

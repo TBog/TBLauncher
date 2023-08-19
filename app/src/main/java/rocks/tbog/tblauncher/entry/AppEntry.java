@@ -420,77 +420,66 @@ public final class AppEntry extends EntryWithTags {
 
             return true;
         }
-        switch (stringId) {
-//            case R.string.menu_remove_history:
-//                ResultHelper.removeFromResultsAndHistory();
-//                return true;
-            case R.string.menu_app_details:
-                launchAppDetails(ctx, parentView);
-                return true;
-            case R.string.menu_app_store:
-                launchAppStore(ctx, parentView);
-                return true;
-            case R.string.menu_app_uninstall:
-                launchUninstall(ctx);
-                return true;
-            case R.string.menu_app_hibernate:
-                hibernate(ctx);
-                return true;
+        if (stringId == R.string.menu_app_details) {
+            launchAppDetails(ctx, parentView);
+            return true;
+        } else if (stringId == R.string.menu_app_store) {
+            launchAppStore(ctx, parentView);
+            return true;
+        } else if (stringId == R.string.menu_app_uninstall) {
+            launchUninstall(ctx);
+            return true;
+        } else if (stringId == R.string.menu_app_hibernate) {
+            hibernate(ctx);
+            return true;
 //            case R.string.menu_app_hibernate:
 //                hibernate(context, appPojo);
 //                return true;
-            case R.string.menu_exclude: {
-                LinearAdapter adapter = new LinearAdapter();
-                ListPopup menu = ListPopup.create(ctx, adapter);
+        } else if (stringId == R.string.menu_exclude) {
+            LinearAdapter adapter = new LinearAdapter();
+            ListPopup menu = ListPopup.create(ctx, adapter);
 
-                adapter.add(new LinearAdapter.Item(ctx, R.string.menu_exclude_history));
-                adapter.add(new LinearAdapter.Item(ctx, R.string.menu_exclude_kiss));
+            adapter.add(new LinearAdapter.Item(ctx, R.string.menu_exclude_history));
+            adapter.add(new LinearAdapter.Item(ctx, R.string.menu_exclude_kiss));
 
-                menu.setOnItemClickListener((a, v, pos) -> {
-                    LinearAdapter.MenuItem menuItem = ((LinearAdapter) a).getItem(pos);
-                    @StringRes int id = 0;
-                    if (menuItem instanceof LinearAdapter.Item) {
-                        id = ((LinearAdapter.Item) a.getItem(pos)).stringId;
-                    }
-                    switch (id) {
-                        case R.string.menu_exclude_history:
-                            //excludeFromHistory(v.getContext(), appPojo());
-                            Toast.makeText(ctx, "Not Implemented", Toast.LENGTH_LONG).show();
-                            break;
-                        case R.string.menu_exclude_kiss:
-                            //excludeFromKiss(v.getContext(), appPojo(), parent);
-                            Toast.makeText(ctx, "Work in progress", Toast.LENGTH_LONG).show();
-                            break;
-                    }
-                });
-                menu.show(parentView);
-                TBApplication.getApplication(ctx).registerPopup(menu);
-                return true;
+            menu.setOnItemClickListener((a, v, pos) -> {
+                LinearAdapter.MenuItem menuItem = ((LinearAdapter) a).getItem(pos);
+                @StringRes int id = 0;
+                if (menuItem instanceof LinearAdapter.Item) {
+                    id = ((LinearAdapter.Item) a.getItem(pos)).stringId;
+                }
+                if (id == R.string.menu_exclude_history) {
+                    //excludeFromHistory(v.getContext(), appPojo());
+                    Toast.makeText(ctx, "Not Implemented", Toast.LENGTH_LONG).show();
+                } else if (id == R.string.menu_exclude_kiss) {
+                    //excludeFromKiss(v.getContext(), appPojo(), parent);
+                    Toast.makeText(ctx, "Work in progress", Toast.LENGTH_LONG).show();
+                }
+            });
+            menu.show(parentView);
+            TBApplication.getApplication(ctx).registerPopup(menu);
+            return true;
+        } else if (stringId == R.string.menu_hide) {
+            if (TBApplication.dataHandler(ctx).addToHidden(this)) {
+                setHiddenByUser(true);
+                TBApplication.behaviour(ctx).refreshSearchRecord(this);
+                //Toast.makeText(ctx, "App "+getName()+" hidden from search", Toast.LENGTH_LONG).show();
             }
-            case R.string.menu_hide:
-                if (TBApplication.dataHandler(ctx).addToHidden(this)) {
-                    setHiddenByUser(true);
-                    TBApplication.behaviour(ctx).refreshSearchRecord(this);
-                    //Toast.makeText(ctx, "App "+getName()+" hidden from search", Toast.LENGTH_LONG).show();
-                }
-                break;
-            case R.string.menu_show:
-                if (TBApplication.dataHandler(ctx).removeFromHidden(this)) {
-                    setHiddenByUser(false);
-                    TBApplication.behaviour(ctx).refreshSearchRecord(this);
-                    //Toast.makeText(ctx, "App "+getName()+" shown in searches", Toast.LENGTH_LONG).show();
-                }
-                break;
-            case R.string.menu_tags_add:
-            case R.string.menu_tags_edit:
-                TBApplication.behaviour(ctx).launchEditTagsDialog(this);
-                return true;
-            case R.string.menu_app_rename:
-                launchRenameDialog(ctx);
-                return true;
-            case R.string.menu_custom_icon:
-                TBApplication.behaviour(ctx).launchCustomIconDialog(this);
-                return true;
+        } else if (stringId == R.string.menu_show) {
+            if (TBApplication.dataHandler(ctx).removeFromHidden(this)) {
+                setHiddenByUser(false);
+                TBApplication.behaviour(ctx).refreshSearchRecord(this);
+                //Toast.makeText(ctx, "App "+getName()+" shown in searches", Toast.LENGTH_LONG).show();
+            }
+        } else if (stringId == R.string.menu_tags_add || stringId == R.string.menu_tags_edit) {
+            TBApplication.behaviour(ctx).launchEditTagsDialog(this);
+            return true;
+        } else if (stringId == R.string.menu_app_rename) {
+            launchRenameDialog(ctx);
+            return true;
+        } else if (stringId == R.string.menu_custom_icon) {
+            TBApplication.behaviour(ctx).launchCustomIconDialog(this);
+            return true;
         }
 
         return super.popupMenuClickHandler(view, item, stringId, parentView);

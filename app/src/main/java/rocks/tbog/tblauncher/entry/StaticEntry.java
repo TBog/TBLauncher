@@ -76,13 +76,12 @@ public abstract class StaticEntry extends EntryItem {
     @Override
     boolean popupMenuClickHandler(@NonNull View view, @NonNull LinearAdapter.MenuItem item, int stringId, View parentView) {
         Context ctx = view.getContext();
-        switch (stringId) {
-            case R.string.menu_action_rename:
-                launchRenameDialog(ctx);
-                return true;
-            case R.string.menu_custom_icon:
-                TBApplication.behaviour(ctx).launchCustomIconDialog(this);
-                return true;
+        if (stringId == R.string.menu_action_rename) {
+            launchRenameDialog(ctx);
+            return true;
+        } else if (stringId == R.string.menu_custom_icon) {
+            TBApplication.behaviour(ctx).launchCustomIconDialog(this);
+            return true;
         }
         return super.popupMenuClickHandler(view, item, stringId, parentView);
     }

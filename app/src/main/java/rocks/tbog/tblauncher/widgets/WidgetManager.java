@@ -764,51 +764,45 @@ public class WidgetManager {
             if (item instanceof LinearAdapter.Item) {
                 stringId = ((LinearAdapter.Item) a.getItem(pos)).stringId;
             }
-            switch (stringId) {
-                case R.string.menu_widget_add:
-                    TBApplication.widgetManager(activity).showSelectWidget(activity);
-                    break;
-                case R.string.menu_widget_configure: {
-                    ListPopup configWidgetPopup = TBApplication.widgetManager(activity).getWidgetListPopup(R.string.menu_widget_configure);
-                    configWidgetPopup.setOnItemClickListener((a1, v1, pos1) -> {
-                        Object item1 = a1.getItem(pos1);
-                        if (item1 instanceof WidgetPopupItem) {
-                            AppWidgetHostView widgetView = mLayout.getWidget(((WidgetPopupItem) item1).appWidgetId);
-                            if (widgetView == null)
-                                return;
-                            ListPopup popup = getConfigPopup((WidgetView) widgetView);
-                            TBApplication.getApplication(mLayout.getContext()).registerPopup(popup);
-                            popup.show(widgetView, 0.f);
-                        } else if (item1 instanceof PlaceholderPopupItem) {
-                            PlaceholderWidgetRecord placeholder = ((PlaceholderPopupItem) item1).placeholder;
-                            View placeholderView = mLayout.getPlaceholder(placeholder.provider);
-                            if (placeholderView != null)
-                                placeholderView.performClick();
-                        }
-                    });
-
-                    TBApplication.getApplication(activity).registerPopup(configWidgetPopup);
-                    configWidgetPopup.showCenter(activity.getWindow().getDecorView());
-                    break;
-                }
-                case R.string.menu_widget_remove:
-                    showRemoveWidgetPopup();
-                    break;
-                case R.string.menu_popup_launcher_settings:
-                    var intent = new Intent(Utilities.getActivity(mLayout), SettingsActivity.class);
-                    Utilities.setIntentSourceBounds(intent, v);
-                    Bundle startActivityOptions = Utilities.makeStartActivityOptions(v);
-                    mLayout.postDelayed(() -> {
-                        var act = Utilities.getActivity(mLayout);
-                        if (act == null)
+            if (stringId == R.string.menu_widget_add) {
+                TBApplication.widgetManager(activity).showSelectWidget(activity);
+            } else if (stringId == R.string.menu_widget_configure) {
+                ListPopup configWidgetPopup = TBApplication.widgetManager(activity).getWidgetListPopup(R.string.menu_widget_configure);
+                configWidgetPopup.setOnItemClickListener((a1, v1, pos1) -> {
+                    Object item1 = a1.getItem(pos1);
+                    if (item1 instanceof WidgetPopupItem) {
+                        AppWidgetHostView widgetView = mLayout.getWidget(((WidgetPopupItem) item1).appWidgetId);
+                        if (widgetView == null)
                             return;
-                        try {
-                            act.startActivity(intent, startActivityOptions);
-                        } catch (ActivityNotFoundException ignored) {
-                            // ignored
-                        }
-                    }, Behaviour.LAUNCH_DELAY);
-                    break;
+                        ListPopup popup = getConfigPopup((WidgetView) widgetView);
+                        TBApplication.getApplication(mLayout.getContext()).registerPopup(popup);
+                        popup.show(widgetView, 0.f);
+                    } else if (item1 instanceof PlaceholderPopupItem) {
+                        PlaceholderWidgetRecord placeholder = ((PlaceholderPopupItem) item1).placeholder;
+                        View placeholderView = mLayout.getPlaceholder(placeholder.provider);
+                        if (placeholderView != null)
+                            placeholderView.performClick();
+                    }
+                });
+
+                TBApplication.getApplication(activity).registerPopup(configWidgetPopup);
+                configWidgetPopup.showCenter(activity.getWindow().getDecorView());
+            } else if (stringId == R.string.menu_widget_remove) {
+                showRemoveWidgetPopup();
+            } else if (stringId == R.string.menu_popup_launcher_settings) {
+                var intent = new Intent(Utilities.getActivity(mLayout), SettingsActivity.class);
+                Utilities.setIntentSourceBounds(intent, v);
+                Bundle startActivityOptions = Utilities.makeStartActivityOptions(v);
+                mLayout.postDelayed(() -> {
+                    var act = Utilities.getActivity(mLayout);
+                    if (act == null)
+                        return;
+                    try {
+                        act.startActivity(intent, startActivityOptions);
+                    } catch (ActivityNotFoundException ignored) {
+                        // ignored
+                    }
+                }, Behaviour.LAUNCH_DELAY);
             }
         });
         return menu;
