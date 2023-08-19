@@ -4,6 +4,7 @@ apply plugin: 'com.getkeepsafe.dexcount'
 apply plugin: 'com.dipien.byebyejetifier'
 
 android {
+    namespace 'rocks.tbog.tblauncher'
     compileSdkVersion 33
 
     defaultConfig {
@@ -56,7 +57,7 @@ android {
     buildFeatures {
         viewBinding true
     }
-    lintOptions {
+    lint {
         // disable quantity translation errors
         disable 'ImpliedQuantity'
     }
