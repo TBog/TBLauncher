@@ -1,0 +1,11 @@
+* Bump gradle wrapper version from  7.6 to 8.3
+* Bump JDK from 11 to 17
+* Bump androidx.annotation:annotation from 1.5.0 to 1.6.0
+* Bump lifecycle_version from 2.5.1 to 2.6.1
+* Bump com.android.tools:desugar_jdk_libs from 1.1.8 to 2.0.3
+* Bump androidx.core:core-ktx from 1.9.0 to 1.10.0
+* Bump org.jetbrains.kotlin:kotlin-gradle-plugin from 1.7.22 to 1.8.21
+* Bump com.android.tools.build:gradle from 7.2.2 to 8.0.1
+* Bump com.google.android.material:material from 1.8.0 to 1.9.0
+* Bump androidx.preference:preference from 1.2.0 to 1.2.1
+* Bump androidx.core:core-ktx from 1.10.0 to 1.10.1
