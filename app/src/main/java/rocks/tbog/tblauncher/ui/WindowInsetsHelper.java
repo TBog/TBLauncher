@@ -12,6 +12,7 @@ import android.widget.EditText;
 
 import androidx.annotation.NonNull;
 import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
 import androidx.core.view.WindowInsetsCompat;
 import androidx.core.view.WindowInsetsControllerCompat;
 
@@ -31,10 +32,11 @@ public class WindowInsetsHelper implements KeyboardHandler {
         if (root == null)
             throw new IllegalStateException("WindowInsetsHelper root == null");
         mRoot = root;
-        controller = ViewCompat.getWindowInsetsController(root);
-        if (controller == null)
-            throw new IllegalStateException("WindowInsetsController == null");
-        controller.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_SHOW_BARS_BY_SWIPE);
+        Window window = findWindow(root.getContext());
+        if (window == null)
+            throw new IllegalStateException("WindowInsetsHelper window == null for " + root);
+        controller = WindowCompat.getInsetsController(window, root);
+        controller.setSystemBarsBehavior(WindowInsetsControllerCompat.BEHAVIOR_DEFAULT);
     }
 
     @Override
