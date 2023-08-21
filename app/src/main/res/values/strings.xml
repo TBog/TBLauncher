@@ -232,6 +232,7 @@
     <string name="invalid_rename_search_engine">There is already a \"%s\" search engine</string>
     <string name="provider_section">Providers</string>
     <string name="enable_search">Search engine</string>
+    <string name="search_engine_grid">Search engine grid</string>
     <string name="enable_url">Web URL</string>
     <string name="enable_calculator">Calculator</string>
     <string name="enable_dial">Dial search</string>

@@ -1074,13 +1074,19 @@
 
             <androidx.preference.SwitchPreference
                 android:defaultValue="true"
-                android:dependency="enable-search"
+                android:disableDependentsState="true"
+                android:key="search-engine-grid"
+                android:title="@string/search_engine_grid" />
+
+            <androidx.preference.SwitchPreference
+                android:defaultValue="true"
                 android:key="enable-url"
                 android:title="@string/enable_url" />
 
             <androidx.preference.SwitchPreference
                 android:defaultValue="true"
                 android:key="enable-search"
+                android:dependency="search-engine-grid"
                 android:title="@string/enable_search" />
 
             <rocks.tbog.tblauncher.preference.CustomDialogPreference

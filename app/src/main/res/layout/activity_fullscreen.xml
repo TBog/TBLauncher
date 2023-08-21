@@ -69,20 +69,47 @@
             app:barrierDirection="bottom"
             app:constraint_referenced_ids="stubSearchTop,dockAboveResults" />
 
+        <GridView
+            android:id="@+id/searchEngines"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:clipToPadding="false"
+            android:columnWidth="@dimen/icon_size"
+            android:gravity="center"
+            android:horizontalSpacing="@dimen/edit_tag_padding"
+            android:numColumns="auto_fit"
+            android:paddingHorizontal="@dimen/result_margin_horizontal"
+            android:paddingVertical="@dimen/result_margin_vertical"
+            android:stretchMode="columnWidth"
+            android:verticalSpacing="@dimen/edit_tag_padding"
+            android:visibility="invisible"
+            app:layout_constraintBottom_toTopOf="@id/resultLayout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/barrierTop"
+            tools:itemCount="9"
+            tools:background="?attr/listBackgroundColor"
+            tools:layout_height="@dimen/icon_size"
+            tools:layout_marginHorizontal="@dimen/result_margin_horizontal"
+            tools:layout_marginVertical="@dimen/result_margin_vertical"
+            tools:listitem="@layout/item_grid"
+            tools:visibility="visible" />
+
         <rocks.tbog.tblauncher.ui.ViewStubPreview
             android:id="@+id/resultLayout"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_marginHorizontal="@dimen/result_margin_horizontal"
-            android:layout_marginVertical="@dimen/result_margin_vertical"
-            android:background="?attr/listBackgroundColor"
+            app:layout_constraintHeight_default="wrap"
             android:elevation="2dp"
             app:inflatedId="@id/resultLayout"
             app:layout="@layout/result_list"
             app:layout_constraintBottom_toTopOf="@id/barrierFooter"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@id/barrierTop"
+            app:layout_constraintTop_toBottomOf="@id/searchEngines"
+            tools:background="?attr/listBackgroundColor"
+            tools:layout_marginHorizontal="@dimen/result_margin_horizontal"
+            tools:layout_marginVertical="@dimen/result_margin_vertical"
             tools:visibility="visible" />
 
         <rocks.tbog.tblauncher.widgets.WidgetLayout
