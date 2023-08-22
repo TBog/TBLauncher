@@ -50,6 +50,7 @@ captures/
 # TBog: Keeps changing when I use the IDE
 .idea/misc.xml
 .idea/deploymentTargetDropDown.xml
+.idea/kotlinc.xml
 
 # Keystore files
 # Uncomment the following lines if you do not want to check your keystore files in.
