@@ -623,7 +623,7 @@ public class Behaviour implements ISearchActivity {
             switch (currentMode) {
                 case SEARCH:
                     resetTask();
-                    hideSearchBar(0, true);
+                    hideSearchBar(true);
                     break;
                 case WIDGET:
                     hideWidgets();
@@ -822,7 +822,7 @@ public class Behaviour implements ISearchActivity {
         mWidgetContainer.setVisibility(View.GONE);
     }
 
-    private void hideSearchBar(int startDelay, boolean animate) {
+    private void hideSearchBar(boolean animate) {
         clearSearchText();
         clearAdapter();
 
@@ -835,7 +835,6 @@ public class Behaviour implements ISearchActivity {
         mSearchBarContainer.animate().cancel();
         if (animate) {
             mSearchBarContainer.animate()
-                .setStartDelay(startDelay)
                 .alpha(0f)
                 .translationY(translationY)
                 .setDuration(UI_ANIMATION_DURATION)
@@ -867,21 +866,24 @@ public class Behaviour implements ISearchActivity {
     }
 
     private void showWidgets(boolean animate) {
-        Log.d(TAG, "showWidgets (anim " + animate + ")");
         if (TBApplication.state().getWidgetScreenVisibility() != LauncherState.AnimatedVisibility.ANIM_TO_VISIBLE)
             mWidgetContainer.animate().cancel();
         if (mWidgetContainer.getVisibility() == View.VISIBLE)
             return;
         mWidgetContainer.setVisibility(View.VISIBLE);
-        Log.d(TAG, "mResultLayout set VISIBLE (anim " + animate + ")");
         if (animate) {
-            TBApplication.state().setWidgetScreen(LauncherState.AnimatedVisibility.ANIM_TO_VISIBLE);
             mWidgetContainer.setAlpha(0f);
             mWidgetContainer.animate()
                 .setStartDelay(UI_ANIMATION_DURATION)
                 .alpha(1f)
                 .setDuration(UI_ANIMATION_DURATION)
+                .setInterpolator(new DecelerateInterpolator())
                 .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationStart(Animator animation) {
+                        TBApplication.state().setWidgetScreen(LauncherState.AnimatedVisibility.ANIM_TO_VISIBLE);
+                    }
+
                     @Override
                     public void onAnimationEnd(Animator animation) {
                         TBApplication.state().setWidgetScreen(LauncherState.AnimatedVisibility.VISIBLE);
