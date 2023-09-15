@@ -12,7 +12,7 @@ public class DrawableInfo {
     public boolean equals(Object o) {
         if (this == o)
             return true;
-        if (o == null || getClass() != o.getClass())
+        if (!(o instanceof DrawableInfo))
             return false;
         DrawableInfo that = (DrawableInfo) o;
         return drawableName.equals(that.drawableName);
