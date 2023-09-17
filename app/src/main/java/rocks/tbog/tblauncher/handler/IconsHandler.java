@@ -267,7 +267,7 @@ public class IconsHandler {
                     drawable = DrawableUtils.applyIconMaskShape(ctx, drawable, shape, true);
                     return icon.setAdaptiveIcon(drawable);
                 } else {
-                    drawable = mIconPack.applyBackgroundAndMask(ctx, drawable, false);
+                    //drawable = mIconPack.applyBackgroundAndMask(ctx, drawable, false);
                     return icon.setFitInside(false).setNonAdaptiveIcon(drawable);
                 }
             }
@@ -294,6 +294,7 @@ public class IconsHandler {
 
     /**
      * Get or generate icon for an app
+     * TODO: use `getIconForPackage` instead of `getDrawableIconForPackage`
      */
     @WorkerThread
     @Nullable
@@ -334,7 +335,7 @@ public class IconsHandler {
                     int shape = mSystemPack.getAdaptiveShape();
                     return DrawableUtils.applyIconMaskShape(ctx, drawable, shape, true);
                 } else
-                    return mIconPack.applyBackgroundAndMask(ctx, drawable, false);
+                    return drawable; //mIconPack.applyBackgroundAndMask(ctx, drawable, false);
             }
         }
 
