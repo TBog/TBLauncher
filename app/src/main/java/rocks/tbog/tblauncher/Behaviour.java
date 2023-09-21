@@ -868,8 +868,11 @@ public class Behaviour implements ISearchActivity {
     private void showWidgets(boolean animate) {
         if (TBApplication.state().getWidgetScreenVisibility() != LauncherState.AnimatedVisibility.ANIM_TO_VISIBLE)
             mWidgetContainer.animate().cancel();
-        if (mWidgetContainer.getVisibility() == View.VISIBLE)
+        if (mWidgetContainer.getVisibility() == View.VISIBLE) {
+            mWidgetContainer.setAlpha(1f);
+            hideResultList(false);
             return;
+        }
         mWidgetContainer.setVisibility(View.VISIBLE);
         if (animate) {
             mWidgetContainer.setAlpha(0f);
