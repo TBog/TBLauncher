@@ -267,7 +267,7 @@ public class IconsHandler {
                     drawable = DrawableUtils.applyIconMaskShape(ctx, drawable, shape, true);
                     return icon.setAdaptiveIcon(drawable);
                 } else {
-                    drawable = mIconPack.applyBackgroundAndMask(ctx, drawable, false);
+                    //drawable = mIconPack.applyBackgroundAndMask(ctx, drawable, false);
                     return icon.setFitInside(false).setNonAdaptiveIcon(drawable);
                 }
             }
