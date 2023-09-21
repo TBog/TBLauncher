@@ -164,7 +164,7 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
      * Add ViewPager pages for every icon pack
      *
      * @param inflater used for inflating the page view
-     * @return an array of pairs with the icon pack package name and icon pack name
+     * @return a list of pairs with the icon pack package name and icon pack name
      */
     @NonNull
     private ArrayList<Pair<String, String>> addIconPacks(LayoutInflater inflater) {
@@ -211,7 +211,7 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
             ComponentName cn = UserHandleCompat.unflattenComponentName(name);
             UserHandleCompat userHandle = UserHandleCompat.fromComponentName(context, name);
 
-            mCustomShapePage = addSystemPage(inflater, mViewPager, cn, userHandle, pageName);
+            mCustomShapePage = addSystemPage(inflater, cn, userHandle, pageName);
         } else if (args.containsKey("entryId")) {
             String entryId = args.getString("entryId", "");
             EntryItem entryItem = TBApplication.dataHandler(context).getPojo(entryId);
@@ -221,7 +221,7 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
             } else {
                 StaticEntry staticEntry = (StaticEntry) entryItem;
                 String pageName = context.getString(R.string.tab_static_icons);
-                mCustomShapePage = addStaticEntryPage(inflater, mViewPager, staticEntry, pageName);
+                mCustomShapePage = addStaticEntryPage(inflater, staticEntry, pageName);
             }
         } else if (args.containsKey("shortcutId")) {
             String packageName = args.getString("packageName", "");
@@ -238,16 +238,16 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
                 String shortcutId = args.getString("shortcutId", "");
                 Toast.makeText(Utilities.getActivity(context), context.getString(R.string.entry_not_found, shortcutId), Toast.LENGTH_LONG).show();
             } else {
-                mCustomShapePage = addShortcutPage(inflater, mViewPager, shortcutRecord, shortcutRecord.displayName);
+                mCustomShapePage = addShortcutPage(inflater, shortcutRecord, shortcutRecord.displayName);
             }
         } else if (args.containsKey("searchEntryId")) {
             String entryName = args.getString("searchName", "");
             String pageName = context.getString(R.string.tab_search_icon);
-            mCustomShapePage = addSearchEntryPage(inflater, mViewPager, entryName, pageName);
+            mCustomShapePage = addSearchEntryPage(inflater, entryName, pageName);
         } else if (args.containsKey("buttonId")) {
             int defaultIcon = args.getInt("defaultIcon");
             String pageName = context.getString(R.string.tab_button_icon);
-            mCustomShapePage = addButtonPage(inflater, mViewPager, defaultIcon, pageName);
+            mCustomShapePage = addButtonPage(inflater, defaultIcon, pageName);
         }
     }
 
@@ -286,51 +286,49 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
         mPreviewLabel.setCompoundDrawables(null, null, icon, null);
     }
 
-    public void addIconPackPage(@NonNull LayoutInflater inflater, ViewGroup container, String packName, String packPackageName) {
+    private void addIconPackPage(@NonNull LayoutInflater inflater, ViewGroup container, String packName, String packPackageName) {
         View view = inflater.inflate(R.layout.dialog_icon_select_page, container, false);
         IconPackPage page = new IconPackPage(packName, packPackageName, view);
         PageAdapter adapter = (PageAdapter) mViewPager.getAdapter();
-        adapter.addPage(page);
+        if (adapter != null)
+            adapter.addPage(page);
     }
 
-    public SystemPage addSystemPage(LayoutInflater inflater, ViewPager container, ComponentName cn, UserHandleCompat userHandle, String pageName) {
-        View view = inflater.inflate(R.layout.dialog_custom_shape_icon_select_page, container, false);
-        SystemPage page = new SystemPage(pageName, view, cn, userHandle);
+    private CustomShapePage addCustomShapePage(CustomShapePage page) {
         PageAdapter adapter = (PageAdapter) mViewPager.getAdapter();
-        adapter.addPage(page);
+        if (adapter != null)
+            adapter.addPage(page);
         return page;
     }
 
-    public StaticEntryPage addStaticEntryPage(LayoutInflater inflater, ViewPager container, StaticEntry staticEntry, String pageName) {
-        View view = inflater.inflate(R.layout.dialog_custom_shape_icon_select_page, container, false);
-        StaticEntryPage page = new StaticEntryPage(pageName, view, staticEntry);
-        PageAdapter adapter = (PageAdapter) mViewPager.getAdapter();
-        adapter.addPage(page);
-        return page;
+    private CustomShapePage addSystemPage(LayoutInflater inflater, ComponentName cn, UserHandleCompat userHandle, String pageName) {
+        View view = inflater.inflate(R.layout.dialog_custom_shape_icon_select_page, mViewPager, false);
+        CustomShapePage page = new SystemPage(pageName, view, cn, userHandle);
+        return addCustomShapePage(page);
     }
 
-    public SearchEntryPage addSearchEntryPage(LayoutInflater inflater, ViewPager container, String entryName, String pageName) {
-        View view = inflater.inflate(R.layout.dialog_custom_shape_icon_select_page, container, false);
-        SearchEntryPage page = new SearchEntryPage(pageName, view, entryName);
-        PageAdapter adapter = (PageAdapter) mViewPager.getAdapter();
-        adapter.addPage(page);
-        return page;
+    private CustomShapePage addStaticEntryPage(LayoutInflater inflater, StaticEntry staticEntry, String pageName) {
+        View view = inflater.inflate(R.layout.dialog_custom_shape_icon_select_page, mViewPager, false);
+        CustomShapePage page = new StaticEntryPage(pageName, view, staticEntry);
+        return addCustomShapePage(page);
     }
 
-    public ShortcutPage addShortcutPage(LayoutInflater inflater, ViewPager container, ShortcutRecord shortcutRecord, String pageName) {
-        View view = inflater.inflate(R.layout.dialog_custom_shape_icon_select_page, container, false);
-        ShortcutPage page = new ShortcutPage(pageName, view, shortcutRecord);
-        PageAdapter adapter = (PageAdapter) mViewPager.getAdapter();
-        adapter.addPage(page);
-        return page;
+    private CustomShapePage addSearchEntryPage(LayoutInflater inflater, String entryName, String pageName) {
+        View view = inflater.inflate(R.layout.dialog_custom_shape_icon_select_page, mViewPager, false);
+        CustomShapePage page = new DefaultButtonPage(pageName, view, entryName, R.drawable.ic_search, R.string.default_static_icon);
+        return addCustomShapePage(page);
     }
 
-    public ButtonPage addButtonPage(LayoutInflater inflater, ViewPager container, int defaultIcon, String pageName) {
-        View view = inflater.inflate(R.layout.dialog_custom_shape_icon_select_page, container, false);
-        ButtonPage page = new ButtonPage(pageName, view, defaultIcon);
-        PageAdapter adapter = (PageAdapter) mViewPager.getAdapter();
-        adapter.addPage(page);
-        return page;
+    private CustomShapePage addShortcutPage(LayoutInflater inflater, ShortcutRecord shortcutRecord, String pageName) {
+        View view = inflater.inflate(R.layout.dialog_custom_shape_icon_select_page, mViewPager, false);
+        CustomShapePage page = new ShortcutPage(pageName, view, shortcutRecord);
+        return addCustomShapePage(page);
+    }
+
+    private CustomShapePage addButtonPage(LayoutInflater inflater, int defaultIcon, String pageName) {
+        View view = inflater.inflate(R.layout.dialog_custom_shape_icon_select_page, mViewPager, false);
+        CustomShapePage page = new DefaultButtonPage(pageName, view, "", defaultIcon, R.string.default_icon);
+        return addCustomShapePage(page);
     }
 
     public ListPopup getIconPackMenu(IconData iconData) {

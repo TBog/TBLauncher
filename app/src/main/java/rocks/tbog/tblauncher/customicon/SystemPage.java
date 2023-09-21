@@ -57,11 +57,11 @@ public class SystemPage extends CustomShapePage {
         // add default icon
         {
             IconsHandler iconsHandler = TBApplication.getApplication(context).iconsHandler();
-            Drawable drawable = iconsHandler.getDrawableIconForPackage(componentName, userHandle);
+            IconsHandler.IconInfo icon = iconsHandler.getIconForPackage(componentName, userHandle);
 
             //checkDuplicateDrawable(dSet, drawable);
 
-            ShapedIconInfo iconInfo = new DefaultIconInfo(drawable);
+            ShapedIconInfo iconInfo = new DefaultIconInfo(icon);
             iconInfo.textId = R.string.default_icon;
             adapter.addItem(iconInfo);
         }

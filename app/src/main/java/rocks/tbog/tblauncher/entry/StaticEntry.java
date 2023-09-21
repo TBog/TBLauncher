@@ -191,7 +191,7 @@ public abstract class StaticEntry extends EntryItem {
         return getDefaultDrawable(context);
     }
 
-    public Drawable getDefaultDrawable(Context context) {
+    public Drawable getDefaultDrawable(@NonNull Context context) {
         return AppCompatResources.getDrawable(context, iconResource);
     }
 
