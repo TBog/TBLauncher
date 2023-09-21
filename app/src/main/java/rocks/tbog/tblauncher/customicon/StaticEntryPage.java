@@ -11,6 +11,7 @@ import androidx.fragment.app.DialogFragment;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.drawable.DrawableUtils;
+import rocks.tbog.tblauncher.handler.IconsHandler;
 
 public class StaticEntryPage extends CustomShapePage {
     private final StaticEntry mStaticEntry;
@@ -23,15 +24,15 @@ public class StaticEntryPage extends CustomShapePage {
 
     @Override
     void setupView(@NonNull DialogFragment dialogFragment, @Nullable OnItemClickListener iconClickListener, @Nullable OnItemClickListener iconLongClickListener) {
-        Context context = dialogFragment.getContext();
+        Context context = dialogFragment.requireContext();
         super.setupView(dialogFragment, iconClickListener, iconLongClickListener);
 
         final Drawable originalDrawable;
         // default icon
         {
-            Drawable drawable = mStaticEntry.getDefaultDrawable(context);
-            originalDrawable = drawable;
-            ShapedIconInfo iconInfo = new DefaultIconInfo(dialogFragment.getString(R.string.default_static_icon, mStaticEntry.getName()), drawable);
+            originalDrawable = mStaticEntry.getDefaultDrawable(context);
+            IconsHandler.IconInfo iconHandlerIconInfo = new IconsHandler.IconInfo().setNonAdaptiveIcon(originalDrawable);
+            ShapedIconInfo iconInfo = new DefaultIconInfo(dialogFragment.getString(R.string.default_static_icon, mStaticEntry.getName()), iconHandlerIconInfo);
             mShapedIconAdapter.addItem(iconInfo);
         }
 
@@ -49,7 +50,7 @@ public class StaticEntryPage extends CustomShapePage {
     static class DefaultIconInfo extends CustomShapePage.DefaultIconInfo {
         final String name;
 
-        DefaultIconInfo(@NonNull String name, Drawable icon) {
+        DefaultIconInfo(@NonNull String name, IconsHandler.IconInfo icon) {
             super(icon);
             this.name = name;
             textId = R.string.default_icon;

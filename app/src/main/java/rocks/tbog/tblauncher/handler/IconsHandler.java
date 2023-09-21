@@ -294,62 +294,12 @@ public class IconsHandler {
 
     /**
      * Get or generate icon for an app
-     * TODO: use `getIconForPackage` instead of `getDrawableIconForPackage`
      */
     @WorkerThread
     @Nullable
     public Drawable getDrawableIconForPackage(ComponentName componentName, UserHandleCompat userHandle) {
-        // check the icon pack for a resource
-        if (mIconPack != null) {
-            // just checking will make this thread wait for the icon pack to load
-            if (!mIconPack.isLoaded()) {
-                String componentString = componentName.toString();
-                if (mLoadIconsPackTask == null) {
-                    Log.w(TAG, "icon pack `" + mIconPack.getPackPackageName() + "` not loaded, reload");
-                    SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(ctx);
-                    loadIconsPack(pref.getString("icons-pack", null));
-                    return getCachedAppIcon(componentString);
-                }
-
-                Drawable cachedIcon = getCachedAppIcon(componentString);
-                if (cachedIcon != null) {
-                    Log.i(TAG, "icon pack `" + mIconPack.getPackPackageName() + "` not loaded, cached icon used");
-                    return cachedIcon;
-                }
-
-                Log.w(TAG, "icon pack `" + mIconPack.getPackPackageName() + "` not loaded, wait");
-                try {
-                    mLoadIconsPackTask.wait();
-                } catch (Exception ignored) {
-                }
-                if (!mIconPack.isLoaded()) {
-                    Log.e(TAG, "icon pack `" + mIconPack.getPackPackageName() + "` waiting failed to load");
-                    return null;
-                }
-            }
-            String componentString = componentName.toString();
-            DrawableInfo info = mIconPack.getComponentDrawable(componentString);
-            Drawable drawable = mIconPack.getDrawable(info);
-            if (drawable != null) {
-                if (DrawableUtils.isAdaptiveIconDrawable(drawable) || mForceAdaptive) {
-                    int shape = mSystemPack.getAdaptiveShape();
-                    return DrawableUtils.applyIconMaskShape(ctx, drawable, shape, true);
-                } else
-                    return drawable; //mIconPack.applyBackgroundAndMask(ctx, drawable, false);
-            }
-        }
-
-        // if icon pack doesn't have the drawable, use system drawable
-        Drawable systemIcon = mSystemPack.getComponentDrawable(ctx, componentName, userHandle);
-        if (systemIcon == null)
-            return null;
-
-        // if the icon pack has a mask, use that instead of the adaptive shape
-        if (mIconPack != null && mIconPack.hasMask() && !mForceShape)
-            return mIconPack.applyBackgroundAndMask(ctx, systemIcon, false);
-
-        boolean fitInside = mForceAdaptive || !mForceShape;
-        return mSystemPack.applyBackgroundAndMask(ctx, systemIcon, fitInside);
+        IconInfo icon = getIconForPackage(componentName, userHandle);
+        return icon.getDrawable();
     }
 
     /**

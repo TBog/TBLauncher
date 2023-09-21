@@ -44,6 +44,7 @@ import rocks.tbog.tblauncher.drawable.DrawableUtils;
 import rocks.tbog.tblauncher.drawable.FourCodePointDrawable;
 import rocks.tbog.tblauncher.drawable.TextDrawable;
 import rocks.tbog.tblauncher.drawable.TwoCodePointDrawable;
+import rocks.tbog.tblauncher.handler.IconsHandler;
 import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.UISizes;
 import rocks.tbog.tblauncher.utils.Utilities;
@@ -408,8 +409,8 @@ class CustomShapePage extends PageAdapter.Page {
 
     static class DefaultIconInfo extends ShapedIconInfo {
 
-        DefaultIconInfo(Drawable icon) {
-            super(icon, icon);
+        DefaultIconInfo(IconsHandler.IconInfo icon) {
+            super(icon.getDrawable(), icon.getDrawable());
         }
 
         @Override
