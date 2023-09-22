@@ -20,6 +20,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.preference.PreferenceManager;
 
 import rocks.tbog.tblauncher.quicklist.QuickList;
@@ -122,9 +123,9 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
         IntentFilter intentFilterLoadOver = new IntentFilter(LOAD_OVER);
         IntentFilter intentFilterFullLoadOver = new IntentFilter(FULL_LOAD_OVER);
 
-        registerReceiver(mReceiver, intentFilterLoad);
-        registerReceiver(mReceiver, intentFilterLoadOver);
-        registerReceiver(mReceiver, intentFilterFullLoadOver);
+        ActivityCompat.registerReceiver(this, mReceiver, intentFilterLoad, ContextCompat.RECEIVER_NOT_EXPORTED);
+        ActivityCompat.registerReceiver(this, mReceiver, intentFilterLoadOver, ContextCompat.RECEIVER_NOT_EXPORTED);
+        ActivityCompat.registerReceiver(this, mReceiver, intentFilterFullLoadOver, ContextCompat.RECEIVER_NOT_EXPORTED);
 
         // init DataHandler after we register the receiver
         app.initDataHandler();
