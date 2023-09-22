@@ -1,16 +1,19 @@
 package rocks.tbog.tblauncher.preference;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.View;
 
+import androidx.annotation.NonNull;
+import androidx.lifecycle.ViewModelProvider;
 import androidx.preference.PreferenceManager;
 
 import rocks.tbog.tblauncher.EditSearchHint;
 
 public class EditSearchHintPreferenceDialog extends BasePreferenceDialog {
 
-    private final EditSearchHint mEditor = new EditSearchHint();
+    private EditSearchHint mEditor = null;
 
     public static EditSearchHintPreferenceDialog newInstance(String key) {
         EditSearchHintPreferenceDialog fragment = new EditSearchHintPreferenceDialog();
@@ -21,16 +24,27 @@ public class EditSearchHintPreferenceDialog extends BasePreferenceDialog {
         return fragment;
     }
 
+    @NonNull
+    @Override
+    public Dialog onCreateDialog(Bundle savedInstanceState) {
+        mEditor = new ViewModelProvider(this).get(EditSearchHint.class);
+        return super.onCreateDialog(savedInstanceState);
+    }
+
     @Override
     public void onDialogClosed(boolean positiveResult) {
         if (!positiveResult)
             return;
-        mEditor.applyChanges(requireContext());
+        if (mEditor != null)
+            mEditor.applyChanges(requireContext());
     }
 
     @Override
     protected void onBindDialogView(View view) {
         super.onBindDialogView(view);
+
+        if (mEditor == null)
+            return;
 
         Context context = requireContext();
         String key = getPreference().getKey();
@@ -56,6 +70,6 @@ public class EditSearchHintPreferenceDialog extends BasePreferenceDialog {
     @Override
     public void onStart() {
         super.onStart();
-        mEditor.onStart();
+        mEditor.onStartLifecycle(requireDialog(), this);
     }
 }
