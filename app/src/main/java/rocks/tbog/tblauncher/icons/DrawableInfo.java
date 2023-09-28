@@ -1,12 +1,32 @@
 package rocks.tbog.tblauncher.icons;
 
+import android.content.res.Resources;
+import android.graphics.drawable.Drawable;
+
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import java.util.Objects;
 
-public class DrawableInfo {
+public abstract class DrawableInfo {
     @NonNull
     private final String drawableName;
+
+    protected DrawableInfo(@NonNull String drawableName) {
+        this.drawableName = drawableName;
+    }
+
+    @NonNull
+    public String getDrawableName() {
+        return drawableName;
+    }
+
+    public boolean isDynamic() {
+        return false;
+    }
+
+    @Nullable
+    public abstract Drawable getDrawable(@NonNull IconPackXML iconPack, @Nullable Resources.Theme theme);
 
     @Override
     public boolean equals(Object o) {
@@ -21,18 +41,5 @@ public class DrawableInfo {
     @Override
     public int hashCode() {
         return Objects.hash(drawableName);
-    }
-
-    protected DrawableInfo(@NonNull String drawableName) {
-        this.drawableName = drawableName;
-    }
-
-    @NonNull
-    public String getDrawableName() {
-        return drawableName;
-    }
-
-    public boolean isDynamic() {
-        return false;
     }
 }
