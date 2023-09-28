@@ -706,11 +706,11 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
 
         @Override
         public void onDisplayPreferenceDialog(@NonNull Preference preference) {
+            String key = preference.getKey();
             // Try if the preference is one of our custom Preferences
-            DialogFragment dialogFragment = null;
+            DialogFragment dialogFragment;
             if (preference instanceof CustomDialogPreference) {
                 // Create a new instance of CustomDialog with the key of the related Preference
-                String key = preference.getKey();
                 Log.d(TAG, "onDisplayPreferenceDialog " + key);
                 switch (key) {
                     case "quick-list-content":
@@ -746,7 +746,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 if (dialogFragment == null)
                     throw new IllegalArgumentException("CustomDialogPreference \"" + key + "\" has no dialog defined");
             } else if (preference instanceof ListPreference) {
-                String key = preference.getKey();
                 switch (key) {
                     case "adaptive-shape":
                     case "contacts-shape":
@@ -759,7 +758,6 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         break;
                 }
             } else if (preference instanceof MultiSelectListPreference) {
-                String key = preference.getKey();
                 if ("tags-menu-order".equals(key)) {
                     dialogFragment = TagOrderListPreferenceDialog.newInstance(key);
                 } else if ("result-popup-order".equals(key)) {
@@ -767,6 +765,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                 } else {
                     dialogFragment = BaseMultiSelectListPreferenceDialog.newInstance(key);
                 }
+            } else {
+                Log.i(TAG, "Preference \"" + key + "\" has no custom dialog defined");
+                dialogFragment = null;
             }
 
             // If it was one of our custom Preferences, show its dialog
