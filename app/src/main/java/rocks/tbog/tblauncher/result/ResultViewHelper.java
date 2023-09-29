@@ -28,7 +28,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import rocks.tbog.tblauncher.DrawableCache;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.entry.EntryItem;
@@ -132,25 +131,19 @@ public final class ResultViewHelper {
 
     public static void setButtonIconAsync(@NonNull ImageView iconView, String buttonId, @NonNull Utilities.GetDrawable getDefaultIcon) {
         Context context = iconView.getContext();
-        var cache = TBApplication.drawableCache(context).getCachedInfo(buttonId);
+
+        Drawable cache = TBApplication.drawableCache(context).getCachedDrawable(buttonId);
         if (cache != null) {
             Log.d(TAG, "cache found, view=" + Integer.toHexString(iconView.hashCode()) + " button=" + buttonId);
-            final Drawable drawable;
-            if (cache.drawable != null) {
-                // found the icon in cache
-                drawable = cache.drawable;
-            } else {
-                drawable = getDefaultIcon.getDrawable(context);
-            }
-            iconView.setImageDrawable(drawable);
+            // found the icon in cache
+            iconView.setImageDrawable(cache);
             return;
         }
 
         Utilities.setIconAsync(iconView, ctx -> {
             Drawable buttonIcon = TBApplication.iconsHandler(ctx).getButtonIcon(buttonId);
             if (buttonIcon == null) {
-                TBApplication.drawableCache(ctx).setCachedInfo(buttonId, new DrawableCache.DrawableInfo(null));
-                return getDefaultIcon.getDrawable(ctx);
+                buttonIcon = getDefaultIcon.getDrawable(ctx);
             }
             TBApplication.drawableCache(ctx).cacheDrawable(buttonId, buttonIcon);
             return buttonIcon;

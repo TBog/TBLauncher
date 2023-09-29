@@ -42,23 +42,6 @@ public class DrawableCache {
         return null;
     }
 
-//    @Nullable
-//    public DrawableInfo getCachedInfo(@NonNull String cacheId) {
-//        return mCache.get(cacheId);
-//    }
-
-    public void setCachedInfo(@NonNull String cacheId, @Nullable DrawableInfo cache) {
-        synchronized (mCache) {
-            if (cache == null) {
-                mCache.remove(cacheId);
-                return;
-            }
-            if (!mEnabled)
-                return;
-            mCache.put(cacheId, cache);
-        }
-    }
-
     public void cacheDrawable(@NonNull String cacheId, @Nullable Drawable drawable) {
         synchronized (mCache) {
             if (drawable == null) {
