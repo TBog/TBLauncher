@@ -677,7 +677,7 @@ public class Behaviour implements ISearchActivity {
                 break;
             case WIDGET:
                 // show widgets
-                showWidgets(true);
+                showWidgets();
                 // hide/show the QuickList
                 TBApplication.quickList(getContext()).updateVisibility();
                 // enable/disable fullscreen (status and navigation bar)
@@ -865,14 +865,13 @@ public class Behaviour implements ISearchActivity {
         mSearchEditText.setEnabled(false);
     }
 
+    private void showWidgets()
+    {
+        boolean animate = !TBApplication.state().isWidgetScreenVisible();
+        showWidgets(animate);
+    }
+
     private void showWidgets(boolean animate) {
-        if (TBApplication.state().getWidgetScreenVisibility() != LauncherState.AnimatedVisibility.ANIM_TO_VISIBLE)
-            mWidgetContainer.animate().cancel();
-        if (mWidgetContainer.getVisibility() == View.VISIBLE) {
-            mWidgetContainer.setAlpha(1f);
-            hideResultList(false);
-            return;
-        }
         mWidgetContainer.setVisibility(View.VISIBLE);
         if (animate) {
             mWidgetContainer.setAlpha(0f);
@@ -894,10 +893,11 @@ public class Behaviour implements ISearchActivity {
                 })
                 .start();
         } else {
+            mWidgetContainer.animate().cancel();
             TBApplication.state().setWidgetScreen(LauncherState.AnimatedVisibility.VISIBLE);
             mWidgetContainer.setAlpha(1f);
         }
-        hideResultList(true);
+        hideResultList(animate);
     }
 
     public void showKeyboard() {
