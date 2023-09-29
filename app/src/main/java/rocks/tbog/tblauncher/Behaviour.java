@@ -42,7 +42,6 @@ import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -623,7 +622,7 @@ public class Behaviour implements ISearchActivity {
             switch (currentMode) {
                 case SEARCH:
                     resetTask();
-                    hideSearchBar(true);
+                    hideSearchBar();
                     break;
                 case WIDGET:
                     hideWidgets();
@@ -786,7 +785,8 @@ public class Behaviour implements ISearchActivity {
         setSearchHint();
         UITheme.applySearchBarTextShadow(mSearchEditText);
 
-        mSearchBarContainer.animate().cancel();
+        if (TBApplication.state().getSearchBarVisibility() != LauncherState.AnimatedVisibility.ANIM_TO_VISIBLE)
+            mSearchBarContainer.animate().cancel();
         mSearchBarContainer.setVisibility(View.VISIBLE);
         mSearchBarContainer.animate()
             .setStartDelay(0)
@@ -822,41 +822,54 @@ public class Behaviour implements ISearchActivity {
         mWidgetContainer.setVisibility(View.GONE);
     }
 
+    private void hideSearchBar() {
+        boolean animate = !TBApplication.state().isSearchBarVisible();
+        hideSearchBar(animate);
+    }
+
     private void hideSearchBar(boolean animate) {
         clearSearchText();
         clearAdapter();
 
-        final float translationY;
-        if (PrefCache.searchBarAtBottom(mPref))
-            translationY = mSearchBarContainer.getHeight() * 2f;
-        else
-            translationY = mSearchBarContainer.getHeight() * -2f;
+        if (mSearchBarContainer.getVisibility() == View.VISIBLE) {
+            final float translationY;
+            if (PrefCache.searchBarAtBottom(mPref))
+                translationY = mSearchBarContainer.getHeight() * 2f;
+            else
+                translationY = mSearchBarContainer.getHeight() * -2f;
 
-        mSearchBarContainer.animate().cancel();
-        if (animate) {
-            mSearchBarContainer.animate()
-                .alpha(0f)
-                .translationY(translationY)
-                .setDuration(UI_ANIMATION_DURATION)
-                .setInterpolator(new AccelerateInterpolator())
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationStart(Animator animation) {
-                        TBApplication.state().setSearchBar(LauncherState.AnimatedVisibility.ANIM_TO_HIDDEN);
-                    }
+            if (TBApplication.state().getSearchBarVisibility() != LauncherState.AnimatedVisibility.ANIM_TO_HIDDEN)
+                mSearchBarContainer.animate().cancel();
 
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        TBApplication.state().setSearchBar(LauncherState.AnimatedVisibility.HIDDEN);
-                        mSearchBarContainer.setVisibility(View.GONE);
-                    }
-                })
-                .start();
+            if (animate) {
+                mSearchBarContainer.setTranslationY(0f);
+                mSearchBarContainer.animate()
+                    .alpha(0f)
+                    .translationY(translationY)
+                    .setDuration(UI_ANIMATION_DURATION)
+                    .setInterpolator(new AccelerateInterpolator())
+                    .setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationStart(Animator animation) {
+                            TBApplication.state().setSearchBar(LauncherState.AnimatedVisibility.ANIM_TO_HIDDEN);
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            TBApplication.state().setSearchBar(LauncherState.AnimatedVisibility.HIDDEN);
+                            mSearchBarContainer.setVisibility(View.GONE);
+                        }
+                    })
+                    .start();
+            } else {
+                TBApplication.state().setSearchBar(LauncherState.AnimatedVisibility.HIDDEN);
+                mSearchBarContainer.setAlpha(0f);
+                mSearchBarContainer.setTranslationY(translationY);
+                mSearchBarContainer.setVisibility(View.GONE);
+            }
         } else {
-            TBApplication.state().setSearchBar(LauncherState.AnimatedVisibility.HIDDEN);
-            mSearchBarContainer.setAlpha(0f);
-            mSearchBarContainer.setTranslationY(translationY);
-            mSearchBarContainer.setVisibility(View.GONE);
+            Log.d(TAG, "mSearchBarContainer not VISIBLE, setting state to HIDDEN");
+            TBApplication.state().setResultList(LauncherState.AnimatedVisibility.HIDDEN);
         }
 
         if (PrefCache.linkKeyboardAndSearchBar(mPref))
@@ -865,13 +878,15 @@ public class Behaviour implements ISearchActivity {
         mSearchEditText.setEnabled(false);
     }
 
-    private void showWidgets()
-    {
+    private void showWidgets() {
         boolean animate = !TBApplication.state().isWidgetScreenVisible();
         showWidgets(animate);
     }
 
     private void showWidgets(boolean animate) {
+        if (TBApplication.state().getWidgetScreenVisibility() != LauncherState.AnimatedVisibility.ANIM_TO_VISIBLE)
+            mSearchBarContainer.animate().cancel();
+
         mWidgetContainer.setVisibility(View.VISIBLE);
         if (animate) {
             mWidgetContainer.setAlpha(0f);
@@ -1045,7 +1060,7 @@ public class Behaviour implements ISearchActivity {
         try {
             Constructor<? extends Searcher> constructor = searcherClass.getConstructor(ISearchActivity.class, String.class);
             searcher = constructor.newInstance(this, query);
-        } catch (IllegalAccessException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {
+        } catch (ReflectiveOperationException e) {
             Log.e(TAG, "new <? extends Searcher>", e);
         }
         if (searcher != null)
@@ -1087,8 +1102,8 @@ public class Behaviour implements ISearchActivity {
         Log.d(TAG, "showResultList (anim " + animate + ")");
         if (TBApplication.state().getResultListVisibility() != LauncherState.AnimatedVisibility.ANIM_TO_VISIBLE)
             mResultLayout.animate().cancel();
-        if (mResultLayout.getVisibility() == View.VISIBLE)
-            return;
+//        if (mResultLayout.getVisibility() == View.VISIBLE)
+//            return;
         mResultLayout.setVisibility(View.VISIBLE);
         Log.d(TAG, "mResultLayout set VISIBLE (anim " + animate + ")");
         if (animate) {
