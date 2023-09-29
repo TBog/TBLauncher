@@ -17,6 +17,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
@@ -148,7 +149,7 @@ public class Behaviour implements ISearchActivity {
                 String text = s.toString();
                 if (lastText.equals(text))
                     return;
-                if (text == null || text.isEmpty())
+                if (TextUtils.isEmpty(text))
                     clearAdapter();
                 else
                     updateSearchRecords(false, text);
@@ -1077,11 +1078,9 @@ public class Behaviour implements ISearchActivity {
     }
 
     public void clearSearch() {
-        if (mSearchEditText == null)
-            return;
-
-        mSearchEditText.setText("");
+        clearSearchText();
         clearAdapter();
+        updateClearButton();
     }
 
     public void refreshSearchRecords() {
@@ -1102,10 +1101,8 @@ public class Behaviour implements ISearchActivity {
         Log.d(TAG, "showResultList (anim " + animate + ")");
         if (TBApplication.state().getResultListVisibility() != LauncherState.AnimatedVisibility.ANIM_TO_VISIBLE)
             mResultLayout.animate().cancel();
-//        if (mResultLayout.getVisibility() == View.VISIBLE)
-//            return;
+
         mResultLayout.setVisibility(View.VISIBLE);
-        Log.d(TAG, "mResultLayout set VISIBLE (anim " + animate + ")");
         if (animate) {
             TBApplication.state().setResultList(LauncherState.AnimatedVisibility.ANIM_TO_VISIBLE);
             mResultLayout.setAlpha(0f);
@@ -1184,7 +1181,8 @@ public class Behaviour implements ISearchActivity {
         dismissPopup();
 
         TBApplication.runTask(getContext(), searcher);
-        showResultList(true);
+        boolean animate = !TBApplication.state().isResultListVisible();
+        showResultList(animate);
     }
 
     public void beforeLaunchOccurred() {
