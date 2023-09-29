@@ -5,12 +5,12 @@ apply plugin: 'com.dipien.byebyejetifier'
 
 android {
     namespace 'rocks.tbog.tblauncher'
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "rocks.tbog.tblauncher"
         minSdk 19
-        targetSdk 33
+        targetSdk 34
         versionCode 42
         versionName "7.4"
         vectorDrawables.useSupportLibrary = true
