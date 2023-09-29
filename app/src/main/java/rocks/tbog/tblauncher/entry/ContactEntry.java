@@ -8,7 +8,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
-import android.graphics.PorterDuff;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -275,8 +274,9 @@ public class ContactEntry extends EntryItem {
                 phoneButton.setVisibility(View.VISIBLE);
                 phoneButton.clearColorFilter();
                 ResultViewHelper.setButtonIconAsync(phoneButton, BTN_ID_PHONE, ctx -> {
-                    phoneButton.post(() -> phoneButton.setColorFilter(contactActionColor, PorterDuff.Mode.MULTIPLY));
-                    return ResourcesCompat.getDrawable(ctx.getResources(), R.drawable.ic_phone, null);
+                    Drawable drawable = ResourcesCompat.getDrawable(ctx.getResources(), R.drawable.ic_phone, null);
+                    Utilities.setColorFilterMultiply(drawable, contactActionColor);
+                    return drawable;
                 });
                 phoneButton.setOnClickListener(v -> {
                     ResultHelper.recordLaunch(this, context);
@@ -295,8 +295,9 @@ public class ContactEntry extends EntryItem {
                 messageButton.setVisibility(View.VISIBLE);
                 messageButton.clearColorFilter();
                 ResultViewHelper.setButtonIconAsync(messageButton, BTN_ID_MESSAGE, ctx -> {
-                    messageButton.post(() -> messageButton.setColorFilter(contactActionColor, PorterDuff.Mode.MULTIPLY));
-                    return ResourcesCompat.getDrawable(ctx.getResources(), R.drawable.ic_message, null);
+                    Drawable drawable = ResourcesCompat.getDrawable(ctx.getResources(), R.drawable.ic_message, null);
+                    Utilities.setColorFilterMultiply(drawable, contactActionColor);
+                    return drawable;
                 });
                 messageButton.setOnClickListener(v -> {
                     ResultHelper.recordLaunch(this, context);
@@ -315,8 +316,9 @@ public class ContactEntry extends EntryItem {
                 openButton.setVisibility(View.VISIBLE);
                 openButton.clearColorFilter();
                 ResultViewHelper.setButtonIconAsync(openButton, BTN_ID_OPEN, ctx -> {
-                    openButton.post(() -> openButton.setColorFilter(contactActionColor, PorterDuff.Mode.MULTIPLY));
-                    return ResourcesCompat.getDrawable(ctx.getResources(), R.drawable.ic_send, null);
+                    Drawable drawable = ResourcesCompat.getDrawable(ctx.getResources(), R.drawable.ic_send, null);
+                    Utilities.setColorFilterMultiply(drawable, contactActionColor);
+                    return drawable;
                 });
                 openButton.setOnClickListener(v -> {
                     ResultHelper.recordLaunch(this, context);
