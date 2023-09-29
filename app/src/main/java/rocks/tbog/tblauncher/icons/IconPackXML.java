@@ -35,7 +35,6 @@ import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Random;
-import java.util.stream.Collectors;
 
 import rocks.tbog.tblauncher.drawable.DrawableUtils;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
@@ -296,10 +295,6 @@ public class IconPackXML implements IconPack<DrawableInfo> {
             return;
 
         Map<String, CalendarDrawable> calendarDrawablesByPrefix = new ArrayMap<>(0);
-        Map<String, Integer> drawableCache = drawableList.stream()
-            .filter(d -> (d instanceof SimpleDrawable))
-            .collect(Collectors.toMap(DrawableInfo::getDrawableName, d -> ((SimpleDrawable) d).getResourceId()));
-
         try {
             XmlPullParser xpp = findAppFilterXml();
             if (xpp != null) {
@@ -319,10 +314,6 @@ public class IconPackXML implements IconPack<DrawableInfo> {
                                         drawableId = packResources.getIdentifier(drawableName, "drawable", iconPackPackageName);
                                         if (drawableId != 0)
                                             backImages.add(new SimpleDrawable(drawableName, drawableId));
-//                                    Bitmap iconback = loadBitmap(drawableName);
-//                                    if (iconback != null) {
-//                                        backImages.add(iconback);
-//                                    }
                                     }
                                 }
                                 break;
@@ -333,7 +324,6 @@ public class IconPackXML implements IconPack<DrawableInfo> {
                                     drawableId = packResources.getIdentifier(drawableName, "drawable", iconPackPackageName);
                                     if (drawableId != 0)
                                         maskImage = new SimpleDrawable(drawableName, drawableId);
-                                    //maskImage = loadBitmap(drawableName);
                                 }
                                 break;
                             //parse <iconupon> xml tags used as front image of generated icons
@@ -343,7 +333,6 @@ public class IconPackXML implements IconPack<DrawableInfo> {
                                     drawableId = packResources.getIdentifier(drawableName, "drawable", iconPackPackageName);
                                     if (drawableId != 0)
                                         frontImage = new SimpleDrawable(drawableName, drawableId);
-                                    //frontImage = loadBitmap(drawableName);
                                 }
                                 break;
                             //parse <scale> xml tags used as scale factor of original bitmap icon
