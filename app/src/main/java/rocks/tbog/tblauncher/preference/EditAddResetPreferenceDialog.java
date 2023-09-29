@@ -23,7 +23,7 @@ public abstract class EditAddResetPreferenceDialog extends BasePreferenceDialog 
         T fragment;
         try {
             fragment = clazz.newInstance();
-        } catch (IllegalAccessException | java.lang.InstantiationException e) {
+        } catch (ReflectiveOperationException e) {
             Log.e(TAG, "no constructor?", e);
             return null;
         }
