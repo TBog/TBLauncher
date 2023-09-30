@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.BaseAdapter;
 import android.widget.GridView;
@@ -14,6 +15,7 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.collection.ArraySet;
 import androidx.fragment.app.DialogFragment;
 
 import java.util.ArrayList;
@@ -30,12 +32,14 @@ import rocks.tbog.tblauncher.utils.UISizes;
 import rocks.tbog.tblauncher.utils.Utilities;
 
 class IconPackPage extends PageAdapter.Page {
+    private static final String TAG = IconPackPage.class.getSimpleName();
     final ArrayList<IconData> iconDataList = new ArrayList<>();
     final String packageName;
     private ProgressBar mIconLoadingBar;
     private GridView mGridView;
     private TextView mSearch;
     private IconPackXML mIconPack = null;
+    private final ArraySet<String> mInvalidDrawables = new ArraySet<>(0);
 
     IconPackPage(CharSequence name, String packPackageName, View view) {
         super(name, view);
@@ -44,7 +48,7 @@ class IconPackPage extends PageAdapter.Page {
 
     @Override
     void setupView(@NonNull DialogFragment dialogFragment, @Nullable OnItemClickListener iconClickListener, @Nullable OnItemClickListener iconLongClickListener) {
-        Context context = dialogFragment.getContext();
+        Context context = dialogFragment.requireContext();
         mIconLoadingBar = pageView.findViewById(R.id.iconLoadingBar);
 
         Drawable packIcon = null;
@@ -104,16 +108,30 @@ class IconPackPage extends PageAdapter.Page {
     void loadData() {
         super.loadData();
 
+        final ArraySet<String> invalidDrawables = new ArraySet<>(0);
         // load the new pack
         final IconPackXML pack = TBApplication.iconPackCache(pageView.getContext()).getIconPack(packageName);
         Utilities.runAsync((t) -> {
             Activity activity = Utilities.getActivity(pageView);
-            if (activity != null)
+            if (activity != null) {
                 pack.loadDrawables(activity.getPackageManager());
+                Collection<DrawableInfo> drawables = pack.getDrawableList();
+                for (DrawableInfo info : drawables) {
+                    if (info.getDrawableResId(pack) == 0) {
+                        invalidDrawables.add(info.getDrawableName());
+                    }
+                }
+            }
         }, (t) -> {
             Activity activity = Utilities.getActivity(pageView);
             if (activity != null) {
                 mIconPack = pack;
+                mInvalidDrawables.clear();
+                mInvalidDrawables.addAll(invalidDrawables);
+                int invalidDrawablesSize = mInvalidDrawables.size();
+                if (invalidDrawablesSize > 0) {
+                    Log.w(TAG, "icon pack `" + mIconPack.getPackPackageName() + "` has " + invalidDrawablesSize + " drawable(s) without resource id");
+                }
                 refreshList();
             } else
                 mIconPack = null;
@@ -127,6 +145,8 @@ class IconPackPage extends PageAdapter.Page {
             StringNormalizer.Result normalized = StringNormalizer.normalizeWithResult(mSearch.getText(), true);
             FuzzyScore fuzzyScore = new FuzzyScore(normalized.codePoints);
             for (DrawableInfo info : drawables) {
+                if (mInvalidDrawables.contains(info.getDrawableName()))
+                    continue;
                 if (fuzzyScore.match(info.getDrawableName()).match)
                     iconDataList.add(new IconData(mIconPack, info));
             }

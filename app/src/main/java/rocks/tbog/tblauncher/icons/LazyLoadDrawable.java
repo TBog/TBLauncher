@@ -20,6 +20,20 @@ public class LazyLoadDrawable extends DrawableInfo {
     }
 
     @SuppressLint("DiscouragedApi")
+    @Override
+    @DrawableRes
+    public int getDrawableResId(@NonNull IconPackXML iconPack) {
+        Resources res = iconPack.getResources();
+        if (res == null)
+            return drawableId;
+        if (!drawableIdCached) {
+            drawableId = res.getIdentifier(getDrawableName(), "drawable", iconPack.getPackPackageName());
+            drawableIdCached = true;
+        }
+        return drawableId;
+    }
+
+    @SuppressLint("DiscouragedApi")
     @Nullable
     @Override
     public Drawable getDrawable(@NonNull IconPackXML iconPack, @Nullable Resources.Theme theme) {
