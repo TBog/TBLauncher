@@ -126,11 +126,11 @@ public class RecycleAdapter extends RecyclerView.Adapter<RecycleAdapter.Holder> 
         onClick(result, anyView);
     }
 
-    public static void onClick(final EntryItem result, View v) {
+    public static void onClick(final EntryItem result, @NonNull View v) {
         ResultHelper.launch(v, result);
     }
 
-    public static boolean onLongClick(final EntryItem result, View v) {
+    public static boolean onLongClick(final EntryItem result, @NonNull View v) {
         ListPopup menu = result.getPopupMenu(v);
 
         // check if menu contains elements and if yes show it

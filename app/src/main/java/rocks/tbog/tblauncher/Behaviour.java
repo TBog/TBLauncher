@@ -108,7 +108,6 @@ public class Behaviour implements ISearchActivity {
     private static final String TAG = Behaviour.class.getSimpleName();
     private TBLauncherActivity mTBLauncherActivity = null;
     private DialogFragment<?> mFragmentDialog = null;
-
     private View mResultLayout;
     private RecyclerList mResultList;
     private RecycleAdapter mResultAdapter;
@@ -131,6 +130,7 @@ public class Behaviour implements ISearchActivity {
             mLauncherTime.postDelayed(mUpdateTime, delay);
         }
     };
+    private boolean mLaunchMostRelevantResult = false;
     private final TextWatcher mSearchTextWatcher = new TextWatcher() {
         @NonNull
         String lastText = "";
@@ -147,7 +147,7 @@ public class Behaviour implements ISearchActivity {
                 s.delete(0, spaceEnd);
             } else {
                 String text = s.toString();
-                if (lastText.equals(text))
+                if (lastText.equals(text) || mLaunchMostRelevantResult)
                     return;
                 if (TextUtils.isEmpty(text))
                     clearAdapter();
@@ -383,11 +383,16 @@ public class Behaviour implements ISearchActivity {
             }
 
             // launch most relevant result
-            final int mostRelevantIdx = mResultList.getAdapterFirstItemIdx();
-            if (mostRelevantIdx >= 0 && mostRelevantIdx < mResultAdapter.getItemCount()) {
-                RecyclerView.ViewHolder holder = mResultList.findViewHolderForAdapterPosition(mostRelevantIdx);
-                mResultAdapter.onClick(mostRelevantIdx, holder != null ? holder.itemView : view);
+            if (TBApplication.hasSearchTask(getContext())) {
+                mLaunchMostRelevantResult = true;
                 return true;
+            } else {
+                final int mostRelevantIdx = mResultList.getAdapterFirstItemIdx();
+                if (mostRelevantIdx >= 0 && mostRelevantIdx < mResultAdapter.getItemCount()) {
+                    RecyclerView.ViewHolder holder = mResultList.findViewHolderForAdapterPosition(mostRelevantIdx);
+                    mResultAdapter.onClick(mostRelevantIdx, holder != null ? holder.itemView : view);
+                    return true;
+                }
             }
             return false;
         });
@@ -1027,6 +1032,22 @@ public class Behaviour implements ISearchActivity {
         mTBLauncherActivity.quickList.adapterUpdated();
         mClearButton.setVisibility(View.VISIBLE);
         mMenuButton.setVisibility(View.INVISIBLE);
+
+        if (mLaunchMostRelevantResult) {
+            mLaunchMostRelevantResult = false;
+
+            // get any view
+            View view = mResultList.getLayoutManager() != null ? mResultList.getLayoutManager().getChildAt(0) : null;
+            final int mostRelevantIdx = mResultList.getAdapterFirstItemIdx();
+            // try to get view of the most relevant item from adapter
+            if (mostRelevantIdx >= 0 && mostRelevantIdx < mResultAdapter.getItemCount()) {
+                RecyclerView.ViewHolder holder = mResultList.findViewHolderForAdapterPosition(mostRelevantIdx);
+                if (holder != null)
+                    view = holder.itemView;
+            }
+            if (view != null)
+                mResultAdapter.onClick(mostRelevantIdx, view);
+        }
     }
 
     @Override
