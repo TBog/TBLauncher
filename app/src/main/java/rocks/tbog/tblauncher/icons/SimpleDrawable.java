@@ -17,8 +17,9 @@ public class SimpleDrawable extends DrawableInfo {
         this.drawableId = drawableId;
     }
 
+    @Override
     @DrawableRes
-    public int getResourceId() {
+    public int getDrawableResId(@NonNull IconPackXML iconPack) {
         return drawableId;
     }
 

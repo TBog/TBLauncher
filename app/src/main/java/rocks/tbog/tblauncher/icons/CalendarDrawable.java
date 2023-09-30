@@ -24,11 +24,19 @@ public class CalendarDrawable extends DrawableInfo {
     }
 
     @SuppressLint("DiscouragedApi")
+    @Override
+    @DrawableRes
+    public int getDrawableResId(@NonNull IconPackXML iconPack) {
+        int dayOfMonthIdx = Calendar.getInstance().get(Calendar.DAY_OF_MONTH) - 1;
+        return getDayDrawableId(iconPack, dayOfMonthIdx);
+    }
+
+    @SuppressLint("DiscouragedApi")
     @DrawableRes
     private int getDayDrawableId(@NonNull IconPackXML iconPack, int dayOfMonthIdx) {
         Resources res = iconPack.getResources();
         if (res == null)
-            return 0;
+            return drawableForDay[dayOfMonthIdx];
         if (!drawableIdCached[dayOfMonthIdx]) {
             String drawableName = getDrawableName() + (1 + dayOfMonthIdx);
             drawableForDay[dayOfMonthIdx] = res.getIdentifier(drawableName, "drawable", iconPack.getPackPackageName());
