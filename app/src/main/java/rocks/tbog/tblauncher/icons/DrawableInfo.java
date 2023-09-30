@@ -3,6 +3,7 @@ package rocks.tbog.tblauncher.icons;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
 
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -24,6 +25,9 @@ public abstract class DrawableInfo {
     public boolean isDynamic() {
         return false;
     }
+
+    @DrawableRes
+    public abstract int getDrawableResId(@NonNull IconPackXML iconPack);
 
     @Nullable
     public abstract Drawable getDrawable(@NonNull IconPackXML iconPack, @Nullable Resources.Theme theme);

@@ -1,6 +1,7 @@
 package rocks.tbog.tblauncher.customicon;
 
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -31,6 +32,7 @@ public class IconViewHolder extends ViewHolderAdapter.ViewHolder<IconData> {
     }
 
     static class AsyncLoad extends AsyncTask<IconData, Drawable> {
+        private static final String TAG = AsyncLoad.class.getSimpleName();
         private final WeakReference<IconViewHolder> holder;
 
         protected AsyncLoad(IconViewHolder holder) {
@@ -48,11 +50,16 @@ public class IconViewHolder extends ViewHolderAdapter.ViewHolder<IconData> {
 
         @Override
         protected Drawable doInBackground(IconData iconData) {
-            return iconData.getIcon();
+            Drawable drawable = iconData.getIcon();
+            if (drawable == null)
+                Log.w(TAG, "drawable `" + iconData.drawableInfo.getDrawableName() + "` from icon pack `" + iconData.iconPack.getPackPackageName() + "` doesn't load");
+            return drawable;
         }
 
         @Override
         protected void onPostExecute(Drawable drawable) {
+            if (drawable == null)
+                return;
             IconViewHolder h = holder.get();
             if (h == null || h.loader != this)
                 return;
