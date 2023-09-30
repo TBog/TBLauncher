@@ -22,47 +22,59 @@ public class DrawableCache {
     }
 
     public void setCalendar(String cacheId) {
-        DrawableInfo info = mCache.get(cacheId);
-        if (info != null)
-            info.setToday();
+        synchronized (mCache) {
+            DrawableInfo info = mCache.get(cacheId);
+            if (info != null)
+                info.setToday();
+        }
     }
 
     @Nullable
     public Drawable getCachedDrawable(@NonNull String cacheId) {
-        DrawableInfo info = mCache.get(cacheId);
-        if (info != null) {
-            if (info.isToday())
-                return info.drawable;
-            mCache.remove(cacheId);
+        synchronized (mCache) {
+            DrawableInfo info = mCache.get(cacheId);
+            if (info != null) {
+                if (info.isToday())
+                    return info.drawable;
+                mCache.remove(cacheId);
+            }
         }
         return null;
     }
 
-    @Nullable
-    public DrawableInfo getCachedInfo(@NonNull String cacheId) {
-        return mCache.get(cacheId);
-    }
-
-    public void setCachedInfo(@NonNull String cacheId, @Nullable DrawableInfo cache) {
-        if (cache == null)
-        {
-            mCache.remove(cacheId);
-            return;
-        }
-        if (!mEnabled)
-            return;
-        mCache.put(cacheId, cache);
-    }
-
     public void cacheDrawable(@NonNull String cacheId, @Nullable Drawable drawable) {
-        if (drawable == null) {
-            mCache.remove(cacheId);
-            return;
+        synchronized (mCache) {
+            if (drawable == null) {
+                mCache.remove(cacheId);
+                return;
+            }
+            if (!mEnabled)
+                return;
+            DrawableInfo info = new DrawableInfo(drawable);
+            mCache.put(cacheId, info);
         }
-        if (!mEnabled)
-            return;
-        DrawableInfo info = new DrawableInfo(drawable);
-        mCache.put(cacheId, info);
+    }
+
+    public void clearCache() {
+        synchronized (mCache) {
+            mCache.evictAll();
+        }
+    }
+
+    public void onPrefChanged(Context ctx, SharedPreferences pref) {
+        boolean enabled = pref.getBoolean("cache-drawable", true);
+        if (enabled != mEnabled) {
+            mEnabled = enabled;
+            clearCache();
+        }
+        boolean halfSize = pref.getBoolean("cache-half-apps", true);
+        Collection<?> apps = TBApplication.appsHandler(ctx).getAllApps();
+        int size = apps.size();
+        size = size < 16 ? 16 : halfSize ? (size / 2) : (size * 115 / 100);
+        Log.i(TAG, "Cache size: " + size);
+        synchronized (mCache) {
+            mCache.resize(size);
+        }
     }
 
     public static class DrawableInfo {
@@ -86,23 +98,5 @@ public class DrawableCache {
                 return true;
             return dayOfMonth == Calendar.getInstance().get(Calendar.DAY_OF_MONTH);
         }
-    }
-
-    public void clearCache() {
-        mCache.evictAll();
-    }
-
-    public void onPrefChanged(Context ctx, SharedPreferences pref) {
-        boolean enabled = pref.getBoolean("cache-drawable", true);
-        if (enabled != mEnabled) {
-            mEnabled = enabled;
-            clearCache();
-        }
-        boolean halfSize = pref.getBoolean("cache-half-apps", true);
-        Collection<?> apps = TBApplication.appsHandler(ctx).getAllApps();
-        int size = apps.size();
-        size = size < 16 ? 16 : halfSize ? (size / 2) : (size * 115 / 100);
-        Log.i(TAG, "Cache size: " + size);
-        mCache.resize(size);
     }
 }
