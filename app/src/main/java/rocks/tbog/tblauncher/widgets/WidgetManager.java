@@ -46,7 +46,6 @@ import java.util.Iterator;
 import rocks.tbog.tblauncher.Behaviour;
 import rocks.tbog.tblauncher.LiveWallpaper;
 import rocks.tbog.tblauncher.R;
-import rocks.tbog.tblauncher.SettingsActivity;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.db.DBHelper;
 import rocks.tbog.tblauncher.db.PlaceholderWidgetRecord;

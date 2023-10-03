@@ -156,7 +156,7 @@ public class SettingsFragment extends PreferenceFragmentCompat implements Shared
 
         final Context context = requireContext();
 
-        tintPreferenceIcons(getPreferenceScreen(), UIColors.getThemeColor(context, R.attr.colorAccent));
+        tintPreferenceIcons(getPreferenceScreen(), UIColors.getThemeColor(context, com.google.android.material.R.attr.colorAccent));
 
         SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
 
