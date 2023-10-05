@@ -129,7 +129,7 @@ public final class ResultViewHelper {
         return matchFound.get();
     }
 
-    public static void setButtonIconAsync(@NonNull ImageView iconView, String buttonId, @NonNull Utilities.GetDrawable getDefaultIcon) {
+    public static void setButtonIconAsync(@NonNull ImageView iconView, @NonNull String buttonId, @NonNull Utilities.GetDrawable getDefaultIcon) {
         Context context = iconView.getContext();
 
         Drawable cache = TBApplication.drawableCache(context).getCachedDrawable(buttonId);

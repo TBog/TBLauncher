@@ -414,7 +414,7 @@ public class IconsHandler {
     }
 
     @Nullable
-    public Drawable getButtonIcon(String buttonId) {
+    public Drawable getButtonIcon(@NonNull String buttonId) {
         Bitmap bitmap = TBApplication.dataHandler(ctx).getCustomEntryIconById(buttonId);
         if (bitmap != null)
             return new BitmapDrawable(ctx.getResources(), bitmap);

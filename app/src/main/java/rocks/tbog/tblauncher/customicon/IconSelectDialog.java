@@ -487,7 +487,15 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
 
     private void customIconButton(Bundle args) {
         final int defaultIcon = args.getInt("defaultIcon", 0);
-        initPreviewIcon(mPreviewLabel, ctx -> ResourcesCompat.getDrawable(getResources(), defaultIcon, null));
+        final String buttonId = args.getString("buttonId", null);
+        initPreviewIcon(mPreviewLabel, ctx -> {
+            if (buttonId != null) {
+                Drawable buttonIcon = TBApplication.iconsHandler(ctx).getButtonIcon(buttonId);
+                if (buttonIcon != null)
+                    return buttonIcon;
+            }
+            return ResourcesCompat.getDrawable(getResources(), defaultIcon, null);
+        });
     }
 
     @Override
