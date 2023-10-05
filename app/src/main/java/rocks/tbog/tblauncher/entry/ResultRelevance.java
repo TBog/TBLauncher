@@ -50,7 +50,7 @@ public class ResultRelevance implements Comparable<ResultRelevance> {
         scoreBoost = 0;
     }
 
-    public <T> void iterateList(Consumer<ResultInfo> action) {
+    public void forEach(Consumer<ResultInfo> action) {
         synchronized (infoList) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                 infoList.parallelStream().forEach(action);

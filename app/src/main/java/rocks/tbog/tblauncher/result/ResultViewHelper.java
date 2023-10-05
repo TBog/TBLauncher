@@ -53,7 +53,7 @@ public final class ResultViewHelper {
     private static CharSequence highlightText(@NonNull StringNormalizer.Result normText, @NonNull String text, @NonNull ResultRelevance relevance, int color) {
         // merge all results that have the same text source
         final TreeSet<Integer> matchedPositions = new TreeSet<>();
-        relevance.iterateList(result -> {
+        relevance.forEach(result -> {
             if (result.relevance.match && result.relevanceSource.equals(normText))
                 matchedPositions.addAll(result.relevance.matchedIndices);
             });
@@ -108,7 +108,7 @@ public final class ResultViewHelper {
 
             matchedPositions.clear();
             // find all matched positions
-            relevance.iterateList(result-> {
+            relevance.forEach(result-> {
                 if (result.relevance.match && result.relevanceSource.equals(tag.normalized)) {
                     matchedPositions.addAll(result.relevance.matchedIndices);
                     matchFound.set(true);
