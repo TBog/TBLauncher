@@ -3,6 +3,7 @@ package rocks.tbog.tblauncher.entry;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 
@@ -57,21 +58,34 @@ public class TagEntry extends StaticEntry {
     boolean popupMenuClickHandler(@NonNull View view, @NonNull LinearAdapter.MenuItem item, int stringId, View parentView) {
         Context ctx = view.getContext();
         boolean changesMade = false;
+        CharSequence toastText = null;
         if (stringId == R.string.menu_action_rename) {
             launchRenameDialog(ctx);
-            changesMade = true;
+            return true;
         } else if (stringId == R.string.menu_tag_sort_az) {
             changesMade = TBApplication.tagsHandler(ctx).changeTagSort(id, SCHEME + TagSortEntry.SORT_AZ + getName());
+            toastText = ctx.getText(stringId);
         } else if (stringId == R.string.menu_tag_sort_za) {
             changesMade = TBApplication.tagsHandler(ctx).changeTagSort(id, SCHEME + TagSortEntry.SORT_ZA + getName());
+            toastText = ctx.getText(stringId);
         } else if (stringId == R.string.menu_tag_sort_hist_rec) {
             changesMade = TBApplication.tagsHandler(ctx).changeTagSort(id, SCHEME + TagSortEntry.HISTORY_REC + getName());
+            toastText = ctx.getText(stringId);
         } else if (stringId == R.string.menu_tag_sort_hist_freq) {
             changesMade = TBApplication.tagsHandler(ctx).changeTagSort(id, SCHEME + TagSortEntry.HISTORY_FREQ + getName());
+            toastText = ctx.getText(stringId);
         } else if (stringId == R.string.menu_tag_sort_hist_frec) {
             changesMade = TBApplication.tagsHandler(ctx).changeTagSort(id, SCHEME + TagSortEntry.HISTORY_FREC + getName());
+            toastText = ctx.getText(stringId);
         } else if (stringId == R.string.menu_tag_sort_hist_adaptive) {
             changesMade = TBApplication.tagsHandler(ctx).changeTagSort(id, SCHEME + TagSortEntry.HISTORY_ADAPTIVE + getName());
+            toastText = ctx.getText(stringId);
+        }
+        if (toastText != null) {
+            if (!changesMade) {
+                toastText = ctx.getString(R.string.error, toastText);
+            }
+            Toast.makeText(ctx, toastText, Toast.LENGTH_SHORT).show();
         }
         if (changesMade) {
             // update providers, we're expecting the tag to be in the Dock
@@ -96,7 +110,7 @@ public class TagEntry extends StaticEntry {
     }
 
     @Override
-    public Drawable getDefaultDrawable(Context context) {
+    public Drawable getDefaultDrawable(@NonNull Context context) {
         return new CodePointDrawable(getName());
     }
 
