@@ -1,7 +1,5 @@
 package rocks.tbog.tblauncher.entry;
 
-import android.os.Build;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
@@ -52,11 +50,7 @@ public class ResultRelevance implements Comparable<ResultRelevance> {
 
     public void forEach(Consumer<ResultInfo> action) {
         synchronized (infoList) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                infoList.parallelStream().forEach(action);
-            } else {
-                infoList.forEach(action);
-            }
+            infoList.forEach(action);
         }
     }
 
