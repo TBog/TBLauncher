@@ -5,6 +5,7 @@ import android.content.Context;
 import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 
@@ -29,7 +30,7 @@ public class QuerySearcher extends Searcher {
     }
 
     @Override
-    public boolean addResult(EntryItem... pojos) {
+    public boolean addResult(Collection<? extends EntryItem> pojos) {
         // Give a boost if item was previously selected for this query
         for (EntryItem pojo : pojos) {
             int historyRecord = MapCompat.getOrDefault(knownIds, pojo.id, 0);
