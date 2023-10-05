@@ -28,12 +28,14 @@ import java.util.Set;
 
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
+import rocks.tbog.tblauncher.dataprovider.ModProvider;
 import rocks.tbog.tblauncher.dataprovider.TagsProvider;
 import rocks.tbog.tblauncher.db.DBHelper;
 import rocks.tbog.tblauncher.entry.AppEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.EntryWithTags;
 import rocks.tbog.tblauncher.entry.TagEntry;
+import rocks.tbog.tblauncher.entry.TagSortEntry;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.ui.TagsMenuUtils;
 import rocks.tbog.tblauncher.utils.PrefOrderedListHelper;
@@ -491,10 +493,34 @@ public class TagsHandler {
 
         editor.apply();
 
+        boolean changeMade = false;
+        // rename sorted tags from favorites
+        TagsProvider tagsProvider = dataHandler.getTagsProvider();
+        ModProvider modProvider = dataHandler.getModProvider();
+        List<EntryItem> favList = modProvider != null ? modProvider.getPojos() : null;
+        if (favList != null) {
+            for (EntryItem item : favList) {
+                if (item instanceof TagSortEntry && item.getName().equals(tagName)) {
+                    TagSortEntry tagSortEntry = (TagSortEntry) item;
+                    String newTagId = TagEntry.SCHEME + TagSortEntry.getTagSortOrder(tagSortEntry.id) + newName;
+                    TagEntry newEntry = tagsProvider != null ? tagsProvider.findById(newTagId) : null;
+                    if (newEntry == null) {
+                        newEntry = TagsProvider.newTagEntryCheckId(newTagId);
+                    }
+                    if (newEntry == null) {
+                        Log.e(TAG, "Can't change sort order from `" + tagSortEntry.id + "` to invalid tag id `" + newTagId + "`");
+                        continue;
+                    }
+                    if (DBHelper.changeTagSort(getContext(), tagSortEntry, newEntry) > 0) {
+                        changeMade = true;
+                    }
+                }
+            }
+        }
+
         // rename tag from favorites
         TagEntry tagEntry = null;
         TagEntry newEntry = null;
-        TagsProvider tagsProvider = dataHandler.getTagsProvider();
         if (tagsProvider != null) {
             tagEntry = tagsProvider.getTagEntry(tagName);
             if (tagEntry.hasCustomIcon()) {
@@ -503,7 +529,10 @@ public class TagsHandler {
         }
 
         // rename tags from database
-        return DBHelper.renameTag(getContext(), tagName, newName, tagEntry, newEntry) > 0;
+        if (DBHelper.renameTag(getContext(), tagName, newName, tagEntry, newEntry) > 0) {
+            changeMade = true;
+        }
+        return changeMade;
     }
 
     /**
