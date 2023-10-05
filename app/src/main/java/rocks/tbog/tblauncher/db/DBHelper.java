@@ -500,7 +500,7 @@ public class DBHelper {
 
         ContentValues values = new ContentValues();
         values.put("record", newEntry.id);
-        int count = db.updateWithOnConflict("favorites", values, "record = ?", new String[]{tagEntry.id}, SQLiteDatabase.CONFLICT_REPLACE);
+        int count = db.updateWithOnConflict("favorites", values, "record = ?", new String[]{tagEntry.id}, SQLiteDatabase.CONFLICT_IGNORE);
         if (count != 1) {
             Log.e(TAG, "Update favorites in rename tag; count = " + count);
         }
