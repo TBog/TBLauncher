@@ -1,19 +1,21 @@
 package rocks.tbog.tblauncher.entry;
 
+import android.os.Build;
+
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Consumer;
 
 import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
 
 public class ResultRelevance implements Comparable<ResultRelevance> {
 
-    private final List<ResultInfo> infoList = Collections.synchronizedList(new ArrayList<>(3));
+    private final List<ResultInfo> infoList = Collections.synchronizedList(new ArrayList<>(2));
     private int scoreBoost = 0;
 
     public int getRelevance() {
@@ -48,8 +50,14 @@ public class ResultRelevance implements Comparable<ResultRelevance> {
         scoreBoost = 0;
     }
 
-    public Collection<ResultInfo> getInfoList() {
-        return infoList;
+    public <T> void iterateList(Consumer<ResultInfo> action) {
+        synchronized (infoList) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+                infoList.parallelStream().forEach(action);
+            } else {
+                infoList.forEach(action);
+            }
+        }
     }
 
     @Override

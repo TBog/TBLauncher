@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.TreeSet;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import rocks.tbog.tblauncher.DrawableCache;
 import rocks.tbog.tblauncher.R;
@@ -51,12 +52,11 @@ public final class ResultViewHelper {
 
     private static CharSequence highlightText(@NonNull StringNormalizer.Result normText, @NonNull String text, @NonNull ResultRelevance relevance, int color) {
         // merge all results that have the same text source
-        TreeSet<Integer> matchedPositions = new TreeSet<>();
-        for (ResultRelevance.ResultInfo result : relevance.getInfoList()) {
-            if (result.relevance.match && result.relevanceSource.equals(normText)) {
+        final TreeSet<Integer> matchedPositions = new TreeSet<>();
+        relevance.iterateList(result -> {
+            if (result.relevance.match && result.relevanceSource.equals(normText))
                 matchedPositions.addAll(result.relevance.matchedIndices);
-            }
-        }
+            });
         if (matchedPositions.isEmpty()) {
             return text;
         }
@@ -96,7 +96,7 @@ public final class ResultViewHelper {
 
     public static boolean displayHighlighted(@NonNull ResultRelevance relevance, Iterable<EntryWithTags.TagDetails> tags,
                                              TextView view, Context context) {
-        boolean matchFound = false;
+        AtomicBoolean matchFound = new AtomicBoolean(false);
         TreeSet<Integer> matchedPositions = new TreeSet<>();
         int color = UIColors.getResultHighlightColor(context);
         SpannableStringBuilder builder = new SpannableStringBuilder();
@@ -108,12 +108,12 @@ public final class ResultViewHelper {
 
             matchedPositions.clear();
             // find all matched positions
-            for (ResultRelevance.ResultInfo result : relevance.getInfoList()) {
+            relevance.iterateList(result-> {
                 if (result.relevance.match && result.relevanceSource.equals(tag.normalized)) {
                     matchedPositions.addAll(result.relevance.matchedIndices);
-                    matchFound = true;
+                    matchFound.set(true);
                 }
-            }
+            });
 
             if (matchedPositions.isEmpty()) {
                 // no matches found
@@ -127,7 +127,7 @@ public final class ResultViewHelper {
 
         view.setText(builder);
 
-        return matchFound;
+        return matchFound.get();
     }
 
     public static void setButtonIconAsync(@NonNull ImageView iconView, String buttonId, @NonNull Utilities.GetDrawable getDefaultIcon) {
