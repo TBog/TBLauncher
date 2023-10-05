@@ -7,7 +7,7 @@ import rocks.tbog.tblauncher.entry.EntryItem;
 
 public class ResultBuffer<T extends EntryItem> implements ISearcher {
     private final boolean tagsEnabled;
-    private final ArrayList<T> entryItems = new ArrayList<>(0);
+    private final ArrayList<T> entryItems = new ArrayList<>();
     Class<T> typeClass;
 
     public ResultBuffer(boolean tagsEnabled, Class<T> typeClass) {
