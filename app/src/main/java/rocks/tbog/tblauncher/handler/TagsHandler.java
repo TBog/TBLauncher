@@ -532,6 +532,14 @@ public class TagsHandler {
         if (DBHelper.renameTag(getContext(), tagName, newName, tagEntry, newEntry) > 0) {
             changeMade = true;
         }
+
+        if (changeMade) {
+            if (tagsProvider != null)
+                tagsProvider.setDirty();
+            if (modProvider != null)
+                modProvider.setDirty();
+        }
+
         return changeMade;
     }
 

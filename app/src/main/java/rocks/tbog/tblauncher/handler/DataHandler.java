@@ -1021,8 +1021,13 @@ public class DataHandler extends BroadcastReceiver
         sendBroadcast(context, TBLauncherActivity.START_LOAD, "reload_" + loadStep);
 
         for (int step : IProvider.LOAD_STEPS) {
-            if (step < loadStep)
+            if (step < loadStep) {
+                for (ProviderEntry entry : providers.values()) {
+                    if (entry.provider != null && step == entry.provider.getLoadStep() && !entry.provider.isLoaded())
+                        entry.provider.reload(false);
+                }
                 continue;
+            }
             for (ProviderEntry entry : providers.values()) {
                 if (entry.provider != null && step == entry.provider.getLoadStep())
                     entry.provider.reload(true);
@@ -1108,22 +1113,25 @@ public class DataHandler extends BroadcastReceiver
     }
 
     public void afterQuickListChanged() {
+        mFullLoadOverSent = false;
         // refresh relevant providers for the Dock
         {
             IProvider<?> provider = getModProvider();
             if (provider != null)
-                provider.reload(true);
+                provider.setDirty();
         }
         {
             IProvider<?> provider = getTagsProvider();
             if (provider != null)
-                provider.reload(true);
+                provider.setDirty();
         }
         {
             IProvider<?> provider = getQuickListProvider();
             if (provider != null)
-                provider.reload(true);
+                provider.setDirty();
         }
+        // reload all dirty providers
+        reloadProviders(IProvider.LOAD_STEP_3);
     }
 
     public boolean fullLoadOverSent() {
