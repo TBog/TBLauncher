@@ -109,24 +109,31 @@ public class TagsManager {
     }
 
     public static void afterChangesMade(@NonNull Context context) {
-        TBApplication.drawableCache(context).clearCache();
-        DataHandler dataHandler = TBApplication.dataHandler(context);
+        final TBApplication app = TBApplication.getApplication(context);
+        DataHandler dataHandler = app.getDataHandler();
+        app.drawableCache().clearCache();
 
+        // QuickListProvider is a LOAD_STEP_1 provider that loads placeholders
+        {
+            IProvider<?> provider = dataHandler.getQuickListProvider();
+            if (provider != null)
+                provider.setDirty();
+        }
         dataHandler.reloadProviders(IProvider.LOAD_STEP_2);
+        if (dataHandler.fullLoadOverSent()) {
+            throw new IllegalStateException("can't use `runAfterLoadOver` if `reloadProviders` doesn't clear `fullLoadOverSent` flag");
+        }
 
-        RunnableTask afterProviders = TaskRunner.newTask(task -> {
-                TBApplication app = TBApplication.getApplication(context);
-                AppsHandler.setTagsForApps(app.appsHandler().getAllApps(), app.tagsHandler());
-            },
+        RunnableTask afterProviders = TaskRunner.newTask(task -> AppsHandler.setTagsForApps(app.appsHandler().getAllApps(), app.tagsHandler()),
             task -> {
                 Log.d(TAG, "tags and fav providers should have loaded by now");
-                TBLauncherActivity activity = TBApplication.launcherActivity(context);
+                TBLauncherActivity activity = app.launcherActivity();
                 if (activity != null) {
                     activity.refreshSearchRecords();
                     activity.queueDockReload();
                 }
             });
-        DataHandler.EXECUTOR_PROVIDERS.execute(afterProviders);
+        dataHandler.runAfterLoadOver(afterProviders);
     }
 
     public void bindView(@NonNull View view, @Nullable OnItemClickListener listener) {
@@ -195,26 +202,26 @@ public class TagsManager {
 
     private void launchRenameDialog(Context ctx, TagInfo info) {
         DialogHelper.makeRenameDialog(ctx, info.name, (dialog, newName) -> {
-            boolean isValid = true;
-            for (TagInfo tagInfo : mTagList) {
-                if (tagInfo == info)
-                    continue;
-                if (tagInfo.tagName.equals(newName) || tagInfo.name.equals(newName)) {
-                    isValid = false;
-                    break;
+                boolean isValid = true;
+                for (TagInfo tagInfo : mTagList) {
+                    if (tagInfo == info)
+                        continue;
+                    if (tagInfo.tagName.equals(newName) || tagInfo.name.equals(newName)) {
+                        isValid = false;
+                        break;
+                    }
                 }
-            }
-            if (!isValid) {
-                Toast.makeText(ctx, ctx.getString(R.string.invalid_rename_tag, newName), Toast.LENGTH_LONG).show();
-                return;
-            }
+                if (!isValid) {
+                    Toast.makeText(ctx, ctx.getString(R.string.invalid_rename_tag, newName), Toast.LENGTH_LONG).show();
+                    return;
+                }
 
-            // Set new name
-            info.name = newName;
-            info.action = info.tagName.equals(info.name) ? TagInfo.Action.NONE : TagInfo.Action.RENAME;
+                // Set new name
+                info.name = newName;
+                info.action = info.tagName.equals(info.name) ? TagInfo.Action.NONE : TagInfo.Action.RENAME;
 
-            mAdapter.notifyDataSetChanged();
-        })
+                mAdapter.notifyDataSetChanged();
+            })
             .setTitle(R.string.title_rename_tag)
             .setHint(R.string.hint_rename_tag)
             .show();
