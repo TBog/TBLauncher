@@ -26,7 +26,6 @@ import java.util.Objects;
 import rocks.tbog.tblauncher.WorkAsync.RunnableTask;
 import rocks.tbog.tblauncher.WorkAsync.TaskRunner;
 import rocks.tbog.tblauncher.customicon.IconSelectDialog;
-import rocks.tbog.tblauncher.dataprovider.IProvider;
 import rocks.tbog.tblauncher.dataprovider.TagsProvider;
 import rocks.tbog.tblauncher.drawable.CodePointDrawable;
 import rocks.tbog.tblauncher.drawable.DrawableUtils;
@@ -113,13 +112,7 @@ public class TagsManager {
         DataHandler dataHandler = app.getDataHandler();
         app.drawableCache().clearCache();
 
-        // QuickListProvider is a LOAD_STEP_1 provider that loads placeholders
-        {
-            IProvider<?> provider = dataHandler.getQuickListProvider();
-            if (provider != null)
-                provider.setDirty();
-        }
-        dataHandler.reloadProviders(IProvider.LOAD_STEP_2);
+        dataHandler.reloadProviderAndDependencies(dataHandler.getQuickListProvider());
         if (dataHandler.fullLoadOverSent()) {
             throw new IllegalStateException("can't use `runAfterLoadOver` if `reloadProviders` doesn't clear `fullLoadOverSent` flag");
         }

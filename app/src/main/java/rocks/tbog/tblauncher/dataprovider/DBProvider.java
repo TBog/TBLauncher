@@ -24,7 +24,7 @@ import rocks.tbog.tblauncher.searcher.ISearcher;
 import rocks.tbog.tblauncher.utils.Timer;
 
 public abstract class DBProvider<T extends EntryItem> implements IProvider<T> {
-    final Context context;
+    protected final Context context;
     protected List<T> entryList = new ArrayList<>();
 
     private boolean mIsLoaded = false;
