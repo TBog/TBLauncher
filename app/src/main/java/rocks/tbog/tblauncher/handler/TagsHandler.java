@@ -28,7 +28,6 @@ import java.util.Set;
 
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
-import rocks.tbog.tblauncher.dataprovider.ModProvider;
 import rocks.tbog.tblauncher.dataprovider.TagsProvider;
 import rocks.tbog.tblauncher.db.DBHelper;
 import rocks.tbog.tblauncher.entry.AppEntry;
@@ -494,26 +493,23 @@ public class TagsHandler {
         editor.apply();
 
         boolean changeMade = false;
-        // rename sorted tags from favorites
+        // rename sorted tags
         TagsProvider tagsProvider = dataHandler.getTagsProvider();
-        ModProvider modProvider = dataHandler.getModProvider();
-        List<EntryItem> favList = modProvider != null ? modProvider.getPojos() : null;
-        if (favList != null) {
-            for (EntryItem item : favList) {
-                if (item instanceof TagSortEntry && item.getName().equals(tagName)) {
-                    TagSortEntry tagSortEntry = (TagSortEntry) item;
-                    String newTagId = TagEntry.SCHEME + TagSortEntry.getTagSortOrder(tagSortEntry.id) + newName;
-                    TagEntry newEntry = tagsProvider != null ? tagsProvider.findById(newTagId) : null;
-                    if (newEntry == null) {
-                        newEntry = TagsProvider.newTagEntryCheckId(newTagId);
-                    }
-                    if (newEntry == null) {
-                        Log.e(TAG, "Can't change sort order from `" + tagSortEntry.id + "` to invalid tag id `" + newTagId + "`");
-                        continue;
-                    }
-                    if (DBHelper.changeTagSort(getContext(), tagSortEntry, newEntry) > 0) {
-                        changeMade = true;
-                    }
+        List<TagEntry> tagList = tagsProvider != null ? tagsProvider.getPojos() : null;
+        for (Object item : tagList != null ? tagList : Collections.emptyList()) {
+            if (item instanceof TagSortEntry && ((TagSortEntry)item).getName().equals(tagName)) {
+                TagSortEntry tagSortEntry = (TagSortEntry) item;
+                String newTagId = TagEntry.SCHEME + TagSortEntry.getTagSortOrder(tagSortEntry.id) + newName;
+                TagEntry newEntry = tagsProvider.findById(newTagId);
+                if (newEntry == null) {
+                    newEntry = TagsProvider.newTagEntryCheckId(newTagId);
+                }
+                if (newEntry == null) {
+                    Log.e(TAG, "Can't change sort order from `" + tagSortEntry.id + "` to invalid tag id `" + newTagId + "`");
+                    continue;
+                }
+                if (DBHelper.changeTagSort(getContext(), tagSortEntry, newEntry) > 0) {
+                    changeMade = true;
                 }
             }
         }
@@ -536,8 +532,6 @@ public class TagsHandler {
         if (changeMade) {
             if (tagsProvider != null)
                 tagsProvider.setDirty();
-            if (modProvider != null)
-                modProvider.setDirty();
         }
 
         return changeMade;
