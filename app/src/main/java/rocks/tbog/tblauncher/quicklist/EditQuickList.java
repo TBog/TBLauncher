@@ -15,6 +15,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.StringRes;
 import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager.widget.ViewPager;
@@ -34,9 +35,12 @@ import rocks.tbog.tblauncher.dataprovider.TagsProvider;
 import rocks.tbog.tblauncher.db.ModRecord;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.TagEntry;
+import rocks.tbog.tblauncher.entry.TagSortEntry;
 import rocks.tbog.tblauncher.handler.DataHandler;
 import rocks.tbog.tblauncher.result.EntryAdapter;
 import rocks.tbog.tblauncher.result.LoadDataForAdapter;
+import rocks.tbog.tblauncher.ui.LinearAdapter;
+import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.ui.RecyclerList;
 import rocks.tbog.tblauncher.utils.DebugInfo;
 
@@ -112,6 +116,18 @@ public class EditQuickList {
         gridView.setOnItemClickListener(mAddToQuickList);
     }
 
+    private void addSortedTag(@NonNull TagEntry entryItem, @NonNull String sortOrder, @NonNull TagsProvider tagsProvider) {
+        String sortedTagId = TagEntry.SCHEME + sortOrder + entryItem.getName();
+        TagEntry sortedTagEntry = tagsProvider.findById(sortedTagId);
+        if (sortedTagEntry == null)
+            sortedTagEntry = TagsProvider.newTagEntryCheckId(sortedTagId);
+        if (sortedTagEntry == null) {
+            Log.e(TAG, "Can't change sort order from `" + entryItem.id + "` to invalid tag id `" + sortedTagId + "`");
+            return;
+        }
+        mAdapter.addItem(sortedTagEntry);
+    }
+
     private void addTags(@NonNull LayoutInflater inflater, @NonNull ArrayList<ViewPagerAdapter.PageInfo> pages) {
         GridView gridView = (GridView) inflater.inflate(R.layout.quick_list_editor_page, mViewPager, false);
         pages.add(new ViewPagerAdapter.PageInfo(inflater.getContext().getString(R.string.edit_quick_list_tab_tags), gridView));
@@ -136,6 +152,58 @@ public class EditQuickList {
             return data;
         }).execute();
         gridView.setOnItemClickListener(mAddToQuickList);
+        gridView.setOnItemLongClickListener((parent, view, pos, id) -> {
+            EntryItem entryItem = null;
+            if (parent.getAdapter() instanceof EntryAdapter) {
+                EntryAdapter entryAdapter = (EntryAdapter) parent.getAdapter();
+                entryItem = entryAdapter.getItem(pos);
+            }
+
+            if (!(entryItem instanceof TagEntry))
+                return false;
+            final TagEntry tagEntry = (TagEntry) entryItem;
+
+            TBApplication app = TBApplication.getApplication(parent.getContext());
+            Context ctx = app.launcherActivity();
+            if (ctx == null)
+                return false;
+            LinearAdapter popupAdapter = new LinearAdapter();
+
+            popupAdapter.add(new LinearAdapter.ItemTitle(entryItem.getName()));
+            popupAdapter.add(new LinearAdapter.Item(ctx, R.string.menu_tag_sort_az));
+            popupAdapter.add(new LinearAdapter.Item(ctx, R.string.menu_tag_sort_za));
+            popupAdapter.add(new LinearAdapter.Item(ctx, R.string.menu_tag_sort_hist_rec));
+            popupAdapter.add(new LinearAdapter.Item(ctx, R.string.menu_tag_sort_hist_freq));
+            popupAdapter.add(new LinearAdapter.Item(ctx, R.string.menu_tag_sort_hist_frec));
+            popupAdapter.add(new LinearAdapter.Item(ctx, R.string.menu_tag_sort_hist_adaptive));
+
+            ListPopup.create(ctx, popupAdapter)
+                .setModal(true)
+                .setOnItemClickListener((a, v, popupPos) -> {
+                    LinearAdapter.MenuItem item = ((LinearAdapter) a).getItem(popupPos);
+                    @StringRes int stringId = 0;
+                    if (item instanceof LinearAdapter.Item) {
+                        stringId = ((LinearAdapter.Item) item).stringId;
+                    }
+                    TagsProvider tagsProvider = app.getDataHandler().getTagsProvider();
+                    if (tagsProvider == null)
+                        return;
+                    if (R.string.menu_tag_sort_az == stringId) {
+                        addSortedTag(tagEntry, TagSortEntry.SORT_AZ, tagsProvider);
+                    } else if (R.string.menu_tag_sort_za == stringId) {
+                        addSortedTag(tagEntry, TagSortEntry.SORT_ZA, tagsProvider);
+                    } else if (R.string.menu_tag_sort_hist_rec == stringId) {
+                        addSortedTag(tagEntry, TagSortEntry.HISTORY_REC, tagsProvider);
+                    } else if (R.string.menu_tag_sort_hist_freq == stringId) {
+                        addSortedTag(tagEntry, TagSortEntry.HISTORY_FREQ, tagsProvider);
+                    } else if (R.string.menu_tag_sort_hist_frec == stringId) {
+                        addSortedTag(tagEntry, TagSortEntry.HISTORY_FREC, tagsProvider);
+                    } else if (R.string.menu_tag_sort_hist_adaptive == stringId) {
+                        addSortedTag(tagEntry, TagSortEntry.HISTORY_ADAPTIVE, tagsProvider);
+                    }
+                }).show(view);
+            return true;
+        });
     }
 
     private void addFavorites(@NonNull LayoutInflater inflater, @NonNull ArrayList<ViewPagerAdapter.PageInfo> pages) {
