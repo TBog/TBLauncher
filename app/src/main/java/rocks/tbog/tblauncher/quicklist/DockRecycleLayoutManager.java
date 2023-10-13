@@ -314,6 +314,19 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
         return getPaddingLeft() + pageOffset;
     }
 
+    private void layoutComputeScrollOffset() {
+        int pageIdx = getPageIdx(mScrollToAdapterPosition);
+        int pagePosition = getPagePosition(pageIdx);
+        // force-scroll the child views
+        int dx = -pagePosition - mScrollOffsetHorizontal;
+        logDebug("scrollToPosition " + mScrollToAdapterPosition +
+            " pageIdx=" + pageIdx +
+            " pagePos=" + pagePosition +
+            " dx=" + dx);
+        offsetChildrenHorizontal(dx);
+        mScrollOffsetHorizontal += dx;
+    }
+
     private void layoutChildren(RecyclerView.Recycler recycler) {
         /*
          * Detach all existing views from the layout.
@@ -324,23 +337,31 @@ public class DockRecycleLayoutManager extends RecyclerView.LayoutManager impleme
 
         // if scrollToPosition is valid, force-scroll to that page
         if (mScrollToAdapterPosition >= 0 && mScrollToAdapterPosition < getItemCount()) {
-            int pageIdx = getPageIdx(mScrollToAdapterPosition);
-            int pagePosition = getPagePosition(pageIdx);
-            // force-scroll the child views
-            int dx = -pagePosition - mScrollOffsetHorizontal;
-            logDebug("scrollToPosition " + mScrollToAdapterPosition +
-                " pageIdx=" + pageIdx +
-                " pagePos=" + pagePosition +
-                " dx=" + dx);
-            offsetChildrenHorizontal(dx);
-            mScrollOffsetHorizontal += dx;
+            layoutComputeScrollOffset();
         }
         // turn off scrollToPosition
         mScrollToAdapterPosition = -1;
 
-        // compute scroll position after we populate `mViewCache`
-        final int scrollOffset = mScrollOffsetHorizontal;
-        final int firstVisiblePos = findFirstVisibleAdapterPosition();
+        final int scrollOffset;
+        final int firstVisiblePos;
+
+        // don't show a blank page (it happens when removing the last element on the last page)
+        {
+            final int position = findFirstVisibleAdapterPosition();
+            if (position >= getItemCount() && getItemCount() > 0) {
+                logDebug("force scroll");
+                mScrollToAdapterPosition = getItemCount() - 1;
+                layoutComputeScrollOffset();
+                mScrollToAdapterPosition = -1;
+
+                // set scroll position after we populate `mViewCache` and apply scroll offset
+                scrollOffset = mScrollOffsetHorizontal;
+                firstVisiblePos = findFirstVisibleAdapterPosition();
+            } else {
+                scrollOffset = mScrollOffsetHorizontal;
+                firstVisiblePos = position;
+            }
+        }
 
         logDebug("layoutChildren" +
             " scrollOffset=" + scrollOffset +
