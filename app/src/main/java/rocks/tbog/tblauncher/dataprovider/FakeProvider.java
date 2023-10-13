@@ -10,6 +10,7 @@ import rocks.tbog.tblauncher.searcher.ISearcher;
 import rocks.tbog.tblauncher.utils.Timer;
 
 public class FakeProvider<T extends EntryItem> implements IProvider<T> {
+    @NonNull
     private final GetEntryItems<T> mEntryProvider;
 
     public interface GetEntryItems<EntryType> {
@@ -17,17 +18,18 @@ public class FakeProvider<T extends EntryItem> implements IProvider<T> {
         List<EntryType> getEntryItems();
     }
 
-    public FakeProvider(GetEntryItems<T> getter) {
+    public FakeProvider(@NonNull GetEntryItems<T> getter) {
         mEntryProvider = getter;
     }
 
     @Override
     public void requestResults(String query, ISearcher searcher) {
-
+        throw new IllegalStateException("don't query the fake provider");
     }
 
     @Override
     public void reload(boolean cancelCurrentLoadTask) {
+        // nothing to reload
     }
 
     @Override
@@ -43,11 +45,12 @@ public class FakeProvider<T extends EntryItem> implements IProvider<T> {
 
     @Override
     public void setDirty() {
+        // do nothing, can't reload
     }
 
     @Override
     public int getLoadStep() {
-        return LOAD_STEP_1;
+        return LOAD_STEP_3;
     }
 
     @Override
