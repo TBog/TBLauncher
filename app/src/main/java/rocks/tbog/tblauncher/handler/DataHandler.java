@@ -47,7 +47,6 @@ import rocks.tbog.tblauncher.dataprovider.ContactsProvider;
 import rocks.tbog.tblauncher.dataprovider.DialProvider;
 import rocks.tbog.tblauncher.dataprovider.FilterProvider;
 import rocks.tbog.tblauncher.dataprovider.IProvider;
-import rocks.tbog.tblauncher.dataprovider.ModProvider;
 import rocks.tbog.tblauncher.dataprovider.Provider;
 import rocks.tbog.tblauncher.dataprovider.QuickListProvider;
 import rocks.tbog.tblauncher.dataprovider.SearchProvider;
@@ -187,13 +186,6 @@ public class DataHandler extends BroadcastReceiver
             ProviderEntry providerEntry = new ProviderEntry();
             providerEntry.provider = new TagsProvider(context);
             providers.put("tags", providerEntry);
-        }
-
-        // Favorites
-        {
-            ProviderEntry providerEntry = new ProviderEntry();
-            providerEntry.provider = new ModProvider(context);
-            providers.put("mods", providerEntry);
         }
 
         // QuickList
@@ -683,9 +675,7 @@ public class DataHandler extends BroadcastReceiver
 
         Log.d(TAG, "Adding shortcut " + record.displayName + " for " + record.packageName);
         if (DBHelper.insertShortcut(context, record)) {
-            ShortcutsProvider provider = getShortcutsProvider();
-            if (provider != null)
-                provider.reload(true);
+            reloadProviderAndDependencies(getShortcutsProvider());
             return true;
         }
         return false;
@@ -694,17 +684,15 @@ public class DataHandler extends BroadcastReceiver
     public void removeShortcut(ShortcutEntry shortcut) {
         final Context context = getContext();
 
-        // Also remove shortcut from mods
-        removeFromMods(shortcut);
+        // Also remove shortcut from DB
+        DBHelper.removeMod(context, shortcut.id);
         DBHelper.removeShortcut(context, shortcut);
 
         if (shortcut.mShortcutInfo != null) {
             ShortcutUtil.removeShortcut(context, shortcut.mShortcutInfo);
         }
 
-        if (this.getShortcutsProvider() != null) {
-            this.getShortcutsProvider().reload(true);
-        }
+        reloadProviderAndDependencies(getShortcutsProvider());
     }
 
     public void removeShortcuts(String packageName) {
@@ -720,14 +708,12 @@ public class DataHandler extends BroadcastReceiver
             String id = ShortcutEntry.generateShortcutId(shortcut);
             EntryItem entry = getPojo(id);
             if (entry != null)
-                removeFromMods(entry);
+                DBHelper.removeMod(context, entry.id);
         }
 
         DBHelper.removeShortcuts(context, packageName);
 
-        if (this.getShortcutsProvider() != null) {
-            this.getShortcutsProvider().reload(true);
-        }
+        reloadProviderAndDependencies(getShortcutsProvider());
     }
 
     public boolean addToHidden(AppEntry entry) {
@@ -756,12 +742,6 @@ public class DataHandler extends BroadcastReceiver
     public AppProvider getAppProvider() {
         ProviderEntry entry = this.providers.get("app");
         return (entry != null) ? ((AppProvider) entry.provider) : null;
-    }
-
-    @Nullable
-    public ModProvider getModProvider() {
-        ProviderEntry entry = this.providers.get("mods");
-        return (entry != null) ? ((ModProvider) entry.provider) : null;
     }
 
     @Nullable
@@ -797,16 +777,6 @@ public class DataHandler extends BroadcastReceiver
     public List<ModRecord> getMods() {
         final Context context = getContext();
         return DBHelper.getMods(context);
-    }
-
-    public void removeFromMods(EntryItem entry) {
-        final Context context = getContext();
-
-        if (DBHelper.removeMod(context, entry.id)) {
-            ModProvider modProvider = getModProvider();
-            if (modProvider != null)
-                modProvider.reload(true);
-        }
     }
 
     /**
@@ -915,9 +885,7 @@ public class DataHandler extends BroadcastReceiver
         if (array != null) {
             DBHelper.setCustomStaticEntryIcon(context, entryId, array);
             // reload provider to make sure we're up to date
-            ModProvider modProvider = getModProvider();
-            if (modProvider != null)
-                modProvider.reload(true);
+            reloadProviders(IProvider.LOAD_STEP_2);
         }
     }
 
@@ -927,6 +895,7 @@ public class DataHandler extends BroadcastReceiver
         if (array != null) {
             DBHelper.setCustomStaticEntryIcon(context, buttonId, array);
             // we expect calling function to refresh buttons
+            reloadProviders(IProvider.LOAD_STEP_2);
         }
     }
 
@@ -993,6 +962,13 @@ public class DataHandler extends BroadcastReceiver
                     entry.provider.setDirty();
             }
         }
+    }
+
+    public void reloadProviderAndDependencies(@Nullable IProvider<?> provider) {
+        if (provider == null)
+            return;
+        provider.setDirty();
+        reloadProviders(provider.getLoadStep() + 1);
     }
 
     /**
@@ -1107,11 +1083,6 @@ public class DataHandler extends BroadcastReceiver
     public void afterQuickListChanged() {
         mFullLoadOverSent = false;
         // refresh relevant providers for the Dock
-        {
-            IProvider<?> provider = getModProvider();
-            if (provider != null)
-                provider.setDirty();
-        }
         {
             IProvider<?> provider = getTagsProvider();
             if (provider != null)
