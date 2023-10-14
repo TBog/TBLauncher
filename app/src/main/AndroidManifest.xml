@@ -69,7 +69,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".SettingsActivity"
+            android:name=".settings.SettingsActivity"
             android:allowTaskReparenting="true"
             android:exported="true"
             android:label="@string/menu_popup_launcher_settings"

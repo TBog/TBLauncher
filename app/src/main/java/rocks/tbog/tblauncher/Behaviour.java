@@ -73,6 +73,7 @@ import rocks.tbog.tblauncher.result.ResultItemDecoration;
 import rocks.tbog.tblauncher.searcher.ISearchActivity;
 import rocks.tbog.tblauncher.searcher.QuerySearcher;
 import rocks.tbog.tblauncher.searcher.Searcher;
+import rocks.tbog.tblauncher.settings.SettingsActivity;
 import rocks.tbog.tblauncher.shortcut.ShortcutUtil;
 import rocks.tbog.tblauncher.ui.DialogFragment;
 import rocks.tbog.tblauncher.ui.KeyboardHandler;

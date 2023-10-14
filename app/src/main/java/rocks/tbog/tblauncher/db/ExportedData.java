@@ -23,7 +23,7 @@ import java.util.Map;
 import java.util.Set;
 
 import rocks.tbog.tblauncher.R;
-import rocks.tbog.tblauncher.SettingsActivity;
+import rocks.tbog.tblauncher.settings.SettingsActivity;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.TBLauncherActivity;
 import rocks.tbog.tblauncher.widgets.WidgetManager;

@@ -22,7 +22,7 @@ import androidx.preference.PreferenceManager;
 
 import rocks.tbog.tblauncher.DeviceAdmin;
 import rocks.tbog.tblauncher.R;
-import rocks.tbog.tblauncher.SettingsActivity;
+import rocks.tbog.tblauncher.settings.SettingsActivity;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.TBLauncherActivity;
 import rocks.tbog.tblauncher.WorkAsync.TaskRunner;

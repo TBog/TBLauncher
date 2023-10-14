@@ -23,7 +23,6 @@ import java.util.List;
 import java.util.Set;
 
 import rocks.tbog.tblauncher.R;
-import rocks.tbog.tblauncher.SettingsActivity;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.dataprovider.TagsProvider;
 import rocks.tbog.tblauncher.drawable.TextDrawable;
@@ -32,6 +31,7 @@ import rocks.tbog.tblauncher.entry.FilterEntry;
 import rocks.tbog.tblauncher.entry.StaticEntry;
 import rocks.tbog.tblauncher.entry.TagEntry;
 import rocks.tbog.tblauncher.handler.TagsHandler;
+import rocks.tbog.tblauncher.settings.SettingsFragment;
 import rocks.tbog.tblauncher.utils.PrefOrderedListHelper;
 import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.Utilities;
@@ -249,7 +249,7 @@ public class ContentLoadHelper {
             }
         }
 
-        public void reloadOrderedValues(@NonNull SharedPreferences sharedPreferences, @NonNull SettingsActivity.SettingsFragment settings, String orderKey) {
+        public void reloadOrderedValues(@NonNull SharedPreferences sharedPreferences, @NonNull SettingsFragment settings, String orderKey) {
             orderedValues.clear();
             orderedValues.addAll(sharedPreferences.getStringSet(orderKey, Collections.emptySet()));
             Collections.sort(orderedValues);

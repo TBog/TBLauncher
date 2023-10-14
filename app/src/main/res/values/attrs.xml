@@ -16,6 +16,7 @@
     <attr name="searchBackgroundOutline" format="reference|color" />
     <attr name="dividerDrawable" format="reference" />
     <attr name="appSelectableItemBackground" format="reference" />
+    <attr name="settingsPageBackground" format="reference" />
 
     <attr name="tabLayoutStyle" format="reference"/>
 

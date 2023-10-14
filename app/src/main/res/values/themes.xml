@@ -420,6 +420,7 @@
         <item name="windowActionBar">true</item>
         <item name="windowNoTitle">false</item>
         <item name="android:windowBackground">@android:color/black</item>
+        <item name="settingsPageBackground">@drawable/dialog_background</item>
         <item name="alertDialogTheme">@style/SettingsDialogTheme</item>
         <item name="preferenceTheme">@style/PreferenceTheme</item>
         <item name="android:textColor">@color/settings_primary_selector_darkbg</item>
@@ -446,6 +447,7 @@
     -->
     <style name="SettingsTheme.White">
         <item name="android:windowBackground">@android:color/white</item>
+        <item name="settingsPageBackground">@drawable/tab_background_light</item>
         <item name="alertDialogTheme">@style/SettingsDialogTheme.White</item>
         <item name="android:textColor">@color/settings_primary_selector_lightbg</item>
         <item name="android:textColorPrimary">@color/settings_primary_selector_lightbg</item>
@@ -468,6 +470,7 @@
     -->
     <style name="SettingsTheme.Black">
         <item name="android:windowBackground">@android:color/black</item>
+        <item name="settingsPageBackground">@drawable/tab_background_black</item>
         <item name="alertDialogTheme">@style/SettingsDialogTheme.Black</item>
         <item name="android:textColor">@color/settings_primary_selector_black</item>
         <item name="android:textColorPrimary">@color/settings_primary_selector_black</item>
@@ -490,6 +493,7 @@
     -->
     <style name="SettingsTheme.DeepBlues">
         <item name="android:windowBackground">@color/DeepBlues_1</item>
+        <item name="settingsPageBackground">@drawable/tab_background_deep_blues</item>
         <item name="alertDialogTheme">@style/SettingsDialogTheme.DeepBlues</item>
         <item name="android:textColor">@color/settings_primary_selector_deep_blues</item>
         <item name="android:textColorPrimary">@color/settings_primary_selector_deep_blues</item>
@@ -513,6 +517,7 @@
     -->
     <style name="SettingsTheme.DarkBg">
         <item name="android:windowBackground">@color/darkBackground</item>
+        <item name="settingsPageBackground">@drawable/handle_background</item>
         <item name="alertDialogTheme">@style/SettingsDialogTheme.DarkBg</item>
         <item name="actionOverflowMenuStyle">@style/OptionsMenu.Dark</item>
         <item name="android:itemBackground">@null</item>
@@ -523,6 +528,7 @@
     -->
     <style name="SettingsTheme.Default">
         <item name="android:windowBackground">@color/Default_background</item>
+        <item name="settingsPageBackground">@drawable/tab_background_default</item>
         <item name="alertDialogTheme">@style/SettingsDialogTheme.Default</item>
         <item name="actionOverflowMenuStyle">@style/OptionsMenu.Default</item>
         <item name="android:itemBackground">@drawable/tab_background_default</item>

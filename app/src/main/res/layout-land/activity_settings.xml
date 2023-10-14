@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:baselineAligned="false"
+    android:fitsSystemWindows="true"
+    android:orientation="horizontal"
+    tools:context=".settings.SettingsActivity"
+    tools:viewBindingIgnore="true"
+    tools:theme="@style/SettingsTheme">
+
+    <FrameLayout
+        android:id="@+id/settings_menu"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="40" />
+
+    <FrameLayout
+        android:id="@+id/settings_page"
+        android:background="?attr/settingsPageBackground"
+        android:layout_width="0dp"
+        android:layout_height="match_parent"
+        android:layout_weight="60" />
+</LinearLayout>
