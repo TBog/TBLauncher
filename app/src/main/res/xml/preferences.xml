@@ -866,6 +866,13 @@
                 android:key="button-home"
                 android:title="@string/button_home" />
 
+            <ListPreference
+                android:defaultValue="showSearchBar"
+                android:entries="@array/gestureEntries"
+                android:entryValues="@array/gestureValues"
+                android:key="button-assist"
+                android:title="@string/button_assist" />
+
             <androidx.preference.SwitchPreference
                 android:defaultValue="true"
                 android:key="behaviour-widget-after-launch"
