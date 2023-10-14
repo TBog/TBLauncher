@@ -23,6 +23,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.preference.PreferenceManager;
 
+import rocks.tbog.tblauncher.broadcast.IncomingCallHandler;
 import rocks.tbog.tblauncher.quicklist.QuickList;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.DebugInfo;
@@ -109,7 +110,7 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
          * Initialize preferences
          */
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
-        //prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        var prefs = PreferenceManager.getDefaultSharedPreferences(this);
 
         /*
          * Permission Manager
@@ -144,6 +145,9 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
         quickList.onCreateActivity(this);
         liveWallpaper.onCreateActivity(this);
         widgetManager.onCreateActivity(this);
+
+        // Enable/disable phone broadcast receiver
+        IncomingCallHandler.setEnabled(this, prefs.getBoolean("enable-phone-history", false));
     }
 
     @Override

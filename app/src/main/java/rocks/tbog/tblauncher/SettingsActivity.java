@@ -2,6 +2,7 @@ package rocks.tbog.tblauncher;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.app.role.RoleManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -52,6 +53,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import rocks.tbog.tblauncher.broadcast.IncomingCallHandler;
 import rocks.tbog.tblauncher.dataprovider.ShortcutsProvider;
 import rocks.tbog.tblauncher.dataprovider.TagsProvider;
 import rocks.tbog.tblauncher.db.ExportedData;
@@ -120,6 +122,7 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
     private static final int FILE_SELECT_XML_OVERWRITE = 62;
     private static final int FILE_SELECT_XML_APPEND = 61;
     public static final int ENABLE_DEVICE_ADMIN = 60;
+    public static final int ENABLE_CALL_SCREENING = 59;
     private static final String TAG = "SettAct";
 
     @Override
@@ -287,6 +290,21 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
         if (requestCode == ENABLE_DEVICE_ADMIN) {
             if (resultCode != RESULT_OK) {
                 Toast.makeText(this, "Failed!", Toast.LENGTH_SHORT).show();
+            }
+        } else if (requestCode == ENABLE_CALL_SCREENING) {
+            if (resultCode != RESULT_OK) {
+                Context context = this;
+                SharedPreferences sharedPreferences = PreferenceManager.getDefaultSharedPreferences(context);
+                if (sharedPreferences.edit().putBoolean("enable-phone-history", false).commit()) {
+                    //TODO: fix toggle not reflecting reality
+                    Fragment fragment = getSupportFragmentManager().findFragmentByTag(SettingsFragment.FRAGMENT_TAG);
+                    if (fragment instanceof SettingsFragment) {
+                        var listView = ((SettingsFragment) fragment).getListView();
+                        if (listView != null && listView.getAdapter() != null)
+                            listView.getAdapter().notifyDataSetChanged();
+                    }
+                }
+                Toast.makeText(context, R.string.permission_denied, Toast.LENGTH_SHORT).show();
             }
         } else if (resultCode == RESULT_OK) {
             ExportedData.Method method = null;
@@ -1174,6 +1192,27 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case "shortcut-dynamic-in-results":
                 TBApplication.dataHandler(context).reloadProviders();
                 break;
+            case "enable-phone-history": {
+                boolean enabled = sharedPreferences.getBoolean(key, false);
+                if (enabled && !Permission.checkPermission(context, Permission.PERMISSION_READ_PHONE_STATE)) {
+                    Permission.askPermission(Permission.PERMISSION_READ_PHONE_STATE, new Permission.PermissionResultListener() {
+                        @Override
+                        public void onGranted() {
+                            setPhoneHistoryEnabled(context, true);
+                        }
+
+                        @Override
+                        public void onDenied() {
+                            // You don't want to give us permission, that's fine. Revert the toggle.
+                            if (sharedPreferences.edit().putBoolean(key, false).commit())
+                                Toast.makeText(context, R.string.permission_denied, Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                } else {
+                    setPhoneHistoryEnabled(context, enabled);
+                }
+                break;
+            }
             case "root-mode":
                 if (sharedPreferences.getBoolean("root-mode", false) &&
                     !TBApplication.rootHandler(context).isRootAvailable()) {
@@ -1188,6 +1227,17 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             case "tags-menu-list":
                 PrefOrderedListHelper.syncOrderedList(sharedPreferences, "tags-menu-list", "tags-menu-order");
                 break;
+        }
+    }
+
+    private static void setPhoneHistoryEnabled(@NonNull Context context, boolean enabled) {
+        IncomingCallHandler.setEnabled(context, enabled);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q && enabled) {
+            RoleManager roleManager = (RoleManager) context.getSystemService(ROLE_SERVICE);
+            Intent intent = roleManager.createRequestRoleIntent(RoleManager.ROLE_CALL_SCREENING);
+            var activity = Utilities.getActivity(context);
+            if (activity != null)
+                activity.startActivityForResult(intent, ENABLE_CALL_SCREENING);
         }
     }
 }
