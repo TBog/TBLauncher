@@ -216,6 +216,7 @@
     <string name="debug_widget_info">Long press for extra widget info</string>
     <string name="debug_item_relevance">Search relevance</string>
     <string name="debug_item_icon_info">Icon info</string>
+    <string name="debug_item_id">Show item id</string>
     <string name="shortcut_section">Shortcut</string>
     <string name="shortcut_pin_auto_confirm">Auto-confirm shortcut</string>
     <string name="shortcut_show_badge">Show app badge</string>
