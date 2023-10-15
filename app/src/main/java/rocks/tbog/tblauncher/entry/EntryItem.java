@@ -2,6 +2,7 @@ package rocks.tbog.tblauncher.entry;
 
 import android.content.Context;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.CallSuper;
 import androidx.annotation.LayoutRes;
@@ -20,6 +21,7 @@ import rocks.tbog.tblauncher.normalizer.StringNormalizer;
 import rocks.tbog.tblauncher.result.ResultHelper;
 import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.ListPopup;
+import rocks.tbog.tblauncher.utils.ClipboardUtils;
 import rocks.tbog.tblauncher.utils.DebugInfo;
 import rocks.tbog.tblauncher.utils.FuzzyScore;
 import rocks.tbog.tblauncher.utils.Utilities;
@@ -273,25 +275,29 @@ public abstract class EntryItem {
         }
 
         if (DebugInfo.itemRelevance(context)) {
-            String debugTitle = context.getString(R.string.popup_title_debug);
-            int pos = -1;
-            // find title
-            for (int i = 0; i < adapter.getCount(); i += 1) {
-                if (debugTitle.equals(adapter.getItem(i).toString())) {
-                    pos = i + 1;
-                    break;
-                }
-            }
-            // if title not found, add title
-            if (pos == -1) {
-                adapter.add(new LinearAdapter.ItemTitle(debugTitle));
-                pos = adapter.getCount();
-            }
-            // add debug data after title
+            int pos = addDebugTitleOnce(context, adapter);
             adapter.add(pos, new LinearAdapter.ItemString("Relevance: " + getRelevance()));
         }
 
+        if (DebugInfo.itemShowId(context)) {
+            int pos = addDebugTitleOnce(context, adapter);
+            adapter.add(pos, new LinearAdapter.ItemString(id));
+        }
+
         return menu;
+    }
+
+    int addDebugTitleOnce(@NonNull Context context, @NonNull LinearAdapter adapter) {
+        String debugTitle = context.getString(R.string.popup_title_debug);
+        // find title
+        for (int i = 0; i < adapter.getCount(); i += 1) {
+            if (debugTitle.equals(adapter.getItem(i).toString())) {
+                return i + 1;
+            }
+        }
+        // if title not found, add title
+        adapter.add(new LinearAdapter.ItemTitle(debugTitle));
+        return adapter.getCount();
     }
 
     /**
@@ -342,6 +348,10 @@ public abstract class EntryItem {
             return true;
         } else if (R.string.menu_popup_quick_list_customize == stringId) {
             TBApplication.behaviour(context).launchEditQuickListDialog(context);
+            return true;
+        } else if (id.equals(item.toString())) {
+            ClipboardUtils.setClipboard(context, id);
+            Toast.makeText(context, context.getString(R.string.copy_confirmation, id), Toast.LENGTH_SHORT).show();
             return true;
         }
 
