@@ -5,6 +5,7 @@ buildscript {
     ext.multidex_version = '2.0.1'
     ext.preference_version = '1.2.1'
     ext.lifecycle_version = '2.8.0'
+    ext.acra_version = '5.11.3'
 
     repositories {
         mavenCentral()

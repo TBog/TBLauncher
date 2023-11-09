@@ -81,6 +81,8 @@ dependencies {
         exclude group: 'androidx.lifecycle', module: 'lifecycle-viewmodel'
         exclude group: 'androidx.lifecycle', module: 'lifecycle-viewmodel-ktx'
     }
+    implementation "ch.acra:acra-mail:$acra_version"
+    implementation "ch.acra:acra-core:$acra_version"
     implementation "androidx.asynclayoutinflater:asynclayoutinflater:1.0.0"
     implementation 'androidx.annotation:annotation:1.8.0'
     implementation 'androidx.constraintlayout:constraintlayout:2.1.4'

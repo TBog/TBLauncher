@@ -19,6 +19,11 @@ import androidx.annotation.Nullable;
 import androidx.lifecycle.Lifecycle;
 import androidx.preference.PreferenceManager;
 
+import org.acra.ACRA;
+import org.acra.config.CoreConfigurationBuilder;
+import org.acra.config.MailSenderConfigurationBuilder;
+import org.acra.data.StringFormat;
+
 import java.lang.ref.WeakReference;
 import java.util.ConcurrentModificationException;
 import java.util.Iterator;
@@ -83,6 +88,13 @@ public class TBApplication extends Application {
     protected void attachBaseContext(Context base) {
         super.attachBaseContext(base);
         //MultiDex.install(this);
+        ACRA.init(this, new CoreConfigurationBuilder()
+            .withBuildConfigClass(BuildConfig.class)
+            .withReportFormat(StringFormat.JSON)
+            .withPluginConfigurations(new MailSenderConfigurationBuilder()
+                .withMailTo("tblauncher.acra@tbog.rocks")
+                .withReportAsFile(false)
+                .build()));
     }
 
     @NonNull
