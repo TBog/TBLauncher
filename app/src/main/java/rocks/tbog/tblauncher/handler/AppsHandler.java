@@ -94,9 +94,11 @@ public class AppsHandler {
     @WorkerThread
     public static void setTagsForApps(@NonNull Collection<AppEntry> apps, @NonNull TagsHandler tagsHandler) {
         tagsHandler.runWhenLoaded(() -> {
-            Log.d(TAG, "set " + apps.size() + " cached app(s) tags");
-            for (AppEntry appEntry : apps)
-                appEntry.setTags(tagsHandler.getTags(appEntry.id));
+            Utilities.runAsync(() -> {
+                Log.d(TAG, "set " + apps.size() + " cached app(s) tags");
+                for (AppEntry appEntry : apps)
+                    appEntry.setTags(tagsHandler.getTags(appEntry.id));
+            });
         });
     }
 
