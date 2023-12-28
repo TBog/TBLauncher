@@ -27,7 +27,7 @@ import androidx.appcompat.content.res.AppCompatResources;
 import androidx.core.content.res.ResourcesCompat;
 import androidx.preference.PreferenceManager;
 
-import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 
 import rocks.tbog.tblauncher.BuildConfig;
@@ -140,10 +140,9 @@ public class ContactEntry extends EntryItem {
     protected Drawable getIconDrawable(Context ctx) {
         Drawable drawable = null;
         if (iconUri != null)
-            try {
-                InputStream inputStream = ctx.getContentResolver().openInputStream(iconUri);
+            try (InputStream inputStream = ctx.getContentResolver().openInputStream(iconUri)) {
                 drawable = Drawable.createFromStream(inputStream, iconUri.toString());
-            } catch (FileNotFoundException ignored) {
+            } catch (IOException ignored) {
             }
         if (drawable == null) {
             drawable = AppCompatResources.getDrawable(ctx, R.drawable.ic_contact_placeholder);
