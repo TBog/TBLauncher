@@ -1,0 +1,6 @@
+* corrigir erro de manifesto do Android 12
+* adicionar a ação "mostrar não marcada" no gestor de tags e no menu de tags
+* adicionar opção para escolher o tipo de mime dos contactos
+* adicionar geradores de temas simples e de destaque
+* adicionar provedor de discagem (pesquisa)
+* permitir ícones personalizados para resultados de pesquisa

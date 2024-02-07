@@ -1,0 +1,2 @@
+* atualização de traduções
+* corrigir as dimensões da caixa de diálogo do escolhedor de cores

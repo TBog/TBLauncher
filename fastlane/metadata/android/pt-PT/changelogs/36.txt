@@ -1,0 +1,2 @@
+* corrigir travar no Android Q
+* veja o changelog do v6.13
