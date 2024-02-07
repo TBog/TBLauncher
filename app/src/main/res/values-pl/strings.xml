@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="copy_confirmation">Skopiowano do schowka: \"%s\"</string>
+    <string name="toast_hibernate_error">[BŁĄD] Nie zahibernowano %s</string>
+    <string name="ui_item_visit">Odwiedź \"%1$s\"</string>
+    <string name="toast_hibernate_completed">Zahibernowano %s. Uruchom aplikację ponownie w celu wybudzenia.</string>
+    <string name="removed_item">Usunięto %s</string>
+    <string name="hint_ui_search">Szukaj w aplikacjach, kontaktach, …</string>
+    <string name="ui_item_search">Szukaj \"%2$s\" w %1$s?</string>
+    <string name="unable_to_initialize_shortcuts">Brak dostępu do skrótów. Upewnij się, że TiniBit jest domyślnym programem uruchamiającym</string>
+    <string name="app_name">TinyBit launcher</string>
+</resources>
