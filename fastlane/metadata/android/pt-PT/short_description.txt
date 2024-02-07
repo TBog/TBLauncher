@@ -1,0 +1,1 @@
+Ocupa pouco espaço de memória, suporta pacotes de ícones, cor e comportamento personalizáveis
