@@ -27,6 +27,7 @@ import androidx.preference.PreferenceManager;
 import java.util.Locale;
 
 import rocks.tbog.tblauncher.ui.ListPopup;
+import rocks.tbog.tblauncher.utils.ActionHelper;
 import rocks.tbog.tblauncher.utils.GestureDetectorHelper;
 import rocks.tbog.tblauncher.utils.UISizes;
 
@@ -88,7 +89,7 @@ public class LiveWallpaper {
         @Override
         public boolean onSingleTapUp(MotionEvent e) {
             // if we have a double tap listener, wait for onSingleTapConfirmed
-            if (mTBLauncherActivity.behaviour.hasDoubleClick())
+            if (mTBLauncherActivity.mActionHelper.hasDoubleClick())
                 return true;
             View view = mTBLauncherActivity.findViewById(R.id.root_layout);
             return onClick(view);
@@ -97,7 +98,7 @@ public class LiveWallpaper {
         @Override
         public boolean onSingleTapConfirmed(MotionEvent e) {
             // if we have both a double tap and click, handle click here
-            if (mTBLauncherActivity.behaviour.hasDoubleClick()) {
+            if (mTBLauncherActivity.mActionHelper.hasDoubleClick()) {
                 View view = mTBLauncherActivity.findViewById(R.id.root_layout);
                 return onClick(view);
             }
@@ -195,13 +196,19 @@ public class LiveWallpaper {
     private static boolean onClick(View view) {
         if (!view.isAttachedToWindow())
             return false;
-        return TBApplication.behaviour(view.getContext()).onClick();
+        final TBLauncherActivity activity = TBApplication.launcherActivity(view.getContext());
+        if (activity == null)
+            return false;
+        return activity.mActionHelper.onClick();
     }
 
     private static boolean onDoubleClick(View view) {
         if (!view.isAttachedToWindow())
             return false;
-        return TBApplication.behaviour(view.getContext()).onDoubleClick();
+        final TBLauncherActivity activity = TBApplication.launcherActivity(view.getContext());
+        if (activity == null)
+            return false;
+        return activity.mActionHelper.onDoubleClick();
     }
 
     private static int computeAngle(float x, float y) {
@@ -211,7 +218,10 @@ public class LiveWallpaper {
     private boolean onFling(View view, float xMove, float yMove, float xVel, float yVel) {
         if (!view.isAttachedToWindow())
             return false;
-        final Behaviour behaviour = mTBLauncherActivity.behaviour;
+        final TBLauncherActivity activity = TBApplication.launcherActivity(view.getContext());
+        if (activity != mTBLauncherActivity)
+            return false;
+        final ActionHelper actionHelper = mTBLauncherActivity.mActionHelper;
 
         final int angle;
 //        if (-minMovement < xMove && xMove < minMovement && -minMovement < yMove && yMove < minMovement) {
@@ -224,26 +234,26 @@ public class LiveWallpaper {
         // fling upwards
         if ((90 + FLING_DELTA_ANGLE) > angle && angle > (90 - FLING_DELTA_ANGLE)) {
             Log.d(TAG, String.format(Locale.US, "Angle=%d - fling upward", angle));
-            return behaviour.onFlingUp();
+            return actionHelper.onFlingUp();
         }
         // fling downwards
         else if ((90 + FLING_DELTA_ANGLE) > -angle && -angle > (90 - FLING_DELTA_ANGLE)) {
             Log.d(TAG, String.format(Locale.US, "Angle=%d - fling downward", angle));
             final int posX = (int) mFirstTouchPos.x;
             if (posX < (mWindowSize.x / 2))
-                return behaviour.onFlingDownLeft();
+                return actionHelper.onFlingDownLeft();
             else
-                return behaviour.onFlingDownRight();
+                return actionHelper.onFlingDownRight();
         }
         // fling left
         else if (FLING_DELTA_ANGLE > angle && angle > -FLING_DELTA_ANGLE) {
             Log.d(TAG, String.format(Locale.US, "Angle=%d - fling left", angle));
-            return behaviour.onFlingLeft();
+            return actionHelper.onFlingLeft();
         }
         // fling right
         else if ((180 - FLING_DELTA_ANGLE) < angle || angle < (-180 + FLING_DELTA_ANGLE)) {
             Log.d(TAG, String.format(Locale.US, "Angle=%d - fling right", angle));
-            return behaviour.onFlingRight();
+            return actionHelper.onFlingRight();
         }
         Log.d(TAG, String.format(Locale.US, "Angle=%d - fling direction uncertain", angle));
         return false;

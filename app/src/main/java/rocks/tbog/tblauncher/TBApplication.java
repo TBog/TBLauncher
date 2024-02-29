@@ -111,6 +111,8 @@ public class TBApplication extends Application {
 
     @NonNull
     private TBLauncherActivity getActivity() {
+        if (mActivities.size() != 1)
+            Log.e(TAG, "found " + mActivities.size() + " activities");
         WeakReference<TBLauncherActivity> ref = mActivities.peekFirst();
         if (ref == null)
             throw new IllegalStateException("no activity registered");

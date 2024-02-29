@@ -24,6 +24,7 @@ import rocks.tbog.tblauncher.Behaviour;
 import rocks.tbog.tblauncher.Permission;
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
+import rocks.tbog.tblauncher.TBLauncherActivity;
 import rocks.tbog.tblauncher.dataprovider.QuickListProvider;
 import rocks.tbog.tblauncher.db.DBHelper;
 import rocks.tbog.tblauncher.entry.AppEntry;
@@ -131,7 +132,10 @@ public class ResultHelper {
     public static void removeFromResultsAndHistory(@NonNull EntryItem pojo, @NonNull Context context) {
         removeFromHistory(pojo, context);
         //TODO: remove from results only if we are showing history
-        TBApplication.behaviour(context).removeResult(pojo);
+        var activity = Utilities.getActivity(context);
+        if (activity instanceof TBLauncherActivity) {
+            ((TBLauncherActivity) activity).getSearchHelper().removeResult(pojo);
+        }
         //TODO: make an UndoBar
         Toast.makeText(context, context.getString(R.string.removed_item, pojo.getName()), Toast.LENGTH_SHORT).show();
     }

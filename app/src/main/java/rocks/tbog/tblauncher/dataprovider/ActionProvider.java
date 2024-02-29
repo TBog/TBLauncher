@@ -41,10 +41,10 @@ public class ActionProvider extends DBProvider<ActionEntry> {
                 if (act == null)
                     return;
                 // toggle grid/list layout
-                if (act.behaviour.isGridLayout())
-                    act.behaviour.setListLayout();
+                if (act.isGridLayout())
+                    act.setListLayout();
                 else
-                    act.behaviour.setGridLayout();
+                    act.setGridLayout();
             });
             s_names[cnt] = R.string.action_toggle_grid;
             s_entries[cnt++] = actionEntry;
@@ -60,7 +60,7 @@ public class ActionProvider extends DBProvider<ActionEntry> {
                     return;
                 Provider<? extends EntryItem> provider = app.getDataHandler().getAppProvider();
                 act.quickList.toggleProvider(v, provider, EntryItem.NAME_COMPARATOR);
-                act.behaviour.setListLayout();
+                act.setListLayout();
             });
             s_names[cnt] = R.string.action_show_apps;
             s_entries[cnt++] = actionEntry;
@@ -76,7 +76,7 @@ public class ActionProvider extends DBProvider<ActionEntry> {
                     return;
                 Provider<? extends EntryItem> provider = app.getDataHandler().getAppProvider();
                 act.quickList.toggleProvider(v, provider, Collections.reverseOrder(EntryItem.NAME_COMPARATOR));
-                act.behaviour.setListLayout();
+                act.setListLayout();
             });
             s_names[cnt] = R.string.action_show_apps_reversed;
             s_entries[cnt++] = actionEntry;
@@ -92,7 +92,7 @@ public class ActionProvider extends DBProvider<ActionEntry> {
                     return;
                 Provider<? extends EntryItem> provider = app.getDataHandler().getAppProvider();
                 act.quickList.toggleProvider(v, provider, EntryItem.NAME_COMPARATOR);
-                act.behaviour.setGridLayout(4);
+                act.setGridLayout(4);
             });
             s_names[cnt] = R.string.action_show_apps_grid4;
             s_entries[cnt++] = actionEntry;
@@ -108,7 +108,7 @@ public class ActionProvider extends DBProvider<ActionEntry> {
                     return;
                 Provider<? extends EntryItem> provider = app.getDataHandler().getAppProvider();
                 act.quickList.toggleProvider(v, provider, Collections.reverseOrder(EntryItem.NAME_COMPARATOR));
-                act.behaviour.setGridLayout(4);
+                act.setGridLayout(4);
             });
             s_names[cnt] = R.string.action_show_apps_grid4_reversed;
             s_entries[cnt++] = actionEntry;

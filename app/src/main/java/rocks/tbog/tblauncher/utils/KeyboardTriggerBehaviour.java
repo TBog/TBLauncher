@@ -1,11 +1,11 @@
 package rocks.tbog.tblauncher.utils;
 
-import android.app.Activity;
 import android.os.Build;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewTreeObserver;
 
+import androidx.annotation.NonNull;
 import androidx.core.view.ViewCompat;
 import androidx.lifecycle.LiveData;
 
@@ -13,13 +13,13 @@ import rocks.tbog.tblauncher.TBApplication;
 
 public class KeyboardTriggerBehaviour extends LiveData<KeyboardTriggerBehaviour.Status> {
     private static final String TAG = "KeyTB";
-
+    @NonNull
     private final View contentView;
     private final ViewTreeObserver.OnGlobalLayoutListener globalLayoutListener;
 
-    public KeyboardTriggerBehaviour(Activity activity) {
+    public KeyboardTriggerBehaviour(@NonNull View view) {
         super(Status.CLOSED);
-        contentView = activity.findViewById(android.R.id.content);
+        contentView = view;
         globalLayoutListener = () -> {
             TBApplication.state().syncKeyboardVisibility(contentView);
             boolean closed = TBApplication.state().isKeyboardHidden();

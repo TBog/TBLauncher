@@ -46,6 +46,7 @@ import rocks.tbog.tblauncher.ui.ViewStubPreview;
 import rocks.tbog.tblauncher.utils.PrefCache;
 import rocks.tbog.tblauncher.utils.UIColors;
 import rocks.tbog.tblauncher.utils.UISizes;
+import rocks.tbog.tblauncher.utils.Utilities;
 
 /**
  * Dock
@@ -300,8 +301,6 @@ public class QuickList {
     }
 
     public void toggleSearch(@NonNull View v, @NonNull String query, @NonNull Class<? extends Searcher> searcherClass) {
-        Context ctx = v.getContext();
-        TBApplication app = TBApplication.getApplication(ctx);
         final String actionId;
         {
             Object tag_actionId = v.getTag(R.id.tag_actionId);
@@ -312,28 +311,36 @@ public class QuickList {
         if (bFilterOn) {
             animToggleOff();
             bFilterOn = false;
-            app.behaviour().filterResults(null);
+            var activity = Utilities.getActivity(v);
+            if (activity instanceof TBLauncherActivity) {
+                ((TBLauncherActivity) activity).getSearchHelper().filterResults(null);
+            }
         }
 
         // show search content
         {
             // if the last action is not the current action, toggle on this action
             if (!bActionOn || !isLastSelection(actionId)) {
-                app.behaviour().runSearcher(query, searcherClass);
+                var activity = Utilities.getActivity(v);
+                if (activity instanceof TBLauncherActivity) {
+                    ((TBLauncherActivity) activity).runSearcher(query, searcherClass);
+                }
 
                 // update toggle information
                 mLastSelection = actionId;
                 bActionOn = true;
             } else {
                 // to toggle off the action, set bActionOn to false
-                app.behaviour().clearSearch();
+                var activity = Utilities.getActivity(v);
+                if (activity instanceof TBLauncherActivity) {
+                    ((TBLauncherActivity) activity).clearSearch();
+                }
             }
         }
     }
 
     public void toggleProvider(View v, IProvider<?> provider, @Nullable java.util.Comparator<? super EntryItem> comparator) {
-        Context ctx = v.getContext();
-        Behaviour behaviour = TBApplication.behaviour(ctx);
+        Behaviour behaviour = mTBLauncherActivity.behaviour;
         final String actionId;
         {
             Object tag_actionId = v.getTag(R.id.tag_actionId);
@@ -344,12 +351,15 @@ public class QuickList {
         if (bFilterOn) {
             animToggleOff();
             bFilterOn = false;
-            behaviour.filterResults(null);
+            var activity = Utilities.getActivity(v);
+            if (activity instanceof TBLauncherActivity) {
+                ((TBLauncherActivity) activity).getSearchHelper().filterResults(null);
+            }
         }
 
         // if the last action is not the current action, toggle on this action
         if (!bActionOn || !isLastSelection(actionId)) {
-            behaviour.clearSearchText();
+            mTBLauncherActivity.clearSearchText();
             // show provider content or toggle off if nothing to show
             if (behaviour.showProviderEntries(provider, comparator)) {
                 // update toggle information
@@ -357,11 +367,11 @@ public class QuickList {
                 bActionOn = true;
             } else {
                 // to toggle off the action, set bActionOn to false
-                behaviour.clearSearch();
+                mTBLauncherActivity.clearSearch();
             }
         } else {
             // to toggle off the action, set bActionOn to false
-            behaviour.clearSearch();
+            mTBLauncherActivity.clearSearch();
         }
     }
 
@@ -377,7 +387,10 @@ public class QuickList {
         // if there is no search we need to filter, just show all matching entries
         if (bAdapterEmpty) {
             if (bFilterOn && provider != null && isLastSelection(actionId)) {
-                app.behaviour().clearAdapter();
+                var activity = Utilities.getActivity(v);
+                if (activity instanceof TBLauncherActivity) {
+                    ((TBLauncherActivity) activity).getSearchHelper().clearAdapter();
+                }
                 bFilterOn = false;
             } else {
                 if (app.behaviour().showProviderEntries(provider)) {
@@ -389,7 +402,10 @@ public class QuickList {
                 List<? extends EntryItem> list;
                 list = provider != null ? provider.getPojos() : null;
                 if (list != null) {
-                    app.behaviour().updateAdapter(list, false);
+                    var activity = Utilities.getActivity(v);
+                    if (activity instanceof TBLauncherActivity) {
+                        ((TBLauncherActivity) activity).getSearchHelper().updateAdapter(list, false);
+                    }
                     mLastSelection = actionId;
                     bFilterOn = true;
                 } else {
@@ -407,14 +423,20 @@ public class QuickList {
                 mLastAction = null;
             }
             bFilterOn = false;
-            app.behaviour().filterResults(null);
+            var activity = Utilities.getActivity(v);
+            if (activity instanceof TBLauncherActivity) {
+                ((TBLauncherActivity) activity).getSearchHelper().filterResults(null);
+            }
         } else if (provider != null) {
             animToggleOff();
             if (bActionOn)
                 mLastAction = mLastSelection;
             bFilterOn = true;
             mLastSelection = actionId;
-            app.behaviour().filterResults(filterName);
+            var activity = Utilities.getActivity(v);
+            if (activity instanceof TBLauncherActivity) {
+                ((TBLauncherActivity) activity).getSearchHelper().filterResults(filterName);
+            }
         }
 
         // show what is currently toggled

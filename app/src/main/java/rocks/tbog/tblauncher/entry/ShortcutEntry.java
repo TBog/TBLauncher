@@ -394,8 +394,11 @@ public final class ShortcutEntry extends EntryWithTags {
         if (stringId == R.string.menu_remove_shortcut) {
             TBApplication app = TBApplication.getApplication(ctx);
             app.getDataHandler().removeShortcut(this);
-            app.behaviour().removeResult(this);
-            //Toast.makeText(ctx, "Shortcut `" + getName() + "` removed.", Toast.LENGTH_LONG).show();
+            var activity = app.launcherActivity();
+            if (activity != null) {
+                activity.getSearchHelper().removeResult(this);
+                //Toast.makeText(ctx, "Shortcut `" + getName() + "` removed.", Toast.LENGTH_LONG).show();
+            }
             return true;
         } else if (stringId == R.string.menu_tags_add || stringId == R.string.menu_tags_edit) {
             TBApplication.behaviour(ctx).launchEditTagsDialog(this);
