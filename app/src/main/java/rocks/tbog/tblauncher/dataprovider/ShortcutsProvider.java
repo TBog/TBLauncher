@@ -18,6 +18,8 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.WorkerThread;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import java.util.List;
 
@@ -169,7 +171,7 @@ public class ShortcutsProvider extends Provider<ShortcutEntry> {
             filter.addAction(Intent.ACTION_MANAGED_PROFILE_ADDED);
             filter.addAction(Intent.ACTION_MANAGED_PROFILE_REMOVED);
             filter.addAction(ACTION_INSTALL_SHORTCUT);
-            registerReceiver(mProfileReceiver, filter);
+            ActivityCompat.registerReceiver(this, mProfileReceiver, filter, ContextCompat.RECEIVER_EXPORTED);
         }
 
         super.onCreate();
