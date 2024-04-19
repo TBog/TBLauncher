@@ -109,7 +109,8 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
          * Initialize preferences
          */
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
-        //prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        var prefs = PreferenceManager.getDefaultSharedPreferences(this);
+        Behaviour.setActivityOrientation(this, prefs);
 
         /*
          * Permission Manager
@@ -157,8 +158,6 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
         Log.d(TAG, "onStart(" + this + ")");
         super.onStart();
 
-        behaviour.setActivityOrientation(this);
-
         if (DebugInfo.providerStatus(this)) {
             debugTextView.setVisibility(View.VISIBLE);
         }
@@ -178,8 +177,6 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
     protected void onRestart() {
         Log.d(TAG, "onRestart(" + this + ")");
         super.onRestart();
-
-        behaviour.setActivityOrientation(this);
     }
 
     @Override

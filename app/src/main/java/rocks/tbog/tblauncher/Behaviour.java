@@ -1624,14 +1624,14 @@ public class Behaviour implements ISearchActivity {
         }
     }
 
-    public void setActivityOrientation(@NonNull Activity act) {
-        if (mPref.getBoolean("lock-portrait", true)) {
-            if (mPref.getBoolean("sensor-orientation", true))
+    public static void setActivityOrientation(@NonNull Activity act, @NonNull SharedPreferences pref) {
+        if (pref.getBoolean("lock-portrait", true)) {
+            if (pref.getBoolean("sensor-orientation", true))
                 act.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
             else
                 act.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT);
         } else {
-            if (mPref.getBoolean("sensor-orientation", true))
+            if (pref.getBoolean("sensor-orientation", true))
                 act.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
             else
                 act.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_USER);
