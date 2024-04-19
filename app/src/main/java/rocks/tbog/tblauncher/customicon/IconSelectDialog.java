@@ -72,8 +72,7 @@ public class IconSelectDialog extends DialogFragment<Drawable> {
                 Uri imageUri = data != null ? data.getData() : null;
                 if (resultCode == Activity.RESULT_OK && imageUri != null) {
                     Drawable imageDrawable;
-                    try {
-                        InputStream is = context.getContentResolver().openInputStream(imageUri);
+                    try (InputStream is = context.getContentResolver().openInputStream(imageUri)) {
                         imageDrawable = Drawable.createFromStream(is, imageUri.toString());
                     } catch (Throwable ignore) {
                         imageDrawable = null;
