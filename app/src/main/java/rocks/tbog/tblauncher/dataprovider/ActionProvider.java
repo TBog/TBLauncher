@@ -292,12 +292,12 @@ public class ActionProvider extends DBProvider<ActionEntry> {
 
     @Override
     protected DBLoader<ActionEntry> newLoadTask() {
-        return new UpdateFromModsLoader<ActionEntry>(this, s_entries, s_names) {
+        return new UpdateFromModsLoader<>(this, s_entries, s_names) {
             @Override
             public List<ActionEntry> getEntryItems(DataHandler dataHandler) {
                 List<ActionEntry> entries = super.getEntryItems(dataHandler);
                 Context context = dataHandler.getContext();
-                if (context == null || !DebugInfo.enableFavorites(context)) {
+                if (!DebugInfo.enableFavorites(context)) {
                     // remove debug entry
                     for (Iterator<ActionEntry> iterator = entries.iterator(); iterator.hasNext(); ) {
                         ActionEntry entry = iterator.next();
