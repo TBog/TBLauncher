@@ -1590,6 +1590,17 @@ public class Behaviour implements ISearchActivity {
                 ShortcutUtil.addShortcut(mTBLauncherActivity, intent);
                 return;
             }
+            // Pasting shared text from Sharesheet via intent-filter into kiss search bar
+            if (Intent.ACTION_SEND.equals(action) && "text/plain".equals(intent.getType())) {
+                String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
+                // making sure the shared text is not an empty string
+                if (sharedText != null && sharedText.trim().length() > 0) {
+                    mSearchEditText.setText(sharedText);
+                    return;
+                } else {
+                    //Toast.makeText(this, R.string.shared_text_empty, Toast.LENGTH_SHORT).show();
+                }
+            }
         }
 
         executeButtonAction("button-home");
