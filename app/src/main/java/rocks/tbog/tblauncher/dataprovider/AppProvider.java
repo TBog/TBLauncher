@@ -12,6 +12,8 @@ import android.os.UserManager;
 import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 import androidx.annotation.WorkerThread;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import java.util.ArrayList;
 import java.util.Objects;
@@ -128,7 +130,7 @@ public class AppProvider extends Provider<AppEntry> {
             IntentFilter filter = new IntentFilter();
             filter.addAction(Intent.ACTION_MANAGED_PROFILE_ADDED);
             filter.addAction(Intent.ACTION_MANAGED_PROFILE_REMOVED);
-            registerReceiver(mProfileReceiver, filter);
+            ActivityCompat.registerReceiver(this, mProfileReceiver, filter, ContextCompat.RECEIVER_EXPORTED);
         }
 
         // Get notified when app changes on standard user profile
@@ -146,7 +148,7 @@ public class AppProvider extends Provider<AppEntry> {
         }
         appChangedFilter.addDataScheme("package");
         appChangedFilter.addDataScheme("file");
-        this.registerReceiver(mPackageAddedRemovedHandler, appChangedFilter);
+        ActivityCompat.registerReceiver(this, mPackageAddedRemovedHandler, appChangedFilter, ContextCompat.RECEIVER_EXPORTED);
 
         super.onCreate();
     }

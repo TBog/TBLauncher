@@ -1,5 +1,6 @@
 package rocks.tbog.tblauncher.handler;
 
+import android.app.Application;
 import android.app.KeyguardManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -19,6 +20,8 @@ import android.util.Log;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.annotation.WorkerThread;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.preference.PreferenceManager;
 
 import java.util.ArrayDeque;
@@ -102,7 +105,7 @@ public class DataHandler extends BroadcastReceiver
     );
 
     @NonNull
-    private final Context context;
+    private final Application mApplication;
     private String currentQuery;
     private final Map<String, ProviderEntry> providers = new LinkedHashMap<>(); // preserve insert order
     private boolean mFullLoadOverSent = false;
@@ -112,22 +115,24 @@ public class DataHandler extends BroadcastReceiver
     /**
      * Initialize all providers
      */
-    public DataHandler(Context ctx) {
+    public DataHandler(@NonNull Application app) {
         // Make sure we are in the context of the main application
         // (otherwise we might receive an exception about broadcast listeners not being able
         //  to bind to services)
-        context = ctx.getApplicationContext();
+        mApplication = app;
+        Context ctx = app.getApplicationContext();
 
         mTimer.start();
 
         IntentFilter intentFilter = new IntentFilter(TBLauncherActivity.LOAD_OVER);
-        ctx.registerReceiver(this, intentFilter);
+
+        ActivityCompat.registerReceiver(ctx, this, intentFilter, ContextCompat.RECEIVER_NOT_EXPORTED);
 
         Intent i = new Intent(TBLauncherActivity.START_LOAD);
         ctx.sendBroadcast(i);
 
         // Monitor changes for service preferences (to automatically start and stop services)
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
         prefs.registerOnSharedPreferenceChangeListener(this);
 
         // add DB providers
@@ -158,7 +163,7 @@ public class DataHandler extends BroadcastReceiver
 
     @NonNull
     public Context getContext() {
-        return context;
+        return mApplication.getApplicationContext();
     }
 
     /*
@@ -167,6 +172,7 @@ public class DataHandler extends BroadcastReceiver
      * to them dynamically.
      */
     private void basicProviders() {
+        Context context = mApplication;
         // Filters
         {
             ProviderEntry providerEntry = new ProviderEntry();
@@ -361,7 +367,7 @@ public class DataHandler extends BroadcastReceiver
             IntentFilter intentFilter = new IntentFilter();
             intentFilter.addAction(Intent.ACTION_SCREEN_ON);
             intentFilter.addAction(Intent.ACTION_USER_PRESENT);
-            context.registerReceiver(new BroadcastReceiver() {
+            ActivityCompat.registerReceiver(context, new BroadcastReceiver() {
                 @Override
                 public void onReceive(final Context context, Intent intent) {
                     // Is there a lockscreen still visible to the user?
@@ -385,7 +391,7 @@ public class DataHandler extends BroadcastReceiver
                         }, 10);
                     }
                 }
-            }, intentFilter);
+            }, intentFilter, ContextCompat.RECEIVER_EXPORTED);
 
             // Stop here for now, the Receiver will re-trigger the whole flow when services can be started.
             return false;
@@ -951,7 +957,7 @@ public class DataHandler extends BroadcastReceiver
         final Context context = getContext();
 
         IntentFilter intentFilter = new IntentFilter(TBLauncherActivity.LOAD_OVER);
-        context.registerReceiver(this, intentFilter);
+        ActivityCompat.registerReceiver(context, this, intentFilter, ContextCompat.RECEIVER_NOT_EXPORTED);
 
         Intent i = new Intent(TBLauncherActivity.START_LOAD);
         context.sendBroadcast(i);
@@ -978,7 +984,7 @@ public class DataHandler extends BroadcastReceiver
         mTimer.start();
 
         IntentFilter intentFilter = new IntentFilter(TBLauncherActivity.LOAD_OVER);
-        context.registerReceiver(this, intentFilter);
+        ActivityCompat.registerReceiver(context, this, intentFilter, ContextCompat.RECEIVER_NOT_EXPORTED);
 
         Intent i = new Intent(TBLauncherActivity.START_LOAD);
         context.sendBroadcast(i);
@@ -999,7 +1005,7 @@ public class DataHandler extends BroadcastReceiver
         mTimer.start();
 
         IntentFilter intentFilter = new IntentFilter(TBLauncherActivity.LOAD_OVER);
-        context.registerReceiver(this, intentFilter);
+        ActivityCompat.registerReceiver(context, this, intentFilter, ContextCompat.RECEIVER_NOT_EXPORTED);
 
         Intent i = new Intent(TBLauncherActivity.START_LOAD);
         context.sendBroadcast(i);

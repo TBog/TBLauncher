@@ -5,6 +5,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.content.res.XmlResourceParser;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Matrix;
@@ -18,6 +19,7 @@ import android.os.Build;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.Pair;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -229,8 +231,9 @@ public class IconPackXML implements IconPack<DrawableInfo> {
 
     @SuppressLint("DiscouragedApi")
     private void parseDrawableXML() {
-        XmlPullParser xpp = null;
+        XmlResourceParser xpp = null;
         // search drawable.xml into icons pack apk resource folder
+        @SuppressLint("DiscouragedApi")
         int drawableXmlId = packResources.getIdentifier("drawable", "xml", iconPackPackageName);
         if (drawableXmlId > 0) {
             xpp = packResources.getXml(drawableXmlId);
@@ -264,29 +267,50 @@ public class IconPackXML implements IconPack<DrawableInfo> {
             }
         } catch (XmlPullParserException | IOException e) {
             Log.e(TAG, "parsing drawable.xml", e);
+        } finally {
+            xpp.close();
         }
 
     }
 
-    @SuppressLint("DiscouragedApi")
-    @Nullable
-    private XmlPullParser findAppFilterXml() throws XmlPullParserException {
+    @NonNull
+    private Pair<XmlPullParser, InputStream> findAppFilterXml() throws XmlPullParserException {
+        XmlPullParser parser = null;
+        InputStream inputStream = null;
         // search appfilter.xml in icon pack's apk resource folder for xml files
-        int appFilterIdXml = packResources.getIdentifier("appfilter", "xml", iconPackPackageName);
-        if (appFilterIdXml > 0) {
-            return packResources.getXml(appFilterIdXml);
+        try {
+            inputStream = packResources.getAssets().open("appfilter.xml");
+            XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
+            parser = factory.newPullParser();
+            parser.setInput(inputStream, "UTF-8");
+        } catch (Exception e) {
+            if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException ignored) {
+                }
+            }
+            inputStream = null;
+            // Catch any exception since we want to fall back to parsing the xml/resource in all cases
+            @SuppressLint("DiscouragedApi")
+            int appFilterIdXml = packResources.getIdentifier("appfilter", "xml", iconPackPackageName);
+            if (appFilterIdXml > 0) {
+                parser = packResources.getXml(appFilterIdXml);
+            }
         }
 
-        // search appfilter.xml in icon pack's apk resource folder for raw files (supporting icon pack studio)
-        int appFilterIdRaw = packResources.getIdentifier("appfilter", "raw", iconPackPackageName);
-        if (appFilterIdRaw > 0) {
-            InputStream input = packResources.openRawResource(appFilterIdRaw);
-            XmlPullParserFactory xppf = XmlPullParserFactory.newInstance();
-            XmlPullParser xpp = xppf.newPullParser();
-            xpp.setInput(input, "UTF-8");
-            return xpp;
+        if (parser == null) {
+            // search appfilter.xml in icon pack's apk resource folder for raw files (supporting icon pack studio)
+            @SuppressLint("DiscouragedApi")
+            int appFilterIdRaw = packResources.getIdentifier("appfilter", "raw", iconPackPackageName);
+            if (appFilterIdRaw > 0) {
+                inputStream = packResources.openRawResource(appFilterIdRaw);
+                XmlPullParserFactory factory = XmlPullParserFactory.newInstance();
+                parser = factory.newPullParser();
+                parser.setInput(inputStream, "UTF-8");
+            }
         }
-        return null;
+        return Pair.create(parser, inputStream);
     }
 
     @SuppressLint("DiscouragedApi")
@@ -294,9 +318,13 @@ public class IconPackXML implements IconPack<DrawableInfo> {
         if (packResources == null)
             return;
 
+        XmlPullParser xpp = null;
+        InputStream inputStream = null;
         Map<String, CalendarDrawable> calendarDrawablesByPrefix = new ArrayMap<>(0);
         try {
-            XmlPullParser xpp = findAppFilterXml();
+            var appFilterXml = findAppFilterXml();
+            xpp = appFilterXml.first;
+            inputStream = appFilterXml.second;
             if (xpp != null) {
                 int eventType = xpp.getEventType();
                 while (eventType != XmlPullParser.END_DOCUMENT) {
@@ -392,7 +420,17 @@ public class IconPackXML implements IconPack<DrawableInfo> {
                 }
             }
         } catch (Exception e) {
-            Log.e(TAG, "parsing appfilter.xml ", e);
+            Log.e(TAG, "Error parsing appfilter.xml ", e);
+        } finally {
+            if (xpp instanceof XmlResourceParser) {
+                ((XmlResourceParser) xpp).close();
+            } else if (inputStream != null) {
+                try {
+                    inputStream.close();
+                } catch (IOException e) {
+                    Log.e(TAG, "Error closing appfilter.xml ", e);
+                }
+            }
         }
     }
 

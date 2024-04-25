@@ -315,6 +315,11 @@ public class TBApplication extends Application {
         }
     }
 
+    public static boolean hasSearchTask(Context context) {
+        TBApplication app = getApplication(context);
+        return app.mSearchTask != null;
+    }
+
     public static IconsHandler iconsHandler(Context ctx) {
         return getApplication(ctx).iconsHandler();
     }

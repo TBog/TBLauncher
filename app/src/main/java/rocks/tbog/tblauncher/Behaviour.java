@@ -17,6 +17,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.text.Editable;
+import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.util.Log;
 import android.view.View;
@@ -42,7 +43,6 @@ import androidx.preference.PreferenceManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -108,7 +108,6 @@ public class Behaviour implements ISearchActivity {
     private static final String TAG = Behaviour.class.getSimpleName();
     private TBLauncherActivity mTBLauncherActivity = null;
     private DialogFragment<?> mFragmentDialog = null;
-
     private View mResultLayout;
     private RecyclerList mResultList;
     private RecycleAdapter mResultAdapter;
@@ -131,6 +130,7 @@ public class Behaviour implements ISearchActivity {
             mLauncherTime.postDelayed(mUpdateTime, delay);
         }
     };
+    private boolean mLaunchMostRelevantResult = false;
     private final TextWatcher mSearchTextWatcher = new TextWatcher() {
         @NonNull
         String lastText = "";
@@ -147,9 +147,9 @@ public class Behaviour implements ISearchActivity {
                 s.delete(0, spaceEnd);
             } else {
                 String text = s.toString();
-                if (lastText.equals(text))
+                if (lastText.equals(text) || mLaunchMostRelevantResult)
                     return;
-                if (text == null || text.isEmpty())
+                if (TextUtils.isEmpty(text))
                     clearAdapter();
                 else
                     updateSearchRecords(false, text);
@@ -383,11 +383,16 @@ public class Behaviour implements ISearchActivity {
             }
 
             // launch most relevant result
-            final int mostRelevantIdx = mResultList.getAdapterFirstItemIdx();
-            if (mostRelevantIdx >= 0 && mostRelevantIdx < mResultAdapter.getItemCount()) {
-                RecyclerView.ViewHolder holder = mResultList.findViewHolderForAdapterPosition(mostRelevantIdx);
-                mResultAdapter.onClick(mostRelevantIdx, holder != null ? holder.itemView : view);
+            if (TBApplication.hasSearchTask(getContext())) {
+                mLaunchMostRelevantResult = true;
                 return true;
+            } else {
+                final int mostRelevantIdx = mResultList.getAdapterFirstItemIdx();
+                if (mostRelevantIdx >= 0 && mostRelevantIdx < mResultAdapter.getItemCount()) {
+                    RecyclerView.ViewHolder holder = mResultList.findViewHolderForAdapterPosition(mostRelevantIdx);
+                    mResultAdapter.onClick(mostRelevantIdx, holder != null ? holder.itemView : view);
+                    return true;
+                }
             }
             return false;
         });
@@ -623,7 +628,7 @@ public class Behaviour implements ISearchActivity {
             switch (currentMode) {
                 case SEARCH:
                     resetTask();
-                    hideSearchBar(true);
+                    hideSearchBar();
                     break;
                 case WIDGET:
                     hideWidgets();
@@ -677,7 +682,7 @@ public class Behaviour implements ISearchActivity {
                 break;
             case WIDGET:
                 // show widgets
-                showWidgets(true);
+                showWidgets();
                 // hide/show the QuickList
                 TBApplication.quickList(getContext()).updateVisibility();
                 // enable/disable fullscreen (status and navigation bar)
@@ -786,7 +791,8 @@ public class Behaviour implements ISearchActivity {
         setSearchHint();
         UITheme.applySearchBarTextShadow(mSearchEditText);
 
-        mSearchBarContainer.animate().cancel();
+        if (TBApplication.state().getSearchBarVisibility() != LauncherState.AnimatedVisibility.ANIM_TO_VISIBLE)
+            mSearchBarContainer.animate().cancel();
         mSearchBarContainer.setVisibility(View.VISIBLE);
         mSearchBarContainer.animate()
             .setStartDelay(0)
@@ -822,41 +828,54 @@ public class Behaviour implements ISearchActivity {
         mWidgetContainer.setVisibility(View.GONE);
     }
 
+    private void hideSearchBar() {
+        boolean animate = !TBApplication.state().isSearchBarVisible();
+        hideSearchBar(animate);
+    }
+
     private void hideSearchBar(boolean animate) {
         clearSearchText();
         clearAdapter();
 
-        final float translationY;
-        if (PrefCache.searchBarAtBottom(mPref))
-            translationY = mSearchBarContainer.getHeight() * 2f;
-        else
-            translationY = mSearchBarContainer.getHeight() * -2f;
+        if (mSearchBarContainer.getVisibility() == View.VISIBLE) {
+            final float translationY;
+            if (PrefCache.searchBarAtBottom(mPref))
+                translationY = mSearchBarContainer.getHeight() * 2f;
+            else
+                translationY = mSearchBarContainer.getHeight() * -2f;
 
-        mSearchBarContainer.animate().cancel();
-        if (animate) {
-            mSearchBarContainer.animate()
-                .alpha(0f)
-                .translationY(translationY)
-                .setDuration(UI_ANIMATION_DURATION)
-                .setInterpolator(new AccelerateInterpolator())
-                .setListener(new AnimatorListenerAdapter() {
-                    @Override
-                    public void onAnimationStart(Animator animation) {
-                        TBApplication.state().setSearchBar(LauncherState.AnimatedVisibility.ANIM_TO_HIDDEN);
-                    }
+            if (TBApplication.state().getSearchBarVisibility() != LauncherState.AnimatedVisibility.ANIM_TO_HIDDEN)
+                mSearchBarContainer.animate().cancel();
 
-                    @Override
-                    public void onAnimationEnd(Animator animation) {
-                        TBApplication.state().setSearchBar(LauncherState.AnimatedVisibility.HIDDEN);
-                        mSearchBarContainer.setVisibility(View.GONE);
-                    }
-                })
-                .start();
+            if (animate) {
+                mSearchBarContainer.setTranslationY(0f);
+                mSearchBarContainer.animate()
+                    .alpha(0f)
+                    .translationY(translationY)
+                    .setDuration(UI_ANIMATION_DURATION)
+                    .setInterpolator(new AccelerateInterpolator())
+                    .setListener(new AnimatorListenerAdapter() {
+                        @Override
+                        public void onAnimationStart(Animator animation) {
+                            TBApplication.state().setSearchBar(LauncherState.AnimatedVisibility.ANIM_TO_HIDDEN);
+                        }
+
+                        @Override
+                        public void onAnimationEnd(Animator animation) {
+                            TBApplication.state().setSearchBar(LauncherState.AnimatedVisibility.HIDDEN);
+                            mSearchBarContainer.setVisibility(View.GONE);
+                        }
+                    })
+                    .start();
+            } else {
+                TBApplication.state().setSearchBar(LauncherState.AnimatedVisibility.HIDDEN);
+                mSearchBarContainer.setAlpha(0f);
+                mSearchBarContainer.setTranslationY(translationY);
+                mSearchBarContainer.setVisibility(View.GONE);
+            }
         } else {
-            TBApplication.state().setSearchBar(LauncherState.AnimatedVisibility.HIDDEN);
-            mSearchBarContainer.setAlpha(0f);
-            mSearchBarContainer.setTranslationY(translationY);
-            mSearchBarContainer.setVisibility(View.GONE);
+            Log.d(TAG, "mSearchBarContainer not VISIBLE, setting state to HIDDEN");
+            TBApplication.state().setResultList(LauncherState.AnimatedVisibility.HIDDEN);
         }
 
         if (PrefCache.linkKeyboardAndSearchBar(mPref))
@@ -865,14 +884,15 @@ public class Behaviour implements ISearchActivity {
         mSearchEditText.setEnabled(false);
     }
 
+    private void showWidgets() {
+        boolean animate = !TBApplication.state().isWidgetScreenVisible();
+        showWidgets(animate);
+    }
+
     private void showWidgets(boolean animate) {
         if (TBApplication.state().getWidgetScreenVisibility() != LauncherState.AnimatedVisibility.ANIM_TO_VISIBLE)
-            mWidgetContainer.animate().cancel();
-        if (mWidgetContainer.getVisibility() == View.VISIBLE) {
-            mWidgetContainer.setAlpha(1f);
-            hideResultList(false);
-            return;
-        }
+            mSearchBarContainer.animate().cancel();
+
         mWidgetContainer.setVisibility(View.VISIBLE);
         if (animate) {
             mWidgetContainer.setAlpha(0f);
@@ -894,10 +914,11 @@ public class Behaviour implements ISearchActivity {
                 })
                 .start();
         } else {
+            mWidgetContainer.animate().cancel();
             TBApplication.state().setWidgetScreen(LauncherState.AnimatedVisibility.VISIBLE);
             mWidgetContainer.setAlpha(1f);
         }
-        hideResultList(true);
+        hideResultList(animate);
     }
 
     public void showKeyboard() {
@@ -1011,6 +1032,22 @@ public class Behaviour implements ISearchActivity {
         mTBLauncherActivity.quickList.adapterUpdated();
         mClearButton.setVisibility(View.VISIBLE);
         mMenuButton.setVisibility(View.INVISIBLE);
+
+        if (mLaunchMostRelevantResult) {
+            mLaunchMostRelevantResult = false;
+
+            // get any view
+            View view = mResultList.getLayoutManager() != null ? mResultList.getLayoutManager().getChildAt(0) : null;
+            final int mostRelevantIdx = mResultList.getAdapterFirstItemIdx();
+            // try to get view of the most relevant item from adapter
+            if (mostRelevantIdx >= 0 && mostRelevantIdx < mResultAdapter.getItemCount()) {
+                RecyclerView.ViewHolder holder = mResultList.findViewHolderForAdapterPosition(mostRelevantIdx);
+                if (holder != null)
+                    view = holder.itemView;
+            }
+            if (view != null)
+                mResultAdapter.onClick(mostRelevantIdx, view);
+        }
     }
 
     @Override
@@ -1045,7 +1082,7 @@ public class Behaviour implements ISearchActivity {
         try {
             Constructor<? extends Searcher> constructor = searcherClass.getConstructor(ISearchActivity.class, String.class);
             searcher = constructor.newInstance(this, query);
-        } catch (IllegalAccessException | InstantiationException | NoSuchMethodException | InvocationTargetException e) {
+        } catch (ReflectiveOperationException e) {
             Log.e(TAG, "new <? extends Searcher>", e);
         }
         if (searcher != null)
@@ -1062,11 +1099,9 @@ public class Behaviour implements ISearchActivity {
     }
 
     public void clearSearch() {
-        if (mSearchEditText == null)
-            return;
-
-        mSearchEditText.setText("");
+        clearSearchText();
         clearAdapter();
+        updateClearButton();
     }
 
     public void refreshSearchRecords() {
@@ -1087,10 +1122,8 @@ public class Behaviour implements ISearchActivity {
         Log.d(TAG, "showResultList (anim " + animate + ")");
         if (TBApplication.state().getResultListVisibility() != LauncherState.AnimatedVisibility.ANIM_TO_VISIBLE)
             mResultLayout.animate().cancel();
-        if (mResultLayout.getVisibility() == View.VISIBLE)
-            return;
+
         mResultLayout.setVisibility(View.VISIBLE);
-        Log.d(TAG, "mResultLayout set VISIBLE (anim " + animate + ")");
         if (animate) {
             TBApplication.state().setResultList(LauncherState.AnimatedVisibility.ANIM_TO_VISIBLE);
             mResultLayout.setAlpha(0f);
@@ -1169,7 +1202,8 @@ public class Behaviour implements ISearchActivity {
         dismissPopup();
 
         TBApplication.runTask(getContext(), searcher);
-        showResultList(true);
+        boolean animate = !TBApplication.state().isResultListVisible();
+        showResultList(animate);
     }
 
     public void beforeLaunchOccurred() {
@@ -1556,6 +1590,17 @@ public class Behaviour implements ISearchActivity {
                 ShortcutUtil.addShortcut(mTBLauncherActivity, intent);
                 return;
             }
+            // Pasting shared text from Sharesheet via intent-filter into kiss search bar
+            if (Intent.ACTION_SEND.equals(action) && "text/plain".equals(intent.getType())) {
+                String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
+                // making sure the shared text is not an empty string
+                if (sharedText != null && sharedText.trim().length() > 0) {
+                    mSearchEditText.setText(sharedText);
+                    return;
+                } else {
+                    //Toast.makeText(this, R.string.shared_text_empty, Toast.LENGTH_SHORT).show();
+                }
+            }
         }
 
         executeButtonAction("button-home");
@@ -1590,14 +1635,14 @@ public class Behaviour implements ISearchActivity {
         }
     }
 
-    public void setActivityOrientation(@NonNull Activity act) {
-        if (mPref.getBoolean("lock-portrait", true)) {
-            if (mPref.getBoolean("sensor-orientation", true))
+    public static void setActivityOrientation(@NonNull Activity act, @NonNull SharedPreferences pref) {
+        if (pref.getBoolean("lock-portrait", true)) {
+            if (pref.getBoolean("sensor-orientation", true))
                 act.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT);
             else
                 act.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_USER_PORTRAIT);
         } else {
-            if (mPref.getBoolean("sensor-orientation", true))
+            if (pref.getBoolean("sensor-orientation", true))
                 act.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_SENSOR);
             else
                 act.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_FULL_USER);

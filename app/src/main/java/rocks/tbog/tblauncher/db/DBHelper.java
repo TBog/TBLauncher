@@ -40,10 +40,12 @@ public class DBHelper {
     }
 
     private static SQLiteDatabase getDatabase(Context context) {
-        if (database == null) {
-            database = new DB(context);
+        synchronized (DBHelper.class) {
+            if (database == null) {
+                database = new DB(context);
+            }
+            return database.getReadableDatabase();
         }
-        return database.getReadableDatabase();
     }
 
     private static ArrayList<ValuedHistoryRecord> readCursor(Cursor cursor) {
