@@ -81,6 +81,7 @@
     <string name="size">&lt;%d&gt;</string>
     <string name="size_float">&lt;%.1f&gt;</string>
     <string name="shadow_preview">&lt;%3$.1f&gt;\n&lt;%1$.1f&#215;%2$.1f&gt;</string>
+    <string name="offset_preview">&lt;%1$.1f&#215;%2$.1f&gt;</string>
 
     <string name="menu_app_rename">Rename app</string>
     <string name="menu_action_rename">Rename</string>
@@ -488,6 +489,7 @@
     <string name="result_fading_edge_summary">Top and bottom edges fade out</string>
     <string name="margin_vertical">Vertical margin</string>
     <string name="margin_horizontal">Horizontal margin</string>
+    <string name="margin_offset">Margin offset</string>
     <string name="browse_add_icon">Browse local images</string>
     <string name="result_list_row_height">List row height</string>
     <string name="result_list_row_height_manual">Custom list row height</string>

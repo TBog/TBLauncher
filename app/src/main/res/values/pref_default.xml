@@ -32,4 +32,5 @@
     so let's make rounded corners small to hide this -->
     <integer name="default_corner_radius" translatable="false">5</integer>              <!-- 12dp -->
     <integer name="default_result_margin" translatable="false">10</integer>             <!-- 10dp -->
+    <item name="default_result_margin_offset" type="dimen" format="float" translatable="false">0</item> <!-- dp -->
 </resources>

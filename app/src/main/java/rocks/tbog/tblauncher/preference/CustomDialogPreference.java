@@ -172,5 +172,19 @@ public class CustomDialogPreference extends androidx.preference.DialogPreference
                 }
             }
         }
+        {
+            View view = holder.findViewById(R.id.prefOffsetPreview);
+            if (view instanceof TextView) {
+                // used for shadow
+                Object value2 = prefMap.get(key.replace("-dx", "-dy"));
+                if (value instanceof Float && value2 instanceof Float) {
+                    float v1 = (float) value;
+                    float v2 = (float) value2;
+                    ((TextView) view).setText(view.getResources().getString(R.string.offset_preview, v1, v2));
+                } else {
+                    ((TextView) view).setText("");
+                }
+            }
+        }
     }
 }

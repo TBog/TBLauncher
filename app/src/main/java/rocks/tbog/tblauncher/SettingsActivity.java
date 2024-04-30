@@ -70,6 +70,7 @@ import rocks.tbog.tblauncher.preference.CustomDialogPreference;
 import rocks.tbog.tblauncher.preference.EditSearchEnginesPreferenceDialog;
 import rocks.tbog.tblauncher.preference.EditSearchHintPreferenceDialog;
 import rocks.tbog.tblauncher.preference.IconListPreferenceDialog;
+import rocks.tbog.tblauncher.preference.MarginDialog;
 import rocks.tbog.tblauncher.preference.OrderListPreferenceDialog;
 import rocks.tbog.tblauncher.preference.PreferenceColorDialog;
 import rocks.tbog.tblauncher.preference.QuickListPreferenceDialog;
@@ -740,6 +741,8 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
                         dialogFragment = SliderDialog.newInstance(key);
                     } else if (R.layout.pref_shadow == dialogLayout) {
                         dialogFragment = ShadowDialog.newInstance(key);
+                    } else if (R.layout.pref_margin_offset == dialogLayout) {
+                        dialogFragment = MarginDialog.newInstance(key);
                     } else if (R.layout.pref_confirm == dialogLayout) {
                         dialogFragment = ConfirmDialog.newInstance(key);
                     }

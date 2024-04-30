@@ -480,6 +480,18 @@
                 android:title="@string/margin_horizontal"
                 android:widgetLayout="@layout/pref_size_preview" />
 
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@dimen/default_result_margin_offset"
+                android:dialogLayout="@layout/pref_margin_offset"
+                android:key="result-list-margin-offset-dx"
+                android:title="@string/margin_offset"
+                android:widgetLayout="@layout/pref_offset_preview" />
+
+            <rocks.tbog.tblauncher.preference.CustomDialogPreference
+                android:defaultValue="@dimen/default_result_margin_offset"
+                android:key="result-list-margin-offset-dy"
+                app:isPreferenceVisible="false" />
+
         </PreferenceCategory>
 
         <!-- Dock / Quick List -->
