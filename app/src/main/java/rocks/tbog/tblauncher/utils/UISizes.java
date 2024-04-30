@@ -3,7 +3,9 @@ package rocks.tbog.tblauncher.utils;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Resources;
+import android.graphics.Rect;
 import android.os.Build;
+import android.util.DisplayMetrics;
 import android.util.TypedValue;
 import android.view.ViewGroup;
 
@@ -64,13 +66,50 @@ public final class UISizes {
         return Math.max(1, (int) (px + .5f));
     }
 
+    public static int dp2px(Context context, float size) {
+        if (-0.001f < size && size < 0.001f)
+            return 0;
+        float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, size, context.getResources().getDisplayMetrics());
+        final int pixelSize = Math.round(px);
+        return pixelSize == 0 ? 1 : pixelSize;
+    }
+
     public static int px2dp(Context context, int pixelSize) {
         if (pixelSize == 0)
             return 0;
-        // Get the screen's density scale
-        final float scale = context.getResources().getDisplayMetrics().density;
-        // Convert the DIPs to pixels, based on density scale
-        return Math.max(1, (int) (pixelSize * scale + .5f));
+        float dp;
+        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+        {
+            // Avoid divide-by-zero, and return 0 since that's what the inverse function will do
+            if (metrics.density == 0) {
+                return 0;
+            }
+            dp = pixelSize / metrics.density;
+        } else {
+            dp = TypedValue.deriveDimension(TypedValue.COMPLEX_UNIT_DIP, pixelSize, metrics);
+        }
+        return Math.max(1, (int) (dp + .5f));
+    }
+
+    public static float px2dp(Context context, float size) {
+        if (-0.001f < size && size < 0.001f)
+            return 0f;
+        DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        float px;
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+        {
+            // Avoid divide-by-zero, and return 0 since that's what the inverse function will do
+            if (metrics.density == 0) {
+                return 0f;
+            }
+            px = size / metrics.density;
+        } else {
+            px = TypedValue.deriveDimension(TypedValue.COMPLEX_UNIT_DIP, size, metrics);
+        }
+        if (-0.001f < px && px < 0.001f)
+            return 0f;
+        return px;
     }
 
     public static int getResultTextSize(Context context) {
@@ -111,16 +150,22 @@ public final class UISizes {
         return dp2px(context, radius);
     }
 
-    public static int getResultListMarginVertical(Context context) {
+    public static Rect getResultListMargin(Context context) {
         SharedPreferences pref = TBApplication.getApplication(context).preferences();
-        int margin = pref.getInt("result-list-margin-vertical", 0);
-        return dp2px(context, margin);
-    }
-
-    public static int getResultListMarginHorizontal(Context context) {
-        SharedPreferences pref = TBApplication.getApplication(context).preferences();
-        int margin = pref.getInt("result-list-margin-horizontal", 0);
-        return dp2px(context, margin);
+        final int marginHorizontal = pref.getInt("result-list-margin-horizontal", 0);
+        final int marginVertical = pref.getInt("result-list-margin-vertical", 0);
+        float marginOffsetX = pref.getFloat("result-list-margin-offset-dx", 0);
+        float marginOffsetY = pref.getFloat("result-list-margin-offset-dy", 0);
+        if (marginOffsetX > marginHorizontal)
+            marginOffsetX = marginHorizontal;
+        if (marginOffsetY > marginVertical)
+            marginOffsetY = marginVertical;
+        Rect margin = new Rect();
+        margin.left = dp2px(context, marginHorizontal + marginOffsetX);
+        margin.right = dp2px(context, marginHorizontal - marginOffsetX);
+        margin.top = dp2px(context, marginVertical + marginOffsetY);
+        margin.bottom = dp2px(context, marginVertical - marginOffsetY);
+        return margin;
     }
 
     public static int getResultListRowHeight(Context context) {

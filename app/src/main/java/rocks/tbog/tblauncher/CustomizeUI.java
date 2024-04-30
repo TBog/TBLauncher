@@ -456,9 +456,8 @@ public class CustomizeUI {
         if (setMargin) {
             ViewGroup.LayoutParams params = resultLayout.getLayoutParams();
             if (params instanceof ViewGroup.MarginLayoutParams) {
-                int hMargin = UISizes.getResultListMarginHorizontal(ctx);
-                int vMargin = UISizes.getResultListMarginVertical(ctx);
-                ((ViewGroup.MarginLayoutParams) params).setMargins(hMargin, vMargin, hMargin, vMargin);
+                final var margin = UISizes.getResultListMargin(ctx);
+                ((ViewGroup.MarginLayoutParams) params).setMargins(margin.left, margin.top, margin.right, margin.bottom);
             }
         }
 

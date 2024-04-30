@@ -40,8 +40,8 @@ class ItemWidget implements MenuItem {
             final CharSequence text;
             if (content instanceof ItemWidget) {
                 WidgetInfo info = ((ItemWidget) content).info;
-                int sizeX = UISizes.px2dp(text1.getContext(), info.appWidgetInfo.minWidth);
-                int sizeY = UISizes.px2dp(text1.getContext(), info.appWidgetInfo.minHeight);
+                int sizeX = UISizes.px2dp(text1.getContext(), info.appWidgetInfo.minWidth) / 40;
+                int sizeY = UISizes.px2dp(text1.getContext(), info.appWidgetInfo.minHeight) / 40;
                 if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.S) {
                     if (info.appWidgetInfo.targetCellWidth != 0 && info.appWidgetInfo.targetCellHeight != 0) {
                         sizeX = info.appWidgetInfo.targetCellWidth;
