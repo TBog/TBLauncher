@@ -1,0 +1,16 @@
+* Fix search hint rename by @TBog in https://github.com/TBog/TBLauncher/pull/413
+* Bump org.jetbrains.kotlin:kotlin-gradle-plugin from 1.8.21 to 1.9.10 by @dependabot in https://github.com/TBog/TBLauncher/pull/400
+* Bump lifecycle_version from 2.6.1 to 2.6.2 by @dependabot in https://github.com/TBog/TBLauncher/pull/404
+* Bump androidx.core:core-ktx from 1.10.1 to 1.12.0 by @dependabot in https://github.com/TBog/TBLauncher/pull/405
+* Bump androidx.annotation:annotation from 1.6.0 to 1.7.0 by @dependabot in https://github.com/TBog/TBLauncher/pull/406
+* Bump com.android.tools.build:gradle from 8.1.1 to 8.1.2 by @dependabot in https://github.com/TBog/TBLauncher/pull/421
+* fix possible NPE in MatchInfo ResultRelevance compare by @TBog in https://github.com/TBog/TBLauncher/pull/427
+* ModProvider setting the custom icons twice by @TBog in https://github.com/TBog/TBLauncher/pull/428
+* Recycler adapter base class by @TBog in https://github.com/TBog/TBLauncher/pull/429
+* Icon pack problems by @TBog in https://github.com/TBog/TBLauncher/pull/407
+* Fix invisible widgets by @TBog in https://github.com/TBog/TBLauncher/pull/411
+* Merge devtest into master by @TBog in https://github.com/TBog/TBLauncher/pull/457
+* Translations update from Hosted Weblate by @weblate in https://github.com/TBog/TBLauncher/pull/447
+* Fix stall on launcher resume e48d451fe160a39984596ba7e04ded0d462716f4
+* Cherrypicked share text from https://github.com/Neamar/KISS/pull/2111
+* Fix Android 14 local broadcast in 54e7b2a09b7c3f4a3931c01dcdbefcf3df913f16
