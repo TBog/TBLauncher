@@ -33,6 +33,7 @@ public final class UISizes {
     private static Float CACHED_RADIUS_RESULT_LIST_SHADOW = null;
     private static Float CACHED_DX_RESULT_LIST_SHADOW = null;
     private static Float CACHED_DY_RESULT_LIST_SHADOW = null;
+    private static final float EPSILON_PX_SIZE = 0.001f;
 
     private UISizes() {
     }
@@ -66,12 +67,9 @@ public final class UISizes {
         return Math.max(1, (int) (px + .5f));
     }
 
-    public static int dp2px(Context context, float size) {
-        if (-0.001f < size && size < 0.001f)
-            return 0;
+    public static int dp2px_float(Context context, float size) {
         float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, size, context.getResources().getDisplayMetrics());
-        final int pixelSize = Math.round(px);
-        return pixelSize == 0 ? 1 : pixelSize;
+        return Math.round(px);
     }
 
     public static int px2dp(Context context, int pixelSize) {
@@ -92,9 +90,7 @@ public final class UISizes {
         return Math.max(1, (int) (dp + .5f));
     }
 
-    public static float px2dp(Context context, float size) {
-        if (-0.001f < size && size < 0.001f)
-            return 0f;
+    public static float px2dp_float(Context context, float size) {
         DisplayMetrics metrics = context.getResources().getDisplayMetrics();
         float px;
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
@@ -107,9 +103,7 @@ public final class UISizes {
         } else {
             px = TypedValue.deriveDimension(TypedValue.COMPLEX_UNIT_DIP, size, metrics);
         }
-        if (-0.001f < px && px < 0.001f)
-            return 0f;
-        return px;
+        return Math.round(px * 1000.f) * 0.001f;
     }
 
     public static int getResultTextSize(Context context) {
@@ -161,10 +155,10 @@ public final class UISizes {
         if (marginOffsetY > marginVertical)
             marginOffsetY = marginVertical;
         Rect margin = new Rect();
-        margin.left = dp2px(context, marginHorizontal + marginOffsetX);
-        margin.right = dp2px(context, marginHorizontal - marginOffsetX);
-        margin.top = dp2px(context, marginVertical + marginOffsetY);
-        margin.bottom = dp2px(context, marginVertical - marginOffsetY);
+        margin.left = dp2px_float(context, marginHorizontal + marginOffsetX);
+        margin.right = dp2px_float(context, marginHorizontal - marginOffsetX);
+        margin.top = dp2px_float(context, marginVertical + marginOffsetY);
+        margin.bottom = dp2px_float(context, marginVertical - marginOffsetY);
         return margin;
     }
 
@@ -193,7 +187,7 @@ public final class UISizes {
             SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
             final float defaultSize = getFloatResource(context.getResources(), R.dimen.default_result_shadow_radius);
             final float size = pref.getFloat("result-shadow-radius", defaultSize);
-            CACHED_RADIUS_RESULT_LIST_SHADOW = size < 0.001f ? 0f : size;
+            CACHED_RADIUS_RESULT_LIST_SHADOW = size < EPSILON_PX_SIZE ? 0f : size;
         }
         return CACHED_RADIUS_RESULT_LIST_SHADOW;
     }
@@ -203,7 +197,7 @@ public final class UISizes {
             SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
             final float defaultSize = getFloatResource(context.getResources(), R.dimen.default_result_shadow_dx);
             final float size = pref.getFloat("result-shadow-dx", defaultSize);
-            CACHED_DX_RESULT_LIST_SHADOW = Math.abs(size) < 0.001f ? 0f : size;
+            CACHED_DX_RESULT_LIST_SHADOW = Math.abs(size) < EPSILON_PX_SIZE ? 0f : size;
         }
         return CACHED_DX_RESULT_LIST_SHADOW;
     }
@@ -213,7 +207,7 @@ public final class UISizes {
             SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
             final float defaultSize = getFloatResource(context.getResources(), R.dimen.default_result_shadow_dy);
             final float size = pref.getFloat("result-shadow-dy", defaultSize);
-            CACHED_DY_RESULT_LIST_SHADOW = Math.abs(size) < 0.001f ? 0f : size;
+            CACHED_DY_RESULT_LIST_SHADOW = Math.abs(size) < EPSILON_PX_SIZE ? 0f : size;
         }
         return CACHED_DY_RESULT_LIST_SHADOW;
     }
@@ -260,7 +254,7 @@ public final class UISizes {
             SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
             final float defaultSize = getFloatResource(context.getResources(), R.dimen.default_result_shadow_radius);
             final float size = pref.getFloat("popup-shadow-radius", defaultSize);
-            CACHED_RADIUS_POPUP_SHADOW = size < 0.001f ? 0f : size;
+            CACHED_RADIUS_POPUP_SHADOW = size < EPSILON_PX_SIZE ? 0f : size;
         }
         return CACHED_RADIUS_POPUP_SHADOW;
     }
@@ -270,7 +264,7 @@ public final class UISizes {
             SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
             final float defaultSize = getFloatResource(context.getResources(), R.dimen.default_result_shadow_dx);
             final float size = pref.getFloat("popup-shadow-dx", defaultSize);
-            CACHED_DX_POPUP_SHADOW = Math.abs(size) < 0.001f ? 0f : size;
+            CACHED_DX_POPUP_SHADOW = Math.abs(size) < EPSILON_PX_SIZE ? 0f : size;
         }
         return CACHED_DX_POPUP_SHADOW;
     }
@@ -280,7 +274,7 @@ public final class UISizes {
             SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(context);
             final float defaultSize = getFloatResource(context.getResources(), R.dimen.default_result_shadow_dy);
             final float size = pref.getFloat("popup-shadow-dy", defaultSize);
-            CACHED_DY_POPUP_SHADOW = Math.abs(size) < 0.001f ? 0f : size;
+            CACHED_DY_POPUP_SHADOW = Math.abs(size) < EPSILON_PX_SIZE ? 0f : size;
         }
         return CACHED_DY_POPUP_SHADOW;
     }
@@ -325,21 +319,21 @@ public final class UISizes {
         SharedPreferences pref = TBApplication.getApplication(context).preferences();
         final float defaultSize = getFloatResource(context.getResources(), R.dimen.default_result_shadow_radius);
         final float size = pref.getFloat("search-bar-shadow-radius", defaultSize);
-        return size < 0.001f ? 0f : size;
+        return size < EPSILON_PX_SIZE ? 0f : size;
     }
 
     public static float getSearchBarShadowOffsetHorizontal(Context context) {
         SharedPreferences pref = TBApplication.getApplication(context).preferences();
         final float defaultSize = getFloatResource(context.getResources(), R.dimen.default_result_shadow_dx);
         final float size = pref.getFloat("search-bar-shadow-dx", defaultSize);
-        return Math.abs(size) < 0.001f ? 0f : size;
+        return Math.abs(size) < EPSILON_PX_SIZE ? 0f : size;
     }
 
     public static float getSearchBarShadowOffsetVertical(Context context) {
         SharedPreferences pref = TBApplication.getApplication(context).preferences();
         final float defaultSize = getFloatResource(context.getResources(), R.dimen.default_result_shadow_dy);
         final float size = pref.getFloat("search-bar-shadow-dy", defaultSize);
-        return Math.abs(size) < 0.001f ? 0f : size;
+        return Math.abs(size) < EPSILON_PX_SIZE ? 0f : size;
     }
 
     public static int getQuickListMarginVertical(Context context) {
