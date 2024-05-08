@@ -421,8 +421,7 @@ public class TBApplication extends Application {
         }
         if (dataHandler.fullLoadOverSent()) {
             // Already loaded! We still need to fire the FULL_LOAD event
-            Intent i = new Intent(TBLauncherActivity.FULL_LOAD_OVER);
-            sendBroadcast(i);
+            DataHandler.sendBroadcast(this, TBLauncherActivity.FULL_LOAD_OVER, TAG);
         }
     }
 

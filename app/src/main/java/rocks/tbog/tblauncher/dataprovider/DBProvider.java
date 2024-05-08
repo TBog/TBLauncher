@@ -1,7 +1,6 @@
 package rocks.tbog.tblauncher.dataprovider;
 
 import android.content.Context;
-import android.content.Intent;
 import android.util.Log;
 
 import androidx.annotation.MainThread;
@@ -15,12 +14,12 @@ import java.util.Collections;
 import java.util.List;
 
 import rocks.tbog.tblauncher.BuildConfig;
-import rocks.tbog.tblauncher.handler.DataHandler;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.TBLauncherActivity;
 import rocks.tbog.tblauncher.WorkAsync.AsyncTask;
 import rocks.tbog.tblauncher.WorkAsync.TaskRunner;
 import rocks.tbog.tblauncher.entry.EntryItem;
+import rocks.tbog.tblauncher.handler.DataHandler;
 import rocks.tbog.tblauncher.searcher.ISearcher;
 import rocks.tbog.tblauncher.utils.Timer;
 
@@ -162,8 +161,7 @@ public abstract class DBProvider<T extends EntryItem> implements IProvider<T> {
             provider.mTimer.stop();
             Log.i("time", "Time to load " + provider.getClass().getSimpleName() + ": " + provider.mTimer);
 
-            Intent i = new Intent(TBLauncherActivity.LOAD_OVER);
-            provider.context.sendBroadcast(i);
+            DataHandler.sendBroadcast(provider.context, TBLauncherActivity.LOAD_OVER, provider.getClass().getSimpleName());
         }
 
         public void execute() {

@@ -17,6 +17,7 @@ import rocks.tbog.tblauncher.BuildConfig;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.TBLauncherActivity;
 import rocks.tbog.tblauncher.entry.EntryItem;
+import rocks.tbog.tblauncher.handler.DataHandler;
 import rocks.tbog.tblauncher.loader.LoadEntryItem;
 import rocks.tbog.tblauncher.utils.Timer;
 
@@ -113,8 +114,7 @@ public abstract class Provider<T extends EntryItem> extends Service implements I
         this.loader = null;
 
         // Broadcast this event
-        Intent i = new Intent(TBLauncherActivity.LOAD_OVER);
-        this.sendBroadcast(i);
+        DataHandler.sendBroadcast(this, TBLauncherActivity.LOAD_OVER, getClass().getSimpleName());
     }
 
     @NonNull

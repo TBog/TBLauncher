@@ -128,8 +128,7 @@ public class DataHandler extends BroadcastReceiver
 
         ActivityCompat.registerReceiver(ctx, this, intentFilter, ContextCompat.RECEIVER_NOT_EXPORTED);
 
-        Intent i = new Intent(TBLauncherActivity.START_LOAD);
-        ctx.sendBroadcast(i);
+        sendBroadcast(ctx, TBLauncherActivity.START_LOAD, TAG);
 
         // Monitor changes for service preferences (to automatically start and stop services)
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(ctx);
@@ -159,6 +158,13 @@ public class DataHandler extends BroadcastReceiver
                 this.connectToProvider(providerName, 0);
             }
         }
+    }
+
+    public static void sendBroadcast(@NonNull Context context, @NonNull String action, @Nullable String data) {
+        Intent msg = new Intent(action)
+            .setPackage(context.getPackageName())
+            .putExtra(TBLauncherActivity.INTENT_DATA, data);
+        context.sendBroadcast(msg);
     }
 
     @NonNull
@@ -486,8 +492,7 @@ public class DataHandler extends BroadcastReceiver
         // Broadcast the fact that the new providers list is ready
         try {
             context.unregisterReceiver(this);
-            Intent i = new Intent(TBLauncherActivity.FULL_LOAD_OVER);
-            context.sendBroadcast(i);
+            sendBroadcast(context, TBLauncherActivity.FULL_LOAD_OVER, TAG);
         } catch (IllegalArgumentException e) {
             Log.e(TAG, "send FULL_LOAD_OVER", e);
         }
@@ -959,8 +964,7 @@ public class DataHandler extends BroadcastReceiver
         IntentFilter intentFilter = new IntentFilter(TBLauncherActivity.LOAD_OVER);
         ActivityCompat.registerReceiver(context, this, intentFilter, ContextCompat.RECEIVER_NOT_EXPORTED);
 
-        Intent i = new Intent(TBLauncherActivity.START_LOAD);
-        context.sendBroadcast(i);
+        sendBroadcast(context, TBLauncherActivity.START_LOAD, provider.getClass().getSimpleName());
 
         // reload providers for the next steps
         for (int step : IProvider.LOAD_STEPS) {
@@ -986,8 +990,7 @@ public class DataHandler extends BroadcastReceiver
         IntentFilter intentFilter = new IntentFilter(TBLauncherActivity.LOAD_OVER);
         ActivityCompat.registerReceiver(context, this, intentFilter, ContextCompat.RECEIVER_NOT_EXPORTED);
 
-        Intent i = new Intent(TBLauncherActivity.START_LOAD);
-        context.sendBroadcast(i);
+        sendBroadcast(context, TBLauncherActivity.START_LOAD, "reload_" + loadStep);
 
         for (int step : IProvider.LOAD_STEPS) {
             if (step < loadStep)
@@ -1007,8 +1010,7 @@ public class DataHandler extends BroadcastReceiver
         IntentFilter intentFilter = new IntentFilter(TBLauncherActivity.LOAD_OVER);
         ActivityCompat.registerReceiver(context, this, intentFilter, ContextCompat.RECEIVER_NOT_EXPORTED);
 
-        Intent i = new Intent(TBLauncherActivity.START_LOAD);
-        context.sendBroadcast(i);
+        sendBroadcast(context, TBLauncherActivity.START_LOAD, "reload");
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(context);
         toggleableProviders(prefs);

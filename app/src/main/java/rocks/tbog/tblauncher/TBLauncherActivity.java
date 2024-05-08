@@ -32,9 +32,10 @@ import rocks.tbog.tblauncher.widgets.WidgetManager;
 public class TBLauncherActivity extends AppCompatActivity implements ActivityCompat.OnRequestPermissionsResultCallback {
 
     private static final String TAG = "TBL";
-    public static final String START_LOAD = "fr.neamar.summon.START_LOAD";
-    public static final String LOAD_OVER = "fr.neamar.summon.LOAD_OVER";
-    public static final String FULL_LOAD_OVER = "fr.neamar.summon.FULL_LOAD_OVER";
+    public static final String START_LOAD = "rocks.tbog.provider.START_LOAD";
+    public static final String LOAD_OVER = "rocks.tbog.provider.LOAD_OVER";
+    public static final String FULL_LOAD_OVER = "rocks.tbog.provider.FULL_LOAD_OVER";
+    public static final String INTENT_DATA = "rocks.tbog.provider.INTENT_DATA";
 
     /**
      * Receive events from providers
@@ -42,6 +43,7 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            Log.d(TAG, "BroadcastReceiver action=`" + intent.getAction() + "` extra=`" + intent.getStringExtra(INTENT_DATA) + "`");
             if (START_LOAD.equalsIgnoreCase(intent.getAction())) {
                 behaviour.displayLoader(true);
             } else if (LOAD_OVER.equalsIgnoreCase(intent.getAction())) {
@@ -120,13 +122,12 @@ public class TBLauncherActivity extends AppCompatActivity implements ActivityCom
         /*
          * Initialize data handler and start loading providers
          */
-        IntentFilter intentFilterLoad = new IntentFilter(START_LOAD);
-        IntentFilter intentFilterLoadOver = new IntentFilter(LOAD_OVER);
-        IntentFilter intentFilterFullLoadOver = new IntentFilter(FULL_LOAD_OVER);
+        IntentFilter intentFilter = new IntentFilter();
+        intentFilter.addAction(START_LOAD);
+        intentFilter.addAction(LOAD_OVER);
+        intentFilter.addAction(FULL_LOAD_OVER);
 
-        ActivityCompat.registerReceiver(this, mReceiver, intentFilterLoad, ContextCompat.RECEIVER_NOT_EXPORTED);
-        ActivityCompat.registerReceiver(this, mReceiver, intentFilterLoadOver, ContextCompat.RECEIVER_NOT_EXPORTED);
-        ActivityCompat.registerReceiver(this, mReceiver, intentFilterFullLoadOver, ContextCompat.RECEIVER_NOT_EXPORTED);
+        ActivityCompat.registerReceiver(this, mReceiver, intentFilter, ContextCompat.RECEIVER_NOT_EXPORTED);
 
         // init DataHandler after we register the receiver
         app.initDataHandler();

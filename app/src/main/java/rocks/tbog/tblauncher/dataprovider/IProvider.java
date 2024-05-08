@@ -30,7 +30,7 @@ public interface IProvider<T extends EntryItem> {
     /**
      * Reload the data stored in this provider
      * <p>
-     * `"fr.neamar.summon.LOAD_OVER"` will be emitted once the reload is complete. The data provider
+     * `LOAD_OVER` will be emitted once the reload is complete. The data provider
      * will stay usable (using it's old data) during the reload.
      * @param cancelCurrentLoadTask pass true to stop current loading task and start another;
      *                              pass false to do nothing if already loading
@@ -41,7 +41,7 @@ public interface IProvider<T extends EntryItem> {
      * Indicate whether this provider has already loaded it's data
      * <p>
      * If this method returns `false` then the client may listen for the
-     * `"fr.neamar.summon.LOAD_OVER"` intent for notification of when the provider is ready.
+     * `LOAD_OVER` intent for notification of when the provider is ready.
      *
      * @return Is the provider ready to process search results?
      */
