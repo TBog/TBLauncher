@@ -96,7 +96,7 @@ public class MarginDialog extends BasePreferenceDialog {
                 dx = 0f;
             if (dy == null)
                 dy = 0f;
-            viewXY.setOffsetValues(UISizes.dp2px(ctx, dx), UISizes.dp2px(ctx, dy));
+            viewXY.setOffsetValues(UISizes.dp2px_float(ctx, dx), UISizes.dp2px_float(ctx, dy));
         }
 
         // initialize preview
@@ -123,8 +123,8 @@ public class MarginDialog extends BasePreferenceDialog {
         }
 
         viewXY.setOnOffsetChanged((dx, dy) -> {
-            offsetX.postValue(UISizes.px2dp(viewXY.getContext(), dx));
-            offsetY.postValue(UISizes.px2dp(viewXY.getContext(), dy));
+            offsetX.postValue(UISizes.px2dp_float(viewXY.getContext(), dx));
+            offsetY.postValue(UISizes.px2dp_float(viewXY.getContext(), dy));
         });
 
         MediatorLiveData<LiveMarginParameters> dataMerge = new MediatorLiveData<>();
