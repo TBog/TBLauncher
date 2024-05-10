@@ -3,7 +3,6 @@ package rocks.tbog.tblauncher.ui;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.ViewTreeObserver;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -12,7 +11,7 @@ public class SquareImageView extends androidx.appcompat.widget.AppCompatImageVie
     private static final String TAG = "SqImgView";
 
     protected int mComputedSize = -1;
-    protected boolean mRequestLayout = false;
+    //protected boolean mRequestLayout = false;
 
     public SquareImageView(@NonNull Context context) {
         super(context);
@@ -26,20 +25,41 @@ public class SquareImageView extends androidx.appcompat.widget.AppCompatImageVie
         super(context, attrs, defStyleAttr);
     }
 
+    interface ToString<T> {
+        @NonNull
+        String fromMode(T input);
+    }
+
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        int widthSize;
-        int heightSize;
-
-        int measuredWidth = getMeasuredWidth();
-        int measuredHeight = getMeasuredHeight();
-
         int size;
         int widthMode = MeasureSpec.getMode(widthMeasureSpec);
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
-        widthSize = MeasureSpec.getSize(widthMeasureSpec);
-        heightSize = MeasureSpec.getSize(heightMeasureSpec);
+        int widthSize = MeasureSpec.getSize(widthMeasureSpec);
+        int heightSize = MeasureSpec.getSize(heightMeasureSpec);
 
+
+        ToString<Integer> toString = input -> {
+            switch (MeasureSpec.getMode(input)) {
+                case MeasureSpec.UNSPECIFIED:
+                    return "UNSPECIFIED";
+                case MeasureSpec.EXACTLY:
+                    return "EXACTLY";
+                case MeasureSpec.AT_MOST:
+                    return "AT_MOST";
+                default:
+                    return Integer.toString(input);
+            }
+        };
+        // Log.v(TAG, Integer.toHexString(System.identityHashCode(this))
+        //     + " measured=" + getMeasuredWidth() + "x" + getMeasuredHeight()
+        //     + "\n\t"
+        //     + " widthMode=" + toString.fromMode(widthMode)
+        //     + " widthSize=" + widthSize
+        //     + "\n\t"
+        //     + " heightMode=" + toString.fromMode(heightMode)
+        //     + " heightSize=" + heightSize
+        // );
         if (widthMode == MeasureSpec.EXACTLY && widthSize > 0) {
             size = widthSize;
             mComputedSize = size;
@@ -47,52 +67,65 @@ public class SquareImageView extends androidx.appcompat.widget.AppCompatImageVie
             size = heightSize;
             mComputedSize = size;
         } else if (heightMode == MeasureSpec.AT_MOST && widthMode == MeasureSpec.UNSPECIFIED) {
-            size = mComputedSize > 0 ? mComputedSize : heightSize;
+            if (mComputedSize > 0) {
+                mComputedSize = Math.min(mComputedSize, heightSize);
+                size = mComputedSize;
+            } else {
+                size = heightSize;
+            }
         } else if (widthMode == MeasureSpec.AT_MOST && heightMode == MeasureSpec.UNSPECIFIED) {
-            size = mComputedSize > 0 ? mComputedSize : widthSize;
+            if (mComputedSize > 0) {
+                mComputedSize = Math.min(widthSize, mComputedSize);
+                size = mComputedSize;
+            } else {
+                size = widthSize;
+            }
         } else {
-            size = mComputedSize > 0 ? mComputedSize : Math.min(widthSize, heightSize);
+            int minSize = Math.min(widthSize, heightSize);
+            mComputedSize = Math.min(mComputedSize, minSize);
+            size = mComputedSize > 0 ? mComputedSize : minSize;
         }
 
-        if (!mRequestLayout && mComputedSize > 0 && (measuredHeight != size || measuredWidth != size)) {
+        final int widthSizeAndState = resolveSizeAndState(size, widthMeasureSpec, 0);
+        final int heightSizeAndState = resolveSizeAndState(size, heightMeasureSpec, 0);
+        widthSize = widthSizeAndState & MEASURED_SIZE_MASK;
+        heightSize = heightSizeAndState & MEASURED_SIZE_MASK;
+
+        if ((widthSizeAndState & MEASURED_STATE_TOO_SMALL) != 0 || (heightSizeAndState & MEASURED_STATE_TOO_SMALL) != 0) {
             Log.d(TAG, Integer.toHexString(System.identityHashCode(this))
                 + " mark for re-layout"
-                + " | measured before " + measuredWidth + "×" + measuredHeight
-                + " | size=" + mComputedSize);
-            mRequestLayout = true;
+                + " | too small " + widthSize + "×" + heightSize
+                + " | size=" + size);
+            setMeasuredDimension(widthSizeAndState, heightSizeAndState);
+            post(this::requestLayout);
+            return;
         }
 
-        int finalMeasureSpec = MeasureSpec.makeMeasureSpec(size, MeasureSpec.EXACTLY);
-        super.onMeasure(finalMeasureSpec, finalMeasureSpec);
-    }
+        int finalWidthSpec;
+        int finalHeightSpec;
 
-    @Override
-    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        int width = right - left;
-        int height = bottom - top;
-        super.onLayout(changed, left, top, right, bottom);
+        if (mComputedSize > 0) {
+            finalWidthSpec = MeasureSpec.makeMeasureSpec(widthSize, MeasureSpec.EXACTLY);
+            finalHeightSpec = MeasureSpec.makeMeasureSpec(heightSize, MeasureSpec.EXACTLY);
+        } else {
+            Log.d(TAG, Integer.toHexString(System.identityHashCode(this))
+                + " AT_MOST " + widthSize + "×" + heightSize
+                + " | size=" + size);
+            finalWidthSpec = MeasureSpec.makeMeasureSpec(widthSize, MeasureSpec.AT_MOST);
+            finalHeightSpec = MeasureSpec.makeMeasureSpec(heightSize, MeasureSpec.AT_MOST);
+        }
 
-        if (width == mComputedSize && height == mComputedSize && !mRequestLayout)
-            return;
+        // let super method call `setMeasuredDimension`
+        super.onMeasure(finalWidthSpec, finalHeightSpec);
 
-        // we need the pre-draw listener because requestLayout should not be called while in the layout phase
-        getViewTreeObserver().addOnPreDrawListener(new ViewTreeObserver.OnPreDrawListener() {
-            @Override
-            public boolean onPreDraw() {
-                getViewTreeObserver().removeOnPreDrawListener(this);
-                int width = getWidth();
-                int height = getHeight();
-                if (width != height || width != mComputedSize || mRequestLayout) {
-                    Log.d(TAG, Integer.toHexString(System.identityHashCode(SquareImageView.this))
-                        + " requesting new layout " + width + "×" + height
-                        + " size=" + mComputedSize + " mark=" + mRequestLayout);
-                    mRequestLayout = false;
-                    requestLayout();
-                    return false;
-                }
-                return true;
-            }
-        });
+        if (mComputedSize > 0 && (getMeasuredWidth() != size || getMeasuredHeight() != size)) {
+            Log.d(TAG, Integer.toHexString(System.identityHashCode(this))
+                + " mark for re-layout"
+                + " | measured at " + getMeasuredWidth() + "×" + getMeasuredHeight()
+                + " | " + toString.fromMode(finalWidthSpec) + " " + widthSize + "×" + heightSize
+                + " | size=" + size);
+            post(this::requestLayout);
+        }
     }
 
     @Override

@@ -2,9 +2,11 @@
 <rocks.tbog.tblauncher.ui.SquareImageView xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/prefColorPreview"
     android:layout_width="wrap_content"
-    android:layout_height="match_parent"
-    android:importantForAccessibility="no"
-    android:scaleType="fitXY"
+    android:layout_height="wrap_content"
     android:layout_marginVertical="@dimen/icon_margin_vertical"
+    android:importantForAccessibility="no"
+    android:minWidth="@dimen/color_preview_size"
+    android:minHeight="@dimen/color_preview_size"
+    android:scaleType="fitXY"
     android:src="@color/colorPrimary" />
 
