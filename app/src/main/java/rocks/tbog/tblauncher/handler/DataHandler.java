@@ -1125,6 +1125,7 @@ public class DataHandler extends BroadcastReceiver
                 Log.e(TAG, "executeAfterLoadOverTasks called before mFullLoadOverSent==true");
                 return;
             }
+            Log.d(TAG, "executeAfterLoadOverTasks size=" + mAfterLoadOverTasks.size());
             // run and remove tasks
             int count = 0;
             Runnable task;
