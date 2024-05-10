@@ -14,7 +14,10 @@ import android.content.pm.ActivityInfo;
 import android.content.pm.LauncherApps;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextUtils;
@@ -167,6 +170,7 @@ public class Behaviour implements ISearchActivity {
     };
     private ImageView mLauncherButton;
     private View mDecorView;
+    private Handler mHandler;
     private final Runnable mHidePart2Runnable = new Runnable() {
         @Override
         public void run() {
@@ -445,7 +449,28 @@ public class Behaviour implements ISearchActivity {
         };
     }
 
+    private void removeCallback(@NonNull Runnable callback) {
+        mHandler.removeCallbacks(callback);
+    }
+
+    private void postDelayedCallbackOnce(@NonNull Runnable callback, long delayMillis) {
+        mHandler.removeCallbacks(callback);
+        mHandler.postDelayed(callback, delayMillis);
+    }
+
+    private void postDelayedRunnableOnce(@NonNull Runnable runnable, @NonNull Object token, long delayMillis) {
+        mHandler.removeCallbacksAndMessages(token);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            mHandler.postDelayed(runnable, token, delayMillis);
+        } else {
+            Message msg = Message.obtain(mHandler, runnable);
+            msg.obj = token;
+            mHandler.sendMessageDelayed(msg, delayMillis);
+        }
+    }
+
     public void onCreateActivity(TBLauncherActivity tbLauncherActivity) {
+        mHandler = new Handler(tbLauncherActivity.getMainLooper());
         mTBLauncherActivity = tbLauncherActivity;
         mPref = PreferenceManager.getDefaultSharedPreferences(mTBLauncherActivity);
         Window window = mTBLauncherActivity.getWindow();
@@ -478,8 +503,7 @@ public class Behaviour implements ISearchActivity {
                     } else {
                         Log.i(TAG, "keyboard closed - user");
                         // delay keyboard closed event to make sure the keyboard is not just glitching
-                        mDecorView.removeCallbacks(mOnKeyboardClosedByUser);
-                        mDecorView.postDelayed(mOnKeyboardClosedByUser, UI_ANIMATION_DURATION);
+                        postDelayedCallbackOnce(mOnKeyboardClosedByUser, UI_ANIMATION_DURATION);
                     }
                 }
 
@@ -501,7 +525,7 @@ public class Behaviour implements ISearchActivity {
                 }
 
                 // don't call the keyboard closed event if keyboard opened
-                mDecorView.removeCallbacks(mOnKeyboardClosedByUser);
+                removeCallback(mOnKeyboardClosedByUser);
 
                 // expand search pill
                 if (state.isSearchBarVisible()) {
@@ -661,12 +685,13 @@ public class Behaviour implements ISearchActivity {
                     hideResultList(false);
                 } else {
                     // try to execute the action
-                    mLauncherButton.postDelayed(() ->
+                    postDelayedRunnableOnce(() ->
                             TBApplication.dataHandler(getContext()).runAfterLoadOver(() -> {
                                 LauncherState state = TBApplication.state();
                                 if (!state.isResultListVisible() && state.getDesktop() == LauncherState.Desktop.SEARCH)
                                     executeAction(openResult, "dm-search-open-result");
                             }),
+                        mLauncherButton,
                         KEYBOARD_ANIMATION_DELAY);
                 }
 
@@ -715,8 +740,8 @@ public class Behaviour implements ISearchActivity {
         Log.i(TAG, "enableFullscreen delay=" + startDelay + " anim=" + animate);
 
         // Schedule a runnable to remove the status and navigation bar after a delay
-        mDecorView.removeCallbacks(mShowPart2Runnable);
-        mDecorView.postDelayed(mHidePart2Runnable, startDelay);
+        removeCallback(mShowPart2Runnable);
+        postDelayedCallbackOnce(mHidePart2Runnable, startDelay);
 
         // hide notification background
         final int statusHeight = UISizes.getStatusBarSize(getContext());
@@ -753,8 +778,8 @@ public class Behaviour implements ISearchActivity {
         boolean animate = SystemUiVisibility.isFullscreenSet(mDecorView) || !TBApplication.state().isNotificationBarVisible();
 
         // Schedule a runnable to display UI elements after a delay
-        mDecorView.removeCallbacks(mHidePart2Runnable);
-        mDecorView.postDelayed(mShowPart2Runnable, UI_ANIMATION_DELAY);
+        removeCallback(mHidePart2Runnable);
+        postDelayedCallbackOnce(mShowPart2Runnable, UI_ANIMATION_DELAY);
 
         // show notification background
         final int statusHeight = UISizes.getStatusBarSize(getContext());
@@ -926,15 +951,14 @@ public class Behaviour implements ISearchActivity {
 
         mKeyboardHandler.showKeyboard();
 
-        mDecorView.removeCallbacks(mShowKeyboardRunnable);
         // UI_ANIMATION_DURATION should be the exact time the full-screen animation ends
-        mDecorView.postDelayed(mShowKeyboardRunnable, UI_ANIMATION_DELAY);
+        postDelayedCallbackOnce(mShowKeyboardRunnable, UI_ANIMATION_DELAY);
     }
 
     public void hideKeyboard() {
         mKeyboardHandler.mRequestOpen = false;
 
-        mDecorView.removeCallbacks(mShowKeyboardRunnable);
+        removeCallback(mShowKeyboardRunnable);
         mKeyboardHandler.hideKeyboard();
     }
 
@@ -1212,7 +1236,7 @@ public class Behaviour implements ISearchActivity {
     }
 
     public void afterLaunchOccurred() {
-        mSearchEditText.postDelayed(() -> {
+        postDelayedRunnableOnce(() -> {
             RecycleScrollListener.setListLayoutHeight(mResultList, ViewGroup.LayoutParams.MATCH_PARENT);
             if (PrefCache.clearSearchAfterLaunch(mPref)) {
                 // We selected an item on the list, now we can cleanup the filter:
@@ -1226,7 +1250,7 @@ public class Behaviour implements ISearchActivity {
                 // show widgets when we return to the launcher
                 switchToDesktop(LauncherState.Desktop.WIDGET);
             }
-        }, UI_ANIMATION_DELAY);
+        }, mSearchEditText, UI_ANIMATION_DELAY);
     }
 
     public void showContextMenu() {
