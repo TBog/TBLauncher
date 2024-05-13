@@ -81,7 +81,7 @@ dependencies {
     implementation 'androidx.core:core-ktx:1.12.0'
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifecycle_version"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifecycle_version"
-    implementation 'com.google.android.material:material:1.9.0'
+    implementation 'com.google.android.material:material:1.12.0'
     implementation('com.github.dhaval2404:imagepicker:2.1', {
         exclude group: 'com.squareup.okhttp3'
     })
