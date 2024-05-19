@@ -28,6 +28,7 @@ import java.util.ArrayList;
 
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
+import rocks.tbog.tblauncher.TBLauncherActivity;
 import rocks.tbog.tblauncher.utils.ArrayHelper;
 
 public class WidgetLayout extends ViewGroup {
@@ -158,7 +159,7 @@ public class WidgetLayout extends ViewGroup {
     }
 
     public void enableHandle(View widgetView, Handle handle) {
-        convertAutoPositionTo(LayoutParams.Placement.MARGIN_TL_AS_POSITION);
+        convertAutoPositionTo(PageLayoutParams.Placement.MARGIN_TL_AS_POSITION);
 
         ViewGroup widgetHandle = null;
         // remove widget view from this layout
@@ -183,13 +184,13 @@ public class WidgetLayout extends ViewGroup {
             // inflate the widget handle layout
             widgetHandle = (ViewGroup) LayoutInflater.from(getContext()).inflate(R.layout.widget_handle, this, false);
             {
-                LayoutParams lp = new LayoutParams((LayoutParams) widgetView.getLayoutParams());
+                PageLayoutParams lp = new PageLayoutParams((PageLayoutParams) widgetView.getLayoutParams());
                 lp.width = ViewGroup.LayoutParams.WRAP_CONTENT;
                 lp.height = ViewGroup.LayoutParams.WRAP_CONTENT;
                 widgetHandle.setLayoutParams(lp);
             }
             {
-                LayoutParams lp = (LayoutParams) widgetView.getLayoutParams();
+                PageLayoutParams lp = (PageLayoutParams) widgetView.getLayoutParams();
                 lp.setMargins(0, 0, 0, 0);
                 widgetView.setLayoutParams(lp);
             }
@@ -204,7 +205,7 @@ public class WidgetLayout extends ViewGroup {
 
         switch (handle) {
             case DISABLED: {
-                final LayoutParams lp = (LayoutParams) widgetHandle.getLayoutParams();
+                final PageLayoutParams lp = (PageLayoutParams) widgetHandle.getLayoutParams();
                 lp.width = widgetView.getWidth();
                 lp.height = widgetView.getHeight();
 
@@ -306,12 +307,12 @@ public class WidgetLayout extends ViewGroup {
         }
     }
 
-    private void convertAutoPositionTo(LayoutParams.Placement placement) {
+    private void convertAutoPositionTo(PageLayoutParams.Placement placement) {
         final int childCount = getChildCount();
         for (int childIdx = 0; childIdx < childCount; childIdx++) {
             final View child = getChildAt(childIdx);
-            final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-            if (lp.placement != LayoutParams.Placement.AUTO)
+            final PageLayoutParams lp = (PageLayoutParams) child.getLayoutParams();
+            if (lp.placement != PageLayoutParams.Placement.AUTO)
                 continue;
             lp.placement = placement;
             lp.leftMargin = child.getLeft();
@@ -333,25 +334,25 @@ public class WidgetLayout extends ViewGroup {
     }
 
     @Override
-    public LayoutParams generateLayoutParams(AttributeSet attrs) {
-        return new LayoutParams(getContext(), attrs);
+    public PageLayoutParams generateLayoutParams(AttributeSet attrs) {
+        return new PageLayoutParams(getContext(), attrs);
     }
 
     @Override
     protected ViewGroup.LayoutParams generateLayoutParams(ViewGroup.LayoutParams p) {
         if (p instanceof LinearLayout.LayoutParams)
-            return new LayoutParams((LinearLayout.LayoutParams) p);
-        return new LayoutParams(new LinearLayout.LayoutParams(p));
+            return new PageLayoutParams((LinearLayout.LayoutParams) p);
+        return new PageLayoutParams(new LinearLayout.LayoutParams(p));
     }
 
     @Override
     protected ViewGroup.LayoutParams generateDefaultLayoutParams() {
-        return new LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
+        return new PageLayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT);
     }
 
     @Override
     protected boolean checkLayoutParams(ViewGroup.LayoutParams p) {
-        return p instanceof LayoutParams;
+        return p instanceof PageLayoutParams;
     }
 
     @Override
@@ -384,7 +385,7 @@ public class WidgetLayout extends ViewGroup {
             //TODO: check that child is not out of bounds
         }
 
-        for (int pagePosition : LayoutParams.PAGE_POSITIONS) {
+        for (int pagePosition : PageLayoutParams.PAGE_POSITIONS) {
             layoutPagePosition(pagePosition, width, height, false);
             width = Math.max(width, mTmpContainerRect.width());
             height = Math.max(height, mTmpContainerRect.height());
@@ -400,17 +401,17 @@ public class WidgetLayout extends ViewGroup {
         final int pageHeight = bottom - top;
         Log.d(TAG, "onLayout left=" + left + " top=" + top + " width=" + pageWidth + " height=" + pageHeight + " pageCount=" + mPageCount.x + "x" + mPageCount.y);
         if (mPageCount.x == 1 && mPageCount.y == 1) {
-            layoutPagePosition(LayoutParams.PAGE_MIDDLE, pageWidth, pageHeight, true);
+            layoutPagePosition(PageLayoutParams.PAGE_MIDDLE, pageWidth, pageHeight, true);
         } else if (mPageCount.x > 1 && mPageCount.y == 1) {
-            for (int pagePos : LayoutParams.PAGE_POSITIONS_HORIZONTAL) {
+            for (int pagePos : PageLayoutParams.PAGE_POSITIONS_HORIZONTAL) {
                 layoutPagePosition(pagePos, pageWidth, pageHeight, true);
             }
         } else if (mPageCount.x == 1 && mPageCount.y > 1) {
-            for (int pagePos : LayoutParams.PAGE_POSITIONS_VERTICAL) {
+            for (int pagePos : PageLayoutParams.PAGE_POSITIONS_VERTICAL) {
                 layoutPagePosition(pagePos, pageWidth, pageHeight, true);
             }
         } else {
-            for (int pagePos : LayoutParams.PAGE_POSITIONS)
+            for (int pagePos : PageLayoutParams.PAGE_POSITIONS)
                 layoutPagePosition(pagePos, pageWidth, pageHeight, true);
         }
         callAfterLayout();
@@ -480,13 +481,13 @@ public class WidgetLayout extends ViewGroup {
     private int getLeftMarginForPage(int page, int width) {
         if (mPageCount.x == 1)
             return 0;
-        final int pagePos = LayoutParams.getPagePosition(page);
-        final int pageIdx = LayoutParams.getPageIndex(page);
-        if (pagePos == LayoutParams.PAGE_LEFT)
+        final int pagePos = PageLayoutParams.getPagePosition(page);
+        final int pageIdx = PageLayoutParams.getPageIndex(page);
+        if (pagePos == PageLayoutParams.PAGE_LEFT)
             return (mPageCount.x / 2 - pageIdx) * width;
 
         final int center = mPageCount.x / 2 * width;
-        if (pagePos == LayoutParams.PAGE_RIGHT)
+        if (pagePos == PageLayoutParams.PAGE_RIGHT)
             return center + pageIdx * width;
 
         return center;
@@ -495,13 +496,13 @@ public class WidgetLayout extends ViewGroup {
     private int getTopMarginForPage(int page, int height) {
         if (mPageCount.y == 1)
             return 0;
-        final int pagePos = LayoutParams.getPagePosition(page);
-        final int pageIdx = LayoutParams.getPageIndex(page);
-        if (pagePos == LayoutParams.PAGE_UP)
+        final int pagePos = PageLayoutParams.getPagePosition(page);
+        final int pageIdx = PageLayoutParams.getPageIndex(page);
+        if (pagePos == PageLayoutParams.PAGE_UP)
             return (mPageCount.y / 2 - pageIdx) * height;
 
         final int center = mPageCount.y / 2 * height;
-        if (pagePos == LayoutParams.PAGE_DOWN)
+        if (pagePos == PageLayoutParams.PAGE_DOWN)
             return center + pageIdx * height;
 
         return center;
@@ -510,18 +511,18 @@ public class WidgetLayout extends ViewGroup {
     private void layoutPagePosition(int pagePosition, int pageWidth, int pageHeight, boolean childLayout) {
         final int pageStart;
         final int pageCount;
-        if (pagePosition == LayoutParams.PAGE_MIDDLE) {
+        if (pagePosition == PageLayoutParams.PAGE_MIDDLE) {
             pageStart = 0;
             pageCount = 1;
         } else {
             pageStart = 1;
-            boolean horizontal = ArrayHelper.contains(LayoutParams.PAGE_POSITIONS_HORIZONTAL, pagePosition);
+            boolean horizontal = ArrayHelper.contains(PageLayoutParams.PAGE_POSITIONS_HORIZONTAL, pagePosition);
             pageCount = 1 + (horizontal ? mPageCount.x : mPageCount.y) / 2;
         }
         int width = pageWidth;
         int height = pageHeight;
         for (int pageIdx = pageStart; pageIdx < pageCount; pageIdx += 1) {
-            int page = LayoutParams.makePage(pagePosition, pageIdx);
+            int page = PageLayoutParams.makePage(pagePosition, pageIdx);
             pageLayout(page, width, height, childLayout);
             width = Math.max(width, mTmpContainerRect.width());
             height = Math.max(height, mTmpContainerRect.height());
@@ -537,22 +538,35 @@ public class WidgetLayout extends ViewGroup {
         final int pageWidth = width - getPaddingLeft() - getPaddingRight();
         final int pageHeight = height - getPaddingTop() - getPaddingBottom();
 
-        Log.d(TAG, "pageLayout " + LayoutParams.debugPage(page) + " left=" + pageLeft + " top=" + pageTop + " width=" + pageWidth + " height=" + pageHeight);
+        Log.d(TAG, (childLayout ? "childLayout " : "pageLayout ")
+            + PageLayoutParams.debugPage(page) + " left=" + pageLeft + " top=" + pageTop + " width=" + pageWidth + " height=" + pageHeight);
 
         int autoX = 0;
         int autoY = 0;
         int maxChildY = 0;
+        StringBuilder debugChild = new StringBuilder();
         final int childCount = getChildCount();
         for (int childIdx = 0; childIdx < childCount; childIdx++) {
             final View child = getChildAt(childIdx);
             if (child.getVisibility() == GONE)
                 continue;
 
-            final LayoutParams lp = (LayoutParams) child.getLayoutParams();
-            if (LayoutParams.validatedPage(lp.screenPage) != page)
+            final PageLayoutParams lp = (PageLayoutParams) child.getLayoutParams();
+            if (PageLayoutParams.validatedPage(lp.screenPage) != page)
                 continue;
 
+            debugChild.setLength(0);
+            debugChild.append(Integer.toHexString(System.identityHashCode(child)))
+                .append(" child #")
+                .append(childIdx)
+                .append("\n\t");
+
             mTmpChildRect.set(0, 0, child.getMeasuredWidth(), child.getMeasuredHeight());
+            debugChild.append("measured ")
+                .append(child.getMeasuredWidth())
+                .append("×")
+                .append(child.getMeasuredHeight())
+                .append("\n\t");
 
             switch (lp.placement) {
                 case AUTO:
@@ -579,9 +593,20 @@ public class WidgetLayout extends ViewGroup {
                     mTmpChildRect.offset(lp.leftMargin, lp.topMargin);
             }
 
+            debugChild.append("offset in page ")
+                .append(mTmpChildRect.left)
+                .append("×")
+                .append(mTmpChildRect.top)
+                .append(" size ")
+                .append(mTmpChildRect.width())
+                .append("×")
+                .append(mTmpChildRect.height())
+                .append("\n\t");
             // apply page offset
             mTmpChildRect.offset(pageLeft, pageTop);
 
+            int initialLeft = mTmpChildRect.left;
+            int initialTop = mTmpChildRect.top;
             // don't let the child start to the right of this page
             while (mTmpChildRect.left > (pageLeft + width))
                 mTmpChildRect.offset(-Math.min(width, mTmpChildRect.width()) / 4, 0);
@@ -595,14 +620,25 @@ public class WidgetLayout extends ViewGroup {
             while (mTmpChildRect.bottom < pageTop)
                 mTmpChildRect.offset(0, Math.min(height, mTmpChildRect.height()) / 4);
 
+            debugChild.append("page correction ")
+                .append(initialLeft - mTmpChildRect.left)
+                .append("×")
+                .append(initialTop - mTmpChildRect.top)
+                .append(" padding ")
+                .append(getPaddingLeft())
+                .append("×")
+                .append(getPaddingTop())
+                .append("\n\t");
+
             // apply page padding
             mTmpChildRect.offset(getPaddingLeft(), getPaddingTop());
 
             // Place the child.
             if (childLayout) {
                 child.layout(mTmpChildRect.left, mTmpChildRect.top, mTmpChildRect.right, mTmpChildRect.bottom);
-                Log.d(TAG, "layout child #" + childIdx + " rect=(" + mTmpChildRect.left + " " + mTmpChildRect.top + " " + mTmpChildRect.right + " " + mTmpChildRect.bottom + ")");
+                debugChild.append("layout");
             }
+            Log.d(TAG, debugChild.toString());
             mTmpContainerRect.union(mTmpChildRect);
         }
     }
@@ -633,14 +669,18 @@ public class WidgetLayout extends ViewGroup {
                     return true;
                 }
                 case MotionEvent.ACTION_UP: {
-                    final LayoutParams lp = (LayoutParams) parent.getLayoutParams();
-
+                    final PageLayoutParams lp = (PageLayoutParams) parent.getLayoutParams();
+                    int left = lp.leftMargin;
+                    int top = lp.topMargin;
                     lp.leftMargin += (int) parent.getTranslationX();
                     lp.topMargin += (int) parent.getTranslationY();
                     parent.setTranslationX(0f);
                     parent.setTranslationY(0f);
 
                     parent.setLayoutParams(lp);
+                    Log.d(TAG, Integer.toHexString(System.identityHashCode(parent))
+                        + "\n\tbefore pos " + left + "×" + top
+                        + "\n\t after pos " + lp.leftMargin + "×" + lp.topMargin);
                     return true;
                 }
                 case MotionEvent.ACTION_CANCEL: {
@@ -671,7 +711,7 @@ public class WidgetLayout extends ViewGroup {
                         mDownSize.set(lp.width, lp.height);
                     }
                     {
-                        final LayoutParams lp = (LayoutParams) parent.getLayoutParams();
+                        final PageLayoutParams lp = (PageLayoutParams) parent.getLayoutParams();
                         mDownMargin.set(lp.leftMargin, lp.topMargin);
                     }
                     mDownPos.set(event.getRawX(), event.getRawY());
@@ -684,7 +724,7 @@ public class WidgetLayout extends ViewGroup {
                     int gravity = ((FrameLayout.LayoutParams) v.getLayoutParams()).gravity;
                     // move widget handler
                     {
-                        final LayoutParams lp = (LayoutParams) parent.getLayoutParams();
+                        final PageLayoutParams lp = (PageLayoutParams) parent.getLayoutParams();
                         boolean changed = false;
                         if ((gravity & Gravity.LEFT) == Gravity.LEFT) {
                             lp.leftMargin = mDownMargin.x + xMove;
@@ -709,6 +749,11 @@ public class WidgetLayout extends ViewGroup {
                         if (vertical)
                             lp.height = mDownSize.y + yMove;
                         widgetView.setLayoutParams(lp);
+                        if (widgetView instanceof AppWidgetHostView hostView) {
+                            TBLauncherActivity activity = TBApplication.launcherActivity(v.getContext());
+                            if (activity != null)
+                                activity.widgetManager.updateWidgetSize(hostView, lp.width, lp.height);
+                        }
                     }
                     //requestLayout();
                     return true;
@@ -724,7 +769,7 @@ public class WidgetLayout extends ViewGroup {
                         widgetView.setLayoutParams(lp);
                     }
                     {
-                        final LayoutParams lp = (LayoutParams) parent.getLayoutParams();
+                        final PageLayoutParams lp = (PageLayoutParams) parent.getLayoutParams();
                         lp.leftMargin = mDownMargin.x;
                         lp.topMargin = mDownMargin.y;
                         parent.setLayoutParams(lp);
@@ -736,7 +781,7 @@ public class WidgetLayout extends ViewGroup {
         }
     };
 
-    public static class LayoutParams extends ViewGroup.MarginLayoutParams {
+    public static class PageLayoutParams extends ViewGroup.MarginLayoutParams {
 
         /**
          * The screen/page to put this view into
@@ -809,19 +854,19 @@ public class WidgetLayout extends ViewGroup {
             MARGIN_TL_AS_POSITION,
         }
 
-        public LayoutParams(Context ctx, AttributeSet attrs) {
+        public PageLayoutParams(Context ctx, AttributeSet attrs) {
             super(ctx, attrs);
         }
 
-        public LayoutParams(int width, int height) {
+        public PageLayoutParams(int width, int height) {
             super(width, height);
         }
 
-        public LayoutParams(ViewGroup.MarginLayoutParams source) {
+        public PageLayoutParams(ViewGroup.MarginLayoutParams source) {
             super(source);
         }
 
-        public LayoutParams(LayoutParams source) {
+        public PageLayoutParams(PageLayoutParams source) {
             this((ViewGroup.MarginLayoutParams) source);
             screenPage = source.screenPage;
             placement = source.placement;

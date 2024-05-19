@@ -16,9 +16,6 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.WindowMetrics;
-import android.view.animation.Animation;
-import android.view.animation.DecelerateInterpolator;
-import android.view.animation.Transformation;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -43,7 +40,7 @@ public class LiveWallpaper {
     private final PointF mFirstTouchPos = new PointF();
     private final PointF mLastTouchPos = new PointF();
     private final PointF mWallpaperOffset = new PointF(.5f, .5f);
-    private Anim mAnimation;
+    private WallpaperSnapAnim mSnapAnimation;
     private VelocityTracker mVelocityTracker;
 
     public static int SCREEN_COUNT_HORIZONTAL = Integer.parseInt("3");
@@ -118,8 +115,14 @@ public class LiveWallpaper {
 //        a.recycle();
     }
 
+    @NonNull
     public PointF getWallpaperOffset() {
         return mWallpaperOffset;
+    }
+
+    @NonNull
+    public Point getWindowSize() {
+        return mWindowSize;
     }
 
     public void scroll(MotionEvent e1, MotionEvent e2) {
@@ -167,7 +170,7 @@ public class LiveWallpaper {
         mContentView = mainActivity.findViewById(android.R.id.content);
         resetPageCount();
 
-        mAnimation = new NoAnim();
+        mSnapAnimation = new WallpaperSnapAnim(this);
         mVelocityTracker = null;
         View root = mainActivity.findViewById(R.id.root_layout);
         root.setOnTouchListener(this::onRootTouch);
@@ -281,6 +284,10 @@ public class LiveWallpaper {
         }
     }
 
+    private boolean initializeSnapAnimation() {
+        return mSnapAnimation.init(mVelocityTracker);
+    }
+
     boolean onRootTouch(View view, MotionEvent event) {
         if (!view.isAttachedToWindow()) {
             return false;
@@ -342,8 +349,8 @@ public class LiveWallpaper {
                     float yVel = mVelocityTracker.getYVelocity();// / mWindowSize.y;
                     Log.d(TAG, String.format(Locale.US, "Velocity=(%.3f, %.3f)\u2248%d\u00b0 Move=(%.3f, %.3f)\u2248%d\u00b0", xVel, yVel, computeAngle(xVel, yVel), xMove, yMove, computeAngle(xMove, yMove)));
                     // snap position if needed
-                    if (isScrollEnabled() && mAnimation.init())
-                        mContentView.startAnimation(mAnimation);
+                    if (isScrollEnabled() && initializeSnapAnimation())
+                        mContentView.startAnimation(mSnapAnimation);
                 }
             }
             // fallthrough
@@ -353,14 +360,14 @@ public class LiveWallpaper {
                         mVelocityTracker.addMovement(event);
 
                         mVelocityTracker.computeCurrentVelocity(1000 / 30); // 1000 provides px per second
-                        if (mAnimation.init())
-                            mContentView.startAnimation(mAnimation);
+                        if (initializeSnapAnimation())
+                            mContentView.startAnimation(mSnapAnimation);
 
                         mVelocityTracker.recycle();
                         mVelocityTracker = null;
                     } else {
-                        if (mAnimation.init())
-                            mContentView.startAnimation(mAnimation);
+                        if (initializeSnapAnimation())
+                            mContentView.startAnimation(mSnapAnimation);
                     }
                     eventConsumed = true;
                 }
@@ -435,11 +442,11 @@ public class LiveWallpaper {
         return wpDragAnimate;
     }
 
-    private boolean isPreferenceWPReturnCenter() {
+    public boolean isPreferenceWPReturnCenter() {
         return wpReturnCenter;
     }
 
-    private boolean isPreferenceWPStickToSides() {
+    public boolean isPreferenceWPStickToSides() {
         return wpStickToSides;
     }
 
@@ -447,7 +454,7 @@ public class LiveWallpaper {
         return mContentView != null && mContentView.isAttachedToWindow() ? mContentView.getWindowToken() : null;
     }
 
-    private void updateWallpaperOffset(float offsetX, float offsetY) {
+    public void updateWallpaperOffset(float offsetX, float offsetY) {
         offsetX = Math.max(0.f, Math.min(1.f, offsetX));
         offsetY = Math.max(0.f, Math.min(1.f, offsetY));
         mWallpaperOffset.set(offsetX, offsetY);
@@ -490,140 +497,6 @@ public class LiveWallpaper {
         pointerIndex = event.findPointerIndex(1);
         if (pointerIndex >= 0 && pointerIndex < pointerCount) {
             sendTouchEvent((int) event.getX(pointerIndex) + viewOffset[0], (int) event.getY(pointerIndex) + viewOffset[1], pointerIndex);
-        }
-    }
-
-    private class NoAnim extends Anim {
-        boolean init() {
-            return false;
-        }
-    }
-
-    private class Anim extends Animation {
-        final PointF mStartOffset = new PointF();
-        final PointF mDeltaOffset = new PointF();
-        final PointF mVelocity = new PointF();
-
-        Anim() {
-            super();
-            setDuration(500);
-            setInterpolator(new DecelerateInterpolator());
-        }
-
-        boolean init() {
-            if (mVelocityTracker == null) {
-                mVelocity.set(0.f, 0.f);
-            } else {
-                mVelocity.set(mVelocityTracker.getXVelocity(), mVelocityTracker.getYVelocity());
-            }
-            //Log.d(TAG, "mVelocity=" + String.format(Locale.US, "%.2f", mVelocity));
-
-            mStartOffset.set(mWallpaperOffset);
-            //Log.d(TAG, "mStartOffset=" + String.format(Locale.US, "%.2f", mStartOffset));
-
-            final float expectedPosX = -Math.min(Math.max(mVelocity.x / mWindowSize.x, -.5f), .5f) + mStartOffset.x;
-            final float expectedPosY = -Math.min(Math.max(mVelocity.y / mWindowSize.y, -.5f), .5f) + mStartOffset.y;
-            //Log.d(TAG, "expectedPos=" + String.format(Locale.US, "%.2f %.2f", expectedPosX, expectedPosY));
-
-            SnapInfo si = new SnapInfo(isPreferenceWPStickToSides(), isPreferenceWPReturnCenter());
-            si.init(expectedPosX, expectedPosY);
-            si.removeDiagonals(expectedPosX, expectedPosY);
-
-            // compute offset based on stick location
-            if (si.stickToTop)
-                mDeltaOffset.y = 0.f - mStartOffset.y;
-            else if (si.stickToBottom)
-                mDeltaOffset.y = 1.f - mStartOffset.y;
-            else if (si.stickToCenter)
-                mDeltaOffset.y = .5f - mStartOffset.y;
-
-            if (si.stickToLeft)
-                mDeltaOffset.x = 0.f - mStartOffset.x;
-            else if (si.stickToRight)
-                mDeltaOffset.x = 1.f - mStartOffset.x;
-            else if (si.stickToCenter)
-                mDeltaOffset.x = .5f - mStartOffset.x;
-
-            return si.stickToLeft || si.stickToTop || si.stickToRight || si.stickToBottom || si.stickToCenter;
-        }
-
-        @Override
-        protected void applyTransformation(float interpolatedTime, Transformation t) {
-            float offsetX = mStartOffset.x + mDeltaOffset.x * interpolatedTime;
-            float offsetY = mStartOffset.y + mDeltaOffset.y * interpolatedTime;
-            float velocityInterpolator = (float) Math.sqrt(interpolatedTime) * 3.f;
-            if (velocityInterpolator < 1.f) {
-                offsetX -= mVelocity.x / mWindowSize.x * velocityInterpolator;
-                offsetY -= mVelocity.y / mWindowSize.y * velocityInterpolator;
-            } else {
-                offsetX -= mVelocity.x / mWindowSize.x * (1.f - 0.5f * (velocityInterpolator - 1.f));
-                offsetY -= mVelocity.y / mWindowSize.y * (1.f - 0.5f * (velocityInterpolator - 1.f));
-            }
-            updateWallpaperOffset(offsetX, offsetY);
-        }
-    }
-
-    private static class SnapInfo {
-        public final boolean stickToSides;
-        public final boolean stickToCenter;
-
-        public boolean stickToLeft;
-        public boolean stickToTop;
-        public boolean stickToRight;
-        public boolean stickToBottom;
-
-        public SnapInfo(boolean sidesSnap, boolean centerSnap) {
-            stickToSides = sidesSnap;
-            stickToCenter = centerSnap;
-        }
-
-        public void init(float x, float y) {
-            // if we stick only to the center
-            float leftStickPercent = -1.f;
-            float topStickPercent = -1.f;
-            float rightStickPercent = 2.f;
-            float bottomStickPercent = 2.f;
-
-            if (stickToSides && stickToCenter) {
-                // if we stick to the left, right and center
-                leftStickPercent = .2f;
-                topStickPercent = .2f;
-                rightStickPercent = .8f;
-                bottomStickPercent = .8f;
-            } else if (stickToSides) {
-                // if we stick only to the center
-                leftStickPercent = .5f;
-                topStickPercent = .5f;
-                rightStickPercent = .5f;
-                bottomStickPercent = .5f;
-            }
-
-            stickToLeft = x <= leftStickPercent;
-            stickToTop = y <= topStickPercent;
-            stickToRight = x >= rightStickPercent;
-            stickToBottom = y >= bottomStickPercent;
-        }
-
-        public void removeDiagonals(float x, float y) {
-            if (stickToTop) {
-                // don't stick to the top-left or top-right corner
-                if (stickToLeft) {
-                    stickToLeft = x < y;
-                    stickToTop = !stickToLeft;
-                } else if (stickToRight) {
-                    stickToRight = (1.f - x) < y;
-                    stickToTop = !stickToRight;
-                }
-            } else if (stickToBottom) {
-                // don't stick to the bottom-left or bottom-right corner
-                if (stickToLeft) {
-                    stickToLeft = x < y;
-                    stickToBottom = !stickToLeft;
-                } else if (stickToRight) {
-                    stickToRight = (1.f - x) < y;
-                    stickToBottom = !stickToRight;
-                }
-            }
         }
     }
 }

@@ -20,6 +20,7 @@ import android.os.Handler;
 import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.SizeF;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -56,7 +57,6 @@ import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.LinearAdapterPlus;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.DebugInfo;
-import rocks.tbog.tblauncher.utils.UISizes;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
 
@@ -124,8 +124,10 @@ public class WidgetManager {
                 if (result.getResultCode() == Activity.RESULT_OK) {
                     if (data != null && !data.getBooleanExtra(EXTRA_WIDGET_BIND_ALLOWED, false))
                         requestBindWidget(data);
-                    else
+                    else {
+                        createWidget(activity, data);
                         configureWidget(activity, data);
+                    }
                 } else {
                     if (data != null) {
                         int appWidgetId = data.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, INVALID_WIDGET_ID);
@@ -360,19 +362,17 @@ public class WidgetManager {
         AppWidgetHostView.getDefaultPaddingForWidget(ctx, appWidgetInfo.provider, padding);
         float density = ctx.getResources().getDisplayMetrics().density;
 
+        float widgetWidthDips = rec.width / density;
+        float widgetHeightDips = rec.height / density;
+
         int xPaddingDips = (int) ((padding.left + padding.right) / density);
         int yPaddingDips = (int) ((padding.top + padding.bottom) / density);
 
-        int minWidth = UISizes.px2dp(ctx, rec.width);
-        int minHeight = UISizes.px2dp(ctx, rec.height);
-        int maxWidth = minWidth;
-        int maxHeight = minHeight;
-        boolean ignorePadding = false;
+        int newMinWidth = (int) (widgetWidthDips - xPaddingDips);
+        int newMaxWidth = (int) (widgetWidthDips - xPaddingDips + .5f);
 
-        int newMinWidth = minWidth - (ignorePadding ? 0 : xPaddingDips);
-        int newMinHeight = minHeight - (ignorePadding ? 0 : yPaddingDips);
-        int newMaxWidth = maxWidth - (ignorePadding ? 0 : xPaddingDips);
-        int newMaxHeight = maxHeight - (ignorePadding ? 0 : yPaddingDips);
+        int newMinHeight = (int) (widgetHeightDips - yPaddingDips);
+        int newMaxHeight = (int) (widgetHeightDips - yPaddingDips + .5f);
 
         Bundle oldOpt = null;
         try {
@@ -387,15 +387,23 @@ public class WidgetManager {
             || newMaxWidth != oldOpt.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH)
             || newMaxHeight != oldOpt.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT)) {
 
-            Bundle opt = new Bundle();
+            final Bundle opt;
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
+                opt = oldOpt != null ? oldOpt.deepCopy() : new Bundle();
+            } else {
+                opt = oldOpt != null ? new Bundle(oldOpt) : new Bundle();
+            }
+
             opt.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, newMinWidth);
             opt.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, newMinHeight);
             opt.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, newMaxWidth);
             opt.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, newMaxHeight);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-                opt.putParcelableArrayList(AppWidgetManager.OPTION_APPWIDGET_SIZES,
-                    new ArrayList<PointF>());
+                ArrayList<SizeF> sizes = new ArrayList<>();
+                sizes.add(new SizeF(widgetWidthDips, widgetHeightDips));
+
+                opt.putParcelableArrayList(AppWidgetManager.OPTION_APPWIDGET_SIZES, sizes);
             }
 
             // send update
@@ -405,15 +413,15 @@ public class WidgetManager {
 
     private void addWidgetToLayout(AppWidgetHostView hostView, AppWidgetProviderInfo appWidgetInfo, WidgetRecord rec) {
         View placeholder = mLayout.getPlaceholder(appWidgetInfo.provider);
-        WidgetLayout.LayoutParams params = null;
+        WidgetLayout.PageLayoutParams params = null;
         if (placeholder != null)
-            params = (WidgetLayout.LayoutParams) placeholder.getLayoutParams();
+            params = (WidgetLayout.PageLayoutParams) placeholder.getLayoutParams();
         if (params == null) {
-            params = new WidgetLayout.LayoutParams(rec.width, rec.height);
+            params = new WidgetLayout.PageLayoutParams(rec.width, rec.height);
             params.leftMargin = rec.left;
             params.topMargin = rec.top;
             params.screenPage = rec.screen;
-            params.placement = WidgetLayout.LayoutParams.Placement.MARGIN_TL_AS_POSITION;
+            params.placement = WidgetLayout.PageLayoutParams.Placement.MARGIN_TL_AS_POSITION;
         }
         hostView.setMinimumWidth(appWidgetInfo.minWidth);
         hostView.setMinimumHeight(appWidgetInfo.minHeight);
@@ -458,11 +466,11 @@ public class WidgetManager {
 
         View placeholder = LayoutInflater.from(context).inflate(R.layout.widget_placeholder, mLayout, false);
         {
-            WidgetLayout.LayoutParams params = new WidgetLayout.LayoutParams(rec.width, rec.height);
+            WidgetLayout.PageLayoutParams params = new WidgetLayout.PageLayoutParams(rec.width, rec.height);
             params.leftMargin = rec.left;
             params.topMargin = rec.top;
             params.screenPage = rec.screen;
-            params.placement = WidgetLayout.LayoutParams.Placement.MARGIN_TL_AS_POSITION;
+            params.placement = WidgetLayout.PageLayoutParams.Placement.MARGIN_TL_AS_POSITION;
             placeholder.setLayoutParams(params);
         }
         {
@@ -644,7 +652,7 @@ public class WidgetManager {
             return;
         int appWidgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID, INVALID_WIDGET_ID);
         AppWidgetProviderInfo appWidgetInfo = mAppWidgetManager.getAppWidgetInfo(appWidgetId);
-        if (appWidgetInfo == null)
+        if (appWidgetInfo == null || mWidgets.containsKey(appWidgetId))
             return;
         AppWidgetHostView hostView = mAppWidgetHost.createView(activity.getApplicationContext(), appWidgetId, appWidgetInfo);
 
@@ -677,6 +685,15 @@ public class WidgetManager {
         mAppWidgetHost.deleteAppWidgetId(appWidgetId);
         DBHelper.removeWidget(mLayout.getContext(), appWidgetId);
         mWidgets.remove(appWidgetId);
+    }
+
+    public void updateWidgetSize(AppWidgetHostView hostView, int width, int height) {
+        int appWidgetId = hostView.getAppWidgetId();
+        AppWidgetProviderInfo appWidgetInfo = mAppWidgetManager.getAppWidgetInfo(appWidgetId);
+        WidgetRecord rec = new WidgetRecord(mWidgets.get(appWidgetId));
+        rec.width = width;
+        rec.height = height;
+        updateAppWidgetOptions(hostView, appWidgetInfo, rec);
     }
 
     /**
@@ -828,16 +845,16 @@ public class WidgetManager {
     }
 
     private static boolean canMoveToPage(WidgetLayout layout, int from, int to) {
-        if (from != WidgetLayout.LayoutParams.PAGE_MIDDLE)
-            return to == WidgetLayout.LayoutParams.PAGE_MIDDLE;
+        if (from != WidgetLayout.PageLayoutParams.PAGE_MIDDLE)
+            return to == WidgetLayout.PageLayoutParams.PAGE_MIDDLE;
         if (layout == null)
             return false;
 
         boolean ok = false;
         if (layout.getVerticalPageCount() > 1)
-            ok = ok || to == WidgetLayout.LayoutParams.PAGE_UP || to == WidgetLayout.LayoutParams.PAGE_DOWN;
+            ok = ok || to == WidgetLayout.PageLayoutParams.PAGE_UP || to == WidgetLayout.PageLayoutParams.PAGE_DOWN;
         if (layout.getHorizontalPageCount() > 1)
-            ok = ok || to == WidgetLayout.LayoutParams.PAGE_LEFT || to == WidgetLayout.LayoutParams.PAGE_RIGHT;
+            ok = ok || to == WidgetLayout.PageLayoutParams.PAGE_LEFT || to == WidgetLayout.PageLayoutParams.PAGE_RIGHT;
         return ok;
     }
 
@@ -891,17 +908,17 @@ public class WidgetManager {
 
         adapter.add(new LinearAdapter.ItemDivider());
         final ViewGroup.LayoutParams lp = view.getLayoutParams();
-        if (lp instanceof WidgetLayout.LayoutParams) {
-            final int screenPage = ((WidgetLayout.LayoutParams) lp).screenPage;
-            if (canMoveToPage(widgetLayout, screenPage, WidgetLayout.LayoutParams.PAGE_LEFT))
+        if (lp instanceof WidgetLayout.PageLayoutParams) {
+            final int screenPage = ((WidgetLayout.PageLayoutParams) lp).screenPage;
+            if (canMoveToPage(widgetLayout, screenPage, WidgetLayout.PageLayoutParams.PAGE_LEFT))
                 adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_screen_left, WidgetOptionItem.Action.MOVE2SCREEN_LEFT));
-            if (canMoveToPage(widgetLayout, screenPage, WidgetLayout.LayoutParams.PAGE_UP))
+            if (canMoveToPage(widgetLayout, screenPage, WidgetLayout.PageLayoutParams.PAGE_UP))
                 adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_screen_up, WidgetOptionItem.Action.MOVE2SCREEN_UP));
-            if (canMoveToPage(widgetLayout, screenPage, WidgetLayout.LayoutParams.PAGE_MIDDLE))
+            if (canMoveToPage(widgetLayout, screenPage, WidgetLayout.PageLayoutParams.PAGE_MIDDLE))
                 adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_screen_middle, WidgetOptionItem.Action.MOVE2SCREEN_MIDDLE));
-            if (canMoveToPage(widgetLayout, screenPage, WidgetLayout.LayoutParams.PAGE_RIGHT))
+            if (canMoveToPage(widgetLayout, screenPage, WidgetLayout.PageLayoutParams.PAGE_RIGHT))
                 adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_screen_right, WidgetOptionItem.Action.MOVE2SCREEN_RIGHT));
-            if (canMoveToPage(widgetLayout, screenPage, WidgetLayout.LayoutParams.PAGE_DOWN))
+            if (canMoveToPage(widgetLayout, screenPage, WidgetLayout.PageLayoutParams.PAGE_DOWN))
                 adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_screen_down, WidgetOptionItem.Action.MOVE2SCREEN_DOWN));
             adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_back, WidgetOptionItem.Action.MOVE_BELOW));
             adapter.add(new WidgetOptionItem(ctx, R.string.cfg_widget_front, WidgetOptionItem.Action.MOVE_ABOVE));
@@ -1005,36 +1022,36 @@ public class WidgetManager {
                     removeWidget(view);
                     break;
                 case MOVE2SCREEN_LEFT: {
-                    final WidgetLayout.LayoutParams lp = (WidgetLayout.LayoutParams) view.getLayoutParams();
-                    lp.screenPage = WidgetLayout.LayoutParams.PAGE_LEFT;
+                    final WidgetLayout.PageLayoutParams lp = (WidgetLayout.PageLayoutParams) view.getLayoutParams();
+                    lp.screenPage = WidgetLayout.PageLayoutParams.PAGE_LEFT;
                     view.setLayoutParams(lp);
                     saveWidgetProperties(view);
                     break;
                 }
                 case MOVE2SCREEN_UP: {
-                    final WidgetLayout.LayoutParams lp = (WidgetLayout.LayoutParams) view.getLayoutParams();
-                    lp.screenPage = WidgetLayout.LayoutParams.PAGE_UP;
+                    final WidgetLayout.PageLayoutParams lp = (WidgetLayout.PageLayoutParams) view.getLayoutParams();
+                    lp.screenPage = WidgetLayout.PageLayoutParams.PAGE_UP;
                     view.setLayoutParams(lp);
                     saveWidgetProperties(view);
                     break;
                 }
                 case MOVE2SCREEN_RIGHT: {
-                    final WidgetLayout.LayoutParams lp = (WidgetLayout.LayoutParams) view.getLayoutParams();
-                    lp.screenPage = WidgetLayout.LayoutParams.PAGE_RIGHT;
+                    final WidgetLayout.PageLayoutParams lp = (WidgetLayout.PageLayoutParams) view.getLayoutParams();
+                    lp.screenPage = WidgetLayout.PageLayoutParams.PAGE_RIGHT;
                     view.setLayoutParams(lp);
                     saveWidgetProperties(view);
                     break;
                 }
                 case MOVE2SCREEN_DOWN: {
-                    final WidgetLayout.LayoutParams lp = (WidgetLayout.LayoutParams) view.getLayoutParams();
-                    lp.screenPage = WidgetLayout.LayoutParams.PAGE_DOWN;
+                    final WidgetLayout.PageLayoutParams lp = (WidgetLayout.PageLayoutParams) view.getLayoutParams();
+                    lp.screenPage = WidgetLayout.PageLayoutParams.PAGE_DOWN;
                     view.setLayoutParams(lp);
                     saveWidgetProperties(view);
                     break;
                 }
                 case MOVE2SCREEN_MIDDLE: {
-                    final WidgetLayout.LayoutParams lp = (WidgetLayout.LayoutParams) view.getLayoutParams();
-                    lp.screenPage = WidgetLayout.LayoutParams.PAGE_MIDDLE;
+                    final WidgetLayout.PageLayoutParams lp = (WidgetLayout.PageLayoutParams) view.getLayoutParams();
+                    lp.screenPage = WidgetLayout.PageLayoutParams.PAGE_MIDDLE;
                     view.setLayoutParams(lp);
                     saveWidgetProperties(view);
                     break;
