@@ -16,6 +16,12 @@ public class LoadWidgetsAsync extends ViewHolderListAdapter.LoadAsyncList<MenuIt
     }
 
     @Override
+    protected void onDataLoadFinished(@NonNull WidgetListAdapter adapter, @NonNull Collection<MenuItem> data) {
+        adapter.clearList();
+        super.onDataLoadFinished(adapter, data);
+    }
+
+    @Override
     protected void onPostExecute(Collection<MenuItem> data) {
         super.onPostExecute(data);
         if (whenDone != null)
