@@ -1,6 +1,7 @@
 package rocks.tbog.tblauncher.widgets;
 
 import android.app.Activity;
+import android.app.ActivityOptions;
 import android.appwidget.AppWidgetHost;
 import android.appwidget.AppWidgetHostView;
 import android.appwidget.AppWidgetManager;
@@ -57,6 +58,7 @@ import rocks.tbog.tblauncher.ui.LinearAdapter;
 import rocks.tbog.tblauncher.ui.LinearAdapterPlus;
 import rocks.tbog.tblauncher.ui.ListPopup;
 import rocks.tbog.tblauncher.utils.DebugInfo;
+import rocks.tbog.tblauncher.utils.DeviceUtils;
 import rocks.tbog.tblauncher.utils.UserHandleCompat;
 import rocks.tbog.tblauncher.utils.Utilities;
 
@@ -120,6 +122,7 @@ public class WidgetManager {
 
         widgetPickerResult =
             activity.registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                Log.d(TAG, "widgetPickerResult " + result);
                 var data = result.getData();
                 if (result.getResultCode() == Activity.RESULT_OK) {
                     if (data != null && !data.getBooleanExtra(EXTRA_WIDGET_BIND_ALLOWED, false))
@@ -142,8 +145,10 @@ public class WidgetManager {
 
         widgetBindResult =
             activity.registerForActivityResult(new ActivityResultContracts.StartActivityForResult(), result -> {
+                Log.d(TAG, "widgetBindResult " + result);
                 var data = result.getData();
                 if (result.getResultCode() == Activity.RESULT_OK) {
+                    createWidget(activity, data);
                     configureWidget(activity, data);
                 } else {
                     if (data != null) {
@@ -358,21 +363,21 @@ public class WidgetManager {
 
     private void updateAppWidgetOptions(AppWidgetHostView hostView, AppWidgetProviderInfo appWidgetInfo, WidgetRecord rec) {
         Context ctx = hostView.getContext();
-        Rect padding = new Rect();
+        Rect padding = new Rect(0, 0, 0, 0);
         AppWidgetHostView.getDefaultPaddingForWidget(ctx, appWidgetInfo.provider, padding);
         float density = ctx.getResources().getDisplayMetrics().density;
 
         float widgetWidthDips = rec.width / density;
         float widgetHeightDips = rec.height / density;
 
-        int xPaddingDips = (int) ((padding.left + padding.right) / density);
-        int yPaddingDips = (int) ((padding.top + padding.bottom) / density);
+        float xPaddingDips = (padding.left + padding.right) / density;
+        float yPaddingDips = (padding.top + padding.bottom) / density;
 
-        int newMinWidth = (int) (widgetWidthDips - xPaddingDips);
-        int newMaxWidth = (int) (widgetWidthDips - xPaddingDips + .5f);
+        int minWidth = (int) (widgetWidthDips - xPaddingDips);
+        int maxWidth = (int) (widgetWidthDips - xPaddingDips + .5f);
 
-        int newMinHeight = (int) (widgetHeightDips - yPaddingDips);
-        int newMaxHeight = (int) (widgetHeightDips - yPaddingDips + .5f);
+        int minHeight = (int) (widgetHeightDips - yPaddingDips);
+        int maxHeight = (int) (widgetHeightDips - yPaddingDips + .5f);
 
         Bundle oldOpt = null;
         try {
@@ -382,10 +387,10 @@ public class WidgetManager {
         }
 
         if (oldOpt == null
-            || newMinWidth != oldOpt.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)
-            || newMinHeight != oldOpt.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT)
-            || newMaxWidth != oldOpt.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH)
-            || newMaxHeight != oldOpt.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT)) {
+            || minWidth != oldOpt.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH)
+            || minHeight != oldOpt.getInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT)
+            || maxWidth != oldOpt.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH)
+            || maxHeight != oldOpt.getInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT)) {
 
             final Bundle opt;
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.O) {
@@ -394,10 +399,10 @@ public class WidgetManager {
                 opt = oldOpt != null ? new Bundle(oldOpt) : new Bundle();
             }
 
-            opt.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, newMinWidth);
-            opt.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, newMinHeight);
-            opt.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, newMaxWidth);
-            opt.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, newMaxHeight);
+            opt.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_WIDTH, minWidth);
+            opt.putInt(AppWidgetManager.OPTION_APPWIDGET_MIN_HEIGHT, minHeight);
+            opt.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_WIDTH, maxWidth);
+            opt.putInt(AppWidgetManager.OPTION_APPWIDGET_MAX_HEIGHT, maxHeight);
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
                 ArrayList<SizeF> sizes = new ArrayList<>();
@@ -499,6 +504,7 @@ public class WidgetManager {
             Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_BIND);
             intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
             if (bindAllowed) {
+                createWidget(activity, intent);
                 configureWidget(activity, intent);
             } else {
                 intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_PROVIDER, provider);
@@ -603,8 +609,16 @@ public class WidgetManager {
         int appWidgetId = extras.getInt(AppWidgetManager.EXTRA_APPWIDGET_ID, INVALID_WIDGET_ID);
         AppWidgetProviderInfo appWidgetInfo = mAppWidgetManager.getAppWidgetInfo(appWidgetId);
 
+        boolean canConfigure = appWidgetInfo.configure != null;
+        boolean shouldConfigure = true;
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+            if ((appWidgetInfo.widgetFeatures & AppWidgetProviderInfo.WIDGET_FEATURE_CONFIGURATION_OPTIONAL) != 0) {
+                shouldConfigure = false;
+            }
+        }
+
         /* See https://stackoverflow.com/a/40269593
-         * If you use the AppWidgetManager.ACTION_APPWIDGET_PICK inten to pick the intent from the chooser displayed by the Android OS, there is no need to bind as the framework automatically binds the widget.
+         * If you use the AppWidgetManager.ACTION_APPWIDGET_PICK intent to pick the intent from the chooser displayed by the Android OS, there is no need to bind as the framework automatically binds the widget.
          * If you implement a custom chooser (for example, something which shows the preview images of widgets which is implemented in lots of custom launchers), then binding is necessary.
          */
 //        boolean hasPermission = mAppWidgetManager.bindAppWidgetIdIfAllowed(appWidgetId, appWidgetInfo.provider);
@@ -615,29 +629,42 @@ public class WidgetManager {
 //            activity.startActivityForResult(intent, REQUEST_PICK_APPWIDGET/*REQUEST_BIND*/);
 //        }
 
-        if (appWidgetInfo.configure != null) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                startConfigActivity(appWidgetId, activity, REQUEST_CONFIGURE_APPWIDGET);
-            } else {
-                Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_CONFIGURE);
-                intent.setComponent(appWidgetInfo.configure);
-                intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
-                try {
-                    activity.startActivityForResult(intent, REQUEST_CONFIGURE_APPWIDGET);
-                } catch (SecurityException e) {
-                    Log.e(TAG, "ACTION_APPWIDGET_CONFIGURE", e);
-                    Toast.makeText(activity, e.getMessage(), Toast.LENGTH_LONG).show();
-                }
-            }
+        if (canConfigure && shouldConfigure) {
+            Log.d(TAG, "configureWidget " + appWidgetInfo.configure);
+            launchConfigureWidgetActivity(activity, appWidgetId, appWidgetInfo);
+        }
+    }
+
+    private void launchConfigureWidgetActivity(Activity activity, int appWidgetId, AppWidgetProviderInfo appWidgetInfo) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            startConfigActivity(appWidgetId, activity, REQUEST_CONFIGURE_APPWIDGET);
         } else {
-            createWidget(activity, data);
+            Intent intent = new Intent(AppWidgetManager.ACTION_APPWIDGET_CONFIGURE);
+            intent.setComponent(appWidgetInfo.configure);
+            intent.putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, appWidgetId);
+            try {
+                activity.startActivityForResult(intent, REQUEST_CONFIGURE_APPWIDGET);
+            } catch (SecurityException e) {
+                Log.e(TAG, "ACTION_APPWIDGET_CONFIGURE", e);
+                Toast.makeText(activity, e.getMessage(), Toast.LENGTH_LONG).show();
+            }
         }
     }
 
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     public void startConfigActivity(int widgetId, Activity activity, int requestCode) {
+        final int flags = 0;
+        final Bundle options;
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            options = ActivityOptions
+                .makeBasic()
+                .setPendingIntentBackgroundActivityStartMode(ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOWED)
+                .toBundle();
+        } else {
+            options = null;
+        }
         try {
-            mAppWidgetHost.startAppWidgetConfigureActivityForResult(activity, widgetId, 0, requestCode, null);
+            mAppWidgetHost.startAppWidgetConfigureActivityForResult(activity, widgetId, flags, requestCode, options);
         } catch (ActivityNotFoundException | SecurityException e) {
             Toast.makeText(activity, e.getMessage(), Toast.LENGTH_LONG).show();
         }
@@ -658,8 +685,31 @@ public class WidgetManager {
 
         WidgetRecord rec = new WidgetRecord();
         rec.appWidgetId = appWidgetId;
-        rec.width = appWidgetInfo.minWidth;
-        rec.height = appWidgetInfo.minHeight;
+        rec.width = Math.max(appWidgetInfo.minWidth, appWidgetInfo.minResizeWidth);
+        rec.height = Math.max(appWidgetInfo.minHeight, appWidgetInfo.minResizeHeight);
+
+        final int screenWidth = DeviceUtils.getScreenWidth(activity);
+        final int screenHeight = DeviceUtils.getScreenHeight(activity);
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            // emulate a cell grid with n×(n+1) cells
+            final int targetCellWidth = Math.max(1, appWidgetInfo.targetCellWidth);
+            final int targetCellHeight = Math.max(1, appWidgetInfo.targetCellHeight);
+            int gridWidth = Math.min(4, targetCellWidth);
+            int gridHeight = Math.min(5, targetCellHeight);
+            if (gridWidth > (gridHeight - 1)) {
+                gridHeight = gridWidth + 1;
+            } else if (gridWidth < (gridHeight - 1)) {
+                gridWidth = gridHeight - 1;
+            }
+            final int cellWidth = screenWidth / gridWidth;
+            final int cellHeight = screenHeight / gridHeight;
+            rec.width = Math.max(rec.width, targetCellWidth * cellWidth);
+            rec.height = Math.max(rec.height, targetCellHeight * cellHeight);
+        } else {
+            // emulate a cell grid with 4×5 cells
+            rec.width = Math.max(rec.width, screenWidth / 4);
+            rec.height = Math.max(rec.height, screenHeight / 5);
+        }
 
         DBHelper.addWidget(activity, rec);
         mWidgets.put(rec.appWidgetId, rec);
@@ -770,6 +820,7 @@ public class WidgetManager {
         adapter.add(new LinearAdapter.Item(activity, R.string.menu_widget_add));
         if (widgetCount() > 0) {
             adapter.add(new LinearAdapter.Item(activity, R.string.menu_widget_configure));
+            adapter.add(new LinearAdapter.Item(activity, R.string.menu_widget_setup));
             adapter.add(new LinearAdapter.Item(activity, R.string.menu_widget_remove));
         }
         adapter.add(new LinearAdapter.Item(activity, R.string.menu_popup_launcher_settings));
@@ -794,6 +845,25 @@ public class WidgetManager {
                         ListPopup popup = getConfigPopup((WidgetView) widgetView);
                         TBApplication.getApplication(mLayout.getContext()).registerPopup(popup);
                         popup.show(widgetView, 0.f);
+                    } else if (item1 instanceof PlaceholderPopupItem) {
+                        PlaceholderWidgetRecord placeholder = ((PlaceholderPopupItem) item1).placeholder;
+                        View placeholderView = mLayout.getPlaceholder(placeholder.provider);
+                        if (placeholderView != null)
+                            placeholderView.performClick();
+                    }
+                });
+
+                TBApplication.getApplication(activity).registerPopup(configWidgetPopup);
+                configWidgetPopup.showCenter(activity.getWindow().getDecorView());
+            } else if (stringId == R.string.menu_widget_setup) {
+                ListPopup configWidgetPopup = TBApplication.widgetManager(activity).getWidgetListPopup(R.string.menu_widget_setup);
+                configWidgetPopup.setOnItemClickListener((a1, v1, pos1) -> {
+                    Object item1 = a1.getItem(pos1);
+                    if (item1 instanceof WidgetPopupItem) {
+                        AppWidgetHostView widgetView = mLayout.getWidget(((WidgetPopupItem) item1).appWidgetId);
+                        if (widgetView == null)
+                            return;
+                        launchConfigureWidgetActivity(activity, widgetView.getAppWidgetId(), widgetView.getAppWidgetInfo());
                     } else if (item1 instanceof PlaceholderPopupItem) {
                         PlaceholderWidgetRecord placeholder = ((PlaceholderPopupItem) item1).placeholder;
                         View placeholderView = mLayout.getPlaceholder(placeholder.provider);

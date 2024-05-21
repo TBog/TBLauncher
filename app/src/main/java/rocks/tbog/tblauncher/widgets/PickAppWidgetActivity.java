@@ -1,6 +1,7 @@
 package rocks.tbog.tblauncher.widgets;
 
 import android.appwidget.AppWidgetManager;
+import android.appwidget.AppWidgetProviderInfo;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
@@ -99,8 +100,6 @@ public class PickAppWidgetActivity extends AppCompatActivity {
         final Context context = getApplicationContext();
         widgetLoadingGroup.setVisibility(View.VISIBLE);
 
-        adapter.clearList();
-
         if (loadWidgetsAsync != null)
             loadWidgetsAsync.cancel(false);
 
@@ -173,7 +172,17 @@ public class PickAppWidgetActivity extends AppCompatActivity {
         var installedProviders = appWidgetManager.getInstalledProviders();
         var infoArrayList = new ArrayList<WidgetInfo>(installedProviders.size());
         var packageManager = context.getPackageManager();
-        for (var providerInfo : installedProviders) {
+        for (AppWidgetProviderInfo providerInfo : installedProviders) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                if (providerInfo.widgetFeatures == AppWidgetProviderInfo.WIDGET_FEATURE_HIDE_FROM_PICKER) {
+                    // widget is hidden
+                    continue;
+                }
+            }
+            if ((providerInfo.widgetCategory & (AppWidgetProviderInfo.WIDGET_CATEGORY_HOME_SCREEN | AppWidgetProviderInfo.WIDGET_CATEGORY_SEARCHBOX)) == 0) {
+                // widget is not for home screen usage
+                continue;
+            }
             // get widget name
             String label = null;
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
