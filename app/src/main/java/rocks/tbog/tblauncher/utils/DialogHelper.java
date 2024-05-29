@@ -37,6 +37,7 @@ public class DialogHelper {
         builder.setCustomTitle(customTitle);
     }
 
+    @SuppressLint("RestrictedApi")
     public static void setButtonBarBackground(Dialog dialog) {
         Context ctx = dialog.getContext();
         View buttonLayout;
