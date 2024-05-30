@@ -5,6 +5,7 @@ import android.util.Log;
 import android.util.Xml;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -27,6 +28,15 @@ public class WidgetRecord {
     public int top;
     public int screen;
     protected String packedProperties = null;
+
+    public WidgetRecord() {
+    }
+
+    public WidgetRecord(@Nullable WidgetRecord rec) {
+        this();
+        if (rec != null)
+            copyFrom(rec);
+    }
 
     protected <T extends WidgetRecord> void copyFrom(@NonNull T o) {
         appWidgetId = o.appWidgetId;
@@ -161,7 +171,7 @@ public class WidgetRecord {
 
     public void saveProperties(AppWidgetHostView view) {
         packedProperties = null;
-        final WidgetLayout.LayoutParams lp = (WidgetLayout.LayoutParams) view.getLayoutParams();
+        final WidgetLayout.PageLayoutParams lp = (WidgetLayout.PageLayoutParams) view.getLayoutParams();
         width = lp.width;
         height = lp.height;
         left = lp.leftMargin;

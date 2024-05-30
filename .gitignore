@@ -86,3 +86,5 @@ lint/tmp/
 # lint/reports/
 
 Gemfile.lock
+
+.idea/deploymentTargetSelector.xml
