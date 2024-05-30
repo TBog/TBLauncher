@@ -21,6 +21,7 @@ import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Transformation;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.view.GestureDetectorCompat;
 import androidx.preference.PreferenceManager;
 
@@ -58,7 +59,7 @@ public class LiveWallpaper {
     private GestureDetectorCompat gestureDetector = null;
     private final GestureDetector.SimpleOnGestureListener onGestureListener = new GestureDetector.SimpleOnGestureListener() {
         @Override
-        public void onLongPress(MotionEvent e) {
+        public void onLongPress(@NonNull MotionEvent e) {
             if (!TBApplication.state().isWidgetScreenVisible())
                 return;
             View view = mTBLauncherActivity.findViewById(R.id.root_layout);
@@ -66,18 +67,22 @@ public class LiveWallpaper {
         }
 
         @Override
-        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-            long deltaTimeMs = e2.getEventTime() - e1.getEventTime();
+        public boolean onFling(@Nullable MotionEvent e1, @NonNull MotionEvent e2, float velocityX, float velocityY) {
+            long deltaTimeMs = (e1 != null) ? (e2.getEventTime() - e1.getEventTime()) : 0;
             if (deltaTimeMs > ViewConfiguration.getDoubleTapTimeout())
                 return false;
             View view = mTBLauncherActivity.findViewById(R.id.root_layout);
-            float xMove = e1.getRawX() - e2.getRawX();
-            float yMove = e1.getRawY() - e2.getRawY();
+            float xMove = velocityX;
+            float yMove = velocityY;
+            if (e1 != null) {
+                xMove = e1.getRawX() - e2.getRawX();
+                yMove = e1.getRawY() - e2.getRawY();
+            }
             return LiveWallpaper.this.onFling(view, xMove, yMove, velocityX, velocityY);
         }
 
         @Override
-        public boolean onDoubleTapEvent(MotionEvent e) {
+        public boolean onDoubleTapEvent(@NonNull MotionEvent e) {
             if (e.getActionMasked() == MotionEvent.ACTION_UP) {
                 View view = mTBLauncherActivity.findViewById(R.id.root_layout);
                 return onDoubleClick(view);
@@ -86,7 +91,7 @@ public class LiveWallpaper {
         }
 
         @Override
-        public boolean onSingleTapUp(MotionEvent e) {
+        public boolean onSingleTapUp(@NonNull MotionEvent e) {
             // if we have a double tap listener, wait for onSingleTapConfirmed
             if (mTBLauncherActivity.behaviour.hasDoubleClick())
                 return true;
@@ -332,7 +337,7 @@ public class LiveWallpaper {
                     Log.d(TAG, String.format(Locale.US, "Move=(%.3f, %.3f)", xMove, yMove));
                 } else {
                     mVelocityTracker.addMovement(event);
-                    mVelocityTracker.computeCurrentVelocity(1000 / 30);
+                    mVelocityTracker.computeCurrentVelocity(1000 / 30); // 1000 provides px per second
                     float xVel = mVelocityTracker.getXVelocity();// / mWindowSize.x;
                     float yVel = mVelocityTracker.getYVelocity();// / mWindowSize.y;
                     Log.d(TAG, String.format(Locale.US, "Velocity=(%.3f, %.3f)\u2248%d\u00b0 Move=(%.3f, %.3f)\u2248%d\u00b0", xVel, yVel, computeAngle(xVel, yVel), xMove, yMove, computeAngle(xMove, yMove)));
@@ -347,7 +352,7 @@ public class LiveWallpaper {
                     if (mVelocityTracker != null) {
                         mVelocityTracker.addMovement(event);
 
-                        mVelocityTracker.computeCurrentVelocity(1000 / 30);
+                        mVelocityTracker.computeCurrentVelocity(1000 / 30); // 1000 provides px per second
                         if (mAnimation.init())
                             mContentView.startAnimation(mAnimation);
 
