@@ -494,6 +494,10 @@ public class Behaviour implements ISearchActivity {
                     Log.i(TAG, "keyboard closed - fragment dialog");
                     // don't send keyboard close event while we have a dialog open
                     keyboardClosedByUser = false;
+                } else if (mKeyboardHandler != null && mKeyboardHandler.mLaunchedApp) {
+                    Log.i(TAG, "keyboard closed - launched app");
+                    // don't send keyboard close event after start intent
+                    keyboardClosedByUser = false;
                 }
 
                 if (keyboardClosedByUser) {
@@ -553,6 +557,12 @@ public class Behaviour implements ISearchActivity {
 
     public void onStart() {
         String initialDesktop = mPref.getString("initial-desktop", null);
+        if ("none".equals(initialDesktop)) {
+            if (TBApplication.state().getDesktop() != null) {
+                return;
+            }
+            Log.d(TAG, "desktop is null");
+        }
         if (executeAction(initialDesktop, null))
             return;
         switchToDesktop(LauncherState.Desktop.EMPTY);
@@ -1232,6 +1242,10 @@ public class Behaviour implements ISearchActivity {
 
     public void beforeLaunchOccurred() {
         RecycleScrollListener.setListLayoutHeight(mResultList, mResultList.getHeight());
+
+        // don't call the keyboard closed event
+        mKeyboardHandler.mLaunchedApp = true;
+
         hideKeyboard();
     }
 
@@ -1586,6 +1600,7 @@ public class Behaviour implements ISearchActivity {
 
     public void onResume() {
         Log.i(TAG, "onResume");
+        mKeyboardHandler.mLaunchedApp = false;
 
         LauncherState.Desktop desktop = TBApplication.state().getDesktop();
         showDesktop(desktop);
@@ -1634,26 +1649,30 @@ public class Behaviour implements ISearchActivity {
         Log.i(TAG, "onWindowFocusChanged " + hasFocus);
         LauncherState state = TBApplication.state();
         if (hasFocus) {
-            if (state.getDesktop() == LauncherState.Desktop.SEARCH) {
-                if (state.isSearchBarVisible() && PrefCache.linkKeyboardAndSearchBar(mPref)) {
-                    Log.d(TAG, "SearchBarVisible and linkKeyboardAndSearchBar");
-                    showKeyboard();
-                } else {
-                    //TODO: find why keyboard gets hidden after onWindowFocusChanged
-                    Log.d(TAG, "state().isKeyboardHidden=" + TBApplication.state().isKeyboardHidden() + " mRequestOpen=" + mKeyboardHandler.mRequestOpen);
-                    if (mKeyboardHandler.mRequestOpen) {
-                        showKeyboard();
-                    }
-                }
-                if (TBApplication.state().isResultListVisible() && mResultAdapter.getItemCount() == 0)
-                    showDesktop(TBApplication.state().getDesktop());
-                else if (TBApplication.state().isResultListVisible()) {
-                    showResultList(false);
-                } else
-                    hideResultList(true);
+            if (mKeyboardHandler.mLaunchedApp) {
+                Log.d(TAG, "skip focus change; LaunchedApp = true");
             } else {
-                if (state.getDesktop() == LauncherState.Desktop.WIDGET) {
-                    hideKeyboard();
+                if (state.getDesktop() == LauncherState.Desktop.SEARCH) {
+                    if (state.isSearchBarVisible() && PrefCache.linkKeyboardAndSearchBar(mPref)) {
+                        Log.d(TAG, "SearchBarVisible and linkKeyboardAndSearchBar");
+                        showKeyboard();
+                    } else {
+                        //TODO: find why keyboard gets hidden after onWindowFocusChanged
+                        Log.d(TAG, "state().isKeyboardHidden=" + TBApplication.state().isKeyboardHidden() + " mRequestOpen=" + mKeyboardHandler.mRequestOpen);
+                        if (mKeyboardHandler.mRequestOpen) {
+                            showKeyboard();
+                        }
+                    }
+                    if (TBApplication.state().isResultListVisible() && mResultAdapter.getItemCount() == 0)
+                        showDesktop(TBApplication.state().getDesktop());
+                    else if (TBApplication.state().isResultListVisible()) {
+                        showResultList(false);
+                    } else
+                        hideResultList(true);
+                } else {
+                    if (state.getDesktop() == LauncherState.Desktop.WIDGET) {
+                        hideKeyboard();
+                    }
                 }
             }
         }
