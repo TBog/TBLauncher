@@ -69,7 +69,7 @@ android {
 
 configurations {
     compileClasspath {
-        resolutionStrategy.force 'com.github.yalantis:ucrop:2.2.8'
+        resolutionStrategy.force 'com.github.yalantis:ucrop:2.2.9'
     }
 }
 
