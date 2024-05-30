@@ -203,12 +203,14 @@
     </array>
 
     <string-array name="desktopEntries">
+        <item>@string/title_desktop_last</item>
         <item>@string/title_desktop_mode_search</item>
         <item>Desktop &#171;Search&#187; with keyboard</item>
         <item>@string/title_desktop_mode_widget</item>
         <item>@string/title_desktop_mode_empty</item>
     </string-array>
     <array name="desktopValues" translatable="false">
+        <item>none</item>
         <item>showSearchBar</item>
         <item>showSearchBarAndKeyboard</item>
         <item>showWidgets</item>
