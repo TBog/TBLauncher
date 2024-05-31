@@ -19,7 +19,6 @@ import android.view.WindowMetrics;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.core.view.GestureDetectorCompat;
 import androidx.preference.PreferenceManager;
 
 import java.util.Locale;
@@ -53,7 +52,7 @@ public class LiveWallpaper {
     private boolean wpReturnCenter = true;
     private boolean wpStickToSides = false;
 
-    private GestureDetectorCompat gestureDetector = null;
+    private GestureDetector gestureDetector = null;
     private final GestureDetector.SimpleOnGestureListener onGestureListener = new GestureDetector.SimpleOnGestureListener() {
         @Override
         public void onLongPress(@NonNull MotionEvent e) {
@@ -175,7 +174,7 @@ public class LiveWallpaper {
         View root = mainActivity.findViewById(R.id.root_layout);
         root.setOnTouchListener(this::onRootTouch);
 
-        gestureDetector = new GestureDetectorCompat(mainActivity, onGestureListener);
+        gestureDetector = new GestureDetector(mainActivity, onGestureListener);
         gestureDetector.setIsLongpressEnabled(true);
         GestureDetectorHelper.setGestureDetectorTouchSlop(gestureDetector, UISizes.dp2px(mainActivity, GD_TOUCH_SLOP_DP));
     }
