@@ -53,3 +53,10 @@
 -dontwarn com.yalantis.ucrop**
 -keep class com.yalantis.ucrop** { *; }
 -keep interface com.yalantis.ucrop** { *; }
+
+# ACRA
+-keepattributes *Annotation*
+-dontwarn javax.annotation.processing.AbstractProcessor
+-dontwarn javax.annotation.processing.SupportedOptions
+-keep class javax.annotation.processing.** { *; }
+-keep interface javax.annotation.processing.** { *; }
