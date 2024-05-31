@@ -21,6 +21,7 @@ import androidx.preference.PreferenceManager;
 
 import org.acra.ACRA;
 import org.acra.config.CoreConfigurationBuilder;
+import org.acra.config.DialogConfigurationBuilder;
 import org.acra.config.MailSenderConfigurationBuilder;
 import org.acra.data.StringFormat;
 
@@ -92,9 +93,15 @@ public class TBApplication extends Application {
             .withBuildConfigClass(BuildConfig.class)
             .withReportFormat(StringFormat.JSON)
             .withPluginConfigurations(new MailSenderConfigurationBuilder()
-                .withMailTo("tblauncher.acra@tbog.rocks")
-                .withReportAsFile(false)
-                .build()));
+                    .withMailTo("tblauncher.acra@tbog.rocks")
+                    .withReportAsFile(false)
+                    .build()
+                , new DialogConfigurationBuilder()
+                    .withTitle(getString(R.string.crash_title))
+                    .withText(getString(R.string.crash_text))
+                    .withPositiveButtonText(getString(R.string.crash_send_email))
+                    .withResTheme(R.style.TitleDialogTheme)
+                    .build()));
     }
 
     @NonNull

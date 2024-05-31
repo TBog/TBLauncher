@@ -177,6 +177,8 @@ public class ConfirmDialog extends BasePreferenceDialog {
                 ((TextView) view.findViewById(android.R.id.text1)).setText(R.string.reset_cached_app_icons_confirm);
                 ((TextView) view.findViewById(android.R.id.text2)).setText(R.string.reset_cached_app_icons_description);
                 break;
+            case "crash-app":
+                throw new IllegalStateException("Debug crash");
             case "exit-app":
                 ((TextView) view.findViewById(android.R.id.text1)).setText(R.string.exit_the_app_confirm);
                 ((TextView) view.findViewById(android.R.id.text2)).setText(R.string.exit_the_app_description);

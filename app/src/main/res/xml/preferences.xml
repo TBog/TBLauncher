@@ -1316,6 +1316,11 @@
         android:key="exit-app"
         android:title="@string/exit_the_app" />
 
+    <rocks.tbog.tblauncher.preference.CustomDialogPreference
+        android:dialogLayout="@layout/pref_confirm"
+        android:key="crash-app"
+        android:title="\u2620 \uE525 \uD83D\uDD71" />
+
     <Preference
         android:key="rate-app"
         android:title="@string/rate_the_app">

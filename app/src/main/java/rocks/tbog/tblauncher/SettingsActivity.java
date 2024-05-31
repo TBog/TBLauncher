@@ -369,6 +369,9 @@ public class SettingsActivity extends AppCompatActivity implements PreferenceFra
             if (!BuildConfig.SHOW_PRIVACY_POLICY) {
                 removePreference("privacy-policy");
             }
+            if (!BuildConfig.DEBUG) {
+                removePreference("crash-app");
+            }
             // set app name and version
             {
                 Preference appVer = findPreference("app-version");

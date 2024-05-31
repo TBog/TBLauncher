@@ -515,6 +515,11 @@
 
     <string name="loading">Loading…</string>
 
+    <!-- ACRA crash reporting -->
+    <string name="crash_title">Crash</string>
+    <string name="crash_text">The application crashed.\nPlease send an EMail to report the crash to the developers.\nThe EMail will contain information about your phone (brand, model, size, etc) as well as the preferences from the launcher.\nYou can look over the data before you send and cancel if you so desire.</string>
+    <string name="crash_send_email">Send EMail</string>
+
     <plurals name="tag_entry_count">
         <item quantity="one">one entry</item>
         <item quantity="other">%d entries</item>
