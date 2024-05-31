@@ -418,6 +418,7 @@ public class Behaviour implements ISearchActivity {
                 }
 
                 Log.i(TAG, "Keyboard - SHOW");
+                removeCallback(mOnKeyboardClosedByUser);
                 dismissPopup();
 
                 mSearchEditText.requestFocus();
@@ -556,6 +557,9 @@ public class Behaviour implements ISearchActivity {
     }
 
     public void onStart() {
+        // don't let the close keyboard event trigger
+        mKeyboardHandler.mLaunchedApp = true;
+
         String initialDesktop = mPref.getString("initial-desktop", null);
         if ("none".equals(initialDesktop)) {
             if (TBApplication.state().getDesktop() != null) {
