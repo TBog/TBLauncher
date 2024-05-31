@@ -79,12 +79,14 @@ public class EditTextDialog extends DialogFragment<CharSequence> {
                             return true;
                         }
                         onConfirm(name);
+                        dismiss();
                         return true;
                     }
                 } else if (event.getKeyCode() == KeyEvent.KEYCODE_ENTER) {
                     if (event.getAction() == KeyEvent.ACTION_UP) {
                         final CharSequence name = v.getText();
                         onConfirm(name);
+                        dismiss();
                     }
                     return true;
                 }

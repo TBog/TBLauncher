@@ -5,6 +5,7 @@ import android.util.Log;
 import androidx.annotation.WorkerThread;
 
 import java.util.Collection;
+import java.util.Collections;
 
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.entry.EntryWithTags;
@@ -74,7 +75,7 @@ public class EntryToResultUtils {
 
             entry.addResultMatch(matchedText, matchedInfo);
 
-            if (matchedInfo.match && !searcher.addResult(entry)) {
+            if (matchedInfo.match && !searcher.addResult(Collections.singletonList(entry))) {
                 return;
             }
         }

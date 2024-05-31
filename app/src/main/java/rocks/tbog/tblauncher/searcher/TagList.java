@@ -8,6 +8,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.WorkerThread;
 import androidx.preference.PreferenceManager;
 
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.PriorityQueue;
@@ -31,15 +32,15 @@ public class TagList extends Searcher {
     }
 
     @Override
-    protected PriorityQueue<EntryItem> getPojoProcessor(ISearchActivity activity) {
+    protected PriorityQueue<EntryItem> newResultQueue() {
         if ("untagged".equals(query))
             return new PriorityQueue<>(INITIAL_CAPACITY, EntryItem.NAME_COMPARATOR);
-        return super.getPojoProcessor(activity);
+        return super.newResultQueue();
     }
 
     @WorkerThread
     @Override
-    public boolean addResult(EntryItem... pojos) {
+    public boolean addResult(Collection<? extends EntryItem> pojos) {
         if (isCancelled())
             return false;
 
@@ -64,6 +65,7 @@ public class TagList extends Searcher {
         if (!foundIdSet.add(entryItem.id))
             return;
 
+        var processedPojos = getResultQueue();
         processedPojos.add(entryItem);
         if (processedPojos.size() > maxResults)
             processedPojos.poll();

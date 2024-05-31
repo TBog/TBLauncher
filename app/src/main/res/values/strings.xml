@@ -15,6 +15,14 @@
     <string name="menu_quick_list_add">Add to dock</string>
     <string name="menu_quick_list_remove">Remove from dock</string>
     <string name="menu_remove_history">Remove from history</string>
+
+    <string name="menu_tag_sort_az">Sort name A to Z</string>
+    <string name="menu_tag_sort_za">Sort name Z to A</string>
+    <string name="menu_tag_sort_hist_rec">Sort by last accessed</string>
+    <string name="menu_tag_sort_hist_freq">Sort most accessed</string>
+    <string name="menu_tag_sort_hist_frec">Sort last and most accessed</string>
+    <string name="menu_tag_sort_hist_adaptive">Sort adaptive history</string>
+
     <string name="stub_application">App name</string>
     <string name="stub_app_tag">app tag list</string>
     <string name="permission_denied">Grant this permission first</string>
@@ -210,6 +218,7 @@
     <string name="debug_widget_info">Long press for extra widget info</string>
     <string name="debug_item_relevance">Search relevance</string>
     <string name="debug_item_icon_info">Icon info</string>
+    <string name="debug_item_id">Show item id</string>
     <string name="shortcut_section">Shortcut</string>
     <string name="shortcut_pin_auto_confirm">Auto-confirm shortcut</string>
     <string name="shortcut_show_badge">Show app badge</string>

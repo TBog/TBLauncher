@@ -20,7 +20,7 @@ public class ResultBuffer<T extends EntryItem> implements ISearcher {
     }
 
     @Override
-    public boolean addResult(EntryItem... items) {
+    public boolean addResult(Collection<? extends EntryItem> items) {
         boolean result = false;
         for (EntryItem item : items)
             result |= entryItems.add(typeClass.cast(item));

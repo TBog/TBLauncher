@@ -136,8 +136,7 @@ public class DBHelper {
             " GROUP BY record " +
             " ORDER BY " +
             "   count(*) * 1.0 / (select count(*) from history LIMIT " + historyWindowSize + ") / ((SELECT _id FROM history ORDER BY _id DESC LIMIT 1) - max(_id) + 0.001) " +
-            " DESC " +
-            " LIMIT " + limit;
+            " DESC " + ((limit > 0 && limit < Integer.MAX_VALUE) ? (" LIMIT " + limit) : "");
         return db.rawQuery(sql, null);
     }
 
@@ -146,7 +145,7 @@ public class DBHelper {
         String sql = "SELECT record, count(*) FROM history" +
             " GROUP BY record " +
             " ORDER BY count(*) DESC " +
-            " LIMIT " + limit;
+            ((limit > 0 && limit < Integer.MAX_VALUE) ? (" LIMIT " + limit) : "");
         return db.rawQuery(sql, null);
     }
 
@@ -170,7 +169,7 @@ public class DBHelper {
             "AND timeStamp >" + (System.currentTimeMillis() - (hours * 3600000)) +
             " GROUP BY record " +
             " ORDER BY count(*) DESC " +
-            " LIMIT " + limit;
+            ((limit > 0 && limit < Integer.MAX_VALUE) ? (" LIMIT " + limit) : "");
         return db.rawQuery(sql, null);
     }
 
@@ -490,6 +489,24 @@ public class DBHelper {
         values.put("tag", newName);
 
         return db.update("tags", values, "tag = ?", new String[]{tagName});
+    }
+
+    /**
+     * @param context android context
+     * @param tagEntry what tag to modify
+     * @param newEntry the new tag sort
+     * @return number of records affected
+     */
+    public static int changeTagSort(Context context, @NonNull TagEntry tagEntry, @NonNull TagEntry newEntry) {
+        SQLiteDatabase db = getDatabase(context);
+
+        ContentValues values = new ContentValues();
+        values.put("record", newEntry.id);
+        int count = db.updateWithOnConflict("favorites", values, "record = ?", new String[]{tagEntry.id}, SQLiteDatabase.CONFLICT_IGNORE);
+        if (count != 1) {
+            Log.e(TAG, "Update favorites in rename tag; count = " + count);
+        }
+        return count;
     }
 
     /**

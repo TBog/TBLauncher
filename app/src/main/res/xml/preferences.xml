@@ -1173,6 +1173,11 @@
 
             <androidx.preference.SwitchPreference
                 android:defaultValue="false"
+                android:key="debug-item-id"
+                android:title="@string/debug_item_id" />
+
+            <androidx.preference.SwitchPreference
+                android:defaultValue="false"
                 android:key="debug-ksh-touch"
                 android:summary="@string/debug_ksh_touch_summary"
                 android:title="@string/debug_ksh_touch" />

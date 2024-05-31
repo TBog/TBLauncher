@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -49,7 +50,6 @@ import rocks.tbog.tblauncher.dataprovider.ContactsProvider;
 import rocks.tbog.tblauncher.dataprovider.DialProvider;
 import rocks.tbog.tblauncher.dataprovider.FilterProvider;
 import rocks.tbog.tblauncher.dataprovider.IProvider;
-import rocks.tbog.tblauncher.dataprovider.ModProvider;
 import rocks.tbog.tblauncher.dataprovider.Provider;
 import rocks.tbog.tblauncher.dataprovider.QuickListProvider;
 import rocks.tbog.tblauncher.dataprovider.SearchProvider;
@@ -198,13 +198,6 @@ public class DataHandler extends BroadcastReceiver
             ProviderEntry providerEntry = new ProviderEntry();
             providerEntry.provider = new TagsProvider(context);
             providers.put("tags", providerEntry);
-        }
-
-        // Favorites
-        {
-            ProviderEntry providerEntry = new ProviderEntry();
-            providerEntry.provider = new ModProvider(context);
-            providers.put("mods", providerEntry);
         }
 
         // QuickList
@@ -591,7 +584,9 @@ public class DataHandler extends BroadcastReceiver
             List<? extends EntryItem> pojos = entry.provider.getPojos();
             if (pojos == null)
                 continue;
-            boolean accept = searcher.addResult(pojos.toArray(new EntryItem[0]));
+            for (var item : pojos)
+                item.resetResultInfo();
+            boolean accept = searcher.addResult(pojos);
             // if searcher will not accept any more results, exit
             if (!accept)
                 break;
@@ -620,12 +615,12 @@ public class DataHandler extends BroadcastReceiver
      *
      * @param itemCount          max number of items to retrieve, total number may be less (search or calls are not returned for instance)
      * @param historyMode        Recency vs Frecency vs Frequency vs Adaptive
-     * @param sortHistory        Sort history entries alphabetically
+     * @param sortByName         Sort history entries alphabetically
      * @param itemsToExcludeById Items to exclude from history by their id
      * @return pojos in recent history
      */
     public List<EntryItem> getHistory(int itemCount, DBHelper.HistoryMode historyMode,
-                                      boolean sortHistory, Set<String> itemsToExcludeById) {
+                                      boolean sortByName, Set<String> itemsToExcludeById) {
         // Max sure that we get enough items, regardless of how many may be excluded
         int extendedItemCount = itemCount + itemsToExcludeById.size();
 
@@ -651,7 +646,7 @@ public class DataHandler extends BroadcastReceiver
         }
 
         // sort the list if needed
-        if (sortHistory)
+        if (sortByName)
             Collections.sort(history, Comparator.comparing(EntryItem::getName));
 
         // enforce item count after the sort operation
@@ -661,14 +656,37 @@ public class DataHandler extends BroadcastReceiver
         return history;
     }
 
+    public Map<EntryItem, Integer> getHistoryOrder(DBHelper.HistoryMode historyMode, Set<String> itemsToExcludeById) {
+        // Read history
+        final Context context = getContext();
+        List<ValuedHistoryRecord> ids = DBHelper.getHistory(context, Integer.MAX_VALUE, historyMode);
+
+        // Pre-allocate array slots that are likely to be used
+        HashMap<EntryItem, Integer> history = new HashMap<>(ids.size());
+
+        // Find associated items
+        for (int i = 0; i < ids.size(); i++) {
+            // Ask all providers if they know this id
+            EntryItem entryItem = getPojo(ids.get(i).record);
+
+            if (entryItem == null)
+                continue;
+
+            if (itemsToExcludeById.contains(entryItem.id))
+                continue;
+
+            history.put(entryItem, i);
+        }
+
+        return history;
+    }
+
     public boolean addShortcut(ShortcutRecord record) {
         final Context context = getContext();
 
         Log.d(TAG, "Adding shortcut " + record.displayName + " for " + record.packageName);
         if (DBHelper.insertShortcut(context, record)) {
-            ShortcutsProvider provider = getShortcutsProvider();
-            if (provider != null)
-                provider.reload(true);
+            reloadProviderAndDependencies(getShortcutsProvider());
             return true;
         }
         return false;
@@ -677,17 +695,15 @@ public class DataHandler extends BroadcastReceiver
     public void removeShortcut(ShortcutEntry shortcut) {
         final Context context = getContext();
 
-        // Also remove shortcut from mods
-        removeFromMods(shortcut);
+        // Also remove shortcut from DB
+        DBHelper.removeMod(context, shortcut.id);
         DBHelper.removeShortcut(context, shortcut);
 
         if (shortcut.mShortcutInfo != null) {
             ShortcutUtil.removeShortcut(context, shortcut.mShortcutInfo);
         }
 
-        if (this.getShortcutsProvider() != null) {
-            this.getShortcutsProvider().reload(true);
-        }
+        reloadProviderAndDependencies(getShortcutsProvider());
     }
 
     public void removeShortcuts(String packageName) {
@@ -703,14 +719,12 @@ public class DataHandler extends BroadcastReceiver
             String id = ShortcutEntry.generateShortcutId(shortcut);
             EntryItem entry = getPojo(id);
             if (entry != null)
-                removeFromMods(entry);
+                DBHelper.removeMod(context, entry.id);
         }
 
         DBHelper.removeShortcuts(context, packageName);
 
-        if (this.getShortcutsProvider() != null) {
-            this.getShortcutsProvider().reload(true);
-        }
+        reloadProviderAndDependencies(getShortcutsProvider());
     }
 
     public boolean addToHidden(AppEntry entry) {
@@ -739,12 +753,6 @@ public class DataHandler extends BroadcastReceiver
     public AppProvider getAppProvider() {
         ProviderEntry entry = this.providers.get("app");
         return (entry != null) ? ((AppProvider) entry.provider) : null;
-    }
-
-    @Nullable
-    public ModProvider getModProvider() {
-        ProviderEntry entry = this.providers.get("mods");
-        return (entry != null) ? ((ModProvider) entry.provider) : null;
     }
 
     @Nullable
@@ -780,16 +788,6 @@ public class DataHandler extends BroadcastReceiver
     public List<ModRecord> getMods() {
         final Context context = getContext();
         return DBHelper.getMods(context);
-    }
-
-    public void removeFromMods(EntryItem entry) {
-        final Context context = getContext();
-
-        if (DBHelper.removeMod(context, entry.id)) {
-            ModProvider modProvider = getModProvider();
-            if (modProvider != null)
-                modProvider.reload(true);
-        }
     }
 
     /**
@@ -898,9 +896,7 @@ public class DataHandler extends BroadcastReceiver
         if (array != null) {
             DBHelper.setCustomStaticEntryIcon(context, entryId, array);
             // reload provider to make sure we're up to date
-            ModProvider modProvider = getModProvider();
-            if (modProvider != null)
-                modProvider.reload(true);
+            reloadProviders(IProvider.LOAD_STEP_2);
         }
     }
 
@@ -910,6 +906,7 @@ public class DataHandler extends BroadcastReceiver
         if (array != null) {
             DBHelper.setCustomStaticEntryIcon(context, buttonId, array);
             // we expect calling function to refresh buttons
+            reloadProviders(IProvider.LOAD_STEP_2);
         }
     }
 
@@ -977,6 +974,13 @@ public class DataHandler extends BroadcastReceiver
         }
     }
 
+    public void reloadProviderAndDependencies(@Nullable IProvider<?> provider) {
+        if (provider == null)
+            return;
+        provider.setDirty();
+        reloadProviders(provider.getLoadStep() + 1);
+    }
+
     /**
      * Reload all providers with load step equal or greater
      *
@@ -993,8 +997,13 @@ public class DataHandler extends BroadcastReceiver
         sendBroadcast(context, TBLauncherActivity.START_LOAD, "reload_" + loadStep);
 
         for (int step : IProvider.LOAD_STEPS) {
-            if (step < loadStep)
+            if (step < loadStep) {
+                for (ProviderEntry entry : providers.values()) {
+                    if (entry.provider != null && step == entry.provider.getLoadStep() && !entry.provider.isLoaded())
+                        entry.provider.reload(false);
+                }
                 continue;
+            }
             for (ProviderEntry entry : providers.values()) {
                 if (entry.provider != null && step == entry.provider.getLoadStep())
                     entry.provider.reload(true);
@@ -1076,22 +1085,24 @@ public class DataHandler extends BroadcastReceiver
             }
         }
 
-        // refresh relevant providers
-        {
-            IProvider<?> provider = getModProvider();
-            if (provider != null)
-                provider.reload(true);
-        }
+        afterQuickListChanged();
+    }
+
+    public void afterQuickListChanged() {
+        mFullLoadOverSent = false;
+        // refresh relevant providers for the Dock
         {
             IProvider<?> provider = getTagsProvider();
             if (provider != null)
-                provider.reload(true);
+                provider.setDirty();
         }
         {
             IProvider<?> provider = getQuickListProvider();
             if (provider != null)
-                provider.reload(true);
+                provider.setDirty();
         }
+        // reload all dirty providers
+        reloadProviders(IProvider.LOAD_STEP_3);
     }
 
     public boolean fullLoadOverSent() {

@@ -12,7 +12,7 @@ import androidx.annotation.WorkerThread;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Collection;
 import java.util.PriorityQueue;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -29,7 +29,8 @@ public abstract class Searcher extends AsyncTask<Void, Void> implements ISearche
     public static final ExecutorService SEARCH_THREAD = Executors.newSingleThreadExecutor();
     protected static final int INITIAL_CAPACITY = 50;
     protected final WeakReference<ISearchActivity> activityWeakReference;
-    protected final PriorityQueue<EntryItem> processedPojos;
+    // sorted queue with search results (lazy init to allow initialization after constructor)
+    private PriorityQueue<EntryItem> resultQueue;
     protected final int maxResults;
     private final boolean tagsEnabled;
     private long start;
@@ -45,7 +46,6 @@ public abstract class Searcher extends AsyncTask<Void, Void> implements ISearche
         super();
         this.query = query;
         activityWeakReference = new WeakReference<>(activity);
-        processedPojos = getPojoProcessor(activity);
         tagsEnabled = PrefCache.getFuzzySearchTags(activity.getContext());
         maxResults = getMaxResultCount(activity.getContext());
     }
@@ -61,8 +61,15 @@ public abstract class Searcher extends AsyncTask<Void, Void> implements ISearche
         return query;
     }
 
-    protected PriorityQueue<EntryItem> getPojoProcessor(ISearchActivity activity) {
+    protected PriorityQueue<EntryItem> newResultQueue() {
         return new PriorityQueue<>(INITIAL_CAPACITY, EntryItem.RELEVANCE_COMPARATOR);
+    }
+
+    @CallSuper
+    protected PriorityQueue<EntryItem> getResultQueue() {
+        if (resultQueue == null)
+            return resultQueue = newResultQueue();
+        return resultQueue;
     }
 
     protected int getMaxResultCount(Context context) {
@@ -71,10 +78,12 @@ public abstract class Searcher extends AsyncTask<Void, Void> implements ISearche
 
     /**
      * This is called from the background thread by the providers
+     *
+     * @param pojos
      */
     @WorkerThread
     @Override
-    public boolean addResult(EntryItem... pojos) {
+    public boolean addResult(Collection<? extends EntryItem> pojos) {
         if (isCancelled())
             return false;
 
@@ -83,7 +92,8 @@ public abstract class Searcher extends AsyncTask<Void, Void> implements ISearche
         if (activity == null)
             return false;
 
-        Collections.addAll(processedPojos, pojos);
+        var processedPojos = getResultQueue();
+        processedPojos.addAll(pojos);
         while (processedPojos.size() > maxResults)
             processedPojos.poll();
 
@@ -118,13 +128,13 @@ public abstract class Searcher extends AsyncTask<Void, Void> implements ISearche
         // Loader should still be displayed until all the providers have finished loading
         searchActivity.displayLoader(!TBApplication.getApplication(activity).getDataHandler().fullLoadOverSent());
 
-        if (this.processedPojos.isEmpty()) {
+        var processedPojos = getResultQueue();
+        if (processedPojos.isEmpty()) {
             searchActivity.clearAdapter();
         } else {
-            PriorityQueue<EntryItem> queue = this.processedPojos;
-            ArrayList<EntryItem> results = new ArrayList<>(queue.size());
-            while (queue.peek() != null) {
-                results.add(queue.poll());
+            ArrayList<EntryItem> results = new ArrayList<>(processedPojos.size());
+            while (processedPojos.peek() != null) {
+                results.add(processedPojos.poll());
             }
 
             searchActivity.updateAdapter(results, isRefresh);

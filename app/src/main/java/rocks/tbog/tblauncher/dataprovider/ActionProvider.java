@@ -9,10 +9,13 @@ import androidx.annotation.StringRes;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 import rocks.tbog.tblauncher.R;
 import rocks.tbog.tblauncher.TBApplication;
 import rocks.tbog.tblauncher.TBLauncherActivity;
+import rocks.tbog.tblauncher.db.DBHelper;
 import rocks.tbog.tblauncher.entry.ActionEntry;
 import rocks.tbog.tblauncher.entry.EntryItem;
 import rocks.tbog.tblauncher.handler.DataHandler;
@@ -180,7 +183,14 @@ public class ActionProvider extends DBProvider<ActionEntry> {
                 TBLauncherActivity act = app.launcherActivity();
                 if (act == null)
                     return;
-                ModProvider provider = app.getDataHandler().getModProvider();
+                FakeProvider<EntryItem> provider = new FakeProvider<>(() -> {
+                    DataHandler dataHandler = app.getDataHandler();
+                    return DBHelper.getMods(act)
+                        .stream()
+                        .map(rec -> dataHandler.getPojo(rec.record))
+                        .filter(Objects::nonNull)
+                        .collect(Collectors.toList());
+                });
                 act.quickList.toggleProvider(v, provider, EntryItem.NAME_COMPARATOR);
             });
             s_names[cnt] = R.string.action_show_favorites;
@@ -282,12 +292,12 @@ public class ActionProvider extends DBProvider<ActionEntry> {
 
     @Override
     protected DBLoader<ActionEntry> newLoadTask() {
-        return new UpdateFromModsLoader<ActionEntry>(this, s_entries, s_names) {
+        return new UpdateFromModsLoader<>(this, s_entries, s_names) {
             @Override
             public List<ActionEntry> getEntryItems(DataHandler dataHandler) {
                 List<ActionEntry> entries = super.getEntryItems(dataHandler);
                 Context context = dataHandler.getContext();
-                if (context == null || !DebugInfo.enableFavorites(context)) {
+                if (!DebugInfo.enableFavorites(context)) {
                     // remove debug entry
                     for (Iterator<ActionEntry> iterator = entries.iterator(); iterator.hasNext(); ) {
                         ActionEntry entry = iterator.next();
