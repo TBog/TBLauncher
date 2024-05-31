@@ -1329,7 +1329,7 @@
         android:title="@string/privacy_policy">
         <intent
             android:action="android.intent.action.VIEW"
-            android:data="https://tbog.github.io/TBLauncher/Privacy-Policy.md" />
+            android:data="https://tbog.github.io/TBLauncher/Privacy-Policy" />
     </Preference>
 
     <Preference
