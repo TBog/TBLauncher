@@ -1,0 +1,2 @@
+* arreglar fallos en Android Q
+* ver el registro de cambios v6.13

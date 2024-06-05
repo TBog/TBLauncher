@@ -1,0 +1,6 @@
+Por favor, informe de cualquier problema que encuentre; cualquier cosa puede salir mal debido a la versión y minimizar los cambios.
+* Habilite minify en la versión de lanzamiento (el tamaño de la apk debería disminuir).
+* El ícono de marcar contacto es personalizable
+* Se agregó una cuadrícula para resultados.
+* Se agregó selector de íconos de almacenamiento
+* Se agregó una barra de búsqueda independientes de las preferencias de altura y tamaño del texto

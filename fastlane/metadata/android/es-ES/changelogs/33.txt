@@ -1,0 +1,9 @@
+* nuevo icono
+* nuevo tema por defecto
+* añadir gestos
+* arreglar fallos
+* añadir selector de imagen para los iconos
+* añadir más ajustes de interfaz de usuario
+* fusionar ajustes de color y opacidad
+* añadir migración de ajustes (permitir que las copias de seguridad antiguas que tenían color y opacidad separados se importen correctamente)
+* añadir actividad de configuración a la pila de actividades

@@ -1,0 +1,3 @@
+* Añadida la versión de la aplicación en los ajustes
+* Arreglar el fondo de la barra del modo de acción
+* Arreglar el fallo de la animación de arrastre del fondo de pantalla

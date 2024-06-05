@@ -1,0 +1,7 @@
+* Se agregó soporte para el paquete de íconos de estudio.
+* se movió la acción de cerrar el teclado a un nuevo oyente (solución #276)
+* Se corrigió que el teclado no se mostrara cuando se expandía el pilar de búsqueda.
+* Arreglar la ventana del Administrador del dispositivo que no se abre
+* Se agregó la opción “Mostrar “Widget” del centro de escritorio”.
+* Se corrigió la opción “Mostrar “Buscar” en el escritorio con el teclado”.
+* Se corrigió el desplazamiento en las listas de resultados (problema #285)
