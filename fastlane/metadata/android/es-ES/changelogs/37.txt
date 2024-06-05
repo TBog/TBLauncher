@@ -1,0 +1,8 @@
+* Añadir animación de la barra de búsqueda para expandir/contraer preferencias.
+* Ignorar el evento de cierre de teclado cuando el diálogo está abierto
+* Añadir soporte para iconos de calendario dinámicos
+* refactorizar `asyncSetEntryIcon`.
+* asegurar que el texto de edición está enfocado durante la animación
+* renombrar las pantallas de preferencias "UI" y "Características
+* añadir la pantalla "Opciones" a las preferencias
+* Cambiar el nombre de "Interfaz de usuario" a "Tema" (problema nº 271)

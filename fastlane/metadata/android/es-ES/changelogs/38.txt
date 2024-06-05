@@ -1,0 +1,6 @@
+* añadir páginas dock
+* Permitir iconos de botones personalizados
+* preferencias de sombra de texto
+* dividir la consulta por palabras
+* Corregir problemas relacionados con el teclado
+* cambiar internamente el selector de color

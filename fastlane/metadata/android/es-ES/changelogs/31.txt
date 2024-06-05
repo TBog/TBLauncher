@@ -1,0 +1,6 @@
+* corregir el error de manifiesto de Android 12
+* agregar la acción "mostrar sin etiquetar" en el administrador de etiquetas y en el menú de etiquetas
+* agregar opción para elegir el tipo mime de contactos
+* agregar generadores de temas simples y destacados
+* agregar proveedor de acceso telefónico (buscar)
+* permitir iconos personalizados para los resultados de búsqueda

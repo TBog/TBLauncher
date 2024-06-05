@@ -1,0 +1,23 @@
+Éste es el lanzador usado y desarrollado por
+██████████████████████▀█
+█─▄─▄─█▄─▄─▀█─▄▄─█─▄▄▄▄█
+███─████─▄─▀█─██─█─██▄─█
+▀▀▄▄▄▀▀▄▄▄▄▀▀▄▄▄▄▀▄▄▄▄▄▀
+
+Motivos para desarrollar mi propio lanzador:
+🔹Pantalla principal limpia para disfrutar el protector de pantalla
+🔸Acceso rápido a las aplicaciones mediante búsqueda
+🔹Compatible con Paquetes de Íconos
+🔸Posibilidad de personalizar colores y comportamientos
+
+Nuevas Características:
+⦾Actualizar lista de aplicaciones cuando se detectan cambios
+⦿Forma de íconos adaptables
+⦾Cache de íconos para visualizar resultados rápidamente
+⦿ Etiquetas para mejor organización de aplicaciones
+⦾Acoplar elementos para filtrar resultados
+⦿Previsualización de color de preferencia
+⦾Atajos a aplicaciones, contactos, etc,.
+
+Código fuente https://github.com/TBog/TBLauncher
+La idea y el código inicial provienen de https://play.google.com/store/apps/details?id=fr.neamar.kiss

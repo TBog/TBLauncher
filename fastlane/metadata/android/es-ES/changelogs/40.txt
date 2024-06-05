@@ -1,0 +1,2 @@
+* Actualizar traducciones
+* Corregir las dimensiones del selector de color

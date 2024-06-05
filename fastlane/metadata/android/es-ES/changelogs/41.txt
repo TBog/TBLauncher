@@ -1,0 +1,6 @@
+* Mejorar las versiones de la biblioteca
+* Mejorar la vista previa de los colores preferidos
+* añadir y actualizar traducciones
+* Corregir el diálogo de edición de etiquetas
+* arreglar el diálogo de selección de color
+* personalizar el selector de widgets
