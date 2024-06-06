@@ -67,12 +67,6 @@ android {
     }
 }
 
-configurations {
-    compileClasspath {
-        resolutionStrategy.force 'com.github.yalantis:ucrop:2.2.8'
-    }
-}
-
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
@@ -94,6 +88,11 @@ dependencies {
     implementation('com.github.dhaval2404:imagepicker:2.1', {
         exclude group: 'com.squareup.okhttp3'
     })
+    implementation('com.github.yalantis:ucrop:2.2.8') {
+        because 'com.github.dhaval2404:imagepicker uses ucrop and we want the latest version'
+        exclude group: 'com.squareup.okhttp3'
+        transitive = true
+    }
     implementation "androidx.multidex:multidex:$multidex_version"
     // 2.0.0 not supported, as "Unsupported desugared library configuration version, please upgrade the D8/R8 compiler." Android Gradle Plugin would need to be 7.4.0-alpha10
     coreLibraryDesugaring 'com.android.tools:desugar_jdk_libs:2.0.4'
