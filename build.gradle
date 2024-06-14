@@ -12,7 +12,7 @@ buildscript {
         google()
     }
     dependencies {
-        classpath 'com.android.tools.build:gradle:8.4.1'
+        classpath 'com.android.tools.build:gradle:8.5.0'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         // see https://keepsafe.github.io/dexcount-gradle-plugin/ for how to use dex method count
         classpath 'com.getkeepsafe.dexcount:dexcount-gradle-plugin:4.0.0'
