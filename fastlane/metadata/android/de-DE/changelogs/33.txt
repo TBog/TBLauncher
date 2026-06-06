@@ -1,0 +1,9 @@
+* Neues Icon
+* Neues Standardthema
+* Füge Gesten hinzu
+* fix crashes
+* Füge Bildwähler für Symbole hinzu
+* Füge mehr Nutzerbedienoberflächeneinstellungen hinzu
+* Zusammenführen von Farb- und Deckkrafteinstellungen
+* Füge Einstelungsmigration hinzu (Erlaube alten backups, die verschiedene Farb- und Deckkraftseinstellungen hatten, ordentlich zu importieren)
+* Füge Einstellungsaktivität zu activity stack hinzu

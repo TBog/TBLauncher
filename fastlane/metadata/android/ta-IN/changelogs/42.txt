@@ -1,0 +1,11 @@
+* பம்ப் கிரேடில் ரேப்பர் பதிப்பு 7.6 முதல் 8.3 வரை
+ * 11 முதல் 17 வரை பம்ப் சே.டி.கே.
+ * பம்ப் androidx.annotation: சிறுகுறிப்பு 1.5.0 முதல் 1.6.0 வரை
+ * 2.5.1 முதல் 2.6.1 வரை பம்ப் LifeCycle_version
+ * பம்ப் com.android.tools:desugar_jdk_libs 1.1.8 முதல் 2.0.3 வரை
+ * பம்ப் androidx.core: கோர்-கே.டி.எக்ச் 1.9.0 முதல் 1.10.0 வரை
+ * Bump org.jetbrains.kotlin:kotlin-gradle-plugin இருந்து 1.7.22 பெறுநர் 1.8.21
+ * பம்ப் com.android.tools.build: கிரிக்டில் 7.2.2 முதல் 8.0.1 வரை
+ * பம்ப் com.google.android.material: பொருள் 1.8.0 முதல் 1.9.0 வரை
+ * பம்ப் Androidx.preference: 1.2.0 முதல் 1.2.1 வரை விருப்பம்
+ * பம்ப் androidx.core: கோர்-கே.டி.எக்ச் 1.10.0 முதல் 1.10.1 வரை

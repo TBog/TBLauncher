@@ -303,4 +303,5 @@
     <string name="title_backup">Резервное копирование</string>
     <string name="export_modifications">Экспорт персонализации</string>
     <string name="export_interface">Экспорт интерфейсной части</string>
+    <string name="menu_widget_setup">Настроить Виджет…</string>
 </resources>

@@ -1,0 +1,8 @@
+* Añadir preferencias de diseño de la barra de búsqueda
+ * Arreglar la acción de abrir y cerrar el teclado
+ * Añadir preferencia de posición del dock
+ * arreglar el fondo de la ventana emergente en Lollipop
+ * Arreglar el fondo de la etiqueta de edición
+ * cambiar preferencia de interruptor (alternar) pulgar y pista para Android antiguos
+ * Arreglar el diálogo de edición de motores de búsqueda
+ * Arreglar los atajos de manifiesto que aparecen en los resultados

@@ -2,4 +2,29 @@
 <resources>
     <string name="adaptive_shape_name">Adaptive Symbolform</string>
     <string name="force_adaptive">Adaptive Symbole erzwingen</string>
+    <string name="force_shape">Adaptive Form erzwingen</string>
+    <string name="force_shape_summary">Adaptive Maske für nicht-adaptive Symbole benutzen</string>
+    <string name="app_name">TinyBit launcher</string>
+    <string name="hint_ui_search">Suche in Apps, Kontakten, …</string>
+    <string name="ui_item_search">Suche in %1$s nach %2$s ?</string>
+    <string name="ui_item_visit">Besuche %1$s</string>
+    <string name="copy_confirmation">%s in Zwischenablage kopiert</string>
+    <string name="removed_item">%s entfernt</string>
+    <string name="toast_hibernate_completed">%s in den Ruhezustand versetzt, zum Aufwachen neu starten</string>
+    <string name="toast_hibernate_error">[FEHLER] %s nicht im Ruhezustand</string>
+    <string name="unable_to_initialize_shortcuts">Zugriff auf Verknüpfungen nicht möglich. Ist TinyBit Ihr Standard-Launcher?</string>
+    <string name="cant_pin_shortcut">Verknüpfung konnte nicht hinzugefügt werden. Ist TinyBit Ihr Standard-Launcher?</string>
+    <string name="menu_quick_list_add">Zum Dock hinzufügen</string>
+    <string name="menu_quick_list_remove">Vom Dock entfernen</string>
+    <string name="menu_remove_history">Aus der Geschichte löschen</string>
+    <string name="stub_application">App Name</string>
+    <string name="stub_app_tag">App-Tag-Liste</string>
+    <string name="permission_denied">Erteilen Sie diese Berechtigung zuerst</string>
+    <string name="menu_exclude">Ausschließen…</string>
+    <string name="menu_hide">Verstecken</string>
+    <string name="menu_show">Aufdecken</string>
+    <string name="menu_remove_shortcut">Lösen</string>
+    <string name="menu_tags_add">Tags hinzufügen</string>
+    <string name="menu_tags_edit">Stichworte bearbeiten</string>
+    <string name="force_adaptive_summary">Verringerte Skalierung und Platzierung auf Formenhintergrund für nicht adaptive Icons</string>
 </resources>

@@ -75,12 +75,12 @@
     <string name="tab_search_icon">Arama simgesi</string>
     <string name="icon_pack_loading">Simge paketlerinden yükleniyor…</string>
     <string name="gesture_section">Jestler</string>
-    <string name="gesture_fling_down_left">Fling from |<b>←</b>|, <b>↓</b></string>
+    <string name="gesture_fling_down_left">Bundan kaçmak |<b>←</b>|, <b>↓</b></string>
     <string name="gesture_fling_down_left_summary">Ekranın <b>←</b> tarafından başlayın ve <b>↓</b> fırlatın</string>
     <string name="gesture_fling_down_right_summary">Ekranın <b>→</b> tarafından başlayın ve <b>↓</b> fırlatın</string>
-    <string name="gesture_fling_up">Fling ↑</string>
-    <string name="gesture_fling_left">Fling ←</string>
-    <string name="gesture_fling_right">Fling →</string>
+    <string name="gesture_fling_up">Savur ↑</string>
+    <string name="gesture_fling_left">Savur ←</string>
+    <string name="gesture_fling_right">Savur →</string>
     <string name="static_icon_letters_label">Simge oluşturmak için kullanılacak harfler</string>
     <string name="backup_summary">Ayarları kaydetme, yedekleme, dışa aktarma ve içe aktarma</string>
     <string name="export_settings_section">Dışa aktarma ayarları</string>
@@ -133,7 +133,7 @@
     <string name="settings_white">Beyaz</string>
     <string name="settings_black">Siyah</string>
     <string name="settings_dark">Karanlık</string>
-    <string name="settings_deep_blues">DeepBlues</string>
+    <string name="settings_deep_blues">Derin Maviler</string>
     <string name="title_static_rename">Özel bir ad seçin</string>
     <string name="letters_toggle">Harf simgeleri</string>
     <string name="button_launcher">Başlatıcı düğmesi</string>
@@ -338,7 +338,7 @@
     <string name="generate_theme_description">Tüm renkleri sıfırlar ve birincil ve ikincil renklere dayalı olarak oluşturulan renkleri uygular</string>
     <string name="reset_matrix_confirm">Varsayılan değerleri ayarlayın\?</string>
     <string name="reset_matrix_description">Bu ekrandaki tüm simge ayarlarını sıfırlar</string>
-    <string name="popup_section">Popup</string>
+    <string name="popup_section">Açılır pencere</string>
     <string name="popup_ripple_color">Dokunmatik renk</string>
     <string name="icon_scale_green">Yeşil ölçekli</string>
     <string name="icon_scale_blue">Ölçek mavi</string>
@@ -421,7 +421,7 @@
     <string name="icon_background">Simge arka planı</string>
     <string name="unlimited_search_cap_summary">Mümkün olan en yüksek limiti ayarlayın</string>
     <string name="settings_default">Varsayılan</string>
-    <string name="icon_hue">Hue</string>
+    <string name="icon_hue">Renk Tonu</string>
     <string name="icon_saturation">Doygunluk</string>
     <string name="matrix_summary">Parlaklık, kontrast, renk tonu, doygunluk</string>
     <string name="title_matrix">Simge rengini modüle etme</string>
@@ -501,4 +501,12 @@
     <string name="result_shadow_radius_dx_dy">Gölge boyutu ve ofset</string>
     <string name="contact_button_reset_default">Varsayılan eylemi sıfırla</string>
     <string name="popup_shadow_color">Metin gölge rengi</string>
+    <string name="menu_widget_setup">Widget\'ı ayarla…</string>
+    <string name="offset_preview">&lt;%1$.1f×%2$.1f&gt;</string>
+    <string name="title_desktop_last">Son masaüstü modu</string>
+    <string name="margin_offset">Marj Telafisi</string>
+    <string name="done_key_contact_action">Ana iletişim sistemi tamamlandı</string>
+    <string name="crash_title">Çökme</string>
+    <string name="crash_text">Aplikasyon çöktü.\nLütfen geliştiricilere çökme hakkında E-Posta gönderin.\nE-Posta telefonunuz hakkında bilgi (marka, model. boyut vb) içermekle birlikte başlatıcıdakı seçimlerinizde içercektir.\nGöndermeden önce bilgilere bakabilirsiniz ve istersiniz iptal edebilirsiniz.</string>
+    <string name="crash_send_email">E-Posta gönder</string>
 </resources>

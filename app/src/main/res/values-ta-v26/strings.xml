@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="force_adaptive_summary">தகவமைப்பு அல்லாத படவுருகளுக்கு, வடிவ பின்னணியில் அளவையும் இடத்தையும் குறைக்கவும்</string>
+    <string name="force_shape">தகவமைப்பு வடிவத்தைக் கட்டாயப்படுத்துங்கள்</string>
+    <string name="force_shape_summary">தகவமைப்பு அல்லாத படவுருகளில் தகவமைப்பு முகமூடியைப் பயன்படுத்தவும்</string>
+    <string name="adaptive_shape_name">தகவமைப்பு படவுரு வடிவம்</string>
+    <string name="force_adaptive">தகவமைப்பு படவுருகளை கட்டாயப்படுத்துங்கள்</string>
+</resources>

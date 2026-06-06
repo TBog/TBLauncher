@@ -1,0 +1,16 @@
+* தேடல் குறிப்பைச் சரிசெய்யவும் https://github.com/tbog/tblauncher/pull/413 இல் @TBOG ஆல் மறுபெயரிடுங்கள்
+ .
+ * Https://github.com/tbog/tblauncher/pull/404
+ .
+ .
+ .
+ * MatchInfo resultrelevance இல் சாத்தியமான NPE ஐ சரிசெய்யவும் https://github.com/tbog/tblauncher/pull/427 இல் @TBOG ஆல் ஒப்பிடுக
+ * Https://github.com/tbog/tblauncher/pull/428
+ * மறுசுழற்சி அடாப்டர் அடிப்படை வகுப்பு httbog ஆல் https://github.com/tbog/tblauncher/pull/429
+ * படவுரு பேக் சிக்கல்கள் httbog ஆல் https://github.com/tbog/tblauncher/pull/407
+ * Https://github.com/tbog/tblauncher/pull/411 இல் @TBOG ஆல் கண்ணுக்குத் தெரியாத விட்செட்டுகளை சரிசெய்யவும்
+ * Https://github.com/tbog/tblauncher/pull/457 இல் @TBOG ஆல் மாச்டரை ஒன்றிணைக்கவும்
+ * Https://github.com/tbog/tblauncher/pull/447 இல் @Wellate ஆல் புரவலன் செய்யப்பட்ட வெப்லேட்டிலிருந்து மொழிபெயர்ப்பு புதுப்பிப்பு
+ * துவக்கி விண்ணப்பத்தில் ச்டாலை சரிசெய்யவும் E48D451FE160A39984596BA7E04DED0D462716F4
+ * Https://github.com/neamar/kiss/pull/2111 இலிருந்து செர்ரிபிக் செய்யப்பட்ட பகிர்வு உரை
+ * ஆண்ட்ராய்டு 14 உள்ளக ஒளிபரப்பை 54E7B2A09B7C3F4A3931C01DCDBEFCFCF3DF913F16 இல் சரிசெய்யவும்

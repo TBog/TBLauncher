@@ -5,18 +5,18 @@ Das ist der Launcher verwendet und entwickelt von
 ▀▀▄▄▄▀▀▄▄▄▄▀▀▄▄▄▄▀▄▄▄▄▄▀
 
 Warum ich meinen eigenen Launcher entwickle:
-🔹Sauberes Hauptschirm um das Hintergrundbild zu genießen
-🔸Schneller Appzugriff durch suchS
+🔹Sauberer Hauptschirm um das Hintergrundbild zu genießen
+🔸Schneller Appzugriff durch Suche
 🔹Icon Pack kompatibel
 🔸Möglichkeit die Farben und das Verhalten anzupassen
 
 Neue Funktionen:
 ⦾ Updaten der Appliste bei Änderungen
 ⦿ Adaptive Icon-Formen
-⦾ Cachen von Icons für ein schnelleres darstellen
-⦿ Tags zum besseren organisieren von Apps
-⦾ Hefte Elemente zum filtern an
-⦿ Farbeintellungsvorschau
+⦾ Cachen von Icons für ein schnelleres Darstellen
+⦿ Tags zum besseren Organisieren von Apps
+⦾ Hefte Elemente zum Filtern an
+⦿ Farbeinstellungsvorschau
 ⦾ Verknüpfung für Apps, Kontakte, etc.
 
 Programmcode https://github.com/TBog/TBLauncher

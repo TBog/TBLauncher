@@ -1,0 +1,6 @@
+* Android 12 Manifestierungsfehler behoben
+* "Zeige untagged" Aktion im tag-Manager und tag-Menü hinzugefügt
+* Option Kontakte mime Typ auszuwählen hinzugefügt
+* Einfachen und Hervorhebungsthemegenerator hinzugefügt
+* Telefonanruf (Suche) provider hinzugefügt
+* Personalisierte Icons bei Suchergebnissen erlaubt

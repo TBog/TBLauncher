@@ -1,0 +1,11 @@
+* Versión de Bump Gradle de  7,6 a 8,3
+* Subir JDK del 11 al 17
+* Mejora androidx.annotation:annotation de 1.5.0 a 1.6.0
+* Mejora lifecycle_version de 2.5.1 a 2.6.1
+* Mejora com.android.tools:desugar_jdk_libs de 1.1.8 a 2.0.3
+* Actualice androidx.core:core-ktx de 1.9.0 a 1.10.0
+* Actualice org.jetbrains.kotlin:kotlin-gradle-plugin de 1.7.22 a 1.8.21
+* Mejora com.android.tools.build:gradle de 7.2.2 a 8.0.1
+* Bump com.google.android.material:material de 1.8.0 a 1.9.0
+* Mejora androidx.preference:preference de 1.2.0 a 1.2.1
+* Actualice androidx.core:core-ktx de 1.10.0 a 1.10.1
